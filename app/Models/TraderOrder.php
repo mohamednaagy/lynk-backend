@@ -11,6 +11,7 @@ use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
@@ -348,19 +349,6 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
-        if ($this->provider == EnumsTrader::Lynk && $this->mode == TraderOrderMode::Automatic) {
-            if ($this->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
-                return [
-                    'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
-                    'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
-                ];
-            } else {
-                return [
-                    'status' => CustomerDeliveryStatus::DeliveryPending,
-                    'message' => null,
-                ];
-            }
-        }
         if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
             return [
                 'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,
@@ -398,11 +386,11 @@ class TraderOrder extends Model implements HasMedia
     public function isExpirable(): bool
     {
         $expiryTime = $this->timeLimits()
-            ->where('type', TraderOrderTimeLimitStatus::Pending)
+            ->where('status', TraderOrderTimeLimitStatus::Pending)
             ->where('effective_at', '<=', Carbon::now())
             ->first();
         if ($expiryTime) {
-            if ($expiryTime->type == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
+            if ($expiryTime->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
                 return $this->isDeliveryExpirable();
             }
             //TODO: need to implement Contract Signed Time Limit Case on Refactor
@@ -414,5 +402,14 @@ class TraderOrder extends Model implements HasMedia
     public function isDeliveryExpirable(): bool
     {
         return $this->checkOrderHistoryAction([FinancingOrderHistory::PendingDelivery]);
+    }
+
+    public function getRecentTimeLimit($type, $status)
+    {
+        return $this->timeLimits()
+            ->where('type', $type)
+            ->where('status', $status)
+            ->orderBy('id', 'desc')
+            ->first();
     }
 }

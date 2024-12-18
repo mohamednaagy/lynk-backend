@@ -12,6 +12,7 @@ return [
             'no_commodity_available' => 'لا يوجد سلع كافيه داخل السوق المحلي',
             'internal_technical_error' => 'يوجد خطا ما',
             'expired_contract_time' => 'انتهى الوقت المحدد لتوقيع العقد بعد :TIME ساعة.',
+            'expired_confirmation_time_limit' => 'انتهى الوقت المحدد لتوقيع العقد بعد :TIME ساعة.',
             'steps' => [
                 'contract_signed' => [
                     'sell' => 'تم توقيع العقد - بيع للعميل مؤكد بواسطة المستخدم.',

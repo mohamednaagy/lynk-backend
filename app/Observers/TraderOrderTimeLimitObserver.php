@@ -11,14 +11,13 @@ class TraderOrderTimeLimitObserver
     /**
      * Handle the TraderOrderTimeLimit "created" event.
      *
-     * @param  \App\Models\TraderOrderTimeLimit  $traderOrderTimeLimit
      * @return void
      */
     public function created(TraderOrderTimeLimit $traderOrderTimeLimit)
     {
         $effectiveAt = Carbon::parse($traderOrderTimeLimit->effective_at);
 
-        ExpireOrderJob::dispatch($traderOrderTimeLimit)
+        ExpireOrderJob::dispatch($traderOrderTimeLimit->id)
             ->delay($effectiveAt->diffInSeconds(Carbon::now()));
     }
 }

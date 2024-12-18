@@ -12,6 +12,7 @@ return [
             'no_commodity_available' => 'No commodities found with LOCAL Trader.',
             'internal_technical_error' => 'Internal Technical Error',
             'expired_contract_time' => 'Contract Sign Time Limit of :TIME hours has expired.',
+            'expired_confirmation_time_limit' => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit of :TIME hours has expired.',
             'steps' => [
                 'contract_signed' => [
                     'sell' => 'Contract Signed - Sell for Customer confirmed by user.',
