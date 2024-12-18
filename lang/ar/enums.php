@@ -133,7 +133,7 @@ return [
         UnitOwnershipAction::PurchaseCommodity => 'شراء السلعة',
         UnitOwnershipAction::BorrowerOwnershipTransfer => 'نقل الملكية إلى المقترض',
         UnitOwnershipAction::Cancel => 'إلغاء',
-        UnitOwnershipAction::ConfirmedDelivery => 'تأكيد التسليم',
+        UnitOwnershipAction::DeliverCommodity => 'تأكيد التسليم',
     ],
     TraderOrderTimeLimitType::class => [
         TraderOrderTimeLimitType::ContractSignTimeLimit => 'توقيع العقد',

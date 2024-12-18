@@ -15,5 +15,5 @@ final class UnitOwnershipAction extends Enum implements LocalizedEnum
 
     const Cancel = 4; // customer  => supplier or previous trade order
 
-    const ConfirmedDelivery = 5; // customer => trade order
+    const DeliverCommodity = 5; // customer => trade order
 }
