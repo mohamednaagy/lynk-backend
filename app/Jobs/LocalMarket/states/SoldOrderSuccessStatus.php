@@ -12,7 +12,7 @@ class SoldOrderSuccessStatus extends BaseStatus
     public function handle(): void
     {
         // handle rotation or complete order
-        $this->localMarketWebhook->with(['case' => OrderStatus::CommoditiesSell, 'external_order_no' => $this->externalOrderNo])->handle();
+        $this->localMarketWebhook->with(['case' => OrderStatus::CommoditiesSell, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         $this->logQueueJob('Order Sold successfully');
     }
 }
