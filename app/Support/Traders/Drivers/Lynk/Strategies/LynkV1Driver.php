@@ -16,6 +16,8 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\TraderException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -241,7 +243,10 @@ class LynkV1Driver implements TraderInterface
         //         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
     }
 
-    public function sellCommodityToLocalMarket(TraderOrder $traderOrder) {}
+    public function sellCommodityToLocalMarket(TraderOrder $traderOrder)
+    {
+        LynkClient::of($traderOrder)->sellProduct();
+    }
 
     public function cancelOrder(FinancingOrder $financingOrder): int
     {
@@ -399,6 +404,9 @@ class LynkV1Driver implements TraderInterface
             TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
             TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.lynk.expired_contract_time', [
                 'TIME' => $traderOrder->default_contract_sign_time_limit / 60,
+            ]),
+            TraderOrderCancelReason::ExpiredConfirmationTimeLimit => __('order.trader.lynk.expired_confirmation_time_limit', [
+                'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
             default => null,
         };

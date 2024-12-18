@@ -21,10 +21,10 @@ class ExpireOrderJob implements ShouldQueue
 
     private string $jobUniqueId;
 
-    public function __construct(TraderOrderTimeLimit $traderOrderTimeLimit)
+    public function __construct(int $traderOrderTimeLimitId)
     {
-        $this->traderOrderTimeLimit = $traderOrderTimeLimit;
-        $this->jobUniqueId = 'expire_trader_order_'.$traderOrderTimeLimit->trader_order_id;
+        $this->traderOrderTimeLimit = TraderOrderTimeLimit::findOrFail($traderOrderTimeLimitId);
+        $this->jobUniqueId = 'expire_trader_order_'.$this->traderOrderTimeLimit->trader_order_id;
         $this->onQueue('expire_trader_order');
     }
 
