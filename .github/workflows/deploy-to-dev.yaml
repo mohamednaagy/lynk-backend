@@ -44,7 +44,14 @@ jobs:
   
   test:
     runs-on: ubuntu-latest
+    needs: deploy
     steps:
+      - name: Install SSH key
+        id: install-ssh-key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          
       - name: Run Tests with Docker Compose
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
@@ -70,16 +77,13 @@ jobs:
           cd /home/ubuntu/lynk-backend-automation
           allure generate merged-allure-results -o allure-report
           EOF
-     
-      - name: Download Allure Report to Runner
-        run: |
-          scp -o StrictHostKeyChecking=no -r ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/home/ubuntu/lynk-backend-automation/allure-report ./allure-report    
 
-      - name: Deploy Allure Report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.TOKEN }}
-          publish_dir: allure-report
+      - name: deploy Allure to GitHub Pages
+        run:
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
+          cd /home/ubuntu/lynk-backend-automation
+          allure generate merged-allure-results -o allure-report
+          EOF
 
       - name: Cleanup Docker Containers - Fix Permissions
         run:
