@@ -88,7 +88,7 @@ jobs:
           EOF
           scp -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/tmp/allure-report.tar.gz ./allure-report.tar.gz
           ls -l
-          # tar -xzf allure-report.tar.gz -C ./allure-report
+          tar -xzf allure-report.tar.gz -C ./allure-report
 
       - name: Deploy Allure Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
