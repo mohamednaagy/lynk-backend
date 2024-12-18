@@ -81,13 +81,16 @@ jobs:
           allure generate merged-allure-results -o allure-report
           EOF
 
-      - name: deploy Allure to GitHub Pages
+      - name: Download Allure Report to Runner
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
-          sudo su - ubuntu
-          cd /home/ubuntu/lynk-backend-automation
-          allure generate merged-allure-results -o allure-report
-          EOF
+          scp -o StrictHostKeyChecking=no -r ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/home/ubuntu/lynk-backend-automation/allure-report ./allure-report    
+
+      - name: Deploy Allure Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          # github_token: ${{ secrets.TOKEN }}
+          github_token: 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
+          publish_dir: allure-report
 
       - name: Cleanup Docker Containers - Fix Permissions
         run: |
