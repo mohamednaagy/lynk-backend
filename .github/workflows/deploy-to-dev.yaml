@@ -74,7 +74,7 @@ jobs:
           EOF
 
       - name: Generate Allure Report
-        run:
+        run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
           sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
@@ -82,7 +82,7 @@ jobs:
           EOF
 
       - name: deploy Allure to GitHub Pages
-        run:
+        run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
           sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
@@ -90,7 +90,7 @@ jobs:
           EOF
 
       - name: Cleanup Docker Containers - Fix Permissions
-        run:
+        run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
           sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
