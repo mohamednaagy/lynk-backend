@@ -24,7 +24,7 @@ jobs:
            "cd /var/www/lynk-backend/ && git pull origin dev && sudo php artisan migrate && sudo supervisorctl stop all && sudo supervisorctl start all"
         
       - name: set pr url
-        if: always()
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
         id: pr-url
         uses: kceb/pull-request-url-action@v1
         with:
