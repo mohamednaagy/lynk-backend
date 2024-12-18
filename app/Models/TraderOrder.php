@@ -10,6 +10,7 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
@@ -26,8 +27,6 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
 use UnexpectedValueException;
-use App\Enums\TraderOrderTimeLimitStatus;
-
 
 /**
  * @property mixed $reference
@@ -137,7 +136,7 @@ class TraderOrder extends Model implements HasMedia
     {
         $stepToHistoriesDictionary = trader_step_histories($this->provider, $this->version);
 
-        if (!array_key_exists($step, $stepToHistoriesDictionary)) {
+        if (! array_key_exists($step, $stepToHistoriesDictionary)) {
             throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
@@ -148,12 +147,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function doesLastActionMatchWith($actions): bool
     {
-        if (!is_array($actions)) {
+        if (! is_array($actions)) {
             $actions = [$actions];
         }
 
         foreach ($actions as $action) {
-            if (!in_array($action, FinancingOrderHistory::getValues())) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException('invalid Action');
             }
         }
@@ -170,12 +169,12 @@ class TraderOrder extends Model implements HasMedia
 
     public function getOrderHistoryAction($actions)
     {
-        if (!is_array($actions)) {
+        if (! is_array($actions)) {
             $actions = [$actions];
         }
 
         foreach ($actions as $action) {
-            if (!in_array($action, FinancingOrderHistory::getValues())) {
+            if (! in_array($action, FinancingOrderHistory::getValues())) {
                 throw new UnexpectedValueException(sprintf('Invalid action %s', $action));
             }
         }
@@ -206,7 +205,7 @@ class TraderOrder extends Model implements HasMedia
         $stepNode = (new StepHistoriesDictionary($this->provider, $this->version))->getStepByHistory($lastAction?->action);
 
         return new Attribute(
-            get: fn() => $stepNode?->step,
+            get: fn () => $stepNode?->step,
         );
     }
 
@@ -215,7 +214,7 @@ class TraderOrder extends Model implements HasMedia
      */
     public function ensureCanAccessStep(string $step)
     {
-        if (!$this->checkOrderStepComplete($step)) {
+        if (! $this->checkOrderStepComplete($step)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
     }
@@ -226,7 +225,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return !$this->checkOrderStepComplete($step);
+        return ! $this->checkOrderStepComplete($step);
     }
 
     public function scopeCompletedOrInProgress($query)
@@ -250,7 +249,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return !$this->hasMedia(TraderOrderMediaCollection::ClientWakala);
+        return ! $this->hasMedia(TraderOrderMediaCollection::ClientWakala);
     }
 
     /**
@@ -353,7 +352,7 @@ class TraderOrder extends Model implements HasMedia
             if ($this->checkOrderStepComplete(MurabhaStep::CommoditySoldToCustomer)) {
                 return [
                     'status' => CustomerDeliveryStatus::DeliveryNotApplicable,
-                    'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.delivery_not_applicable'),
+                    'message' => __('order.trader.lynk.steps.customer_delivery_confirmation.pending'),
                 ];
             } else {
                 return [
@@ -402,17 +401,18 @@ class TraderOrder extends Model implements HasMedia
             ->where('type', TraderOrderTimeLimitStatus::Pending)
             ->where('effective_at', '<=', Carbon::now())
             ->first();
-            if($expiryTime){
-                if ($expiryTime->type == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit){
-                    return $this->isDeliveryExpirable();
-                }
-                #TODO: need to implement Contract Signed Time Limit Case on Refactor
+        if ($expiryTime) {
+            if ($expiryTime->type == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
+                return $this->isDeliveryExpirable();
             }
+            //TODO: need to implement Contract Signed Time Limit Case on Refactor
+        }
 
         return false;
     }
 
-    public function isDeliveryExpirable(): bool {
+    public function isDeliveryExpirable(): bool
+    {
         return $this->checkOrderHistoryAction([FinancingOrderHistory::PendingDelivery]);
     }
 }
