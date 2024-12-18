@@ -184,8 +184,8 @@ class UnitService
                     $unit,
                     $ownerIdentifier,
                     $ownerType,
-                    $unit->current_owner,
-                    $unit->current_owner_type,
+                    $previousOwner,
+                    $previousOwnerType,
                     $action
                 );
             }
