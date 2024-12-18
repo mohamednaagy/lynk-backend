@@ -349,6 +349,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCustomerDeliveryStatusAndMessage(): array
     {
+
         if ($this->checkOrderHistoryAction(FinancingOrderHistory::DeliveryCancelled)) {
             return [
                 'status' => CustomerDeliveryStatus::DeliveryIgnoreAndSell,
@@ -401,7 +402,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function isDeliveryExpirable(): bool
     {
-        return $this->checkOrderHistoryAction([FinancingOrderHistory::PendingDelivery]);
+        return $this->doesLastActionMatchWith([FinancingOrderHistory::PendingDelivery]);
     }
 
     public function getRecentTimeLimit($type, $status)
