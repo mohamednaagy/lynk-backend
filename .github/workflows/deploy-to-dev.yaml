@@ -78,7 +78,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
           sudo su - ubuntu
           cd /home/ubuntu/lynk-backend-automation
-          allure generate merged-allure-results -o allure-report
+          allure generate merged-allure-results -o allure-report --clean
           EOF
 
       - name: Download Allure Report to Runner
