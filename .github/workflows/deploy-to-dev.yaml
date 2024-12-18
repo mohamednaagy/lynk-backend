@@ -87,7 +87,7 @@ jobs:
           sudo tar -czf /tmp/allure-report.tar.gz -C /home/ubuntu/lynk-backend-automation allure-report
           EOF
           scp -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/tmp/allure-report.tar.gz ./allure-report.tar.gz
-          ll 
+          ls -l
           # tar -xzf allure-report.tar.gz -C ./allure-report
 
       - name: Deploy Allure Report to GitHub Pages
