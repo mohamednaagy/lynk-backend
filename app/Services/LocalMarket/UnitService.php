@@ -67,37 +67,49 @@ class UnitService
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
-        LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
-            ->where('status', InventoryUnitsStatus::Free)
-            ->where('hold_for', 0)
-            ->where(function ($query) use ($localMarketOrder, $numberOfRotation) {
-                if ($numberOfRotation > 0) {
-                    $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($localMarketOrder, $numberOfRotation) {
-                        // Generate JSON_EXTRACT statements dynamically
-                        $jsonExtractParts = [];
-                        for ($i = 0; $i < $numberOfRotation; $i++) {
-                            $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
-                        }
-                        // Combine the generated JSON_EXTRACT parts into a JSON_ARRAY
-                        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
-                        // Add the NOT JSON_OVERLAPS condition
-                        $subQuery->whereRaw(
-                            "NOT JSON_OVERLAPS(
-                        JSON_ARRAY(?),
-                        JSON_ARRAY(
-                            $jsonArrayCondition
-                        )
-                    )",
-                            [$localMarketOrder->company_id] // Bind company ID dynamically
-                        );
-                    });
-                }
-            })
-            ->limit($numberOfNeededUnits)
-            ->update([
-                'hold_for' => $localMarketOrder->id,
-                'status' => InventoryUnitsStatus::Reserved,
-            ]);
+        $now = now();
+        $holdFor = $localMarketOrder->id;
+        $statusReserved = InventoryUnitsStatus::Reserved;
+        $freeStatus = InventoryUnitsStatus::Free;
+        $localMarketInventoryId = $inventory->id;
+        $companyId = $localMarketOrder->company_id;
+        $jsonExtractParts = [];
+        for ($i = 0; $i < $numberOfRotation; $i++) {
+            $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
+        }
+        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
+
+        DB::update("
+                    UPDATE `local_market_inventory_units`
+                    SET `hold_for` = ?,
+                        `status` = ?,
+                        `updated_at` = ?
+                    WHERE `id` IN (
+                        SELECT `id` FROM (
+                            SELECT `id`
+                            FROM `local_market_inventory_units`
+                            WHERE `local_market_inventory_id` = ?
+                              AND `status` = ?
+                              AND `hold_for` = 0
+                              AND (`previous_company_id_owners` IS NULL OR NOT JSON_OVERLAPS(
+                                      JSON_ARRAY(?),
+                                      JSON_ARRAY(
+                                          $jsonArrayCondition
+                                      )
+                                  ))
+                              AND `deleted_at` IS NULL
+                            LIMIT ?
+                        ) AS temp_table
+                    )
+                ", [
+            $holdFor,
+            $statusReserved,
+            $now,
+            $localMarketInventoryId,
+            $freeStatus,
+            $companyId,
+            $numberOfNeededUnits,
+        ]);
         $inventory->refreshStockQuantities();
     }
 
