@@ -3,7 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
 use Illuminate\Support\Facades\Log;
@@ -22,12 +22,12 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 
             if ($eligibleCommodities) {
                 $localMarketOrder->update([
-                    'status' => LocalMarketOrderStatus::EligibleCommoditiesAvailable,
+                    'status' => OrderStatus::EligibleCommoditiesAvailable,
                     'data' => ['inventories' => $eligibleCommodities],
                 ]);
             } else {
                 $localMarketOrder->update([
-                    'status' => LocalMarketOrderStatus::NoEligibleCommoditiesAvailable,
+                    'status' => OrderStatus::NoEligibleCommoditiesAvailable,
                 ]);
             }
 
@@ -45,7 +45,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
             ]);
 
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
+                'status' => OrderStatus::FailedPurchase,
             ]);
 
             throw $e;

@@ -3,9 +3,9 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
-use App\Enums\LocalMarketOrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\OwnershipService;
@@ -51,12 +51,12 @@ class PendingSellOrderStatus implements ShouldQueue
             $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no, UnitOwnershipAction::SellCommodity);
             $this->inventoryService->completeOrderUnits($this->localMarketOrder);
             DB::commit();
-            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::CommoditiesSell);
+            $this->localMarketOrder->changeStatusTo(OrderStatus::CommoditiesSell);
             $this->logQueueJob('pending successfully');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::channel('local_market')->error("failed sell local market order id {$this->localMarketOrder->id}", ['message' => $e->getMessage()]);
-            $this->localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedSell);
+            $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
 
         }
     }

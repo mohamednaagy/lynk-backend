@@ -3,7 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\SellCommodities;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 
 class SellCommoditiesAction implements SellCommodities
@@ -14,6 +14,6 @@ class SellCommoditiesAction implements SellCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingSellCommodities);
+        $localMarketOrder->changeStatusTo(OrderStatus::PendingSellCommodities);
     }
 }

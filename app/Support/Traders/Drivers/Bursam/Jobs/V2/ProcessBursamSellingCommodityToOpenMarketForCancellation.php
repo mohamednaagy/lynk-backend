@@ -47,11 +47,11 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
             if (is_null($traderOrder)) {
                 return;
             }
-            if ($traderOrder->traderHistories()->latest()->first()->action != FinancingOrderHistory::OnHold) {
+
+            if (!$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
                 Trader::driver('bursam', $traderOrder->version)
                     ->sellCommodityToBursam($traderOrder);
             }
-
         });
     }
 
@@ -67,7 +67,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
 
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.$this->traderOrderId;
+        return __CLASS__ . '_' . $this->traderOrderId;
     }
 
     public function failed($exception)

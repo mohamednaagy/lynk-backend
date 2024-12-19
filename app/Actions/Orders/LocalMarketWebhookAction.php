@@ -3,7 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\TraderOrderCancelReason;
 use App\Exceptions\LocalMarketWebhookException;
 use App\Models\TraderOrder;
@@ -36,36 +36,36 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
         );
 
         switch ($this->data['case']) {
-            case LocalMarketOrderStatus::CommoditiesPurchased:
+            case OrderStatus::CommoditiesPurchased:
                 $this->data['auto_generate_financing_institution_certificate'] = 1;
                 (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
                     ->updatePurchasingCommodity($traderOrder, $this->data);
                 break;
 
-            case LocalMarketOrderStatus::FailedPurchase:
+            case OrderStatus::FailedPurchase:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToPurchase);
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->confirmCancelledFromProvider($traderOrder);
                 break;
-            case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
+            case OrderStatus::NoEligibleCommoditiesAvailable:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::NoEligibleCommoditiesAvailable);
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->confirmCancelledFromProvider($traderOrder);
                 break;
-            case LocalMarketOrderStatus::TransferOwnershipToCustomer:
+            case OrderStatus::TransferOwnershipToCustomer:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->createSellingCommodityToCustomerDocument($traderOrder);
                 break;
-            case LocalMarketOrderStatus::CommoditiesSell:
+            case OrderStatus::CommoditiesSell:
                 (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder);
                 break;
-            case LocalMarketOrderStatus::Cancelled:
+            case OrderStatus::Cancelled:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->confirmCancelledFromProvider($traderOrder);
                 break;
-            case LocalMarketOrderStatus::FailedSell:
+            case OrderStatus::FailedSell:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToSellAtLocalMarket);
                 Trader::driver($traderOrder->provider, $traderOrder->version)

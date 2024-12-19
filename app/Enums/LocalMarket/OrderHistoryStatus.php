@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Enums;
+namespace App\Enums\LocalMarket;
 
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 
-final class LocalMarketOrderHistoryStatus extends Enum implements LocalizedEnum
+final class OrderHistoryStatus extends Enum implements LocalizedEnum
 {
     const initiate = 0;
 

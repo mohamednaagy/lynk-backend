@@ -3,8 +3,8 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Enums\LocalMarketOrderHistoryStatus;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderHistoryStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -32,8 +32,8 @@ class FailedSoldOrderStatus implements ShouldQueue
 
     public function handle(): void
     {
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::FailedSell);
-        $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::FailedSell, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::FailedSell);
+        $this->localMarketWebhook->with(['case' => OrderStatus::FailedSell, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         $this->logQueueJob('Failed Order Sold successfully');
     }
 

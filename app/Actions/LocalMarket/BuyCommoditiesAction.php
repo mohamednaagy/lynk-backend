@@ -3,7 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Exceptions\LocalMarket\PurchaseProductException;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
@@ -31,14 +31,14 @@ class BuyCommoditiesAction implements BuyCommodities
             $startTime = microtime(true);
             if ($this->LoanService->buyCommodities($localMarketOrder)) {
                 $localMarketOrder->update([
-                    'status' => LocalMarketOrderStatus::CommoditiesPurchased,
+                    'status' => OrderStatus::CommoditiesPurchased,
                     'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),
                 ]);
 
                 Log::channel('local_market')->info('unit service for order '.$localMarketOrder->id, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]);
             } else {
                 $localMarketOrder->update([
-                    'status' => LocalMarketOrderStatus::FailedPurchase,
+                    'status' => OrderStatus::FailedPurchase,
                 ]);
             }
 
@@ -55,7 +55,7 @@ class BuyCommoditiesAction implements BuyCommodities
                 'trace' => $e->getTraceAsString(),
             ]);
             $localMarketOrder->update([
-                'status' => LocalMarketOrderStatus::FailedPurchase,
+                'status' => OrderStatus::FailedPurchase,
             ]);
             throw $e;
         }

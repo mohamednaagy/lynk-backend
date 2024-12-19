@@ -3,7 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -32,7 +32,7 @@ class CancelledOrderStatus implements ShouldQueue
 
     public function handle(): void
     {
-        $this->localMarketWebhook->with(['case' => LocalMarketOrderStatus::Cancelled, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
+        $this->localMarketWebhook->with(['case' => OrderStatus::Cancelled, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
         $this->logQueueJob('Order cancelled successfully');
     }
 

@@ -3,8 +3,8 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
-use App\Enums\LocalMarketOrderHistoryStatus;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderHistoryStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -33,8 +33,8 @@ class NoEligibleCommoditiesAvailableStatus implements ShouldQueue
     public function handle(): void
     {
 
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, LocalMarketOrderHistoryStatus::NoEligibleCommoditiesAvailable);
-        $data['case'] = LocalMarketOrderStatus::NoEligibleCommoditiesAvailable;
+        $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::NoEligibleCommoditiesAvailable);
+        $data['case'] = OrderStatus::NoEligibleCommoditiesAvailable;
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->localMarketWebhook->with($data)->handle();
         Log::channel('local_market')->info('Notify our customer sorry we can not find your eligibilities commodities ');

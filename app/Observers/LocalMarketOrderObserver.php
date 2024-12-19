@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Jobs\LocalMarket\states\CancelledOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
@@ -90,37 +90,37 @@ class LocalMarketOrderObserver
         // TODO:sell_commodity_21_10 => add new job for sold success
         // TODO:sell_commodity_21_10 => add new job for cancelled success
         switch ($localMarketOrder->status) {
-            case LocalMarketOrderStatus::EligibleCommoditiesAvailable:
+            case OrderStatus::EligibleCommoditiesAvailable:
                 EligibleCommoditiesFoundStatus::dispatch($localMarketOrder->id);
                 break;
-            case LocalMarketOrderStatus::NoEligibleCommoditiesAvailable:
+            case OrderStatus::NoEligibleCommoditiesAvailable:
                 NoEligibleCommoditiesAvailableStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::CommoditiesPurchased:
+            case OrderStatus::CommoditiesPurchased:
                 CommoditiesPurchaseCompletedStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::FailedPurchase:
+            case OrderStatus::FailedPurchase:
                 FailedPurchaseStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::PendingCancellation:
+            case OrderStatus::PendingCancellation:
                 PendingCancelOrderStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::Cancelled:
+            case OrderStatus::Cancelled:
                 CancelledOrderStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::FailedToCancel:
+            case OrderStatus::FailedToCancel:
                 FailedCancelOrderStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::PendingSellCommodities:
+            case OrderStatus::PendingSellCommodities:
                 PendingSellOrderStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::CommoditiesSell:
+            case OrderStatus::CommoditiesSell:
                 SoldOrderSuccessStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::FailedSell:
+            case OrderStatus::FailedSell:
                 FailedSoldOrderStatus::dispatch($localMarketOrder);
                 break;
-            case LocalMarketOrderStatus::TransferOwnershipToCustomer:
+            case OrderStatus::TransferOwnershipToCustomer:
                 TransferCommodityToCustomerStatus::dispatch($localMarketOrder);
                 break;
         }

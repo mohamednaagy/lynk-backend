@@ -2,7 +2,7 @@
 
 namespace App\Support\Traders\Drivers\LocalMarket;
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -36,7 +36,7 @@ class ProcessLocalMarketInitiatedTraderOrder implements ShouldBeUnique, ShouldQu
     {
         DB::transaction(function () {
             $traderOrder = LocalMarketOrder::query()
-                ->where('status', LocalMarketOrderStatus::PendingEligibleCommodities)
+                ->where('status', OrderStatus::PendingEligibleCommodities)
                 ->lockForUpdate()
                 ->find($this->localMarketOrderId);
         });

@@ -3,7 +3,7 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\CancelOrder;
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 
 class CancelOrderAction implements CancelOrder
@@ -12,6 +12,6 @@ class CancelOrderAction implements CancelOrder
 
     public function handle(LocalMarketOrder $localMarketOrder)
     {
-        $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingCancellation);
+        $localMarketOrder->changeStatusTo(OrderStatus::PendingCancellation);
     }
 }

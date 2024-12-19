@@ -57,7 +57,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
 
             if (
                 (is_null($traderOrder)
-                   || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) && $traderOrder->traderHistories()->latest()->first()->action != FinancingOrderHistory::OnHold
+                   || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) && !$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)
             ) {
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }

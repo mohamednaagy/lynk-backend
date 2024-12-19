@@ -2,7 +2,7 @@
 
 namespace App\Support\Traders\Traits;
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use UnexpectedValueException;
 
@@ -19,8 +19,8 @@ trait LocalMarketHelperTrait
 
     public function canMoveToNextStep($currentStep, int $nextStep, $localMarketOrder): bool
     {
-        $currentStep = LocalMarketOrderStatus::getEnumInstanceByValue($currentStep);
-        $nextStep = LocalMarketOrderStatus::getEnumInstanceByValue($nextStep);
+        $currentStep = OrderStatus::getEnumInstanceByValue($currentStep);
+        $nextStep = OrderStatus::getEnumInstanceByValue($nextStep);
         $checkStep = $currentStep->canMoveTo($nextStep->value);
         if (! $currentStep->canMoveTo($nextStep->value)) {
             throw new UnexpectedValueException("can not move $currentStep to $nextStep for local market order {$localMarketOrder->id}");
