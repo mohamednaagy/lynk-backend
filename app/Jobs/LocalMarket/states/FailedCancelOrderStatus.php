@@ -7,5 +7,8 @@ class FailedCancelOrderStatus extends BaseStatus
     /**
      * Execute the job.
      */
-    public function handle(): void {}
+    public function handle(): void
+    {
+        $this->logQueueJob('Failed to cancel order.');
+    }
 }
