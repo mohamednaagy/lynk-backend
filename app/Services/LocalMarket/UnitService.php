@@ -4,6 +4,7 @@ namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
@@ -195,8 +196,9 @@ class UnitService
 
     public function revertInventoryUnitOwnership(LocalMarketOrder $localMarketOrder)
     {
+        $ownershipService = app(OwnershipService::class);
         LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
-            ->chunkById(100, function ($units) use ($localMarketOrder) {
+            ->chunkById(100, function ($units) use ($ownershipService, $localMarketOrder) {
                 Log::channel('local_market')->info('Swapping current owner for order '.$localMarketOrder->id);
 
                 foreach ($units as $unit) {
@@ -218,6 +220,16 @@ class UnitService
                         'previous_owner' => $unit->current_owner,
                         'previous_owner_type' => $unit->current_owner_type,
                     ]);
+
+                    $ownershipService->addOwnershipLogsToDB(
+                        $unit->hold_for,
+                        $unit,
+                        $newCurrentOwner,
+                        $newCurrentOwnerType,
+                        $unit->current_owner,
+                        $unit->current_owner_type,
+                        UnitOwnershipAction::Cancel
+                    );
                 }
             });
     }
