@@ -94,34 +94,34 @@ class LocalMarketOrderObserver
                 EligibleCommoditiesFoundStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::NoEligibleCommoditiesAvailable:
-                NoEligibleCommoditiesAvailableStatus::dispatch($localMarketOrder);
+                NoEligibleCommoditiesAvailableStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::CommoditiesPurchased:
-                CommoditiesPurchaseCompletedStatus::dispatch($localMarketOrder);
+                CommoditiesPurchaseCompletedStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::FailedPurchase:
-                FailedPurchaseStatus::dispatch($localMarketOrder);
+                FailedPurchaseStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::PendingCancellation:
-                PendingCancelOrderStatus::dispatch($localMarketOrder);
+                PendingCancelOrderStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::Cancelled:
-                CancelledOrderStatus::dispatch($localMarketOrder);
+                CancelledOrderStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::FailedToCancel:
-                FailedCancelOrderStatus::dispatch($localMarketOrder);
+                FailedCancelOrderStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::PendingSellCommodities:
-                PendingSellOrderStatus::dispatch($localMarketOrder);
+                PendingSellOrderStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::CommoditiesSell:
-                SoldOrderSuccessStatus::dispatch($localMarketOrder);
+                SoldOrderSuccessStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::FailedSell:
-                FailedSoldOrderStatus::dispatch($localMarketOrder);
+                FailedSoldOrderStatus::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::TransferOwnershipToCustomer:
-                TransferCommodityToCustomerStatus::dispatch($localMarketOrder);
+                TransferCommodityToCustomerStatus::dispatch($localMarketOrder->id);
                 break;
         }
     }
