@@ -57,7 +57,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
             Trader::driver('bursam', $traderOrder->version)
                 ->getBidCertificateDetails($traderOrder);
 
-            app(GenerateClientWakala::class)->handle($traderOrder);
+            //app(GenerateClientWakala::class)->handle($traderOrder);
         });
     }
 
