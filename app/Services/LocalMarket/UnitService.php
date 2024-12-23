@@ -74,40 +74,32 @@ class UnitService
         $localMarketInventoryId = $inventory->id;
         $companyId = $localMarketOrder->company_id;
         $conditions = [];
-        for ($i = 0; $i < $numberOfRotation; $i++) {
-            $conditions[] = "previous_company_id_owner_$i != ?";
+        if ($numberOfRotation > 0) {
+            for ($i = 0; $i < $numberOfRotation; $i++) {
+                $conditions[] = "previous_company_id_owner_$i != $companyId";
+            }
         }
-        $conditionsSql = implode(' AND ', $conditions);
 
-        DB::update("
-                    UPDATE `local_market_inventory_units`
-                    SET `hold_for` = ?,
-                        `status` = ?,
-                        `updated_at` = ?
-                    WHERE `id` IN (
-                        SELECT `id` FROM (
-                            SELECT `id`
-                            FROM `local_market_inventory_units`
-                            WHERE `local_market_inventory_id` = ?
-                              AND `status` = ?
-                              AND `hold_for` = 0
-                              AND (
-                                    `previous_company_id_owners` IS NULL 
-                                    OR ($conditionsSql)
-                                )
-                              AND `deleted_at` IS NULL
-                            LIMIT ?
-                        ) AS temp_table
-                    )
-                ", [
-            $holdFor,
-            $statusReserved,
-            $now,
-            $localMarketInventoryId,
-            $freeStatus,
-            $companyId,
-            $numberOfNeededUnits,
+        $query = DB::table('local_market_inventory_units')
+            ->where('local_market_inventory_id', $inventory->id)
+            ->where('status', InventoryUnitsStatus::Free)
+            ->where('hold_for', 0)
+            ->whereNull('deleted_at');
+
+        if ($numberOfRotation > 0) {
+            for ($i = 0; $i < $numberOfRotation; $i++) {
+                $query->where(function ($query) use ($companyId, $i) {
+                    $query->where("previous_company_id_owner_$i", '!=', $companyId)
+                        ->orWhereNull("previous_company_id_owner_$i");
+                });
+            }
+        }
+        $query->update([
+            'hold_for' => $holdFor,
+            'status' => $statusReserved,
+            'updated_at' => $now,
         ]);
+
         $inventory->refreshStockQuantities();
     }
 
