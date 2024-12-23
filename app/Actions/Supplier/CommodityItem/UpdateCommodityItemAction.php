@@ -14,7 +14,6 @@ class UpdateCommodityItemAction implements UpdateCommodityItem
 
     public function handle(CommodityItem $item, array $data): CommodityItem
     {
-
         $item->update(
             Arr::only(
                 $data,
@@ -28,7 +27,6 @@ class UpdateCommodityItemAction implements UpdateCommodityItem
                     'volume_sellable_unit',
                     'currency_id',
                     'measurement_id',
-                    'commodity_type_id',
                 ]
             )
         );
