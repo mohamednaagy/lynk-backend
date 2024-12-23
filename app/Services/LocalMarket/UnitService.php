@@ -153,38 +153,33 @@ class UnitService
         }
         $jsonArrayCondition = implode(",\n", $jsonExtractParts);
 
-        $query = "
-            SELECT COUNT(*)
-            FROM `local_market_inventory_units`
-            WHERE `local_market_inventory_id` = ?
-              AND `status` = ?
-              AND `hold_for` = ?
-              AND (
-                  (
-                      ? = 0 -- Number of rotations is zero, skip JSON logic
-                      OR (
-                          `previous_company_id_owners` IS NULL
-                          OR NOT JSON_OVERLAPS(
-                              JSON_ARRAY(?),
-                              JSON_ARRAY(
-                                  $jsonArrayCondition
-                              )
-                          )
-                      )
-                  )
-              )
-              AND `deleted_at` IS NULL
-        ";
-
-        $count = DB::selectOne($query, [
+        return DB::selectOne("
+                SELECT COUNT(*) as count
+                FROM `local_market_inventory_units`
+                WHERE `local_market_inventory_id` = ?
+                AND `status` = ?
+                AND `hold_for` = ?
+                AND (
+                    (
+                        ? = 0 -- Number of rotations is zero, skip JSON logic
+                        OR (
+                            `previous_company_id_owners` IS NULL
+                            OR NOT JSON_OVERLAPS(
+                                JSON_ARRAY(?),
+                                JSON_ARRAY($jsonArrayCondition)
+                            )
+                        )
+                    )
+                )
+                AND `deleted_at` IS NULL
+            ", [
             $inventory->id,
             InventoryUnitsStatus::Free,
             0,
             $numberOfRotation,
             $company->id,
-        ]);
+        ])->count;
 
-        return $count->{'COUNT(*)'};
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
