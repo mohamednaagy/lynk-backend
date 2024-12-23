@@ -146,34 +146,41 @@ class UnitService
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
+        $jsonExtractParts = [];
+        if ($numberOfRotation > 0) {
+            for ($i = 0; $i < $numberOfRotation; $i++) {
+                $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
+            }
+        }
+        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
 
-        return LocalMarketInventoryUnits::where('local_market_inventory_id', $inventory->id)
-            ->where('status', InventoryUnitsStatus::Free)
-            ->where('hold_for', 0)
-            ->where(function ($query) use ($company, $numberOfRotation) {
-                if ($numberOfRotation > 0) {
-                    $query->whereNull('previous_company_id_owners')->orWhere(function ($subQuery) use ($company, $numberOfRotation) {
-                        // Generate JSON_EXTRACT statements dynamically
-                        $jsonExtractParts = [];
-                        for ($i = 0; $i < $numberOfRotation; $i++) {
-                            $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
-                        }
-                        // Combine the generated JSON_EXTRACT parts into a JSON_ARRAY
-                        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
-                        // Add the NOT JSON_OVERLAPS condition
-                        $subQuery->whereRaw(
-                            "NOT JSON_OVERLAPS(
-                        JSON_ARRAY(?),
-                        JSON_ARRAY(
-                            $jsonArrayCondition
+        return DB::selectOne("
+                SELECT COUNT(*) as count
+                FROM `local_market_inventory_units`
+                WHERE `local_market_inventory_id` = ?
+                AND `status` = ?
+                AND `hold_for` = ?
+                AND (
+                    (
+                        ? = 0 -- Number of rotations is zero, skip JSON logic
+                        OR (
+                            `previous_company_id_owners` IS NULL
+                            OR NOT JSON_OVERLAPS(
+                                JSON_ARRAY(?),
+                                JSON_ARRAY($jsonArrayCondition)
+                            )
                         )
-                    )",
-                            [$company->id] // Bind company ID dynamically
-                        );
-                    });
-                }
-            })
-            ->count();
+                    )
+                )
+                AND `deleted_at` IS NULL
+            ", [
+            $inventory->id,
+            InventoryUnitsStatus::Free,
+            0,
+            $numberOfRotation,
+            $company->id,
+        ])->count;
+
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
