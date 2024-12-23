@@ -74,11 +74,11 @@ class UnitService
         $freeStatus = InventoryUnitsStatus::Free;
         $localMarketInventoryId = $inventory->id;
         $companyId = $localMarketOrder->company_id;
-        $jsonExtractParts = [];
+        $conditions = [];
         for ($i = 0; $i < $numberOfRotation; $i++) {
-            $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
+            $conditions[] = "previous_company_id_owner_$i != ?";
         }
-        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
+        $conditionsSql = implode(' AND ', $conditions);
 
         DB::update("
                     UPDATE `local_market_inventory_units`
@@ -92,12 +92,10 @@ class UnitService
                             WHERE `local_market_inventory_id` = ?
                               AND `status` = ?
                               AND `hold_for` = 0
-                              AND (`previous_company_id_owners` IS NULL OR NOT JSON_OVERLAPS(
-                                      JSON_ARRAY(?),
-                                      JSON_ARRAY(
-                                          $jsonArrayCondition
-                                      )
-                                  ))
+                              AND (
+                                    `previous_company_id_owners` IS NULL 
+                                    OR ($conditionsSql)
+                                )
                               AND `deleted_at` IS NULL
                             LIMIT ?
                         ) AS temp_table
@@ -146,41 +144,21 @@ class UnitService
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
-        $jsonExtractParts = [];
+        $query = DB::table('local_market_inventory_units')
+            ->where('local_market_inventory_id', $inventory->id)
+            ->where('status', InventoryUnitsStatus::Free)
+            ->where('hold_for', 0)
+            ->whereNull('deleted_at');
         if ($numberOfRotation > 0) {
             for ($i = 0; $i < $numberOfRotation; $i++) {
-                $jsonExtractParts[] = "JSON_EXTRACT(previous_company_id_owners, '$[$i]')";
+                $query->where(function ($query) use ($company, $i) {
+                    $query->where("previous_company_id_owner_$i", '!=', $company->id)
+                        ->orWhereNull("previous_company_id_owner_$i");
+                });
             }
         }
-        $jsonArrayCondition = implode(",\n", $jsonExtractParts);
 
-        return DB::selectOne("
-                SELECT COUNT(*) as count
-                FROM `local_market_inventory_units`
-                WHERE `local_market_inventory_id` = ?
-                AND `status` = ?
-                AND `hold_for` = ?
-                AND (
-                    (
-                        ? = 0 -- Number of rotations is zero, skip JSON logic
-                        OR (
-                            `previous_company_id_owners` IS NULL
-                            OR NOT JSON_OVERLAPS(
-                                JSON_ARRAY(?),
-                                JSON_ARRAY($jsonArrayCondition)
-                            )
-                        )
-                    )
-                )
-                AND `deleted_at` IS NULL
-            ", [
-            $inventory->id,
-            InventoryUnitsStatus::Free,
-            0,
-            $numberOfRotation,
-            $company->id,
-        ])->count;
-
+        return $query->count();
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
