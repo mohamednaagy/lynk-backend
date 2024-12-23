@@ -12,49 +12,61 @@ class CreateSoftDeleteLocalMarketInventoryUnitsProcedure extends Migration
      */
     public function up()
     {
-        DB::unprepared('
+        // Check if the procedure exists
+        $procedureExists = DB::table('information_schema.ROUTINES')
+            ->where('ROUTINE_NAME', 'DeleteLocalMarketInventoryUnits')
+            ->where('ROUTINE_TYPE', 'PROCEDURE')
+            ->where('ROUTINE_SCHEMA', DB::getDatabaseName())
+            ->exists();
+
+        // If it doesn't exist, create the procedure
+        if (! $procedureExists) {
+            DB::unprepared('
         CREATE PROCEDURE DeleteLocalMarketInventoryUnits(
             IN p_inventory_id INT,
             IN p_status INT,
             IN p_limit INT
         )
         BEGIN
-                DECLARE current_batch INT UNSIGNED DEFAULT 0;
-                DECLARE batch_size INT UNSIGNED DEFAULT 100000; -- Adjust batch size based on your system capacity
-                DECLARE total_units_remaining INT UNSIGNED;
-                DECLARE time_now DATETIME;
-                DECLARE EXIT HANDLER FOR SQLEXCEPTION
-                BEGIN
-                    -- Log and rollback on error
-                    ROLLBACK;
-                    SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = \'An error occurred. Rolling back transaction.\';
-                END;
-                
-                SET total_units_remaining = p_limit;
-                SET time_now = NOW();
-                START TRANSACTION;
-                -- Continue updating in batches as long as rows are being affected
-                WHILE total_units_remaining > 0 DO                
-                    -- Determine the size of the current batch
-                    IF total_units_remaining > batch_size THEN
-                        SET current_batch = batch_size;
-                    ELSE
-                        SET current_batch = total_units_remaining;
-                    END IF;
-                    
-                    -- Update in chunks
-                    UPDATE local_market_inventory_units
-                    SET deleted_at = time_now
-                    WHERE local_market_inventory_id = p_inventory_id
-                    AND status = p_status
-                    AND deleted_at IS NULL
-                    LIMIT current_batch;
-                    
-                    SET total_units_remaining = total_units_remaining - current_batch;
-                END WHILE;
-                COMMIT;
+            DECLARE current_batch INT UNSIGNED DEFAULT 0;
+            DECLARE batch_size INT UNSIGNED DEFAULT 100000; -- Adjust batch size based on your system capacity
+            DECLARE total_units_remaining INT UNSIGNED;
+            DECLARE time_now DATETIME;
+            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+            BEGIN
+                -- Log and rollback on error
+                ROLLBACK;
+                SIGNAL SQLSTATE \'45000\' SET MESSAGE_TEXT = \'An error occurred. Rolling back transaction.\';
             END;
-        ');
+
+            SET total_units_remaining = p_limit;
+            SET time_now = NOW();
+            START TRANSACTION;
+            -- Continue updating in batches as long as rows are being affected
+            WHILE total_units_remaining > 0 DO
+
+                -- Determine the size of the current batch
+                IF total_units_remaining > batch_size THEN
+                    SET current_batch = batch_size;
+                ELSE
+                    SET current_batch = total_units_remaining;
+                END IF;
+
+                -- Update in chunks
+                UPDATE local_market_inventory_units
+                SET deleted_at = time_now
+                WHERE local_market_inventory_id = p_inventory_id
+                AND status = p_status
+                AND deleted_at IS NULL
+                LIMIT current_batch;
+
+                SET total_units_remaining = total_units_remaining - current_batch;
+            END WHILE;
+            COMMIT;
+        END;
+    ');
+        }
+
     }
 
     /**
