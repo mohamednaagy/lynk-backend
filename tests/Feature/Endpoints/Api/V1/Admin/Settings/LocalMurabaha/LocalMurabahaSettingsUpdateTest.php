@@ -50,8 +50,8 @@ class LocalMurabahaSettingsUpdateTest extends TestCase
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$localMurabahaSettings = $this->getLocalMurabahaSettingsClass('LocalMurabaha');
         self::$localMurabahaSettingsData = [
-            'default_trade_order_rotation_count' => 1,
             'default_contract_sign_time_limit' => 45,
+            'default_customer_delivery_confirmation_time_limit' => 20,
         ];
     }
 
