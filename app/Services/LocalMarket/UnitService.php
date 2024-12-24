@@ -67,20 +67,12 @@ class UnitService
 
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
+        Log::channel('local_market')->info('time of hold eligable units start at '.now());
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         $now = now();
         $holdFor = $localMarketOrder->id;
         $statusReserved = InventoryUnitsStatus::Reserved;
-        $freeStatus = InventoryUnitsStatus::Free;
-        $localMarketInventoryId = $inventory->id;
         $companyId = $localMarketOrder->company_id;
-        $conditions = [];
-        if ($numberOfRotation > 0) {
-            for ($i = 0; $i < $numberOfRotation; $i++) {
-                $conditions[] = "previous_company_id_owner_$i != $companyId";
-            }
-        }
-
         $query = DB::table('local_market_inventory_units')
             ->where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
@@ -95,12 +87,15 @@ class UnitService
                 });
             }
         }
+
+        $query->limit($numberOfNeededUnits);
         $query->update([
             'hold_for' => $holdFor,
             'status' => $statusReserved,
             'updated_at' => $now,
         ]);
 
+        Log::channel('local_market')->info('time of hold eligable units end at '.now());
         $inventory->refreshStockQuantities();
     }
 
@@ -136,6 +131,7 @@ class UnitService
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
+        Log::channel('local_market')->info('time of count eligable units end at '.now());
         $query = DB::table('local_market_inventory_units')
             ->where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
@@ -149,8 +145,10 @@ class UnitService
                 });
             }
         }
+        $count = $query->count();
+        Log::channel('local_market')->info('time of count eligable units end at '.now());
 
-        return $query->count();
+        return $count;
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
