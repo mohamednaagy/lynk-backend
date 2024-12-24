@@ -116,7 +116,7 @@ class UnitService
         Collection $unitIds,
         int $holdFor,
         string $status,
-        int $chunkSize = 1000
+        int $chunkSize = 100
     ): void {
         try {
             DB::beginTransaction();
