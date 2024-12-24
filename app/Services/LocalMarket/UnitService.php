@@ -10,6 +10,7 @@ use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -66,36 +67,62 @@ class UnitService
 
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
-        Log::channel('local_market')->info('time of hold eligable units start at '.now(), ['order_id' => $localMarketOrder->id, 'inventory_id' => $inventory->id]);
-        $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
-        $now = now();
-        $holdFor = $localMarketOrder->id;
-        $statusReserved = InventoryUnitsStatus::Reserved;
-        $companyId = $localMarketOrder->company_id;
-        $query = DB::table('local_market_inventory_units')
-            ->where('local_market_inventory_id', $inventory->id)
-            ->where('status', InventoryUnitsStatus::Free)
-            ->where('hold_for', 0)
-            ->whereNull('deleted_at');
-
-        if ($numberOfRotation > 0) {
-            for ($i = 0; $i < $numberOfRotation; $i++) {
-                $query->where(function ($query) use ($companyId, $i) {
-                    $query->where("previous_company_id_owner_$i", '!=', $companyId)
-                        ->orWhereNull("previous_company_id_owner_$i");
-                });
-            }
-        }
-
-        $query->limit($numberOfNeededUnits);
-        $query->update([
-            'hold_for' => $holdFor,
-            'status' => $statusReserved,
-            'updated_at' => $now,
+        Log::channel('local_market')->info('time of hold eligible units start at '.now(), [
+            'order_id' => $localMarketOrder->id,
+            'inventory_id' => $inventory->id,
         ]);
 
-        Log::channel('local_market')->info('time of hold eligable units end at '.now());
+        // Get eligible unit IDs
+        $eligibleUnitIds = $this->getEligibleUnitIds(
+            $inventory,
+            $localMarketOrder->company_id,
+            $numberOfNeededUnits
+        );
+
+        // Update units if any found
+        if ($eligibleUnitIds->isNotEmpty()) {
+            $this->updateUnitsStatus(
+                $eligibleUnitIds,
+                $localMarketOrder->id,
+                InventoryUnitsStatus::Reserved
+            );
+        }
+
+        Log::channel('local_market')->info('time of hold eligible units end at '.now());
         $inventory->refreshStockQuantities();
+    }
+
+    /**
+     * Get IDs of eligible units based on inventory and company history
+     */
+    private function getEligibleUnitIds(
+        LocalMarketInventory $inventory,
+        int $companyId,
+        int $limit
+    ): Collection {
+        return collect(
+            $this->buildEligibleUnitsQuery($inventory->id, $companyId)
+                ->select('id')
+                ->limit($limit)
+                ->pluck('id')
+        );
+    }
+
+    /**
+     * Update status of selected units
+     */
+    private function updateUnitsStatus(
+        Collection $unitIds,
+        int $holdFor,
+        string $status
+    ): void {
+        DB::table('local_market_inventory_units')
+            ->whereIn('id', $unitIds)
+            ->update([
+                'hold_for' => $holdFor,
+                'status' => $status,
+                'updated_at' => now(),
+            ]);
     }
 
     public static function getUnitsByGroupedByPreviousOwner(LocalMarketOrder $localMarketOrder)
@@ -127,27 +154,45 @@ class UnitService
             ->toArray();
     }
 
-    public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
+    /**
+     * Count eligible units for a company in an inventory
+     */
+    public function countEligibleUnits(Company $company, LocalMarketInventory $inventory): int
+    {
+        Log::channel('local_market')->info('time of count eligible units start at '.now(), [
+            'inventory_id' => $inventory->id,
+        ]);
+
+        $count = $this->buildEligibleUnitsQuery($inventory->id, $company->id)->count();
+
+        Log::channel('local_market')->info('time of count eligible units end at '.now());
+
+        return $count;
+    }
+
+    /**
+     * Build base query for eligible units based on company and rotation rules
+     */
+    private function buildEligibleUnitsQuery(int $inventoryId, int $companyId): \Illuminate\Database\Query\Builder
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
-        Log::channel('local_market')->info('time of count eligable units end at '.now(), ['inventory_id' => $inventory->id]);
+
         $query = DB::table('local_market_inventory_units')
-            ->where('local_market_inventory_id', $inventory->id)
+            ->where('local_market_inventory_id', $inventoryId)
             ->where('status', InventoryUnitsStatus::Free)
             ->where('hold_for', 0)
             ->whereNull('deleted_at');
+
         if ($numberOfRotation > 0) {
             for ($i = 0; $i < $numberOfRotation; $i++) {
-                $query->where(function ($query) use ($company, $i) {
-                    $query->where("previous_company_id_owner_$i", '!=', $company->id)
+                $query->where(function ($query) use ($companyId, $i) {
+                    $query->where("previous_company_id_owner_$i", '!=', $companyId)
                         ->orWhereNull("previous_company_id_owner_$i");
                 });
             }
         }
-        $count = $query->count();
-        Log::channel('local_market')->info('time of count eligable units end at '.now());
 
-        return $count;
+        return $query;
     }
 
     public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
