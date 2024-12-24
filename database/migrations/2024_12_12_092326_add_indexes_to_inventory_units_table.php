@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
             $table->index('hold_for');
             $table->index('status');
-            $table->index('local_market_inventory_id');
         });
     }
 
@@ -29,7 +27,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
-            //
+            $table->dropIndex('hold_for');
+            $table->dropIndex('status');
         });
     }
 };

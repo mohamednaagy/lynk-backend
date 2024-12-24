@@ -20,7 +20,7 @@ use Tests\Traits\InteractsWithSupplier;
 
 class CommodityItemControllerUpdateTest extends TestCase
 {
-    use AssertsAccessByRoleAndArea, InteractsWithCommodityItem ,  InteractsWithSupplier, RefreshDatabase;
+    use AssertsAccessByRoleAndArea, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
 
     private static User $supplierAdmin;
 
@@ -84,7 +84,6 @@ class CommodityItemControllerUpdateTest extends TestCase
             'volume_sellable_unit' => 10,
             'currency_id' => $this->createCurrency()->id,
             'measurement_id' => $this->createMeasurement()->id,
-            'commodity_type_id' => $this->createCommodityType('type', 'test_item')->id,
         ];
 
         self::$commodityItem2 = [
@@ -97,7 +96,6 @@ class CommodityItemControllerUpdateTest extends TestCase
             'volume_sellable_unit' => 10,
             'currency_id' => $this->createCurrency()->id,
             'measurement_id' => $this->createMeasurement()->id,
-            'commodity_type_id' => $this->createCommodityType()->id,
         ];
         self::$item = $this->createCommodityItem(self::$supplier, 'test_update', 'test_update_unique');
         self::$item2 = $this->createCommodityItem(self::$supplier2, 'test_update2', 'test_update_unique2');
@@ -213,7 +211,7 @@ class CommodityItemControllerUpdateTest extends TestCase
             ->putJson($this->endpoint, self::$commodityItem)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$item->refresh(), new CommodityItemsTransformer())
+                fractal(self::$item->refresh(), new CommodityItemsTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
@@ -224,5 +222,22 @@ class CommodityItemControllerUpdateTest extends TestCase
                     ->respond()
                     ->getData(true)
             );
+    }
+
+    public function test_supplier_user_cant_update_commodity_item_with_commodity_type_id(): void
+    {
+        $this
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->putJson($this->endpoint, Arr::add(self::$commodityItem, 'commodity_type_id', 123))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The commodity_type_id should not be passed in the request.',
+                'errors' => [
+                    'commodity_type_id' => [
+                        'The commodity_type_id should not be passed in the request.',
+                    ],
+                ],
+            ]);
     }
 }

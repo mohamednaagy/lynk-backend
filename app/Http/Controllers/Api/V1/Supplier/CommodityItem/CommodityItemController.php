@@ -139,7 +139,6 @@ class CommodityItemController extends Controller
      */
     public function update(UpdateCommodityItemRequest $request, CommodityItem $commodityItem, UpdateCommodityItem $updateItem): JsonResponse
     {
-
         $item = $updateItem->handle($commodityItem, $request->validated());
 
         return fractal($item, new CommodityItemsTransformer)

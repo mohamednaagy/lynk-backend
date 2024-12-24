@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Supplier\CommodityItem;
 
 use App\Models\CommodityItem;
 use App\Rules\CommodityItemUniqueNameRole;
+use App\Rules\ExcludeCommodityTypeId;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -32,12 +33,12 @@ class UpdateCommodityItemRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:32',
-                new CommodityItemUniqueNameRole(),
+                new CommodityItemUniqueNameRole,
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id)->ignore($this->route('commodity_item'))->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:256'],
             'description' => ['nullable', 'string', 'max:512'],
-            'commodity_type_id' => ['required', 'exists:commodity_types,id'],
+            'commodity_type_id' => [new ExcludeCommodityTypeId],
             'max_price' => ['required', 'numeric', 'gt:0', 'gte:min_price'],
             'min_price' => ['required', 'numeric', 'gt:0', 'lte:max_price'],
             'currency_id' => ['required', 'exists:currencies,id'],
