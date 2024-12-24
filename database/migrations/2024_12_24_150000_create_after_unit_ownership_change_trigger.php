@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class CreateUnitOwnershipTrigger extends Migration
+class CreateAfterUnitOwnershipChangeTrigger extends Migration
 {
     /**
      * Run the migrations.
@@ -22,7 +22,6 @@ class CreateUnitOwnershipTrigger extends Migration
                         previous_owner_type,
                         current_owner,
                         current_owner_type,
-                        action,
                         created_at,
                         updated_at
                     ) VALUES (
@@ -31,7 +30,6 @@ class CreateUnitOwnershipTrigger extends Migration
                         OLD.current_owner_type,
                         NEW.current_owner,
                         NEW.current_owner_type,
-                        NEW.action,
                         NOW(),
                         NOW()
                     );
