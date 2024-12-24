@@ -66,7 +66,7 @@ class UnitService
 
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
-        Log::channel('local_market')->info('time of hold eligable units start at '.now());
+        Log::channel('local_market')->info('time of hold eligable units start at '.now(), ['order_id' => $localMarketOrder->id, 'inventory_id' => $inventory->id]);
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         $now = now();
         $holdFor = $localMarketOrder->id;
@@ -130,7 +130,7 @@ class UnitService
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory)
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
-        Log::channel('local_market')->info('time of count eligable units end at '.now());
+        Log::channel('local_market')->info('time of count eligable units end at '.now(), ['inventory_id' => $inventory->id]);
         $query = DB::table('local_market_inventory_units')
             ->where('local_market_inventory_id', $inventory->id)
             ->where('status', InventoryUnitsStatus::Free)
