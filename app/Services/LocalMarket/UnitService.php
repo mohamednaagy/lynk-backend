@@ -9,7 +9,6 @@ use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -214,25 +213,42 @@ class UnitService
         return $query;
     }
 
-    public function changeOrderUnitsOwnershipTo(LocalMarketOrder $localMarketOrder, $ownerType, $ownerIdentifier, $action)
-    {
-        $localMarketOrder->inventoryUnits()->chunkById(100, function ($units) use ($ownerType, $ownerIdentifier, $action) {
-            foreach ($units as $unit) {
-                // Get the current values for previous_owner and previous_owner_type
-                $previousOwner = $unit->current_owner;
-                $previousOwnerType = $unit->current_owner_type;
-
-                // Perform update with new and old values using Eloquent's update() method
-                $unit->update([
+    /**
+     * Change ownership of order units directly with better performance
+     *
+     * @param  int|string  $ownerIdentifier
+     */
+    public function changeOrderUnitsOwnershipTo(
+        LocalMarketOrder $localMarketOrder,
+        string $ownerType,
+        $ownerIdentifier,
+        string $action
+    ): void {
+        try {
+            // Single update query for all units with this hold_for
+            DB::table('local_market_inventory_units')
+                ->where('hold_for', $localMarketOrder->id)
+                ->update([
+                    'previous_owner' => DB::raw('current_owner'),
+                    'previous_owner_type' => DB::raw('current_owner_type'),
                     'current_owner' => $ownerIdentifier,
                     'current_owner_type' => $ownerType,
-                    'previous_owner' => $previousOwner,
-                    'previous_owner_type' => $previousOwnerType,
-                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
                     'action' => $action,
+                    'updated_at' => now(),
                 ]);
-            }
-        });
+
+            Log::channel('local_market')->info('Completed ownership change', [
+                'order_id' => $localMarketOrder->id,
+                'owner_type' => $ownerType,
+                'action' => $action,
+            ]);
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error('Failed to change ownership', [
+                'order_id' => $localMarketOrder->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     public function revertInventoryUnitOwnership(LocalMarketOrder $localMarketOrder)
