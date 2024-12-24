@@ -114,15 +114,34 @@ class UnitService
     private function updateUnitsStatus(
         Collection $unitIds,
         int $holdFor,
-        string $status
+        string $status,
+        int $chunkSize = 1000
     ): void {
-        DB::table('local_market_inventory_units')
-            ->whereIn('id', $unitIds)
-            ->update([
-                'hold_for' => $holdFor,
-                'status' => $status,
-                'updated_at' => now(),
+        try {
+            DB::beginTransaction();
+
+            $unitIds->chunk($chunkSize)->each(function ($chunk) use ($holdFor, $status) {
+                $ids = $chunk->join(',');
+                DB::statement("
+                    UPDATE local_market_inventory_units 
+                    SET hold_for = ?, 
+                        status = ?,
+                        updated_at = ? 
+                    WHERE id IN ({$ids})
+                ", [$holdFor, $status, now()]);
+
+                Log::channel('local_market')->info('Updated unit statuses chunk');
+            });
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::channel('local_market')->error('Failed to update unit statuses', [
+                'error' => $e->getMessage(),
+                'total_units' => $unitIds->count(),
             ]);
+            throw $e;
+        }
     }
 
     public static function getUnitsByGroupedByPreviousOwner(LocalMarketOrder $localMarketOrder)
@@ -230,8 +249,8 @@ class UnitService
 
                     Log::channel('local_market')->info(
                         'Swapping unit ID '.$unit->id.
-                        ' to owner '.$newCurrentOwner.
-                        ' of type '.$newCurrentOwnerType
+                            ' to owner '.$newCurrentOwner.
+                            ' of type '.$newCurrentOwnerType
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer
