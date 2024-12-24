@@ -20,6 +20,7 @@ class LocalMarketInventoryUnits extends Model
         'qr_code',
         'status',
         'hold_for',
+        'last_action',
         'current_owner',
         'current_owner_type',
         'last_completed_order_id',

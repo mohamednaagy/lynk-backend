@@ -22,6 +22,7 @@ class CreateAfterUnitOwnershipChangeTrigger extends Migration
                         previous_owner_type,
                         current_owner,
                         current_owner_type,
+                        action,
                         created_at,
                         updated_at
                     ) VALUES (
@@ -30,6 +31,7 @@ class CreateAfterUnitOwnershipChangeTrigger extends Migration
                         OLD.current_owner_type,
                         NEW.current_owner,
                         NEW.current_owner_type,
+                        NEW.last_action,
                         NOW(),
                         NOW()
                     );

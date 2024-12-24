@@ -233,7 +233,7 @@ class UnitService
                     'previous_owner_type' => DB::raw('current_owner_type'),
                     'current_owner' => $ownerIdentifier,
                     'current_owner_type' => $ownerType,
-                    'action' => $action,
+                    'last_action' => $action,
                     'updated_at' => now(),
                 ]);
 
