@@ -22,6 +22,7 @@ class CreateAfterUnitOwnershipChangeTrigger extends Migration
                         previous_owner_type,
                         current_owner,
                         current_owner_type,
+                        local_market_order_id,
                         action,
                         created_at,
                         updated_at
@@ -31,6 +32,7 @@ class CreateAfterUnitOwnershipChangeTrigger extends Migration
                         OLD.current_owner_type,
                         NEW.current_owner,
                         NEW.current_owner_type,
+                        OLD.hold_for,
                         NEW.last_action,
                         NOW(),
                         NOW()
