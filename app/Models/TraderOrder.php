@@ -10,8 +10,6 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderTimeLimitStatus;
-use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
@@ -382,25 +380,6 @@ class TraderOrder extends Model implements HasMedia
     public function setDefaultContractSignTimeLimitAttribute($value)
     {
         $this->attributes['default_contract_sign_time_limit'] = $value * 60;
-    }
-
-    /**
-     * Determine if the order related to given time limit is expirable.
-     */
-    public function isExpirable(TraderOrderTimeLimit $traderOrderTimeLimit): bool
-    {
-        if (
-            $traderOrderTimeLimit
-            && $traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending
-            && $traderOrderTimeLimit->effective_at <= now()
-        ) {
-            if ($traderOrderTimeLimit->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
-                return $this->isDeliveryExpirable();
-            }
-            //TODO: need to implement Contract Signed Time Limit Case on Refactor
-        }
-
-        return false;
     }
 
     public function isDeliveryExpirable(): bool
