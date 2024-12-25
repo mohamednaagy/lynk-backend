@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -139,9 +140,11 @@ class BursamV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
+        try {
+        Log::info("Processing initiated trader order". $traderOrder);
         $productCode = $this->getUnusedProductCode($traderOrder->provider);
         $response = BursamClient::of($traderOrder)->buyProduct($productCode);
-
+        Log::info("response bursa client: ".$response);
         if (! empty($response->json('header.errorCode'))) {
             throw new TraderException(
                 'Failed to create trader order',
@@ -163,11 +166,23 @@ class BursamV1Driver implements TraderInterface
             'product_code' => $productCode,
         ]);
 
+        } catch (Exception $e) {
+            $traderOrder->order->update([
+                'status' => FinancingOrderStatus::TradingFailure,
+            ]);
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+            app(UpdateTraderOrderStatusToCancel::class)->handle(
+                $traderOrder,
+                TraderOrderCancelReason::FailureToPurchase
+            );
+        }
+
         return $traderOrder;
     }
 
     public function moveHoldTraderOrder(TraderOrder $trader)
     {
+        Log::info("Moving : " . $trader);
         $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
         if ($checkCanChangeStatusOfTrader) {
             $trader->update(['status' => TraderOrderStatus::Initiated]);

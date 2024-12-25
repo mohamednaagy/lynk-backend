@@ -17,6 +17,7 @@ class UpdateTraderOrderStatusToPendingCancelAction implements UpdateTraderOrderS
 
     public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null, $cancelledByType = TraderOrderCancelType::System, ?User $cancelledBy = null): void
     {
+        $currentStep = $traderOrder->getCancelStep();
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,
@@ -33,7 +34,7 @@ class UpdateTraderOrderStatusToPendingCancelAction implements UpdateTraderOrderS
         $traderOrder->cancelDetail()->create([
             'cancelled_by' => $cancelledBy?->id,
             'cancel_type' => $cancelledByType,
-            'cancel_step' => $traderOrder->getCancelStep(),
+            'cancel_step' => $currentStep,
             'cancel_reason' => $cancelReason,
         ]);
 
