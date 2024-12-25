@@ -3,6 +3,7 @@
 namespace App\Services\LocalMarket;
 
 use App\Enums\CompanyType;
+use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\Company;
 use App\Models\LocalMarketEligibleQuantity;
 use App\Models\LocalMarketInventory;
@@ -54,6 +55,9 @@ class EligibleQuantityService
                 'inventory_id' => $inventory->id,
             ]);
 
+            $inventory->status = InventoryStatus::Pending;
+            $inventory->save();
+
             // Remove existing records
             LocalMarketEligibleQuantity::where('inventory_id', $inventory->id)->delete();
 
@@ -63,6 +67,9 @@ class EligibleQuantityService
                 $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company);
                 $this->createEligibleQuantityRecord($inventory, $company, $eligibleQuantity);
             }
+
+            $inventory->status = InventoryStatus::Active;
+            $inventory->save();
 
             $this->logInfo('Completed rebuilding eligible quantities for inventory', [
                 'inventory_id' => $inventory->id,
