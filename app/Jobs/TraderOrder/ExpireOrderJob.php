@@ -31,12 +31,31 @@ class ExpireOrderJob implements ShouldQueue
     public function handle()
     {
         try {
+            // TODO : need to check this condition before firing this job
+            //  $traderOrderTimeLimit
+            // && $traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending
+            // && $traderOrderTimeLimit->effective_at <= now()
+
             $traderOrder = TraderOrder::find($this->traderOrderTimeLimit->trader_order_id);
 
             if (! $traderOrder) {
                 $this->traderOrderTimeLimit->fail();
 
                 return;
+            }
+
+            if ($this->traderOrderTimeLimit->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
+                if ($traderOrder->isDeliveryExpirable()) {
+                    Trader::driver($traderOrder->provider, $traderOrder->version)
+                        ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
+
+                }
+            } elseif ($this->traderOrderTimeLimit->type->value == TraderOrderTimeLimitType::ContractSignedTimeLimit) {
+                if ($traderOrder->isContractSignedExpirable()) {
+                    Trader::driver($traderOrder->provider, $traderOrder->version)
+                        ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
+
+                }
             }
 
             if ($traderOrder->isExpirable($this->traderOrderTimeLimit)) {
