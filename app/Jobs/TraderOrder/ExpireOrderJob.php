@@ -44,6 +44,11 @@ class ExpireOrderJob implements ShouldQueue
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
 
                 $this->traderOrderTimeLimit->expire();
+                Log::info("Expire order {$traderOrder->id} successfully");
+            } else {
+                Log::info("Order {$traderOrder->id} is not expirable", [
+                    'time_limit' => $this->traderOrderTimeLimit,
+                ]);
             }
         } catch (\Exception $exception) {
             Log::error("ExpireOrderJob failed: {$exception->getMessage()}", [

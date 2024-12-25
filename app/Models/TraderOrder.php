@@ -388,7 +388,6 @@ class TraderOrder extends Model implements HasMedia
     {
         $expiryTime = $this->timeLimits()
             ->where('status', TraderOrderTimeLimitStatus::Pending)
-            ->where('effective_at', '<=', Carbon::now())
             ->first();
         if ($expiryTime) {
             if ($expiryTime->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
