@@ -15,7 +15,6 @@ class BursamStrategyV2 extends BursamStrategyV1
     public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
         parent::updatePurchasingCommodity($traderOrder, $data);
-        app(GenerateClientWakala::class)->handle($traderOrder);
     }
 
     public function updateCommodityCertificateForClient(TraderOrder $traderOrder, Request $request)
