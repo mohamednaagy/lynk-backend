@@ -8,6 +8,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
@@ -20,9 +21,7 @@ class DeleteInventory implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected LocalMarketInventory $inventory)
-    {
-    }
+    public function __construct(protected LocalMarketInventory $inventory) {}
 
     /**
      * Execute the job.
@@ -36,6 +35,15 @@ class DeleteInventory implements ShouldQueue
         } catch (\Exception $e) {
             Log::error("Updated Inventory ID: {$this->inventory->id} status to Problem due to error: {$e->getMessage()}");
         }
-       
+    }
+
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->inventory->id;
     }
 }

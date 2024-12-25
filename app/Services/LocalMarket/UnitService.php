@@ -87,7 +87,7 @@ class UnitService
                 'hold_units' => $eligibleUnitIds->count(),
             ]);
 
-            throw new \Exception('there is an error while holding eligible units');
+            // throw new \Exception('there is an error while holding eligible units');
         } else {
             $this->updateUnitsStatus(
                 $eligibleUnitIds,
