@@ -35,7 +35,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -141,31 +140,29 @@ class BursamV1Driver implements TraderInterface
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
         try {
-        Log::info("Processing initiated trader order". $traderOrder);
-        $productCode = $this->getUnusedProductCode($traderOrder->provider);
-        $response = BursamClient::of($traderOrder)->buyProduct($productCode);
-        Log::info("response bursa client: ".$response);
-        if (! empty($response->json('header.errorCode'))) {
-            throw new TraderException(
-                'Failed to create trader order',
-                [
-                    'trader_order_id' => $traderOrder->id,
-                    'provider' => $this->provider,
-                    'version' => $this->version,
-                    'provider_response_body' => $response->json(),
-                    'financing_order_id' => $traderOrder->order->id,
-                    'failure_reason' => $response->json('body.0.bidMsg'),
-                ]
-            );
-        }
+            $productCode = $this->getUnusedProductCode($traderOrder->provider);
+            $response = BursamClient::of($traderOrder)->buyProduct($productCode);
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+            if (! empty($response->json('header.errorCode'))) {
+                throw new TraderException(
+                    'Failed to create trader order',
+                    [
+                        'trader_order_id' => $traderOrder->id,
+                        'provider' => $this->provider,
+                        'version' => $this->version,
+                        'provider_response_body' => $response->json(),
+                        'financing_order_id' => $traderOrder->order->id,
+                        'failure_reason' => $response->json('body.0.bidMsg'),
+                    ]
+                );
+            }
 
-        $traderOrder->update([
-            'status' => TraderOrderStatus::InProgress,
-            'product_code' => $productCode,
-        ]);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
+            $traderOrder->update([
+                'status' => TraderOrderStatus::InProgress,
+                'product_code' => $productCode,
+            ]);
         } catch (Exception $e) {
             $traderOrder->order->update([
                 'status' => FinancingOrderStatus::TradingFailure,
@@ -182,7 +179,6 @@ class BursamV1Driver implements TraderInterface
 
     public function moveHoldTraderOrder(TraderOrder $trader)
     {
-        Log::info("Moving : " . $trader);
         $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
         if ($checkCanChangeStatusOfTrader) {
             $trader->update(['status' => TraderOrderStatus::Initiated]);
