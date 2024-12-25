@@ -384,13 +384,17 @@ class TraderOrder extends Model implements HasMedia
         $this->attributes['default_contract_sign_time_limit'] = $value * 60;
     }
 
-    public function isExpirable(): bool
+    /**
+     * Determine if the order related to given time limit is expirable.
+     */
+    public function isExpirable(TraderOrderTimeLimit $traderOrderTimeLimit): bool
     {
-        $expiryTime = $this->timeLimits()
-            ->where('status', TraderOrderTimeLimitStatus::Pending)
-            ->first();
-        if ($expiryTime) {
-            if ($expiryTime->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
+        if (
+            $traderOrderTimeLimit
+            && $traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending
+            && $traderOrderTimeLimit->effective_at <= now()
+        ) {
+            if ($traderOrderTimeLimit->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
                 return $this->isDeliveryExpirable();
             }
             //TODO: need to implement Contract Signed Time Limit Case on Refactor

@@ -39,7 +39,7 @@ class ExpireOrderJob implements ShouldQueue
                 return;
             }
 
-            if ($traderOrder->isExpirable()) {
+            if ($traderOrder->isExpirable($this->traderOrderTimeLimit)) {
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
 
