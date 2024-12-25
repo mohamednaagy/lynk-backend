@@ -81,16 +81,26 @@ class UnitService
         );
 
         // Update units if any found
-        if ($eligibleUnitIds->isNotEmpty()) {
+        if ($eligibleUnitIds->count() != $numberOfNeededUnits) {
+            Log::channel('local_market')->error('there is an error while holding eligible units', [
+                'order_id' => $localMarketOrder->id,
+                'inventory_id' => $inventory->id,
+                'needed_units' => $numberOfNeededUnits,
+                'hold_units' => $eligibleUnitIds->count(),
+            ]);
+
+            // throw new \Exception('there is an error while holding eligible units');
+        } else {
             $this->updateUnitsStatus(
                 $eligibleUnitIds,
                 $localMarketOrder->id,
                 InventoryUnitsStatus::Reserved
             );
+
+            $inventory->refreshStockQuantities();
         }
 
         Log::channel('local_market')->info('time of hold eligible units end at '.now());
-        $inventory->refreshStockQuantities();
     }
 
     /**
