@@ -6,7 +6,6 @@ use App\Enums\LocalMarket\OwnershipTypes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -20,6 +19,7 @@ class LocalMarketInventoryUnits extends Model
         'qr_code',
         'status',
         'hold_for',
+        'last_action',
         'current_owner',
         'current_owner_type',
         'last_completed_order_id',
