@@ -49,7 +49,7 @@ class BursamV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
-    private function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
+    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
     {
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
@@ -72,7 +72,7 @@ class BursamV1Driver implements TraderInterface
         return $differenceInHours;
     }
 
-    private function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
+    public function createHoldTraderOrder(FinancingOrder $financingOrder): ?Model
     {
         $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Hold);
 
@@ -82,7 +82,7 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder;
     }
 
-    private function createBaseTraderOrder(FinancingOrder $financingOrder, string $status): TraderOrder
+    public function createBaseTraderOrder(FinancingOrder $financingOrder, string $status): TraderOrder
     {
         // Create the base trader order
         $data = [
@@ -139,29 +139,40 @@ class BursamV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        $productCode = $this->getUnusedProductCode($traderOrder->provider);
-        $response = BursamClient::of($traderOrder)->buyProduct($productCode);
+        try {
+            $productCode = $this->getUnusedProductCode($traderOrder->provider);
+            $response = BursamClient::of($traderOrder)->buyProduct($productCode);
 
-        if (! empty($response->json('header.errorCode'))) {
-            throw new TraderException(
-                'Failed to create trader order',
-                [
-                    'trader_order_id' => $traderOrder->id,
-                    'provider' => $this->provider,
-                    'version' => $this->version,
-                    'provider_response_body' => $response->json(),
-                    'financing_order_id' => $traderOrder->order->id,
-                    'failure_reason' => $response->json('body.0.bidMsg'),
-                ]
+            if (! empty($response->json('header.errorCode'))) {
+                throw new TraderException(
+                    'Failed to create trader order',
+                    [
+                        'trader_order_id' => $traderOrder->id,
+                        'provider' => $this->provider,
+                        'version' => $this->version,
+                        'provider_response_body' => $response->json(),
+                        'financing_order_id' => $traderOrder->order->id,
+                        'failure_reason' => $response->json('body.0.bidMsg'),
+                    ]
+                );
+            }
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+            $traderOrder->update([
+                'status' => TraderOrderStatus::InProgress,
+                'product_code' => $productCode,
+            ]);
+        } catch (Exception $e) {
+            $traderOrder->order->update([
+                'status' => FinancingOrderStatus::TradingFailure,
+            ]);
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+            app(UpdateTraderOrderStatusToCancel::class)->handle(
+                $traderOrder,
+                TraderOrderCancelReason::FailureToPurchase
             );
         }
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
-
-        $traderOrder->update([
-            'status' => TraderOrderStatus::InProgress,
-            'product_code' => $productCode,
-        ]);
 
         return $traderOrder;
     }

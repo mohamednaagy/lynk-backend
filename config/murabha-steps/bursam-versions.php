@@ -9,6 +9,7 @@ return [
     'v1' => [
         ContractSignedType::Sell => [
             MurabhaStep::TraderOrderCreated => [
+                FinancingOrderHistory::OnHold => null,
                 FinancingOrderHistory::GetTtiId => null,
             ],
             MurabhaStep::PurchasingCommodity => [
@@ -50,6 +51,7 @@ return [
     'v2' => [
         ContractSignedType::Sell => [
             MurabhaStep::TraderOrderCreated => [
+                FinancingOrderHistory::OnHold => null,
                 FinancingOrderHistory::GetTtiId => null,
             ],
             MurabhaStep::PurchasingCommodity => [

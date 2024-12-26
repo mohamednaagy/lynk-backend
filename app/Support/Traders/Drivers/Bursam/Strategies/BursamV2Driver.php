@@ -43,19 +43,15 @@ class BursamV2Driver extends BursamV1Driver
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
-        
-        $traderOrder = $financingOrder->traderOrders()->create([
-            'uuid_one' => Str::uuid(),
-            'provider' => $this->provider,
-            'reference' => '',
-            'status' => TraderOrderStatus::Initiated,
-            'version' => $this->version,
-            'mode' => TraderOrderMode::Automatic
-        ]);
+
+        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Initiated);
+
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }
+
+    
 
     public function getDefaultInitialTradeOrderStatus()
     {
