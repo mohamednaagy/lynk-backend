@@ -2,13 +2,16 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Enums\ErrorCode;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
+use App\Exceptions\LocalMarket\ErrorPurchasingAtLocalMarket;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -86,8 +89,8 @@ class UnitService
                 'needed_units' => $numberOfNeededUnits,
                 'hold_units' => $eligibleUnitIds->count(),
             ]);
-
-            // throw new \Exception('there is an error while holding eligible units');
+            // throw new Exception("Error When Purchasing From Local Marker Available Commodity != Eligible Commodity" , 5001);
+            throw new ErrorPurchasingAtLocalMarket('Error When Purchasing From Local Marker Available Commodity != Eligible Commodity', ErrorCode::LOCAL_MARKET_CANT_PURCHASING);
         } else {
             $this->updateUnitsStatus(
                 $eligibleUnitIds,
