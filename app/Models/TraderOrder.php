@@ -10,8 +10,6 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderTimeLimitStatus;
-use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
@@ -379,22 +377,6 @@ class TraderOrder extends Model implements HasMedia
         // save the expire_at value based on provider
         $this->expire_at = ($this->provider == EnumsTrader::Bursam) ? get_bursam_contract_signed_deadline() : Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
         $this->save();
-    }
-
-    public function isExpirable(): bool
-    {
-        $expiryTime = $this->timeLimits()
-            ->where('status', TraderOrderTimeLimitStatus::Pending)
-            ->where('effective_at', '<=', Carbon::now())
-            ->first();
-        if ($expiryTime) {
-            if ($expiryTime->type->value == TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit) {
-                return $this->isDeliveryExpirable();
-            }
-            //TODO: need to implement Contract Signed Time Limit Case on Refactor
-        }
-
-        return false;
     }
 
     public function isDeliveryExpirable(): bool

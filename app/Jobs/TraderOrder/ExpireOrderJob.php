@@ -3,6 +3,8 @@
 namespace App\Jobs\TraderOrder;
 
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
 use App\Models\TraderOrderTimeLimit;
 use App\Support\Traders\Facades\Trader;
@@ -21,33 +23,33 @@ class ExpireOrderJob implements ShouldQueue
 
     private string $jobUniqueId;
 
+    private TraderOrder $traderOrder;
+
     public function __construct(int $traderOrderTimeLimitId)
     {
         $this->traderOrderTimeLimit = TraderOrderTimeLimit::findOrFail($traderOrderTimeLimitId);
         $this->jobUniqueId = 'expire_trader_order_'.$this->traderOrderTimeLimit->trader_order_id;
         $this->onQueue('expire_trader_order');
+        $this->traderOrder = $this->traderOrderTimeLimit->traderOrder;
     }
 
     public function handle()
     {
+        if (! $this->shouldExpire()) {
+            $this->traderOrderTimeLimit->cancel();
+
+            return;
+        }
+
         try {
-            $traderOrder = TraderOrder::find($this->traderOrderTimeLimit->trader_order_id);
-
-            if (! $traderOrder) {
-                $this->traderOrderTimeLimit->fail();
-
-                return;
-            }
-
-            if ($traderOrder->isExpirable()) {
-                Trader::driver($traderOrder->provider, $traderOrder->version)
-                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
-
-                $this->traderOrderTimeLimit->expire();
-            }
+            match ($this->traderOrderTimeLimit->type->value) {
+                TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => $this->expireOrderDelivery(),
+                TraderOrderTimeLimitType::ContractSignTimeLimit => null, //Todo: add logic for contract sign time limit
+                default => throw new \Exception("Unknown trader order time limit type: {$this->traderOrderTimeLimit->type->value}"),
+            };
         } catch (\Exception $exception) {
             Log::error("ExpireOrderJob failed: {$exception->getMessage()}", [
-                'time_limit_id' => $this->traderOrderTimeLimit->id,
+                'time_limit' => $this->traderOrderTimeLimit,
                 'exception' => $exception,
             ]);
             $this->traderOrderTimeLimit->fail();
@@ -58,4 +60,41 @@ class ExpireOrderJob implements ShouldQueue
     {
         return $this->jobUniqueId;
     }
+
+    /**
+     * Determine if the TraderOrderTimeLimit should be expired.
+     *
+     * It will be expired if the TraderOrderTimeLimit is pending, the effective_at datetime is in the past,
+     * and the related TraderOrder exists.
+     */
+    private function shouldExpire(): bool
+    {
+        return $this->traderOrderTimeLimit
+            && $this->traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending
+            && $this->traderOrderTimeLimit->effective_at <= now()
+            && $this->traderOrder;
+    }
+
+    /**
+     * Expire the order when it is delivery expirable, otherwise cancel the time limit.
+     *
+     * @return void
+     */
+    private function expireOrderDelivery()
+    {
+        if ($this->traderOrder->isDeliveryExpirable()) {
+            Trader::driver($this->traderOrder->provider, $this->traderOrder->version)
+                ->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
+            $this->traderOrderTimeLimit->expire();
+            Log::info("Expire order {$this->traderOrder->id} successfully");
+
+            return;
+        }
+        $this->traderOrderTimeLimit->cancel();
+        Log::info("Order {$this->traderOrder->id} is not expirable", [
+            'time_limit' => $this->traderOrderTimeLimit,
+        ]);
+    }
+
+    //TODO: add new method to expire contract sign time limit logic
 }
