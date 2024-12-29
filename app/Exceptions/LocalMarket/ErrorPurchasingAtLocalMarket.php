@@ -20,8 +20,6 @@ class ErrorPurchasingAtLocalMarket extends Exception
         $code = Response::HTTP_INTERNAL_SERVER_ERROR;
 
         if ($request->expectsJson()) {
-            dd('eeeee');
-
             return response()->errorResponse(
                 $message,
                 $code,
