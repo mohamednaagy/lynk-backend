@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Commodities;
 
+use App\Actions\Contracts\Commodities\CommodityItem\CreateCommodityItem;
 use App\Actions\Contracts\Commodities\CommodityItem\GetPaginatedCommodityItems;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommodityItem\ListCommodityItemsRequest;
+use App\Http\Requests\V1\Admin\Commodities\CommodityItem\StoreCommodityItemRequest;
 use App\Transformers\Admin\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -55,6 +57,25 @@ class CommodityItemController extends Controller
                 'max_price',
                 'available_units',
                 'reserved_units',
+            ])
+            ->respond();
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreCommodityItemRequest $storeNewItem, CreateCommodityItem $createCommodityItem): JsonResponse
+    {
+        $data = $storeNewItem->validated();
+        $item = $createCommodityItem->handle($data);
+
+        return fractal($item, new CommodityItemsTransformer)
+            ->parseIncludes([
+                'id',
+                'name',
+                'unique_name',
+                'commodity_type',
+                'created_at',
             ])
             ->respond();
     }

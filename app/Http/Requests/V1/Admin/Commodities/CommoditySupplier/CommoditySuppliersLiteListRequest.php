@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Commodities\CommoditySupplier;
 
+use App\Enums\CommoitySupplierStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CommoditySuppliersLiteListRequest extends FormRequest
@@ -15,6 +16,7 @@ class CommoditySuppliersLiteListRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'integer', 'in:'.CommoitySupplierStatus::Active.','.CommoitySupplierStatus::Inactive],
         ];
     }
 }
