@@ -11,4 +11,6 @@ interface BuildPaginatedCommoditySuppliersQuery
     public function setType(string $type): self;
 
     public function setName(?string $name): self;
+
+    public function setStatus(?int $status): self;
 }
