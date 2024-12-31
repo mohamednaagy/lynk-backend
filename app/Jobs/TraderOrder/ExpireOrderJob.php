@@ -44,7 +44,7 @@ class ExpireOrderJob implements ShouldQueue
         try {
             match ($this->traderOrderTimeLimit->type->value) {
                 TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => $this->expireOrderDelivery(),
-                TraderOrderTimeLimitType::ContractSignTimeLimit => null, //Todo: add logic for contract sign time limit
+                TraderOrderTimeLimitType::ContractSignTimeLimit => $this->expireOrderContractSigned(), 
                 default => throw new \Exception("Unknown trader order time limit type: {$this->traderOrderTimeLimit->type->value}"),
             };
         } catch (\Exception $exception) {
@@ -96,5 +96,37 @@ class ExpireOrderJob implements ShouldQueue
         ]);
     }
 
-    //TODO: add new method to expire contract sign time limit logic
+    /**
+     * Expires the order when it is contract sign expirable, otherwise cancels the time limit.
+     *
+     * @param void
+     *
+     * @return void
+     */
+    private function expireOrderContractSigned()
+    {
+        // Check if the order is contract sign limit expirable
+        if ($this->traderOrder->isContractSignLimitExpirable()) {
+            // Cancel the trader order with the expired contract sign time reason
+            Trader::driver($this->traderOrder->provider, $this->traderOrder->version)
+                ->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
+
+            // Expire the trader order time limit
+            $this->traderOrderTimeLimit->expire();
+
+            // Log the successful expiration of the order
+            Log::info("Expire order {$this->traderOrder->id} successfully");
+
+            return;
+        }
+
+        // Cancel the trader order time limit if the order is not contract sign limit expirable
+        $this->traderOrderTimeLimit->cancel();
+
+        // Log the unsuccessful expiration of the order
+        Log::info("Order {$this->traderOrder->id} is not expirable", [
+            'time_limit' => $this->traderOrderTimeLimit,
+        ]);
+    }
+
 }

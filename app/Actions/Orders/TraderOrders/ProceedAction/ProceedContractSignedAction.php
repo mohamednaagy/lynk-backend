@@ -6,8 +6,10 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigne
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -15,6 +17,9 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 class ProceedContractSignedAction implements ProceedContractSigned
 {
     use TraderHelperTrait;
+
+    public function __construct(protected TimeLimitService $timeLimitService) {}
+
 
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
@@ -34,6 +39,8 @@ class ProceedContractSignedAction implements ProceedContractSigned
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
         }
+
+        $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
 
         return [];
     }

@@ -4,6 +4,7 @@ namespace App\Services\TraderOrder;
 
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
+use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use Carbon\Carbon;
@@ -34,7 +35,8 @@ class TimeLimitService
      */
     public function setContractSignTimeLimit(TraderOrder $traderOrder): void
     {
-        $config = $this->getContractSignedLimitTimeConfig();
+        $company = $traderOrder->order->company;
+        $config = $this->getContractSignedLimitTimeConfig($company);
         $this->setTimeLimit(
             $traderOrder,
             TraderOrderTimeLimitType::ContractSignTimeLimit,
@@ -121,9 +123,9 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default contract sign time limit in hours)
      *               and 'effective_at' (the calculated effective contract sign time as a string in 'Y-m-d H:i:s' format).
      */
-    private function getContractSignedLimitTimeConfig()
+    private function getContractSignedLimitTimeConfig(Company $company)
     {
-        $defaultValue = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
+        $defaultValue = $company->lenderDetail->default_contract_sign_time_limit ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
         $effectiveAt = Carbon::now()
             ->timezone('UTC')
             ->addHours($defaultValue)

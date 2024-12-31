@@ -372,16 +372,14 @@ class TraderOrder extends Model implements HasMedia
         return $query->completed()->where('contract_signed_type', $contractSignedType);
     }
 
-    public function setExpireDate()
-    {
-        // save the expire_at value based on provider
-        $this->expire_at = ($this->provider == EnumsTrader::Bursam) ? get_bursam_contract_signed_deadline() : Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
-        $this->save();
-    }
-
     public function isDeliveryExpirable(): bool
     {
         return $this->doesLastActionMatchWith([FinancingOrderHistory::PendingDelivery]);
+    }
+
+    public function isContractSignLimitExpirable(): bool
+    {
+        return $this->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
     }
 
     public function getRecentTimeLimit($type, $status)
