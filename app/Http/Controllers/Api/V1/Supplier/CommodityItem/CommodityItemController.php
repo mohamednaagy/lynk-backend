@@ -67,6 +67,7 @@ class CommodityItemController extends Controller
                 : []
             )
             ->setSort($request->validated('sort'))
+            ->setActive($request->validated('active'))
             ->setDirection($request->validated('direction'))
             ->handle(tenant()->supplier)
             ->paginate();
