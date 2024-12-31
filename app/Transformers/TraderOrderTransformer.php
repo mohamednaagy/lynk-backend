@@ -222,7 +222,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeExpiryDate(TraderOrder $traderOrder)
     {
-        $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)->effective_at;
+        $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
 
         return ($effective_at) ? $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at))) : null;
     }
