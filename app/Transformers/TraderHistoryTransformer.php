@@ -103,7 +103,7 @@ class TraderHistoryTransformer extends TransformerAbstract
         return $this->primitive([
             'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
-            'completed_at' => optional($history) ? saudi_now('Y-m-d h:i:s A', optional($history)->created_at) : null,
+            'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'is_deliverable' => $this->traderOrder->isDeliverable(),
             'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => [
@@ -269,7 +269,6 @@ class TraderHistoryTransformer extends TransformerAbstract
 
         // Determine the last history action node. If no history found, use the last node in the step histories.
         $lastHistoryOfStepNode = $history ? $history->action : end($stepHistoriesNode->histories);
-
 
         return $this->primitive([
             'step' => MurabhaStep::CustomerDeliveryConfirmation,
