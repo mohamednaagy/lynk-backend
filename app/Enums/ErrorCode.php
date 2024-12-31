@@ -95,4 +95,6 @@ class ErrorCode
     public const LOCAL_MARKET_PURCHASE_PRODUCT = 1047;
 
     public const LOCAL_MARKET_WEBHOOK_INVALID_CASE = 1048;
+
+    public const LOCAL_MARKET_CANT_PURCHASING = 1049;
 }
