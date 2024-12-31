@@ -48,7 +48,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 'status' => LocalMarketOrderStatus::FailedPurchase,
             ]);
 
-            //throw $e;
         }
     }
 }
