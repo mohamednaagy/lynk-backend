@@ -48,7 +48,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 'status' => OrderStatus::FailedPurchase,
             ]);
 
-            throw $e;
         }
     }
 }
