@@ -43,6 +43,7 @@ class CommodityItemController extends Controller
                 ? collect($request->validated('supplier'))->pluck('id')->toArray()
                 : [])
             ->setSort($request->validated('sort'))
+            ->setActive($request->validated('active'))
             ->setDirection($request->validated('direction'))
             ->handle();
 
