@@ -3,6 +3,7 @@
 namespace Tests\Traits;
 
 use App\Models\CommodityItem;
+use App\Models\CommodityType;
 use App\Models\Supplier;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,7 +12,7 @@ use Illuminate\Database\Query\Builder;
 
 trait InteractsWithCommodityItem
 {
-    use InteractsWithCommodityType , InteractsWithSupplier, InteractsWithCurrency , InteractsWithMeasurements;
+    use InteractsWithCommodityType , InteractsWithCurrency, InteractsWithMeasurements , InteractsWithSupplier;
 
     public function getCommodityItems(Supplier $supplier, $number_of_objects = 5, $is_paginate = false): LengthAwarePaginator|Collection
     {
@@ -51,10 +52,11 @@ trait InteractsWithCommodityItem
         ?string $description = null,
         float $min_price = 10,
         float $max_price = 20,
-        int $volume_sellable_unit = 10
+        int $volume_sellable_unit = 10,
+        ?CommodityType $commodityType = null
     ): Model|Builder {
 
-        $commodity_type = $this->createCommodityType('test', 'test_type');
+        $commodity_type = $commodityType ?? $this->createCommodityType('test', 'test_type');
         $currency = $this->createCurrency();
         $measurement = $this->createMeasurement();
 

@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests\V1\Admin\Commodities\CommodityItem;
 
-use App\Enums\CommodityItemStatus;
-use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+
 class ListCommodityItemsRequest extends FormRequest
 {
     /**
@@ -26,18 +25,19 @@ class ListCommodityItemsRequest extends FormRequest
     public function rules()
     {
         return [
-            'unique_name'               => ['nullable', 'string'],
-            'name'                      => ['nullable', 'string'],
-            'supplier'                  => ['nullable', 'array'],
-            'supplier.*.id'             => ['required', 'numeric'],
-            'suppliers.*.name'          => ['required', 'string'],
-            'commodity_types'           => ['nullable', 'array'],
-            'commodity_type.*.id'       => ['required', 'numeric'],
-            'commodity_type.*.name'     => ['required', 'string'],
-            'direction'                 => ['nullable', 'string', Rule::in('asc', 'desc')],
-            'sort'                      => ['nullable' , 'string'],
-            'page'                      => ['nullable', 'numeric'],
-            'per_page'                  => ['nullable', 'numeric'],
+            'unique_name' => ['nullable', 'string'],
+            'name' => ['nullable', 'string'],
+            'supplier' => ['nullable', 'array'],
+            'supplier.*.id' => ['required', 'numeric'],
+            'suppliers.*.name' => ['required', 'string'],
+            'commodity_types' => ['nullable', 'array'],
+            'commodity_type.*.id' => ['required', 'numeric'],
+            'commodity_type.*.name' => ['required', 'string'],
+            'active' => ['nullable', 'integer', Rule::in([1, 2, 3])],
+            'direction' => ['nullable', 'string', Rule::in('asc', 'desc')],
+            'sort' => ['nullable', 'string'],
+            'page' => ['nullable', 'numeric'],
+            'per_page' => ['nullable', 'numeric'],
         ];
     }
 }

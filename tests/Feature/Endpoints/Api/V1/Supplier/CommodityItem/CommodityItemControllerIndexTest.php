@@ -4,6 +4,7 @@ namespace Endpoints\Api\V1\Supplier\CommodityItem;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CommodityTypeStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\User;
@@ -29,6 +30,8 @@ class CommodityItemControllerIndexTest extends TestCase
 
     private $endpoint = 'api/v1/supplier/commodity-items';
 
+    private const NUMBER_OF_ACTIVE_COMMODITY_ITEMS = 5;
+
     /**
      * @throws BindingResolutionException
      */
@@ -45,7 +48,7 @@ class CommodityItemControllerIndexTest extends TestCase
             ]
         );
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
-        self::$commodityItems = $this->getCommodityItems(self::$supplier, 5, true);
+        self::$commodityItems = $this->getCommodityItems(self::$supplier, self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, true);
 
         $this->assignPermissionToUser(
             self::$userManager,
@@ -74,12 +77,13 @@ class CommodityItemControllerIndexTest extends TestCase
             ->getJson($this->endpoint)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$commodityItems, new CommodityItemsTransformer())
+                fractal(self::$commodityItems, new CommodityItemsTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
                         'unique_name',
                         'commodity_type',
+                        'max_price',
                         'available_units',
                         'reserved_units',
                         'created_at',
@@ -96,5 +100,68 @@ class CommodityItemControllerIndexTest extends TestCase
             ->withHeader('X-Company', self::$supplier->id)
             ->getJson($this->endpoint)
             ->assertForbidden();
+    }
+
+    public function test_filter_commodity_items_by_active_status(): void
+    {
+        // Create inactive commodity type
+        $inactiveCommodityType = $this->createCommodityType(status: CommodityTypeStatus::Inactive);
+
+        // Create inactive commodity item by assigning inactive commodity type
+        $this->createCommodityItem(self::$supplier, commodityType: $inactiveCommodityType);
+
+        // Total inactive commodity items in this test
+        $inactiveCommodityItemsCount = 1;
+
+        /**
+         * In this scenario, we have some active commodity items initialized in the setUp function,
+         * and some inactive commodity items initialized here in this test.
+         */
+
+        // [1] Assert that when the "active" filter is not provided, the default is "active" (1),
+        // meaning only active commodity items should be returned.
+        $response = $this->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->getJson($this->endpoint)
+            ->assertOk()
+            ->assertJsonCount(self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, 'data');
+
+        $responseData = $response->json();
+        $data = $responseData['data'];
+        foreach ($data as $commodityItem) {
+            $commodityTypeStatus = $commodityItem['commodity_type']['status']['value'];
+
+            $this->assertEquals($commodityTypeStatus, CommodityTypeStatus::Active);
+        }
+
+        // [2] Assert that when we set the "active" filter to be 1, we will get only active commodity items.
+        $this->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->getJson(sprintf('%s?active=1', $this->endpoint))
+            ->assertOk()
+            ->assertJsonCount(self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, 'data');
+
+        // [3] Assert that when we set the "active" filter to be 2, we will get only inactive commodity items.
+        $response = $this->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->getJson(sprintf('%s?active=2', $this->endpoint))
+            ->assertOk()
+            ->assertJsonCount($inactiveCommodityItemsCount, 'data');
+
+        $responseData = $response->json();
+        $data = $responseData['data'];
+        foreach ($data as $commodityItem) {
+            $commodityTypeStatus = $commodityItem['commodity_type']['status']['value'];
+
+            $this->assertEquals($commodityTypeStatus, CommodityTypeStatus::Inactive);
+        }
+
+        // [4] Assert that when we set the "active" filter to be 3, we will get both active and inactive commodity items.
+        $allCommodityItemsCount = $inactiveCommodityItemsCount + self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS;
+        $this->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->getJson(sprintf('%s?active=3', $this->endpoint))
+            ->assertOk()
+            ->assertJsonCount($allCommodityItemsCount, 'data');
     }
 }
