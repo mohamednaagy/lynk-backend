@@ -269,7 +269,7 @@ class UnitService
     {
         $ownershipService = app(OwnershipService::class);
         LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
-            ->chunkById(100, function ($units) use ($ownershipService, $localMarketOrder) {
+            ->chunkById(100, function ($units) use ($localMarketOrder) {
                 Log::channel('local_market')->info('Swapping current owner for order '.$localMarketOrder->id);
 
                 foreach ($units as $unit) {
@@ -290,17 +290,8 @@ class UnitService
                         'current_owner_type' => $newCurrentOwnerType,
                         'previous_owner' => $unit->current_owner,
                         'previous_owner_type' => $unit->current_owner_type,
+                        'last_action' => UnitOwnershipAction::Cancel,
                     ]);
-
-                    $ownershipService->addOwnershipLogsToDB(
-                        $unit->hold_for,
-                        $unit,
-                        $newCurrentOwner,
-                        $newCurrentOwnerType,
-                        $unit->current_owner,
-                        $unit->current_owner_type,
-                        UnitOwnershipAction::Cancel
-                    );
                 }
             });
     }
