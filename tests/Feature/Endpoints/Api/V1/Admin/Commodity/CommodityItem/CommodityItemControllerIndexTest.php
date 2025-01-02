@@ -98,13 +98,13 @@ class CommodityItemControllerIndexTest extends TestCase
         $inactiveCommodityType = $this->createCommodityType(status: CommodityTypeStatus::Inactive);
 
         // Create inactive commodity item by assigning inactive supplier
-        $commodityItemForInactiveSupplier = $this->createCommodityItem($inactiveSupplier, unique_name: 'inactive commodity item');
+        $this->createCommodityItem($inactiveSupplier, unique_name: 'inactive commodity item');
 
         // Create inactive commodity item by assigning inactive commodity type
-        $commodityItemForInactiveCommodityType = $this->createCommodityItem($activeSupplier, commodityType: $inactiveCommodityType);
+        $this->createCommodityItem($activeSupplier, commodityType: $inactiveCommodityType);
 
         // Create inactive commodity item by assigning both inactive supplier and inactive commodity type
-        $commodityItemForInactiveCommodityTypeAndSupplier = $this->createCommodityItem($inactiveSupplier, commodityType: $inactiveCommodityType);
+        $this->createCommodityItem($inactiveSupplier, commodityType: $inactiveCommodityType);
 
         // Total inactive commodity items in this test
         $inactiveCommodityItemsCount = 3;
@@ -114,10 +114,17 @@ class CommodityItemControllerIndexTest extends TestCase
          * and some inactive commodity items initialized here in this test.
          */
 
-        // [1] Assert that when the "active" filter is not provided, the default is "active" (1),
-        // meaning only active commodity items should be returned.
-        $response = $this->actingAs(self::$userAdmin)
+        // [1] Assert that when the "active" filter is not provided, the default is "all" (3),
+        // meaning all active/inactive commodity items should be returned.
+        $allCommodityItemsCount = $inactiveCommodityItemsCount + self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS;
+        $this->actingAs(self::$userAdmin)
             ->getJson($this->endpoint)
+            ->assertOk()
+            ->assertJsonCount($allCommodityItemsCount, 'data');
+
+        // [2] Assert that when we set the "active" filter to be 1, we will get only active commodity items.
+        $response = $this->actingAs(self::$userAdmin)
+            ->getJson(sprintf('%s?active=1', $this->endpoint))
             ->assertOk()
             ->assertJsonCount(self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, 'data');
 
@@ -128,16 +135,10 @@ class CommodityItemControllerIndexTest extends TestCase
             $supplierStatus = $commodityItem['supplier']['status']['value'];
 
             $this->assertTrue(
-                $commodityTypeStatus == CommodityTypeStatus::Active || $supplierStatus == SupplierStatus::Active,
+                $commodityTypeStatus == CommodityTypeStatus::Active && $supplierStatus == SupplierStatus::Active,
                 'Both commodity_type.status.value and supplier.status.value must be 1 "active"'
             );
         }
-
-        // [2] Assert that when we set the "active" filter to be 1, we will get only active commodity items.
-        $this->actingAs(self::$userAdmin)
-            ->getJson(sprintf('%s?active=1', $this->endpoint))
-            ->assertOk()
-            ->assertJsonCount(self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, 'data');
 
         // [3] Assert that when we set the "active" filter to be 2, we will get only inactive commodity items.
         $response = $this->actingAs(self::$userAdmin)
@@ -158,7 +159,6 @@ class CommodityItemControllerIndexTest extends TestCase
         }
 
         // [4] Assert that when we set the "active" filter to be 3, we will get both active and inactive commodity items.
-        $allCommodityItemsCount = $inactiveCommodityItemsCount + self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS;
         $this->actingAs(self::$userAdmin)
             ->getJson(sprintf('%s?active=3', $this->endpoint))
             ->assertOk()

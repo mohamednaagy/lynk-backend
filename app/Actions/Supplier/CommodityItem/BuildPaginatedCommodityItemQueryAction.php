@@ -17,7 +17,7 @@ class BuildPaginatedCommodityItemQueryAction implements BuildPaginatedCommodityI
 
     protected array $suppliers = []; // Add this line to define the suppliers property
 
-    private ?int $active = 1; // Default to "active" items (active = 1)
+    private ?int $active = 1;
 
     private string $direction = 'asc';
 
@@ -26,15 +26,10 @@ class BuildPaginatedCommodityItemQueryAction implements BuildPaginatedCommodityI
     public function handle(Supplier|Company $supplier): Builder
     {
         return $supplier->commodityItems()->getQuery()
-            ->when($this->uniqueName, function ($query) {
-                $query->where('unique_name', 'like', "%{$this->uniqueName}%");
-            })
-            ->when($this->name, function ($query) {
-                $query->where('name', 'like', "%{$this->name}%");
-            })
-            ->when(! empty($this->commodityTypes), function ($query) {
-                $query->whereIn('commodity_type_id', $this->commodityTypes);
-            })->active($this->active)
+            ->when($this->uniqueName, fn ($query) => $query->where('unique_name', 'like', "%{$this->uniqueName}%"))
+            ->when($this->name, fn ($query) => $query->where('name', 'like', "%{$this->name}%"))
+            ->when(! empty($this->commodityTypes), fn ($query) => $query->whereIn('commodity_type_id', $this->commodityTypes))
+            ->when($this->active, fn ($q) => $q->active($this->active))
             ->orderBy($this->sort ?? 'id', $this->direction ?? 'asc');
     }
 
@@ -81,12 +76,12 @@ class BuildPaginatedCommodityItemQueryAction implements BuildPaginatedCommodityI
      * @param  int|null  $value  The active filter value:
      *                           1 = Active
      *                           2 = Inactive
-     *                           3 = No filter (or null to default to 1).
+     *                           3 = All
      * @return $this
      */
     public function setActive(?int $value): self
     {
-        $this->active = $value ?? 1; // Default to "active" (1) if not provided
+        $this->active = $value;
 
         return $this;
     }
