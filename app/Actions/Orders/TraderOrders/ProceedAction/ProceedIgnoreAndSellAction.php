@@ -6,8 +6,10 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -17,6 +19,13 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
 {
     use TraderHelperTrait;
+
+    private TimeLimitService $timeLimitService;
+
+    public function __construct()
+    {
+        $this->timeLimitService = app(TimeLimitService::class);
+    }
 
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
@@ -38,6 +47,8 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
                 ->updateMurabhaCompleteDocument($traderOrder),
             TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)->sellCommodityToLocalMarket($traderOrder),
         };
+
+        $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
 
         return [];
     }
