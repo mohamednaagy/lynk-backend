@@ -118,11 +118,19 @@ class CommodityItemControllerIndexTest extends TestCase
          * and some inactive commodity items initialized here in this test.
          */
 
-        // [1] Assert that when the "active" filter is not provided, the default is "active" (1),
-        // meaning only active commodity items should be returned.
-        $response = $this->withHeader('X-Company', self::$supplier->id)
+        // [1] Assert that when the "active" filter is not provided, the default is "all" (3),
+        // meaning both active/inactive commodity items should be returned.
+        $allCommodityItemsCount = $inactiveCommodityItemsCount + self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS;
+        $this->withHeader('X-Company', self::$supplier->id)
             ->actingAs(self::$supplierAdmin)
             ->getJson($this->endpoint)
+            ->assertOk()
+            ->assertJsonCount($allCommodityItemsCount, 'data');
+
+        // [2] Assert that when we set the "active" filter to be 1, we will get only active commodity items.
+        $response = $this->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->getJson(sprintf('%s?active=1', $this->endpoint))
             ->assertOk()
             ->assertJsonCount(self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, 'data');
 
@@ -133,13 +141,6 @@ class CommodityItemControllerIndexTest extends TestCase
 
             $this->assertEquals($commodityTypeStatus, CommodityTypeStatus::Active);
         }
-
-        // [2] Assert that when we set the "active" filter to be 1, we will get only active commodity items.
-        $this->withHeader('X-Company', self::$supplier->id)
-            ->actingAs(self::$supplierAdmin)
-            ->getJson(sprintf('%s?active=1', $this->endpoint))
-            ->assertOk()
-            ->assertJsonCount(self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS, 'data');
 
         // [3] Assert that when we set the "active" filter to be 2, we will get only inactive commodity items.
         $response = $this->withHeader('X-Company', self::$supplier->id)
@@ -157,7 +158,6 @@ class CommodityItemControllerIndexTest extends TestCase
         }
 
         // [4] Assert that when we set the "active" filter to be 3, we will get both active and inactive commodity items.
-        $allCommodityItemsCount = $inactiveCommodityItemsCount + self::NUMBER_OF_ACTIVE_COMMODITY_ITEMS;
         $this->withHeader('X-Company', self::$supplier->id)
             ->actingAs(self::$supplierAdmin)
             ->getJson(sprintf('%s?active=3', $this->endpoint))

@@ -16,7 +16,7 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
 
     protected array $commodityTypes = [];
 
-    private ?int $active = 1; // Default to "active" items (active = 1)
+    private ?int $active;
 
     private ?string $direction = 'asc';
 
@@ -25,15 +25,11 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
     public function handle(): LengthAwarePaginator
     {
         return CommodityItem::query()
-            ->when($this->uniqueName, function ($query) {
-                $query->where('unique_name', 'like', "%{$this->uniqueName}%");
-            })->when($this->name, function ($query) {
-                $query->where('name', 'like', "%{$this->name}%");
-            })->when($this->suppliers, function ($query) {
-                $query->whereIn('company_id', $this->suppliers);
-            })->when($this->commodityTypes, function ($query) {
-                $query->whereIn('commodity_type_id', $this->commodityTypes);
-            })->active($this->active)
+            ->when($this->uniqueName, fn ($q) => $q->where('unique_name', 'like', "%{$this->uniqueName}%"))
+            ->when($this->name, fn ($q) => $q->where('name', 'like', "%{$this->name}%"))
+            ->when($this->suppliers, fn ($q) => $q->whereIn('company_id', $this->suppliers))
+            ->when($this->commodityTypes, fn ($q) => $q->whereIn('commodity_type_id', $this->commodityTypes))
+            ->when($this->active, fn ($q) => $q->active($this->active))
             ->orderBy($this->sort, $this->direction)->paginate();
     }
 
@@ -92,12 +88,12 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
      * @param  int|null  $value  The active filter value:
      *                           1 = Active
      *                           2 = Inactive
-     *                           3 = No filter (or null to default to 1).
+     *                           3/null = All
      * @return $this
      */
     public function setActive(?int $value): self
     {
-        $this->active = $value ?? 1; // Default to "active" (1) if not provided
+        $this->active = $value;
 
         return $this;
     }
