@@ -2,6 +2,9 @@
 
 namespace App\Services\TraderOrder;
 
+use App\Enums\Trader;
+use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\Company;
@@ -20,10 +23,13 @@ class TimeLimitService
      */
     private function setTimeLimit(TraderOrder $traderOrder, int $type, string $effectiveAt, int $defaultValue): void
     {
+        // Determine the appropriate action based on the trader order's mode and provider
+        $action = $this->determineAction($traderOrder);
         $traderOrder->timeLimits()->create([
             'type' => $type,
             'effective_at' => $effectiveAt,
             'default_value' => $defaultValue,
+            'action'    => $action,
         ]);
     }
 
@@ -36,7 +42,7 @@ class TimeLimitService
     public function setContractSignTimeLimit(TraderOrder $traderOrder): void
     {
         $company = $traderOrder->order->company;
-        $config = $this->getContractSignedLimitTimeConfig($company);
+        $config = $this->getContractSignedLimitTimeConfig($company, $traderOrder->provider);
         $this->setTimeLimit(
             $traderOrder,
             TraderOrderTimeLimitType::ContractSignTimeLimit,
@@ -123,14 +129,39 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default contract sign time limit in hours)
      *               and 'effective_at' (the calculated effective contract sign time as a string in 'Y-m-d H:i:s' format).
      */
-    private function getContractSignedLimitTimeConfig(Company $company)
+    private function getContractSignedLimitTimeConfig(Company $company, $provider) : array
     {
-        $defaultValue = $company->lenderDetail->default_contract_sign_time_limit ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
-        $effectiveAt = Carbon::now()
-            ->timezone('UTC')
-            ->addHours($defaultValue)
-            ->format('Y-m-d H:i:s');
+        return match ($provider) {
+            Trader::Bursam => [
+                // Default value (hours) calculated from the difference between now and the Bursam deadline
+                Carbon::now('Asia/Riyadh')->diffInHours(get_bursam_contract_signed_deadline()),
+                // Effective time for Bursam deadline
+                get_bursam_contract_signed_deadline()->format('Y-m-d H:i:s'),
+            ],
+            Trader::Lynk => [
+                // Default value from company lender details or fallback to global settings
+                $defaultValue = $company->lenderDetail->default_contract_sign_time_limit 
+                    ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
+                // Effective time calculated by adding default hours to the current UTC time
+                Carbon::now('UTC')
+                    ->addHours($defaultValue)
+                    ->format('Y-m-d H:i:s'),
+            ],
+        };
+    }
 
-        return ['default_value' => $defaultValue, 'effective_at' => $effectiveAt];
+    /**
+     * Determine the action for the time limit based on the trader order.
+     *
+     * @param TraderOrder $traderOrder The trader order instance.
+     * 
+     * @return int The action to be set.
+     */
+    private function determineAction(TraderOrder $traderOrder): int
+    {
+        // If mode is automatic and provider is Lynk, set to auto-cancel, otherwise no action needed
+        return ($traderOrder->mode === TraderOrderMode::Automatic && $traderOrder->provider === Trader::Lynk)
+            ? TraderOrderTimeLimitAction::AutoCancelOrder
+            : TraderOrderTimeLimitAction::NoActionNeeded;
     }
 }

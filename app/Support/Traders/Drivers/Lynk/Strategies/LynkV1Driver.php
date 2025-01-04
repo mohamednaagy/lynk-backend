@@ -154,10 +154,7 @@ class LynkV1Driver implements TraderInterface
                 );
             });
 
-            match ($traderOrder->mode) {
-                TraderOrderMode::Automatic => $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit),
-                TraderOrderMode::Manual => null,
-            };
+            $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
 
         } catch (\Throwable $exception) {
             throw new TraderException(

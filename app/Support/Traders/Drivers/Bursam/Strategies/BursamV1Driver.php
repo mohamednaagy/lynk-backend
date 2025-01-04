@@ -21,6 +21,7 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient;
@@ -330,6 +331,8 @@ class BursamV1Driver implements TraderInterface
                 );
 
             });
+            $timeLimitService = new TimeLimitService;
+            $timeLimitService->setContractSignTimeLimit($traderOrder);
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',

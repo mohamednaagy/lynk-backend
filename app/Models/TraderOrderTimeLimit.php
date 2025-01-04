@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,11 +18,13 @@ class TraderOrderTimeLimit extends Model
         'effective_at',
         'trader_order_id',
         'status',
+        'action',
     ];
 
     protected $casts = [
         'type' => TraderOrderTimeLimitType::class,
         'status' => TraderOrderTimeLimitStatus::class,
+        'action' => TraderOrderTimeLimitAction::class,
         'effective_at' => 'datetime',
     ];
 
