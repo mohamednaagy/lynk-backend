@@ -1,5 +1,8 @@
 <?php
 
+use App\Enums\Trader;
+use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrderTimeLimit;
@@ -20,12 +23,14 @@ return new class extends Migration
     public function up()
     {
         $defaultContractSignTimeLimit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
+        $bursamContractSignTimeLimit = Carbon::now()->diffInHours(get_bursam_contract_signed_deadline());
         DB::table('trader_orders')
             ->whereNotNull('expire_at')
             ->orderBy('id')
-            ->chunk(100, function ($traderOrders) use ($defaultContractSignTimeLimit) {
+            ->chunk(100, function ($traderOrders) use ($defaultContractSignTimeLimit, $bursamContractSignTimeLimit) {
                 foreach ($traderOrders as $traderOrder) {
                     $isExpired = Carbon::parse($traderOrder->expire_at)->isPast();
+                    $isAutoCancel = $traderOrder->mode === TraderOrderMode::Automatic && $traderOrder->provider === Trader::Lynk;
 
                     TraderOrderTimeLimit::create([
                         'trader_order_id' => $traderOrder->id,
@@ -34,7 +39,12 @@ return new class extends Migration
                             ? TraderOrderTimeLimitStatus::Expired
                             : TraderOrderTimeLimitStatus::Pending,
                         'effective_at' => $traderOrder->expire_at,
-                        'default_value' => $defaultContractSignTimeLimit,
+                        'default_value' => $traderOrder->provider === Trader::Bursam
+                            ? $bursamContractSignTimeLimit
+                            : $defaultContractSignTimeLimit,
+                        'action' => $isAutoCancel
+                            ? TraderOrderTimeLimitAction::AutoCancelOrder
+                            : TraderOrderTimeLimitAction::NoActionNeeded,
                     ]);
                 }
             });
