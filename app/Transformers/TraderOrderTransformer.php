@@ -8,6 +8,8 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
@@ -220,9 +222,8 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeExpiryDate(TraderOrder $traderOrder)
     {
-        $isInProgress = $traderOrder->status->is(TraderOrderStatus::InProgress);
-        $lastActionMatches = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument);
+        $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
 
-        return ($isInProgress && $lastActionMatches) ? $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($traderOrder->expire_at))) : null;
+        return ($effective_at) ? $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at))) : null;
     }
 }

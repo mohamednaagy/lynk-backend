@@ -138,6 +138,7 @@ class LenderController extends Controller
                 'contract_number',
                 'preferred_market_type',
                 'preferred_commodity_types',
+                'default_contract_sign_time_limit',
             ])
             ->respond();
     }
@@ -149,7 +150,6 @@ class LenderController extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
-
             $currency = $lender->getWallet(WalletType::CompanyWallet)->currency;
             $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers'], $currency);
