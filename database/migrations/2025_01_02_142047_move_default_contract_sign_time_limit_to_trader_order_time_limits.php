@@ -36,7 +36,7 @@ return new class extends Migration
                             ? TraderOrderTimeLimitStatus::Expired
                             : TraderOrderTimeLimitStatus::Pending,
                         'effective_at' => $traderOrder->expire_at,
-                        'default_value' => $traderOrder->default_contract_sign_time_limit / 60,
+                        'default_value' => (int) $traderOrder->default_contract_sign_time_limit / 60,
                         'action' => $isAutoCancel
                             ? TraderOrderTimeLimitAction::AutoCancelOrder
                             : TraderOrderTimeLimitAction::NoActionNeeded,
