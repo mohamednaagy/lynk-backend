@@ -95,12 +95,6 @@ class BursamV1Driver implements TraderInterface
             'mode' => TraderOrderMode::Automatic,
         ];
 
-        // If it's an initiated order, add additional fields
-        if ($status === TraderOrderStatus::Initiated) {
-            $data['default_contract_sign_time_limit'] = $this->calculateTimeDifference();
-            $data['expire_at'] = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'));
-        }
-
         // Create and return the order
         return $financingOrder->traderOrders()->create($data);
     }

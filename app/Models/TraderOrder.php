@@ -59,7 +59,6 @@ class TraderOrder extends Model implements HasMedia
             'can_continue_progress',
             'updated_at',
             'created_at',
-            'default_contract_sign_time_limit',
             'contract_signed_type',
             'expire_at',
         ];
@@ -309,32 +308,6 @@ class TraderOrder extends Model implements HasMedia
     public function timeLimits()
     {
         return $this->hasMany(TraderOrderTimeLimit::class, 'trader_order_id', 'id');
-    }
-
-    public function scopeWithExpiredContractSignLimit($query)
-    {
-        $version = get_latest_version_of_trader(EnumsTrader::Lynk);
-
-        return $query->where([
-            ['provider', EnumsTrader::Lynk],
-            ['version', $version],
-            ['mode', TraderOrderMode::Automatic],
-            ['status', TraderOrderStatus::InProgress],
-            ['expire_at', '<', now()],
-        ])
-            ->whereNotNull('default_contract_sign_time_limit')
-            ->whereHas('traderHistories', function ($historyQuery) {
-                $historyQuery->select('id')
-                    ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                    ->where('id', function ($subQuery) {
-                        $subQuery->select('id')
-                            ->from('trader_histories')
-                            ->whereRaw('trader_orders.id = trader_histories.trader_order_id')
-                            ->orderByDesc('id')
-                            ->limit(1);
-                    });
-            })
-            ->get();
     }
 
     public function hoverMessage(): ?string
