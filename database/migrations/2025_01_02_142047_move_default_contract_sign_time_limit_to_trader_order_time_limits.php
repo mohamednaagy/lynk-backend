@@ -6,7 +6,6 @@ use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrderTimeLimit;
-use App\Settings\Classes\Areas\LocalMurabahaSettings;
 use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
@@ -22,12 +21,10 @@ return new class extends Migration
      */
     public function up()
     {
-        $defaultContractSignTimeLimit = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
-        $bursamContractSignTimeLimit = Carbon::now()->diffInHours(get_bursam_contract_signed_deadline());
         DB::table('trader_orders')
             ->whereNotNull('expire_at')
             ->orderBy('id')
-            ->chunk(100, function ($traderOrders) use ($defaultContractSignTimeLimit, $bursamContractSignTimeLimit) {
+            ->chunk(100, function ($traderOrders) {
                 foreach ($traderOrders as $traderOrder) {
                     $isExpired = Carbon::parse($traderOrder->expire_at)->isPast();
                     $isAutoCancel = $traderOrder->mode === TraderOrderMode::Automatic && $traderOrder->provider === Trader::Lynk;
@@ -39,9 +36,7 @@ return new class extends Migration
                             ? TraderOrderTimeLimitStatus::Expired
                             : TraderOrderTimeLimitStatus::Pending,
                         'effective_at' => $traderOrder->expire_at,
-                        'default_value' => $traderOrder->provider === Trader::Bursam
-                            ? $bursamContractSignTimeLimit
-                            : $defaultContractSignTimeLimit,
+                        'default_value' => $traderOrder->default_contract_sign_time_limit / 60,
                         'action' => $isAutoCancel
                             ? TraderOrderTimeLimitAction::AutoCancelOrder
                             : TraderOrderTimeLimitAction::NoActionNeeded,
