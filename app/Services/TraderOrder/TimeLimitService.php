@@ -88,6 +88,7 @@ class TimeLimitService
         $timeLimit = $traderOrder->timeLimits()
             ->where('status', TraderOrderTimeLimitStatus::Pending)
             ->where('type', $timeLimitType)
+            ->where('action', TraderOrderTimeLimitAction::AutoCancelOrder)
             ->first(); // Ensure we get a single instance
 
         if ($timeLimit) {
