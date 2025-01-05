@@ -129,25 +129,30 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default contract sign time limit in hours)
      *               and 'effective_at' (the calculated effective contract sign time as a string in 'Y-m-d H:i:s' format).
      */
-    private function getContractSignedLimitTimeConfig(Company $company, $provider) : array
+    private function getContractSignedLimitTimeConfig(Company $company, $provider): array
     {
-        return match ($provider) {
+        [$defaultValue, $effectiveAt] = match ($provider) {
             Trader::Bursam => [
-                // Default value (hours) calculated from the difference between now and the Bursam deadline
-                Carbon::now('Asia/Riyadh')->diffInHours(get_bursam_contract_signed_deadline()),
-                // Effective time for Bursam deadline
-                get_bursam_contract_signed_deadline()->format('Y-m-d H:i:s'),
+                Carbon::now()->diffInHours(get_bursam_contract_signed_deadline()), // default value
+                get_bursam_contract_signed_deadline(), // Effective time
             ],
             Trader::Lynk => [
-                // Default value from company lender details or fallback to global settings
-                $defaultValue = $company->lenderDetail->default_contract_sign_time_limit 
-                    ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit,
-                // Effective time calculated by adding default hours to the current UTC time
-                Carbon::now('UTC')
-                    ->addHours($defaultValue)
-                    ->format('Y-m-d H:i:s'),
+                $company->lenderDetail->default_contract_sign_time_limit
+                    ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit, //default value
+                Carbon::now()
+                    ->timezone('UTC')
+                    ->addHours(
+                        $company->lenderDetail->default_contract_sign_time_limit
+                            ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit
+                    )
+                    ->format('Y-m-d H:i:s'), // Effective time
             ],
         };
+
+        return [
+            'default_value' => $defaultValue,
+            'effective_at' => $effectiveAt,
+        ];
     }
 
     /**

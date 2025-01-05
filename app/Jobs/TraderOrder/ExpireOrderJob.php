@@ -3,6 +3,7 @@
 namespace App\Jobs\TraderOrder;
 
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
@@ -71,6 +72,7 @@ class ExpireOrderJob implements ShouldQueue
     {
         return $this->traderOrderTimeLimit
             && $this->traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending
+            && $this->traderOrderTimeLimit->action->value === TraderOrderTimeLimitAction::AutoCancelOrder
             && $this->traderOrderTimeLimit->effective_at <= now()
             && $this->traderOrder;
     }

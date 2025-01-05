@@ -17,8 +17,9 @@ class TraderOrderTimeLimitObserver
      */
     public function created(TraderOrderTimeLimit $traderOrderTimeLimit)
     {
-        if ($traderOrderTimeLimit->status === TraderOrderTimeLimitStatus::Pending && 
-            $traderOrderTimeLimit->action === TraderOrderTimeLimitAction::AutoCancelOrder) {
+        $traderOrderTimeLimit = $traderOrderTimeLimit->fresh();
+        if ($traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending && 
+            $traderOrderTimeLimit->action->value === TraderOrderTimeLimitAction::AutoCancelOrder) {
             ExpireOrderJob::dispatch($traderOrderTimeLimit->id)->delay(
                 Carbon::parse($traderOrderTimeLimit->effective_at)
             );
