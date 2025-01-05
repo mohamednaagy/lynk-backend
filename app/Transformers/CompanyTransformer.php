@@ -196,6 +196,6 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeDefaultContractSignTimeLimit(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail->default_contract_sign_time_limit);
+        return $this->primitive($company->lenderDetail?->default_contract_sign_time_limit);
     }
 }
