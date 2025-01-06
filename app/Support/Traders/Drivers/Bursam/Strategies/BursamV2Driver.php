@@ -28,7 +28,6 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToCustomer;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToLender;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
@@ -44,14 +43,18 @@ class BursamV2Driver extends BursamV1Driver
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Initiated);
-
+        $traderOrder = $financingOrder->traderOrders()->create([
+            'uuid_one' => Str::uuid(),
+            'provider' => $this->provider,
+            'reference' => '',
+            'status' => TraderOrderStatus::Initiated,
+            'version' => $this->version,
+            'mode' => TraderOrderMode::Automatic,
+        ]);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }
-
-    
 
     public function getDefaultInitialTradeOrderStatus()
     {
@@ -194,11 +197,6 @@ class BursamV2Driver extends BursamV1Driver
     public function contractSignedMessage(TraderOrder $traderOrder)
     {
         return null;
-    }
-
-    public function retryOrder(TraderOrder $traderOrder)
-    {
-        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}

@@ -23,7 +23,6 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Services\TraderOrder\TimeLimitService;
-use App\Settings\Classes\LocalMurabahaSettings;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\TraderInterface;
@@ -84,7 +83,7 @@ class LynkV1Driver implements TraderInterface
 
     private function generateTemporaryReference(Model $financingOrder): string
     {
-        return Str::upper(Str::random(14)) . $financingOrder->id;
+        return Str::upper(Str::random(14)).$financingOrder->id;
     }
 
     private function generateFinalReferenceNumber(Model $traderOrder): string
@@ -137,11 +136,11 @@ class LynkV1Driver implements TraderInterface
                         'order_number' => $traderOrder->financing_order_id,
                         'amount' => $amount,
                         'previous_owner' => $products->map(
-                            fn($item) => $item->getPreviousOwnerAsArray()
+                            fn ($item) => $item->getPreviousOwnerAsArray()
                         )
                             ->flatten()
                             ->implode('،'),
-                        'product_name' => $products->implode(fn($item) => $item->getProduct(), '،'),
+                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
                         'date' => $currentTimeInRiyadhTz->toDateString(),
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
                         'trade_order' => $traderOrder,
@@ -303,8 +302,8 @@ class LynkV1Driver implements TraderInterface
     {
         Bus::chain([
             new ProcessLynkCancelTraderOrder($traderOrder->id),
-            fn() => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
-            fn() => $this->checkAndRetryOrder($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
+            fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
+            fn () => $this->retryOrder($traderOrder),
         ])->dispatch();
     }
 
@@ -325,30 +324,24 @@ class LynkV1Driver implements TraderInterface
         }
     }
 
-    protected function canRetryOrder(TraderOrder $traderOrder, $cancelReason): bool
+    protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
         return
             $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any) && (
-                $cancelReason === TraderOrderCancelReason::NoEligibleCommoditiesAvailable ||
-                $cancelReason === TraderOrderCancelReason::FailureToPurchase);
+                $traderOrder->cancelDetail->cancel_reason->in([
+                    TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
+                    TraderOrderCancelReason::FailureToPurchase,
+                ])) && ! $traderOrder->order->activeTraderOrder()->exists();
     }
 
     public function retryOrder(TraderOrder $traderOrder): void
     {
-
-        if ($traderOrder->order->activeTraderOrder()->count() === 0) {
+        if ($this->canRetryOrder($traderOrder)) {
             if ($traderOrder->order->status->is(FinancingOrderStatus::PendingTraderOrder)) {
                 $traderOrder->order->update(['status' => FinancingOrderStatus::InProgress]);
             }
-            Trader::driver(\App\Enums\Trader::Bursam, 'v2')
-                ->createTraderOrder($traderOrder->order);
-        }
-    }
 
-    protected function checkAndRetryOrder(TraderOrder $traderOrder, int $cancelReason): void
-    {
-        if ($this->canRetryOrder($traderOrder, $cancelReason)) {
-            $this->retryOrder($traderOrder);
+            Trader::driver(\App\Enums\Trader::Bursam, 'v2')->createTraderOrder($traderOrder->order);
         }
     }
 
@@ -369,7 +362,7 @@ class LynkV1Driver implements TraderInterface
                 break;
         }
 
-        return 'LYNK_' . $fileType . '_' . $traderOrder->order->company->unique_name . '_' . $traderOrder->financing_order_id . '_' . $traderOrder->reference . '_' . date('Ymd') . '.pdf';
+        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
 
     // use it in public api to proceed order after purchasing commodity step by one step
@@ -443,7 +436,7 @@ class LynkV1Driver implements TraderInterface
     {
         match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
-                //            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkCompleteMurabahaAfterSellToMarket::dispatch($traderOrder->id),
+            //            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkCompleteMurabahaAfterSellToMarket::dispatch($traderOrder->id),
             default => null,
         };
     }
@@ -469,10 +462,8 @@ class LynkV1Driver implements TraderInterface
     /**
      * Sets the time limit for a specific type based on the provided TraderOrder.
      *
-     * @param TraderOrder $traderOrder The TraderOrder for which the time limit needs to be set.
-     * @param mixed $timeLimitType The type of time limit to be set (DeliveryConfirmationTimeLimit or ContractSignTimeLimit).
-     *
-     * @return void
+     * @param  TraderOrder  $traderOrder  The TraderOrder for which the time limit needs to be set.
+     * @param  mixed  $timeLimitType  The type of time limit to be set (DeliveryConfirmationTimeLimit or ContractSignTimeLimit).
      */
     private function setTimeLimitByType(TraderOrder $traderOrder, $timeLimitType): void
     {
@@ -484,5 +475,4 @@ class LynkV1Driver implements TraderInterface
             default => null,
         };
     }
-
 }

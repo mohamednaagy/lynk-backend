@@ -681,11 +681,6 @@ class BursamV1Driver implements TraderInterface
         return null;
     }
 
-    public function retryOrder(TraderOrder $traderOrder)
-    {
-        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
-    }
-
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 
     public function handleConfirmDelivery(TraderOrder $traderOrder) {}
