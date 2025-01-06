@@ -308,7 +308,7 @@ class LynkV1Driver implements TraderInterface
         Bus::chain([
             new ProcessLynkCancelTraderOrder($traderOrder->id),
             fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
-            fn () => $this->checkAndRetryOrder($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
+            fn () => $this->retryOrder($traderOrder),
         ])->dispatch();
     }
 
@@ -327,30 +327,24 @@ class LynkV1Driver implements TraderInterface
         }
     }
 
-    protected function canRetryOrder(TraderOrder $traderOrder, $cancelReason): bool
+    protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
         return
             $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any) && (
-                $cancelReason === TraderOrderCancelReason::NoEligibleCommoditiesAvailable ||
-                $cancelReason === TraderOrderCancelReason::FailureToPurchase);
+                $traderOrder->cancelDetail->cancel_reason->in([
+                    TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
+                    TraderOrderCancelReason::FailureToPurchase,
+                ])) && ! $traderOrder->order->activeTraderOrder()->exists();
     }
 
     public function retryOrder(TraderOrder $traderOrder): void
     {
-
-        if ($traderOrder->order->activeTraderOrder()->count() === 0) {
+        if ($this->canRetryOrder($traderOrder)) {
             if ($traderOrder->order->status->is(FinancingOrderStatus::PendingTraderOrder)) {
                 $traderOrder->order->update(['status' => FinancingOrderStatus::InProgress]);
             }
-            Trader::driver(\App\Enums\Trader::Bursam, 'v2')
-                ->createTraderOrder($traderOrder->order);
-        }
-    }
 
-    protected function checkAndRetryOrder(TraderOrder $traderOrder, int $cancelReason): void
-    {
-        if ($this->canRetryOrder($traderOrder, $cancelReason)) {
-            $this->retryOrder($traderOrder);
+            Trader::driver(\App\Enums\Trader::Bursam, 'v2')->createTraderOrder($traderOrder->order);
         }
     }
 
