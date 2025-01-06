@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityItemController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityLocationController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
@@ -135,11 +136,14 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         });
 
         Route::apiResource('lenders', LenderController::class);
+
         Route::prefix('commodity-suppliers')->group(function () {
             Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
             Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update']);
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
+            Route::apiResource('{supplier}/locations', CommodityLocationController::class)->only(['index', 'store']);
         });
+
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
 
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
