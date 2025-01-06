@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\RetryOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
-use App\Support\Traders\Facades\Trader;
 
 class RetryOrderAction implements RetryOrder
 {
@@ -23,8 +22,6 @@ class RetryOrderAction implements RetryOrder
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 
-        $activeTraderOrder = $financingOrder->traderOrders()->latest()->first();
-        Trader::driver($activeTraderOrder->provider, $activeTraderOrder->version)
-            ->retryOrder($activeTraderOrder);
+        $financingOrder->retry();
     }
 }
