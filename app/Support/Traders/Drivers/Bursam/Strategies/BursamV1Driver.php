@@ -287,6 +287,9 @@ class BursamV1Driver implements TraderInterface
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
     {
         try {
+            $timeLimitService = new TimeLimitService;
+            $timeLimitService->setContractSignTimeLimit($traderOrder);
+            
             $this->withLocale('ar', function () use ($traderOrder) {
                 $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
@@ -325,8 +328,6 @@ class BursamV1Driver implements TraderInterface
                 );
 
             });
-            $timeLimitService = new TimeLimitService;
-            $timeLimitService->setContractSignTimeLimit($traderOrder);
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
