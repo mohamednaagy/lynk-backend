@@ -337,6 +337,11 @@ class LynkV1Driver implements TraderInterface
 
     public function retryOrder(TraderOrder $traderOrder): void
     {
+        $traderOrder->order->update(['status' => FinancingOrderStatus::Approved]);
+    }
+
+    public function retryTraderOrder(TraderOrder $traderOrder): void
+    {
 
         if ($traderOrder->order->activeTraderOrder()->count() === 0) {
             if ($traderOrder->order->status->is(FinancingOrderStatus::PendingTraderOrder)) {
@@ -350,7 +355,7 @@ class LynkV1Driver implements TraderInterface
     protected function checkAndRetryOrder(TraderOrder $traderOrder, int $cancelReason): void
     {
         if ($this->canRetryOrder($traderOrder, $cancelReason)) {
-            $this->retryOrder($traderOrder);
+            $this->retryTraderOrder($traderOrder);
         }
     }
 
