@@ -622,6 +622,7 @@ class BursamV1Driver implements TraderInterface
                 'status' => FinancingOrderStatus::PendingTraderOrder,
             ]);
         }
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::Cancelled;
     }

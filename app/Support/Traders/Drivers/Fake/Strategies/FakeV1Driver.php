@@ -15,6 +15,7 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoOrder;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccRespondedToPtpOrder;
@@ -189,6 +190,8 @@ class FakeV1Driver implements TraderInterface
         $cancelledByType = TraderOrderCancelType::System,
         ?User $cancelledBy = null
     ): bool {
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
+
         return true;
     }
 

@@ -29,7 +29,7 @@ class TimeLimitService
             'type' => $type,
             'effective_at' => $effectiveAt,
             'default_value' => $defaultValue,
-            'action'    => $action,
+            'action' => $action,
         ]);
     }
 
@@ -100,6 +100,18 @@ class TimeLimitService
     }
 
     /**
+     * Cancel all pending time limits for the given TraderOrder.
+     *
+     * @param  TraderOrder  $traderOrder  The TraderOrder for which to cancel pending time limits.
+     */
+    public function cancelPendingTimeLimits(TraderOrder $traderOrder): void
+    {
+        $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)->update([
+            'status' => TraderOrderTimeLimitStatus::Canceled,
+        ]);
+    }
+
+    /**
      * Get the delivery confirmation time configuration.
      *
      * Fetches the default delivery confirmation time limit from the local Murabaha settings,
@@ -159,8 +171,7 @@ class TimeLimitService
     /**
      * Determine the action for the time limit based on the trader order.
      *
-     * @param TraderOrder $traderOrder The trader order instance.
-     * 
+     * @param  TraderOrder  $traderOrder  The trader order instance.
      * @return int The action to be set.
      */
     private function determineAction(TraderOrder $traderOrder): int
