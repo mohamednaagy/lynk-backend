@@ -392,6 +392,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function retry()
     {
-        $this->update(['status' => FinancingOrderStatus::Approved]);
+        $this->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
     }
 }
