@@ -18,6 +18,7 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
@@ -74,6 +75,7 @@ class BursamV2Driver extends BursamV1Driver
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+            app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -113,6 +115,7 @@ class BursamV2Driver extends BursamV1Driver
                 }
             },
         ])->dispatch();
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::PendingCancellation;
     }

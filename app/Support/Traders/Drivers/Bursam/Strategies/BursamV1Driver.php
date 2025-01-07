@@ -95,12 +95,6 @@ class BursamV1Driver implements TraderInterface
             'mode' => TraderOrderMode::Automatic,
         ];
 
-        // If it's an initiated order, add additional fields
-        if ($status === TraderOrderStatus::Initiated) {
-            $data['default_contract_sign_time_limit'] = $this->calculateTimeDifference();
-            $data['expire_at'] = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'));
-        }
-
         // Create and return the order
         return $financingOrder->traderOrders()->create($data);
     }
@@ -304,6 +298,9 @@ class BursamV1Driver implements TraderInterface
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
     {
         try {
+            $timeLimitService = new TimeLimitService;
+            $timeLimitService->setContractSignTimeLimit($traderOrder);
+            
             $this->withLocale('ar', function () use ($traderOrder) {
                 $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
@@ -342,8 +339,6 @@ class BursamV1Driver implements TraderInterface
                 );
 
             });
-            $timeLimitService = new TimeLimitService;
-            $timeLimitService->setContractSignTimeLimit($traderOrder);
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
@@ -639,6 +634,7 @@ class BursamV1Driver implements TraderInterface
                 'status' => FinancingOrderStatus::PendingTraderOrder,
             ]);
         }
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::Cancelled;
     }
