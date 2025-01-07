@@ -456,7 +456,11 @@ class LynkV1Driver implements TraderInterface
     public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
         $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
-        LynkClient::of($traderOrder)->requestDeliverProducts();
+        
+        if ($traderOrder->mode == TraderOrderMode::Automatic) {
+            LynkClient::of($traderOrder)->requestDeliverProducts();
+        }
+        
     }
 
     /**
