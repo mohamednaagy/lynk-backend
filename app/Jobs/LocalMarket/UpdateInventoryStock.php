@@ -20,12 +20,17 @@ class UpdateInventoryStock implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    protected LocalMarketInventory $inventory;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(protected LocalMarketInventory $inventory, protected $total, protected $inventoryWasRecentlyCreated = false) {}
+    public function __construct(protected int $inventoryId, protected int $total, protected bool $inventoryWasRecentlyCreated = false)
+    {
+        $this->inventory = LocalMarketInventory::findOrFail($this->inventoryId);
+    }
 
     /**
      * Execute the job.
@@ -34,44 +39,41 @@ class UpdateInventoryStock implements ShouldQueue
      */
     public function handle()
     {
-
         try {
-            $numberOfUnits = 0;
 
-            Log::info("Starting transaction for updating inventory ID: {$this->inventory->id}");
+            Log::info("Starting transaction for inventory ID: {$this->inventory->id}", [
+                'inventory' => $this->inventory,
+                'total' => $this->total,
+                'inventory_was_recently_created' => $this->inventoryWasRecentlyCreated,
+            ]);
+
             $this->inventory->update(['status' => InventoryStatus::Pending]);
 
             if ($this->inventoryWasRecentlyCreated) {
-                $numberOfUnits = $this->inventory->available_quantity;
-                $this->createItemUnits($this->inventory, $numberOfUnits);
+                $this->createItemUnits($this->inventory, $this->inventory->available_quantity);
             } else {
-                if ($this->total > $this->inventory->total_items) {
-                    $numberOfUnits = $this->total - $this->inventory->total_items;
-                    $this->createItemUnits($this->inventory, $numberOfUnits);
-                } elseif ($this->total < $this->inventory->total_items) {
-                    $numberOfUnits = $this->inventory->total_items - $this->total;
-                    $this->decreaseItemUnits($this->inventory, $numberOfUnits);
-                }
+                // Handle both increase and decrease in one transaction
+                $difference = $this->total - $this->inventory->total_items;
+                Log::info("Difference: {$difference} for inventory ID: {$this->inventory->id}");
+                $difference > 0 ? $this->createItemUnits($this->inventory, $difference) : $this->decreaseItemUnits($this->inventory, abs($difference));
             }
 
-            // Enable inventory (set status to active)
             $this->inventory->refreshStockQuantities();
+            $this->inventory->update(['status' => InventoryStatus::Active]);
 
-            $this->inventory->update([
-                'status' => InventoryStatus::Active,
-            ]);
-            Log::info("Set inventory ID: {$this->inventory->id} to status active");
+            Log::info("Successfully updated inventory ID: {$this->inventory->id}");
         } catch (\Exception $e) {
-            $this->inventory->update([
-                'status' => InventoryStatus::Problem,
-            ]);
-            Log::error('Error in transaction: '.$e->getMessage());
+            $this->inventory->update(['status' => InventoryStatus::Problem]);
+            Log::error('Error in transaction for inventory ID: '.$this->inventory->id, ['error' => $e]);
+            throw $e;
         }
     }
 
     public function createItemUnits(LocalMarketInventory $inventory, $numberOfUnits)
     {
-        Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}");
+        Log::info("Increasing units by: {$numberOfUnits} for inventory ID: {$inventory->id}", [
+            'was_recently_created' => $this->inventoryWasRecentlyCreated,
+        ]);
         try {
             DB::select('CALL GenerateRandomInventoryUnitsQRCode(?, ? , ?, ?, ?, ?, ?)', [
                 $inventory->id,
@@ -82,17 +84,25 @@ class UpdateInventoryStock implements ShouldQueue
                 InventoryUnitsStatus::Free,
                 $inventory->generateQrCodeBaseName(),
             ]);
+            Log::info("Successfully created {$numberOfUnits} units for inventory ID: {$inventory->id}");
         } catch (\Exception $e) {
+            Log::error('Error creating units for inventory ID: '.$inventory->id, [
+                'error' => $e,
+            ]);
             throw new ErrorCreatingUnitsForThisINventory;
         }
     }
 
     public function decreaseItemUnits(LocalMarketInventory $inventory, $decreased_amount)
     {
-        Log::info("Decreasing units by: {$decreased_amount}");
+        Log::info("Decreasing units by: {$decreased_amount} for inventory ID: {$inventory->id}");
         try {
             DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $decreased_amount]);
+            Log::info("Successfully decreased {$decreased_amount} units for inventory ID: {$inventory->id}");
         } catch (\Exception $e) {
+            Log::error('Error decreasing units for inventory ID: '.$inventory->id, [
+                'error' => $e,
+            ]);
             throw new FailedDecreaseUnitsForInventory;
         }
     }

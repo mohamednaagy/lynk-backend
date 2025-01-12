@@ -16,7 +16,7 @@ class UpdateCommodityInventoryAction implements UpdateCommodityInventory
         }
 
         if ($data['total_units']) {
-            UpdateInventoryStock::dispatch($inventory, $data['total_units']);
+            UpdateInventoryStock::dispatch($inventory->id, $data['total_units']);
         }
 
         return $inventory;
