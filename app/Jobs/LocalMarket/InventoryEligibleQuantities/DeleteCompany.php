@@ -24,7 +24,7 @@ class DeleteCompany implements ShouldQueue
     public function handle(EligibleQuantityService $service): void
     {
         try {
-            $company = Company::findOrFail($this->companyId);
+            $company = Company::withTrashed()->findOrFail($this->companyId);
 
             Log::channel('live_market')->info('Starting delete eligible quantities for company', [
                 'company_id' => $this->companyId,
