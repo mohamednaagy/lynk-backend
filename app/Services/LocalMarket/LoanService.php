@@ -14,21 +14,16 @@ class LoanService
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
         $startTime = microtime(true);
-        $result = DB::transaction(function () use ($localMarketOrder) {
-            $inventoryService = app(InventoryService::class);
-            $unitsService = app(UnitService::class);
-
-            $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
-                $localMarketOrder
-            );
+        $inventoryService = app(InventoryService::class);
+        $unitsService = app(UnitService::class);
+        $result = DB::transaction(function () use ($localMarketOrder, $inventoryService, $unitsService) {
+            $eligibleInventories = $inventoryService->findEligibleInventoryForLoan($localMarketOrder);
 
             if (empty($eligibleInventories)) {
                 return false;
             }
 
-            $loanDetails = $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-
-            return $loanDetails;
+            return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
         });
         $endTime = microtime(true);
         Log::info('Get Commodities For Loan Transaction Duration', [
