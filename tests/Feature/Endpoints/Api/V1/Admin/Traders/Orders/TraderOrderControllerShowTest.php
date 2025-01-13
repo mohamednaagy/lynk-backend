@@ -46,11 +46,11 @@ class TraderOrderControllerShowTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-
         [self::$traderCompany, self::$traderWallet] = $this->createTraderCompany('2000', ['company_cr' => '12345678910', 'driver' => 'fake']);
         [self::$lenderCompany, self::$lenderWallet] = $this->createLenderCompany('2000', ['company_cr' => '12345678911']);
         self::$userAdmin = $this->createSuperAdminUser();
         self::$order = $this->createOrder(self::$lenderCompany->id, self::$userAdmin->id);
+
         self::$traderOrder = self::$order->traderOrders()->create([
             'provider' => 'fake',
             'status' => TraderOrderStatus::InProgress,
@@ -95,23 +95,24 @@ class TraderOrderControllerShowTest extends TestCase
                         'id',
                         'status',
                         'company_name',
+                        'contract_number',
                         'reference_number',
                         'customer_name',
                         'national_id',
                         'amount',
-                        'selling_price',
                         'amount_formatted',
+                        'selling_price',
                         'selling_price_formatted',
+                        'is_updatable',
+                        'is_cancellable',
+                        'is_approved',
+                        'status_reason',
+                        'creator',
+                        'approver',
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                        'is_approved',
-                        'is_cancellable',
-                        'status_reason',
-                        'can_be_completed',
-                        'can_create_trader_order',
-                        'is_updatable',
-                        'approver',
+                        'created_at',
                         'trader_orders.id',
                         'trader_orders.reference',
                         'trader_orders.provider',
@@ -124,9 +125,12 @@ class TraderOrderControllerShowTest extends TestCase
                         'trader_orders.failure_reason',
                         'trader_orders.refunded_at',
                         'trader_orders.refund_status',
-                        'creator',
-                        'created_at',
+                        'trader_orders.cancel_details',
+                        'trader_orders.hover_message',
+                        'trader_orders.contract_signed_type',
+                        'can_be_completed',
                         'payment_proof_url',
+                        'can_create_trader_order',
                     ])
                     ->respond()
                     ->getData(true)
