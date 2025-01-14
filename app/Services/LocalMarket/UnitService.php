@@ -98,7 +98,7 @@ class UnitService
                 $localMarketOrder->id,
                 InventoryUnitsStatus::Reserved
             );
-            $inventory->refreshStockQuantities();
+            $inventory->refreshStockQuantities(true);
             Log::channel('local_market')->info('Hold eligible units', [
                 'order_id' => $localMarketOrder->id,
                 'inventory_id' => $inventory->id,

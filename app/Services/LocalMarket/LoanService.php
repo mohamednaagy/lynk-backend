@@ -34,7 +34,7 @@ class LoanService
         Log::channel('local_market')->info('Get Commodities For Loan Transaction Duration', [
             'order_id' => $localMarketOrder->id,
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
-            'eligibleInventoriesCount' => count($eligibleInventories),
+            'eligibleInventoriesCount' => is_countable($eligibleInventories) ? count($eligibleInventories) : 0,
         ]);
 
         return $eligibleUnits;
