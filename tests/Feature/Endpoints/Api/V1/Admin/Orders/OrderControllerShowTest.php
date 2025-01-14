@@ -88,12 +88,13 @@ class OrderControllerShowTest extends TestCase
             ->getJson('api/v1/admin/orders/'.$order->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($order, (new FinancingOrderTransformer())
+                fractal($order, (new FinancingOrderTransformer)
                     ->setArea(Area::SuperAdmin)
                     ->setCurrentUser(self::$admin))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'contract_number',
                         'company_name',
                         'reference_number',
                         'customer_name',
@@ -123,6 +124,10 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.products',
                         'trader_orders.status',
                         'trader_orders.created_at',
+                        'trader_orders.cancel_details',
+                        'trader_orders.hover_message',
+                        'trader_orders.contract_signed_type',
+                        'trader_orders.version',
                         'creator',
                         'created_at',
                         'payment_proof_url',

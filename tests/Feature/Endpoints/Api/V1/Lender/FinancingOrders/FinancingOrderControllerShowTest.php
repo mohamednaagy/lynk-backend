@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithUser;
 
 class FinancingOrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $firstCompany;
 
@@ -77,10 +77,11 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$firstOrderInSameCompany, (new FinancingOrderTransformer())->setCurrentUser(self::$userLenderAdmin))
+                fractal(self::$firstOrderInSameCompany, (new FinancingOrderTransformer)->setCurrentUser(self::$userLenderAdmin))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'contract_number',
                         'reference_number',
                         'customer_name',
                         'national_id',
@@ -123,10 +124,11 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$firstOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$firstOrderInSameCompany, (new FinancingOrderTransformer())->setCurrentUser(self::$userLenderSupervisor))
+                fractal(self::$firstOrderInSameCompany, (new FinancingOrderTransformer)->setCurrentUser(self::$userLenderSupervisor))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'contract_number',
                         'reference_number',
                         'customer_name',
                         'national_id',
@@ -185,10 +187,11 @@ class FinancingOrderControllerShowTest extends TestCase
             ->getJson('api/v1/lender/orders/'.self::$thirdOrderInSameCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$thirdOrderInSameCompany, (new FinancingOrderTransformer())->setCurrentUser(self::$userLenderOrderCreator))
+                fractal(self::$thirdOrderInSameCompany, (new FinancingOrderTransformer)->setCurrentUser(self::$userLenderOrderCreator))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'contract_number',
                         'reference_number',
                         'customer_name',
                         'national_id',

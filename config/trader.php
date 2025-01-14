@@ -45,6 +45,9 @@ return [
                     TraderOrderMode::Automatic,
                 ],
             ],
+            'default_contract_sign_time_limit' => function () {
+                return 240;
+            },
         ],
         'bursam' => [
             'latest' => 'v2',

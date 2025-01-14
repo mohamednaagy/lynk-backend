@@ -20,8 +20,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderOrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $lender;
 
@@ -86,12 +86,13 @@ class LenderOrderControllerShowTest extends TestCase
             ->getJson(self::$endpoint.$order->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($order, (new FinancingOrderTransformer())
+                fractal($order, (new FinancingOrderTransformer)
                     ->setArea(Area::SuperAdmin)
                     ->setCurrentUser(self::$admin))
                     ->parseIncludes([
                         'id',
                         'status',
+                        'contract_number',
                         'reference_number',
                         'customer_name',
                         'company_name',
@@ -150,6 +151,7 @@ class LenderOrderControllerShowTest extends TestCase
             ->assertStatus(403);
     }
 
+    //
     public function test_admin_manager_can_access_order_controller_show_when_has_permission()
     {
         $order = FinancingOrder::where('company_id', self::$lender->id)->first();
