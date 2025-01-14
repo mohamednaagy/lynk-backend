@@ -116,10 +116,23 @@ trait AssertsAccessByRoleAndArea
         }
     }
 
+    public function assertStatusForCommoditySupplierAreaUsers($status, $request, $permissions = [])
+    {
+        $roles = Area::roles(Area::CommoditySupplier);
+
+        foreach ($roles as $role) {
+            [$company] = $this->createCompanyByArea(Area::Trader);
+            $user = $this->createLenderUser($company->id, $role);
+            $this->assignPermissionToUser($user, $permissions);
+            $request($user, $role, $permissions)->assertStatus($status);
+        }
+    }
+
     public function assertStatusCodeToSpecificRoles(int $status, array $roles, $request)
     {
         foreach ($roles as $role) {
             $area = Area::getAreaByRole($role);
+
             switch ($area) {
                 case Area::SuperAdmin:
                     $admin = $this->createUserByRole($role);

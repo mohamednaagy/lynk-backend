@@ -23,7 +23,7 @@ use Tests\Traits\InteractsWithUser;
 
 class OrderControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -84,8 +84,8 @@ class OrderControllerShowTest extends TestCase
             ->assertOk()
             ->assertExactJson(
                 fractal(
-                    (new GetOrderAction())->setCompany(tenant())->handle(self::$order->id),
-                    (new FinancingOrderTransformer())->setArea(Area::Trader)
+                    (new GetOrderAction)->setCompany(tenant())->handle(self::$order->id),
+                    (new FinancingOrderTransformer)->setArea(Area::Trader)
                 )
                     ->parseIncludes([
                         'id',

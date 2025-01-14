@@ -7,7 +7,6 @@ return [
     OrderController::class => [
         'show' => [
             Role::LenderApiUser => [
-                'trader_orders.provider',
                 'trader_orders.mode',
             ],
         ],
