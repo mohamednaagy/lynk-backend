@@ -59,7 +59,6 @@ class TraderOrder extends Model implements HasMedia
             'can_continue_progress',
             'updated_at',
             'created_at',
-            'default_contract_sign_time_limit',
             'contract_signed_type',
             'expire_at',
         ];
@@ -311,32 +310,6 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasMany(TraderOrderTimeLimit::class, 'trader_order_id', 'id');
     }
 
-    public function scopeWithExpiredContractSignLimit($query)
-    {
-        $version = get_latest_version_of_trader(EnumsTrader::Lynk);
-
-        return $query->where([
-            ['provider', EnumsTrader::Lynk],
-            ['version', $version],
-            ['mode', TraderOrderMode::Automatic],
-            ['status', TraderOrderStatus::InProgress],
-            ['expire_at', '<', now()],
-        ])
-            ->whereNotNull('default_contract_sign_time_limit')
-            ->whereHas('traderHistories', function ($historyQuery) {
-                $historyQuery->select('id')
-                    ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-                    ->where('id', function ($subQuery) {
-                        $subQuery->select('id')
-                            ->from('trader_histories')
-                            ->whereRaw('trader_orders.id = trader_histories.trader_order_id')
-                            ->orderByDesc('id')
-                            ->limit(1);
-                    });
-            })
-            ->get();
-    }
-
     public function hoverMessage(): ?string
     {
         return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
@@ -372,16 +345,14 @@ class TraderOrder extends Model implements HasMedia
         return $query->completed()->where('contract_signed_type', $contractSignedType);
     }
 
-    public function setExpireDate()
-    {
-        // save the expire_at value based on provider
-        $this->expire_at = ($this->provider == EnumsTrader::Bursam) ? get_bursam_contract_signed_deadline() : Carbon::now()->addMinutes($this->default_contract_sign_time_limit);
-        $this->save();
-    }
-
     public function isDeliveryExpirable(): bool
     {
         return $this->doesLastActionMatchWith([FinancingOrderHistory::PendingDelivery]);
+    }
+
+    public function isContractSignLimitExpirable(): bool
+    {
+        return $this->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
     }
 
     public function getRecentTimeLimit($type, $status)

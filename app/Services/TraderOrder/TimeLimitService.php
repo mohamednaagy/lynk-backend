@@ -2,8 +2,12 @@
 
 namespace App\Services\TraderOrder;
 
+use App\Enums\Trader;
+use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
+use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use Carbon\Carbon;
@@ -19,10 +23,13 @@ class TimeLimitService
      */
     private function setTimeLimit(TraderOrder $traderOrder, int $type, string $effectiveAt, int $defaultValue): void
     {
+        // Determine the appropriate action based on the trader order's mode and provider
+        $action = $this->determineAction($traderOrder);
         $traderOrder->timeLimits()->create([
             'type' => $type,
             'effective_at' => $effectiveAt,
             'default_value' => $defaultValue,
+            'action' => $action,
         ]);
     }
 
@@ -34,7 +41,8 @@ class TimeLimitService
      */
     public function setContractSignTimeLimit(TraderOrder $traderOrder): void
     {
-        $config = $this->getContractSignedLimitTimeConfig();
+        $company = $traderOrder->order->company;
+        $config = $this->getContractSignedLimitTimeConfig($company, $traderOrder->provider);
         $this->setTimeLimit(
             $traderOrder,
             TraderOrderTimeLimitType::ContractSignTimeLimit,
@@ -80,6 +88,7 @@ class TimeLimitService
         $timeLimit = $traderOrder->timeLimits()
             ->where('status', TraderOrderTimeLimitStatus::Pending)
             ->where('type', $timeLimitType)
+            ->where('action', TraderOrderTimeLimitAction::AutoCancelOrder)
             ->first(); // Ensure we get a single instance
 
         if ($timeLimit) {
@@ -88,6 +97,18 @@ class TimeLimitService
         } else {
             Log::warning("No pending time limit found to cancel for Trader Order ID: {$traderOrder->id}");
         }
+    }
+
+    /**
+     * Cancel all pending time limits for the given TraderOrder.
+     *
+     * @param  TraderOrder  $traderOrder  The TraderOrder for which to cancel pending time limits.
+     */
+    public function cancelPendingTimeLimits(TraderOrder $traderOrder): void
+    {
+        $traderOrder->timeLimits()->where('status', TraderOrderTimeLimitStatus::Pending)->update([
+            'status' => TraderOrderTimeLimitStatus::Canceled,
+        ]);
     }
 
     /**
@@ -121,14 +142,43 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default contract sign time limit in hours)
      *               and 'effective_at' (the calculated effective contract sign time as a string in 'Y-m-d H:i:s' format).
      */
-    private function getContractSignedLimitTimeConfig()
+    private function getContractSignedLimitTimeConfig(Company $company, $provider): array
     {
-        $defaultValue = app(LocalMurabahaSettings::class)->default_contract_sign_time_limit;
-        $effectiveAt = Carbon::now()
-            ->timezone('UTC')
-            ->addHours($defaultValue)
-            ->format('Y-m-d H:i:s');
+        [$defaultValue, $effectiveAt] = match ($provider) {
+            Trader::Bursam => [
+                Carbon::now()->diffInHours(get_bursam_contract_signed_deadline()), // default value
+                get_bursam_contract_signed_deadline(), // Effective time
+            ],
+            Trader::Lynk => [
+                $company->lenderDetail->default_contract_sign_time_limit
+                    ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit, //default value
+                Carbon::now()
+                    ->timezone('UTC')
+                    ->addHours(
+                        $company->lenderDetail->default_contract_sign_time_limit
+                            ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit
+                    )
+                    ->format('Y-m-d H:i:s'), // Effective time
+            ],
+        };
 
-        return ['default_value' => $defaultValue, 'effective_at' => $effectiveAt];
+        return [
+            'default_value' => $defaultValue,
+            'effective_at' => $effectiveAt,
+        ];
+    }
+
+    /**
+     * Determine the action for the time limit based on the trader order.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order instance.
+     * @return int The action to be set.
+     */
+    private function determineAction(TraderOrder $traderOrder): int
+    {
+        // If mode is automatic and provider is Lynk, set to auto-cancel, otherwise no action needed
+        return ($traderOrder->mode === TraderOrderMode::Automatic && $traderOrder->provider === Trader::Lynk)
+            ? TraderOrderTimeLimitAction::AutoCancelOrder
+            : TraderOrderTimeLimitAction::NoActionNeeded;
     }
 }

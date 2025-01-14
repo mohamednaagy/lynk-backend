@@ -13,6 +13,13 @@ class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Company $company, array $data): Company
     {
+        $company->lenderDetail()->updateOrCreate(
+            ['company_id' => $company->id],
+            Arr::only($data, [
+                'default_contract_sign_time_limit',
+            ])
+        );
+        
         $company->update(
             Arr::only(
                 $data,

@@ -36,6 +36,7 @@ class CompanyTransformer extends TransformerAbstract
         'preferred_market_type',
         'preferred_commodity_types',
         'auto_complete_murabaha_order',
+        'default_contract_sign_time_limit',
     ];
 
     public function transform(Company $company): array
@@ -191,5 +192,10 @@ class CompanyTransformer extends TransformerAbstract
             'name' => $type->name,
         ]);
 
+    }
+
+    public function includeDefaultContractSignTimeLimit(Company $company): Primitive
+    {
+        return $this->primitive($company->lenderDetail?->default_contract_sign_time_limit);
     }
 }

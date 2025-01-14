@@ -47,11 +47,6 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
-        $schedule->job(new checkExpiredContractSignedTimeTraderOrdersJob)
-            ->everyMinute()
-            ->withoutOverlapping()
-            ->onOneServer();
-
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
     }
 

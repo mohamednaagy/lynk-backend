@@ -2,6 +2,8 @@
 
 namespace App\Observers;
 
+use App\Enums\TraderOrderTimeLimitAction;
+use App\Enums\TraderOrderTimeLimitStatus;
 use App\Jobs\TraderOrder\ExpireOrderJob;
 use App\Models\TraderOrderTimeLimit;
 use Carbon\Carbon;
@@ -15,9 +17,12 @@ class TraderOrderTimeLimitObserver
      */
     public function created(TraderOrderTimeLimit $traderOrderTimeLimit)
     {
-        $effectiveAt = Carbon::parse($traderOrderTimeLimit->effective_at);
-
-        ExpireOrderJob::dispatch($traderOrderTimeLimit->id)
-            ->delay($effectiveAt);
+        $traderOrderTimeLimit = $traderOrderTimeLimit->fresh();
+        if ($traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending && 
+            $traderOrderTimeLimit->action->value === TraderOrderTimeLimitAction::AutoCancelOrder) {
+            ExpireOrderJob::dispatch($traderOrderTimeLimit->id)->delay(
+                Carbon::parse($traderOrderTimeLimit->effective_at)
+            );
+        }
     }
 }

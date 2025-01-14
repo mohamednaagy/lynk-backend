@@ -8,6 +8,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -19,8 +20,8 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
 
     public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
-        // Set expiration time for the trader order
-        $traderOrder->setExpireDate();
+        $timeLimitService = new TimeLimitService;
+        $timeLimitService->setContractSignTimeLimit($traderOrder);
 
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
 

@@ -177,6 +177,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required', 'exists:commodity_types,id', new CheckActiveCommodityTypeRule,
             ],
 
+            'default_contract_sign_time_limit' => [
+                'nullable', 'integer', 'min:1'
+            ],
+
         ];
     }
 }

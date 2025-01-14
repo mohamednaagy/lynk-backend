@@ -25,10 +25,6 @@ class TraderOrderObserver
                 'is_base' => true,
             ]);
         }
-
-        $traderOrder->fill([
-            'default_contract_sign_time_limit' => config("trader.providers.{$traderOrder->provider}.default_contract_sign_time_limit")(),
-        ]);
     }
 
     /**

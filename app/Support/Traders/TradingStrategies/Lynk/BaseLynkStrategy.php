@@ -159,10 +159,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
      */
     public function requestDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
-        match ($traderOrder->mode) {
-            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)
-                ->handleRequestDeliverCommodityToCustomer($traderOrder),
-            TraderOrderMode::Manual => null,
-        };
+        Trader::driver($traderOrder->provider, $traderOrder->version)
+        ->handleRequestDeliverCommodityToCustomer($traderOrder);
     }
 }

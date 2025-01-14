@@ -78,7 +78,6 @@ class LynkV1Driver implements TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'default_contract_sign_time_limit' => config('trader.providers.lynk.default_contract_sign_time_limit'),
         ]);
     }
 
@@ -152,10 +151,9 @@ class LynkV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
-
             });
-            // Set expiration time for the trader order
-            $traderOrder->setExpireDate();
+
+            $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
 
         } catch (\Throwable $exception) {
             throw new TraderException(
@@ -220,7 +218,6 @@ class LynkV1Driver implements TraderInterface
                         'created_at' => $currentTimeInUtcTz,
                     ]
                 );
-
             });
         } catch (Exception $exception) {
             throw new TraderException(
@@ -274,6 +271,7 @@ class LynkV1Driver implements TraderInterface
             TraderOrderMode::Manual => $this->handleManualOrderCancellation($traderOrder, $cancelReason, $cancelledByType, $cancelledBy),
             TraderOrderMode::Automatic => $this->handleAutomaticOrderCancellation($traderOrder, $cancelReason, $cancelledByType, $cancelledBy),
         };
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::Cancelled;
     }
@@ -318,8 +316,10 @@ class LynkV1Driver implements TraderInterface
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
             $order->update(['status' => FinancingOrderStatus::Cancelled]);
         } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
-            if ($order->company->preferred_market_type->is(CompanyMarketType::Local())
-                && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)) {
+            if (
+                $order->company->preferred_market_type->is(CompanyMarketType::Local())
+                && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)
+            ) {
                 $order->update(['status' => FinancingOrderStatus::TradingFailure]);
             } else {
                 $order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
@@ -397,7 +397,7 @@ class LynkV1Driver implements TraderInterface
             TraderOrderCancelReason::TraderOrderIsCancelled => __('order.user_cancel_request'),
             TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
             TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.lynk.expired_contract_time', [
-                'TIME' => $traderOrder->default_contract_sign_time_limit / 60,
+                'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
             TraderOrderCancelReason::ExpiredConfirmationTimeLimit => __('order.trader.lynk.expired_confirmation_time_limit', [
                 'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
@@ -458,8 +458,28 @@ class LynkV1Driver implements TraderInterface
 
     public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
+        $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
+        
+        if ($traderOrder->mode == TraderOrderMode::Automatic) {
+            LynkClient::of($traderOrder)->requestDeliverProducts();
+        }
+        
+    }
+
+    /**
+     * Sets the time limit for a specific type based on the provided TraderOrder.
+     *
+     * @param  TraderOrder  $traderOrder  The TraderOrder for which the time limit needs to be set.
+     * @param  mixed  $timeLimitType  The type of time limit to be set (DeliveryConfirmationTimeLimit or ContractSignTimeLimit).
+     */
+    private function setTimeLimitByType(TraderOrder $traderOrder, $timeLimitType): void
+    {
         $timeLimitService = new TimeLimitService;
-        $timeLimitService->setDeliveryConfirmationTimeLimit($traderOrder);
-        LynkClient::of($traderOrder)->requestDeliverProducts();
+
+        match ($timeLimitType) {
+            TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => $timeLimitService->setDeliveryConfirmationTimeLimit($traderOrder),
+            TraderOrderTimeLimitType::ContractSignTimeLimit => $timeLimitService->setContractSignTimeLimit($traderOrder),
+            default => null,
+        };
     }
 }

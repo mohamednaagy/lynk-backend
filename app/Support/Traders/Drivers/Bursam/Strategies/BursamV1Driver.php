@@ -21,6 +21,7 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient;
@@ -93,12 +94,6 @@ class BursamV1Driver implements TraderInterface
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ];
-
-        // If it's an initiated order, add additional fields
-        if ($status === TraderOrderStatus::Initiated) {
-            $data['default_contract_sign_time_limit'] = $this->calculateTimeDifference();
-            $data['expire_at'] = Carbon::createFromFormat('H:i:s', env('BURSAM_MARKET_OPENING_END_TIME'));
-        }
 
         // Create and return the order
         return $financingOrder->traderOrders()->create($data);
@@ -292,6 +287,9 @@ class BursamV1Driver implements TraderInterface
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
     {
         try {
+            $timeLimitService = new TimeLimitService;
+            $timeLimitService->setContractSignTimeLimit($traderOrder);
+            
             $this->withLocale('ar', function () use ($traderOrder) {
                 $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
@@ -320,9 +318,6 @@ class BursamV1Driver implements TraderInterface
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
-
-                // Set expiration time for the trader order
-                $traderOrder->setExpireDate();
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
@@ -628,6 +623,7 @@ class BursamV1Driver implements TraderInterface
                 'status' => FinancingOrderStatus::PendingTraderOrder,
             ]);
         }
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::Cancelled;
     }

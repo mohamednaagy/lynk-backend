@@ -6,6 +6,8 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommodityPurcha
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Enums\WebhookType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -28,6 +30,8 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
             ->getNextStepOf($lastCompletedStep);
+        
+        $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
 
         WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -43,7 +47,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'products' => $this->resolveProducts($traderOrder),
                 'cert_document_url' => get_file_url($certDocumentMediaFile),
                 'ownership_document_url' => get_file_url($ownershipDocumentMediaFile),
-                'expiry_date' => $traderOrder->expire_at ? saudi_now('Y-m-d h:i:s A', Carbon::parse($traderOrder->expire_at)) : null,
+                'expiry_date' => $effective_at ? saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at)) : null,
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
         ]);
