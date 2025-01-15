@@ -43,8 +43,8 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
+                ->select('id', 'version', 'status')
                 ->where('status', TraderOrderStatus::Initiated)
-                ->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {

@@ -14,9 +14,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
 {
     public function handle(User $user, int $orderId)
     {
-        $financingOrder = FinancingOrder::query()
-            ->lockForUpdate()
-            ->findOrFail($orderId);
+        $financingOrder = FinancingOrder::findOrFail($orderId);
 
         if (! $financingOrder->canCreateTraderOrder($user)) {
             if ($financingOrder->hasCompletedTraderOrder()) {
