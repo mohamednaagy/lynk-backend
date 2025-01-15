@@ -181,6 +181,12 @@ class UpdateCompanyRequest extends FormRequest
                 'nullable', 'integer', 'min:1'
             ],
 
+            'force_preferred_commodity_type' => [
+                'nullable', 
+                'required_with:preferred_commodity_types',
+                'boolean',
+            ],
+
         ];
     }
 }

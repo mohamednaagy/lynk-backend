@@ -49,9 +49,12 @@ class CreateCompanyAction implements CreateCompany
                 ]
             )
         );
-
+        
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
             $company->commodityTypes()->attach($data['preferred_commodity_types']);
+            $company->lenderDetail()->create([
+                'force_preferred_commodity_type' => $data['force_preferred_commodity_type'],
+            ]);
         }
 
         return $company;

@@ -109,6 +109,7 @@ class LenderControllerUpdateTest extends TestCase
             'preferred_market_type' => CompanyMarketType::International,
             'contract_number' => '1234567'.rand('111', '999'),
             'preferred_commodity_types' => [self::$activeCommodityType->id],
+            'force_preferred_commodity_type' => true,
 
         ];
         self::$endpoint = 'api/v1/admin/lenders/';
