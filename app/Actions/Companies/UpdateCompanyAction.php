@@ -17,6 +17,7 @@ class UpdateCompanyAction implements UpdateCompany
             ['company_id' => $company->id],
             Arr::only($data, [
                 'default_contract_sign_time_limit',
+                'force_preferred_commodity_type',
             ])
         );
         

@@ -37,6 +37,7 @@ class CompanyTransformer extends TransformerAbstract
         'preferred_commodity_types',
         'auto_complete_murabaha_order',
         'default_contract_sign_time_limit',
+        'force_preferred_commodity_type',
     ];
 
     public function transform(Company $company): array
@@ -197,5 +198,10 @@ class CompanyTransformer extends TransformerAbstract
     public function includeDefaultContractSignTimeLimit(Company $company): Primitive
     {
         return $this->primitive($company->lenderDetail?->default_contract_sign_time_limit);
+    }
+
+    public function includeForcePreferredCommodityType(Company $company): Primitive
+    {
+        return $this->primitive($company->lenderDetail?->force_preferred_commodity_type);
     }
 }

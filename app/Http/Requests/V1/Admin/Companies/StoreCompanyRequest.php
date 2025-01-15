@@ -171,6 +171,12 @@ class StoreCompanyRequest extends FormRequest
             'preferred_commodity_types.*' => [
                 'required', new CheckActiveCommodityTypeRule,
             ],
+
+            'force_preferred_commodity_type' => [
+                'nullable',
+                'required_with:preferred_commodity_types',
+                'boolean',
+            ],
         ];
     }
 }

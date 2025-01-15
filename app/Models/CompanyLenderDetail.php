@@ -8,7 +8,12 @@ class CompanyLenderDetail extends Model
 {
     protected $fillable = [
         'default_contract_sign_time_limit',
+        'force_preferred_commodity_type',
         'company_id',
+    ];
+
+    protected $casts = [
+        'force_preferred_commodity_type' => 'boolean',
     ];
 
     public function company()

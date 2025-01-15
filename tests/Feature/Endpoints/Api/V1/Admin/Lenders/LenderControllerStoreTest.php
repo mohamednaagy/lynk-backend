@@ -94,6 +94,7 @@ class LenderControllerStoreTest extends TestCase
             'trading_mode' => TraderOrderMode::Automatic,
             'preferred_market_type' => CompanyMarketType::International,
             'preferred_commodity_types' => [self::$activeCommodityType->id],
+            'force_preferred_commodity_type' => false,
         ];
         self::$endpoint = 'api/v1/admin/lenders';
     }
@@ -126,6 +127,7 @@ class LenderControllerStoreTest extends TestCase
                     'notify_borrowers_about_order_updates',
                     'preferred_market_type',
                     'preferred_commodity_types',
+                    'force_preferred_commodity_type',
                 ],
             ]);
 
@@ -167,7 +169,7 @@ class LenderControllerStoreTest extends TestCase
                     'notify_borrowers_about_order_updates',
                     'preferred_market_type',
                     'preferred_commodity_types',
-
+                    'force_preferred_commodity_type',
                 ],
             ]);
 
@@ -209,7 +211,7 @@ class LenderControllerStoreTest extends TestCase
                     'notify_borrowers_about_order_updates',
                     'preferred_market_type',
                     'preferred_commodity_types',
-
+                    'force_preferred_commodity_type',
                 ],
             ]);
 
@@ -474,6 +476,7 @@ class LenderControllerStoreTest extends TestCase
                     'does_order_require_approval',
                     'preferred_market_type',
                     'preferred_commodity_types',
+                    'force_preferred_commodity_type',
                 ],
             ]);
     }
