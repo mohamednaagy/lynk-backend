@@ -2,8 +2,10 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -39,13 +41,12 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
      */
     public function handle()
     {
-        Log::info('Starting ProcessBursamBidCertificate Job');
-
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
+            Log::info('bursa Purchasing Step => Starting ProcessBursamBidCertificate Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
             if (
                 is_null($traderOrder)
@@ -71,6 +72,9 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamBidCertificate', ['traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        Log::error('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
     }
 }

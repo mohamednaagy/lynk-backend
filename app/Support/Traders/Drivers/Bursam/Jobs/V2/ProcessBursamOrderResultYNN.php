@@ -49,6 +49,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
+            Log::info('bursa Purchasing Step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
             if (
                 is_null($traderOrder)
