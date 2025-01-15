@@ -95,6 +95,7 @@ class LenderControllerStoreTest extends TestCase
             'preferred_market_type' => CompanyMarketType::International,
             'preferred_commodity_types' => [self::$activeCommodityType->id],
             'force_preferred_commodity_type' => false,
+            'auto_complete_murabaha_order' => true,
         ];
         self::$endpoint = 'api/v1/admin/lenders';
     }
