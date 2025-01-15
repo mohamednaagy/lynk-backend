@@ -132,6 +132,13 @@ return [
             'days' => 30,
             'permission' => 0664,
         ],
+        'tracking_bursam' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/bursam/tracking_bursam.log'),
+            'level' => 'debug',
+            'days' => 30,
+            'permission' => 0664,
+        ],
         'local_market' => [
             'driver' => 'daily',
             'path' => storage_path('logs/local_market/local_market.log'),

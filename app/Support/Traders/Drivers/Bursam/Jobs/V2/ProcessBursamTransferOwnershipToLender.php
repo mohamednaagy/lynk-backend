@@ -2,8 +2,11 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -25,9 +28,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
-    {
-    }
+    public function __construct(protected int $traderOrderId) {}
 
     /**
      * Execute the job.
@@ -40,6 +41,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             ->where('status', TraderOrderStatus::InProgress)
             ->lockForUpdate()
             ->find($this->traderOrderId);
+        Log::channel('tracking_bursam')->info('Purchasing Step => Starting ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
         if (
             is_null($traderOrder)
@@ -50,7 +52,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
         Trader::driver('bursam', $traderOrder->version)
             ->createTransferOwnershipToLenderDocument($traderOrder);
-            
+
         app(GenerateClientWakala::class)->handle($traderOrder);
     }
 
@@ -66,6 +68,10 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamTransferOwnershipToLender', ['traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        Log::error('purchasing step => faild to get ProcessBursamTransferOwnershipToLender and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+
     }
 }

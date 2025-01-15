@@ -56,6 +56,7 @@ class BursamClient
     {
         $financingOrder = $this->traderOrder->order;
 
+        Log::channel('tracking_bursam')->info('purchasing step => buy product', ['financingOrderId' => $financingOrder->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
         $url = 'api/process/svc/bsas/order.json';
 
         $request = [
@@ -157,6 +158,8 @@ class BursamClient
 
     public function fetchBuyResult()
     {
+        Log::channel('tracking_bursam')->info('purchasing step => fetchBuyResult', ['financingOrderId' => $this->traderOrder->order->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
+
         return $this->fetchOrderResult($this->traderOrder->uuid_one);
     }
 
@@ -167,6 +170,7 @@ class BursamClient
 
     private function fetchOrderResult($uuid)
     {
+        Log::channel('tracking_bursam')->info('purchasing step => fetchOrderResult', ['financingOrderId' => $this->traderOrder->order->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
         $url = 'api/process/svc/bsas/orderResult.json';
 
         $requestHeader = [
@@ -204,12 +208,12 @@ class BursamClient
 
     public function getBidXml()
     {
+        Log::channel('tracking_bursam')->info('purchasing step => getBidXml', ['financingOrderId' => $this->traderOrder->order->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
         $url = 'api/process/svc/bsas/bidXML.json';
         $request = [
             'membershortname' => config('trader.providers.bursam.member_short_name'),
             'ecertno' => $this->traderOrder->reference,
         ];
-
         $response = $this->rateLimitRequest(
             fn () => $this->http()
                 ->post(
@@ -302,41 +306,71 @@ class BursamClient
 
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
-        $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
-        if ($remainingRetries > $maxRetriesBeforeException) {
-            $exception = new RateLimitExceededException('bursam_api');
+        try {
+            $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
+            $decaySeconds = (int) config('trader.providers.bursam.rate_limit.decay_seconds');
+            $maxAttempts = (int) config('trader.providers.bursam.rate_limit.max_attempts');
 
-            $exception->setContext([
-                'trader_order_id' => $this->traderOrder->id,
-                'provider' => $this->traderOrder->provider,
-                'version' => $this->traderOrder->version,
-                'remaining_retries' => $remainingRetries,
-                'max_retries_before_exception' => $maxRetriesBeforeException,
+            if ($remainingRetries > $maxRetriesBeforeException) {
+                $exception = new RateLimitExceededException('bursam_api');
+
+                $exception->setContext([
+                    'trader_order_id' => $this->traderOrder->id,
+                    'provider' => $this->traderOrder->provider,
+                    'version' => $this->traderOrder->version,
+                    'remaining_retries' => $remainingRetries,
+                    'max_retries_before_exception' => $maxRetriesBeforeException,
+                ]);
+                Log::channel('tracking_bursam')->error('Reached the maximum number of allowed retries', [
+                    'remainingRetries' => $remainingRetries,
+                    'maxRetriesBeforeException' => $maxRetriesBeforeException,
+                ]);
+                throw $exception;
+            }
+            Log::channel('tracking_bursam')->info('send request rate limit', ['time' => now(),
+                'order' => $this->traderOrder->order->id,
+                'trader_order_id' => $this->traderOrder->id]);
+            $executed = RateLimiter::attempt(
+                'bursam_api',
+                $maxAttempts,
+                $callback,
+                $decaySeconds,
+            );
+
+            if ($executed === false) {
+                Log::channel('tracking_bursam')->warning('Rate limit exceeded, delaying retry without incrementing retries', [
+                    'remainingRetries' => $remainingRetries,
+                    'callback' => $callback,
+                    'executed' => $executed,
+                    'order' => $this->traderOrder->order->id,
+                    'trader_order_id' => $this->traderOrder->id,
+                ]);
+
+                sleep($decaySeconds + 1);
+
+                return $this->rateLimitRequest($callback, $remainingRetries);
+            }
+
+            return $executed;
+        } catch (RateLimitExceededException $e) {
+            Log::channel('tracking_bursam')->error('RateLimitExceededException FUll ', [
+                'message' => $e->getMessage(),
+                'decaySeconds' => $decaySeconds,
+                'remainingRetries' => $remainingRetries,
+                'maxRetriesBeforeException' => $maxRetriesBeforeException,
             ]);
-            Log::error('Reached The Maximum number Of allowed retries', ['remainingRetries' => $remainingRetries, 'maxRetriesBeforeException' => $maxRetriesBeforeException]);
-            throw $exception;
-        }
-
-        if ($remainingRetries > 0) {
-            Log::info('remaining of retry more than 0 so we need to sleep for two seconds', ['remainingRetries' => $remainingRetries, 'decay_seconds' => config('trader.providers.bursam.rate_limit.decay_seconds')]);
-
-            sleep(((int) config('trader.providers.bursam.rate_limit.decay_seconds')) + 1);
-        }
-
-        $executed = RateLimiter::attempt(
-            'bursam_api',
-            config('trader.providers.bursam.rate_limit.max_attempts'),
-            $callback,
-            config('trader.providers.bursam.rate_limit.decay_seconds'),
-        );
-
-        if ($executed === false) {
-            Log::error('not allowed to send BURSAM request already send one in less than one second', ['remainingRetries' => $remainingRetries]);
+        } catch (Exception $e) {
+            Log::channel('tracking_bursam')->error('Bursam exception occurred', [
+                'traderOrderId' => $this->traderOrder->id,
+                'financingOrderId' => $this->traderOrder->order->id,
+                'message' => $e->getMessage(),
+                'decaySeconds' => $decaySeconds,
+                'remainingRetries' => $remainingRetries,
+                'maxRetriesBeforeException' => $maxRetriesBeforeException,
+            ]);
 
             return $this->rateLimitRequest($callback, ++$remainingRetries);
         }
-
-        return $executed;
     }
 
     private function registerFakeBursamResponses()
