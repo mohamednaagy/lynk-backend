@@ -46,7 +46,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
                 ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
-            Log::channel('tracking_bursam')->info('Purchasing Step => Starting ProcessBursamBidCertificate Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            Log::info('bursa Purchasing Step => Starting ProcessBursamBidCertificate Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
             if (
                 is_null($traderOrder)
@@ -73,7 +73,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     public function failed($exception)
     {
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-        Log::error('purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        Log::error('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
     }
