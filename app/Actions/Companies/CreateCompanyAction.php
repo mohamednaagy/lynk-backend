@@ -5,6 +5,7 @@ namespace App\Actions\Companies;
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
 use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Support\Arr;
 
 class CreateCompanyAction implements CreateCompany
@@ -14,7 +15,7 @@ class CreateCompanyAction implements CreateCompany
     ) {
     }
 
-    public function handle(array $data): Company
+    public function handle(array $data): Lender
     {
         if (empty($data['webhook_secret_key'])) {
             $data['webhook_secret_key'] = $this->generateWebhookSecretKey->handle();
@@ -24,7 +25,7 @@ class CreateCompanyAction implements CreateCompany
             unset($data['require_initiate_trade_request']);
         }
 
-        $company = Company::create(
+        $lender = Lender::create(
             Arr::only(
                 $data,
                 [
@@ -49,14 +50,16 @@ class CreateCompanyAction implements CreateCompany
                 ]
             )
         );
+
+        
+        $lender->lenderDetail()->create([
+            'force_preferred_commodity_type' => $data['force_preferred_commodity_type'],
+        ]);
         
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
-            $company->commodityTypes()->attach($data['preferred_commodity_types']);
-            $company->lenderDetail()->create([
-                'force_preferred_commodity_type' => $data['force_preferred_commodity_type'],
-            ]);
+            $lender->commodityTypes()->attach($data['preferred_commodity_types']);
         }
 
-        return $company;
+        return $lender;
     }
 }
