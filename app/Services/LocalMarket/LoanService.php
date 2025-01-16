@@ -13,32 +13,18 @@ class LoanService
 {
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
-        $startTime = microtime(true);
         $inventoryService = app(InventoryService::class);
         $unitsService = app(UnitService::class);
-        $eligibleInventories = [];
-        $eligibleUnits = [];
 
-        // Use a transaction to ensure data integrity
-        $eligibleUnits = DB::transaction(function () use ($localMarketOrder, $inventoryService, $unitsService, &$eligibleInventories) {
-            $eligibleInventories = $inventoryService->findEligibleInventoryForLoan($localMarketOrder);
+        $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
+            $localMarketOrder
+        );
 
-            // Early exit if no eligible inventories are found
-            if (empty($eligibleInventories)) {
-                return false;
-            }
+        if (empty($eligibleInventories)) {
+            return false;
+        }
 
-            return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-        });
-
-        Log::channel('local_market')->info('Get Commodities For Loan Transaction Duration', [
-            'order_id' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
-            'eligibleInventoriesCount' => is_countable($eligibleInventories) ? count($eligibleInventories) : 0,
-            'eligibleUnits' => $eligibleUnits,
-        ]);
-
-        return $eligibleUnits;
+        return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder)
