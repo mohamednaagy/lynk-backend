@@ -153,13 +153,6 @@ return [
             'days' => 14,
             'permission' => 0664,
         ],
-        'loan_covering' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/loan_covering/loan_covering.log'),
-            'level' => 'debug',
-            'days' => 30,
-            'permission' => 0664,
-        ],
     ],
 
 ];

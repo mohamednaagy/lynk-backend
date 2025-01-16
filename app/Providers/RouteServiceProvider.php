@@ -58,10 +58,10 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api/edaat.php'));
-            //
-            //            Route::middleware('api')
-            //                ->prefix('api')
-            //                ->group(base_path('routes/api/trader.php'));
+
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api/test.php'));
 
             Route::middleware('api')
                 ->prefix('api')
@@ -70,10 +70,6 @@ class RouteServiceProvider extends ServiceProvider
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/api/supplier.php'));
-
-            Route::middleware('api')
-                ->prefix('api')
-                ->group(base_path('routes/api/local_market.php'));
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
