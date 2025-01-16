@@ -29,7 +29,7 @@ class LoanService
             }
 
             return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-        }, 1, 'SERIALIZABLE');
+        });
 
         Log::channel('local_market')->info('Get Commodities For Loan Transaction Duration', [
             'order_id' => $localMarketOrder->id,

@@ -90,6 +90,7 @@ class InventoryService
             })
             ->orderBy('local_market_inventories.max_price', 'DESC')
             ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
+            ->lockForUpdate()
             ->get();
     }
 
