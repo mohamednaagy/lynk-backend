@@ -29,12 +29,13 @@ class LoanService
             }
 
             return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-        }, 1, 'SERIALIZABLE');
+        });
 
         Log::channel('local_market')->info('Get Commodities For Loan Transaction Duration', [
             'order_id' => $localMarketOrder->id,
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             'eligibleInventoriesCount' => is_countable($eligibleInventories) ? count($eligibleInventories) : 0,
+            'eligibleUnits' => $eligibleUnits,
         ]);
 
         return $eligibleUnits;
