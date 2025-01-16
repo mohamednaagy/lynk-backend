@@ -104,6 +104,7 @@ class UnitService
                 'inventory_id' => $inventory->id,
                 'eligible_units_count' => $eligibleUnitIds->count(),
                 'numberOfNeededUnits' => $numberOfNeededUnits,
+                'unit_count' => $inventory->units()->count(),
             ]);
         }
 
@@ -122,6 +123,7 @@ class UnitService
             $this->buildEligibleUnitsQuery($inventory->id, $companyId)
                 ->select('id')
                 ->limit($limit)
+                ->lockForUpdate()
                 ->pluck('id')
         );
     }
@@ -140,7 +142,6 @@ class UnitService
                 LocalMarketInventoryUnits::whereIn('id', $chunk)->update([
                     'hold_for' => $holdFor,
                     'status' => $status,
-                    'updated_at' => now(),
                 ]);
                 Log::channel('local_market')->info('Updated unit statuses chunk');
             });
