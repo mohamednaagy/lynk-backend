@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\V1\LocalMarket\LocalMarketController;
+use App\Http\Controllers\Api\V1\LocalMarket\Test\LoanController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/local_markets')->name('api.v1.')->group(function () {
-    Route::post('buy', [LocalMarketController::class, 'buy']);
+    Route::post('loan-coverage', [LoanController::class, 'calculateLoanCoverage']);
 });
