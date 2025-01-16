@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\CompanyType;
 use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -82,7 +83,7 @@ class RouteServiceProvider extends ServiceProvider
         });
 
         Route::bind('lender', function ($id) {
-            return Company::where('id', $id)
+            return Lender::where('id', $id)
                 ->where('type', CompanyType::Lender)
                 ->firstOrFail();
         });

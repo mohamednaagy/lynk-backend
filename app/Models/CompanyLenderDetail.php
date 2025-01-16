@@ -16,8 +16,8 @@ class CompanyLenderDetail extends Model
         'force_preferred_commodity_type' => 'boolean',
     ];
 
-    public function company()
+    public function lender()
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(Lender::class, 'company_id');
     }
 }

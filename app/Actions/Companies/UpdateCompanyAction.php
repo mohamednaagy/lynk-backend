@@ -4,24 +4,24 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\UpdateCompany;
 use App\Enums\WalletNotificationType;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\TieredPricing;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class UpdateCompanyAction implements UpdateCompany
 {
-    public function handle(Company $company, array $data): Company
+    public function handle(Lender $lender, array $data): Lender
     {
-        $company->lenderDetail()->updateOrCreate(
-            ['company_id' => $company->id],
+        $lender->lenderDetail()->updateOrCreate(
+            ['company_id' => $lender->id],
             Arr::only($data, [
                 'default_contract_sign_time_limit',
                 'force_preferred_commodity_type',
             ])
         );
         
-        $company->update(
+        $lender->update(
             Arr::only(
                 $data,
                 [
@@ -48,28 +48,28 @@ class UpdateCompanyAction implements UpdateCompany
         );
 
         if (isset($data['order_cost_tiers'])) {
-            $isTieredBeforeUpdate = $company->isTiered();
+            $isTieredBeforeUpdate = $lender->isTiered();
 
-            $this->updateCompanyPricingTiers($company, collect($data['order_cost_tiers']));
+            $this->updateCompanyPricingTiers($lender, collect($data['order_cost_tiers']));
 
-            $isTieredAfterUpdate = $company->isTiered();
+            $isTieredAfterUpdate = $lender->isTiered();
 
             if ($isTieredBeforeUpdate != $isTieredAfterUpdate && $isTieredAfterUpdate) {
-                $company->walletNotification()->where('type', WalletNotificationType::ORDER_COUNT)->delete();
+                $lender->walletNotification()->where('type', WalletNotificationType::ORDER_COUNT)->delete();
             }
         }
 
         if (isset($data['preferred_commodity_types'])) {
-            $company->commodityTypes()->sync($data['preferred_commodity_types']);
+            $lender->commodityTypes()->sync($data['preferred_commodity_types']);
         }
 
-        return $company;
+        return $lender;
     }
 
-    public function updateCompanyPricingTiers(Company $company, Collection $requestPricingTiers)
+    public function updateCompanyPricingTiers(Lender $lender, Collection $requestPricingTiers)
     {
         $requestPricingTiersIds = $requestPricingTiers->pluck('id');
-        $deletedPricingTiersIds = $company->tieredPricing()->pluck('id')->diff($requestPricingTiersIds);
+        $deletedPricingTiersIds = $lender->tieredPricing()->pluck('id')->diff($requestPricingTiersIds);
 
         foreach ($deletedPricingTiersIds as $tier_id) {
             TieredPricing::find($tier_id)->delete();
@@ -82,7 +82,7 @@ class UpdateCompanyAction implements UpdateCompany
 
         $newTiers = $requestPricingTiers->whereNull('id');
         foreach ($newTiers as $tier) {
-            $company->tieredPricing()->create($tier);
+            $lender->tieredPricing()->create($tier);
         }
     }
 }

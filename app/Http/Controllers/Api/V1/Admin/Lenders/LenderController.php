@@ -15,7 +15,7 @@ use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Transformers\CompanyTransformer;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
@@ -111,7 +111,7 @@ class LenderController extends Controller
         });
     }
 
-    public function show(Company $lender): JsonResponse
+    public function show(Lender $lender): JsonResponse
     {
         return fractal($lender, new CompanyTransformer)
             ->parseIncludes([
@@ -148,7 +148,7 @@ class LenderController extends Controller
     public function update(
         UpdateCompanyRequest $request,
         UpdateCompany $updateCompany,
-        Company $lender
+        Lender $lender
     ): JsonResponse {
         return DB::transaction(function () use ($request, $updateCompany, $lender) {
             $data = $request->validated();
@@ -167,7 +167,7 @@ class LenderController extends Controller
      *
      * @throws \Throwable
      */
-    public function destroy(Company $lender): JsonResponse
+    public function destroy(Lender $lender): JsonResponse
     {
         DB::transaction(function () use ($lender) {
             $lender->update(['unique_name' => null]);
