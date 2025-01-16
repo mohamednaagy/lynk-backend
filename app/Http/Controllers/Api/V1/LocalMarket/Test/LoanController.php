@@ -189,6 +189,6 @@ class LoanController extends Controller
      */
     private function logInfo(string $logInfo, array $data = []): void
     {
-        Log::channel('loan_covering')->info($logInfo, $data);
+        Log::channel('local_market')->info($logInfo, $data);
     }
 }

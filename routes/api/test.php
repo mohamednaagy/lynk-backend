@@ -3,6 +3,7 @@
 use App\Actions\LocalMarket\BuyCommoditiesAction;
 use App\Actions\LocalMarket\CreateLocalMarketOrderAction;
 use App\Actions\LocalMarket\FindEligibleCommoditiesAction;
+use App\Http\Controllers\Api\V1\LocalMarket\Test\LoanController;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
@@ -65,4 +66,6 @@ Route::prefix('v1/test')->group(function () {
             $localMarketOrder->save();
         }
     });
+
+    Route::post('loan-coverage', [LoanController::class, 'calculateLoanCoverage']);
 });
