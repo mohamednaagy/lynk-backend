@@ -85,7 +85,7 @@ class Company extends BaseTenant
 
     public function orders(): HasMany
     {
-        return $this->hasMany(FinancingOrder::class);
+        return $this->hasMany(FinancingOrder::class, 'company_id');
     }
 
     public function traderOrders(): HasMany
@@ -95,7 +95,7 @@ class Company extends BaseTenant
 
     public function webhooks(): HasMany
     {
-        return $this->hasMany(Webhook::class);
+        return $this->hasMany(Webhook::class, 'company_id');
     }
 
     public function wallets()
@@ -110,7 +110,7 @@ class Company extends BaseTenant
 
     public function tieredPricing()
     {
-        return $this->hasMany(TieredPricing::class);
+        return $this->hasMany(TieredPricing::class, 'company_id');
     }
 
     public function isTiered(): bool
@@ -171,8 +171,8 @@ class Company extends BaseTenant
         return $this->auto_complete_murabaha_order;
     }
 
-    public function lenderDetail()
+    public function lender() 
     {
-        return $this->hasOne(CompanyLenderDetail::class, 'company_id');
+        return $this->hasOne(Lender::class, 'id');
     }
 }
