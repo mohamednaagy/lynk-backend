@@ -337,6 +337,22 @@ class LenderControllerStoreTest extends TestCase
             ]);
     }
 
+    public function test_admin_force_preferred_commodity_type_is_required_with_preferred_market_type(): void
+    {
+        self::$standardLenderDetails['preferred_market_type'] = 2;
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, Arr::except(self::$standardLenderDetails, 'force_preferred_commodity_type'))
+            ->assertUnprocessable()
+            ->assertExactJson([
+                'message' => 'The force preferred commodity type field is required when preferred commodity types is present.',
+                'errors' => [
+                    "force_preferred_commodity_type" => [
+                        'The force preferred commodity type field is required when preferred commodity types is present.',
+                    ],
+                ],
+            ]);
+    }
+
     public function test_admin_cant_store_lender_without_does_order_require_approval(): void
     {
         $this->actingAs(self::$userAdmin)
