@@ -103,6 +103,7 @@ class UnitService
                 'order_id' => $localMarketOrder->id,
                 'inventory_id' => $inventory->id,
                 'eligible_units_count' => $eligibleUnitIds->count(),
+                'numberOfNeededUnits' => $numberOfNeededUnits,
             ]);
         }
 
@@ -135,24 +136,15 @@ class UnitService
         int $chunkSize = 100
     ): void {
         try {
-            DB::beginTransaction();
-
             $unitIds->chunk($chunkSize)->each(function ($chunk) use ($holdFor, $status) {
-                $ids = $chunk->join(',');
-                DB::statement("
-                    UPDATE local_market_inventory_units 
-                    SET hold_for = ?, 
-                        status = ?,
-                        updated_at = ? 
-                    WHERE id IN ({$ids})
-                ", [$holdFor, $status, now()]);
-
+                LocalMarketInventoryUnits::whereIn('id', $chunk)->update([
+                    'hold_for' => $holdFor,
+                    'status' => $status,
+                    'updated_at' => now(),
+                ]);
                 Log::channel('local_market')->info('Updated unit statuses chunk');
             });
-
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             Log::channel('local_market')->error('Failed to update unit statuses', [
                 'error' => $e->getMessage(),
                 'total_units' => $unitIds->count(),

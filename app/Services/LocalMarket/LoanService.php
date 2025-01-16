@@ -35,6 +35,7 @@ class LoanService
             'order_id' => $localMarketOrder->id,
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             'eligibleInventoriesCount' => is_countable($eligibleInventories) ? count($eligibleInventories) : 0,
+            'eligibleUnits' => $eligibleUnits,
         ]);
 
         return $eligibleUnits;
