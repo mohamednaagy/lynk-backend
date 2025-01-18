@@ -25,11 +25,11 @@ class SupplierObserver
     public function updated(Company $company): void
     {
         // Handle supplier status changes
-        if ($company->wasChanged('status')) {
-            $this->liveMarketService->handleSupplierStatusChange($company);
+        // if ($company->wasChanged('status')) {
+        //     $this->liveMarketService->handleSupplierStatusChange($company);
 
-            return;
-        }
+        //     return;
+        // }
     }
 
     /**
