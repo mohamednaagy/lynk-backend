@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Locations;
+
+use App\Models\SupplierLocation;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+/**
+ * @property string $area
+ */
+class UpdateLocationRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     */
+    public function rules(): array
+    {
+        $supplier = request()->route('supplier');
+
+        return [
+            'unique_identifier' => [
+                'required',
+                'string',
+                'min:3',
+                'max:16',
+                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', $supplier->id)->ignore($this->route('location'))->withoutTrashed(),
+            ],
+            'name' => ['required', 'string',  'max:32'],
+            'description' => ['nullable', 'string', 'max:256'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'unique_identifier.unique' => __('validation.unique_input'),
+        ];
+    }
+}
