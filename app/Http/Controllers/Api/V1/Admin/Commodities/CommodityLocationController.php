@@ -22,13 +22,23 @@ class CommodityLocationController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Manage, Action::Index])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Create, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Manage, Action::Create])
         )->only('store');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Manage, Action::Edit])
+        )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Manage, Action::Show])
+        )->only('show');
     }
 
     /**
@@ -90,6 +100,23 @@ class CommodityLocationController extends Controller
                 'unique_identifier',
                 'name',
                 'description',
+            ])
+            ->respond();
+    }
+
+    /**
+     * Display the specified supplier location.
+     */
+    public function show(Supplier $supplier, SupplierLocation $location): JsonResponse
+    {
+        return fractal($location, new SupplierLocationsTransformer)
+            ->parseIncludes([
+                'id',
+                'unique_identifier',
+                'name',
+                'description',
+                'created_at',
+                'is_deletable',
             ])
             ->respond();
     }
