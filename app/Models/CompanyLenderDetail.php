@@ -8,11 +8,16 @@ class CompanyLenderDetail extends Model
 {
     protected $fillable = [
         'default_contract_sign_time_limit',
+        'force_preferred_commodity_type',
         'company_id',
     ];
 
-    public function company()
+    protected $casts = [
+        'force_preferred_commodity_type' => 'boolean',
+    ];
+
+    public function lender()
     {
-        return $this->belongsTo(Company::class, 'company_id');
+        return $this->belongsTo(Lender::class, 'company_id');
     }
 }

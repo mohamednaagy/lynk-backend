@@ -2,14 +2,14 @@
 
 namespace App\Actions\Contracts\Companies;
 
-use App\Models\Company;
+use App\Models\Lender;
 
 interface UpdateCompany
 {
     /**
-     * @param  Company  $company
+     * @param  Lender  $lender
      * @param  array  $data
-     * @return Company
+     * @return Lender
      */
-    public function handle(Company $company, array $data): Company;
+    public function handle(Lender $lender, array $data): Lender;
 }
