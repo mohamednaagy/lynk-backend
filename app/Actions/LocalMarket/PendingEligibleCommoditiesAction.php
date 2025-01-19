@@ -17,6 +17,7 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
+        $startTime = microtime(true);
         $localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
 
         DB::beginTransaction();
@@ -31,7 +32,12 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
             $localMarketOrder->update([
                 'status' => OrderStatus::FailedPurchase,
             ]);
-
+        } finally {
+            $duration = microtime(true) - $startTime;
+            Log::channel('local_market')->info('PendingEligibleCommoditiesAction Duration', [
+                'order_id' => $localMarketOrder->id,
+                'duration' => convertMicrotimeToDuration($duration),
+            ]);
         }
 
     }
