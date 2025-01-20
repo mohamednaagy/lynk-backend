@@ -53,16 +53,21 @@ class InventoryService
             if (!empty($combination)) {
                 return $combination;
             }
+        }else {
+            // If forcing is not required or no combination was found, use the original inventories
+            if (! empty($preferredItemTypes)) {
+                $combination = $this->findOptimalCombination($filteredInventories, $loanAmount, $preferredItemTypes);
+
+                if (!empty($combination)) {
+                    return $combination;
+                }
+            }
+
+            return $this->findOptimalCombination($inventories, $loanAmount, $preferredItemTypes);
+
         }
 
-        // If forcing is not required or no combination was found, use the original inventories
-        $combination = $this->findOptimalCombination(
-            !empty($preferredItemTypes) ? $filteredInventories : $inventories,
-            $loanAmount,
-            $preferredItemTypes
-        );
-
-        return $combination;
+       
     }
 
     private function findEligibleInventoriesForLoanVersionOne($loanAmount)
