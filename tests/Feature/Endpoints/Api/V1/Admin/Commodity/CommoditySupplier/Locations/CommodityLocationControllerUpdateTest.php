@@ -48,14 +48,12 @@ class CommodityLocationControllerUpdateTest extends TestCase
 
     public function test_that_authorized_admin_can_update_location(): void
     {
-        // Prepare data to update the location
         $updateData = [
             'unique_identifier' => 'updated_location',
             'name' => 'Updated Location',
             'description' => 'Updated description of the location',
         ];
 
-        // Acting as admin with required permissions
         $this->actingAs(self::$userAdmin)
             ->putJson(self::$endpoint, $updateData)
             ->assertOk()
@@ -112,13 +110,11 @@ class CommodityLocationControllerUpdateTest extends TestCase
 
     public function test_that_duplicate_unique_identifier_returns_error(): void
     {
-        // Create a second location with a specific unique_identifier
         SupplierLocation::factory()->create([
             'company_id' => self::$supplier->id,
             'unique_identifier' => 'taken_identifier',
         ]);
 
-        // Try to update the first location with the same unique_identifier as the second location
         $duplicateData = [
             'unique_identifier' => 'taken_identifier',
             'name' => 'Duplicate Location',
@@ -135,6 +131,23 @@ class CommodityLocationControllerUpdateTest extends TestCase
                         'This value already exists',
                     ],
                 ],
+            ]);
+    }
+
+    public function test_that_unique_identifier_with_spaces_returns_validation_error(): void
+    {
+        $invalidData = [
+            'unique_identifier' => 'abc def',
+            'name' => 'Updated Location',
+            'description' => 'Updated description of the location',
+        ];
+
+        $this->actingAs(self::$userAdmin)
+            ->patchJson(self::$endpoint, $invalidData)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['unique_identifier'])
+            ->assertJsonFragment([
+                'unique_identifier' => ['The unique identifier format is invalid.'],
             ]);
     }
 }
