@@ -402,9 +402,4 @@ class TraderOrder extends Model implements HasMedia
             ->mode(TraderOrderMode::Automatic)
             ->orderBy('id', 'asc');
     }
-
-    public function allowProgressToNextStep()
-    {
-        $this->update(['can_continue_progress' => true]);
-    }
 }

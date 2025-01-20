@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
@@ -51,6 +52,8 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
         Trader::driver('bursam', $traderOrder->version)
             ->createTransferOwnershipToLenderDocument($traderOrder);
+
+        app(GenerateClientWakala::class)->handle($traderOrder);
 
         Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
