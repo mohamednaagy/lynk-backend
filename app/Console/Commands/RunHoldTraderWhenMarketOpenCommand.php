@@ -2,8 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Enums\TraderOrderMode;
-use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Console\Command;
@@ -32,9 +30,9 @@ class RunHoldTraderWhenMarketOpenCommand extends Command
     public function handle()
     {
 
-        $traders = TraderOrder::where('status', TraderOrderStatus::Hold)->where('mode', TraderOrderMode::Automatic)->get();
-        foreach ($traders as $trader) {
-            Trader::driver($trader->provider, $trader->version)->moveHoldTraderOrder($trader);
+        $holdTrader = TraderOrder::getFirstHoldTraderOrder();
+        if ($holdTrader) {
+            Trader::driver($holdTrader->provider, $holdTrader->version)->moveHoldTraderOrder($holdTrader);
         }
 
         return Command::SUCCESS;

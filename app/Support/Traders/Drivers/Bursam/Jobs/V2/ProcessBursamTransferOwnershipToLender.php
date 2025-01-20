@@ -11,6 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -41,7 +42,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             ->where('status', TraderOrderStatus::InProgress)
             ->lockForUpdate()
             ->find($this->traderOrderId);
-        Log::info('bursa Purchasing Step => Starting ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+        Log::channel('bursam')->info('bursa Purchasing Step => Starting ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
         if (
             is_null($traderOrder)
@@ -54,6 +55,25 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             ->createTransferOwnershipToLenderDocument($traderOrder);
 
         app(GenerateClientWakala::class)->handle($traderOrder);
+
+        Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+
+        //move the first hold trader to iniaite
+        $holdTraderOrder = TraderOrder::getFirstHoldTraderOrder();
+        if (is_bursam_service_available() && $holdTraderOrder) {
+            Log::channel('bursam')->info('move hold trader to initiate', ['financingOrderId' => $holdTraderOrder->order->id, 'traderOrderId' => $holdTraderOrder->id]);
+            Trader::driver($holdTraderOrder->provider, $holdTraderOrder->version)->moveHoldTraderOrder($holdTraderOrder);
+        }
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
     }
 
     public function middleware(): array
@@ -68,10 +88,17 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
     public function failed($exception)
     {
+
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-        Log::error('purchasing step => faild to get ProcessBursamTransferOwnershipToLender and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('bursa purchasing step => faild to get ProcessBursamTransferOwnershipToLender and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+
+        $holdTraderOrder = TraderOrder::getFirstHoldTraderOrder();
+        if (is_bursam_service_available() && $holdTraderOrder) {
+            Log::channel('bursam')->info('move hold trader to initiate', ['financingOrderId' => $holdTraderOrder->order->id, 'traderOrderId' => $holdTraderOrder->id]);
+            Trader::driver($holdTraderOrder->provider, $holdTraderOrder->version)->moveHoldTraderOrder($holdTraderOrder);
+        }
 
     }
 }

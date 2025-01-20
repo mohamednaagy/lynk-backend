@@ -363,4 +363,14 @@ class TraderOrder extends Model implements HasMedia
             ->orderBy('id', 'desc')
             ->first();
     }
+
+    public static function getFirstHoldTraderOrder(string $provider = EnumsTrader::Bursam, string $version = 'v2'): ?TraderOrder
+    {
+        return TraderOrder::where('provider', $provider)
+            ->where('version', $version)
+            ->where('status', TraderOrderStatus::Hold)
+            ->where('mode', TraderOrderMode::Automatic)
+            ->orderBy('id', 'asc')
+            ->first();
+    }
 }

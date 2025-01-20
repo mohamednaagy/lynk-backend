@@ -26,6 +26,7 @@ use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
@@ -172,12 +174,12 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder;
     }
 
-    public function moveHoldTraderOrder(TraderOrder $trader)
+    public function moveHoldTraderOrder(TraderOrder $traderOrder)
     {
         $checkCanChangeStatusOfTrader = $this->checkCanInitiateTraderOrder();
         if ($checkCanChangeStatusOfTrader) {
-            $trader->update(['status' => TraderOrderStatus::Initiated]);
-            $this->processInitiatedTraderOrder($trader);
+            $traderOrder->update(['status' => TraderOrderStatus::Initiated]);
+            ProcessBursamInitiatedTraderOrder::dispatch($traderOrder->id);
         }
     }
 
@@ -293,6 +295,9 @@ class BursamV1Driver implements TraderInterface
         );
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
+
+        Log::channel('bursam')->info('bursa purchasing step => Bid certificate generated successfully', ['financingOrderId' => $traderOrder->order->id, 'trader_order_id' => $traderOrder->id]);
+
     }
 
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
@@ -300,7 +305,7 @@ class BursamV1Driver implements TraderInterface
         try {
             $timeLimitService = new TimeLimitService;
             $timeLimitService->setContractSignTimeLimit($traderOrder);
-            
+
             $this->withLocale('ar', function () use ($traderOrder) {
                 $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
@@ -339,6 +344,8 @@ class BursamV1Driver implements TraderInterface
                 );
 
             });
+            Log::channel('bursam')->info('bursa purchasing step => transferOwnershipToLenderDocument certificate generated successfully', ['financingOrderId' => $traderOrder->order->id, 'trader_order_id' => $traderOrder->id]);
+
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
