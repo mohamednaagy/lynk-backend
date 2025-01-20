@@ -364,13 +364,42 @@ class TraderOrder extends Model implements HasMedia
             ->first();
     }
 
-    public static function getFirstHoldTraderOrder(string $provider = EnumsTrader::Bursam, string $version = 'v2'): ?TraderOrder
+    public function scopeForProvider($query, string $provider)
     {
-        return TraderOrder::where('provider', $provider)
-            ->where('version', $version)
-            ->where('status', TraderOrderStatus::Hold)
-            ->where('mode', TraderOrderMode::Automatic)
-            ->orderBy('id', 'asc')
-            ->first();
+        return $query->where('provider', $provider);
+    }
+
+    /**
+     * Scope for filtering by version.
+     */
+    public function scopeForVersion($query, string $version)
+    {
+        return $query->where('version', $version);
+    }
+
+    /**
+     * Scope for filtering by hold status.
+     */
+    public function scopeHoldStatus($query)
+    {
+        return $query->where('status', TraderOrderStatus::Hold);
+    }
+
+    /**
+     * Scope for filtering by automatic mode.
+     */
+    public function scopeMode($query, string $mode)
+    {
+        return $query->where('mode', $mode);
+    }
+
+    public function scopeGetFirstHoldTraderOrder($query, string $provider = EnumsTrader::Bursam, string $version = 'v2')
+    {
+        return $query
+            ->forProvider($provider)
+            ->forVersion($version)
+            ->holdStatus()
+            ->mode(TraderOrderMode::Automatic)
+            ->orderBy('id', 'asc');
     }
 }

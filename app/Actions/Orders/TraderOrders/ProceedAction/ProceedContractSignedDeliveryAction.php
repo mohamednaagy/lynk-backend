@@ -23,7 +23,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
 
     public function __construct(protected TimeLimitService $timeLimitService) {}
 
-
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
@@ -44,6 +43,9 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
 
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
+        // use it to complete sequence of steps ( use it in ProcessFinancingOrders)
+        $traderOrder->update(['can_continue_progress' => true]);
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
