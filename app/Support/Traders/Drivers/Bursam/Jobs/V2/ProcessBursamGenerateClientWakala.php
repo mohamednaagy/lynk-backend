@@ -47,8 +47,6 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
             ->lockForUpdate()
             ->find($this->traderOrderId);
 
-        Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamGenerateClientWakala Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
-
         if (
             is_null($traderOrder)
             || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
