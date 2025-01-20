@@ -4,12 +4,14 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
-use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,7 +20,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ProcessBursamTransferOwnershipToLender implements ShouldQueue
+class ProcessBursamGenerateClientWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
@@ -27,7 +29,11 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId) {}
+    public function __construct(protected int $traderOrderId)
+    {
+        $this->onQueue('bursam');
+
+    }
 
     /**
      * Execute the job.
@@ -40,20 +46,30 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             ->where('status', TraderOrderStatus::InProgress)
             ->lockForUpdate()
             ->find($this->traderOrderId);
-        Log::channel('bursam')->info('bursa Purchasing Step => Starting ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
         if (
             is_null($traderOrder)
-            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
+            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
         ) {
             return;
         }
 
-        Trader::driver('bursam', $traderOrder->version)
-            ->createTransferOwnershipToLenderDocument($traderOrder);
+        Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamGenerateClientWakala Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+        app(GenerateClientWakala::class)->handle($traderOrder);
+        $traderOrder->update(['can_continue_progress' => false]);
+        Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamGenerateClientWakala Job and update can_continue_progress of trader to false', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
-        Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+        (new RunHoldTraderWhenMarketOpenCommand)->handle();
+    }
 
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
     }
 
     public function middleware(): array
@@ -73,6 +89,8 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         Log::channel('bursam')->error('bursa purchasing step => faild to get ProcessBursamTransferOwnershipToLender and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+
+        (new RunHoldTraderWhenMarketOpenCommand)->handle();
 
     }
 }

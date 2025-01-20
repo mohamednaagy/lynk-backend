@@ -46,13 +46,15 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
                 ->where('status', TraderOrderStatus::Initiated)
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
-            Log::info('bursa Purchasing Step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
+            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
 
             if (is_null($traderOrder)) {
                 return;
             }
 
             Trader::driver('bursam', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
+            Log::channel('bursam')->info('bursa purchasing step => finishing ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
+
         });
     }
 
@@ -61,7 +63,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = null;
 
         if ($exception instanceof RateLimitExceededException) {
-            Log::warning('Rate limit exceeded for ProcessBursamInitiatedTraderOrder we will retry again soon', [
+            Log::channel('bursam')->warning('bursa purchasing step => Rate limit exceeded for ProcessBursamInitiatedTraderOrder we will retry again soon', [
                 'message' => $exception->getMessage(),
             ]);
 
@@ -77,7 +79,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
-        Log::error('ProcessBursamInitiatedTraderOrder', ['financingOrderId' => $traderOrder->order->id,  'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('bursa purchasing step => ProcessBursamInitiatedTraderOrder', ['financingOrderId' => $traderOrder->order->id,  'message' => $exception->getMessage()]);
 
     }
 

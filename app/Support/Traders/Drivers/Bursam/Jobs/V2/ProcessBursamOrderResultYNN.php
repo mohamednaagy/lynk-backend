@@ -49,7 +49,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
-            Log::info('bursa Purchasing Step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
             if (
                 is_null($traderOrder)
@@ -60,6 +60,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
             try {
                 Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+                Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+
             } catch (TraderException $exception) {
                 if ($exception->getContext('failure_code') == TraderErrorCode::INSUFFICIENT_COMMODITY) {
                     $traderOrder->order->update([
@@ -105,7 +107,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             );
         });
 
-        Log::error('ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
 
     }
 
