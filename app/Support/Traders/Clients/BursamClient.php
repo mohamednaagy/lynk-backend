@@ -56,7 +56,10 @@ class BursamClient
     {
         $financingOrder = $this->traderOrder->order;
 
-        Log::channel('bursam')->info('bursa purchasing step => buy product', ['financingOrderId' => $financingOrder->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
+        Log::channel('bursam')->info('bursa purchasing step => buy product', [
+            'financingOrderId' => $financingOrder->id,
+            'traderOrderId' => $this->traderOrder->id,
+            'time' => now()]);
         $url = 'api/process/svc/bsas/order.json';
 
         $request = [
@@ -158,7 +161,10 @@ class BursamClient
 
     public function fetchBuyResult()
     {
-        Log::channel('bursam')->info('bursa purchasing step => fetchBuyResult', ['financingOrderId' => $this->traderOrder->order->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
+        Log::channel('bursam')->info('bursa purchasing step => fetchBuyResult', [
+            'financingOrderId' => $this->traderOrder->order->id,
+            'traderOrderId' => $this->traderOrder->id,
+            'time' => now()]);
 
         return $this->fetchOrderResult($this->traderOrder->uuid_one);
     }
@@ -170,7 +176,10 @@ class BursamClient
 
     private function fetchOrderResult($uuid)
     {
-        Log::channel('bursam')->info('bursa purchasing step => fetchOrderResult', ['financingOrderId' => $this->traderOrder->order->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
+        Log::channel('bursam')->info('bursa purchasing step => fetchOrderResult', [
+            'financingOrderId' => $this->traderOrder->order->id,
+            'traderOrderId' => $this->traderOrder->id,
+            'time' => now()]);
         $url = 'api/process/svc/bsas/orderResult.json';
 
         $requestHeader = [
@@ -208,7 +217,10 @@ class BursamClient
 
     public function getBidXml()
     {
-        Log::channel('bursam')->info('bursa purchasing step => getBidXml', ['financingOrderId' => $this->traderOrder->order->id, 'traderOrderId' => $this->traderOrder->id, 'time' => now()]);
+        Log::channel('bursam')->info('bursa purchasing step => getBidXml', [
+            'financingOrderId' => $this->traderOrder->order->id,
+            'traderOrderId' => $this->traderOrder->id,
+            'time' => now()]);
         $url = 'api/process/svc/bsas/bidXML.json';
         $request = [
             'membershortname' => config('trader.providers.bursam.member_short_name'),

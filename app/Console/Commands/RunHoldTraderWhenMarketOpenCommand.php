@@ -30,8 +30,8 @@ class RunHoldTraderWhenMarketOpenCommand extends Command
      */
     public function handle()
     {
-        $holdTrader = TraderOrder::getFirstHoldTraderOrder()->first();
-        if ($holdTrader) {
+        $holdTrader = TraderOrder::getHoldTraderOrder()->first();
+        if ($holdTrader && is_bursam_service_available()) {
             Log::channel('bursam')->info('move Hold Trader Order to initiate', ['financingOrderId' => $holdTrader->order->id,  'traderOrderId' => $holdTrader->id]);
             Trader::driver($holdTrader->provider, $holdTrader->version)->moveHoldTraderOrder($holdTrader);
         }
