@@ -77,7 +77,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
     public function backoff(): array
     {
-        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
+        return [60, 120, 180, 240, 300, 360, 420, 120];
     }
 
     public function failed($exception)
