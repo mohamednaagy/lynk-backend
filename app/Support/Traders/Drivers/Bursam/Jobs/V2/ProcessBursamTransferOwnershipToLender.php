@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
@@ -54,6 +55,8 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
         Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
+        Log::channel('bursam')->info('move Hold Trader Order to initiate', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+        (new RunHoldTraderWhenMarketOpenCommand)->handle();
     }
 
     public function middleware(): array
@@ -74,5 +77,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
+        Log::channel('bursam')->info('move Hold Trader Order to initiate', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+        (new RunHoldTraderWhenMarketOpenCommand)->handle();
     }
 }
