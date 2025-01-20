@@ -30,6 +30,8 @@ class ProceedContractSignedAction implements ProceedContractSigned
         }
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+        // use it to complete sequence of steps ( use it in ProcessFinancingOrders)
+        $traderOrder->update(['can_continue_progress' => true]);
 
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);

@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
@@ -25,9 +24,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
-    {
-    }
+    public function __construct(protected int $traderOrderId) {}
 
     /**
      * Execute the job.
@@ -50,8 +47,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
         Trader::driver('bursam', $traderOrder->version)
             ->createTransferOwnershipToLenderDocument($traderOrder);
-            
-        app(GenerateClientWakala::class)->handle($traderOrder);
+
     }
 
     public function middleware(): array
