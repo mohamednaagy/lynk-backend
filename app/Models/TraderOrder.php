@@ -410,4 +410,9 @@ class TraderOrder extends Model implements HasMedia
             ->orderBy('id', 'desc')
             ->first();
     }
+
+    public function allowProgressToNextStep()
+    {
+        $this->update(['can_continue_progress' => true]);
+    }
 }

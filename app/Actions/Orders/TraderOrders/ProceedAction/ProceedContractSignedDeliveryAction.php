@@ -41,7 +41,7 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
         // use it to complete sequence of steps ( use it in ProcessFinancingOrders)
-        $traderOrder->update(['can_continue_progress' => true]);
+        $traderOrder->allowProgressToNextStep();
 
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
