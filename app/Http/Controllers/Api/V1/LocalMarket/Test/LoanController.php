@@ -28,14 +28,32 @@ class LoanController extends Controller
             'inventories.*.count' => 'required|integer|min:0',
         ]);
 
-        // Filter out inventories where price > $loan
-        $inventories = array_filter($inventories, function ($item) use ($loan) {
-            return $item['price'] <= $loan;
-        });
+        // Step 1: Filter out inventories where price > loan
+        $inventories = array_filter($inventories, fn ($item) => $item['count'] > 0 && $item['price'] <= $loan);
 
-        usort($inventories, function ($a, $b) {
+        // Step 2: Sort based on divisibility and then by descending price
+        usort($inventories, function ($a, $b) use ($loan) {
+            // Check divisibility by loan
+            $aDivisible = $loan % $a['price'] === 0;
+            $bDivisible = $loan % $b['price'] === 0;
+
+            // Prioritize divisibility
+            if ($aDivisible && ! $bDivisible) {
+                return -1;
+            }
+            if (! $aDivisible && $bDivisible) {
+                return 1;
+            }
+
+            // If both are divisible or neither is, sort by price descending
             return $b['price'] <=> $a['price'];
         });
+
+        $inventories = array_map(function ($inventory) {
+            $inventory['count'] = min($inventory['count'], 50);
+
+            return $inventory;
+        }, $inventories);
 
         $this->logInfo('Loan Amount', ['loan' => $loan]);
         $this->logInfo('Inventories', ['inventories' => $inventories]);
@@ -46,38 +64,48 @@ class LoanController extends Controller
         $coverage = 0;
         $tempInventories = $inventories;
         $skippedInventories = [];
+        $inventoriesMap = [];
 
         // Run optimization logic
-        $success = $this->processInventories($loanRemaining, $tempInventories, $queue, $coverage);
+        $success = $this->processInventories($loanRemaining, $tempInventories, $queue, $inventoriesMap, $coverage);
+
         $loanDeadAmount = [];
         while ((! $success && $loanRemaining > 0 && ! empty($queue)) || count($queue) > 10000) {
-            $loanDeadAmount[] = $loanRemaining;
-            $usedInventories = array_count_values($queue);
-            $usedInventoryIndex = array_key_first($usedInventories);
+            $this->logInfo('Taken inventories map', $inventoriesMap);
 
-            if (($key = array_search($usedInventoryIndex, $queue)) !== false) {
+            $loanDeadAmount[] = $loanRemaining; // i.e The uncovered amount across all the provided inventories.
+
+            $skipInventoryIndex = $inventoriesMap[0];
+            $usedInventories = array_count_values($queue);
+
+            if (($key = array_search($skipInventoryIndex, $queue)) !== false) {
                 unset($queue[$key]);
 
-                $loanRemaining += $inventories[$usedInventoryIndex]['price'];
-                $coverage -= $inventories[$usedInventoryIndex]['price'];
+                $loanRemaining += $inventories[$skipInventoryIndex]['price'];
+                $coverage -= $inventories[$skipInventoryIndex]['price'];
 
-                if (! isset($skippedInventories[$usedInventoryIndex]) && isset($tempInventories[$usedInventoryIndex])) {
-                    $skippedInventories[$usedInventoryIndex] = $tempInventories[$usedInventoryIndex];
+                if (! isset($skippedInventories[$skipInventoryIndex]) && isset($tempInventories[$skipInventoryIndex])) {
+                    $skippedInventories[$skipInventoryIndex] = $tempInventories[$skipInventoryIndex];
                 }
 
-                $removedInventory = $skippedInventories[$usedInventoryIndex] ?? null;
-                unset($tempInventories[$usedInventoryIndex]);
+                $removedInventory = $skippedInventories[$skipInventoryIndex] ?? null;
+                unset($tempInventories[$skipInventoryIndex]);
 
                 // Debugging message
                 if ($removedInventory) {
                     $this->logInfo("Skipping the inventory ID {$removedInventory['id']}, price {$removedInventory['price']}, available count {$removedInventory['count']}");
                     $this->logInfo("Removed an item from the queue related the inventory ID {$removedInventory['id']}");
                     $this->logInfo("Adjusted loan remaining {$loanRemaining}, adjusted coverage {$coverage}");
-                    $currentUsedItemCount = $usedInventories[$usedInventoryIndex] - 1;
+                    $currentUsedItemCount = $usedInventories[$skipInventoryIndex] - 1;
                     $this->logInfo("Current used item count in the queue related to the inventory ID {$removedInventory['id']}: {$currentUsedItemCount}");
                 }
 
-                $success = $this->processInventories($loanRemaining, $tempInventories, $queue, $coverage, $loanDeadAmount);
+                $success = $this->processInventories($loanRemaining, $tempInventories, $queue, $inventoriesMap, $coverage, $loanDeadAmount);
+            } else {
+                $this->logInfo('Remove inventory ID('.$inventories[$skipInventoryIndex]['id'].') from the inventories map');
+                unset($inventoriesMap[0]);
+                $inventoriesMap = array_values($inventoriesMap);
+                $this->logInfo('The current inventories map', $inventoriesMap);
             }
         }
 
@@ -131,7 +159,7 @@ class LoanController extends Controller
     /**
      * Process inventories to cover a portion of the loan
      */
-    private function processInventories(int &$loanRemaining, array &$inventories, array &$queue, int &$coverage, array $loanDeadAmount = []): bool
+    private function processInventories(int &$loanRemaining, array &$inventories, array &$queue, array &$inventoriesMap, int &$coverage, array $loanDeadAmount = []): bool
     {
         foreach ($inventories as $inventoryIndex => &$inventory) {
             $price = $inventory['price'];
@@ -154,6 +182,12 @@ class LoanController extends Controller
                     $loanRemaining -= $price;
                     $coverage += $price;
                     $inventory['count']--;
+
+                    // add inventory id to the map
+                    if (! in_array($inventoryIndex, $inventoriesMap)) {
+                        $inventoriesMap[] = $inventoryIndex;
+                    }
+
                     $this->logInfo("Used inventory ID {$inventory['id']}, price = $price, remaining loan = $loanRemaining, loan coverage = $coverage");
                 } else {
                     break;
