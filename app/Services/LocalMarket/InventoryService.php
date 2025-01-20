@@ -6,6 +6,7 @@ use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Models\Lender;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -35,14 +36,18 @@ class InventoryService
         $companyId = $localMarketOrder->company_id;
         $preferredItemTypes = $localMarketOrder->preferred_commodity_type;
 
+        $forcePreferredCommodityType = Lender::find($companyId)
+            ->lenderDetail
+            ->force_preferred_commodity_type;
+
         $inventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
         // $inventories = $this->findEligibleInventoriesForLoanVersionOne($loanAmount);
 
-        if (! empty($preferredItemTypes)) {
-            $filteredInventories = $inventories->filter(function ($inventory) use ($preferredItemTypes) {
-                return in_array($inventory->item->commodity_type_id, $preferredItemTypes);
-            });
+        // Filter inventories based on preferred commodity types
+        $filteredInventories = $this->filterInventoriesByPreferredTypes($inventories, $preferredItemTypes);
 
+        // Attempt to find the optimal combination with filtered inventories if required
+        if ($forcePreferredCommodityType && ! empty($preferredItemTypes)) {
             $combination = $this->findOptimalCombination($filteredInventories, $loanAmount, $preferredItemTypes);
 
             if (! empty($combination)) {
@@ -50,7 +55,14 @@ class InventoryService
             }
         }
 
-        return $this->findOptimalCombination($inventories, $loanAmount, $preferredItemTypes);
+        // If forcing is not required or no combination was found, use the original inventories
+        $combination = $this->findOptimalCombination(
+            ! empty($preferredItemTypes) ? $filteredInventories : $inventories,
+            $loanAmount,
+            $preferredItemTypes
+        );
+
+        return $combination;
     }
 
     private function findEligibleInventoriesForLoanVersionOne($loanAmount)
@@ -270,5 +282,23 @@ class InventoryService
                 'error' => $e->getMessage(),
             ]);
         }
+    }
+
+    /**
+     * Filter inventories based on preferred commodity types.
+     *
+     * @param  \Illuminate\Support\Collection  $inventories
+     * @param  array|null  $preferredItemTypes
+     * @return \Illuminate\Support\Collection
+     */
+    private function filterInventoriesByPreferredTypes($inventories, $preferredItemTypes)
+    {
+        if (empty($preferredItemTypes)) {
+            return $inventories;
+        }
+
+        return $inventories->filter(function ($inventory) use ($preferredItemTypes) {
+            return in_array($inventory->commodity_type_id, $preferredItemTypes);
+        });
     }
 }
