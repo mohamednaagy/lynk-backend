@@ -11,6 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -67,6 +68,16 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
     }
 
     public function failed($exception)
