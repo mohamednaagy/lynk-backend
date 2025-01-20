@@ -393,7 +393,7 @@ class TraderOrder extends Model implements HasMedia
         return $query->where('mode', $mode);
     }
 
-    public function scopeGetFirstHoldTraderOrder($query, string $provider = EnumsTrader::Bursam, string $version = 'v2')
+    public function scopeGetHoldTraderOrder($query, string $provider = EnumsTrader::Bursam, string $version = 'v2')
     {
         return $query
             ->forProvider($provider)
