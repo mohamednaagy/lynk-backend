@@ -32,6 +32,25 @@ class CommodityLocationControllerStoreTest extends TestCase
         self::$endpoint = '/api/v1/admin/commodity-suppliers/'.self::$supplier->id.'/locations';
     }
 
+    // Test: Reject unique_identifier with spaces
+    public function test_that_unique_identifier_with_spaces_returns_validation_error(): void
+    {
+        // Prepare data with spaces in unique_identifier
+        $invalidData = [
+            'unique_identifier' => 'abc def',
+            'name' => 'New Location',
+            'description' => 'Description of the new location',
+        ];
+
+        $this->actingAs(self::$userAdmin)
+            ->postJson(self::$endpoint, $invalidData)
+            ->assertUnprocessable() // Expecting validation error
+            ->assertJsonValidationErrors(['unique_identifier'])
+            ->assertJsonFragment([
+                'unique_identifier' => ['The unique identifier format is invalid.'],
+            ]);
+    }
+
     public function test_that_unauthenticated_user_cannot_store_location(): void
     {
         $this->postJson(self::$endpoint, [])
@@ -43,14 +62,12 @@ class CommodityLocationControllerStoreTest extends TestCase
 
     public function test_that_authorized_admin_can_store_location(): void
     {
-        // Prepare data to be posted to the store endpoint
         $locationData = [
             'unique_identifier' => 'new_location_123',
             'name' => 'New Location',
             'description' => 'Description of the new location',
         ];
 
-        // Acting as admin with required permissions
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, $locationData)
             ->assertOk()
@@ -70,7 +87,6 @@ class CommodityLocationControllerStoreTest extends TestCase
 
     public function test_that_unauthorized_user_cannot_store_location_with_permissions(): void
     {
-        // Try accessing the store endpoint without the necessary permissions
         $unauthorizedUser = $this->createUser();
         $this->actingAs($unauthorizedUser)
             ->postJson(self::$endpoint, [])
@@ -80,10 +96,8 @@ class CommodityLocationControllerStoreTest extends TestCase
             ]);
     }
 
-    // Test: Missing unique_identifier field
     public function test_that_missing_unique_identifier_field_returns_validation_error(): void
     {
-        // Prepare data with missing unique_identifier
         $invalidData = [
             'name' => 'New Location',
             'description' => 'Description of the new location',
@@ -91,14 +105,12 @@ class CommodityLocationControllerStoreTest extends TestCase
 
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, $invalidData)
-            ->assertUnprocessable() // Expecting validation error
+            ->assertUnprocessable()
             ->assertJsonValidationErrors(['unique_identifier']);
     }
 
-    // Test: Missing name field
     public function test_that_missing_name_field_returns_validation_error(): void
     {
-        // Prepare data with missing name
         $invalidData = [
             'unique_identifier' => 'location_123',
             'description' => 'Description of the new location',
@@ -106,13 +118,12 @@ class CommodityLocationControllerStoreTest extends TestCase
 
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, $invalidData)
-            ->assertUnprocessable() // Expecting validation error
+            ->assertUnprocessable()
             ->assertJsonValidationErrors(['name']);
     }
 
     public function test_that_duplicate_unique_identifier_returns_error(): void
     {
-        // Create a location with a specific unique_identifier
         $existingLocationData = [
             'unique_identifier' => 'location_123',
             'name' => 'Existing Location',
@@ -121,9 +132,8 @@ class CommodityLocationControllerStoreTest extends TestCase
 
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, $existingLocationData)
-            ->assertOk(); // Creating the first location
+            ->assertOk();
 
-        // Now try to create a new location with the same unique_identifier
         $duplicateLocationData = [
             'unique_identifier' => 'location_123',
             'name' => 'Duplicate Location',
@@ -132,7 +142,7 @@ class CommodityLocationControllerStoreTest extends TestCase
 
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, $duplicateLocationData)
-            ->assertUnprocessable() // Expecting a validation error for duplicate unique identifier
+            ->assertUnprocessable()
             ->assertJson([
                 'message' => 'This value already exists',
                 'errors' => [

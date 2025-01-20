@@ -32,6 +32,7 @@ class UpdateLocationRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:16',
+                'regex:/^\S+$/', // Ensures no spaces
                 Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', $supplier->id)->ignore($this->route('location'))->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:32'],
