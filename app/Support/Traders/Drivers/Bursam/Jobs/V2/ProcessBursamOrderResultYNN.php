@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderErrorCode;
@@ -93,6 +94,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             if ($traderOrder === null) {
                 return;
             }
+            (new RunHoldTraderWhenMarketOpenCommand)->handle();
 
             $traderOrder->order->update([
                 'status' => FinancingOrderStatus::TradingFailure,
@@ -126,8 +128,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
         return now()->addMinutes(30);
     }
 
-    public function backoff(): int
+    public function backoff(): array
     {
-        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
+        return [60, 120, 180, 240, 300, 360, 420, 120];
     }
 }
