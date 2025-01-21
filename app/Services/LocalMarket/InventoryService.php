@@ -46,7 +46,7 @@ class InventoryService
             $combination = $this->findOptimalCombination($preferredInventories, $loanAmount);
             // if force is set to true return combination even is null
             if ($forcePreferredCommodityType) {
-                return $combination;
+                return $combination ?? null;
             }
             // return the combination if preferred type and not forced but it has covered the loan 
             if (!empty($combination)) {
