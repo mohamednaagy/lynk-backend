@@ -29,7 +29,7 @@ class RunHoldTraderWhenMarketOpenCommand extends Command
      */
     public function handle()
     {
-        $holdTrader = TraderOrder::getHoldTraderOrder()->lockForUpdate()->first();
+        $holdTrader = TraderOrder::getHoldTraderOrder()->first();
         if ($holdTrader) {
             ProcessBursamRunHoldTrader::dispatch($holdTrader->id);
         }
