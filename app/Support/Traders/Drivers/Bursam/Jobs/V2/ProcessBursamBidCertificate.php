@@ -10,7 +10,6 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -59,16 +58,6 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
             Trader::driver('bursam', $traderOrder->version)
                 ->getBidCertificateDetails($traderOrder);
         });
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(30);
-    }
-
-    public function backoff(): int
-    {
-        return config('trader.providers.bursam.purchasing_commodity_job_backoff_time');
     }
 
     public function middleware(): array
