@@ -36,27 +36,28 @@ class InventoryService
         $companyId = $localMarketOrder->company_id;
         $preferredItemTypes = $localMarketOrder->preferred_commodity_type;
 
-        $forcePreferredCommodityType = Lender::find($companyId)
+        $forcePreferredCommodityType = $localMarketOrder->lender
             ->lenderDetail
             ->force_preferred_commodity_type;
-
-        $inventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
         // $inventories = $this->findEligibleInventoriesForLoanVersionOne($loanAmount);
 
-        // Filter inventories based on preferred commodity types
-        $filteredInventories = $this->filterInventoriesByPreferredTypes($inventories, $preferredItemTypes);
 
         // Attempt to find the optimal combination with filtered inventories if required
         if ($forcePreferredCommodityType && !empty($preferredItemTypes)) {
-            $combination = $this->findOptimalCombination($filteredInventories, $loanAmount, $preferredItemTypes);
+            $inventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId, $preferredItemTypes);
+            $combination = $this->findOptimalCombination($inventories, $loanAmount);
 
             if (!empty($combination)) {
                 return $combination;
             }
         }else {
+            $inventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
             // If forcing is not required or no combination was found, use the original inventories
             if (! empty($preferredItemTypes)) {
-                $combination = $this->findOptimalCombination($filteredInventories, $loanAmount, $preferredItemTypes);
+                // Filter inventories based on preferred commodity types
+                $filteredInventories = $this->filterInventoriesByPreferredTypes($inventories, $preferredItemTypes);
+
+                $combination = $this->findOptimalCombination($filteredInventories, $loanAmount);
 
                 if (!empty($combination)) {
                     return $combination;
@@ -75,7 +76,7 @@ class InventoryService
         return LocalMarketInventory::where('max_price', '<=', $loanAmount)
             ->where('status', InventoryStatus::Active)
             ->where('available_quantity', '>', 0)
-            ->whereHas('type', function ($query) {
+            ->whereHas('type', function ($query){
                 $query->where('status', CommodityTypeStatus::Active);
             })
             ->whereHas('supplier.detail', function ($query) {
@@ -85,7 +86,7 @@ class InventoryService
             ->get();
     }
 
-    private function findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId)
+    private function findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId, $preferredItemTypes = [])
     {
         return LocalMarketInventory::query()
             ->select([
@@ -99,8 +100,11 @@ class InventoryService
             ->where('local_market_inventories.status', InventoryStatus::Active)
             ->where('local_market_inventories.available_quantity', '>', 0)
             ->where('local_market_inventories.max_price', '<=', $loanAmount)
-            ->whereHas('type', function ($query) {
+            ->whereHas('type', function ($query) use ($preferredItemTypes) {
                 $query->where('status', CommodityTypeStatus::Active);
+                if (!empty($preferredItemTypes)) {
+                    $query->whereIn('commodity_types.id', $preferredItemTypes);
+                }
             })
             ->whereHas('supplier.detail', function ($query) {
                 $query->where('status', CommoitySupplierStatus::Active);
@@ -110,7 +114,7 @@ class InventoryService
             ->get();
     }
 
-    private function findOptimalCombination($inventories, $loanAmount, array $preferredCommodities)
+    private function findOptimalCombination($inventories, $loanAmount, array $preferredCommodities = [])
     {
         $maxUnits = config('trader.providers.lynk.max_units_per_trader', 10000);
 
