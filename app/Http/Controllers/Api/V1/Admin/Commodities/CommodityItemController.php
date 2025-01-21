@@ -8,6 +8,8 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommodityItem\ListCommodityItemsRequest;
+use App\Http\Requests\V1\Admin\CommodityItem\UpdateCommodityItemRequest;
+use App\Models\CommodityItem;
 use App\Transformers\Admin\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -18,7 +20,7 @@ class CommodityItemController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::CommodityMarketCommodityItems, Action::Index, Action::Manage])
-        )->only('index');
+        )->only('index', 'show');
 
     }
 
@@ -59,4 +61,53 @@ class CommodityItemController extends Controller
             ])
             ->respond();
     }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(CommodityItem $commodityItem): JsonResponse
+    {
+
+        return fractal($commodityItem, new CommodityItemsTransformer)
+            ->parseIncludes([
+                'id',
+                'name',
+                'unique_name',
+                'commodity_type',
+                'description',
+                'supplier',
+                'min_price',
+                'max_price',
+                'volume_sellable_unit',
+                'currency',
+                'measurement',
+                'available_units',
+                'reserved_units',
+                'created_at',
+                'is_deletable',
+            ])
+            ->respond();
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function update(UpdateCommodityItemRequest $request, CommodityItem $commodityItem, UpdateCommodityItem $updateItem): JsonResponse
+    {
+        $item = $updateItem->handle($commodityItem, $request->validated());
+
+        return fractal($item, new CommodityItemsTransformer)
+            ->parseIncludes([
+                'id',
+                'name',
+                'unique_name',
+                'commodity_type',
+                'created_at',
+            ])
+            ->respond();
+    }
+
 }
