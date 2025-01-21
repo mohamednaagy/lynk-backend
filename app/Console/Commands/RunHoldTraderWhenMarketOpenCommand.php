@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\TraderOrder;
-use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamRunHoldTrader;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Log;
 
 class RunHoldTraderWhenMarketOpenCommand extends Command
 {
@@ -32,8 +31,7 @@ class RunHoldTraderWhenMarketOpenCommand extends Command
     {
         $holdTrader = TraderOrder::getHoldTraderOrder()->first();
         if ($holdTrader) {
-            Log::channel('bursam')->info('move Hold Trader Order to initiate', ['financingOrderId' => $holdTrader->order->id,  'traderOrderId' => $holdTrader->id]);
-            Trader::driver($holdTrader->provider, $holdTrader->version)->moveHoldTraderOrder($holdTrader);
+            ProcessBursamRunHoldTrader::dispatch($holdTrader->id);
         }
 
         return Command::SUCCESS;
