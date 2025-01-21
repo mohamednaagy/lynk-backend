@@ -24,9 +24,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
-    {
-    }
+    public function __construct(protected int $traderOrderId) {}
 
     /**
      * Execute the job.
@@ -49,6 +47,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
         Trader::driver('bursam', $traderOrder->version)
             ->createTransferOwnershipToLenderDocument($traderOrder);
+
     }
 
     public function middleware(): array
