@@ -4,12 +4,14 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -70,11 +72,23 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
         return __CLASS__.'_'.$this->traderOrderId;
     }
 
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 180, 240, 300, 360, 420, 120];
+    }
+
     public function failed($exception)
     {
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
         Log::channel('bursam')->error('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+        (new RunHoldTraderWhenMarketOpenCommand)->handle();
+
     }
 }
