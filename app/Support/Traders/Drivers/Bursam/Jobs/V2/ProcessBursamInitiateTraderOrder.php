@@ -36,7 +36,7 @@ class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(InitiateTraderOrder $initiateTraderOrder)
     {
-        Log::info('Starting ProcessBursamInitiateTraderOrder Job');
+        Log::channel('bursam')->info('Starting ProcessBursamInitiateTraderOrder Job');
 
         return DB::multipleTransaction(function () use ($initiateTraderOrder) {
             try {
@@ -56,6 +56,6 @@ class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamInitiateTraderOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('ProcessBursamInitiateTraderOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
     }
 }
