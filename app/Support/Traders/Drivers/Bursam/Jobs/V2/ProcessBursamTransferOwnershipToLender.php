@@ -11,6 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -55,7 +56,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
         Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
-        Log::channel('bursam')->info('move Hold Trader Order to initiate', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
         (new RunHoldTraderWhenMarketOpenCommand)->handle();
     }
 
@@ -69,6 +69,16 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         return __CLASS__.'_'.$this->traderOrderId;
     }
 
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(30);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 180, 240, 300, 360, 420, 120];
+    }
+
     public function failed($exception)
     {
 
@@ -77,7 +87,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
 
-        Log::channel('bursam')->info('move Hold Trader Order to initiate', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
         (new RunHoldTraderWhenMarketOpenCommand)->handle();
     }
 }
