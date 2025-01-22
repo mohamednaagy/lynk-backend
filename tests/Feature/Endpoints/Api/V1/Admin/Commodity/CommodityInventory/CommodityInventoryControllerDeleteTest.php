@@ -1,0 +1,167 @@
+<?php
+
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommodityInventory;
+
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Role;
+use App\Enums\Subject;
+use App\Jobs\LocalMarket\DeleteInventory;
+use App\Jobs\LocalMarket\UpdateInventoryStock;
+use App\Models\User;
+use App\Observers\LocalMarketInventoryObserver;
+use App\Services\LocalMarket\LiveMarketService;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
+use Symfony\Component\HttpFoundation\Response;
+use Tests\TestCase;
+use Tests\Traits\AssertsAccessByRoleAndArea;
+use Tests\Traits\InteractsWithCommodityInventory;
+use Tests\Traits\InteractsWithCommodityItem;
+use Tests\Traits\InteractsWithSupplier;
+
+class CommodityInventoryControllerDeleteTest extends TestCase
+{
+    use AssertsAccessByRoleAndArea, InteractsWithCommodityInventory, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
+
+    private static User $userManager;
+
+    private static $commodityItems;
+
+    private static $location;
+
+    private static $supplier;
+
+    private static $supplier2;
+
+    private static string $endpoint;
+
+    private static array $commodityItem;
+
+    private static $inventory;
+
+    private static $inventory2;
+
+    /**
+     * @throws BindingResolutionException
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        Queue::fake();
+        self::$supplier = $this->createSupplier();
+        self::$supplier2 = $this->createSupplier();
+
+        self::$commodityItems = $this->createCommodityItem(
+            self::$supplier,
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
+            'Test Description',
+            10,
+            20,
+            10,
+            $this->createCommodityType('type', 'test_item'),
+        );
+
+        self::$inventory = $this->createInventory(
+            self::$supplier,
+            300
+        );
+
+        $observer = new LocalMarketInventoryObserver(new LiveMarketService);
+        $observer->created(self::$inventory);
+
+        $job = new UpdateInventoryStock(self::$inventory, 300, true);
+        Bus::dispatchNow($job);
+
+        self::$location = $this->createSupplierLocation(
+            self::$supplier,
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
+            'Test Description',
+        );
+
+        self::$userManager = $this->createSuperAdminUser(Role::Admin);
+        $this->assignPermissionToUser(
+            self::$userManager,
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Delete])
+        );
+
+        self::$endpoint = 'api/v1/admin/commodity-items/'.self::$commodityItems->id.'/inventories/'.self::$inventory->id;
+
+        self::$inventory2 = [
+            'location_id' => self::$location->id,
+            'total_units' => 20,
+        ];
+
+    }
+
+    public function test_un_auth_user_cant_delete_commodity_inventory(): void
+    {
+        $this
+            ->deleteJson(self::$endpoint)
+            ->assertUnauthorized()
+            ->assertExactJson([
+                'message' => __('Unauthenticated.'),
+            ]);
+    }
+
+    public function test_supplier_user_cant_delete_commodity_inventory_with_active_reserved_units(): void
+    {
+        $inventory = self::$inventory;
+        $inventory->reserved_items = 50;
+        $inventory->save();
+
+        $this
+            ->actingAs(self::$userManager)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertExactJson([
+                'message' => 'Reserved Units is greater than 0. Commodity Inventory cannot be deleted.',
+                'code' => 1040,
+            ]);
+    }
+
+    public function test_supplier_user_can_delete_commodity_inventory_successfully(): void
+    {
+        $this
+            ->actingAs(self::$userManager)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
+
+        // Manually dispatch the job immediately
+        $job = new DeleteInventory(self::$inventory);
+        Bus::dispatchNow($job);
+
+        $this->assertDatabaseMissing('local_market_inventories', [
+            'id' => self::$inventory->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_delete_inventory_stock_job_is_fired()
+    {
+        $this
+            ->actingAs(self::$userManager)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
+
+        Queue::assertPushed(DeleteInventory::class);
+    }
+
+    public function test_inventory_units_are_soft_deleted()
+    {
+        $this
+            ->actingAs(self::$userManager)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
+
+        // Manually dispatch the job immediately
+        $job = new DeleteInventory(self::$inventory);
+        Bus::dispatchNow($job);
+
+        $this->assertSoftDeleted('local_market_inventory_units', ['local_market_inventory_id' => self::$inventory->id]);
+    }
+}
