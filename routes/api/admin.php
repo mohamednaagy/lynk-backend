@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
-use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -209,11 +208,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::post('/upload-image', [UploadImage::class, 'store']);
 
-        Route::prefix('commodity-items')->group(function () {
-            Route::get('/', [CommodityItemController::class, 'index']);
-            Route::post('/', [CommodityItemController::class, 'store']);
-            Route::apiResource('{item}/inventories', LocalMarketInventoryController::class)->only(['index', 'store', 'destroy']);
-        });
+        Route::apiResource('/commodity-items', CommodityItemController::class)
+            ->except(['delete', 'store']);
+
         Route::get('constants', [ConstantController::class, 'index']);
     });
 
