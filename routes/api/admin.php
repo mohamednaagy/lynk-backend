@@ -210,7 +210,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('commodity-items')->group(function () {
             Route::get('/', [CommodityItemController::class, 'index']);
-            Route::apiResource('{item}/inventories', LocalMarketInventoryController::class)->only(['index', 'store']);
+            Route::apiResource('{item}/inventories', LocalMarketInventoryController::class)->only(['index', 'store', 'update', 'show']);
         });
 
     });
