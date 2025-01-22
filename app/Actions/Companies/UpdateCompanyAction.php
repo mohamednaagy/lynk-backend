@@ -13,14 +13,6 @@ class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Lender $lender, array $data): Lender
     {
-        $lender->lenderDetail()->updateOrCreate(
-            ['company_id' => $lender->id],
-            Arr::only($data, [
-                'default_contract_sign_time_limit',
-                'force_preferred_commodity_type',
-            ])
-        );
-        
         $lender->update(
             Arr::only(
                 $data,
@@ -61,7 +53,16 @@ class UpdateCompanyAction implements UpdateCompany
 
         if (isset($data['preferred_commodity_types'])) {
             $lender->commodityTypes()->sync($data['preferred_commodity_types']);
+            $data['force_preferred_commodity_types'] = ! empty($data['preferred_commodity_types']);
         }
+
+        $lender->lenderDetail()->updateOrCreate(
+            ['company_id' => $lender->id],
+            Arr::only($data, [
+                'default_contract_sign_time_limit',
+                'force_preferred_commodity_type',
+            ])
+        );
 
         return $lender;
     }

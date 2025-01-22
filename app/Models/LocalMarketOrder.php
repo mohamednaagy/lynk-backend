@@ -77,4 +77,9 @@ class LocalMarketOrder extends Model
         $this->save();
         $this->createLocalMarketOrderHistory($this, $status);
     }
+
+    public function lender()
+    {
+        return $this->belongsTo(Lender::class, 'company_id');
+    }
 }
