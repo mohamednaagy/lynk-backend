@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Actions\Admins\CommodityItem;
+namespace App\Actions\Commodities\CommodityItem;
 
 use App\Actions\Contracts\Commodities\CommodityItem\UpdateCommodityItem;
 use App\Models\CommodityItem;
-use App\Models\Company;
-use App\Models\Supplier;
 use Illuminate\Support\Arr;
 
 class UpdateCommodityItemAction implements UpdateCommodityItem
 {
-    private $supplier;
 
     public function handle(CommodityItem $item, array $data): CommodityItem
     {
+        if (isset($data['commodity_supplier_id'])) {
+            $data['company_id'] = $data['commodity_supplier_id'];
+        }
+
         $item->update(
             Arr::only(
                 $data,
@@ -27,17 +28,11 @@ class UpdateCommodityItemAction implements UpdateCommodityItem
                     'volume_sellable_unit',
                     'currency_id',
                     'measurement_id',
+                    'company_id',
                 ]
             )
         );
 
         return $item;
-    }
-
-    public function setSupplier(Supplier|Company $supplier): static
-    {
-        $this->supplier = $supplier;
-
-        return $this;
     }
 }

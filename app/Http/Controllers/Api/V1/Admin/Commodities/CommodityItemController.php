@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Admin\Commodities;
 
 use App\Actions\Contracts\Commodities\CommodityItem\GetPaginatedCommodityItems;
+use App\Actions\Contracts\Commodities\CommodityItem\UpdateCommodityItem;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -102,6 +103,7 @@ class CommodityItemController extends Controller
         return fractal($item, new CommodityItemsTransformer)
             ->parseIncludes([
                 'id',
+                'supplier',
                 'name',
                 'unique_name',
                 'commodity_type',
