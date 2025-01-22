@@ -209,7 +209,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::post('/upload-image', [UploadImage::class, 'store']);
 
         Route::apiResource('/commodity-items', CommodityItemController::class)
-            ->except(['delete', 'store']);
+            ->except(['delete']);
         Route::get('constants', [ConstantController::class, 'index']);
     });
 
