@@ -210,10 +210,12 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::post('/upload-image', [UploadImage::class, 'store']);
 
         Route::prefix('commodity-items')->group(function () {
-            Route::apiResource('/', CommodityItemController::class)
-                ->except(['delete']);
             Route::apiResource('{item}/inventories', LocalMarketInventoryController::class)->only(['index', 'store', 'update', 'show', 'destroy']);
         });
+
+        Route::apiResource('/commodity-items', CommodityItemController::class)
+            ->except(['delete']);
+
         Route::get('constants', [ConstantController::class, 'index']);
     });
 
