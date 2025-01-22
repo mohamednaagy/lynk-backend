@@ -53,7 +53,10 @@ class UpdateCompanyAction implements UpdateCompany
 
         if (isset($data['preferred_commodity_types'])) {
             $lender->commodityTypes()->sync($data['preferred_commodity_types']);
-            $data['force_preferred_commodity_type'] = ! empty($data['preferred_commodity_types']);
+            if (empty($data['preferred_commodity_types']))
+            {
+                $data['force_preferred_commodity_type'] = false;
+            }
         }
 
         $lender->lenderDetail()->updateOrCreate(
