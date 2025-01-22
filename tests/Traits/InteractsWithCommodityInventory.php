@@ -2,7 +2,7 @@
 
 namespace Tests\Traits;
 
-use App\Enums\LocalMarketInventoryStatus;
+use App\Enums\LocalMarket\InventoryStatus as LocalMarketInventoryStatus;
 use App\Models\CommodityItem;
 use App\Models\LocalMarketInventory;
 use App\Models\Supplier;

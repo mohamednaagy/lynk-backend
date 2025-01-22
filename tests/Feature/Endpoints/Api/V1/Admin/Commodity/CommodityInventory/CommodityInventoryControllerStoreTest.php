@@ -1,0 +1,187 @@
+<?php
+
+namespace Endpoints\Api\V1\Admin\Commodity\CommodityInventory;
+
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Role;
+use App\Enums\Subject;
+use App\Jobs\LocalMarket\UpdateInventoryStock;
+use App\Models\LocalMarketInventory;
+use App\Models\User;
+use App\Observers\LocalMarketInventoryObserver;
+use App\Services\LocalMarket\LiveMarketService;
+use App\Transformers\LocalMarketInventoryTransformer;
+use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Queue;
+use Symfony\Component\HttpFoundation\Response;
+use Tests\TestCase;
+use Tests\Traits\AssertsAccessByRoleAndArea;
+use Tests\Traits\InteractsWithCommodityInventory;
+use Tests\Traits\InteractsWithCommodityItem;
+use Tests\Traits\InteractsWithSupplier;
+
+class CommodityInventoryControllerStoreTest extends TestCase
+{
+    use AssertsAccessByRoleAndArea, InteractsWithCommodityInventory, InteractsWithCommodityItem, InteractsWithSupplier, RefreshDatabase;
+
+    private static User $userManager;
+
+    private static $commodityItems;
+
+    private static $location;
+
+    private static $supplier;
+
+    private static $supplier2;
+
+    private static string $endpoint;
+
+    private static $inventory;
+
+    private static $inventory2;
+
+    /**
+     * @throws BindingResolutionException
+     */
+    public function setUp(): void
+    {
+        parent::setUp();
+        LocalMarketInventory::observe(LocalMarketInventoryObserver::class);
+        self::$supplier = $this->createSupplier();
+        self::$supplier2 = $this->createSupplier();
+
+        self::$commodityItems = $this->createCommodityItem(
+            self::$supplier,
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
+            'Test Description',
+            10,
+            20,
+            10,
+            $this->createCurrency()->id,
+            $this->createMeasurement()->id,
+            $this->createCommodityType('type', 'test_item')->id,
+        );
+
+        self::$location = $this->createSupplierLocation(
+            self::$supplier,
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
+            'Test Description',
+        );
+        self::$userManager = $this->createSuperAdminUser(Role::Admin);
+        $this->assignPermissionToUser(
+            self::$userManager,
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierInventories, Action::Index])
+        );
+
+        self::$endpoint = 'api/v1/admin/commodity-items/'.self::$commodityItems->id.'/inventories';
+
+        self::$inventory = [
+            'location_id' => self::$location->id,
+            'total_units' => 200,
+        ];
+
+        self::$inventory2 = [
+            'location_id' => self::$location->id,
+            'total_units' => 200,
+        ];
+    }
+
+    public function test_un_auth_user_cant_create_commodity_item_inventory(): void
+    {
+        $this
+            ->postJson(self::$endpoint, self::$inventory)
+            ->assertStatus(Response::HTTP_UNAUTHORIZED)
+            ->assertExactJson([
+                'message' => 'Unauthenticated.',
+            ]);
+    }
+
+    public function test_that_auth_user_without_location_id_cant_create_commodity_item_inventory(): void
+    {
+        $this
+            ->actingAs(self::$userManager)
+            ->postJson(self::$endpoint, Arr::except(self::$inventory, ['location_id']))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('location_id');
+    }
+
+    public function test_supplier_user_create_item_inventory_but_total_units_less_than_one(): void
+    {
+        $inv = self::$inventory;
+        $inv['total_units'] = 0;
+        $this
+            ->actingAs(self::$userManager)
+            ->postJson(self::$endpoint, $inv)
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('total_units');
+    }
+
+    public function test_store_commodity_item_inventory_successfully(): void
+    {
+        $this
+            ->actingAs(self::$userManager)
+            ->postJson(self::$endpoint, self::$inventory)
+            ->assertOk()
+            ->assertExactJson(
+                fractal(LocalMarketInventory::orderBy('id', 'desc')->first(), new LocalMarketInventoryTransformer)
+                    ->parseIncludes([
+                        'id',
+                        'company_id',
+                        'company_name',
+                        'commodity_item_id',
+                        'commodity_item',
+                        'commodity_type',
+                        'min_price',
+                        'max_price',
+                        'supplier_location_id',
+                        'supplier_location',
+                        'total_items',
+                        'available_quantity',
+                        'reserved_items',
+                        'status',
+                    ])
+                    ->respond()
+                    ->getData(true)
+            );
+    }
+
+    public function test_admin_cant_create_commodity_item_inventory_with_duplicate_location(): void
+    {
+        $inventory = $this->createInventory(self::$supplier, 200);
+        self::$inventory2['location_id'] = $inventory->location_id;
+        $this
+            ->actingAs(self::$userManager)
+            ->postJson(self::$endpoint, self::$inventory2)
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
+            ->assertJsonValidationErrorFor('location_id');
+    }
+
+    public function test_it_creates_the_specified_number_of_units_when_inventory_is_created()
+    {
+        Queue::fake();
+
+        $numberOfUnits = 5;
+        $inventory = $this->createInventory(self::$supplier, $numberOfUnits);
+
+        $liveMarketService = app(LiveMarketService::class);
+        // Trigger the observer manually
+        $observer = new LocalMarketInventoryObserver($liveMarketService);
+        $observer->created($inventory);
+
+        // Verify the job was pushed
+        Queue::assertPushed(UpdateInventoryStock::class);
+
+        // Manually dispatch the job immediately
+        $job = new UpdateInventoryStock($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
+        Bus::dispatchNow($job);
+
+        // Ensure the units were created
+        $this->assertCount($numberOfUnits, $inventory->units);
+    }
+}

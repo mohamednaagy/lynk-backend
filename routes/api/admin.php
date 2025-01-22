@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
+use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -141,7 +142,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
             Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update']);
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
-            Route::apiResource('{supplier}/locations', CommodityLocationController::class)->only(['index', 'store']);
+            Route::apiResource('{supplier}/locations', CommodityLocationController::class)->except(['delete']);
         });
 
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
@@ -209,6 +210,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::prefix('commodity-items')->group(function () {
             Route::get('/', [CommodityItemController::class, 'index']);
+            Route::apiResource('{item}/inventories', LocalMarketInventoryController::class)->only(['index', 'store', 'update', 'show']);
         });
 
     });

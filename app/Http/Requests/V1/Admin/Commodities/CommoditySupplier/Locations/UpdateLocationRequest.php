@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Supplier\Locations;
+namespace App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Locations;
 
 use App\Models\SupplierLocation;
 use Illuminate\Foundation\Http\FormRequest;
@@ -9,7 +9,7 @@ use Illuminate\Validation\Rule;
 /**
  * @property string $area
  */
-class UpdateSupplierLocationRequest extends FormRequest
+class UpdateLocationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,6 +24,8 @@ class UpdateSupplierLocationRequest extends FormRequest
      */
     public function rules(): array
     {
+        $supplier = request()->route('supplier');
+
         return [
             'unique_identifier' => [
                 'required',
@@ -31,7 +33,7 @@ class UpdateSupplierLocationRequest extends FormRequest
                 'min:3',
                 'max:16',
                 'regex:/^\S+$/', // Ensures no spaces
-                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', tenant()->id)->ignore($this->route('location'))->withoutTrashed(),
+                Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', $supplier->id)->ignore($this->route('location'))->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:32'],
             'description' => ['nullable', 'string', 'max:256'],
