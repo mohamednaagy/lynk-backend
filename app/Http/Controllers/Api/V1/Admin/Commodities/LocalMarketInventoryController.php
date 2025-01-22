@@ -37,6 +37,11 @@ class LocalMarketInventoryController extends Controller
 
         $this->middleware(
             'permission:'.
+                perm(Area::SuperAdmin, [Subject::CommoditySupplierInventories, Action::Manage, Action::Delete])
+        )->only('destroy');
+
+        $this->middleware(
+            'permission:'.
                 perm(Area::SuperAdmin, [Subject::CommoditySupplierInventories, Action::Manage, Action::Show])
         )->only('show');
 
@@ -44,10 +49,6 @@ class LocalMarketInventoryController extends Controller
             'permission:'.
                 perm(Area::SuperAdmin, [Subject::CommoditySupplierInventories, Action::Manage, Action::Edit])
         )->only('update');
-
-        $this->middleware(
-            'permission:'.perm(Area::SuperAdmin, [Subject::CommoditySupplierInventories, Action::Manage, Action::Delete])
-        )->only('destroy');
     }
 
     /**
@@ -131,6 +132,38 @@ class LocalMarketInventoryController extends Controller
             ->respond();
     }
 
+    /**
+     * Delete the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(CommodityItem $item, LocalMarketInventory $inventory, DeleteCommodityInventory $deleteCommodityInventory)
+    {
+        //check if the inventory is deleteable
+        if (! $inventory->is_deletable) {
+            return $this->errorResponse(
+                __('error.inventory_cannot_be_deleted'),
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::INVENTORY_NOT_DELETABLE
+            );
+        }
+
+        try {
+            $deleteCommodityInventory->handle($inventory);
+
+            return $this->successResponse();
+        } catch (\Exception $e) {
+            Log::error("Failed to delete inventory ID: {$inventory->id}. Error: {$e->getMessage()}");
+
+            return $this->errorResponse(
+                __('error.failed_to_delete_inventory'),
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                ErrorCode::FAILED_TO_DELETE_INVENTORY
+            );
+        }
+    }
+
     public function show(CommodityItem $item, LocalMarketInventory $inventory): JsonResponse
     {
         return fractal($inventory, new LocalMarketInventoryTransformer)
@@ -180,38 +213,6 @@ class LocalMarketInventoryController extends Controller
                 ->respond();
         } catch (\Throwable $th) {
             throw $th;
-        }
-    }
-
-    /**
-     * Delete the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(CommodityItem $item, LocalMarketInventory $inventory, DeleteCommodityInventory $deleteCommodityInventory)
-    {
-        //check if the inventory is deleteable
-        if (! $inventory->is_deletable) {
-            return $this->errorResponse(
-                __('error.inventory_cannot_be_deleted'),
-                Response::HTTP_BAD_REQUEST,
-                ErrorCode::INVENTORY_NOT_DELETABLE
-            );
-        }
-
-        try {
-            $deleteCommodityInventory->handle($inventory);
-
-            return $this->successResponse();
-        } catch (\Exception $e) {
-            Log::error("Failed to delete inventory ID: {$inventory->id}. Error: {$e->getMessage()}");
-
-            return $this->errorResponse(
-                __('error.failed_to_delete_inventory'),
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-                ErrorCode::FAILED_TO_DELETE_INVENTORY
-            );
         }
     }
 }
