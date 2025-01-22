@@ -28,7 +28,6 @@ class UpdateCommodityItemAction implements UpdateCommodityItem
                     'volume_sellable_unit',
                     'currency_id',
                     'measurement_id',
-                    'company_id',
                 ]
             )
         );
