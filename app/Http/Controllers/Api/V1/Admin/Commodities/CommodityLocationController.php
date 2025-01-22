@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\V1\Admin\Commodities;
 
 use App\Actions\Contracts\Commodities\CommodityLocation\CreateSupplierLocation;
+use App\Actions\Contracts\Commodities\CommodityLocation\DeleteSupplierLocation;
 use App\Actions\Contracts\Commodities\CommodityLocation\GetPaginatedSupplierLocations;
 use App\Actions\Contracts\Commodities\CommodityLocation\UpdateSupplierLocation;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\ErrorCode;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\Locations\StoreLocationRequest;
@@ -15,6 +17,8 @@ use App\Models\Supplier;
 use App\Models\SupplierLocation;
 use App\Transformers\SupplierLocationsTransformer;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class CommodityLocationController extends Controller
 {
@@ -39,6 +43,11 @@ class CommodityLocationController extends Controller
             'permission:'.
             perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Manage, Action::Show])
         )->only('show');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::CommoditySupplierLocations, Action::Manage, Action::Delete])
+        )->only('destroy');
     }
 
     /**
@@ -119,5 +128,43 @@ class CommodityLocationController extends Controller
                 'is_deletable',
             ])
             ->respond();
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(
+        Supplier $supplier,
+        SupplierLocation $location,
+        DeleteSupplierLocation $deleteSupplierLocation
+    ) {
+        // Check if the commodity location is deletable
+        if (! $location->is_deletable) {
+            return $this->errorResponse(
+                __('error.location_cannot_be_deleted'),
+                Response::HTTP_BAD_REQUEST,
+                ErrorCode::LOCATION_NOT_DELETABLE
+            );
+        }
+
+        try {
+            // Attempt to delete the location
+            $deleteSupplierLocation->handle($location);
+
+            return $this->successResponse();
+        } catch (\Throwable $exception) {
+            // Log the error for debugging
+            Log::error(sprintf(
+                'Failed to delete location with ID: %d. Error: %s',
+                $location->id,
+                $exception->getMessage()
+            ));
+
+            return $this->errorResponse(
+                __('error.failed_to_delete_location'),
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+                ErrorCode::FAILED_TO_DELETE_LOCATION
+            );
+        }
     }
 }

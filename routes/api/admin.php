@@ -143,7 +143,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
             Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update']);
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
-            Route::apiResource('{supplier}/locations', CommodityLocationController::class)->except(['delete']);
+            Route::apiResource('{supplier}/locations', CommodityLocationController::class);
         });
 
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
