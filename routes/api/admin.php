@@ -70,6 +70,7 @@ use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
+use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -211,8 +212,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::prefix('commodity-items')->group(function () {
             Route::get('/', [CommodityItemController::class, 'index']);
             Route::apiResource('{item}/inventories', LocalMarketInventoryController::class)->only(['index', 'store', 'update', 'show', 'destroy']);
+            Route::post('/', [CommodityItemController::class, 'store']);
         });
 
+        Route::get('constants', [ConstantController::class, 'index']);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
