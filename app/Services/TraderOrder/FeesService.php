@@ -17,7 +17,7 @@ class FeesService
      */
     protected $actions = [
         Trader::Bursam => [
-            FinancingOrderHistory::GetTtiId => DeductBalanceForNewOrder::class,
+            FinancingOrderHistory::MurabahaSaleCompleted => DeductBalanceForNewOrder::class,
         ],
         Trader::Dmcc => [
             FinancingOrderHistory::GetTtiId => DeductBalanceForNewOrder::class,
