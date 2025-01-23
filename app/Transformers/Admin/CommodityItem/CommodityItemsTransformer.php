@@ -23,6 +23,7 @@ class CommodityItemsTransformer extends TransformerAbstract
         'reserved_units',
         'created_at',
         'supplier',
+        'is_deletable',
 
     ];
 
@@ -121,5 +122,10 @@ class CommodityItemsTransformer extends TransformerAbstract
     public function includeCreatedAt(CommodityItem $commodityItem): Primitive
     {
         return $this->primitive(optional($commodityItem->created_at)->format('Y-m-d'));
+    }
+
+    public function includeIsDeletable(CommodityItem $commodityItem): Primitive
+    {
+        return $this->primitive($commodityItem->is_deletable);
     }
 }

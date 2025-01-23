@@ -127,6 +127,7 @@ class SuperAdmin
             Action::Index,
             Action::Manage,
             Action::Edit,
+            Action::Delete,
         ],
 
         Subject::CommoditySupplierUsers => [
