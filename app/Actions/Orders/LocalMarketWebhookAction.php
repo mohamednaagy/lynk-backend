@@ -51,8 +51,8 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
             case OrderStatus::NoEligibleCommoditiesAvailable:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::NoEligibleCommoditiesAvailable);
-                Trader::driver($traderOrder->provider, $traderOrder->version)
-                    ->confirmCancelledFromProvider($traderOrder);
+                // Trader::driver($traderOrder->provider, $traderOrder->version)
+                //     ->confirmCancelledFromProvider($traderOrder);
                 break;
             case OrderStatus::TransferOwnershipToCustomer:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
