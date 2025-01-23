@@ -14,12 +14,13 @@ class LoanController extends Controller
      */
     public function calculateLoanCoverage(Request $request)
     {
+        $loanDeadAmount = [];
+        $maxUsedItems = 10000;
+
         try {
             // Start time
             $startTime = microtime(true);
-            $maxExecutionTime = ini_get('max_execution_time'); // PHP's max execution time
-            $customThreshold = $maxExecutionTime - 2; // Custom threshold to stop execution
-            ini_set('max_execution_time', $maxExecutionTime);
+            $maxExecutionTime = 3;
 
             // Start time
             $startTime = microtime(true);
@@ -71,17 +72,22 @@ class LoanController extends Controller
             // Run optimization logic
             $success = $this->processInventories($loanRemaining, $tempInventories, $queue, $inventoriesMap, $coverage);
 
-            $loanDeadAmount = [];
-            while ((! $success && $loanRemaining > 0 && ! empty($queue)) || count($queue) > 10000) {
+            $itemUsed = count($queue);
+            if ($loanRemaining == 0 && $itemUsed > $maxUsedItems) {
+                $this->logInfo('Loan covered with ('.number_format($itemUsed).' Item) , so its unacceptable');
+            }
 
-                $elapsedTime = microtime(true) - $startTime;
-                if ($elapsedTime > $customThreshold) {
-                    throw new \Exception('Time out!!', Response::HTTP_REQUEST_TIMEOUT);
-                }
-
+            while ((! $success && $loanRemaining > 0 && ! empty($queue)) || count($queue) > $maxUsedItems) {
                 $this->logInfo('Taken inventories map', $inventoriesMap);
 
-                $loanDeadAmount[] = $loanRemaining; // i.e The uncovered amount across all the provided inventories.
+                if ($loanRemaining != 0 && ! in_array($loanRemaining, $loanDeadAmount)) {
+                    $loanDeadAmount[] = $loanRemaining; // i.e The uncovered amount across all the provided inventories.
+                }
+
+                $elapsedTime = microtime(true) - $startTime;
+                if ($elapsedTime >= $maxExecutionTime) {
+                    throw new \Exception('Request timeout!', Response::HTTP_REQUEST_TIMEOUT);
+                }
 
                 $skipInventoryIndex = $inventoriesMap[0];
                 $usedInventories = array_count_values($queue);
@@ -124,7 +130,7 @@ class LoanController extends Controller
             $elapsedTime = round(($endTime - $startTime), 4);
 
             if ($result['uncovered'] === $loan) {
-                $this->logInfo('Loan uncovered');
+                $this->logInfo('Loan uncovered', $loanDeadAmount);
             }
 
             $response = [
@@ -132,6 +138,10 @@ class LoanController extends Controller
                 'used_units' => 0,
                 'total_price' => 0,
                 'elapsed_time' => $elapsedTime,
+                'extra' => [
+                    'msg' => '',
+                    'suggested_inventories' => $loanDeadAmount,
+                ],
                 'inventories' => [],
             ];
 
@@ -164,6 +174,11 @@ class LoanController extends Controller
             return response()->json($response);
 
         } catch (\Exception $e) {
+            $message = empty($loanDeadAmount) ? $e->getMessage().' NOTE: The loan is covered but with more than 10k items' : $e->getMessage();
+
+            $this->logInfo('Loan uncovered', $loanDeadAmount);
+            $this->logInfo($message);
+
             $endTime = microtime(true);
             $elapsedTime = round(($endTime - $startTime), 4);
 
@@ -173,7 +188,8 @@ class LoanController extends Controller
                 'total_price' => 0,
                 'elapsed_time' => $elapsedTime,
                 'extra' => [
-                    'msg' => 'Request Timeout!',
+                    'msg' => $message,
+                    'suggested_inventories' => $loanDeadAmount,
                 ],
                 'inventories' => [],
             ], $e->getCode());
