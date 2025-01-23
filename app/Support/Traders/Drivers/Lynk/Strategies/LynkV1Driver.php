@@ -327,6 +327,7 @@ class LynkV1Driver implements TraderInterface
     protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
         return
+            $traderOrder->order->company->trading_mode->is(TraderOrderMode::Automatic) &&
             $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any) && (
                 $traderOrder->cancelDetail->cancel_reason->in([
                     TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
@@ -456,11 +457,11 @@ class LynkV1Driver implements TraderInterface
     public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder)
     {
         $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
-        
+
         if ($traderOrder->mode == TraderOrderMode::Automatic) {
             LynkClient::of($traderOrder)->requestDeliverProducts();
         }
-        
+
     }
 
     /**
