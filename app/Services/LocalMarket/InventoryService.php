@@ -80,17 +80,17 @@ class InventoryService
                 $join->on('local_market_inventories.id', '=', 'local_market_eligible_quantities.inventory_id')
                     ->where('local_market_eligible_quantities.company_id', '=', $companyId);
             })
-            ->join('commodity_items', 'local_market_inventories.commodity_item_id', '=', 'commodity_items.id') // Join commodity_items
+            ->join('commodity_items', 'local_market_inventories.commodity_item_id', '=', 'commodity_items.id')
             ->where('local_market_inventories.status', InventoryStatus::Active)
             ->where('local_market_eligible_quantities.eligible_quantity', '>', 0)
-            ->where('commodity_items.max_price', '<=', $loanAmount) // Use max_price directly in the condition
+            ->where('commodity_items.max_price', '<=', $loanAmount)
             ->whereHas('item.type', function ($query) {
                 $query->where('status', CommodityTypeStatus::Active);
             })
             ->whereHas('supplier.detail', function ($query) {
                 $query->where('status', CommoitySupplierStatus::Active);
             })
-            ->orderBy('commodity_items.max_price', 'desc') // Order by max_price from the joined table
+            ->orderBy('commodity_items.max_price', 'desc')
             ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
             ->get();
 
