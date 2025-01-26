@@ -1,12 +1,11 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier\Users;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommoditySupplier\Users;
 
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
-use App\Models\CompanySupplierDetail;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Transformers\UserTransformer;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier\Auth;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier\Auth;
 
 use App\Enums\CommoitySupplierStatus;
 use App\Models\User;

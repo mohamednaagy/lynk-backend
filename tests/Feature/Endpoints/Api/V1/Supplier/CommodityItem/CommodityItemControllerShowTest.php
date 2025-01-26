@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier\CommodityItem;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier\CommodityItem;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -87,7 +87,7 @@ class CommodityItemControllerShowTest extends TestCase
             ->getJson($this->endpoint)
             ->assertOk()
             ->assertJson(
-                fractal(self::$item, new CommodityItemsTransformer())
+                fractal(self::$item, new CommodityItemsTransformer)
                     ->parseIncludes([
                         'id',
                         'name',

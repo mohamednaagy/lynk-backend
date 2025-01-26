@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier\CommodityItem\Inventory;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier\CommodityItem\Inventory;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -75,7 +75,7 @@ class InventoryControllerDeleteTest extends TestCase
             300
         );
 
-        $observer = new LocalMarketInventoryObserver();
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
@@ -163,22 +163,24 @@ class InventoryControllerDeleteTest extends TestCase
         ]);
     }
 
-    public function test_delete_inventory_stock_job_is_fired() {
+    public function test_delete_inventory_stock_job_is_fired()
+    {
         $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->deleteJson(self::$endpoint)
-        ->assertStatus(Response::HTTP_OK);
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
 
         Queue::assertPushed(DeleteInventory::class);
     }
 
-    public function test_inventory_units_are_soft_deleted() {
+    public function test_inventory_units_are_soft_deleted()
+    {
         $this
-        ->withHeader('X-Company', self::$supplier->id)
-        ->actingAs(self::$supplierAdmin)
-        ->deleteJson(self::$endpoint)
-        ->assertStatus(Response::HTTP_OK);
+            ->withHeader('X-Company', self::$supplier->id)
+            ->actingAs(self::$supplierAdmin)
+            ->deleteJson(self::$endpoint)
+            ->assertStatus(Response::HTTP_OK);
 
         // Manually dispatch the job immediately
         $job = new DeleteInventory(self::$inventory);

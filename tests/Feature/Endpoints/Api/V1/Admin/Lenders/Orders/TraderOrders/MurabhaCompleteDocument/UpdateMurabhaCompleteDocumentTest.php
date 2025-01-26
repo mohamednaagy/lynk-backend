@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -27,7 +27,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UpdateMurabhaCompleteDocumentTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 

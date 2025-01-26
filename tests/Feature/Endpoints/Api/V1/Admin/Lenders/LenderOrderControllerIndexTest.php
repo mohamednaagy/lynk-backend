@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -20,7 +20,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderOrderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $lender;
 
@@ -75,7 +75,7 @@ class LenderOrderControllerIndexTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer())->setArea(Area::SuperAdmin))
+                fractal(FinancingOrder::paginate(), (new FinancingOrderTransformer)->setArea(Area::SuperAdmin))
                     ->parseIncludes([
                         'id',
                         'status',

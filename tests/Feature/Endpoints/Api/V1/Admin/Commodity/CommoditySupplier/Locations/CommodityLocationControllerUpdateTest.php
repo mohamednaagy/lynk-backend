@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier\Locations;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommoditySupplier\Locations;
 
 use App\Models\Supplier;
 use App\Models\SupplierLocation;

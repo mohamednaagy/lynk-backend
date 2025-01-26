@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Bursam\V2;
+namespace Tests\Unit\Jobs\Bursam\V2;
 
 use App\Enums\BursamErrorCode;
 use App\Enums\FinancingOrderHistory;

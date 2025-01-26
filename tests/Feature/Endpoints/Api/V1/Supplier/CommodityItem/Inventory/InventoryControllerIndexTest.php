@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier\CommodityItem;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier\CommodityItem\Inventory;
 
 use App\Enums\Action;
 use App\Enums\Area;

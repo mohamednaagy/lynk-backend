@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Dmcc\V1;
+namespace Tests\Unit\Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithLender;
 
 class ProcessDmccPtpDocumentRetrievedOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     protected static Company $company;
 

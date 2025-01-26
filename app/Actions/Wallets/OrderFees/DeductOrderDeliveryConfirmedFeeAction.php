@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Actions\Wallets;
+namespace App\Actions\Wallets\OrderFees;
 
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
-use App\Actions\Contracts\Wallets\DeductOrderDeliveryConfirmedFee;
+use App\Actions\Contracts\Wallets\OrderFees\DeductOrderDeliveryConfirmedFee;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Exceptions\NoMatchOrderCostAndValueException;
@@ -18,8 +18,7 @@ class DeductOrderDeliveryConfirmedFeeAction implements DeductOrderDeliveryConfir
         protected CreateTransactions $createTransactions,
         protected CalculateVatAmount $calculateVatAmount,
         protected GetProjectSettings $getProjectSettings,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws NoMatchOrderCostAndValueException

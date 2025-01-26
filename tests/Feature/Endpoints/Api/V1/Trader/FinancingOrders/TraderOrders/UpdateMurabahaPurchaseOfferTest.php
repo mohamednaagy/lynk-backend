@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -24,7 +24,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UpdateMurabahaPurchaseOfferTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 

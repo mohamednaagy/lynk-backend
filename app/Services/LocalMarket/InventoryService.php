@@ -182,7 +182,6 @@ class InventoryService
             Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
             $inventory->delete();
 
-            // (new LiveMarketService)->handleInventoryDeletion($inventory);
             Log::info("Success for deleting inventory ID: {$inventory->id}");
         } catch (\Exception $e) {
             Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");

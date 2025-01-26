@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Dmcc\V1;
+namespace Tests\Unit\Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
@@ -29,7 +29,7 @@ use Tests\Traits\InteractsWithLender;
 
 class ProcessDmccMpoOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     protected static Company $company;
 
@@ -192,23 +192,23 @@ class ProcessDmccMpoOrderTest extends TestCase
 
         (new ProcessDmccMpoOrder(self::$traderOrder->id))->handle();
 
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderHistories + 3);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), $traderHistories + 3);
+        $this->assertDatabaseHas((new TraderHistory)->getTable(), [
             'trader_order_id' => self::$traderOrder->id,
             'action' => FinancingOrderHistory::IssueMurabahaOffer,
         ]);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
+        $this->assertDatabaseHas((new TraderHistory)->getTable(), [
             'trader_order_id' => self::$traderOrder->id,
             'action' => FinancingOrderHistory::GetMurabahaPurchaseOfferDocument,
         ]);
-        $this->assertDatabaseHas((new TraderHistory())->getTable(), [
+        $this->assertDatabaseHas((new TraderHistory)->getTable(), [
             'trader_order_id' => self::$traderOrder->id,
             'action' => FinancingOrderHistory::AttachMpoDocument,
         ]);
 
-        $this->assertDatabaseCount((new Media())->getTable(), $media + 1);
+        $this->assertDatabaseCount((new Media)->getTable(), $media + 1);
 
-        $this->assertDatabaseHas((new Media())->getTable(), [
+        $this->assertDatabaseHas((new Media)->getTable(), [
             'model_id' => self::$traderOrder->id,
             'model_type' => (new TraderOrder)->getMorphClass(),
             'collection_name' => TraderOrderMediaCollection::MurabahaPurchaseOrder,
