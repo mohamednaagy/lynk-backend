@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Traders\Users;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders\Users;
 
 use App\Enums\Area;
 use App\Models\Company;
@@ -14,7 +14,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class UserControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, RefreshDatabase;
 
     private static User $userAdmin;
 
@@ -26,9 +26,6 @@ class UserControllerShowTest extends TestCase
 
     private static string $endPoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -39,9 +36,6 @@ class UserControllerShowTest extends TestCase
         self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users/'.self::$userTraderAdmin->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_show_trader_user(): void
     {
         $this->getJson(self::$endPoint)
@@ -51,9 +45,6 @@ class UserControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_show_trader_user(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -77,9 +68,6 @@ class UserControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_super_admin_roles_can_show_trader_user(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Trader, function ($user, $role) {

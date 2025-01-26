@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier\CommodityItem\Inventory;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier\CommodityItem;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -76,7 +76,7 @@ class CommodityItemControllerDeleteTest extends TestCase
             300
         );
 
-        $observer = new LocalMarketInventoryObserver();
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
@@ -84,8 +84,8 @@ class CommodityItemControllerDeleteTest extends TestCase
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
-            'name' . rand(11, 999),
-            'unique name' . rand(11, 999),
+            'name'.rand(11, 999),
+            'unique name'.rand(11, 999),
             'Test Description',
         );
 
@@ -109,7 +109,7 @@ class CommodityItemControllerDeleteTest extends TestCase
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierItems, Action::Delete])
         );
 
-        self::$endpoint = 'api/v1/supplier/commodity-items/' . self::$inventory->commodity_item_id;
+        self::$endpoint = 'api/v1/supplier/commodity-items/'.self::$inventory->commodity_item_id;
 
         self::$inventory2 = [
             'location_id' => self::$location->id,

@@ -1,23 +1,19 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\LynkMurabhaCompleteDocument;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\LynkMurabhaCompleteDocument;
 
-use App\Enums\Area;
 use App\Enums\ErrorCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
-use App\Enums\TraderOrderStatus;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\Sms\Events\SmsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
@@ -29,7 +25,7 @@ use Tests\Traits\InteractsWithSupplier;
 
 class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea, InteractsWithSupplier;
+    use AssertsAccessByRoleAndArea, InteractsWithSupplier, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -91,12 +87,12 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
     public function test_that_other_area_roles_of_not_super_admin_area_cant_update_sell_confirmation_document(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
-        ->reset()
-        ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
+            ->reset()
+            ->moveToStep(MurabhaStep::MurabahaSaleCompleted);
 
-    $this->actingAs(self::$userLender)
-        ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
-        ->assertForbidden();
+        $this->actingAs(self::$userLender)
+            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData)
+            ->assertForbidden();
     }
 
     public function test_proceed_sell_confirmation_document_is_successful_and_order_status_will_be_updated(): void

@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\PurchasingCommodity;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\PurchasingCommodity;
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
@@ -28,7 +28,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UpdatePurchasingCommodityTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -162,7 +162,7 @@ class UpdatePurchasingCommodityTest extends TestCase
 
         $this->actingAs(self::$superAdminUser)
             ->postJson(self::$updatePurchasingCommodityUrl, self::$requestData)
-            ->assertJson(fractal(self::$traderOrder->fresh(), (new TraderOrderTransformer())->setArea(Area::SuperAdmin))
+            ->assertJson(fractal(self::$traderOrder->fresh(), (new TraderOrderTransformer)->setArea(Area::SuperAdmin))
                 ->parseIncludes(
                     'purchasing_commodity_information',
                 )

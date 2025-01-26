@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Constants\ConstantController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryReplyController;
@@ -70,7 +71,6 @@ use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
-use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use Illuminate\Support\Facades\Route;
 
 /*

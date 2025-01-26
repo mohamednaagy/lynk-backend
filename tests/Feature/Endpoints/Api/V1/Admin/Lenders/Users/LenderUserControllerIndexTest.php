@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Users;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Users;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -20,7 +20,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderUserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $lender;
 

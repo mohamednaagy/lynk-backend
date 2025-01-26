@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
 
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
@@ -106,7 +106,7 @@ class CommoditySupplierControllerStoreTest extends TestCase
             ->postJson($this->endpoint, self::$commoditySuppllier)
             ->assertOk()
             ->assertExactJson(
-                fractal(Company::where('type', CompanyType::Supplier)->latest()->first(), new CommoditySuppliersTransformer())
+                fractal(Company::where('type', CompanyType::Supplier)->latest()->first(), new CommoditySuppliersTransformer)
                     ->parseIncludes([
                         'id',
                         'legal_name',

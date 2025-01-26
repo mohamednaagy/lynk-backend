@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Orders;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Orders;
 
 use App\Enums\Action;
 use App\Enums\Area;

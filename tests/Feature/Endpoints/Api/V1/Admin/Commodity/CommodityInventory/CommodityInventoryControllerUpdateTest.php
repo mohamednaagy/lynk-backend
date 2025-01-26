@@ -10,7 +10,6 @@ use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\CommodityType;
 use App\Models\User; // Added import for CommodityType
 use App\Observers\LocalMarketInventoryObserver;
-use App\Services\LocalMarket\LiveMarketService;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,7 +69,7 @@ class CommodityInventoryControllerUpdateTest extends TestCase
             300
         );
 
-        $observer = new LocalMarketInventoryObserver(new LiveMarketService);
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);

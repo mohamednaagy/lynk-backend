@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Lender\Wallet;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\Wallet;
 
 use App\Enums\Role;
 use App\Enums\TransactionReason;
@@ -49,7 +49,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->fresh()->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    self::$company->fresh()->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer)
                     ->parseIncludes([
                         'id',
                         'date',
@@ -72,7 +72,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(2, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->latest('id')->paginate(), new TransactionTransformer())
+                    self::$company->transactions(WalletType::CompanyWallet)->latest('id')->paginate(), new TransactionTransformer)
                     ->parseIncludes([
                         'id',
                         'date',
@@ -96,7 +96,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer)
                     ->parseIncludes([
                         'id',
                         'date',
@@ -120,7 +120,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer)
                     ->parseIncludes([
                         'id',
                         'date',
@@ -144,7 +144,7 @@ class GetWalletTransactionsTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertExactJson(
                 fractal(
-                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer())
+                    self::$company->transactions(WalletType::CompanyWallet)->paginate(), new TransactionTransformer)
                     ->parseIncludes([
                         'id',
                         'date',

@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Bursam\V2;
+namespace Tests\Unit\Jobs\Bursam\V2;
 
 use App\Actions\Contracts\Orders\TraderOrders\InitiateTraderOrder;
 use App\Models\Company;
@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithUser;
 
 class ProcessBursamInitiateTraderOrderTest extends TestCase
 {
-    use RefreshDatabase,  InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany,  InteractsWithUser, RefreshDatabase;
 
     protected static CommittedOrder $financingOrder;
 

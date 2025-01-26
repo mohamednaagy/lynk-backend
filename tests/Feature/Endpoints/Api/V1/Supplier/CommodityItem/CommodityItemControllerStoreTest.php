@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier\CommodityItem;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier\CommodityItem;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -180,7 +180,7 @@ class CommodityItemControllerStoreTest extends TestCase
             ->postJson($this->endpoint, self::$commodityItem2)
             ->assertOk()
             ->assertExactJson(
-                fractal(CommodityItem::orderBy('id', 'desc')->first(), new CommodityItemsTransformer())
+                fractal(CommodityItem::orderBy('id', 'desc')->first(), new CommodityItemsTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
@@ -213,7 +213,7 @@ class CommodityItemControllerStoreTest extends TestCase
             ->postJson($this->endpoint, self::$commodityItem)
             ->assertOk()
             ->assertExactJson(
-                fractal(CommodityItem::orderBy('id', 'desc')->first(), new CommodityItemsTransformer())
+                fractal(CommodityItem::orderBy('id', 'desc')->first(), new CommodityItemsTransformer)
                     ->parseIncludes([
                         'id',
                         'name',

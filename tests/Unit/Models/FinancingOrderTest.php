@@ -1,6 +1,6 @@
 <?php
 
-namespace Models;
+namespace Tests\Unit\Models;
 
 use App\Enums\MurabhaStep;
 use App\Models\TraderOrder;
@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithUser;
 
 class FinancingOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected CommittedOrder $financingOrder;
 

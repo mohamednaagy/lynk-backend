@@ -10,7 +10,6 @@ use App\Jobs\LocalMarket\DeleteInventory;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
-use App\Services\LocalMarket\LiveMarketService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
@@ -70,7 +69,7 @@ class CommodityInventoryControllerDeleteTest extends TestCase
             300
         );
 
-        $observer = new LocalMarketInventoryObserver(new LiveMarketService);
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
