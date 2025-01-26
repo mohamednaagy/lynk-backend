@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\LocalMarket\Test;
 
 use App\Http\Controllers\Controller;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,9 @@ class LoanController extends Controller
 
             $this->logInfo('Loan Amount', ['loan' => $loan]);
             $this->logInfo('Inventories', ['inventories' => $inventories]);
+
+            // Check the sum and compare it with the loan amount
+            $this->loanCoverageFastChecking($loan, $inventories);
 
             // Initialize necessary variables
             $loanRemaining = $loan;
@@ -140,7 +144,7 @@ class LoanController extends Controller
                 'elapsed_time' => $elapsedTime,
                 'extra' => [
                     'msg' => '',
-                    'suggested_inventories' => $loanDeadAmount,
+                    'suggested_inventories' => $result['uncovered'] == 0 ? [] : $loanDeadAmount,
                 ],
                 'inventories' => [],
             ];
@@ -173,11 +177,9 @@ class LoanController extends Controller
 
             return response()->json($response);
 
-        } catch (\Exception $e) {
-            $message = empty($loanDeadAmount) ? $e->getMessage().' NOTE: The loan is covered but with more than 10k items' : $e->getMessage();
-
+        } catch (Exception $e) {
             $this->logInfo('Loan uncovered', $loanDeadAmount);
-            $this->logInfo($message);
+            $this->logInfo($e->getMessage());
 
             $endTime = microtime(true);
             $elapsedTime = round(($endTime - $startTime), 4);
@@ -188,7 +190,7 @@ class LoanController extends Controller
                 'total_price' => 0,
                 'elapsed_time' => $elapsedTime,
                 'extra' => [
-                    'msg' => $message,
+                    'msg' => $e->getMessage(),
                     'suggested_inventories' => $loanDeadAmount,
                 ],
                 'inventories' => [],
@@ -255,6 +257,26 @@ class LoanController extends Controller
             'uncovered' => max(0, $loanRemaining),
             'usedSuppliers' => $usedSuppliers,
         ];
+    }
+
+    private function loanCoverageFastChecking($loan, $inventories): void
+    {
+        $totalValue = 0;
+        $totalItemsUsed = 0;
+
+        foreach ($inventories as $inventory) {
+            if ($totalItemsUsed >= 10000) {
+                break;
+            }
+
+            $itemsToUse = min($inventory['count'], 10000 - $totalItemsUsed);
+            $totalValue += $itemsToUse * $inventory['price'];
+            $totalItemsUsed += $itemsToUse;
+        }
+
+        if ($totalValue < $loan) {
+            throw new Exception("The loan cannot be covered. Accumulated value for the first 10K items: $totalValue", 422);
+        }
     }
 
     /**
