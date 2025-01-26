@@ -40,7 +40,7 @@ class InventoryService
 
         if (! empty($preferredItemTypes)) {
             $filteredInventories = $inventories->filter(function ($inventory) use ($preferredItemTypes) {
-                return in_array($inventory->commodity_type_id, $preferredItemTypes);
+                return in_array($inventory->item->commodity_type_id, $preferredItemTypes);
             });
 
             $combination = $this->findOptimalCombination($filteredInventories, $loanAmount, $preferredItemTypes);
@@ -74,23 +74,26 @@ class InventoryService
             ->select([
                 'local_market_inventories.*',
                 'local_market_eligible_quantities.eligible_quantity as available_quantity',
+                'commodity_items.max_price as item_max_price', // Select max_price for ordering
             ])
             ->join('local_market_eligible_quantities', function ($join) use ($companyId) {
                 $join->on('local_market_inventories.id', '=', 'local_market_eligible_quantities.inventory_id')
                     ->where('local_market_eligible_quantities.company_id', '=', $companyId);
             })
+            ->join('commodity_items', 'local_market_inventories.commodity_item_id', '=', 'commodity_items.id') // Join commodity_items
             ->where('local_market_inventories.status', InventoryStatus::Active)
-            ->where('local_market_inventories.available_quantity', '>', 0)
-            ->where('local_market_inventories.max_price', '<=', $loanAmount)
-            ->whereHas('type', function ($query) {
+            ->where('local_market_eligible_quantities.eligible_quantity', '>', 0)
+            ->where('commodity_items.max_price', '<=', $loanAmount) // Use max_price directly in the condition
+            ->whereHas('item.type', function ($query) {
                 $query->where('status', CommodityTypeStatus::Active);
             })
             ->whereHas('supplier.detail', function ($query) {
                 $query->where('status', CommoitySupplierStatus::Active);
             })
-            ->orderBy('local_market_inventories.max_price', 'DESC')
+            ->orderBy('commodity_items.max_price', 'desc') // Order by max_price from the joined table
             ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
             ->get();
+
     }
 
     private function findOptimalCombination($inventories, $loanAmount, array $preferredCommodities)
