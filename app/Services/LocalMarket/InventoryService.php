@@ -35,26 +35,29 @@ class InventoryService
         $companyId = $localMarketOrder->company_id;
         $preferredItemTypes = $localMarketOrder->preferred_commodity_type;
 
-        $forcePreferredCommodityType = $localMarketOrder->lender
+        $forcePreferredCommodityType = $localMarketOrder
+            ->lender
             ->lenderDetail
             ->force_preferred_commodity_type;
+
         // $inventories = $this->findEligibleInventoriesForLoanVersionOne($loanAmount);
-        if (! empty($preferredItemTypes)) {
-            $preferredInventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId, $preferredItemTypes);
+        // First try with preferred commodity types
+        $preferredInventories = $this->findEligibleInventoriesForLoanVersionTwo(
+            $loanAmount,
+            $companyId,
+            $preferredItemTypes
+        );
+        $combination = $this->findOptimalCombination($preferredInventories, $loanAmount);
 
-            $combination = $this->findOptimalCombination($preferredInventories, $loanAmount);
-            // if force is set to true return combination even is null
-            if ($forcePreferredCommodityType) {
-                return $combination ?? null;
-            }
-            // return the combination if preferred type and not forced but it has covered the loan
-            if (! empty($combination)) {
-                return $combination;
-            }
-            // get all inventories and try to cover the loan amount
-            $inventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
+        // Return combination if found or if we must use preferred types
+        if ($forcePreferredCommodityType || ! empty($combination)) {
+            return $combination;
+        } else {
+            // Fallback to all inventory types if allowed
 
-            return $this->findOptimalCombination($inventories, $loanAmount, $preferredItemTypes);
+            $allInventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
+
+            return $this->findOptimalCombination($allInventories, $loanAmount);
         }
     }
 
