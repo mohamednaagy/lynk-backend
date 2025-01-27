@@ -4,7 +4,6 @@ namespace App\Observers;
 
 use App\Actions\Commodities\CommodityType\UpdateCommodityTypeStatusAction;
 use App\Models\CommodityType;
-use App\Services\LocalMarket\LiveMarketService;
 
 class CommodityTypeObserver
 {
@@ -12,14 +11,10 @@ class CommodityTypeObserver
 
     protected $UpdateCommodityTypeStatusAction;
 
-    protected LiveMarketService $liveMarketService;
-
     public function __construct(
-        UpdateCommodityTypeStatusAction $UpdateCommodityTypeStatusAction,
-        LiveMarketService $liveMarketService
+        UpdateCommodityTypeStatusAction $UpdateCommodityTypeStatusAction
     ) {
         $this->UpdateCommodityTypeStatusAction = $UpdateCommodityTypeStatusAction;
-        $this->liveMarketService = $liveMarketService;
     }
 
     /**

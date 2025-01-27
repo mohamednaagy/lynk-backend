@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Actions\Commodities\CommoditySupplier\UpdateCommoditySupplierStatusAction;
-use App\Jobs\LocalMarket\LiveMarket\HandleSupplierStatusChange;
 use App\Models\CompanySupplierDetail;
 
 class CommoditySupplierObserver
@@ -26,8 +25,6 @@ class CommoditySupplierObserver
     {
         if ($supplierDetails->wasChanged('status')) {
             // Handle supplier status changes
-            // should run before updating the status in the inventories table
-            // HandleSupplierStatusChange::dispatch($supplierDetails->supplier);
             $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
 
         }

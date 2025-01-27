@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Contracts\Wallets;
+namespace App\Actions\Contracts\Wallets\OrderFees;
 
 use App\Models\TraderOrder;
 

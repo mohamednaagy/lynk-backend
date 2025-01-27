@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Lender\Wallet\Notification;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\Wallet\Notification;
 
 use App\Enums\Role;
 use App\Enums\WalletNotificationType;
@@ -15,8 +15,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class WalletNotificationControllerIndexTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $company;
 

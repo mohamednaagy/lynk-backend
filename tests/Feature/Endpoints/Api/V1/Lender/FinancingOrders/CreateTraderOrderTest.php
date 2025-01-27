@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Lender\FinancingOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
@@ -20,7 +20,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CreateTraderOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 

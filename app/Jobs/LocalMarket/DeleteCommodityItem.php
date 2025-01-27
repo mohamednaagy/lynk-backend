@@ -4,7 +4,6 @@ namespace App\Jobs\LocalMarket;
 
 use App\Models\CommodityItem;
 use App\Services\LocalMarket\InventoryService;
-use App\Services\LocalMarket\LiveMarketService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -28,14 +27,13 @@ class DeleteCommodityItem implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(LiveMarketService $liveMarketService, InventoryService $inventoryService): void
+    public function handle(InventoryService $inventoryService): void
     {
         try {
-            DB::transaction(function () use ($liveMarketService, $inventoryService) {
+            DB::transaction(function () use ($inventoryService) {
                 $this->logStartDeletion();
 
                 $this->deleteRelatedInventories($inventoryService);
-                $this->deleteLiveMarketRecords($liveMarketService);
                 $this->deleteCommodityItem();
 
                 $this->logSuccessfulDeletion();
@@ -54,14 +52,6 @@ class DeleteCommodityItem implements ShouldQueue
         $this->commodityItem->inventories->each(function ($inventory) use ($inventoryService) {
             $inventoryService->deleteInventory($inventory);
         });
-    }
-
-    /**
-     * Delete live market records
-     */
-    private function deleteLiveMarketRecords(LiveMarketService $liveMarketService): void
-    {
-        $liveMarketService->handleCommodityItemDeletion($this->commodityItem);
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Supplier;
+namespace Tests\Feature\Endpoints\Api\V1\Supplier;
 
 use App\Enums\Area;
 use App\Enums\CompanyType;

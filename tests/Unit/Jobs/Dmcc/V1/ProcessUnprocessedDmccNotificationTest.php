@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Dmcc\V1;
+namespace Tests\Unit\Jobs\Dmcc\V1;
 
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
@@ -24,7 +24,7 @@ use Tests\Traits\InteractsWithLender;
 
 class ProcessUnprocessedDmccNotificationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     protected static Company $company;
 

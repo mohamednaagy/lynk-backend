@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier\Users;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommoditySupplier\Users;
 
 use App\Enums\Role;
 use App\Mail\ChangeEmail;

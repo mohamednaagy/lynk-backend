@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommodityInventory;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommodityInventory;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -10,7 +10,6 @@ use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
-use App\Services\LocalMarket\LiveMarketService;
 use App\Transformers\LocalMarketInventoryTransformer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -169,9 +168,8 @@ class CommodityInventoryControllerStoreTest extends TestCase
         $numberOfUnits = 5;
         $inventory = $this->createInventory(self::$supplier, $numberOfUnits);
 
-        $liveMarketService = app(LiveMarketService::class);
         // Trigger the observer manually
-        $observer = new LocalMarketInventoryObserver($liveMarketService);
+        $observer = new LocalMarketInventoryObserver;
         $observer->created($inventory);
 
         // Verify the job was pushed

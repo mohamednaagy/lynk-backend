@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Users;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Users;
 
 use App\Enums\Area;
 use App\Mail\CompleteRegisterInvitation;
@@ -14,7 +14,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class ResendInvitationToUserTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $lender;
 

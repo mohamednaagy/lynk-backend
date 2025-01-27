@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Endpoints\Api\V1\Admin\Settings\Lender;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Settings\LocalMurabaha;
 
 use App\Enums\Action;
 use App\Enums\Area;
