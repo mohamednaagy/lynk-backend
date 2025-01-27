@@ -45,7 +45,7 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
 
     public function includeCommodityTypeId(LocalMarketInventory $inventory): Primitive
     {
-        return $this->primitive($inventory->commodity_type_id);
+        return $this->primitive($inventory->type->id);
     }
 
     public function includeCompanyId(LocalMarketInventory $inventory): Primitive
@@ -89,12 +89,12 @@ class LocalMarketInventoryTransformer extends TransformerAbstract
 
     public function includeMinPrice(LocalMarketInventory $inventory): Primitive
     {
-        return $this->primitive($inventory->min_price);
+        return $this->primitive($inventory->item->max_price);
     }
 
     public function includeMaxPrice(LocalMarketInventory $inventory): Primitive
     {
-        return $this->primitive($inventory->max_price);
+        return $this->primitive($inventory->item->max_price);
     }
 
     public function includeTotalItems(LocalMarketInventory $inventory): Primitive
