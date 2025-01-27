@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1\Admin\Constant;
+namespace App\Http\Controllers\Api\V1\Admin\Constants;
 
 use App\Actions\Contracts\GetConstantApi;
 use App\Enums\Action;

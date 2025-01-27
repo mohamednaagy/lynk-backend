@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommodityType;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommodityType;
 
 use App\Enums\Role;
 use App\Models\CommodityType;

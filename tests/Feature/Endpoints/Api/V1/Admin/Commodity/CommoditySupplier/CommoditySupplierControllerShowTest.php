@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
 
 use App\Enums\Role;
 use App\Models\User;
@@ -53,7 +53,7 @@ class CommoditySupplierControllerShowTest extends TestCase
             ->getJson($this->endpoint)
             ->assertOk()
             ->assertJson(
-                fractal(self::$supplier->company, new CommoditySuppliersTransformer())
+                fractal(self::$supplier->company, new CommoditySuppliersTransformer)
                     ->parseIncludes([
                         'id',
                         'legal_name',

@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders\MurabhaPurchaseOffer;
 
 use App\Enums\Area;
 use App\Enums\FinancingOrderStatus;
@@ -21,7 +21,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetMurabhaPurchaseOfferTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -37,9 +37,6 @@ class GetMurabhaPurchaseOfferTest extends TestCase
 
     private static string $getMurabhaPurchaseOfferUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -73,9 +70,6 @@ class GetMurabhaPurchaseOfferTest extends TestCase
             '/murabha-purchase-offer';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_get_murabha_purchase_offer(): void
     {
         $this->getJson(self::$getMurabhaPurchaseOfferUrl)
@@ -85,9 +79,6 @@ class GetMurabhaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_get_murabha_purchase_offer(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -103,8 +94,6 @@ class GetMurabhaPurchaseOfferTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */

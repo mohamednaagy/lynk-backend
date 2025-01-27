@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Dmcc\V1;
+namespace Tests\Unit\Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
@@ -20,7 +20,7 @@ use Tests\Traits\InteractsWithUser;
 
 class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 

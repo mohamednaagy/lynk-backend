@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Dmcc\V1;
+namespace Tests\Unit\Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -21,7 +21,7 @@ use Throwable;
 
 class ProcessDmccCancelNotificationTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     protected static Company $company;
 

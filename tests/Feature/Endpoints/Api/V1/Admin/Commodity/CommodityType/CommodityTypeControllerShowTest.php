@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommodityType;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommodityType;
 
 use App\Enums\Role;
 use App\Models\User;
@@ -53,7 +53,7 @@ class CommodityTypeControllerShowTest extends TestCase
             ->getJson($this->endpoint)
             ->assertOk()
             ->assertJson(
-                fractal(self::$type, new CommodityTypeTransformer())
+                fractal(self::$type, new CommodityTypeTransformer)
                     ->parseIncludes([
                         'id',
                         'name',

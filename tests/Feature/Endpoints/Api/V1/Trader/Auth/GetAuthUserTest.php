@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Trader\Auth;
+namespace Tests\Feature\Endpoints\Api\V1\Trader\Auth;
 
 use App\Enums\Area;
 use App\Enums\CompanyType;
@@ -16,7 +16,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetAuthUserTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -25,8 +25,6 @@ class GetAuthUserTest extends TestCase
     private static User $userTrader;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -37,9 +35,6 @@ class GetAuthUserTest extends TestCase
         self::$userTrader = $this->createTraderUser(self::$company->id);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_fetch_his_details(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -50,9 +45,6 @@ class GetAuthUserTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_trader_user_can_fetch_his_details(): void
     {
         $this->assertStatusCodeForAreaRoles(Response::HTTP_OK, Area::Trader, function ($user) {
@@ -82,9 +74,6 @@ class GetAuthUserTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_other_roles_unless_trader_cant_acess(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(

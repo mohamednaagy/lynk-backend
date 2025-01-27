@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Commodity\CommodityType;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommodityType;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -103,7 +103,7 @@ class CommodityTypeControllerStoreTest extends TestCase
             ->postJson($this->endpoint, self::$commodityType)
             ->assertOk()
             ->assertExactJson(
-                fractal(CommodityType::latest()->first(), new CommodityTypeTransformer())
+                fractal(CommodityType::latest()->first(), new CommodityTypeTransformer)
                     ->parseIncludes([
                         'id',
                         'name',

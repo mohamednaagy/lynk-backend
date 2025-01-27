@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -23,7 +23,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetCommodityCertificateForClientTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -43,9 +43,6 @@ class GetCommodityCertificateForClientTest extends TestCase
 
     private static string $fileName;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -86,9 +83,6 @@ class GetCommodityCertificateForClientTest extends TestCase
         self::$fileName = self::$traderOrder->provider.'-'.self::$traderOrder->reference.'.pdf';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_get_selling_commodity_certificate(): void
     {
         $this->getJson(self::$endpoint)
@@ -98,9 +92,6 @@ class GetCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_get_selling_commodity_certificate(): void
     {
         $this->assertStatusCodeExceptForPermissions(
@@ -120,8 +111,6 @@ class GetCommodityCertificateForClientTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */
@@ -141,9 +130,6 @@ class GetCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_manager_with_proper_permissions_can_access(): void
     {
         $this->assignPermissionToUser(self::$managerUser, perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show]));
@@ -153,9 +139,6 @@ class GetCommodityCertificateForClientTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_manager_without_proper_permissions_cannot_access(): void
     {
         $this->actingAs(self::$managerUser)

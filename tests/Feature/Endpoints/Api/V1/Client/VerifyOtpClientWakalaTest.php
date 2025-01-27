@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Client;
+namespace Tests\Feature\Endpoints\Api\V1\Client;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\Role;
@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class VerifyOtpClientWakalaTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 

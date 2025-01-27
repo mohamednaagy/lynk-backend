@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\Traders\Users;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Traders\Users;
 
 use App\Enums\Area;
 use App\Enums\Role;
@@ -15,7 +15,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static User $userAdmin;
 
@@ -26,8 +26,6 @@ class UserControllerIndexTest extends TestCase
     private static LengthAwarePaginator $traderUsersCollection;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -51,9 +49,6 @@ class UserControllerIndexTest extends TestCase
         })->paginate();
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_index_trader_users(): void
     {
         $this->getJson('api/v1/admin/traders/'.self::$traderCompany->id.'/users')
@@ -63,9 +58,6 @@ class UserControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_index_trader_users(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -89,9 +81,6 @@ class UserControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_only_super_admin_roles_can_index_trader_users(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {

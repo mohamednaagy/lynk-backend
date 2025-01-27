@@ -1,6 +1,6 @@
 <?php
 
-namespace Jobs\Dmcc\V1;
+namespace Tests\Unit\Jobs\Dmcc\V1;
 
 use App\Enums\FinancingOrderHistory;
 use App\Models\Company;
@@ -21,7 +21,7 @@ use Tests\Traits\InteractsWithUser;
 
 class ProcessDmccPtpNotificationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 

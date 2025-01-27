@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Lender\FinancingOrders;
+namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\CompanyStatus;
 use App\Enums\FinancingOrderStatus;
@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithUser;
 
 class ApproveOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -29,9 +29,6 @@ class ApproveOrderTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

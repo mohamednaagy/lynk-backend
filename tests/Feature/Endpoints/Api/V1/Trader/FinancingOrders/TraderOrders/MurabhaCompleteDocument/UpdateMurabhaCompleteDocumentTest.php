@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDocument;
+namespace Tests\Feature\Endpoints\Api\V1\Trader\FinancingOrders\TraderOrders\MurabhaCompleteDocument;
 
 use App\Enums\Area;
 use App\Enums\ErrorCode;
