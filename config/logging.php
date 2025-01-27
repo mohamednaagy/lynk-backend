@@ -127,28 +127,28 @@ return [
 
         'bursam' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/bursam/bursam.log'),
+            'path' => storage_path('logs/bursam/'.php_sapi_name().'bursam.log'),
             'level' => 'debug',
             'days' => 30,
             'permission' => 0664,
         ],
         'local_market' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/local_market/local_market.log'),
+            'path' => storage_path('logs/local_market/'.php_sapi_name().'local_market.log'),
             'level' => 'debug',
             'days' => 30,
             'permission' => 0664,
         ],
         'orders' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/orders/order-log.log'),
+            'path' => storage_path('logs/orders/'.php_sapi_name().'order-log.log'),
             'level' => 'debug',
             'days' => 30,
             'permission' => 0664,
         ],
         'live_market' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/live-market/live-market.log'),
+            'path' => storage_path('logs/live-market/'.php_sapi_name().'live-market.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
             'permission' => 0664,

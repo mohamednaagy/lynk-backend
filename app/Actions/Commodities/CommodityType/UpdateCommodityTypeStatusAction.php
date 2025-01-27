@@ -17,7 +17,9 @@ class UpdateCommodityTypeStatusAction
     {
         $activeSuppliers = Supplier::withSupplierStatus(CommoitySupplierStatus::Active)->pluck('id');
         // Update inventory status based on commodity type status
-        LocalMarketInventory::where('commodity_type_id', $commodityTypeId)
+        LocalMarketInventory::whereHas('item', function ($query) use ($commodityTypeId) {
+            $query->where('commodity_type_id', $commodityTypeId);
+        })
             ->whereIn('company_id', $activeSuppliers)
             ->chunkById(100, function ($inventories) use ($commodityStatus) {
                 foreach ($inventories as $inventory) {

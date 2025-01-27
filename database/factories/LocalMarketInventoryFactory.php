@@ -20,12 +20,7 @@ class LocalMarketInventoryFactory extends Factory
         return [
             'company_id' => Supplier::factory(), // Assumes a Supplier factory exists
             'commodity_item_id' => CommodityItem::factory(), // Assumes a CommodityItem factory exists
-            'commodity_type_id' => function (array $attributes) {
-                return CommodityItem::find($attributes['commodity_item_id'])->commodity_type_id;
-            },
             'supplier_location_id' => SupplierLocation::factory(), // Assumes a SupplierLocation factory exists
-            'min_price' => $this->faker->randomFloat(2, 10, 100),
-            'max_price' => $this->faker->randomFloat(2, 101, 500),
             'reserved_items' => $this->faker->numberBetween(0, 50),
             'available_quantity' => $this->faker->numberBetween(50, 1000),
             'status' => $this->faker->randomElement([

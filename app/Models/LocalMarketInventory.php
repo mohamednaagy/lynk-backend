@@ -18,11 +18,8 @@ class LocalMarketInventory extends Model
 
     protected $fillable = [
         'commodity_item_id',
-        'commodity_type_id',
         'supplier_location_id',
         'company_id',
-        'min_price',
-        'max_price',
         'reserved_items',
         'available_quantity',
         'status',
@@ -50,7 +47,14 @@ class LocalMarketInventory extends Model
 
     public function type()
     {
-        return $this->belongsTo(CommodityType::class, 'commodity_type_id');
+        return $this->hasOneThrough(
+            CommodityType::class,
+            CommodityItem::class,
+            'id',
+            'id',
+            'commodity_item_id',
+            'commodity_type_id'
+        );
     }
 
     public function item()
@@ -109,7 +113,7 @@ class LocalMarketInventory extends Model
 
     public function price()
     {
-        return $this->max_price;
+        return $this->item->max_price;
     }
 
     /**

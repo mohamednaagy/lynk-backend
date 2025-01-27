@@ -42,10 +42,7 @@ trait InteractsWithCommodityInventory
         return LocalMarketInventory::create([
             'company_id' => $supplier->id,
             'commodity_item_id' => $item->id,
-            'commodity_type_id' => $item->commodity_type_id,
             'supplier_location_id' => $location->id,
-            'min_price' => $item->min_price,
-            'max_price' => $item->max_price,
             'reserved_items' => 0,
             'available_quantity' => $total_units,
             'status' => LocalMarketInventoryStatus::Pending,

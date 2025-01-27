@@ -493,7 +493,7 @@ class LiveMarketService
                 ],
                 [
                     'commodity_item_id' => $inventory->commodity_item_id,
-                    'commodity_type_id' => $inventory->commodity_type_id,
+                    'commodity_type_id' => $inventory->item->commodity_type_id,
                     'supplier_id' => $inventory->company_id,
                     'price' => $inventory->item->max_price,
                     'eligible_quantity' => $eligibleQuantity,
