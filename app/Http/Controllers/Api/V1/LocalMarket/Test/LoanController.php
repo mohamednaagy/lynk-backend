@@ -4,51 +4,48 @@ namespace App\Http\Controllers\Api\V1\LocalMarket\Test;
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class LoanController extends Controller
 {
+    private const MAX_USED_ITEMS = 10000;
+
+    private const MAX_EXECUTION_TIME = 3;
+
     /**
      * Public method to calculate loan coverage
      */
-    public function calculateLoanCoverage(Request $request)
+    public function calculateLoanCoverage(Request $request): JsonResponse
     {
         $loanDeadAmount = [];
-        $maxUsedItems = 10000;
+
+        // Start time
+        $startTime = microtime(true);
+
+        $loan = $request->input('loan');
+        $inventories = $request->input('inventories');
+
+        // Validate inputs
+        $request->validate([
+            'loan' => 'required|min:1',
+            'inventories' => 'required|array|min:1',
+            'inventories.*.id' => 'required|integer',
+            'inventories.*.price' => 'required|min:1',
+            'inventories.*.count' => 'required|integer|min:0',
+        ]);
+
+        $this->logInfo('Loan Amount', ['loan' => $loan]);
 
         try {
-            // Start time
-            $startTime = microtime(true);
-            $maxExecutionTime = 3;
-
-            // Start time
-            $startTime = microtime(true);
-
-            $loan = $request->input('loan');
-            $inventories = $request->input('inventories');
-
-            // Validate inputs
-            $validatedData = $request->validate([
-                'loan' => 'required|min:1',
-                'inventories' => 'required|array|min:1',
-                'inventories.*.id' => 'required|integer',
-                'inventories.*.price' => 'required|min:1',
-                'inventories.*.count' => 'required|integer|min:0',
-            ]);
-
             if (! is_numeric($loan) || intval($loan) != $loan) {
-                return response()->json([
-                    'status' => 'uncovered',
-                    'used_units' => 0,
-                    'total_price' => 0,
-                    'elapsed_time' => 0,
-                    'extra' => [
-                        'msg' => 'Loan has a fraction part',
-                    ],
-                    'inventories' => [],
-                ], 422);
+                $elapsedTime = $this->getElapsedTime($startTime);
+                $msg = 'Loan has a fraction part';
+                $output = $this->output($loan, $inventories, $elapsedTime, $loanDeadAmount, $msg);
+
+                return response()->json($output, 422);
             }
 
             // Step 1: Filter out inventories where price > loan
@@ -59,8 +56,14 @@ class LoanController extends Controller
                 return $b['price'] <=> $a['price'];
             });
 
-            $this->logInfo('Loan Amount', ['loan' => $loan]);
             $this->logInfo('Inventories', ['inventories' => $inventories]);
+
+            if (empty($inventories)) {
+                $elapsedTime = $this->getElapsedTime($startTime);
+                $output = $this->output($loan, $inventories, $elapsedTime, $loanDeadAmount);
+
+                return response()->json($output);
+            }
 
             // Check the sum and compare it with the loan amount
             $this->loanCoverageFastChecking($loan, $inventories);
@@ -77,11 +80,11 @@ class LoanController extends Controller
             $success = $this->processInventories($loanRemaining, $tempInventories, $queue, $inventoriesMap, $coverage);
 
             $itemUsed = count($queue);
-            if ($loanRemaining == 0 && $itemUsed > $maxUsedItems) {
+            if ($loanRemaining == 0 && $itemUsed > self::MAX_USED_ITEMS) {
                 $this->logInfo('Loan covered with ('.number_format($itemUsed).' Item) , so its unacceptable');
             }
 
-            while ((! $success && $loanRemaining > 0 && ! empty($queue)) || count($queue) > $maxUsedItems) {
+            while ((! $success && $loanRemaining > 0 && ! empty($queue)) || count($queue) > self::MAX_USED_ITEMS) {
                 $this->logInfo('Taken inventories map', $inventoriesMap);
 
                 if ($loanRemaining != 0 && ! in_array($loanRemaining, $loanDeadAmount)) {
@@ -89,7 +92,7 @@ class LoanController extends Controller
                 }
 
                 $elapsedTime = microtime(true) - $startTime;
-                if ($elapsedTime >= $maxExecutionTime) {
+                if ($elapsedTime >= self::MAX_EXECUTION_TIME) {
                     throw new \Exception('Request timeout!', Response::HTTP_REQUEST_TIMEOUT);
                 }
 
@@ -130,71 +133,21 @@ class LoanController extends Controller
             $result = $this->getLoanCoverageResult($coverage, $loanRemaining, $queue);
 
             // Prepare result in the desired format
-            $endTime = microtime(true);
-            $elapsedTime = round(($endTime - $startTime), 4);
+            $elapsedTime = $this->getElapsedTime($startTime);
 
-            if ($result['uncovered'] === $loan) {
-                $this->logInfo('Loan uncovered', $loanDeadAmount);
-            }
+            $output = $this->output($loan, $inventories, $elapsedTime, $loanDeadAmount, null, $result);
 
-            $response = [
-                'status' => $result['uncovered'] === 0 ? 'covered' : 'uncovered',
-                'used_units' => 0,
-                'total_price' => 0,
-                'elapsed_time' => $elapsedTime,
-                'extra' => [
-                    'msg' => '',
-                    'suggested_inventories' => $result['uncovered'] == 0 ? [] : $loanDeadAmount,
-                ],
-                'inventories' => [],
-            ];
-
-            // Initialize variables to accumulate used_units and total_price
-            $totalUsedUnits = 0;
-            $totalPriceCovered = 0;
-
-            foreach ($result['usedSuppliers'] as $inventoryIndex => $count) {
-                $inventory = $inventories[$inventoryIndex];
-                $totalPrice = $inventory['price'] * $count;
-
-                // Update total used units and total price covered
-                $totalUsedUnits += $count;
-                $totalPriceCovered += $totalPrice;
-
-                // Add inventory details to the response
-                $response['inventories'][] = [
-                    'inventory_id' => $inventory['id'],
-                    'actual_count' => $inventory['count'],
-                    'used_count' => $count,
-                    'price' => $inventory['price'],
-                    'total_price' => $totalPrice,
-                ];
-            }
-
-            // Set the total used units and total price in the response
-            $response['used_units'] = $totalUsedUnits;
-            $response['total_price'] = $totalPriceCovered;
-
-            return response()->json($response);
+            return response()->json($output);
 
         } catch (Exception $e) {
             $this->logInfo('Loan uncovered', $loanDeadAmount);
             $this->logInfo($e->getMessage());
 
-            $endTime = microtime(true);
-            $elapsedTime = round(($endTime - $startTime), 4);
+            $elapsedTime = $this->getElapsedTime($startTime);
 
-            return response()->json([
-                'status' => 'uncovered',
-                'used_units' => 0,
-                'total_price' => 0,
-                'elapsed_time' => $elapsedTime,
-                'extra' => [
-                    'msg' => $e->getMessage(),
-                    'suggested_inventories' => $loanDeadAmount,
-                ],
-                'inventories' => [],
-            ], $e->getCode());
+            $output = $this->output($loan, $inventories, $elapsedTime, $loanDeadAmount, $e->getMessage());
+
+            return response()->json($output, $e->getCode());
         }
     }
 
@@ -250,12 +203,12 @@ class LoanController extends Controller
      */
     private function getLoanCoverageResult(int $coverage, int $loanRemaining, array $queue): array
     {
-        $usedSuppliers = array_count_values($queue);
+        $usedInventories = array_count_values($queue);
 
         return [
             'coverage' => $coverage,
             'uncovered' => max(0, $loanRemaining),
-            'usedSuppliers' => $usedSuppliers,
+            'usedInventories' => $usedInventories,
         ];
     }
 
@@ -265,18 +218,89 @@ class LoanController extends Controller
         $totalItemsUsed = 0;
 
         foreach ($inventories as $inventory) {
-            if ($totalItemsUsed >= 10000) {
+            if ($totalItemsUsed >= self::MAX_USED_ITEMS) {
                 break;
             }
 
-            $itemsToUse = min($inventory['count'], 10000 - $totalItemsUsed);
+            $itemsToUse = min($inventory['count'], self::MAX_USED_ITEMS - $totalItemsUsed);
             $totalValue += $itemsToUse * $inventory['price'];
             $totalItemsUsed += $itemsToUse;
         }
 
         if ($totalValue < $loan) {
-            throw new Exception("The loan cannot be covered. Accumulated value for the first 10K items: $totalValue", 422);
+            throw new Exception('The loan cannot be covered. Accumulated value for the first '.self::MAX_USED_ITEMS." items: $totalValue", 422);
         }
+    }
+
+    private function output($loan, array $inventories, $elapsedTime, array $loanDeadAmount, ?string $msg = null, array $coverageResult = []): array
+    {
+        $coverageResult = empty($coverageResult) ? [
+            'uncovered' => $loan,
+            'usedInventories' => [],
+        ] : $coverageResult;
+
+        $isCovered = $coverageResult['uncovered'] === 0;
+
+        if (! $isCovered && empty($loanDeadAmount)) {
+            $loanDeadAmount = [$loan];
+        }
+
+        $output = [
+            'status' => $isCovered ? 'covered' : 'uncovered',
+            'used_units' => 0,
+            'total_price' => 0,
+            'elapsed_time' => $elapsedTime,
+            'extra' => [
+                'msg' => $msg,
+                'suggested_inventories' => $isCovered ? [] : $loanDeadAmount,
+            ],
+            'inventories' => [],
+        ];
+
+        // Initialize variables to accumulate used_units and total_price
+        $totalUsedUnits = 0;
+        $totalPriceCovered = 0;
+
+        foreach ($coverageResult['usedInventories'] as $inventoryIndex => $count) {
+            $inventory = $inventories[$inventoryIndex];
+            $totalPrice = $inventory['price'] * $count;
+
+            // Update total used units and total price covered
+            $totalUsedUnits += $count;
+            $totalPriceCovered += $totalPrice;
+
+            // Add inventory details to the response
+            $output['inventories'][] = [
+                'inventory_id' => $inventory['id'],
+                'actual_count' => $inventory['count'],
+                'used_count' => $count,
+                'price' => $inventory['price'],
+                'total_price' => $totalPrice,
+            ];
+        }
+
+        // Set the total used units and total price in the response
+        $output['used_units'] = $totalUsedUnits;
+        $output['total_price'] = $totalPriceCovered;
+
+        $this->logInfo('The loan is '.$output['status']);
+
+        if (! $isCovered) {
+            $this->logInfo('the Suggested inventories', $loanDeadAmount);
+        }
+
+        if (! is_null($msg)) {
+            $this->logInfo('Extra info: '.$msg);
+        }
+
+        return $output;
+    }
+
+    private function getElapsedTime($startTime)
+    {
+        $endTime = microtime(true);
+
+        return round(($endTime - $startTime), 4);
     }
 
     /**
