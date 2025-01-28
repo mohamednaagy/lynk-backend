@@ -674,6 +674,9 @@ class BursamV1Driver implements TraderInterface
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
     {
         return match ($traderOrder->status->value) {
+            TraderOrderCancelReason::FailureToPurchase => __('order.trader.lynk.internal_technical_error'),
+            TraderOrderCancelReason::TraderOrderIsCancelled => __('order.user_cancel_request'),
+            TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
             TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['TIME' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
             default => null,
         };
