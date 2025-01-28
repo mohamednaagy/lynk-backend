@@ -74,7 +74,7 @@ class InventoryService
             ->select([
                 'local_market_inventories.*',
                 'local_market_eligible_quantities.eligible_quantity as available_quantity',
-                'commodity_items.max_price as item_max_price', // Select max_price for ordering
+                'commodity_items.max_price as max_price', // Select max_price for ordering
             ])
             ->join('local_market_eligible_quantities', function ($join) use ($companyId) {
                 $join->on('local_market_inventories.id', '=', 'local_market_eligible_quantities.inventory_id')
