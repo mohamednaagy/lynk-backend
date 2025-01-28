@@ -90,6 +90,7 @@ class InventoryService
             })
             ->join('commodity_items', 'local_market_inventories.commodity_item_id', '=', 'commodity_items.id')
             ->where('local_market_inventories.status', InventoryStatus::Active)
+            ->where('commodity_items.max_price', '<=', $loanAmount)
             ->where('local_market_inventories.available_quantity', '>', 0)
             ->whereHas('type', function ($query) use ($preferredItemTypes) {
                 $query->where('status', CommodityTypeStatus::Active);
