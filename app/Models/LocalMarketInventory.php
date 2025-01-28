@@ -15,6 +15,8 @@ class LocalMarketInventory extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    protected $appends = ['max_price'];
+
     protected $fillable = [
         'commodity_item_id',
         'supplier_location_id',
@@ -136,5 +138,10 @@ class LocalMarketInventory extends Model
         $this->save();
 
         RebuildInventory::dispatch($this->id);
+    }
+
+    public function getMaxPriceAttribute()
+    {
+        return $this->item->max_price;
     }
 }
