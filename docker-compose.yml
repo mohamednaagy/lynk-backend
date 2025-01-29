@@ -24,16 +24,6 @@ services:
         extra_hosts:
             - "host.docker.internal:host-gateway"
 
-    # supervisor:
-    #     build:
-    #         context: .
-    #         dockerfile: ./docker/supervisor.dockerfile
-    #     container_name: supervisor
-    #     volumes:
-    #         - .:/var/www/html
-    #     networks:
-    #         - sail
-
     mysql:
         image: "mysql/mysql-server:8.0"
         ports:
@@ -53,6 +43,7 @@ services:
             test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
             timeout: 5s
+        command: --log-bin-trust-function-creators=1
 
     phpmyadmin:
         image: phpmyadmin/phpmyadmin
@@ -89,8 +80,49 @@ services:
 
     mailhog:
         image: mailhog/mailhog
+        networks:
+            - sail
         ports:
         - "8025:8025"
+
+    worker-1:
+      image: lynk/backend:latest
+      container_name: worker-1
+      restart: always
+      working_dir: /var/www/html/
+      command: php artisan queue:work redis --verbose --tries=3 --queue=local_market
+      depends_on:
+          - laravel-app
+      volumes:
+          - ./:/var/www/html
+      networks:
+          - sail
+
+    worker-2:
+      image: lynk/backend:latest
+      container_name: worker-2
+      restart: always
+      working_dir: /var/www/html/
+      command: php artisan queue:work redis --verbose --tries=3 --queue=default,bursam
+      depends_on:
+          - laravel-app
+      volumes:
+          - ./:/var/www/html
+      networks:
+          - sail
+
+    worker-3:
+      image: lynk/backend:latest
+      container_name: worker-3
+      restart: always
+      working_dir: /var/www/html/
+      command: php artisan queue:work redis --verbose --tries=3 --queue=expire_trader_order,unit-inventory
+      depends_on:
+          - laravel-app
+      volumes:
+          - ./:/var/www/html
+      networks:
+          - sail
 
 networks:
     sail:

@@ -25,7 +25,7 @@ class LocalMarketInventoryObserver
     public function created(LocalMarketInventory $inventory): void
     {
         // Update inventory stock
-        UpdateInventoryStock::dispatch($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
+        UpdateInventoryStock::dispatch($inventory->id, $inventory->available_quantity, $inventory->wasRecentlyCreated);
     }
 
     /**
