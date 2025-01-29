@@ -102,7 +102,7 @@ class InventoryService
                 $query->where('status', CommoitySupplierStatus::Active);
             })
             ->lockForUpdate()
-            ->orderBy('local_market_inventories.max_price', 'DESC')
+            ->orderBy('commodity_items.max_price', 'desc')
             ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
             ->get();
 
