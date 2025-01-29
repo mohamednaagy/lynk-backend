@@ -24,9 +24,7 @@ class LoanService
             return false;
         }
 
-        $loanDetails = $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-
-        return $loanDetails;
+        return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder)

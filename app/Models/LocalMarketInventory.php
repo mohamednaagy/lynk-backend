@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildInventory;
+use App\Services\LocalMarket\EligibleQuantityService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -98,15 +99,7 @@ class LocalMarketInventory extends Model
 
     public function canUpdateUnits($total_new_units)
     {
-        if ($total_new_units >= $this->reserved_items) {
-            return true;
-        }
-
-        if ($total_new_units == $this->total_items) {
-            return false;
-        }
-
-        return false;
+        return $total_new_units >= $this->reserved_items;
     }
 
     /**
@@ -126,15 +119,20 @@ class LocalMarketInventory extends Model
     /**
      * Update the available quantity based on the number of free units in LocalMarketInventoryUnits.
      *
+     * @param  bool  $forceRebuildEligibility  If true, rebuild eligibility immediately
      * @return void
      */
-    public function refreshStockQuantities()
+    public function refreshStockQuantities($forceRebuildEligibility = false)
     {
         $this->available_quantity = $this->units()->where('status', InventoryUnitsStatus::Free)->count();
         $this->reserved_items = $this->units()->where('status', InventoryUnitsStatus::Reserved)->count();
 
         $this->save();
 
-        RebuildInventory::dispatch($this->id);
+        if ($forceRebuildEligibility) {
+            app(EligibleQuantityService::class)->rebuildForInventory($this);
+        } else {
+            RebuildInventory::dispatch($this->id);
+        }
     }
 }
