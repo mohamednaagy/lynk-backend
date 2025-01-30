@@ -27,6 +27,8 @@ class UpdateCommodityItemRequest extends FormRequest
      */
     public function rules(): array
     {
+        $commodityItem = $this->route('commodity_item');
+
         return [
             'commodity_supplier_id' => 'required|exists:companies,id',
             'unique_name' => [
@@ -34,8 +36,9 @@ class UpdateCommodityItemRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:32',
+                'in:'.$commodityItem->unique_name,
                 new CommodityItemUniqueNameRole,
-                Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', request()->commodity_supplier_id)->ignore($this->route('commodity_item'))->withoutTrashed(),
+                Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', request()->commodity_supplier_id)->ignore($commodityItem)->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:256'],
             'description' => ['nullable', 'string', 'max:512'],
