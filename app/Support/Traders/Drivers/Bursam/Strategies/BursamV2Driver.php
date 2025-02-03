@@ -20,7 +20,6 @@ use App\Models\TraderOrder;
 use App\Models\User;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
-use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamGenerateClientWakala;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOtcCertificate;
@@ -151,7 +150,6 @@ class BursamV2Driver extends BursamV1Driver
             FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::class,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::class,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::class,
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessBursamGenerateClientWakala::class,
             FinancingOrderHistory::ContractSigned => ProcessBursamTransferOwnershipToCustomer::class,
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::class,
             FinancingOrderHistory::ClientWakalaAccepted => ProcessBursamSellingCommodityToOpenMarket::class,

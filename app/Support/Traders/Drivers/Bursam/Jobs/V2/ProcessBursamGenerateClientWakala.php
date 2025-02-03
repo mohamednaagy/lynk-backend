@@ -55,7 +55,6 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
 
         Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamGenerateClientWakala Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
         app(GenerateClientWakala::class)->handle($traderOrder);
-        $traderOrder->update(['can_continue_progress' => false]);
         Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamGenerateClientWakala Job and update can_continue_progress of trader to false', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
     }
 
