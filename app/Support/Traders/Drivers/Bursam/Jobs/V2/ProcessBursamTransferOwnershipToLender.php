@@ -57,6 +57,9 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
         (new RunHoldTraderWhenMarketOpenCommand)->handle();
+
+        // fire the next step job
+        ProcessBursamGenerateClientWakala::dispatch($this->traderOrderId);
     }
 
     public function middleware(): array
