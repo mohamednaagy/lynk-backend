@@ -75,6 +75,7 @@ class GreedyLoanCoverageStrategy extends BaseLoanCoverageStrategy
         }
 
         $this->logInfo("Successfully covered the loan amount with a total of $maxCoveredAmount.");
+        $this->logInfo('Selected Inventories: ', $finalSelectedInventories);
 
         return $finalSelectedInventories;
     }

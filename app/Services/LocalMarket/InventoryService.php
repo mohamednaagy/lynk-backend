@@ -43,14 +43,13 @@ class InventoryService
             ->lenderDetail
             ->force_preferred_commodity_type;
 
-        // $inventories = $this->findEligibleInventoriesForLoanVersionOne($loanAmount);
         // First try with preferred commodity types
         $preferredInventories = $this->findEligibleInventoriesForLoanVersionTwo(
             $loanAmount,
             $companyId,
             $preferredItemTypes
         );
-        $combination = $this->findOptimalCombination($preferredInventories, $loanAmount);
+        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories);
 
         // Return combination if found or if we must use preferred types
         if ($forcePreferredCommodityType || ! empty($combination)) {
@@ -60,7 +59,7 @@ class InventoryService
 
             $allInventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
 
-            return $this->findOptimalCombination($allInventories, $loanAmount);
+            return $this->findOptimalCombination($loanAmount, $allInventories);
         }
     }
 
@@ -114,6 +113,12 @@ class InventoryService
 
     private function findOptimalCombination($loanAmount, $inventories)
     {
+        if ($inventories->isEmpty()) {
+            Log::channel('local_market')->info('The inventories list are empty');
+
+            return false;
+        }
+
         if (fmod($loanAmount, 1) !== 0.0) {
             Log::channel('local_market')->info('The loan amount must be integer');
 
