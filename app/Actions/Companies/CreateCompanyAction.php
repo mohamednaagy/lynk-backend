@@ -51,13 +51,8 @@ class CreateCompanyAction implements CreateCompany
         );
 
         $lender->lenderDetail()->create([
-            Arr::only(
-                $data,
-                [
-                    'notifications_email',
-                ]
-            )
-            ]);
+            'notifications_email' => $data['notifications_email'],
+        ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
             $lender->commodityTypes()->attach($data['preferred_commodity_types']);
