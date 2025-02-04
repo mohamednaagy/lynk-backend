@@ -15,7 +15,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
-            $table->string('notifications_email')->after('name')->nullable();
+            $table->string('notifications_email')->after('company_id')->nullable();
         });
 
         // Migrate data from `companies.notifications_email` to `company_lender_details`
