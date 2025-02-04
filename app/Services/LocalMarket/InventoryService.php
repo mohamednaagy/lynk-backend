@@ -27,10 +27,7 @@ class InventoryService
      * - Excludes inventories that have already been used.
      * - Orders the inventory by a combination of available quantity and maximum price to prioritize the most suitable items.
      *
-     * @param  float  $loanAmount  The amount of the loan, used to filter inventory items by maximum price.
-     * @param  array  $preferredItemTypes  An optional array of preferred commodity type IDs. If provided, the function prioritizes items matching these types.
-     * @param  array  $usedInventories  An optional array of inventory IDs that have already been used. These inventories are excluded from the results.
-     * @return LocalMarketInventory|null The best matching inventory item, or null if no eligible inventory is found.
+     * @return LocalMarketInventory|false The best matching inventory item, or false if no eligible inventory is found.
      */
     public function findEligibleInventoryForLoan(LocalMarketOrder $localMarketOrder)
     {
@@ -44,7 +41,7 @@ class InventoryService
             ->force_preferred_commodity_type;
 
         // First try with preferred commodity types
-        $preferredInventories = $this->findEligibleInventoriesForLoanVersionTwo(
+        $preferredInventories = $this->findEligibleInventoriesForLoan(
             $loanAmount,
             $companyId,
             $preferredItemTypes
@@ -57,28 +54,13 @@ class InventoryService
         } else {
             // Fallback to all inventory types if allowed
 
-            $allInventories = $this->findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId);
+            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId);
 
             return $this->findOptimalCombination($loanAmount, $allInventories);
         }
     }
 
-    private function findEligibleInventoriesForLoanVersionOne($loanAmount)
-    {
-        return LocalMarketInventory::where('max_price', '<=', $loanAmount)
-            ->where('status', InventoryStatus::Active)
-            ->where('available_quantity', '>', 0)
-            ->whereHas('type', function ($query) {
-                $query->where('status', CommodityTypeStatus::Active);
-            })
-            ->whereHas('supplier.detail', function ($query) {
-                $query->where('status', CommoitySupplierStatus::Active);
-            })
-            ->orderBy('max_price', 'DESC')
-            ->get();
-    }
-
-    private function findEligibleInventoriesForLoanVersionTwo($loanAmount, $companyId, $preferredItemTypes = [])
+    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes = [])
     {
         return LocalMarketInventory::query()
             ->select([
