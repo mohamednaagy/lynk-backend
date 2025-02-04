@@ -23,8 +23,6 @@ return [
 
     'currency' => env('APP_CURRENCY', 'SAR4'),
 
-    'loan_coverage_strategy' => env('LOAN_COVERAGE_STRATEGY', 'optimized'),
-
     /*
     |--------------------------------------------------------------------------
     | Application Environment

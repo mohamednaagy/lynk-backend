@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(LoanCoverageStrategy::class, function () {
-            return match (config('app.loan_coverage_strategy')) {
+            return match (config('trader.providers.lynk.loan_coverage_strategy')) {
                 'greedy' => new GreedyLoanCoverageStrategy,
                 default => new OptimizedLoanCoverageStrategy, // Default to optimized
             };
