@@ -112,11 +112,15 @@ class InventoryService
 
     }
 
-    private function findOptimalCombination(LocalMarketOrder $localMarketOrder, $inventories)
+    private function findOptimalCombination($loanAmount, $inventories)
     {
-        // Convert inventory objects to arrays
-        $inventoriesArray = array_values($inventories->all());
-        $result = $this->loanCoverageStrategy->calculateCombination($localMarketOrder, $inventoriesArray);
+        if (fmod($loanAmount, 1) !== 0.0) {
+            Log::channel('local_market')->info('The loan amount must be integer');
+
+            return false;
+        }
+
+        $result = $this->loanCoverageStrategy->calculateCombination($loanAmount, $inventories->all());
 
         return empty($result) ? false : $result;
     }

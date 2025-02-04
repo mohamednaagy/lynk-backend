@@ -2,23 +2,14 @@
 
 namespace App\Services\LocalMarket\LoanCoverageStrategy\Strategies;
 
-use App\Models\LoanCoverageHistory;
-use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanCoverageStrategy\BaseLoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\LoanCoverageTranslator;
 
 class GreedyLoanCoverageStrategy extends BaseLoanCoverageStrategy
 {
-    public function calculateCombination(LocalMarketOrder $localMarketOrder, array $inventories): array
+    public function calculateCombination(int $loanAmount, array $inventories): array
     {
         $this->logInfo('Using GreedyLoanCoverageStrategy');
-
-        $loanAmount = $localMarketOrder->amount;
-        // Start time
-        $startTime = microtime(true);
-
-        // Convert inventory objects to arrays
-        $inventoriesArray = $inventories;
 
         $finalSelectedInventories = [];
         $maxCoveredAmount = 0;
@@ -27,7 +18,7 @@ class GreedyLoanCoverageStrategy extends BaseLoanCoverageStrategy
         $this->logInfo("Trying to cover loan amount of $loanAmount with inventories...");
 
         // Outer loop to iterate through all inventories
-        foreach ($inventoriesArray as $outerIndex => $outerInventory) {
+        foreach ($inventories as $outerIndex => $outerInventory) {
             if ($loanCovered) {
                 break; // Early exit if already covered
             }
@@ -39,8 +30,8 @@ class GreedyLoanCoverageStrategy extends BaseLoanCoverageStrategy
             $selectedInventories = [];
 
             // Inner loop to try combinations starting with the current outer inventory
-            for ($innerIndex = $outerIndex; $innerIndex < count($inventoriesArray); $innerIndex++) {
-                $inv = $inventoriesArray[$innerIndex];
+            for ($innerIndex = $outerIndex; $innerIndex < count($inventories); $innerIndex++) {
+                $inv = $inventories[$innerIndex];
                 if ($coveredAmount >= $loanAmount || $usedUnits >= $this->maxUnitsPerTrader) {
                     break; // Stop if the loan is covered or max units reached
                 }
@@ -76,10 +67,6 @@ class GreedyLoanCoverageStrategy extends BaseLoanCoverageStrategy
                 }
             }
         }
-
-        $status = $loanCovered ? 'covered' : 'uncovered';
-        $elapsedTime = $this->getElapsedTime($startTime);
-        LoanCoverageHistory::log($localMarketOrder, $status, $elapsedTime, $finalSelectedInventories, [], self::GREEDY_STRATEGY);
 
         if (! $loanCovered) {
             $this->logInfo("Failed to cover the exact loan amount. Covered $maxCoveredAmount of $loanAmount.");

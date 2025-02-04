@@ -7,10 +7,6 @@ use Illuminate\Support\Facades\Log;
 
 abstract class BaseLoanCoverageStrategy implements LoanCoverageStrategy
 {
-    protected const GREEDY_STRATEGY = 'greedy';
-
-    protected const OPTIMIZED_STRATEGY = 'optimized';
-
     protected int $maxUnitsPerTrader;
 
     protected float $loanCoverageTimeout;
@@ -26,7 +22,7 @@ abstract class BaseLoanCoverageStrategy implements LoanCoverageStrategy
         Log::channel('local_market')->info($message, $data);
     }
 
-    protected function getElapsedTime($startTime)
+    protected function getElapsedTime($startTime): float
     {
         $endTime = microtime(true);
 
