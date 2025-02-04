@@ -170,4 +170,9 @@ class Company extends BaseTenant
     {
         return $this->auto_complete_murabaha_order;
     }
+
+    public function lender()
+    {
+        return $this->hasOne(Lender::class, 'id');
+    }
 }
