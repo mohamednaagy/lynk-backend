@@ -110,7 +110,7 @@ class Company extends BaseTenant
 
     public function tieredPricing()
     {
-        return $this->hasMany(TieredPricing::class);
+        return $this->hasMany(TieredPricing::class, 'company_id');
     }
 
     public function isTiered(): bool
