@@ -119,7 +119,7 @@ class LenderRegistrationTest extends TestCase
         );
 
         $this->assertTrue(
-            Company::find($response->json('data.company_id'))->notifications_email
+            Company::find($response->json('data.company_id'))->lenderDetail?->notifications_email
             == $email
         );
     }
