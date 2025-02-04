@@ -4,7 +4,6 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
-use App\Models\Company;
 use App\Models\Lender;
 use Illuminate\Support\Arr;
 
@@ -30,7 +29,6 @@ class CreateCompanyAction implements CreateCompany
                 $data,
                 [
                     'name',
-                    'notifications_email',
                     'unique_name',
                     'contract_number',
                     'company_cr',
@@ -54,8 +52,10 @@ class CreateCompanyAction implements CreateCompany
         
         $lender->lenderDetail()->create([
             'force_preferred_commodity_type' => $data['force_preferred_commodity_type'],
+            'notifications_email' => $data['notifications_email'],
         ]);
-        
+
+
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
             $lender->commodityTypes()->attach($data['preferred_commodity_types']);
         }

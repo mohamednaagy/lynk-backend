@@ -12,13 +12,12 @@ use Illuminate\Support\Collection;
 class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Lender $lender, array $data): Lender
-    {
+    {   
         $lender->update(
             Arr::only(
                 $data,
                 [
                     'name',
-                    'notifications_email',
                     'unique_name',
                     'company_cr',
                     'contract_number',
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
             Arr::only($data, [
                 'default_contract_sign_time_limit',
                 'force_preferred_commodity_type',
+                'notifications_email',
             ])
         );
 

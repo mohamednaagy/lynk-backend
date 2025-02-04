@@ -77,7 +77,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeNotificationsEmail(Company $company): Primitive
     {
-        return $this->primitive($company->notifications_email);
+        return $this->primitive($company->lenderDetail?->notifications_email);
     }
 
     public function includeStatus(Company $company): Primitive

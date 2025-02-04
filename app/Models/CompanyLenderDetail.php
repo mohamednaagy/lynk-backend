@@ -10,6 +10,7 @@ class CompanyLenderDetail extends Model
         'default_contract_sign_time_limit',
         'force_preferred_commodity_type',
         'company_id',
+        'notifications_email',
     ];
 
     protected $casts = [
