@@ -32,7 +32,6 @@ class CreateCompanyAction implements CreateCompany
                     'name',
                     'unique_name',
                     'contract_number',
-                    'company_cr',
                     'status',
                     'does_order_require_approval',
                     'webhook_secret_key',
@@ -51,7 +50,8 @@ class CreateCompanyAction implements CreateCompany
         );
 
         $lender->lenderDetail()->create([
-            'notifications_email' => $data['notifications_email'],
+            'notifications_email'   => $data['notifications_email'],
+            'company_cr'            => $data['company_cr'],
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {

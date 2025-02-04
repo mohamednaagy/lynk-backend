@@ -24,7 +24,7 @@ class UpdateCompanyRequest extends FormRequest
     {
         return true;
     }
-
+    
     /**
      * Get the validation rules that apply to the request.
      *
@@ -54,8 +54,8 @@ class UpdateCompanyRequest extends FormRequest
             'company_cr' => [
                 'string',
                 'size:10',
-                Rule::unique('companies', 'company_cr')
-                    ->ignore($this->route('lender')),
+                Rule::unique('company_lender_details', 'company_cr')
+                    ->ignore($this->route('lender')->id, 'company_id'),
             ],
             'contract_number' => [
                 'required',

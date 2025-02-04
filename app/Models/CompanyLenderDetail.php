@@ -10,6 +10,7 @@ class CompanyLenderDetail extends Model
         'default_contract_sign_time_limit',
         'company_id',
         'notifications_email',
+        'company_cr',
     ];
 
     public function lender()

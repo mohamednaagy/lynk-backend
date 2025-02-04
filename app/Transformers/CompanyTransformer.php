@@ -66,7 +66,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeCompanyCr(Company $company): Primitive
     {
-        return $this->primitive($company->company_cr);
+        return $this->primitive($company->lenderDetail?->company_cr);
     }
 
     public function includeContractNumber(Company $company): Primitive

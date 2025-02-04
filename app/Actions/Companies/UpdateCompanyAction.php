@@ -18,6 +18,7 @@ class UpdateCompanyAction implements UpdateCompany
             Arr::only($data, [
                 'default_contract_sign_time_limit',
                 'notifications_email',
+                'company_cr',
             ])
         );
         
@@ -27,7 +28,6 @@ class UpdateCompanyAction implements UpdateCompany
                 [
                     'name',
                     'unique_name',
-                    'company_cr',
                     'contract_number',
                     'status',
                     'does_order_require_approval',
