@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
+use App\Models\FinancingOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CompleteOrderRequest extends FormRequest
@@ -23,8 +24,14 @@ class CompleteOrderRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'payment_proof' => ['sometimes', 'nullable', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
-        ];
+        $financingOrder = FinancingOrder::findOrFail($this->route('order'));
+
+        if ($financingOrder->canBeCompleted()) {
+            return [
+                'payment_proof' => ['sometimes', 'nullable', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
+            ];
+        } else {
+            return json_encode(['message' => 'Order cannot be completed']);
+        }
     }
 }
