@@ -48,11 +48,16 @@ class CompanySearchScope extends QueryScoper
     {
         $search = $data['search'];
 
-        return $builder->where(function (Builder $builder) use ($search) {
+        return $builder->with('lender')
+        ->where(function (Builder $builder) use ($search) {
             $builder->where('id', $search)
                 ->orWhere('name', 'LIKE', "%$search%")
-                ->orWhere('company_cr', 'LIKE', "%$search%")
                 ->orWhere('unique_name', 'LIKE', "%$search%");
+        })
+        ->orWhereHas('lender', function (Builder $query) use ($search) {
+            $query->whereHas('lenderDetail', function (Builder $q) use ($search) {
+                $q->where('company_cr', 'LIKE', "%{$search}%"); 
+            });
         });
     }
 }

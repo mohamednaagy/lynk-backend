@@ -8,6 +8,7 @@ use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
 use App\Models\Company;
+use App\Models\CompanyLenderDetail;
 use App\Rules\CheckActiveCommodityTypeRule;
 use App\Rules\CompanyUniqueNameRule;
 use App\Rules\OrderCostTiersRangeRule;
@@ -55,7 +56,7 @@ class StoreCompanyRequest extends FormRequest
                 'required',
                 'string',
                 'size:10',
-                Rule::unique(Company::class, 'company_cr'),
+                Rule::unique(CompanyLenderDetail::class, 'company_cr'),
             ],
             'does_order_require_approval' => [
                 'required',

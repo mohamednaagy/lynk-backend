@@ -19,7 +19,6 @@ class UpdateCompanyAction implements UpdateCompany
                 [
                     'name',
                     'unique_name',
-                    'company_cr',
                     'contract_number',
                     'status',
                     'does_order_require_approval',
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'default_contract_sign_time_limit',
                 'force_preferred_commodity_type',
                 'notifications_email',
+                'company_cr',
             ])
         );
 

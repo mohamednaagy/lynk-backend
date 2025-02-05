@@ -11,6 +11,7 @@ class CompanyLenderDetail extends Model
         'force_preferred_commodity_type',
         'company_id',
         'notifications_email',
+        'company_cr',
     ];
 
     protected $casts = [
