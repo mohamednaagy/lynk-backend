@@ -100,6 +100,8 @@ return [
                 ],
             ],
             'max_units_per_trader' => env('LYNK_MAX_UNITS_PER_TRADER', 10000),
+            'loan_coverage_strategy' => env('LOAN_COVERAGE_STRATEGY', 'optimized'),
+            'loan_coverage_timeout' => env('LOAN_COVERAGE_TIMEOUT', 3), // 3sec
             'default_contract_sign_time_limit' => function () {
                 return app(LocalMurabahaSettings::class)->default_contract_sign_time_limit * 60;
             },
