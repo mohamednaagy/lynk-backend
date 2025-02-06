@@ -60,7 +60,8 @@ class UpdateCompanyRequest extends FormRequest
             'contract_number' => [
                 'required',
                 'string',
-                Rule::unique(Company::class, 'contract_number')->ignore($this->route('lender')),
+                Rule::unique('company_lender_details', 'contract_number')
+                    ->ignore($this->route('lender')->id, 'company_id'),
                 'min:4',
                 'max:16',
             ],

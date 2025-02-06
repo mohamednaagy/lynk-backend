@@ -19,7 +19,6 @@ class UpdateCompanyAction implements UpdateCompany
                 [
                     'name',
                     'unique_name',
-                    'contract_number',
                     'status',
                     'does_order_require_approval',
                     'webhook_secret_key',
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'force_preferred_commodity_type',
                 'notifications_email',
                 'company_cr',
+                'contract_number',
             ])
         );
 

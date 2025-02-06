@@ -12,6 +12,7 @@ class CompanyLenderDetail extends Model
         'company_id',
         'notifications_email',
         'company_cr',
+        'contract_number',
     ];
 
     protected $casts = [

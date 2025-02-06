@@ -17,6 +17,8 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
      */
     public function handle(Company $company, array $data): FinancingOrder
     {
+        $lender = $company->lender;
+
         $data = cast_phone_number_if_exist($data);
 
         $data['currency'] = $company->getWallet(WalletType::CompanyWallet)->currency;
@@ -25,7 +27,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
         $data['selling_price'] = Money::parseByDecimal($data['selling_price'], $data['currency']);
 
-        $data['contract_number'] = $company->contract_number;
+        $data['contract_number'] = $lender->lenderDetail->contract_number;
 
         return $company->orders()->create(
             Arr::only($data, [
