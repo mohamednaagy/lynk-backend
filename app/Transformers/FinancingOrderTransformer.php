@@ -39,7 +39,6 @@ class FinancingOrderTransformer extends TransformerAbstract
         'reference_number',
         'customer_name',
         'national_id',
-        'contract_number',
         'amount',
         'amount_formatted',
         'selling_price',
