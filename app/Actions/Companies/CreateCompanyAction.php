@@ -50,6 +50,7 @@ class CreateCompanyAction implements CreateCompany
         );
 
         $lender->lenderDetail()->create([
+            'force_preferred_commodity_type'    => $data['force_preferred_commodity_type'] ?? null,
             'notifications_email'               => $data['notifications_email'],
             'company_cr'                        => $data['company_cr'],
             'default_contract_sign_time_limit'  => $data['default_contract_sign_time_limit'] ?? null,
