@@ -15,7 +15,6 @@ class CompanyTransformer extends TransformerAbstract
         'name',
         'unique_name',
         'company_cr',
-        'contract_number',
         'does_order_require_approval',
         'status',
         'orders_count',
@@ -71,7 +70,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeContractNumber(Company $company): Primitive
     {
-        return $this->primitive($company->contract_number);
+        return $this->primitive($company->lenderDetail?->contract_number);
     }
 
     public function includeNotificationsEmail(Company $company): Primitive

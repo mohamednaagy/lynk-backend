@@ -19,6 +19,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'default_contract_sign_time_limit',
                 'notifications_email',
                 'company_cr',
+                'contract_number',
             ])
         );
         
@@ -28,7 +29,6 @@ class UpdateCompanyAction implements UpdateCompany
                 [
                     'name',
                     'unique_name',
-                    'contract_number',
                     'status',
                     'does_order_require_approval',
                     'webhook_secret_key',

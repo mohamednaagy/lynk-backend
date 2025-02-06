@@ -153,7 +153,7 @@ class StoreCompanyRequest extends FormRequest
             'contract_number' => [
                 'required',
                 'string',
-                Rule::unique(Company::class, 'contract_number'),
+                Rule::unique(CompanyLenderDetail::class, 'contract_number'),
                 'min:4',
                 'max:16',
             ],
