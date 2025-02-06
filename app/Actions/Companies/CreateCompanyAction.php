@@ -49,9 +49,14 @@ class CreateCompanyAction implements CreateCompany
             )
         );
 
+        if(empty($data['default_contract_sign_time_limit'])) {
+            $data['default_contract_sign_time_limit'] = null;
+        }
+        
         $lender->lenderDetail()->create([
-            'notifications_email'   => $data['notifications_email'],
-            'company_cr'            => $data['company_cr'],
+            'notifications_email'               => $data['notifications_email'],
+            'company_cr'                        => $data['company_cr'],
+            'default_contract_sign_time_limit'  => $data['default_contract_sign_time_limit'],
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {

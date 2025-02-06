@@ -172,6 +172,10 @@ class StoreCompanyRequest extends FormRequest
             'preferred_commodity_types.*' => [
                 'required', new CheckActiveCommodityTypeRule,
             ],
+
+            'default_contract_sign_time_limit' => [
+                'nullable', 'integer', 'min:1'
+            ],
         ];
     }
 }
