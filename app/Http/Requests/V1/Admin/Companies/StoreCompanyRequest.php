@@ -178,6 +178,10 @@ class StoreCompanyRequest extends FormRequest
                 'required_with:preferred_commodity_types',
                 'boolean',
             ],
+            
+            'default_contract_sign_time_limit' => [
+                'nullable', 'integer', 'min:1'
+            ],
         ];
     }
 }
