@@ -49,7 +49,6 @@ class CreateCompanyAction implements CreateCompany
             )
         );
 
-        
         $lender->lenderDetail()->create([
             'notifications_email'               => $data['notifications_email'],
             'company_cr'                        => $data['company_cr'],
