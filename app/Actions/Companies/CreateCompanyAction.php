@@ -52,7 +52,7 @@ class CreateCompanyAction implements CreateCompany
             'notifications_email'               => $data['notifications_email'],
             'company_cr'                        => $data['company_cr'],
             'default_contract_sign_time_limit'  => $data['default_contract_sign_time_limit'] ?? null,
-            'contract_number'                   => $data['contract_number'],
+            'contract_number'                   => $data['contract_number'] ?? null,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
