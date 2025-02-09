@@ -47,7 +47,7 @@ class LynkClient
             return app(CreateLocalMarketOrder::class)->handle($data);
         } catch (\Exception $e) {
             Log::channel('local_market')->error("Error creating LocalMarketOrder for Trader Order ID: {$this->traderOrder->id}", [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
         }
 
@@ -65,7 +65,7 @@ class LynkClient
 
     public function cancelOrder()
     {
-        return app(CancelOrder::class)->handle($this->getLocalMarketOrder());
+        return app(CancelOrder::class)->handle($this->traderOrder->reference);
     }
 
     public function confirmDeliverProducts()
@@ -86,29 +86,27 @@ class LynkClient
     /**
      * Prepare data for the local market order creation.
      *
-     * @param \App\Models\FinancingOrder $financingOrder
-     * @return array
+     * @param  \App\Models\FinancingOrder  $financingOrder
      */
     private function prepareOrderData($financingOrder): array
     {
         return [
-            'currency'               => $financingOrder->currency,
-            'national_id'            => $financingOrder->national_id,
-            'amount'                 => $financingOrder->amount->convertAndFormatByDecimal(),
-            'customer_name'          => $financingOrder->customer_name,
-            'external_order_no'      => $this->traderOrder->reference,
-            'source'                 => $this->traderOrder->provider,
-            'company_id'             => $financingOrder->company_id,
-            'buying_uuid'            => $this->traderOrder->uuid_one,
-            'preferred_commodity_type'=> $this->getPreferredCommodityTypes($financingOrder->company),
+            'currency' => $financingOrder->currency,
+            'national_id' => $financingOrder->national_id,
+            'amount' => $financingOrder->amount->convertAndFormatByDecimal(),
+            'customer_name' => $financingOrder->customer_name,
+            'external_order_no' => $this->traderOrder->reference,
+            'source' => $this->traderOrder->provider,
+            'company_id' => $financingOrder->company_id,
+            'buying_uuid' => $this->traderOrder->uuid_one,
+            'preferred_commodity_type' => $this->getPreferredCommodityTypes($financingOrder->company),
         ];
     }
 
     /**
      * Get preferred commodity types for a company.
      *
-     * @param \App\Models\Company $company
-     * @return array
+     * @param  \App\Models\Company  $company
      */
     private function getPreferredCommodityTypes($company): array
     {
