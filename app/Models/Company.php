@@ -85,7 +85,7 @@ class Company extends BaseTenant
 
     public function orders(): HasMany
     {
-        return $this->hasMany(FinancingOrder::class);
+        return $this->hasMany(FinancingOrder::class, 'company_id', 'id');
     }
 
     public function traderOrders(): HasMany
