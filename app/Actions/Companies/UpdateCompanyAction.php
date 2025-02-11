@@ -20,6 +20,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'notifications_email',
                 'company_cr',
                 'contract_number',
+                'preferred_market_type',
             ])
         );
         
@@ -40,7 +41,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
-                    'preferred_market_type',
                     'auto_complete_murabaha_order',
                 ]
             )

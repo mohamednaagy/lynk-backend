@@ -250,7 +250,7 @@ class LenderControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'data' => [],
             ]);
-        $this->assertEquals(CompanyMarketType::Any, self::$lender->refresh()->preferred_market_type->value);
+        $this->assertEquals(CompanyMarketType::Any, self::$lender->lender->lenderDetail->preferred_market_type->value);
 
     }
 

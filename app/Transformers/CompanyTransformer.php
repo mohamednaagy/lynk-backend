@@ -166,7 +166,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includePreferredMarketType(Company $company): Primitive
     {
-        $market_type = $company->preferred_market_type;
+        $market_type = $company->lenderDetail?->preferred_market_type;
         if (is_null($market_type)) {
             return $this->primitive(null);
         }
