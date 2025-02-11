@@ -3,7 +3,7 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\BuildPaginatedCompaniesQuery;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Support\QueryScoper\Scopes\Company\CompanySearchScope;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -13,7 +13,7 @@ class BuildPaginatedCompaniesQueryAction implements BuildPaginatedCompaniesQuery
 
     public function handle(): Builder
     {
-        return Company::query()
+        return Lender::query()
             ->when($this->type, function ($query) {
                 $query->type($this->type);
             })
