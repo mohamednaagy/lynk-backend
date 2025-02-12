@@ -4,14 +4,12 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
 use App\Enums\TraderOrderMode;
 use App\Models\FinancingOrder;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 
 class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
@@ -33,22 +31,13 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info('Starting ProcessDailySellingPendingCommodityToMarket Job');
-
-        $timezone = Config::get('services.bursam.timezone');
-        $marketOpeningStartTime = Carbon::parse(Config::get('services.bursam.market_opening_start_time'), $timezone);
-        $marketOpeningEndTime = Carbon::parse(Config::get('services.bursam.market_opening_end_time'), $timezone);
-
-        if ($marketOpeningStartTime->greaterThan($marketOpeningEndTime)) {
-            $marketOpeningStartTime->subDay();
-        }
+        Log::channel('bursam')->info('Starting ProcessDailySellingPendingCommodityToMarket Job');
 
         FinancingOrder::query()
-            ->whereHas('activeTraderOrder', function (Builder $query) use ($marketOpeningEndTime, $marketOpeningStartTime) {
+            ->whereHas('activeTraderOrder', function (Builder $query) {
                 return $query->where('provider', 'bursam')
                     ->where('version', 'v2')
-                    ->where('mode', TraderOrderMode::Automatic)
-                    ->whereBetween('created_at', [$marketOpeningStartTime->utc(), $marketOpeningEndTime->utc()]);
+                    ->where('mode', TraderOrderMode::Automatic);
             })
             ->select('id')
             ->lazyById()
@@ -60,6 +49,6 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage()]);
     }
 }
