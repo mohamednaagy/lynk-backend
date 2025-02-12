@@ -310,11 +310,12 @@ class LynkV1Driver implements TraderInterface
     protected function updateFinancingOrderStatusAfterCancellation($traderOrder, int $cancelReason): void
     {
         $order = $traderOrder->order;
+        $lender = $order->company->lender;
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
             $order->update(['status' => FinancingOrderStatus::Cancelled]);
         } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
             if (
-                $order->company->preferred_market_type->is(CompanyMarketType::Local())
+                $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Local())
                 && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)
             ) {
                 $order->update(['status' => FinancingOrderStatus::TradingFailure]);
@@ -326,9 +327,10 @@ class LynkV1Driver implements TraderInterface
 
     protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
+        $lender = $traderOrder->order->company->lender;
         return
             $traderOrder->order->company->trading_mode->is(TraderOrderMode::Automatic) &&
-            $traderOrder->order->company->preferred_market_type->is(CompanyMarketType::Any) && (
+            $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
                 $traderOrder->cancelDetail->cancel_reason->in([
                     TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
                     TraderOrderCancelReason::FailureToPurchase,

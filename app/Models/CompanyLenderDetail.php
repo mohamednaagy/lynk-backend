@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyMarketType;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyLenderDetail extends Model
 {
+    protected $casts = [
+        'preferred_market_type' => CompanyMarketType::class,
+    ];
+
     protected $fillable = [
         'default_contract_sign_time_limit',
         'force_preferred_commodity_type',
@@ -13,6 +18,7 @@ class CompanyLenderDetail extends Model
         'notifications_email',
         'company_cr',
         'contract_number',
+        'preferred_market_type',
     ];
 
     protected $casts = [

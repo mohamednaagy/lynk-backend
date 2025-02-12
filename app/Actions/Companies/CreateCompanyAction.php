@@ -42,7 +42,6 @@ class CreateCompanyAction implements CreateCompany
                     'force_unique_reference_number',
                     'trading_mode',
                     'require_initiate_trade_request',
-                    'preferred_market_type',
                 ]
             )
         );
@@ -53,6 +52,7 @@ class CreateCompanyAction implements CreateCompany
             'company_cr'                        => $data['company_cr'],
             'default_contract_sign_time_limit'  => $data['default_contract_sign_time_limit'] ?? null,
             'contract_number'                   => $data['contract_number'] ?? null,
+            'preferred_market_type'             => $data['preferred_market_type'] ?? null,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {

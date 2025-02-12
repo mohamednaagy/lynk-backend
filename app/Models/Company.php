@@ -39,7 +39,6 @@ class Company extends BaseTenant
         'type' => CompanyType::class,
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'trading_mode' => TraderOrderMode::class,
-        'preferred_market_type' => CompanyMarketType::class,
         'auto_complete_murabaha_order' => 'boolean',
     ];
 
@@ -154,7 +153,7 @@ class Company extends BaseTenant
 
     public function isInternationalMarketType()
     {
-        return $this->preferred_market_type->is(CompanyMarketType::International());
+        return $this->lender->lenderDetail->preferred_market_type->is(CompanyMarketType::International());
     }
 
     public function getPreferredTrader()

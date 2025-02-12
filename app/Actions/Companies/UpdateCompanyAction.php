@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Lender $lender, array $data): Lender
-    {   
+    {        
         $lender->update(
             Arr::only(
                 $data,
@@ -30,7 +30,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
-                    'preferred_market_type',
                     'auto_complete_murabaha_order',
                 ]
             )
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'notifications_email',
                 'company_cr',
                 'contract_number',
+                'preferred_market_type',
             ])
         );
 
