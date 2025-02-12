@@ -9,6 +9,7 @@ class CompanyLenderDetail extends Model
 {
     protected $casts = [
         'preferred_market_type' => CompanyMarketType::class,
+        'force_preferred_commodity_type' => 'boolean',
     ];
 
     protected $fillable = [
@@ -19,10 +20,6 @@ class CompanyLenderDetail extends Model
         'company_cr',
         'contract_number',
         'preferred_market_type',
-    ];
-
-    protected $casts = [
-        'force_preferred_commodity_type' => 'boolean',
     ];
 
     public function lender()
