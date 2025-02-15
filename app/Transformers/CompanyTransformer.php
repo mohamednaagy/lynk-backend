@@ -93,7 +93,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeDoesOrderRequireApproval(Company $company): Primitive
     {
-        return $this->primitive($company->does_order_require_approval);
+        return $this->primitive($company->lenderDetail?->does_order_require_approval);
     }
 
     public function includeTradingMode(Company $company): Primitive

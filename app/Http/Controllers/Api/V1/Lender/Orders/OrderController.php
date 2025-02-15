@@ -169,7 +169,7 @@ class OrderController extends Controller
                     )
                 );
 
-                $status = $company->does_order_require_approval
+                $status = $company->lender->lenderDetail->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
                     : ($company->trading_mode->is(TraderOrderMode::Automatic) && ! $company->require_initiate_trade_request
                         ? FinancingOrderStatus::Approved

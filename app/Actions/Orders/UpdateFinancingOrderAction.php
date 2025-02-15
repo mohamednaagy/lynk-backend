@@ -30,7 +30,7 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
         }
 
         if ($financingOrder->status->is(FinancingOrderStatus::Rejected)) {
-            $data['status'] = $financingOrder->company()->withTrashed()->first()->does_order_require_approval
+            $data['status'] = $financingOrder->company()->withTrashed()->first()->lender->lenderDetail->does_order_require_approval
                 ? FinancingOrderStatus::PendingApproval
                 : FinancingOrderStatus::PendingTraderOrder;
 

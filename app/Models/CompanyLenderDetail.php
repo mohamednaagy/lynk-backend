@@ -9,6 +9,7 @@ class CompanyLenderDetail extends Model
 {
     protected $casts = [
         'preferred_market_type' => CompanyMarketType::class,
+        'does_order_require_approval' => 'boolean',
     ];
 
     protected $fillable = [
