@@ -19,6 +19,7 @@ class CompanyLenderDetail extends Model
         'company_cr',
         'contract_number',
         'preferred_market_type',
+        'does_order_require_approval',
     ];
 
     public function lender()
