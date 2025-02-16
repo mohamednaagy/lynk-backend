@@ -50,10 +50,11 @@ class CommodityTypeController extends Controller
 
         $commidityTypes = $buildPaginatedCommodityTypesQuery
             ->setStatus($request->status)
+            ->setActive($request->validated('active'))
             ->handle()
             ->paginate();
 
-        return fractal($commidityTypes, new CommodityTypeTransformer())
+        return fractal($commidityTypes, new CommodityTypeTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -72,7 +73,7 @@ class CommodityTypeController extends Controller
         $data = $storeCommodityTypeRequest->validated();
         $createCommodityType = $createCommodityType->handle($data);
 
-        return fractal($createCommodityType, new CommodityTypeTransformer())
+        return fractal($createCommodityType, new CommodityTypeTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -85,7 +86,7 @@ class CommodityTypeController extends Controller
 
     public function show(CommodityType $commodityType): JsonResponse
     {
-        return fractal($commodityType, new CommodityTypeTransformer())
+        return fractal($commodityType, new CommodityTypeTransformer)
             ->parseIncludes([
                 'id',
                 'name',
