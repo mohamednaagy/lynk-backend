@@ -14,6 +14,8 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
 
     private ?int $status = null;
 
+    private ?int $active;
+
     public function handle(): Builder
     {
         return Company::when($this->type, function ($query) {
@@ -22,7 +24,9 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
             $query->where('name', 'like', "%{$this->name}%");
         })->when($this->status, function ($query) {
             $query->where('status', $this->status);
-        });
+        })->when($this->active, fn ($q) => $q->whereHas('commoditySupplier', function ($commoditySupplier) {
+            $commoditySupplier->active($this->active);
+        }));
     }
 
     public function setType(string $type): static
@@ -43,6 +47,22 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
     public function setStatus(?int $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Set the active filter status.
+     *
+     * @param  int|null  $value  The active filter value:
+     *                           1 = Active
+     *                           2 = Inactive
+     *                           3/null = All
+     * @return $this
+     */
+    public function setActive(?int $value): self
+    {
+        $this->active = $value;
 
         return $this;
     }
