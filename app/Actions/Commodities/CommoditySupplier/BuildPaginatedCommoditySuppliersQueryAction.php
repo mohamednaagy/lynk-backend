@@ -29,11 +29,6 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
         }));
     }
 
-    /*************  ✨ Codeium Command ⭐  *************/
-    /**
-     * Set the type of the commodity supplier.
-     */
-    /******  a8a0bbe1-6900-4b15-b6ae-8c4ecbdbcc4e  *******/
     public function setType(string $type): static
     {
         $this->type = $type;
