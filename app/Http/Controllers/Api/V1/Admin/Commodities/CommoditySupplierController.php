@@ -10,6 +10,7 @@ use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\CommoditySuppliersListRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\StoreCommoditySupplierRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\UpdateCommoditySupplierRequest;
 use App\Models\Supplier;
@@ -42,10 +43,12 @@ class CommoditySupplierController extends Controller
     }
 
     public function index(
+        CommoditySuppliersListRequest $request,
         BuildPaginatedCommoditySuppliersQuery $buildPaginatedCommoditySuppliersQuery
     ): JsonResponse {
 
         $commiditySuppliers = $buildPaginatedCommoditySuppliersQuery->setType(CompanyType::Supplier)
+            ->setActive($request->validated('active'))
             ->handle()
             ->paginate();
 
