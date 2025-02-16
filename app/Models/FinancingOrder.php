@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Area;
-use App\Enums\ContractSignedType;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -272,12 +272,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function canBeCompleted(?string $area = Area::SuperAdmin): bool
     {
-        $allTraderOrders = $this->traderOrders();
-        $traderOrderCompleted = ($area == Area::Lender) ? $allTraderOrders->completedWithContractSignedType() : $allTraderOrders->completed();
 
-        return $traderOrderCompleted->exists()
+        $allTraderOrders = $this->traderOrders();
+        $traderOrderCompleted = ($area == Area::Lender)
+        ? $allTraderOrders->get()->every(fn ($traderOrder) => ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)
+        )
+        : $allTraderOrders->completed()->exists();
+
+        return $traderOrderCompleted
             && $this->status->isNot(FinancingOrderStatus::Completed)
             && $this->status->isNot(FinancingOrderStatus::Cancelled);
+
     }
 
     public function cantBeCompleted()
@@ -376,7 +381,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             return false;
         }
 
-        if ($area === Area::Lender && $this->traderOrders()->completedWithContractSignedType(ContractSignedType::Delivery)->exists()) {
+        if ($area === Area::Lender && $this->traderOrders->every(fn ($traderOrder) => $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::DeliveryConfirmed))) {
             return false;
         }
 
