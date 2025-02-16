@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CommodityTypeStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
@@ -27,5 +28,14 @@ class CommodityType extends Model
     {
         return LogOptions::defaults()
             ->logOnly(['status']);
+    }
+
+    public function scopeActive(Builder $query, ?int $value): Builder
+    {
+        return match ($value) {
+            1 => $query->where('status', CommodityTypeStatus::Active()),
+            2 => $query->where('status', CommodityTypeStatus::Inactive()),
+            default => $query,
+        };
     }
 }
