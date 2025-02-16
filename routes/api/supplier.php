@@ -2,17 +2,17 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
+use App\Http\Controllers\Api\V1\Supplier\Auth\GetAuthUser;
 use App\Http\Controllers\Api\V1\Supplier\CommodityItem\CommodityItemController;
 use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
+use App\Http\Controllers\Api\V1\Supplier\Inventory\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use App\Http\Controllers\Api\V1\Supplier\Users\ResendInvitationToUserController;
 use App\Http\Controllers\Api\V1\Supplier\Users\UsersController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
-use App\Http\Controllers\Api\V1\Supplier\Auth\GetAuthUser;
-use App\Http\Controllers\Api\V1\Supplier\Inventory\LocalMarketInventoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +48,7 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
             Route::post('/', [UsersController::class, 'store']);
             Route::put('{user}', [UsersController::class, 'update']);
             Route::get('{user}', [UsersController::class, 'show']);
+            Route::delete('{user}', [UsersController::class, 'destroy']);
             Route::post('{user}/resend-invitation', [ResendInvitationToUserController::class, '__invoke']);
         })->middleware('checkDataOfSupplier');
 
