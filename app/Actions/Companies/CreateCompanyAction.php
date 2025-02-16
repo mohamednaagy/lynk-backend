@@ -31,7 +31,6 @@ class CreateCompanyAction implements CreateCompany
                     'name',
                     'unique_name',
                     'status',
-                    'does_order_require_approval',
                     'webhook_secret_key',
                     'public_status_comment',
                     'internal_status_comment',
@@ -53,6 +52,7 @@ class CreateCompanyAction implements CreateCompany
             'default_contract_sign_time_limit'  => $data['default_contract_sign_time_limit'] ?? null,
             'contract_number'                   => $data['contract_number'] ?? null,
             'preferred_market_type'             => $data['preferred_market_type'] ?? null,
+            'does_order_require_approval'       => $data['does_order_require_approval'] ?? null,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {

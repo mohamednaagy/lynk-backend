@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Lender $lender, array $data): Lender
-    {        
+    {
         $lender->update(
             Arr::only(
                 $data,
@@ -20,7 +20,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'name',
                     'unique_name',
                     'status',
-                    'does_order_require_approval',
                     'webhook_secret_key',
                     'public_status_comment',
                     'internal_status_comment',
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'company_cr',
                 'contract_number',
                 'preferred_market_type',
+                'does_order_require_approval',
             ])
         );
 

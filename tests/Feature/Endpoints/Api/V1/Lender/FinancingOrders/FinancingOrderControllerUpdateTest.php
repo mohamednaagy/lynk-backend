@@ -294,7 +294,7 @@ class FinancingOrderControllerUpdateTest extends TestCase
     public function test_rejected_order_status_will_be_pending_approval_when_required_otherwise_pending_trader_order(): void
     {
         // Require approval case
-        self::$company->update(['does_order_require_approval' => true]);
+        self::$company->lender->lenderDetail()->update(['does_order_require_approval' => true]);
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
             ->putJson('api/v1/lender/orders/'.self::$order->id, self::$updatedOrderDetails)
@@ -302,7 +302,7 @@ class FinancingOrderControllerUpdateTest extends TestCase
         $this->assertTrue(self::$order->refresh()->status->is(FinancingOrderStatus::PendingApproval));
 
         // Approval not Require  case
-        self::$company->update(['does_order_require_approval' => false]);
+        self::$company->lender->lenderDetail()->update(['does_order_require_approval' => false]);
         self::$order->update(['status' => FinancingOrderStatus::Rejected]);
         $this->actingAs(self::$userLenderAdmin)
             ->withHeader('X-Company', self::$company->id)
