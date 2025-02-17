@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Api\V1\Supplier\Users;
 use App\Actions\Contracts\Commodities\CommoditySupplier\CreateSupplierUserWithRoleAndPermission;
 use App\Actions\Contracts\Commodities\CommoditySupplier\GetPaginatedSupplierUsers;
 use App\Actions\Contracts\Commodities\CommoditySupplier\UpdateSupplierUserWithRoleAndPermission;
-use App\Http\Controllers\Controller;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Supplier\CommoditySupplier\Users\StoreUserRequest;
 use App\Http\Requests\V1\Supplier\CommoditySupplier\Users\UpdateUserRequest;
 use App\Mail\Supplier\CompleteSupplierRegisterInvitation;
@@ -24,26 +24,28 @@ class UsersController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Manage, Action::Create])
         )->only('store');
 
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Edit, Action::Manage])
         )->only('update');
+
+        $this->middleware(
+            'permission:'.
+            perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Delete, Action::Manage])
+        )->only('destroy');
     }
 
     /**
      * Display a paginated list of supplier users.
-     *
-     * @param  GetPaginatedSupplierUsers  $getPaginatedUsers
-     * @return JsonResponse
      */
     public function index(GetPaginatedSupplierUsers $getPaginatedUsers): JsonResponse
     {
@@ -51,25 +53,21 @@ class UsersController extends Controller
             $getPaginatedUsers->handle(tenant()),
             new UserTransformer(Area::CommoditySupplier)
         )->parseIncludes([
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'email',
-                    'phone_number',
-                    'phone_country_code',
-                    'formatted_phone_number',
-                    'role',
-                    'is_active',
-                    'is_invitation_accepted',
-                ])->respond();
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'phone_number',
+            'phone_country_code',
+            'formatted_phone_number',
+            'role',
+            'is_active',
+            'is_invitation_accepted',
+        ])->respond();
     }
 
     /**
      * Store a newly created supplier user in storage.
-     *
-     * @param  StoreUserRequest  $request
-     * @param  CreateSupplierUserWithRoleAndPermission  $createSupplierUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function store(StoreUserRequest $request, CreateSupplierUserWithRoleAndPermission $createSupplierUserWithRoleAndPermission): JsonResponse
     {
@@ -98,14 +96,8 @@ class UsersController extends Controller
         });
     }
 
-
     /**
      * Update the specified supplier user in storage.
-     *
-     * @param  UpdateUserRequest  $updateUserRequest
-     * @param  User  $user
-     * @param  UpdateSupplierUserWithRoleAndPermission  $updateSupplierUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $updateUserRequest,
@@ -123,17 +115,13 @@ class UsersController extends Controller
 
     public function checkIfUserDoesNotHaveSupplierAreaRole(User $user)
     {
-        if (!$user->hasRole(Area::roles(Area::CommoditySupplier))) {
-            throw new AuthorizationException();
+        if (! $user->hasRole(Area::roles(Area::CommoditySupplier))) {
+            throw new AuthorizationException;
         }
     }
 
-
     /**
      * Display the specified supplier user resource.
-     *
-     * @param  User  $user
-     * @return JsonResponse
      */
     public function show(User $user): JsonResponse
     {
@@ -156,4 +144,29 @@ class UsersController extends Controller
             ])->respond();
     }
 
+    /**
+     * Soft deletes the specified supplier user.
+     *
+     * This method updates the user's email to a format suitable for soft deletion
+     * and then deletes the user. It ensures the user has the necessary supplier
+     * area role before proceeding with the deletion.
+     *
+     * @param  User  $user  The user to be soft deleted.
+     * @return JsonResponse A success response upon successful deletion.
+     *
+     * @throws AuthorizationException If the user does not have the required role.
+     */
+    public function destroy(User $user)
+    {
+        if ($user->id == auth()->user()->id) {
+            throw new AuthorizationException(__('You cannot delete yourself'));
+        }
+
+        $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+
+        $user->update(['email' => $user->getEmailForSoftDeleting()]);
+        $user->delete();
+
+        return $this->successResponse();
+    }
 }
