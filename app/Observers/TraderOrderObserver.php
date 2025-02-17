@@ -8,7 +8,6 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use Illuminate\Support\Facades\Log;
 
 class TraderOrderObserver
 {
@@ -66,7 +65,7 @@ class TraderOrderObserver
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
             if (
-                TraderOrder::whereId($traderOrder->id)->completedWithContractSignedType()->exists() &&
+                TraderOrder::whereId($traderOrder->id)->completedSellStep()->exists() &&
                 $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
                 $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
             }
