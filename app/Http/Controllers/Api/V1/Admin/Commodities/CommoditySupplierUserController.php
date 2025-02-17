@@ -152,22 +152,20 @@ class CommoditySupplierUserController extends Controller
         }));
     }
 
-    // /**
-    //  * Remove the specified resource from storage.
-    //  *
-    //  * @param  User  $user
-    //  * @param  CommoditySupplier  $supplier
-    //  * @return JsonResponse
-    //  */
-    // public function destroy(Company $supplier, User $user): JsonResponse
-    // {
-    //     $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  CommoditySupplier  $supplier
+     */
+    public function destroy(Supplier $supplier, User $user): JsonResponse
+    {
+        $this->checkIfUserDoesNotHaveSupplierAreaRole($user);
 
-    //     $user->update(['email' => $user->getEmailForSoftDeleting()]);
-    //     $user->delete();
+        $user->update(['email' => $user->getEmailForSoftDeleting()]);
+        $user->delete();
 
-    //     return $this->successResponse();
-    // }
+        return $this->successResponse();
+    }
 
     public function checkIfUserDoesNotHaveSupplierAreaRole(User $user)
     {
