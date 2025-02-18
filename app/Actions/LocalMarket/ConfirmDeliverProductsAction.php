@@ -6,14 +6,16 @@ use App\Actions\Contracts\LocalMarket\ConfirmDeliverProducts;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\LocalMarketOrderStatus;
-use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
+use App\Traits\LocalMarket\LocalMarketTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
 {
+    use LocalMarketTrait;
+
     private InventoryService $inventoryService;
 
     private UnitService $unitService;
@@ -24,8 +26,9 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
         $this->unitService = app(UnitService::class);
     }
 
-    public function handle(LocalMarketOrder $localMarketOrder): void
+    public function handle(string $reference): void
     {
+        $localMarketOrder = $this->getLocalMarketOrderByReference($reference);
         DB::beginTransaction();
         try {
             $this->unitService->changeOrderUnitsOwnershipTo(

@@ -4,16 +4,15 @@ namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
 use App\Enums\LocalMarket\OrderStatus;
-use App\Models\LocalMarketOrder;
+use App\Traits\LocalMarket\LocalMarketTrait;
 
 class TransferOwnerShipAction implements TransferOwnerShip
 {
-    public function __construct(
-        LocalMarketOrder $localMarketOrder
-    ) {}
+    use LocalMarketTrait;
 
-    public function handle(LocalMarketOrder $localMarketOrder): void
+    public function handle(string $reference): void
     {
+        $localMarketOrder = $this->getLocalMarketOrderByReference($reference);
         $localMarketOrder->changeStatusTo(OrderStatus::TransferOwnershipToCustomer);
     }
 }

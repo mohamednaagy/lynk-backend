@@ -8,7 +8,6 @@ use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\RequestDeliverProducts;
 use App\Actions\Contracts\LocalMarket\SellCommodities;
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
-use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Localizable;
@@ -55,12 +54,12 @@ class LynkClient
 
     public function sellProduct()
     {
-        return app(SellCommodities::class)->handle($this->getLocalMarketOrder());
+        return app(SellCommodities::class)->handle($this->traderOrder->reference);
     }
 
     public function transferOwnershipToCustomer()
     {
-        return app(TransferOwnerShip::class)->handle($this->getLocalMarketOrder());
+        return app(TransferOwnerShip::class)->handle($this->traderOrder->reference);
     }
 
     public function cancelOrder()
@@ -70,17 +69,12 @@ class LynkClient
 
     public function confirmDeliverProducts()
     {
-        return app(ConfirmDeliverProducts::class)->handle($this->getLocalMarketOrder());
+        return app(ConfirmDeliverProducts::class)->handle($this->traderOrder->reference);
     }
 
     public function requestDeliverProducts()
     {
-        return app(RequestDeliverProducts::class)->handle($this->getLocalMarketOrder());
-    }
-
-    private function getLocalMarketOrder(): ?LocalMarketOrder
-    {
-        return LocalMarketOrder::where('external_order_no', $this->traderOrder->reference)->first();
+        return app(RequestDeliverProducts::class)->handle($this->traderOrder->reference);
     }
 
     /**

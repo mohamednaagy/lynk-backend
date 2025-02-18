@@ -6,12 +6,14 @@ use App\Actions\Contracts\LocalMarket\RequestDeliverProducts;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\LocalMarketOrderStatus;
-use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\UnitService;
+use App\Traits\LocalMarket\LocalMarketTrait;
 use Illuminate\Support\Facades\Log;
 
 class RequestDeliverProductsAction implements RequestDeliverProducts
 {
+    use LocalMarketTrait;
+
     private UnitService $unitService;
 
     public function __construct()
@@ -19,8 +21,9 @@ class RequestDeliverProductsAction implements RequestDeliverProducts
         $this->unitService = app(UnitService::class);
     }
 
-    public function handle(LocalMarketOrder $localMarketOrder): void
+    public function handle(string $reference): void
     {
+        $localMarketOrder = $this->getLocalMarketOrderByReference($reference);
         try {
             $this->unitService->changeOrderUnitsOwnershipTo(
                 $localMarketOrder,
