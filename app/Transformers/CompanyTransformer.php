@@ -132,7 +132,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeNotifyAdminsAboutNewOrders(Company $company)
     {
-        return $this->primitive($company->notify_admins_about_new_orders);
+        return $this->primitive($company->lenderDetail?->notify_admins_about_new_orders);
     }
 
     public function includeForceUniqueReferenceNumber(Company $company)

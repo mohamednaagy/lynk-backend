@@ -308,7 +308,7 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_admin_and_managers_did_not_get_notification_about_new_order_when_disabled(): void
     {
         Notification::fake();
-        self::$company->update(['notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::Off]);
+        self::$company->lender->lenderDetail()->update(['notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::Off]);
         self::$company->refresh();
 
         $this->actingAs(self::$userLenderAdmin)
