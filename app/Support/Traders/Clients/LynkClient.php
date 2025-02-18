@@ -8,7 +8,6 @@ use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\RequestDeliverProducts;
 use App\Actions\Contracts\LocalMarket\SellCommodities;
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
-use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Localizable;
@@ -47,7 +46,7 @@ class LynkClient
             return app(CreateLocalMarketOrder::class)->handle($data);
         } catch (\Exception $e) {
             Log::channel('local_market')->error("Error creating LocalMarketOrder for Trader Order ID: {$this->traderOrder->id}", [
-                'exception' => $e->getMessage()
+                'exception' => $e->getMessage(),
             ]);
         }
 
@@ -55,60 +54,53 @@ class LynkClient
 
     public function sellProduct()
     {
-        return app(SellCommodities::class)->handle($this->getLocalMarketOrder());
+        return app(SellCommodities::class)->handle($this->traderOrder->reference);
     }
 
     public function transferOwnershipToCustomer()
     {
-        return app(TransferOwnerShip::class)->handle($this->getLocalMarketOrder());
+        return app(TransferOwnerShip::class)->handle($this->traderOrder->reference);
     }
 
     public function cancelOrder()
     {
-        return app(CancelOrder::class)->handle($this->getLocalMarketOrder());
+        return app(CancelOrder::class)->handle($this->traderOrder->reference);
     }
 
     public function confirmDeliverProducts()
     {
-        return app(ConfirmDeliverProducts::class)->handle($this->getLocalMarketOrder());
+        return app(ConfirmDeliverProducts::class)->handle($this->traderOrder->reference);
     }
 
     public function requestDeliverProducts()
     {
-        return app(RequestDeliverProducts::class)->handle($this->getLocalMarketOrder());
-    }
-
-    private function getLocalMarketOrder(): ?LocalMarketOrder
-    {
-        return LocalMarketOrder::where('external_order_no', $this->traderOrder->reference)->first();
+        return app(RequestDeliverProducts::class)->handle($this->traderOrder->reference);
     }
 
     /**
      * Prepare data for the local market order creation.
      *
-     * @param \App\Models\FinancingOrder $financingOrder
-     * @return array
+     * @param  \App\Models\FinancingOrder  $financingOrder
      */
     private function prepareOrderData($financingOrder): array
     {
         return [
-            'currency'               => $financingOrder->currency,
-            'national_id'            => $financingOrder->national_id,
-            'amount'                 => $financingOrder->amount->convertAndFormatByDecimal(),
-            'customer_name'          => $financingOrder->customer_name,
-            'external_order_no'      => $this->traderOrder->reference,
-            'source'                 => $this->traderOrder->provider,
-            'company_id'             => $financingOrder->company_id,
-            'buying_uuid'            => $this->traderOrder->uuid_one,
-            'preferred_commodity_type'=> $this->getPreferredCommodityTypes($financingOrder->company),
+            'currency' => $financingOrder->currency,
+            'national_id' => $financingOrder->national_id,
+            'amount' => $financingOrder->amount->convertAndFormatByDecimal(),
+            'customer_name' => $financingOrder->customer_name,
+            'external_order_no' => $this->traderOrder->reference,
+            'source' => $this->traderOrder->provider,
+            'company_id' => $financingOrder->company_id,
+            'buying_uuid' => $this->traderOrder->uuid_one,
+            'preferred_commodity_type' => $this->getPreferredCommodityTypes($financingOrder->company),
         ];
     }
 
     /**
      * Get preferred commodity types for a company.
      *
-     * @param \App\Models\Company $company
-     * @return array
+     * @param  \App\Models\Company  $company
      */
     private function getPreferredCommodityTypes($company): array
     {

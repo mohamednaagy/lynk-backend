@@ -407,4 +407,11 @@ class TraderOrder extends Model implements HasMedia
     {
         $this->update(['can_continue_progress' => true]);
     }
+
+    public function scopeCompletedSellStep($query)
+    {
+        return $query->completed()->whereHas('traderHistories', function ($query) {
+            $query->where('action', FinancingOrderHistory::MurabahaSaleCompleted);
+        });
+    }
 }

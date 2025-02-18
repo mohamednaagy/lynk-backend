@@ -12,7 +12,7 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 
     private $name;
 
-    private ?int $active;
+    private ?int $active = null;
 
     public function handle(): Builder
     {

@@ -4,16 +4,15 @@ namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\SellCommodities;
 use App\Enums\LocalMarket\OrderStatus;
-use App\Models\LocalMarketOrder;
+use App\Traits\LocalMarket\LocalMarketTrait;
 
 class SellCommoditiesAction implements SellCommodities
 {
-    public function __construct(
-        LocalMarketOrder $localMarketOrder
-    ) {}
+    use LocalMarketTrait;
 
-    public function handle(LocalMarketOrder $localMarketOrder): void
+    public function handle(string $reference): void
     {
+        $localMarketOrder = $this->getLocalMarketOrderByReference($reference);
         $localMarketOrder->changeStatusTo(OrderStatus::PendingSellCommodities);
     }
 }

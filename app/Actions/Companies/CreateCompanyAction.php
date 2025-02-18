@@ -11,8 +11,7 @@ class CreateCompanyAction implements CreateCompany
 {
     public function __construct(
         protected GenerateWebhookSecretKey $generateWebhookSecretKey
-    ) {
-    }
+    ) {}
 
     public function handle(array $data): Lender
     {
@@ -36,7 +35,6 @@ class CreateCompanyAction implements CreateCompany
                     'internal_status_comment',
                     'driver',
                     'type',
-                    'notify_admins_about_new_orders',
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
                     'trading_mode',
@@ -44,15 +42,16 @@ class CreateCompanyAction implements CreateCompany
                 ]
             )
         );
-        
+
         $lender->lenderDetail()->create([
-            'force_preferred_commodity_type'    => $data['force_preferred_commodity_type'] ?? false,
-            'notifications_email'               => $data['notifications_email'],
-            'company_cr'                        => $data['company_cr'],
-            'default_contract_sign_time_limit'  => $data['default_contract_sign_time_limit'] ?? null,
-            'contract_number'                   => $data['contract_number'] ?? null,
-            'preferred_market_type'             => $data['preferred_market_type'] ?? null,
-            'does_order_require_approval'       => $data['does_order_require_approval'] ?? null,
+            'force_preferred_commodity_type' => $data['force_preferred_commodity_type'] ?? false,
+            'notifications_email' => $data['notifications_email'],
+            'company_cr' => $data['company_cr'],
+            'default_contract_sign_time_limit' => $data['default_contract_sign_time_limit'] ?? null,
+            'contract_number' => $data['contract_number'] ?? null,
+            'preferred_market_type' => $data['preferred_market_type'] ?? null,
+            'does_order_require_approval' => $data['does_order_require_approval'] ?? null,
+            'notify_admins_about_new_orders' => $data['notify_admins_about_new_orders'] ?? null,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {

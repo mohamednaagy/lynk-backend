@@ -14,7 +14,7 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
 
     private ?int $status = null;
 
-    private ?int $active;
+    private ?int $active = null;
 
     public function handle(): Builder
     {
