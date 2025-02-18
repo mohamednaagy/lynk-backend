@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 return new class extends Migration
 {
@@ -106,28 +107,26 @@ return new class extends Migration
                 try {
                     DB::statement("ALTER TABLE `$table` DROP FOREIGN KEY `$key`;");
                 } catch (\Exception $e) {
-                    // Ignore if foreign key does not exist
+                    Log::error('Error dropping foreign key: '.$e->getMessage());
+                    throw $e;
                 }
             }
         }
 
         // Step 2: Drop Partitioning (Recreate Table)
         try {
-            DB::statement('CREATE TABLE local_market_inventory_units_temp LIKE local_market_inventory_units;');
-            DB::statement('ALTER TABLE local_market_inventory_units_temp REMOVE PARTITIONING;');
-
-            DB::statement('INSERT INTO local_market_inventory_units_temp SELECT * FROM local_market_inventory_units;');
-            DB::statement('DROP TABLE local_market_inventory_units;');
-            DB::statement('ALTER TABLE local_market_inventory_units_temp RENAME TO local_market_inventory_units;');
+            DB::statement('ALTER TABLE local_market_inventory_units DROP PARTITIONING;');
         } catch (\Exception $e) {
-            // Handle error if partitioning fails
+            Log::error('Error partitioning units table: '.$e->getMessage());
+            throw $e;
         }
 
         // Step 3: Restore Original Primary Key
         try {
             DB::statement('ALTER TABLE local_market_inventory_units DROP PRIMARY KEY, ADD PRIMARY KEY (id);');
         } catch (\Exception $e) {
-            // Handle error if restoring primary key fails
+            Log::error('Error restoring primary key: '.$e->getMessage());
+            throw $e;
         }
 
         // Step 4: Re-add Original Foreign Keys
