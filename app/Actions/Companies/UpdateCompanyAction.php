@@ -13,6 +13,20 @@ class UpdateCompanyAction implements UpdateCompany
 {
     public function handle(Lender $lender, array $data): Lender
     {
+        $lender->lenderDetail()->updateOrCreate(
+            ['company_id' => $lender->id],
+            Arr::only($data, [
+                'default_contract_sign_time_limit',
+                'notifications_email',
+                'company_cr',
+                'contract_number',
+                'preferred_market_type',
+                'does_order_require_approval',
+                'notify_admins_about_new_orders',
+                'notify_borrowers_about_order_updates',
+            ])
+        );
+
         $lender->update(
             Arr::only(
                 $data,
@@ -26,7 +40,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'driver',
                     'trading_mode',
                     'require_initiate_trade_request',
-                    'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
                     'auto_complete_murabaha_order',
                 ]
