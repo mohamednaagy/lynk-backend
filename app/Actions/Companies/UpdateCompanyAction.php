@@ -24,7 +24,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'public_status_comment',
                     'internal_status_comment',
                     'driver',
-                    'notify_admins_about_new_orders',
                     'trading_mode',
                     'require_initiate_trade_request',
                     'notify_borrowers_about_order_updates',
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'contract_number',
                 'preferred_market_type',
                 'does_order_require_approval',
+                'notify_admins_about_new_orders',
             ])
         );
 

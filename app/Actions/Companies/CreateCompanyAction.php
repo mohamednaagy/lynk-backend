@@ -36,7 +36,6 @@ class CreateCompanyAction implements CreateCompany
                     'internal_status_comment',
                     'driver',
                     'type',
-                    'notify_admins_about_new_orders',
                     'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
                     'trading_mode',
@@ -53,6 +52,7 @@ class CreateCompanyAction implements CreateCompany
             'contract_number'                   => $data['contract_number'] ?? null,
             'preferred_market_type'             => $data['preferred_market_type'] ?? null,
             'does_order_require_approval'       => $data['does_order_require_approval'] ?? null,
+            'notify_admins_about_new_orders'    => $data['notify_admins_about_new_orders'] ?? null,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
