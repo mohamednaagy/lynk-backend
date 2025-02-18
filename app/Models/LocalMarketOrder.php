@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use App\Enums\LocalMarket\OrderStatus;
+use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property mixed $currency
  */
 class LocalMarketOrder extends Model
 {
-    use HasFactory , LocalMarketHelperTrait;
+    use HasFactory, LocalMarketHelperTrait;
 
     protected $fillable = [
         'source',
@@ -30,6 +33,7 @@ class LocalMarketOrder extends Model
         'hold_for',
         'order_no',
         'preferred_commodity_type',
+        'sell_confirmation_status',
     ];
 
     protected $attributes = [
@@ -81,5 +85,13 @@ class LocalMarketOrder extends Model
     public function lender()
     {
         return $this->belongsTo(Lender::class, 'company_id');
+    }
+
+    public function skipSellConfirmationCertificate(): void
+    {
+        Log::channel('local_market')->info("Skipping sell confirmation certificate for order {$this->id}. It will be delivered.");
+        DB::table($this->getTable())->where('id', $this->id)->update([
+            'sell_confirmation_status' => SellConfirmationStatus::Skip,
+        ]);
     }
 }

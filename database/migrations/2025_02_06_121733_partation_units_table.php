@@ -63,10 +63,10 @@ return new class extends Migration
         foreach ($foreignKeyQueries as $table => $keys) {
             foreach ($keys as $key => $query) {
                 $exists = DB::select('
-                    SELECT CONSTRAINT_NAME 
-                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-                    WHERE TABLE_NAME = ? 
-                    AND CONSTRAINT_NAME = ? 
+                    SELECT CONSTRAINT_NAME
+                    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                    WHERE TABLE_NAME = ?
+                    AND CONSTRAINT_NAME = ?
                     AND TABLE_SCHEMA = DATABASE()
                 ', [$table, $key]);
 
@@ -146,10 +146,10 @@ return new class extends Migration
         foreach ($originalForeignKeys as $table => $keys) {
             foreach ($keys as $key => $query) {
                 $exists = DB::select('
-                SELECT CONSTRAINT_NAME 
-                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-                WHERE TABLE_NAME = ? 
-                AND CONSTRAINT_NAME = ? 
+                SELECT CONSTRAINT_NAME
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                WHERE TABLE_NAME = ?
+                AND CONSTRAINT_NAME = ?
                 AND TABLE_SCHEMA = DATABASE()
             ', [$table, $key]);
 

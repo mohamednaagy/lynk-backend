@@ -141,6 +141,7 @@ class UnitService
             $unitIds->chunk($chunkSize)->each(function ($chunk) use ($holdFor, $status) {
                 LocalMarketInventoryUnits::whereIn('id', $chunk)->update([
                     'hold_for' => $holdFor,
+                    'last_purchasing_order_id' => $holdFor, // A more permanent way to store the ID, especially for canceled orders.
                     'status' => $status,
                 ]);
                 Log::channel('local_market')->info('Updated unit statuses chunk');

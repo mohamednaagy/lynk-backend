@@ -4,6 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
+use App\Jobs\LocalMarket\SellConfirmation\CheckOrderUnitOwnershipSellConfirmation;
 
 class CommoditiesPurchaseCompletedStatus extends BaseStatus
 {
@@ -18,5 +19,8 @@ class CommoditiesPurchaseCompletedStatus extends BaseStatus
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->localMarketWebhook->with($data)->handle();
         $this->logQueueJob('Congratulations Commodities purchased');
+
+        // Dispatch a job to check the previous ownership of inventory units
+        CheckOrderUnitOwnershipSellConfirmation::dispatch();
     }
 }

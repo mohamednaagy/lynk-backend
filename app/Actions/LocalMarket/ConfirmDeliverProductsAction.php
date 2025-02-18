@@ -36,6 +36,8 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
             );
             $this->inventoryService->confirmDeliverOrderUnits($localMarketOrder);
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Delivered);
+            $localMarketOrder->skipSellConfirmationCertificate();
+
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

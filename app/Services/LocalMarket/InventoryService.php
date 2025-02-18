@@ -6,6 +6,7 @@ use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Jobs\LocalMarket\SellConfirmation\CheckOrderUnitOwnershipSellConfirmation;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -122,6 +123,9 @@ class InventoryService
             $inventory->delete();
 
             Log::info("Success for deleting inventory ID: {$inventory->id}");
+
+            // Dispatch a job to check the previous ownership of inventory units
+            CheckOrderUnitOwnershipSellConfirmation::dispatch($inventory->id);
         } catch (\Exception $e) {
             Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
             throw $e;
