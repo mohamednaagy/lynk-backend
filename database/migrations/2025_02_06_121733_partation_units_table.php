@@ -45,36 +45,38 @@ return new class extends Migration
             // Handle error if partitioning fails
         }
 
-        // Step 3: Add Foreign Keys if Not Exists
-        // $foreignKeyQueries = [
-        //     'local_market_inventory_units' => [
-        //         'inventory_units_commodity_item_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT inventory_units_commodity_item_id_foreign FOREIGN KEY (commodity_item_id) REFERENCES commodity_items (id) ON DELETE CASCADE;',
-        //         'inventory_units_local_market_inventory_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT inventory_units_local_market_inventory_id_foreign FOREIGN KEY (local_market_inventory_id) REFERENCES local_market_inventories (id) ON DELETE CASCADE;',
-        //         'local_market_inventory_units_last_completed_order_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT local_market_inventory_units_last_completed_order_id_foreign FOREIGN KEY (last_completed_order_id) REFERENCES local_market_orders (id);',
-        //     ],
-        //     'local_market_order_has_units' => [
-        //         'local_market_order_has_units_unit_id_foreign' => 'ALTER TABLE local_market_order_has_units ADD CONSTRAINT local_market_order_has_units_unit_id_foreign FOREIGN KEY (unit_id) REFERENCES local_market_inventory_units (id) ON DELETE CASCADE;',
-        //     ],
-        //     'local_market_unit_ownership' => [
-        //         'local_market_unit_ownership_unit_id_foreign' => 'ALTER TABLE local_market_unit_ownership ADD CONSTRAINT local_market_unit_ownership_unit_id_foreign FOREIGN KEY (unit_id) REFERENCES local_market_inventory_units (id) ON DELETE CASCADE;',
-        //     ],
-        // ];
+        // Step 3: Add Foreign Keys if Not Existing
+        if (! in_array(env('APP_ENV'), ['dev', 'sandbox', 'local'])) {
+            $foreignKeyQueries = [
+                'local_market_inventory_units' => [
+                    'inventory_units_commodity_item_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT inventory_units_commodity_item_id_foreign FOREIGN KEY (commodity_item_id) REFERENCES commodity_items (id) ON DELETE CASCADE;',
+                    'inventory_units_local_market_inventory_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT inventory_units_local_market_inventory_id_foreign FOREIGN KEY (local_market_inventory_id) REFERENCES local_market_inventories (id) ON DELETE CASCADE;',
+                    'local_market_inventory_units_last_completed_order_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT local_market_inventory_units_last_completed_order_id_foreign FOREIGN KEY (last_completed_order_id) REFERENCES local_market_orders (id);',
+                ],
+                'local_market_order_has_units' => [
+                    'local_market_order_has_units_unit_id_foreign' => 'ALTER TABLE local_market_order_has_units ADD CONSTRAINT local_market_order_has_units_unit_id_foreign FOREIGN KEY (unit_id) REFERENCES local_market_inventory_units (id) ON DELETE CASCADE;',
+                ],
+                'local_market_unit_ownership' => [
+                    'local_market_unit_ownership_unit_id_foreign' => 'ALTER TABLE local_market_unit_ownership ADD CONSTRAINT local_market_unit_ownership_unit_id_foreign FOREIGN KEY (unit_id) REFERENCES local_market_inventory_units (id) ON DELETE CASCADE;',
+                ],
+            ];
 
-        // foreach ($foreignKeyQueries as $table => $keys) {
-        //     foreach ($keys as $key => $query) {
-        //         $exists = DB::select('
-        //             SELECT CONSTRAINT_NAME
-        //             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-        //             WHERE TABLE_NAME = ?
-        //             AND CONSTRAINT_NAME = ?
-        //             AND TABLE_SCHEMA = DATABASE()
-        //         ', [$table, $key]);
+            foreach ($foreignKeyQueries as $table => $keys) {
+                foreach ($keys as $key => $query) {
+                    $exists = DB::select('
+                        SELECT CONSTRAINT_NAME
+                        FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                        WHERE TABLE_NAME = ?
+                        AND CONSTRAINT_NAME = ?
+                        AND TABLE_SCHEMA = DATABASE()
+                    ', [$table, $key]);
 
-        //         if (empty($exists)) {
-        //             DB::statement($query);
-        //         }
-        //     }
-        // }
+                    if (empty($exists)) {
+                        DB::statement($query);
+                    }
+                }
+            }
+        }
     }
 
     /**
