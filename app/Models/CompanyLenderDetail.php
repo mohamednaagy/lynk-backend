@@ -26,6 +26,7 @@ class CompanyLenderDetail extends Model
         'preferred_market_type',
         'does_order_require_approval',
         'notify_admins_about_new_orders',
+        'notify_borrowers_about_order_updates',
     ];
 
     public function lender()
