@@ -7,13 +7,12 @@ use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
 
 class ReplyToEnquiryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -27,10 +26,17 @@ class ReplyToEnquiryRequest extends FormRequest
      */
     public function rules(): array
     {
+        $enquiry = $this->route('enquiry');
+        if (! $enquiry->allowToBeReplied()) {
+            throw ValidationException::withMessages([
+                'enquiry' => 'Enquiry is not allowed to be replied to',
+            ]);
+        }
+
         return [
             'body' => ['required', 'string', 'max:1000'],
             'status' => ['nullable', 'integer', new EnumValue(EnquiryStatus::class)],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
     }
 }
