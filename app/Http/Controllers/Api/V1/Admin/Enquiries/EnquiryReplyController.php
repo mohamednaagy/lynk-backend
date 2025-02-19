@@ -66,6 +66,12 @@ class EnquiryReplyController extends Controller
         ReplyToEnquiryInterface $replyToEnquiry,
         Enquiry $enquiry
     ): JsonResponse {
+        if (! $enquiry->allowToBeReplied()) {
+            return response()->json([
+                'message' => 'Enquiry is not allowed to be replied to',
+            ], 400);
+        }
+
         return DB::transaction(function () use ($request, $replyToEnquiry, $enquiry) {
             // create the enquiry reply
             $data = $request->validated();

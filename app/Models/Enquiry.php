@@ -65,4 +65,9 @@ class Enquiry extends Model
     {
         return $this->hasMany(EnquiryReply::class);
     }
+
+    public function allowToBeReplied(): bool
+    {
+        return ! $this->status->is(EnquiryStatus::Closed);
+    }
 }
