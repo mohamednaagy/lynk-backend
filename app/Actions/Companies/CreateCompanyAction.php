@@ -4,6 +4,7 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
+use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Models\Lender;
 use Illuminate\Support\Arr;
 
@@ -52,7 +53,7 @@ class CreateCompanyAction implements CreateCompany
             'contract_number'                   => $data['contract_number'] ?? null,
             'preferred_market_type'             => $data['preferred_market_type'] ?? null,
             'does_order_require_approval'       => $data['does_order_require_approval'] ?? null,
-            'notify_admins_about_new_orders'    => $data['notify_admins_about_new_orders'] ?? null,
+            'notify_admins_about_new_orders'    => $data['notify_admins_about_new_orders'] ?? CompanyNewOrderNotificationForAdminStatus::On,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
