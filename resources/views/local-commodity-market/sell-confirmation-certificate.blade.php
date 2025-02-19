@@ -711,6 +711,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             text-align: center;
             padding: 8px;
         }
+
+        .justify-center{justify-content:center}
     </style>
 </head>
 
@@ -725,8 +727,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black">الوقت: {{ $current_time ?? '' }}</p>
             <p class="text-xl text-center text-black">  شهادة إتمام بالبيع </p>
             <p class="text-center text-black">
-                نتعهد نحن لينك من تاريخ وتوقيت هذه الشهادة ببيع السلع المشار لها بناء على طلب {{ $customer_name }}
+                نؤكد
+                نحن لينك من تاريخ وتوقيت هذه الشهادة بيع السلع المشار لها بناء على طلب {{ $customer_name }}
                 مقابل مبلغ وقدره {{ $amount }} ريال سعودي
+                إلى <span style="font-weight: bold">عملاء متفرقين.</span>
             <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
             <table class="min-w-full mt-4">
                 <tbody>
@@ -761,26 +765,11 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </tbody>
             </table>
 
-            <p class="text-lg text-right text-black">سيتم حفظ السلعة
-
-                ، بالنيابة عن {{ $customer_name }}
-                إلى أن يتم إشعارنا بالتصرف.
-            </p>
-
-            <div class="flex justify-end">
-                <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('radised-logo.png'))) }}" alt="Stamp">
+            <div class="flex justify-center">
+                <img style="height: 12rem;" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('radised-logo.png'))) }}" alt="Stamp">
             </div>
         </div>
-        <div class="flex flex-row justify-between pt-8 font-semibold">
-            <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
-            <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 13522</p>
-            <div class="flex flex-row-reverse gap-0.5">
-                <p class="text-right text-[11px] text-cyan-900">,3504</p>
-                <p class="text-right text-[11px] text-cyan-900">طريق الامام سعود بن فيصل ، حي الملقا ، 6418</p>
-            </div>
-            <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
-            <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
-        </div>
+        @include('local-commodity-market.shared.address-footer')
     </div>
 </body>
 
