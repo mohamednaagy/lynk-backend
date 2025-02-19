@@ -15,7 +15,6 @@ use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 // TODO_LOCAL_MARKET need to review
 
@@ -105,38 +104,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 'status' => TraderOrderStatus::Completed,
             ]);
         }
-    }
-
-    /**
-     * Business logic for generating the Sell Confirmation Certificate.
-     */
-    public function generateSellConfirmationCertificate(TraderOrder $traderOrder): void
-    {
-        $trader = Trader::driver($traderOrder->provider);
-        $currentTimeInUtcTz = CarbonImmutable::now();
-        $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-
-        $financeOrder = $traderOrder->order;
-
-        if (is_null($financeOrder)) {
-            Log::channel('local_market')->info('failed in generate certificate', [
-                'data' => $traderOrder->toArray(),
-            ]);
-            dd($traderOrder->id);
-        }
-        $trader->storeOrderDocumentAsPdf(
-            'local-commodity-market.sell-confirmation-certificate',
-            [
-                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                'trader_order_reference' => $traderOrder->reference,
-                'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
-                'customer_name' => $financeOrder->customer_name,
-                'current_date' => $currentTimeInRiyadhTz->toDateString(),
-                'current_time' => $currentTimeInRiyadhTz->toTimeString(),
-            ],
-            $traderOrder,
-            TraderOrderMediaCollection::LynkSalePledgeCertificate,
-        );
     }
 
     protected function sellCommodityToCustomer($traderOrder, $request)

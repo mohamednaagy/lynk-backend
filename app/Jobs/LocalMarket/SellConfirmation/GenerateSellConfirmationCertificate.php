@@ -6,7 +6,7 @@ use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Exceptions\SellConfirmationGenerationException;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
-use App\Support\Traders\TradingStrategies\Lynk\LynkStrategyV1;
+use App\Support\Traders\Drivers\Lynk\Strategies\LynkV1Driver;
 use Stancl\Tenancy\Database\TenantScope;
 
 class GenerateSellConfirmationCertificate extends BaseSellConfirmation
@@ -79,8 +79,7 @@ class GenerateSellConfirmationCertificate extends BaseSellConfirmation
             'order' => fn ($q) => $q->withoutGlobalScope(TenantScope::class), //retrieve the financing order without checking the tenant.
         ])->where('reference', $order->external_order_no)->firstOrFail();
 
-        $lynkStrategy = app(LynkStrategyV1::class);
-
-        $lynkStrategy->generateSellConfirmationCertificate($traderOrder);
+        $lynkV1Driver = app(LynkV1Driver::class);
+        $lynkV1Driver->createSellConfirmationDocument($traderOrder);
     }
 }
