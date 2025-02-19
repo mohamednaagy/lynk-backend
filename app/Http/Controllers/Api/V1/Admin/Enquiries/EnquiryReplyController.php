@@ -33,9 +33,6 @@ class EnquiryReplyController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
@@ -43,7 +40,7 @@ class EnquiryReplyController extends Controller
             $query->latest();
         }]);
 
-        return fractal($enquiry->replies, new EnquiryReplyTransformer())
+        return fractal($enquiry->replies, new EnquiryReplyTransformer)
             ->parseIncludes([
                 'id',
                 'body',
@@ -55,23 +52,12 @@ class EnquiryReplyController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  ReplyToEnquiryRequest  $request
-     * @param  ReplyToEnquiryInterface  $replyToEnquiry
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      */
     public function store(
         ReplyToEnquiryRequest $request,
         ReplyToEnquiryInterface $replyToEnquiry,
         Enquiry $enquiry
     ): JsonResponse {
-        if (! $enquiry->allowToBeReplied()) {
-            return response()->json([
-                'message' => 'Enquiry is not allowed to be replied to',
-            ], 400);
-        }
-
         return DB::transaction(function () use ($request, $replyToEnquiry, $enquiry) {
             // create the enquiry reply
             $data = $request->validated();
@@ -96,7 +82,7 @@ class EnquiryReplyController extends Controller
                 Mail::to($enquiry->email)->send(new ReplyToVisitorEnquiry($enquiry, $invitationUrl));
             }
 
-            return fractal($enquiryReply, new EnquiryReplyTransformer())
+            return fractal($enquiryReply, new EnquiryReplyTransformer)
                 ->parseIncludes([
                     'id',
                     'body',
