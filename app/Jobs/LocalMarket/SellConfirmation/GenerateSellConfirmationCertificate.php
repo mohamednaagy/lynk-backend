@@ -2,64 +2,48 @@
 
 namespace App\Jobs\LocalMarket\SellConfirmation;
 
+use App\Enums\LocalMarketOrderStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Exceptions\SellConfirmationGenerationException;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Lynk\Strategies\LynkV1Driver;
+use Exception;
 use Stancl\Tenancy\Database\TenantScope;
 
 class GenerateSellConfirmationCertificate extends BaseSellConfirmation
 {
-    /**
-     * Create a new job instance.
-     */
     public function __construct(private ?int $localMarketOrderId = null)
     {
         parent::__construct();
     }
 
-    /**
-     * Execute the job.
-     */
-    public function handle()
+    public function handle(): void
     {
-        try {
-            // Step 1: If no specific order is given, get all orders with status "Ready for Certificate"
-            $query = LocalMarketOrder::query()
-                ->where('sell_confirmation_status', SellConfirmationStatus::ReadyForCertificate);
+        // Retrieve all orders with a status of 'ready for certificate'
+        LocalMarketOrder::query()
+            ->whereIn('status', [LocalMarketOrderStatus::CommoditiesSell, LocalMarketOrderStatus::Completed])
+            ->where('sell_confirmation_status', SellConfirmationStatus::ReadyForCertificate)
+            ->when($this->localMarketOrderId, fn ($q) => $q->where('id', $this->localMarketOrderId))
+            ->chunkById(self::CHUNK_SIZE, function ($orders) {
+                try {
+                    foreach ($orders as $order) {
+                        $this->generateCertificate($order);
+                        $this->updateCertificateStatus($order->id, SellConfirmationStatus::Generated);
+                    }
+                } catch (Exception $e) {
+                    self::logError('GenerateSellConfirmationCertificate failed', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
 
-            if ($this->localMarketOrderId) {
-                $query->where('id', $this->localMarketOrderId);
-            }
+                    $this->updateCertificateStatus($order->id, SellConfirmationStatus::Error);
 
-            $query->chunkById(self::CHUNK_SIZE, function ($orders) {
-                foreach ($orders as $order) {
-                    // Step 3: Generate the Sell Confirmation Certificate
-                    $this->generateCertificate($order);
-
-                    // Step 4: Update status to "Generated"
-                    LocalMarketOrder::withoutEvents(fn () => $order->update([
-                        'sell_confirmation_status' => SellConfirmationStatus::Generated,
-                    ]));
+                    throw new SellConfirmationGenerationException($e->getMessage());
                 }
+
             });
-
-        } catch (\Exception $e) {
-            self::logError('GenerateSellConfirmationCertificate failed', [
-                'order_id' => $this->localMarketOrderId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // If a specific order was targeted, update its status to "Error"
-            if ($this->localMarketOrderId) {
-                LocalMarketOrder::withoutEvents(fn () => LocalMarketOrder::where('id', $this->localMarketOrderId)
-                    ->update(['sell_confirmation_status' => SellConfirmationStatus::Error]));
-            }
-
-            throw new SellConfirmationGenerationException($e->getMessage());
-        }
     }
 
     /**
@@ -67,19 +51,27 @@ class GenerateSellConfirmationCertificate extends BaseSellConfirmation
      */
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.($this->localMarketOrderId ?? 'all');
+        return $this->localMarketOrderId
+            ? __CLASS__.'_'.$this->localMarketOrderId
+            : parent::uniqueId();
     }
 
-    /**
-     * Business logic for generating the Sell Confirmation Certificate.
-     */
-    private function generateCertificate(LocalMarketOrder $order)
+    private function generateCertificate(LocalMarketOrder $order): void
     {
         $traderOrder = TraderOrder::with([
-            'order' => fn ($q) => $q->withoutGlobalScope(TenantScope::class), //retrieve the financing order without checking the tenant.
+            //retrieve the financing order without checking the tenant.
+            'order' => fn ($q) => $q->withoutGlobalScope(TenantScope::class),
         ])->where('reference', $order->external_order_no)->firstOrFail();
 
         $lynkV1Driver = app(LynkV1Driver::class);
         $lynkV1Driver->createSellConfirmationDocument($traderOrder);
+    }
+
+    private function updateCertificateStatus(int $orderId, int $status): void
+    {
+        LocalMarketOrder::withoutEvents(fn () => LocalMarketOrder::whereId($orderId)->update([
+            'sell_confirmation_status' => $status,
+        ])
+        );
     }
 }

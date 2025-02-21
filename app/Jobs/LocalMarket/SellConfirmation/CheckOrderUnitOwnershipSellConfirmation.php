@@ -3,6 +3,7 @@
 namespace App\Jobs\LocalMarket\SellConfirmation;
 
 use App\Enums\LocalMarketOrderStatus;
+use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Enums\UnitOwnershipStatus;
 use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasUnit;
@@ -18,24 +19,25 @@ class CheckOrderUnitOwnershipSellConfirmation extends BaseSellConfirmation
     public function handle(): void
     {
         LocalMarketOrder::whereIn('status', [LocalMarketOrderStatus::CommoditiesSell, LocalMarketOrderStatus::Completed])
+            ->where('sell_confirmation_status', SellConfirmationStatus::Pending)
             ->chunkById(self::CHUNK_SIZE, function ($orders) {
                 $this->processOrders($orders);
             });
 
-        // Continue the process of sell-confirmation certificate
-        ValidateOrderUnitsEligibility::dispatch();
+        ValidateOrderEligibility::dispatch();
     }
 
     public function uniqueId(): string
     {
         return $this->inventoryId ?
-            __CLASS__.'_'.$this->inventoryId :
-            __CLASS__;
+            __CLASS__.'_'.$this->inventoryId
+            : parent::uniqueId();
     }
 
     private function processOrders(Collection $orders): void
     {
         foreach ($orders as $order) {
+            self::logInfo("Processing LocalMarketOrderId ($order->id)");
             $this->processOrderUnits($order);
         }
     }
@@ -62,7 +64,6 @@ class CheckOrderUnitOwnershipSellConfirmation extends BaseSellConfirmation
         self::logInfo('Processing unit', [
             'unit_id' => $unit->id,
             'order_id' => $unit->local_market_order_id,
-            'inventory_unit_id' => optional($inventoryUnit)->id,
             'inventory_deleted_at' => optional($inventoryUnit)->deleted_at,
             'inventory_last_purchasing_order_id' => optional($inventoryUnit)->last_purchasing_order_id,
         ]);
@@ -76,7 +77,6 @@ class CheckOrderUnitOwnershipSellConfirmation extends BaseSellConfirmation
 
     private function markUnitDeleted(LocalMarketOrderHasUnit $unit): void
     {
-        // Deleted by supplier
         $unit->update([
             'ownership_status' => UnitOwnershipStatus::DeletedBySupplier,
         ]);
@@ -88,7 +88,6 @@ class CheckOrderUnitOwnershipSellConfirmation extends BaseSellConfirmation
 
     private function markUnitSold(LocalMarketOrderHasUnit $unit): void
     {
-        // Sold to another customer
         $unit->update([
             'ownership_status' => UnitOwnershipStatus::SoldToAnotherCustomer,
         ]);

@@ -4,4 +4,4 @@ namespace App\Jobs\LocalMarket\SellConfirmation\Exceptions;
 
 use Exception;
 
-class ValidateOrderUnitsEligibilityException extends Exception {}
+class ValidateOrderEligibilityException extends Exception {}
