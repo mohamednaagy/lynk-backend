@@ -46,7 +46,7 @@ class AdminController extends Controller
         $this->middleware(
             'permission:'.
                 perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage])
-        )->only('update');
+        )->only(['update', 'partiallyUpdate']);
 
         $this->middleware(
             'permission:'.
