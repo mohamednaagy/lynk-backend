@@ -57,7 +57,7 @@ return [
 
         'single' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/'.php_sapi_name().'/laravel.log'),
+            'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
         'custom' => [
@@ -72,7 +72,7 @@ return [
         ],
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/'.php_sapi_name().'/laravel.log'),
+            'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
         ],
@@ -127,31 +127,27 @@ return [
 
         'bursam' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/bursam/'.php_sapi_name().'-bursam.log'),
+            'path' => storage_path('logs/bursam/bursam.log'),
             'level' => 'debug',
             'days' => 30,
-            'permission' => 0664,
         ],
         'local_market' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/local-market/'.php_sapi_name().'-local-market.log'),
+            'path' => storage_path('logs/local-market/local-market.log'),
             'level' => 'debug',
             'days' => 30,
-            'permission' => 0664,
         ],
         'orders' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/orders/'.php_sapi_name().'-order-log.log'),
+            'path' => storage_path('logs/orders/order-log.log'),
             'level' => 'debug',
             'days' => 30,
-            'permission' => 0664,
         ],
         'live_market' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/live-market/'.php_sapi_name().'-live-market.log'),
+            'path' => storage_path('logs/live-market/live-market.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
-            'permission' => 0664,
         ],
     ],
 
