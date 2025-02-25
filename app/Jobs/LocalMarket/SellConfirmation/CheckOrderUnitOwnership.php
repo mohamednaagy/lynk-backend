@@ -3,7 +3,9 @@
 namespace App\Jobs\LocalMarket\SellConfirmation;
 
 use App\Jobs\LocalMarket\SellConfirmation\Enums\UnitOwnershipStatus;
+use App\Jobs\LocalMarket\SellConfirmation\Exceptions\CheckOrderUnitOwnershipException;
 use App\Models\LocalMarketOrderHasUnit;
+use Exception;
 
 class CheckOrderUnitOwnership extends BaseSellConfirmation
 {
@@ -14,8 +16,18 @@ class CheckOrderUnitOwnership extends BaseSellConfirmation
 
     public function handle(): void
     {
-        $this->processOrderUnits($this->localMarketOrderId, $this->inventoryId);
-        ValidateOrderEligibility::dispatch($this->localMarketOrderId);
+        try {
+            $this->processOrderUnits($this->localMarketOrderId, $this->inventoryId);
+            ValidateOrderEligibility::dispatch($this->localMarketOrderId);
+        } catch (Exception $e) {
+            self::logError('CheckOrderUnitOwnership failed', [
+                'order_id' => $this->localMarketOrderId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw new CheckOrderUnitOwnershipException($e->getMessage());
+        }
     }
 
     public function uniqueId(): string

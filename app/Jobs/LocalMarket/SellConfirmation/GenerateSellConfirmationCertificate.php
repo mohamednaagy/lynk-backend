@@ -53,11 +53,6 @@ class GenerateSellConfirmationCertificate extends BaseSellConfirmation
 
     private function generateCertificate(LocalMarketWebhook $localMarketWebhook, LocalMarketOrder $order): void
     {
-        //        $traderOrder = TraderOrder::with([
-        ////            //retrieve the financing order without checking the tenant.
-        ////            'order' => fn ($q) => $q->withoutGlobalScope(TenantScope::class),
-        ////        ])->where('reference', $order->external_order_no)->firstOrFail();
-
         $localMarketWebhook->with(['case' => 'sell_confirmation_certificate', 'external_order_no' => $order->external_order_no])->handle();
     }
 
