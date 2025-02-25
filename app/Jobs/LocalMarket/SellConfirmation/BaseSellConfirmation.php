@@ -20,16 +20,18 @@ abstract class BaseSellConfirmation implements ShouldQueue
     {
         $className = class_basename(static::class);
         self::logInfo("add $className job to queue local_market");
-        $this->onQueue('local_market');
+        $this->onQueue('sell_confirmation_certificate');
     }
 
     protected function logInfo(string $message, array $data = []): void
     {
+        $message = 'SellConfirmationCertificate - '.$message;
         Log::channel('local_market')->info($message, $data);
     }
 
     protected function logError(string $message, array $data = []): void
     {
+        $message = 'SellConfirmationCertificate - '.$message;
         Log::channel('local_market')->error($message, $data);
     }
 

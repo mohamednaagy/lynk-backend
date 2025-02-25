@@ -2,14 +2,11 @@
 
 namespace App\Jobs\LocalMarket\SellConfirmation;
 
-use App\Enums\LocalMarketOrderStatus;
+use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Exceptions\SellConfirmationGenerationException;
 use App\Models\LocalMarketOrder;
-use App\Models\TraderOrder;
-use App\Support\Traders\Drivers\Lynk\Strategies\LynkV1Driver;
 use Exception;
-use Stancl\Tenancy\Database\TenantScope;
 
 class GenerateSellConfirmationCertificate extends BaseSellConfirmation
 {
@@ -18,17 +15,15 @@ class GenerateSellConfirmationCertificate extends BaseSellConfirmation
         parent::__construct();
     }
 
-    public function handle(): void
+    public function handle(LocalMarketWebhook $localMarketWebhook): void
     {
         // Retrieve all orders with a status of 'ready for certificate'
-        LocalMarketOrder::query()
-            ->whereIn('status', [LocalMarketOrderStatus::CommoditiesSell, LocalMarketOrderStatus::Completed])
-            ->where('sell_confirmation_status', SellConfirmationStatus::ReadyForCertificate)
+        LocalMarketOrder::query()->where('sell_confirmation_status', SellConfirmationStatus::ReadyForCertificate)
             ->when($this->localMarketOrderId, fn ($q) => $q->where('id', $this->localMarketOrderId))
-            ->chunkById(self::CHUNK_SIZE, function ($orders) {
+            ->chunkById(self::CHUNK_SIZE, function ($orders) use ($localMarketWebhook) {
                 try {
                     foreach ($orders as $order) {
-                        $this->generateCertificate($order);
+                        $this->generateCertificate($localMarketWebhook, $order);
                         $this->updateCertificateStatus($order->id, SellConfirmationStatus::Generated);
                     }
                 } catch (Exception $e) {
@@ -56,15 +51,14 @@ class GenerateSellConfirmationCertificate extends BaseSellConfirmation
             : parent::uniqueId();
     }
 
-    private function generateCertificate(LocalMarketOrder $order): void
+    private function generateCertificate(LocalMarketWebhook $localMarketWebhook, LocalMarketOrder $order): void
     {
-        $traderOrder = TraderOrder::with([
-            //retrieve the financing order without checking the tenant.
-            'order' => fn ($q) => $q->withoutGlobalScope(TenantScope::class),
-        ])->where('reference', $order->external_order_no)->firstOrFail();
+        //        $traderOrder = TraderOrder::with([
+        ////            //retrieve the financing order without checking the tenant.
+        ////            'order' => fn ($q) => $q->withoutGlobalScope(TenantScope::class),
+        ////        ])->where('reference', $order->external_order_no)->firstOrFail();
 
-        $lynkV1Driver = app(LynkV1Driver::class);
-        $lynkV1Driver->createSellConfirmationDocument($traderOrder);
+        $localMarketWebhook->with(['case' => 'sell_confirmation_certificate', 'external_order_no' => $order->external_order_no])->handle();
     }
 
     private function updateCertificateStatus(int $orderId, int $status): void

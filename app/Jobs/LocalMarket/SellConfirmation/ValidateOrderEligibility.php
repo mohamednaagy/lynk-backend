@@ -2,32 +2,40 @@
 
 namespace App\Jobs\LocalMarket\SellConfirmation;
 
-use App\Enums\LocalMarketOrderStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Enums\UnitOwnershipStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Exceptions\ValidateOrderEligibilityException;
 use App\Models\LocalMarketOrder;
 use Exception;
-use Illuminate\Support\Collection;
 
 class ValidateOrderEligibility extends BaseSellConfirmation
 {
+    public function __construct(private int $localMarketOrderId)
+    {
+        parent::__construct();
+    }
+
     public function handle(): void
     {
         try {
-            // Retrieve pending orders and check that all their units are either deleted or sold.
-            LocalMarketOrder::query()
+            // Retrieve the order and check that all their units are either deleted or sold.
+            $order = LocalMarketOrder::query()
                 ->select('id')
-                ->whereIn('status', [LocalMarketOrderStatus::CommoditiesSell, LocalMarketOrderStatus::Completed])
+                ->whereId($this->localMarketOrderId)
                 ->where('sell_confirmation_status', SellConfirmationStatus::Pending)
                 ->whereDoesntHave('orderUnits', function ($query) {
                     $query->where('ownership_status', UnitOwnershipStatus::Owner);
-                })->chunkById(self::CHUNK_SIZE, function ($orders) {
-                    $this->markOrdersAsEligible($orders);
-                    $this->dispatchSellConfirmationJobs($orders);
-                });
+                })->first();
+
+            if (! $order) {
+                return;
+            }
+
+            $this->markOrderAsEligible($order->id);
+            GenerateSellConfirmationCertificate::dispatch($order->id);
         } catch (Exception $e) {
             self::logError('ValidateOrderEligibility failed', [
+                'order_id' => $this->localMarketOrderId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -36,19 +44,14 @@ class ValidateOrderEligibility extends BaseSellConfirmation
         }
     }
 
-    private function markOrdersAsEligible(Collection $orders): void
+    private function markOrderAsEligible(int $orderId): void
     {
-        $orderIds = $orders->pluck('id')->toArray();
+        $this->logInfo('Set sell_confirmation_status to "Ready For Certificate"', [
+            'order_id' => $orderId,
+        ]);
 
-        LocalMarketOrder::whereIn('id', $orderIds)->update([
+        LocalMarketOrder::whereId($orderId)->update([
             'sell_confirmation_status' => SellConfirmationStatus::ReadyForCertificate,
         ]);
-    }
-
-    private function dispatchSellConfirmationJobs(Collection $orders): void
-    {
-        foreach ($orders as $order) {
-            GenerateSellConfirmationCertificate::dispatch($order->id);
-        }
     }
 }

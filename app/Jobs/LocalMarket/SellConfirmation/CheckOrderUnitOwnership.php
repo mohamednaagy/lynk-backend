@@ -2,52 +2,35 @@
 
 namespace App\Jobs\LocalMarket\SellConfirmation;
 
-use App\Enums\LocalMarketOrderStatus;
-use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
 use App\Jobs\LocalMarket\SellConfirmation\Enums\UnitOwnershipStatus;
-use App\Models\LocalMarketOrder;
 use App\Models\LocalMarketOrderHasUnit;
-use Illuminate\Support\Collection;
 
-class CheckOrderUnitOwnershipSellConfirmation extends BaseSellConfirmation
+class CheckOrderUnitOwnership extends BaseSellConfirmation
 {
-    public function __construct(private ?int $inventoryId = null)
+    public function __construct(private int $localMarketOrderId, private ?int $inventoryId = null)
     {
         parent::__construct();
     }
 
     public function handle(): void
     {
-        LocalMarketOrder::whereIn('status', [LocalMarketOrderStatus::CommoditiesSell, LocalMarketOrderStatus::Completed])
-            ->where('sell_confirmation_status', SellConfirmationStatus::Pending)
-            ->chunkById(self::CHUNK_SIZE, function ($orders) {
-                $this->processOrders($orders);
-            });
-
-        ValidateOrderEligibility::dispatch();
+        $this->processOrderUnits($this->localMarketOrderId, $this->inventoryId);
+        ValidateOrderEligibility::dispatch($this->localMarketOrderId);
     }
 
     public function uniqueId(): string
     {
-        return $this->inventoryId ?
-            __CLASS__.'_'.$this->inventoryId
+        return $this->localMarketOrderId ?
+            __CLASS__.'_'.$this->localMarketOrderId
             : parent::uniqueId();
     }
 
-    private function processOrders(Collection $orders): void
-    {
-        foreach ($orders as $order) {
-            self::logInfo("Processing LocalMarketOrderId ($order->id)");
-            $this->processOrderUnits($order);
-        }
-    }
-
-    private function processOrderUnits(LocalMarketOrder $order): void
+    private function processOrderUnits(int $orderId, ?int $inventoryId = null): void
     {
         LocalMarketOrderHasUnit::with('inventoryUnit')
-            ->when($this->inventoryId, fn ($q) => $q->where('inventory_id', $this->inventoryId))
+            ->when($inventoryId, fn ($q) => $q->where('inventory_id', $inventoryId))
             ->where([
-                'local_market_order_id' => $order->id,
+                'local_market_order_id' => $orderId,
                 'ownership_status' => UnitOwnershipStatus::Owner,
             ])
             ->chunkById(self::CHUNK_SIZE, function ($units) {
