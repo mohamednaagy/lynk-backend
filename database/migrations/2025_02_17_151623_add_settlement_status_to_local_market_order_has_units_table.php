@@ -1,6 +1,5 @@
 <?php
 
-use App\Jobs\LocalMarket\SellConfirmation\Enums\UnitOwnershipStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::table('local_market_order_has_units', function (Blueprint $table) {
-            $table->tinyInteger('ownership_status')
-                ->default(UnitOwnershipStatus::Owner)
-                ->comment('1: Owner, 2: Sold, 3: Deleted by supplier')
+            $table->tinyInteger('settlement_status')
+                ->nullable()
+                ->comment('1: SoldToAnotherCustomer, 3: DeletedBySupplier')
                 ->after('inventory_id')
                 ->index();
         });
@@ -31,7 +30,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('local_market_order_has_units', function (Blueprint $table) {
-            $table->dropColumn('ownership_status');
+            $table->dropColumn('settlement_status');
         });
     }
 };

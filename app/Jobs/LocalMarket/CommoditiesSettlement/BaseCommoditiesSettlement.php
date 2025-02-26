@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs\LocalMarket\SellConfirmation;
+namespace App\Jobs\LocalMarket\CommoditiesSettlement;
 
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Bus\Queueable;
@@ -10,28 +10,29 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
 
-abstract class BaseSellConfirmation implements ShouldQueue
+abstract class BaseCommoditiesSettlement implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable;
 
-    protected const CHUNK_SIZE = 100;
+    protected const CHUNK_SIZE = 10;
 
     public function __construct()
     {
         $className = class_basename(static::class);
-        self::logInfo("add $className job to queue local_market");
-        $this->onQueue('sell_confirmation_certificate');
+        $queueName = 'local_market_commodities_settlement';
+        self::logInfo("add $className job to queue $queueName");
+        $this->onQueue($queueName);
     }
 
     protected function logInfo(string $message, array $data = []): void
     {
-        $message = 'SellConfirmationCertificate - '.$message;
+        $message = 'CommoditiesSettlement - '.$message;
         Log::channel('local_market')->info($message, $data);
     }
 
     protected function logError(string $message, array $data = []): void
     {
-        $message = 'SellConfirmationCertificate - '.$message;
+        $message = 'CommoditiesSettlement - '.$message;
         Log::channel('local_market')->error($message, $data);
     }
 

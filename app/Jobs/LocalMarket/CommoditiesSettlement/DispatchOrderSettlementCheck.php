@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Jobs\LocalMarket\SellConfirmation;
+namespace App\Jobs\LocalMarket\CommoditiesSettlement;
 
-use App\Jobs\LocalMarket\SellConfirmation\Enums\SellConfirmationStatus;
+use App\Jobs\LocalMarket\CommoditiesSettlement\Enums\CommoditySettlementStatus;
 use App\Models\LocalMarketOrder;
 
-class DispatchOrderUnitOwnershipChecks extends BaseSellConfirmation
+class DispatchOrderSettlementCheck extends BaseCommoditiesSettlement
 {
     public function __construct(private ?int $inventoryId = null)
     {
@@ -14,10 +14,10 @@ class DispatchOrderUnitOwnershipChecks extends BaseSellConfirmation
 
     public function handle(): void
     {
-        LocalMarketOrder::query()->where('sell_confirmation_status', SellConfirmationStatus::Pending)
+        LocalMarketOrder::query()->where('commodities_settlement_status', CommoditySettlementStatus::PendingSettlement)
             ->chunkById(self::CHUNK_SIZE, function ($orders) {
                 foreach ($orders as $order) {
-                    CheckOrderUnitOwnership::dispatch($order->id, $this->inventoryId);
+                    CheckOrderUnitSettlement::dispatch($order->id, $this->inventoryId);
                 }
             });
     }

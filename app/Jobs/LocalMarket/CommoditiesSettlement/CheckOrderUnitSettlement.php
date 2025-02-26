@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Jobs\LocalMarket\SellConfirmation;
+namespace App\Jobs\LocalMarket\CommoditiesSettlement;
 
-use App\Jobs\LocalMarket\SellConfirmation\Enums\UnitOwnershipStatus;
-use App\Jobs\LocalMarket\SellConfirmation\Exceptions\CheckOrderUnitOwnershipException;
+use App\Jobs\LocalMarket\CommoditiesSettlement\Enums\UnitSettlementStatus;
+use App\Jobs\LocalMarket\CommoditiesSettlement\Exceptions\CheckOrderUnitSettlementException;
 use App\Models\LocalMarketOrderHasUnit;
 use Exception;
 
-class CheckOrderUnitOwnership extends BaseSellConfirmation
+class CheckOrderUnitSettlement extends BaseCommoditiesSettlement
 {
     public function __construct(private int $localMarketOrderId, private ?int $inventoryId = null)
     {
@@ -18,15 +18,15 @@ class CheckOrderUnitOwnership extends BaseSellConfirmation
     {
         try {
             $this->processOrderUnits($this->localMarketOrderId, $this->inventoryId);
-            ValidateOrderEligibility::dispatch($this->localMarketOrderId);
+            ValidateCommoditiesSettlement::dispatch($this->localMarketOrderId);
         } catch (Exception $e) {
-            self::logError('CheckOrderUnitOwnership failed', [
+            self::logError('CheckOrderUnitSettlement failed', [
                 'order_id' => $this->localMarketOrderId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            throw new CheckOrderUnitOwnershipException($e->getMessage());
+            throw new CheckOrderUnitSettlementException($e->getMessage());
         }
     }
 
@@ -41,10 +41,8 @@ class CheckOrderUnitOwnership extends BaseSellConfirmation
     {
         LocalMarketOrderHasUnit::with('inventoryUnit')
             ->when($inventoryId, fn ($q) => $q->where('inventory_id', $inventoryId))
-            ->where([
-                'local_market_order_id' => $orderId,
-                'ownership_status' => UnitOwnershipStatus::Owner,
-            ])
+            ->where('local_market_order_id', $orderId)
+            ->whereNull('settlement_status')
             ->chunkById(self::CHUNK_SIZE, function ($units) {
                 self::logInfo('Processing chunk of units');
                 foreach ($units as $unit) {
@@ -56,38 +54,21 @@ class CheckOrderUnitOwnership extends BaseSellConfirmation
     private function processUnit(LocalMarketOrderHasUnit $unit): void
     {
         $inventoryUnit = $unit->inventoryUnit;
-        self::logInfo('Processing unit', [
-            'unit_id' => $unit->id,
-            'order_id' => $unit->local_market_order_id,
-            'inventory_deleted_at' => optional($inventoryUnit)->deleted_at,
-            'inventory_last_purchasing_order_id' => optional($inventoryUnit)->last_purchasing_order_id,
-        ]);
 
         if (is_null($inventoryUnit)) {
-            $this->markUnitDeleted($unit);
+            $this->changeSettlementStatus($unit, UnitSettlementStatus::DeletedBySupplier);
         } elseif ($unit->local_market_order_id != $inventoryUnit->last_purchasing_order_id) {
-            $this->markUnitSold($unit);
+            $this->changeSettlementStatus($unit, UnitSettlementStatus::SoldToAnotherCustomer);
         }
     }
 
-    private function markUnitDeleted(LocalMarketOrderHasUnit $unit): void
+    private function changeSettlementStatus(LocalMarketOrderHasUnit $unit, string $status): void
     {
         $unit->update([
-            'ownership_status' => UnitOwnershipStatus::DeletedBySupplier,
+            'settlement_status' => $status,
         ]);
 
-        self::logInfo('Updated status to DeletedBySupplier', [
-            'unit_id' => $unit->id,
-        ]);
-    }
-
-    private function markUnitSold(LocalMarketOrderHasUnit $unit): void
-    {
-        $unit->update([
-            'ownership_status' => UnitOwnershipStatus::SoldToAnotherCustomer,
-        ]);
-
-        self::logInfo('Updated status to SoldToAnotherCustomer', [
+        self::logInfo("Updated settlement_status to $status", [
             'unit_id' => $unit->id,
         ]);
     }

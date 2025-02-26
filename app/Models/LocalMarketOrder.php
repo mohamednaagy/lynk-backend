@@ -6,6 +6,7 @@ use App\Enums\LocalMarket\OrderStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @property mixed $currency
@@ -30,7 +31,7 @@ class LocalMarketOrder extends Model
         'hold_for',
         'order_no',
         'preferred_commodity_type',
-        'sell_confirmation_status',
+        'commodities_settlement_status',
     ];
 
     protected $attributes = [
@@ -82,5 +83,17 @@ class LocalMarketOrder extends Model
     public function lender()
     {
         return $this->belongsTo(Lender::class, 'company_id');
+    }
+
+    public static function changeCommoditiesSettlementStatus(int $localMarketOrderId, string $status): void
+    {
+        LocalMarketOrder::whereId($localMarketOrderId)->update([
+            'commodities_settlement_status' => $status,
+        ]);
+
+        Log::channel('local_market')->info('Change commodities_settlement_status', [
+            'order_id' => $localMarketOrderId,
+            'status' => $status,
+        ]);
     }
 }

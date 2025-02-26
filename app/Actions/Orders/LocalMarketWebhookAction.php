@@ -69,7 +69,7 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->confirmCancelledFromProvider($traderOrder);
                 break;
-            case 'sell_confirmation_certificate':
+            case 'commodities_settled':
                 Trader::driver($traderOrder->provider, $traderOrder->version)->createSellConfirmationDocument($traderOrder);
                 break;
             default:

@@ -168,24 +168,42 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     public function createSellConfirmationDocument(TraderOrder $traderOrder): void
     {
-        $trader = Trader::driver($traderOrder->provider);
-        $currentTimeInUtcTz = CarbonImmutable::now();
-        $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-        $financeOrder = $traderOrder->order;
+        try {
+            $trader = Trader::driver($traderOrder->provider);
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+            $financeOrder = $traderOrder->order;
 
-        $trader->storeOrderDocumentAsPdf(
-            'local-commodity-market.sell-confirmation-certificate',
-            [
-                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                'trader_order_reference' => $traderOrder->reference,
-                'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
-                'customer_name' => $financeOrder->customer_name,
-                'current_date' => $currentTimeInRiyadhTz->toDateString(),
-                'current_time' => $currentTimeInRiyadhTz->toTimeString(),
-            ],
-            $traderOrder,
-            TraderOrderMediaCollection::SellConfirmationDocument,
-        );
+            $trader->storeOrderDocumentAsPdf(
+                'local-commodity-market.sell-confirmation-certificate',
+                [
+                    'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
+                    'trader_order_reference' => $traderOrder->reference,
+                    'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
+                    'customer_name' => $financeOrder->customer_name,
+                    'current_date' => $currentTimeInRiyadhTz->toDateString(),
+                    'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+                ],
+                $traderOrder,
+                TraderOrderMediaCollection::SellConfirmationDocument,
+            );
+
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::AttachSellConfirmationDocument,
+            );
+
+        } catch (\Throwable $exception) {
+            throw new TraderException(
+                'Failed to create sell-confirmation-certificate',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                ],
+                $exception
+            );
+        }
     }
 
     /**
@@ -449,7 +467,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     {
         match (true) {
             $lastHistoryAction === FinancingOrderHistory::ContractSigned
-                && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
+            && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
             default => null,
         };
     }

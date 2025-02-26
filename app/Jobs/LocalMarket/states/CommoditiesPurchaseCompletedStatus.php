@@ -4,7 +4,7 @@ namespace App\Jobs\LocalMarket\states;
 
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
-use App\Jobs\LocalMarket\SellConfirmation\DispatchOrderUnitOwnershipChecks;
+use App\Jobs\LocalMarket\CommoditiesSettlement\DispatchOrderSettlementCheck;
 
 class CommoditiesPurchaseCompletedStatus extends BaseStatus
 {
@@ -20,7 +20,7 @@ class CommoditiesPurchaseCompletedStatus extends BaseStatus
         $this->localMarketWebhook->with($data)->handle();
         $this->logQueueJob('Congratulations Commodities purchased');
 
-        // Dispatch a job to check the previous ownership of inventory units
-        DispatchOrderUnitOwnershipChecks::dispatch();
+        // Dispatch a job to verify the settlement status of orders that require settlement.
+        DispatchOrderSettlementCheck::dispatch();
     }
 }

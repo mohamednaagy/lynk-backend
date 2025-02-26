@@ -6,7 +6,6 @@ use App\Actions\Contracts\LocalMarket\ConfirmDeliverProducts;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\LocalMarketOrderStatus;
-use App\Jobs\LocalMarket\SellConfirmation\ChangeStatus\SetSellConfirmationStatusSkipped;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
 use App\Traits\LocalMarket\LocalMarketTrait;
@@ -40,8 +39,6 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
             );
             $this->inventoryService->confirmDeliverOrderUnits($localMarketOrder);
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::Delivered);
-            SetSellConfirmationStatusSkipped::dispatch($localMarketOrder->id);
-
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();

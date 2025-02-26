@@ -3,8 +3,8 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\CommoditiesSettlement\DispatchOrderSettlementCheck;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteInventory as DeleteInventoryEligibleQuantities;
-use App\Jobs\LocalMarket\SellConfirmation\DispatchOrderUnitOwnershipChecks;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
 
@@ -46,7 +46,7 @@ class LocalMarketInventoryObserver
     {
         DeleteInventoryEligibleQuantities::dispatch($inventory->id);
 
-        // Dispatch a job to check the previous ownership of inventory units
-        DispatchOrderUnitOwnershipChecks::dispatch($inventory->id);
+        // Dispatch a job to verify the settlement status of inventory units.
+        DispatchOrderSettlementCheck::dispatch($inventory->id);
     }
 }

@@ -7,7 +7,7 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Exceptions\ErrorCreatingUnitsForThisINventory;
 use App\Exceptions\FailedDecreaseUnitsForInventory;
-use App\Jobs\LocalMarket\SellConfirmation\DispatchOrderUnitOwnershipChecks;
+use App\Jobs\LocalMarket\CommoditiesSettlement\DispatchOrderSettlementCheck;
 use App\Models\LocalMarketInventory;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -101,8 +101,8 @@ class UpdateInventoryStock implements ShouldQueue
             DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $decreased_amount]);
             Log::info("Successfully decreased {$decreased_amount} units for inventory ID: {$inventory->id}");
 
-            // Dispatch a job to check the previous ownership of inventory units
-            DispatchOrderUnitOwnershipChecks::dispatch($inventory->id);
+            // Dispatch a job to verify the settlement status of inventory units.
+            DispatchOrderSettlementCheck::dispatch($inventory->id);
         } catch (\Exception $e) {
             Log::error('Error decreasing units for inventory ID: '.$inventory->id, [
                 'error' => $e,
