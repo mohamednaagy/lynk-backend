@@ -57,7 +57,7 @@ return [
 
         'single' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/lynk/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
         ],
         'custom' => [
@@ -72,7 +72,7 @@ return [
         ],
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/lynk/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
         ],
