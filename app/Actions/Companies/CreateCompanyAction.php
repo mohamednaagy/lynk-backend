@@ -4,7 +4,6 @@ namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
-use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Models\Lender;
 use Illuminate\Support\Arr;
 
@@ -44,16 +43,21 @@ class CreateCompanyAction implements CreateCompany
             )
         );
 
-        $lender->lenderDetail()->create([
-            'force_preferred_commodity_type' => $data['force_preferred_commodity_type'] ?? false,
-            'notifications_email' => $data['notifications_email'],
-            'company_cr' => $data['company_cr'],
-            'default_contract_sign_time_limit' => $data['default_contract_sign_time_limit'] ?? null,
-            'contract_number' => $data['contract_number'] ?? null,
-            'preferred_market_type' => $data['preferred_market_type'] ?? null,
-            'does_order_require_approval' => $data['does_order_require_approval'] ?? null,
-            'notify_admins_about_new_orders' => $data['notify_admins_about_new_orders'] ?? CompanyNewOrderNotificationForAdminStatus::On,
-        ]);
+        $lender->lenderDetail()->create(
+            Arr::only(
+                $data,
+                [
+                    'force_preferred_commodity_type',
+                    'notifications_email',
+                    'company_cr',
+                    'default_contract_sign_time_limit',
+                    'contract_number',
+                    'preferred_market_type',
+                    'does_order_require_approval',
+                    'notify_admins_about_new_orders',
+                ]
+            )
+        );
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
             $lender->commodityTypes()->attach($data['preferred_commodity_types']);
