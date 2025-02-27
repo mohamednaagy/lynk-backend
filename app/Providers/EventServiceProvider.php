@@ -8,6 +8,7 @@ use App\Models\CommodityType;
 use App\Models\Company;
 use App\Models\CompanySupplierDetail;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderHistory;
@@ -58,6 +59,7 @@ class EventServiceProvider extends ServiceProvider
         User::class => [UserObserver::class],
         TraderOrderTimeLimit::class => [TraderOrderTimeLimitObserver::class],
         Company::class => [CompanyObserver::class],
+        Lender::class => [CompanyObserver::class],
     ];
 
     /**
