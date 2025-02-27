@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\InventoryStatus;
+use App\Jobs\LocalMarket\CommoditiesSettlement\DispatchOrderSettlementCheck;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteInventory as DeleteInventoryEligibleQuantities;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
@@ -44,5 +45,8 @@ class LocalMarketInventoryObserver
     public function deleted(LocalMarketInventory $inventory): void
     {
         DeleteInventoryEligibleQuantities::dispatch($inventory->id);
+
+        // Dispatch a job to verify the settlement status of inventory units.
+        DispatchOrderSettlementCheck::dispatch($inventory->id);
     }
 }

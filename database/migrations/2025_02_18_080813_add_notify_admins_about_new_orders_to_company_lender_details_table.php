@@ -17,12 +17,12 @@ return new class extends Migration
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
             $table->tinyInteger('notify_admins_about_new_orders')
-            ->default(CompanyNewOrderNotificationForAdminStatus::On)
-            ->after('does_order_require_approval');
+                ->default(CompanyNewOrderNotificationForAdminStatus::On)
+                ->after('does_order_require_approval');
         });
 
-         // Migrate data from `companies.notify_admins_about_new_orders` to `company_lender_details`
-         DB::table('companies')->select('id')->chunkById(100, function ($companies) {
+        // Migrate data from `companies.notify_admins_about_new_orders` to `company_lender_details`
+        DB::table('companies')->select('id')->chunkById(100, function ($companies) {
             foreach ($companies as $company) {
                 DB::table('company_lender_details')->updateOrInsert(
                     ['company_id' => $company->id],

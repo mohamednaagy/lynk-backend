@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
+use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
@@ -42,7 +43,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
 // TODO_LOCAL_MARKET need to review
-class LynkV1Driver implements TraderInterface
+class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 {
     use Localizable;
     use TraderHelperTrait {
@@ -155,6 +156,46 @@ class LynkV1Driver implements TraderInterface
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $traderOrder->provider,
+                    'version' => $traderOrder->version,
+                ],
+                $exception
+            );
+        }
+    }
+
+    public function createSellConfirmationDocument(TraderOrder $traderOrder): void
+    {
+        try {
+            $trader = Trader::driver($traderOrder->provider);
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
+            $financeOrder = $traderOrder->order;
+
+            $trader->storeOrderDocumentAsPdf(
+                'local-commodity-market.sell-confirmation-certificate',
+                [
+                    'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
+                    'trader_order_reference' => $traderOrder->reference,
+                    'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
+                    'customer_name' => $financeOrder->customer_name,
+                    'current_date' => $currentTimeInRiyadhTz->toDateString(),
+                    'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+                ],
+                $traderOrder,
+                TraderOrderMediaCollection::SellConfirmationDocument,
+            );
+
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::AttachSellConfirmationDocument,
+            );
+
+        } catch (\Throwable $exception) {
+            throw new TraderException(
+                'Failed to create sell-confirmation-certificate',
                 [
                     'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
@@ -328,6 +369,7 @@ class LynkV1Driver implements TraderInterface
     protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
         $lender = $traderOrder->order->company->lender;
+
         return
             $traderOrder->order->company->trading_mode->is(TraderOrderMode::Automatic) &&
             $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
@@ -353,17 +395,12 @@ class LynkV1Driver implements TraderInterface
      */
     public function generatePdfFileName($traderOrder, $collectionName): string
     {
-        switch ($collectionName) {
-            case 'transfer_ownership_to_lender':
-                $fileType = 'CommCert';
-                break;
-            case 'selling_commodity_to_customer':
-                $fileType = 'BorrOwnCert';
-                break;
-            case 'lynk_sale_pledge_certificate':
-                $fileType = 'SellCommCert';
-                break;
-        }
+        $fileType = match ($collectionName) {
+            TraderOrderMediaCollection::TransferOwnershipToLender => 'CommCert',
+            TraderOrderMediaCollection::SellingCommodityToCustomer => 'BorrOwnCert',
+            TraderOrderMediaCollection::LynkSalePledgeCertificate => 'SellCommCert',
+            TraderOrderMediaCollection::SellConfirmationDocument => 'SellConfCert',
+        };
 
         return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
@@ -430,7 +467,7 @@ class LynkV1Driver implements TraderInterface
     {
         match (true) {
             $lastHistoryAction === FinancingOrderHistory::ContractSigned
-                && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
+            && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
             default => null,
         };
     }

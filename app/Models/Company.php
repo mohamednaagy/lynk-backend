@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\CompanyMarketType;
-use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
@@ -168,7 +167,7 @@ class Company extends BaseTenant
         return $this->auto_complete_murabaha_order;
     }
 
-    public function lender() 
+    public function lender()
     {
         return $this->hasOne(Lender::class, 'id');
     }
