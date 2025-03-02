@@ -414,4 +414,10 @@ class TraderOrder extends Model implements HasMedia
             $query->where('action', FinancingOrderHistory::MurabahaSaleCompleted);
         });
     }
+
+    public function hasAutoCompleteFinancingOrder()
+    {
+        return $this->completedSellStep()->exists() &&
+        $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
+    }
 }

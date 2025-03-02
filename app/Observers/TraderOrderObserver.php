@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
+use App\Actions\Contracts\Orders\CompleteOrder;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
-use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
@@ -64,11 +64,7 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
-            if (
-                TraderOrder::whereId($traderOrder->id)->completedSellStep()->exists() &&
-                $traderOrder->order->company->isCompanyHasMurabahaAutoCompleteOrder()) {
-                $traderOrder->order->update(['status' => FinancingOrderStatus::Completed]);
-            }
+
         }
     }
 
@@ -78,6 +74,13 @@ class TraderOrderObserver
             TraderOrderCancelled::dispatch($traderOrder);
             app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         }
+
+        if ($traderOrder->status->is(TraderOrderStatus::Completed)) {
+            if ($traderOrder->hasAutoCompleteFinancingOrder()) {
+                app(CompleteOrder::class)->handle($traderOrder->order->id, []);
+            }
+        }
+
     }
 
     /**

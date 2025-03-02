@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
+use App\Models\FinancingOrder;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\ValidationException;
 
 class CompleteOrderRequest extends FormRequest
 {
@@ -13,7 +15,9 @@ class CompleteOrderRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $financingOrder = FinancingOrder::findOrFail($this->route('order'));
+
+        return $financingOrder->canBeCompleted();
     }
 
     /**
@@ -26,5 +30,19 @@ class CompleteOrderRequest extends FormRequest
         return [
             'payment_proof' => ['sometimes', 'nullable', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
         ];
+    }
+
+    /**
+     * Handle a failed authorization attempt.
+     *
+     * @return void
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    protected function failedAuthorization()
+    {
+        throw ValidationException::withMessages([
+            'order' => ['Order cannot be completed'],
+        ]);
     }
 }
