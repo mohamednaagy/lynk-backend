@@ -9,7 +9,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DeleteSupplierLocation implements ShouldQueue
@@ -31,21 +30,17 @@ class DeleteSupplierLocation implements ShouldQueue
     public function handle()
     {
         try {
-            DB::beginTransaction();
-
             Log::info("Starting transaction for Deleting location ID: {$this->supplierLocation->id}");
-            
+
             foreach ($this->supplierLocation->inventories as $inventory) {
                 InventoryService::deleteInventory($inventory);
             }
 
             $this->supplierLocation->delete();
-
-            DB::commit();
-            Log::info("Transaction committed for deleting Location ID: {$this->supplierLocation->id}");
+            Log::info("Successfully deleted Supplier Location ID: {$this->supplierLocation->id}");
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Location ID: {$this->supplierLocation->id} Problem due to error: {$e->getMessage()}");
+            Log::error("Location ID: {$this->supplierLocation->id} failed: {$e->getMessage()}");
+            throw $e;
         }
     }
 }
