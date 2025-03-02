@@ -193,7 +193,11 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
                 FinancingOrderHistory::AttachSellConfirmationDocument,
             );
 
-        } catch (\Throwable $exception) {
+        } catch (\Throwable $e) {
+            Log::channel('local_market')->error('Failed to create sell-confirmation-certificate', [
+                'message' => $e->getMessage(),
+            ]);
+
             throw new TraderException(
                 'Failed to create sell-confirmation-certificate',
                 [
@@ -201,7 +205,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
                 ],
-                $exception
+                $e
             );
         }
     }
