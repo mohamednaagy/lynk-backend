@@ -41,6 +41,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
+use Stancl\Tenancy\Database\TenantScope;
 
 // TODO_LOCAL_MARKET need to review
 class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
@@ -169,6 +170,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     public function createSellConfirmationDocument(TraderOrder $traderOrder): void
     {
         try {
+            $traderOrder->load(['order' => fn ($query) => $query->withoutGlobalScope(TenantScope::class)]);
             $trader = Trader::driver($traderOrder->provider);
             $currentTimeInUtcTz = CarbonImmutable::now();
             $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
