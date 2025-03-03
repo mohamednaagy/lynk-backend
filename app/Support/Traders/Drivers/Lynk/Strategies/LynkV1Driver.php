@@ -41,7 +41,6 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
-use Stancl\Tenancy\Database\TenantScope;
 
 // TODO_LOCAL_MARKET need to review
 class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
@@ -170,10 +169,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     public function createSellConfirmationDocument(TraderOrder $traderOrder): void
     {
         try {
-            $traderOrder->load(['order' => fn ($query) => $query->withoutGlobalScope(TenantScope::class)]);
             $trader = Trader::driver($traderOrder->provider);
-            $currentTimeInUtcTz = CarbonImmutable::now();
-            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
             $financeOrder = $traderOrder->order;
 
             $trader->storeOrderDocumentAsPdf(
@@ -183,8 +179,8 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
                     'trader_order_reference' => $traderOrder->reference,
                     'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
                     'customer_name' => $financeOrder->customer_name,
-                    'current_date' => $currentTimeInRiyadhTz->toDateString(),
-                    'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+                    'current_date' => saudi_now('Y-m-d'),
+                    'current_time' => saudi_now('H:i:s'),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellConfirmationDocument,

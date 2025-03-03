@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
+use Stancl\Tenancy\Tenancy;
 
 abstract class BaseCommoditiesSettlement implements ShouldQueue
 {
@@ -18,6 +19,9 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
 
     public function __construct()
     {
+        // Disable tenancy inside the job
+        app(Tenancy::class)->end();
+
         $className = class_basename(static::class);
         $queueName = 'local_market_commodities_settlement';
         self::logInfo("add $className job to queue $queueName");

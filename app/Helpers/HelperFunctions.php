@@ -255,7 +255,7 @@ if (! function_exists('saudi_now')) {
      *
      * @return Carbon
      */
-    function saudi_now($format, ?Carbon $date = null): string
+    function saudi_now($format = 'Y-m-d h:i:s A', ?Carbon $date = null): string
     {
         $timezone = 'Asia/Riyadh';
 
