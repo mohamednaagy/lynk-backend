@@ -170,8 +170,6 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     {
         try {
             $trader = Trader::driver($traderOrder->provider);
-            $currentTimeInUtcTz = CarbonImmutable::now();
-            $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
             $financeOrder = $traderOrder->order;
 
             $trader->storeOrderDocumentAsPdf(
@@ -181,8 +179,8 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
                     'trader_order_reference' => $traderOrder->reference,
                     'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
                     'customer_name' => $financeOrder->customer_name,
-                    'current_date' => $currentTimeInRiyadhTz->toDateString(),
-                    'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+                    'current_date' => saudi_now('Y-m-d'),
+                    'current_time' => saudi_now('H:i:s'),
                 ],
                 $traderOrder,
                 TraderOrderMediaCollection::SellConfirmationDocument,

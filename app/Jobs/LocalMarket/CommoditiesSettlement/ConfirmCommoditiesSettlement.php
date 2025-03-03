@@ -5,6 +5,7 @@ namespace App\Jobs\LocalMarket\CommoditiesSettlement;
 use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Jobs\LocalMarket\CommoditiesSettlement\Enums\CommoditySettlementStatus;
 use App\Jobs\LocalMarket\CommoditiesSettlement\Exceptions\ConfirmCommoditiesSettlementException;
+use App\Jobs\LocalMarket\LynkWebhooks\CommoditiesSettledWebhook;
 use App\Models\LocalMarketOrder;
 use Exception;
 
@@ -19,10 +20,10 @@ class ConfirmCommoditiesSettlement extends BaseCommoditiesSettlement
     {
         LocalMarketOrder::query()->where('commodities_settlement_status', CommoditySettlementStatus::CommoditySettled)
             ->when($this->localMarketOrderId, fn ($q) => $q->where('id', $this->localMarketOrderId))
-            ->chunkById(self::CHUNK_SIZE, function ($orders) use ($localMarketWebhook) {
+            ->chunkById(self::CHUNK_SIZE, function ($orders) {
                 try {
                     foreach ($orders as $order) {
-                        $this->confirmSettlement($localMarketWebhook, $order);
+                        CommoditiesSettledWebhook::dispatch($order->id);
                         LocalMarketOrder::changeCommoditiesSettlementStatus($order->id, CommoditySettlementStatus::SettlementConfirmed);
                     }
                 } catch (Exception $e) {
@@ -48,10 +49,5 @@ class ConfirmCommoditiesSettlement extends BaseCommoditiesSettlement
         return $this->localMarketOrderId
             ? __CLASS__.'_'.$this->localMarketOrderId
             : parent::uniqueId();
-    }
-
-    private function confirmSettlement(LocalMarketWebhook $localMarketWebhook, LocalMarketOrder $order): void
-    {
-        $localMarketWebhook->with(['case' => 'commodities_settled', 'external_order_no' => $order->external_order_no])->handle();
     }
 }
