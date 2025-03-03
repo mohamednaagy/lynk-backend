@@ -72,10 +72,11 @@ class BursamV2Driver extends BursamV1Driver
         ?User $cancelledBy = null
     ): int {
         $user = auth()->check() ? auth()->user() : null;
-        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::OnHold)) {
+        if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
             app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
+            $this->updateFinancingOrderStatus($traderOrder->order);
 
             return TraderOrderCancellationStatus::Cancelled;
         }
@@ -100,24 +101,28 @@ class BursamV2Driver extends BursamV1Driver
                     return;
                 }
 
-                $order = $traderOrder->order()->first();
+                $this->updateFinancingOrderStatus($traderOrder->order);
 
-                if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-                    $order->update([
-                        'status' => FinancingOrderStatus::Cancelled,
-                    ]);
-                }
-
-                if ($order->status->is(FinancingOrderStatus::InProgress)) {
-                    $order->update([
-                        'status' => FinancingOrderStatus::PendingTraderOrder,
-                    ]);
-                }
             },
         ])->dispatch();
         app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::PendingCancellation;
+    }
+
+    public function updateFinancingOrderStatus(FinancingOrder $financingOrder): void
+    {
+        if ($financingOrder->status->is(FinancingOrderStatus::PendingCancellation)) {
+            $financingOrder->update([
+                'status' => FinancingOrderStatus::Cancelled,
+            ]);
+        }
+
+        if ($financingOrder->status->is(FinancingOrderStatus::InProgress) && $financingOrder->activeTraderOrder()->count() === 0) {
+            $financingOrder->update([
+                'status' => FinancingOrderStatus::PendingTraderOrder,
+            ]);
+        }
     }
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
