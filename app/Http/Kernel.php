@@ -44,6 +44,7 @@ class Kernel extends HttpKernel
         'api' => [
             EnsureFrontendRequestsAreStatefulWithoutCookie::class,
             //            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\SetLocalization::class,
             \App\Http\Middleware\SetUserPreferredLocale::class,

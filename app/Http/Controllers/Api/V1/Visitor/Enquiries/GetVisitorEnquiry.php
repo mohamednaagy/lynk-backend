@@ -11,7 +11,7 @@ class GetVisitorEnquiry extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['signed', 'throttle:sensitive']);
+        $this->middleware(['signed', 'throttle:6,1']);
     }
 
     public function __invoke(Enquiry $enquiry): JsonResponse
@@ -20,7 +20,7 @@ class GetVisitorEnquiry extends Controller
             $query->latest();
         }]);
 
-        return fractal($enquiry, new EnquiryTransformer())
+        return fractal($enquiry, new EnquiryTransformer)
             ->parseIncludes([
                 'id',
                 'subject',

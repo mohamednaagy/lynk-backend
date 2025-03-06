@@ -13,7 +13,7 @@ class VerifyEmail extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['signed', 'throttle:sensitive']);
+        $this->middleware(['signed', 'throttle:6,1']);
     }
 
     /**
@@ -21,7 +21,6 @@ class VerifyEmail extends Controller
      *
      * @param  VerifyEmailInterface  $verifyEmail
      * @param  Company  $company
-     * @param  User  $user
      * @return JsonResponse
      */
     public function __invoke(Request $request, User $user)

@@ -11,7 +11,7 @@ class VerifyOtp extends Controller
 {
     public function __construct()
     {
-        $this->middleware('throttle:sensitive');
+        $this->middleware('throttle:5,1');
     }
 
     public function __invoke(VerifyOtpRequest $request, VerifyOtpInterface $verifyOtp, LoginUser $loginUser)

@@ -254,5 +254,5 @@ return [
     |
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
-    'api_throttle_enabled' => env('API_THROTTLE_ENABLED', true),
+    'enable_rate_limiter' => env('ENABLE_RATE_LIMITER', true),
 ];

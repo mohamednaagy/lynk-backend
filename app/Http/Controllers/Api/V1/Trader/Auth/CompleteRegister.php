@@ -16,17 +16,12 @@ class CompleteRegister extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['signed', 'throttle:sensitive']);
+        $this->middleware(['signed', 'throttle:6,1']);
     }
 
     /**
      * Handle the incoming request.
      *
-     * @param  CompleteRegisterRequest  $request
-     * @param  User  $user
-     * @param  CompleteUserRegistration  $completeUserRegistration
-     * @param  LoginUser  $loginUser
-     * @return JsonResponse
      *
      * @throws Throwable
      */
@@ -37,7 +32,7 @@ class CompleteRegister extends Controller
         LoginUser $loginUser
     ): JsonResponse {
         if ($user->isRegisterCompleted()) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         return DB::transaction(function () use ($request, $user, $completeUserRegistration, $loginUser) {

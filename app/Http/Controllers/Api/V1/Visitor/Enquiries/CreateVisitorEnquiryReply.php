@@ -14,16 +14,11 @@ class CreateVisitorEnquiryReply extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['signed', 'throttle:sensitive']);
+        $this->middleware(['signed', 'throttle:6,1']);
     }
 
     /**
      * Summary of __invoke
-     *
-     * @param  StoreVisitorEnquiryReply  $request
-     * @param  ReplyToEnquiry  $replyToEnquiry
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      */
     public function __invoke(StoreVisitorEnquiryReply $request, ReplyToEnquiry $replyToEnquiry, Enquiry $enquiry): JsonResponse
     {
@@ -39,7 +34,7 @@ class CreateVisitorEnquiryReply extends Controller
         //change the enquiry status to be UnderReview
         $enquiry->update(['status' => EnquiryStatus::UnderReview]);
 
-        return fractal($enquiryReply, new EnquiryReplyTransformer())
+        return fractal($enquiryReply, new EnquiryReplyTransformer)
             ->parseIncludes([
                 'id',
                 'body',
