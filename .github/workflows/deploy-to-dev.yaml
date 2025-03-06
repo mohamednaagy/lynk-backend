@@ -28,7 +28,7 @@ jobs:
         id: pr-url
         uses: kceb/pull-request-url-action@v1
         with:
-          github-oauth-token: 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
+          github-oauth-token: ${{ secrets.GB_OAUTH_TOKEN }}
 
       - name: print info
         if: always()
@@ -94,7 +94,7 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           # github_token: ${{ secrets.TOKEN }}
-          github_token: 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
+          github_token: ${{ secrets.GB_OAUTH_TOKEN }}
           publish_dir: allure-report
 
       - name: Cleanup Docker Containers - Fix Permissions
