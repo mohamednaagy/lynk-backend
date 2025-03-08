@@ -21,11 +21,6 @@ class CompleteAdminRegister extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CompleteAdminRegisterRequest  $request
-     * @param  User  $admin
-     * @param  CompleteAdminRegistration  $completeAdminRegistration
-     * @param  LoginUser  $loginUser
-     * @return JsonResponse
      *
      * @throws \Throwable
      */
@@ -36,10 +31,10 @@ class CompleteAdminRegister extends Controller
         LoginUser $loginUser
     ): JsonResponse {
         if ($admin->isRegisterCompleted()) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
-        return  DB::transaction(function () use ($request, $admin, $completeAdminRegistration, $loginUser) {
+        return DB::transaction(function () use ($request, $admin, $completeAdminRegistration, $loginUser) {
             $admin = $completeAdminRegistration->handle($admin, $request->validated());
 
             return $this->successResponse(

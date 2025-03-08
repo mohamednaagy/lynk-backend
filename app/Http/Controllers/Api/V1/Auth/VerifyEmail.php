@@ -21,7 +21,6 @@ class VerifyEmail extends Controller
      *
      * @param  VerifyEmailInterface  $verifyEmail
      * @param  Company  $company
-     * @param  User  $user
      * @return JsonResponse
      */
     public function __invoke(Request $request, User $user)

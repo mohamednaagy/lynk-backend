@@ -22,11 +22,6 @@ class CompleteRegister extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  CompleteRegisterRequest  $request
-     * @param  User  $user
-     * @param  CompleteUserRegistration  $completeUserRegistration
-     * @param  LoginUser  $loginUser
-     * @return JsonResponse
      *
      * @throws Throwable
      */
@@ -37,7 +32,7 @@ class CompleteRegister extends Controller
         LoginUser $loginUser
     ): JsonResponse {
         if ($user->isRegisterCompleted()) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
 
         return DB::transaction(function () use ($request, $user, $completeUserRegistration, $loginUser) {

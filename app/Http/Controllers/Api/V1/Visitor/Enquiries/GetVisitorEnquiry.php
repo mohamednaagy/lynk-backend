@@ -20,7 +20,7 @@ class GetVisitorEnquiry extends Controller
             $query->latest();
         }]);
 
-        return fractal($enquiry, new EnquiryTransformer())
+        return fractal($enquiry, new EnquiryTransformer)
             ->parseIncludes([
                 'id',
                 'subject',
