@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - sandbox
-
+      
 jobs:
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
@@ -15,12 +15,12 @@ jobs:
         id: install-ssh-key
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_SANDBOX_PRIVATE_KEY }}
 
       - name: pulling and build code
         id: pull-and-build
         run: | 
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@144.24.208.157 \
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SANDBOX_USER_NAME }}@144.24.208.157 \
            "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo php artisan migrate && sudo supervisorctl stop all && sudo supervisorctl start all"
         
       - name: set pr url
