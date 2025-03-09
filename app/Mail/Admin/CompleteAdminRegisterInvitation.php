@@ -30,7 +30,7 @@ class CompleteAdminRegisterInvitation extends Mailable implements ShouldQueue
     {
         $url = URL::signedExternalRoute(
             $externalUrl,
-            'api.v1.admins.admin.sign-up',
+            'api.v1.admins.sign-up',
             ['admin' => $invitee->id],
             now()->addDays(2)
         );

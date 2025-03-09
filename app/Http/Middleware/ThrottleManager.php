@@ -10,7 +10,11 @@ class ThrottleManager extends ThrottleRequests
     public function handle($request, Closure $next, $maxAttempts = 60, $decayMinutes = 1, $prefix = '')
     {
         if (config('app.enable_rate_limiter')) {
-            return parent::handle($request, $next, $maxAttempts, $decayMinutes, $prefix);
+            $rateLimiterAttempts = config('rate_limiter', []);
+            $routeKey = $request->route()->getName() ?: $request->path();
+            $maxAttempts = $rateLimiterAttempts[$routeKey] ?? $maxAttempts;
+
+            return parent::handle($request, $next, $maxAttempts, $decayMinutes, $routeKey);
         }
 
         return $next($request);
