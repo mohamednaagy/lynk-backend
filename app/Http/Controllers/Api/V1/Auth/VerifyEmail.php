@@ -13,7 +13,7 @@ class VerifyEmail extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['signed', 'throttle:6,1']);
+        $this->middleware('signed');
     }
 
     /**

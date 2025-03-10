@@ -26,14 +26,14 @@ Route::middleware('auth:sanctum')->prefix('v1/auth')->group(function () {
 });
 
 Route::prefix('v1/auth')->name('api.v1.')->group(function () {
-    Route::post('login', [LoginController::class, 'authenticate']);
+    Route::post('login', [LoginController::class, 'authenticate'])->name('login');
     Route::post('send-otp', SendOtp::class);
-    Route::post('verify-otp', VerifyOtp::class);
+    Route::post('verify-otp', VerifyOtp::class)->name('verify.otp');
     Route::post('send-reset-password-link', ForgotPassword::class);
     Route::post('reset-password', ResetPassword::class);
     Route::post('verify-email/{user}', VerifyEmail::class)->name('verify.email');
 });
 
 Route::prefix('v1/supplier/auth')->name('api.v1.supplier.')->group(function () {
-    Route::post('login', [\App\Http\Controllers\Api\V1\Supplier\Auth\LoginController::class, 'authenticate']);
+    Route::post('login', [\App\Http\Controllers\Api\V1\Supplier\Auth\LoginController::class, 'authenticate'])->name('login');
 });

@@ -218,5 +218,5 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::get('constants', [ConstantController::class, 'index']);
     });
 
-    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('admin.sign-up');
+    Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('sign-up');
 });
