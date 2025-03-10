@@ -211,7 +211,8 @@ class UnitService
             ->where('local_market_inventory_id', $inventoryId)
             ->where('status', InventoryUnitsStatus::Free)
             ->where('hold_for', 0)
-            ->whereNull('deleted_at');
+            ->whereNull('deleted_at')
+            ->fromRaw('local_market_inventory_units FORCE INDEX (inventory_units_eligibility_index)');
 
         if ($numberOfRotation > 0) {
             for ($i = 0; $i < $numberOfRotation; $i++) {
