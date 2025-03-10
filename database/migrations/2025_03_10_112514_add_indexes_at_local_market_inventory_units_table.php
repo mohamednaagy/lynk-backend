@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up()
     {
-        DB::statement('
-                ALTER TABLE local_market_inventory_units 
-                RENAME INDEX idx_hold_for_optimized TO inventory_units_hold_for_index
-            ');
+        // DB::statement('
+        //         ALTER TABLE local_market_inventory_units
+        //         RENAME INDEX idx_hold_for_optimized TO inventory_units_hold_for_index
+        //     ');
 
         DB::statement('
                 ALTER TABLE local_market_inventory_units 
@@ -43,9 +43,9 @@ return new class extends Migration
             DROP INDEX inventory_units_eligibility_index
         ');
 
-        DB::statement('
-            ALTER TABLE local_market_inventory_units 
-            RENAME INDEX inventory_units_hold_for_index TO idx_hold_for_optimized
-        ');
+        // DB::statement('
+        //     ALTER TABLE local_market_inventory_units
+        //     RENAME INDEX inventory_units_hold_for_index TO idx_hold_for_optimized
+        // ');
     }
 };
