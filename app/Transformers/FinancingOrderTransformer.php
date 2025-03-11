@@ -105,7 +105,7 @@ class FinancingOrderTransformer extends TransformerAbstract
             return $this->primitive($this->company->name);
         }
 
-        return $this->primitive($financingOrder->company->name);
+        return $this->primitive($financingOrder->company()->withTrashed()->first()->name);
     }
 
     public function includeReferenceNumber(FinancingOrder $financingOrder)
@@ -251,7 +251,7 @@ class FinancingOrderTransformer extends TransformerAbstract
     {
         return $this->collection(
             $financingOrder->traderOrders,
-            (new TraderOrderTransformer())->setArea($this->area)->setCurrentOrderTraderOrders($financingOrder->traderOrders)
+            (new TraderOrderTransformer)->setArea($this->area)->setCurrentOrderTraderOrders($financingOrder->traderOrders)
         );
     }
 
@@ -263,7 +263,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
         return $this->item(
             $financingOrder->activeTraderOrder->first(),
-            (new TraderOrderTransformer())->setArea($this->area)
+            (new TraderOrderTransformer)->setArea($this->area)
         );
     }
 
