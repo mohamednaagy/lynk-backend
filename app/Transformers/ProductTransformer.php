@@ -14,6 +14,7 @@ class ProductTransformer extends TransformerAbstract
         'quantity',
         'amount',
         'currency',
+        'type',
     ];
 
     protected array $availableIncludes = [];
@@ -46,5 +47,15 @@ class ProductTransformer extends TransformerAbstract
     public function includeCurrency(CommodityProductDto $productDto): Primitive
     {
         return $this->primitive($productDto->getCurrency());
+    }
+
+    public function includeType(CommodityProductDto $productDto): Primitive
+    {
+        if (array_key_exists('type', $productDto->toArray())) {
+            return $this->primitive($productDto->getType());
+        }
+
+        return $this->primitive(null);
+
     }
 }
