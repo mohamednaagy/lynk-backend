@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Support\DataTransferObjects\CommodityProductDto;
+use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -14,6 +15,7 @@ class ProductTransformer extends TransformerAbstract
         'quantity',
         'amount',
         'currency',
+        'type',
     ];
 
     protected array $availableIncludes = [];
@@ -46,5 +48,15 @@ class ProductTransformer extends TransformerAbstract
     public function includeCurrency(CommodityProductDto $productDto): Primitive
     {
         return $this->primitive($productDto->getCurrency());
+    }
+
+    public function includeType(CommodityProductDto $productDto): Primitive
+    {
+        if ($productDto instanceof LynkCommodityProductDto) {
+            return $this->primitive($productDto->getType());
+        }
+
+        return $this->primitive(null);
+
     }
 }
