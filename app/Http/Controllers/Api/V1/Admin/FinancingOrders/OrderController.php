@@ -82,7 +82,6 @@ class OrderController extends Controller
                 'creator',
                 'assignable_admin',
                 'company_name',
-                'charged_trader_orders_count',
                 'created_at',
             ])
             ->respond();

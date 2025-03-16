@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
+class FinancingOrdersExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
     use Localizable;
 
@@ -36,9 +36,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected array $excludes = [];
 
-    public function __construct(protected Request $request, protected Builder $ordersQuery)
-    {
-    }
+    public function __construct(protected Request $request, protected Builder $ordersQuery) {}
 
     public function query()
     {
@@ -70,7 +68,6 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
             'national_id' => fn () => $order->national_id,
             'amount' => fn () => number_format($order->amount->formatByDecimal(), 2),
             'selling_price' => fn () => number_format($order->selling_price->formatByDecimal(), 2),
-            'charged_transactions' => fn () => (string) $order->charged_trader_orders_count,
             'order_owner' => fn () => $order->creator?->full_name,
             'company_name' => fn () => $order->company->name,
             'assigned_to' => fn () => $order->responsableAdmin ? $order->responsableAdmin->full_name : null,

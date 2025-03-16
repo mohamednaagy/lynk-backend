@@ -117,7 +117,6 @@ class OrderController extends Controller
                 'reference_number',
                 'national_id',
                 'amount',
-                'charged_trader_orders_count',
                 'selling_price',
                 'amount_formatted',
                 'selling_price_formatted',
@@ -126,7 +125,6 @@ class OrderController extends Controller
                 'created_at',
             ])->respond();
     }
-    
 
     /**
      * @throws AuthorizationException
@@ -139,10 +137,10 @@ class OrderController extends Controller
 
         $userRole = $request->user()->getRoleNames()->first();
         $fields = array_diff($this->sharedFields, $this->getFieldsForRole($userRole, OrderController::class, 'show'));
-        return $this->formatResponse($order,  (new FinancingOrderTransformer())
-        ->setArea(Area::Lender)
-        ->setCurrentUser($request->user())
-        , $fields);
+
+        return $this->formatResponse($order, (new FinancingOrderTransformer)
+            ->setArea(Area::Lender)
+            ->setCurrentUser($request->user()), $fields);
     }
 
     /**

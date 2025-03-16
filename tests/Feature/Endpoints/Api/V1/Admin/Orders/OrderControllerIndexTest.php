@@ -103,7 +103,6 @@ class OrderControllerIndexTest extends TestCase
                         'status_reason',
                         'current_step',
                         'creator',
-                        'charged_trader_orders_count',
                         'company_name',
                         'created_at',
                     ])
