@@ -117,6 +117,7 @@ class OrderController extends Controller
                 'reference_number',
                 'national_id',
                 'amount',
+                'charged_trader_orders_count',
                 'selling_price',
                 'amount_formatted',
                 'selling_price_formatted',

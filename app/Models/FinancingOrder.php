@@ -68,6 +68,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'is_verification_required',
         'company_id',
         'created_at',
+        'charged_trader_orders_count',
     ];
 
     protected $casts = [

@@ -14,7 +14,6 @@ return new class extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropColumn('charged_trader_orders_count');
             $table->dropColumn('old_charged_trader_orders_count');
             $table->dropColumn('update_charged_count_status');
         });
@@ -28,7 +27,6 @@ return new class extends Migration
     public function down()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->tinyInteger('charged_trader_orders_count')->unsigned()->default(0);
             $table->tinyInteger('old_charged_trader_orders_count')->unsigned()->default(0)->after('charged_trader_orders_count');
             $table->tinyInteger('update_charged_count_status')->default(0)->comment('PENDING=>0|ERROR=>1|DONE=>2');
         });
