@@ -10,6 +10,9 @@ use League\Fractal\TransformerAbstract;
 class ProductTransformer extends TransformerAbstract
 {
     protected array $defaultIncludes = [
+    ];
+
+    protected array $availableIncludes = [
         'name',
         'volume_unit',
         'quantity',
@@ -17,8 +20,6 @@ class ProductTransformer extends TransformerAbstract
         'currency',
         'type',
     ];
-
-    protected array $availableIncludes = [];
 
     public function transform(CommodityProductDto $productDto): array
     {
