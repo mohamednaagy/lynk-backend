@@ -9,35 +9,48 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderAssignableScope extends QueryScoper
 {
+    private const NOT_ASSIGNED_FILTER_VALUE = '-1';
 
-    private const NOT_AASSIGNED_FILTER_VALUE = '-1';
     /**
      * Prepare builder
      *
      * @param  Builder  $builder
      * @param  array  $data
-     * @return Builder
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        if (!empty($data['assignable_id']) && in_array(self::NOT_AASSIGNED_FILTER_VALUE, $data['assignable_id'], true))
-            return $builder->whereIn('assignable_id', $data['assignable_id'])->orWhereNull('assignable_id');
+        if (empty($data['assignable_id'])) {
+            return $builder;
+        }
 
-        if (!empty($data['assignable_id']) && !in_array(self::NOT_AASSIGNED_FILTER_VALUE, $data['assignable_id'], true))
-            return $builder->whereIn('assignable_id', $data['assignable_id']);
+        if (in_array(self::NOT_ASSIGNED_FILTER_VALUE, $data['assignable_id'], true)) {
+            return $builder->where(function ($query) use ($data) {
+                $query->whereIn('assignable_id', $data['assignable_id'])
+                    ->orWhereNull('assignable_id');
+            });
+        }
 
-        return $builder;
+        return $builder->whereIn('assignable_id', $data['assignable_id']);
     }
 
     /**
      * Prepare data
-     *
-     * @return array
      */
     public function prepareData(): array
     {
+        $assignableId = Request::query('assignable_id');
+
+        // Handle both array input and comma-separated string input
+        $assignableIdArray = [];
+
+        if (is_string($assignableId) && ! empty($assignableId)) {
+            $assignableIdArray = array_map('trim', explode(',', $assignableId));
+        } elseif (is_array($assignableId)) {
+            $assignableIdArray = $assignableId;
+        }
+
         return [
-            'assignable_id' => collect(Request::query('assignable_id'))->pluck('value')->toArray()
+            'assignable_id' => $assignableIdArray,
         ];
     }
 
@@ -45,20 +58,27 @@ class OrderAssignableScope extends QueryScoper
      * Get the validator
      *
      * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
      */
     public function validator($data): \Illuminate\Contracts\Validation\Validator
     {
+        $validUserIds = $this->getValidUserIds();
+
         return Validator::make($data, [
             'assignable_id' => ['nullable', 'array'],
-            'assignable_id.*' => ['required', 'integer', 'in:-1,' . implode(',', $this->getValidUserIds())],
+            'assignable_id.*' => [
+                'required',
+                'integer',
+                function ($attribute, $value, $fail) use ($validUserIds) {
+                    if ($value != self::NOT_ASSIGNED_FILTER_VALUE && ! in_array($value, $validUserIds)) {
+                        $fail('The '.$attribute.' is invalid.');
+                    }
+                },
+            ],
         ]);
     }
 
     /**
      * Get valid user IDs for validation
-     *
-     * @return array
      */
     protected function getValidUserIds(): array
     {
