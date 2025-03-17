@@ -109,6 +109,12 @@ class FinancingOrderControllerShowTest extends TestCase
                         'trader_orders.history',
                         'trader_orders.status',
                         'trader_orders.created_at',
+                        'trader_orders.products.name',
+                        'trader_orders.products.volume_unit',
+                        'trader_orders.products.quantity',
+                        'trader_orders.products.amount',
+                        'trader_orders.products.currency',
+                        'trader_orders.products.location',
                         'history',
                     ])
                     ->respond()
