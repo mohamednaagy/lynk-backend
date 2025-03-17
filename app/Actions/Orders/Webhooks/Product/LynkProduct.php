@@ -19,6 +19,7 @@ class LynkProduct implements ProductInterface
                 'product_value' => $productDto->getAmount(),
                 'currency' => $productDto->getCurrency(),
                 'type' => $productDto->getType(),
+                'location' => $productDto->getLocation(),
             ];
         })->toArray();
     }

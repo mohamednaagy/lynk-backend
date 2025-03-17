@@ -19,6 +19,7 @@ class ProductTransformer extends TransformerAbstract
         'amount',
         'currency',
         'type',
+        'location',
     ];
 
     public function transform(CommodityProductDto $productDto): array
@@ -55,6 +56,16 @@ class ProductTransformer extends TransformerAbstract
     {
         if ($productDto instanceof LynkCommodityProductDto) {
             return $this->primitive($productDto->getType());
+        }
+
+        return $this->primitive(null);
+
+    }
+
+    public function includeLocation(CommodityProductDto $productDto): Primitive
+    {
+        if ($productDto instanceof LynkCommodityProductDto) {
+            return $this->primitive($productDto->getLocation());
         }
 
         return $this->primitive(null);
