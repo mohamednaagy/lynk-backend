@@ -13,7 +13,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
+class FinancingOrdersExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
     use Localizable;
 
@@ -36,9 +36,7 @@ class FinancingOrdersExport implements FromQuery, WithHeadings, WithMapping, Sho
 
     protected array $excludes = [];
 
-    public function __construct(protected Request $request, protected Builder $ordersQuery)
-    {
-    }
+    public function __construct(protected Request $request, protected Builder $ordersQuery) {}
 
     public function query()
     {

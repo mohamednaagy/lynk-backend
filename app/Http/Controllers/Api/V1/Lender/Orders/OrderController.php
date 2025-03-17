@@ -64,7 +64,12 @@ class OrderController extends Controller
         'trader_orders.failure_reason',
         'trader_orders.is_cancellable',
         'trader_orders.history',
-        'trader_orders.products',
+        'trader_orders.products.name',
+        'trader_orders.products.volume_unit',
+        'trader_orders.products.quantity',
+        'trader_orders.products.amount',
+        'trader_orders.products.currency',
+        'trader_orders.products.type',
         'trader_orders.status',
         'trader_orders.expiry_date',
         'trader_orders.cancel_details',
@@ -126,7 +131,6 @@ class OrderController extends Controller
                 'created_at',
             ])->respond();
     }
-    
 
     /**
      * @throws AuthorizationException
@@ -139,10 +143,10 @@ class OrderController extends Controller
 
         $userRole = $request->user()->getRoleNames()->first();
         $fields = array_diff($this->sharedFields, $this->getFieldsForRole($userRole, OrderController::class, 'show'));
-        return $this->formatResponse($order,  (new FinancingOrderTransformer())
-        ->setArea(Area::Lender)
-        ->setCurrentUser($request->user())
-        , $fields);
+
+        return $this->formatResponse($order, (new FinancingOrderTransformer)
+            ->setArea(Area::Lender)
+            ->setCurrentUser($request->user()), $fields);
     }
 
     /**

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class OrderCompanyScope extends QueryScoper
 {
     /**
-     * Prepare data for vailation
+     * Prepare data for validation
      *
      * @return array
      */
@@ -18,10 +18,17 @@ class OrderCompanyScope extends QueryScoper
     {
         $company = Request::query('company');
 
+        // Handle both array input and comma-separated string input
+        $companyArray = [];
+
+        if (is_string($company) && ! empty($company)) {
+            $companyArray = array_map('trim', explode(',', $company));
+        } elseif (is_array($company)) {
+            $companyArray = $company;
+        }
+
         return [
-            'company' => is_array($company)
-                ? $company
-                : explode(',', $company),
+            'company' => $companyArray,
         ];
     }
 
@@ -36,8 +43,8 @@ class OrderCompanyScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'company' => ['required', 'array'],
-                'company.*' => ['required', 'exists:companies,id'],
+                'company' => ['required', 'array', 'min:1'],
+                'company.*' => ['required', 'integer', 'exists:companies,id'],
             ]
         );
     }
@@ -51,6 +58,10 @@ class OrderCompanyScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
+        if (empty($data['company'])) {
+            return $builder;
+        }
+
         return $builder->whereIn('company_id', $data['company']);
     }
 }

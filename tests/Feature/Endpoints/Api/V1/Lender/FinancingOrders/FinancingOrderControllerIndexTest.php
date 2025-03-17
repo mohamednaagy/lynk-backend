@@ -79,7 +79,7 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->getJson('api/v1/lender/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',
@@ -108,7 +108,7 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->getJson('api/v1/lender/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',
@@ -147,7 +147,7 @@ class FinancingOrderControllerIndexTest extends TestCase
             ->getJson('api/v1/lender/orders')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',
