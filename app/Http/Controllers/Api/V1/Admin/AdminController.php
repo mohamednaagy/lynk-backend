@@ -30,34 +30,30 @@ class AdminController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Admins, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Admins, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Admins, Action::Create, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Admins, Action::Create, Action::Manage])
         )->only('store');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage])
         )->only('show');
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage])
         )->only(['update', 'partiallyUpdate']);
 
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::Admins, Action::Delete, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::Admins, Action::Delete, Action::Manage])
         )->only('destroy');
     }
 
-    /**
-     * @param  GetPaginatedUsersByRole  $getPaginatedUsersByRole
-     * @return JsonResponse
-     */
     public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): JsonResponse
     {
         $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin))->paginate();
@@ -76,10 +72,6 @@ class AdminController extends Controller
             ])->respond();
     }
 
-    /**
-     * @param  User  $admin
-     * @return JsonResponse
-     */
     public function show(User $admin): JsonResponse
     {
         if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
@@ -107,8 +99,6 @@ class AdminController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreAdminRequest  $createAdminRequest
-     * @param  CreateAdminWithRoleAndPermission  $createAdminWithRoleAndPermission
-     * @return JsonResponse
      *
      * @throws \Throwable
      */
@@ -151,10 +141,7 @@ class AdminController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  User  $admin
      * @param  UpdateAdminRequest  $updateAdminRequest
-     * @param  UpdateAdminWithRoleAndPermission  $updateAdminWithRoleAndPermission
-     * @return JsonResponse
      *
      * @throws \Throwable
      */
@@ -207,17 +194,16 @@ class AdminController extends Controller
             ->respond();
     }
 
-    /**
-     * @param  User  $admin
-     * @return JsonResponse
-     */
     public function destroy(User $admin): JsonResponse
     {
         if (! $admin->hasRole(Area::roles(Area::SuperAdmin))) {
             throw UnauthorizedException::forRoles(Area::roles(Area::SuperAdmin));
         }
 
-        $admin->update(['email' => $admin->getEmailForSoftDeleting()]);
+        $admin->update([
+            'email' => $admin->getEmailForSoftDeleting(),
+            'can_manage_orders' => 0,
+        ]);
         $admin->delete();
 
         return $this->successResponse();

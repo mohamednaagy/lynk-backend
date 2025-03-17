@@ -390,7 +390,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function responsableAdmin()
     {
-        return $this->belongsTo(User::class, 'assignable_id', 'id');
+        return $this->belongsTo(User::class, 'assignable_id', 'id')->withTrashed();
     }
 
     public function retry()
