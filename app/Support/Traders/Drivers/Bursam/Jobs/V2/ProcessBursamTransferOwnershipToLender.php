@@ -42,7 +42,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             ->where('status', TraderOrderStatus::InProgress)
             ->lockForUpdate()
             ->find($this->traderOrderId);
-        Log::channel('bursam')->info('bursa Purchasing Step => Starting ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
         if (
             is_null($traderOrder)
@@ -50,6 +49,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         ) {
             return;
         }
+        Log::channel('bursam')->info('bursa Purchasing Step => Starting ProcessBursamTransferOwnershipToLender Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
         Trader::driver('bursam', $traderOrder->version)
             ->createTransferOwnershipToLenderDocument($traderOrder);

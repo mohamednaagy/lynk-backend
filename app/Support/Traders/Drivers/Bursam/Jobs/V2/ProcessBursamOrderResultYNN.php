@@ -50,7 +50,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
-            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
             if (
                 is_null($traderOrder)
@@ -58,6 +57,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             ) {
                 return;
             }
+            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
             try {
                 Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);

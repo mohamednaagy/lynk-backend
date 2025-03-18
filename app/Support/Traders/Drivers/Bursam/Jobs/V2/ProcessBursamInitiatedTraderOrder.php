@@ -46,11 +46,11 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
                 ->where('status', TraderOrderStatus::Initiated)
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
-            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
 
             if (is_null($traderOrder)) {
                 return;
             }
+            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
 
             Trader::driver('bursam', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
             Log::channel('bursam')->info('bursa purchasing step => finishing ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
