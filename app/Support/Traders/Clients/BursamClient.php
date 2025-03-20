@@ -320,36 +320,21 @@ class BursamClient
             ]);
         });
 
-        // Log successful response
-        $instance->successful(function ($response) {
-            Log::channel('bursam')->info('BURSAM API request successful', [
-                'status' => $response->status(),
-                'headers' => $response->headers(),
-                'body' => $response->json()
-            ]);
-        });
-
-        // Log failed response with detailed error information
-        $instance->throw(function ($response, $e) {
-            Log::channel('bursam')->error('BURSAM API request failed', [
-                'error' => [
-                    'message' => $e->getMessage(),
-                    'code' => $e->getCode(),
-                    'file' => $e->getFile(),
-                    'line' => $e->getLine(),
-                    'trace' => $e->getTraceAsString()
-                ],
-                'response' => [
+        // Log response details
+        $instance->afterSending(function ($response) {
+            if ($response->successful()) {
+                Log::channel('bursam')->info('BURSAM API request successful', [
                     'status' => $response->status(),
                     'headers' => $response->headers(),
                     'body' => $response->json()
-                ],
-                'request' => [
-                    'method' => $response->effectiveUri()->getMethod(),
-                    'url' => $response->effectiveUri()->__toString(),
-                    'headers' => $response->request->getHeaders()
-                ]
-            ]);
+                ]);
+            } else {
+                Log::channel('bursam')->error('BURSAM API request failed', [
+                    'status' => $response->status(),
+                    'headers' => $response->headers(),
+                    'body' => $response->json()
+                ]);
+            }
         });
 
         return $instance;
