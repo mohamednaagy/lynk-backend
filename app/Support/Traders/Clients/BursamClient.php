@@ -309,40 +309,9 @@ class BursamClient
             $instance->withMiddleware($middleware);
         }
 
-        // Log request details
-        $instance->beforeSending(function ($request, $options) {
-            Log::channel('bursam')->info('Making BURSAM API request', [
-                'method' => $request->getMethod(),
-                'url' => $request->getUri(),
-                'headers' => $request->getHeaders(),
-                'body' => $request->getBody()->getContents(),
-                'options' => $options
-            ]);
+        $instance->throw(function ($response, $e) {
+            Log::channel('bursam')->error('Error in request with BURSAM', ['message' => $e->getMessage()]);
         });
-
-        // Log response details using withOptions
-        $instance->withOptions([
-            'http_errors' => false,
-            'verify' => false,
-            'on_stats' => function ($stats) {
-                $response = $stats->getResponse();
-                if ($response) {
-                    if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300) {
-                        Log::channel('bursam')->info('BURSAM API request successful', [
-                            'status' => $response->getStatusCode(),
-                            'headers' => $response->getHeaders(),
-                            'body' => json_decode($response->getBody()->getContents(), true)
-                        ]);
-                    } else {
-                        Log::channel('bursam')->error('BURSAM API request failed', [
-                            'status' => $response->getStatusCode(),
-                            'headers' => $response->getHeaders(),
-                            'body' => json_decode($response->getBody()->getContents(), true)
-                        ]);
-                    }
-                }
-            }
-        ]);
 
         return $instance;
     }
