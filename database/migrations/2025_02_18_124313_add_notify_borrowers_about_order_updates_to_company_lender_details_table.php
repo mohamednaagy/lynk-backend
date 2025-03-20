@@ -20,18 +20,24 @@ return new class extends Migration
                 ->after('notify_admins_about_new_orders');
         });
 
-        // Migrate data from `companies.notify_borrowers_about_order_updates` to `company_lender_details`
-        DB::table('companies')->select('id')->chunkById(100, function ($companies) {
+        // Chunk through the `companies` table in batches
+        DB::table('companies')->select('id', 'notify_borrowers_about_order_updates')->chunkById(100, function ($companies) {
+            $data = [];
+
+            // Prepare data for updating or inserting into `company_lender_details`
             foreach ($companies as $company) {
-                DB::table('company_lender_details')->updateOrInsert(
-                    ['company_id' => $company->id],
-                    [
-                        'notify_borrowers_about_order_updates' => DB::table('companies')
-                            ->where('id', $company->id)
-                            ->value('notify_borrowers_about_order_updates'),
-                    ]
-                );
+                $data[] = [
+                    'company_id' => $company->id,
+                    'notify_borrowers_about_order_updates' => $company->notify_borrowers_about_order_updates,
+                ];
             }
+
+            // Bulk update or insert the data into `company_lender_details`
+            DB::table('company_lender_details')->upsert(
+                $data,
+                ['company_id'], // Unique key to prevent duplicates
+                ['notify_borrowers_about_order_updates'] // Columns to update
+            );
         });
     }
 

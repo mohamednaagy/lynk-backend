@@ -11,8 +11,7 @@ class CreateCompanyAction implements CreateCompany
 {
     public function __construct(
         protected GenerateWebhookSecretKey $generateWebhookSecretKey
-    ) {
-    }
+    ) {}
 
     public function handle(array $data): Lender
     {
@@ -44,13 +43,13 @@ class CreateCompanyAction implements CreateCompany
         );
 
         $lender->lenderDetail()->create([
-            'notifications_email'   => $data['notifications_email'],
-            'company_cr'            => $data['company_cr'],
-            'contract_number'       => $data['contract_number'] ?? null,
+            'notifications_email' => $data['notifications_email'],
+            'company_cr' => $data['company_cr'],
+            'contract_number' => $data['contract_number'] ?? null,
             'preferred_market_type' => $data['preferred_market_type'] ?? null,
-            'does_order_require_approval' => $data['does_order_require_approval'] ?? null,
-            'notify_admins_about_new_orders' => $data['notify_admins_about_new_orders'] ?? null,
-            'notify_borrowers_about_order_updates'  => $data['notify_borrowers_about_order_updates'] ?? null,
+            'does_order_require_approval' => $data['does_order_require_approval'] ?? false,
+            'notify_admins_about_new_orders' => $data['notify_admins_about_new_orders'] ?? true,
+            'notify_borrowers_about_order_updates' => $data['notify_borrowers_about_order_updates'] ?? false,
         ]);
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
