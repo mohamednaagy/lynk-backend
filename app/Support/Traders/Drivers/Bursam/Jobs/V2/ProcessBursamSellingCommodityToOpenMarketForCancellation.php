@@ -38,6 +38,8 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
      */
     public function handle(): void
     {
+        Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2) => ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::PendingCancellation)
@@ -48,9 +50,13 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
                 return;
             }
 
-            if (!$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
+                Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2) => ProcessBursamSellingCommodityToOpenMarketForCancellation => start sellCommodityToBursam', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
                 Trader::driver('bursam', $traderOrder->version)
                     ->sellCommodityToBursam($traderOrder);
+                Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2) => ProcessBursamSellingCommodityToOpenMarketForCancellation => finish sellCommodityToBursam', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
             }
         });
     }
@@ -67,7 +73,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
 
     public function uniqueId(): string
     {
-        return __CLASS__ . '_' . $this->traderOrderId;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 
     public function failed($exception)
