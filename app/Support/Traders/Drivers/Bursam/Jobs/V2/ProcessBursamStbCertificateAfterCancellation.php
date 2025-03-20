@@ -49,6 +49,8 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
      */
     public function handle(): void
     {
+        Log::channel('bursam')->warning('start processing cancel trader order => bus chain (2) => ProcessBursamStbCertificateAfterCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::PendingCancellation)
@@ -57,11 +59,18 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
 
             if (
                 (is_null($traderOrder)
-                   || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) && !$traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)
+                   || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)) && ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)
             ) {
+                Log::channel('bursam')->warning('start processing cancel trader order => bus chain (2) => ProcessBursamStbCertificateAfterCancellation => start getStbCertificateDetails', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
                 Trader::driver('bursam', $traderOrder->version)->getStbCertificateDetails($traderOrder);
             }
+            Log::channel('bursam')->warning('start processing cancel trader order => bus chain (2) => ProcessBursamStbCertificateAfterCancellation => finish getStbCertificateDetails', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
+            Log::channel('bursam')->warning('start processing cancel trader order => bus chain (2) => ProcessBursamStbCertificateAfterCancellation => start cancel step', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $this->cancelReason);
+            Log::channel('bursam')->warning('start processing cancel trader order => bus chain (2) => ProcessBursamStbCertificateAfterCancellation => finish cancel step', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+
         });
     }
 

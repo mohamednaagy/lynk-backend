@@ -32,6 +32,7 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToL
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BursamV2Driver extends BursamV1Driver
@@ -71,10 +72,16 @@ class BursamV2Driver extends BursamV1Driver
         $cancelledByType = TraderOrderCancelType::System,
         ?User $cancelledBy = null
     ): int {
+        Log::channel('bursam')->warning('start processing cancel trader order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
+
         $user = auth()->check() ? auth()->user() : null;
         if ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
+            Log::channel('bursam')->warning('start processing cancel trader order => this order has CommoditySoldToMarket or OnHold so we will cancel it direct', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
+            Log::channel('bursam')->warning('start processing cancel trader order => start pending cancel (1)', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+            Log::channel('bursam')->warning('start processing cancel trader order => finish pending cancel and start cancel step (1)', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
+            Log::channel('bursam')->warning('start processing cancel trader order => finish cancel step (1)', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
             app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
             $this->updateFinancingOrderStatus($traderOrder->order);
 
@@ -87,8 +94,11 @@ class BursamV2Driver extends BursamV1Driver
             throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
         }
 
-        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+        Log::channel('bursam')->warning('start processing cancel trader order => start pending cancel (2)', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
 
+        app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+        Log::channel('bursam')->warning('start processing cancel trader order => finish pending cancel (2)', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
+        Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2)', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'cancel_at' => now()->toDateTimeString()]);
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
             new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
