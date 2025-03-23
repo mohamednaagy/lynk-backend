@@ -30,7 +30,6 @@ class Company extends BaseTenant
 
     protected $casts = [
         'status' => CompanyStatus::class,
-        'notify_borrowers_about_order_updates' => 'boolean',
         'force_unique_reference_number' => 'boolean',
         'require_initiate_trade_request' => 'boolean',
         'webhook_secret_key' => 'encrypted',

@@ -26,7 +26,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'driver',
                     'trading_mode',
                     'require_initiate_trade_request',
-                    'notify_borrowers_about_order_updates',
                     'force_unique_reference_number',
                     'auto_complete_murabaha_order',
                 ]
@@ -63,6 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'preferred_market_type',
                 'does_order_require_approval',
                 'notify_admins_about_new_orders',
+                'notify_borrowers_about_order_updates',
             ])
         );
 

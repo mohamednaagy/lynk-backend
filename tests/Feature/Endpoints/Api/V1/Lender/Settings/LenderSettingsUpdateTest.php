@@ -5,6 +5,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\Settings;
 use App\Enums\CompanyStatus;
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\Lender;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -105,7 +106,7 @@ class LenderSettingsUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
 
         $this->assertEquals(
-            Company::find(self::$company->id)->does_order_require_approval,
+            Lender::find(self::$company->id)->lenderDetail->does_order_require_approval,
             self::$updatedLenderSettingsDetails['does_order_require_approval']
         );
 
@@ -115,7 +116,7 @@ class LenderSettingsUpdateTest extends TestCase
         );
 
         $this->assertEquals(
-            Company::find(self::$company->id)->notify_borrowers_about_order_updates,
+            Lender::find(self::$company->id)->lenderDetail->notify_borrowers_about_order_updates,
             self::$updatedLenderSettingsDetails['notify_borrowers_about_order_updates']
         );
 
@@ -133,12 +134,12 @@ class LenderSettingsUpdateTest extends TestCase
             ->assertOk();
 
         $this->assertEquals(
-            Company::find(self::$company->id)->does_order_require_approval,
+            Lender::find(self::$company->id)->lenderDetail->does_order_require_approval,
             self::$updatedLenderSettingsDetails['does_order_require_approval']
         );
 
         $this->assertEquals(
-            Company::find(self::$company->id)->notify_borrowers_about_order_updates,
+            Lender::find(self::$company->id)->lenderDetail->notify_borrowers_about_order_updates,
             self::$updatedLenderSettingsDetails['notify_borrowers_about_order_updates']
         );
 

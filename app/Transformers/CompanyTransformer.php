@@ -143,7 +143,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
     {
-        return $this->primitive($company->notify_borrowers_about_order_updates);
+        return $this->primitive($company->lenderDetail->notify_borrowers_about_order_updates);
     }
 
     public function includeOrderCostTiers(Company $company): Collection

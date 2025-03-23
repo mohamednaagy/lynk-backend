@@ -66,8 +66,8 @@ class SendSmsWhenStatusIsMurabahaSaleCompletedAction implements SendSmsWhenStatu
 
     private function isNotifyBorrowersAboutOrderUpdatesOn(FinancingOrder $financingOrder): bool
     {
-        $company = $financingOrder->company;
+        $company = $financingOrder->company->lender;
 
-        return $company->notify_borrowers_about_order_updates;
+        return $company->lenderDetail->notify_borrowers_about_order_updates;
     }
 }
