@@ -42,17 +42,22 @@ class CreateCompanyAction implements CreateCompany
             )
         );
 
-        $lender->lenderDetail()->create(Arr::only($data, [
-            'force_preferred_commodity_type',
-            'default_contract_sign_time_limit',
-            'notifications_email',
-            'company_cr',
-            'contract_number',
-            'preferred_market_type',
-            'does_order_require_approval',
-            'notify_admins_about_new_orders',
-            'notify_borrowers_about_order_updates',
-        ]));
+        $lender->lenderDetail()->create(
+            Arr::only(
+                $data,
+                [
+                    'force_preferred_commodity_type',
+                    'notifications_email',
+                    'company_cr',
+                    'default_contract_sign_time_limit',
+                    'contract_number',
+                    'preferred_market_type',
+                    'does_order_require_approval',
+                    'notify_admins_about_new_orders',
+                    'notify_borrowers_about_order_updates',
+                ]
+            )
+        );
 
         if (isset($data['preferred_commodity_types']) && ! empty($data['preferred_commodity_types'])) {
             $lender->commodityTypes()->attach($data['preferred_commodity_types']);
