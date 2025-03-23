@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
+use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
@@ -51,7 +52,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'cancel_details',
         'hover_message',
         'contract_signed_type',
-
+        'show_proceed_btn',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -225,5 +226,13 @@ class TraderOrderTransformer extends TransformerAbstract
         $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
 
         return ($effective_at) ? $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at))) : null;
+    }
+
+    public function includeShowProceedBtn(TraderOrder $traderOrder): Primitive
+    {
+        $isBursamAutomatic = $traderOrder->provider === Trader::Bursam && $traderOrder->mode === TraderOrderMode::Automatic;
+        $signedWakalaDocumentMediaFile = $isBursamAutomatic ? $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) : null;
+
+        return $this->primitive($isBursamAutomatic ? ! empty($signedWakalaDocumentMediaFile) : true);
     }
 }
