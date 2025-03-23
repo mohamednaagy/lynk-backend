@@ -51,14 +51,8 @@ class CommodityItemController extends Controller
         $commidityItems = $getPaginatedCommodityItems
             ->setName($request->validated('name'))
             ->setuniqueName($request->validated('unique_name'))
-            ->setCommodityTypes(
-                $request->validated('commodity_type')
-                    ? collect($request->validated('commodity_type'))->pluck('id')->toArray()
-                    : []
-            )
-            ->setSuppliers($request->validated('supplier')
-                ? collect($request->validated('supplier'))->pluck('id')->toArray()
-                : [])
+            ->setCommodityTypes($request->validated('commodity_types'))
+            ->setSuppliers($request->validated('suppliers'))
             ->setSort($request->validated('sort'))
             ->setActive($request->validated('active'))
             ->setDirection($request->validated('direction'))
