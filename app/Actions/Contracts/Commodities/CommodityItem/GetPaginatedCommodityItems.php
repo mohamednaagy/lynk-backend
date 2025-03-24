@@ -12,9 +12,9 @@ interface GetPaginatedCommodityItems
 
     public function setName(?string $name): self;
 
-    public function setSuppliers(?array $suppliers): self;
+    public function setSuppliers(?string $suppliers): self;
 
-    public function setCommodityTypes(?array $commodityTypes): self;
+    public function setCommodityTypes(?string $commodityTypes): self;
 
     public function setActive(?int $value): self;
 

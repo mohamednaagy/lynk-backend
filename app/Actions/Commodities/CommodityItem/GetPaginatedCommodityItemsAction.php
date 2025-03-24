@@ -62,9 +62,9 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
      *
      * @return $this
      */
-    public function setSuppliers(?array $suppliers): self
+    public function setSuppliers(?string $suppliers): self
     {
-        $this->suppliers = $suppliers;
+        $this->suppliers = $suppliers ? explode(',', $suppliers) : [];
 
         return $this;
     }
@@ -72,12 +72,12 @@ class GetPaginatedCommodityItemsAction implements GetPaginatedCommodityItems
     /**
      * Set the commodity types to filter by.
      *
-     * @param  array|null  $commodityTypes  an array of commodity type ids or null
+     * @param  string|null  $commodityTypes  a comma-separated list of commodity type ids or null
      * @return $this
      */
-    public function setCommodityTypes(?array $commodityTypes): self
+    public function setCommodityTypes(?string $commodityTypes): self
     {
-        $this->commodityTypes = $commodityTypes;
+        $this->commodityTypes = $commodityTypes ? explode(',', $commodityTypes) : [];
 
         return $this;
     }
