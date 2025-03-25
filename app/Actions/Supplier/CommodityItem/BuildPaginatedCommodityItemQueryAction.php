@@ -60,12 +60,12 @@ class BuildPaginatedCommodityItemQueryAction implements BuildPaginatedCommodityI
     /**
      * Set the commodity types to filter by.
      *
-     * @param  array|null  $commodityTypes  an array of commodity type ids or null
+     * @param  string|null  $commodityTypes  a comma-separated list of commodity type IDs or null
      * @return $this
      */
-    public function setCommodityTypes(?array $commodityTypes): self
+    public function setCommodityTypes(?string $commodityTypes): self
     {
-        $this->commodityTypes = $commodityTypes;
+        $this->commodityTypes = $commodityTypes ? explode(',', $commodityTypes) : [];
 
         return $this;
     }
