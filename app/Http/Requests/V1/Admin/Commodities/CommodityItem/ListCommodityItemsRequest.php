@@ -27,8 +27,8 @@ class ListCommodityItemsRequest extends FormRequest
         return [
             'unique_name' => ['nullable', 'string'],
             'name' => ['nullable', 'string'],
-            'suppliers' => ['nullable', 'string', 'regex:/^\d+(,\d+)*$/'],
-            'commodity_types' => ['nullable', 'string', 'regex:/^\d+(,\d+)*$/'],
+            'supplier' => ['nullable', 'string', 'regex:/^\d+(,\d+)*$/'],
+            'commodity_type' => ['nullable', 'string', 'regex:/^\d+(,\d+)*$/'],
             'active' => ['nullable', 'integer', Rule::in([1, 2, 3])],
             'direction' => ['nullable', 'string', Rule::in('asc', 'desc')],
             'sort' => ['nullable', 'string'],
