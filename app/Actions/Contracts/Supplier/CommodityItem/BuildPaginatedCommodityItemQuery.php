@@ -14,7 +14,7 @@ interface BuildPaginatedCommodityItemQuery
 
     public function setName(?string $name): self;
 
-    public function setCommodityTypes(?array $commodityTypes): self;
+    public function setCommodityTypes(?string $commodityTypes): self;
 
     public function setActive(?int $value): self;
 
