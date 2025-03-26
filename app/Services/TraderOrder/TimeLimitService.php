@@ -150,12 +150,12 @@ class TimeLimitService
                 get_bursam_contract_signed_deadline(), // Effective time
             ],
             Trader::Lynk => [
-                $company->lenderDetail->default_contract_sign_time_limit
+                $company->lender->lenderDetail->default_contract_sign_time_limit
                     ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit, //default value
                 Carbon::now()
                     ->timezone('UTC')
                     ->addHours(
-                        $company->lenderDetail->default_contract_sign_time_limit
+                        $company->lender->lenderDetail->default_contract_sign_time_limit
                             ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit
                     )
                     ->format('Y-m-d H:i:s'), // Effective time
