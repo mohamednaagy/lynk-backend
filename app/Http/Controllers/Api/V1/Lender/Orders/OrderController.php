@@ -77,6 +77,7 @@ class OrderController extends Controller
         'trader_orders.created_at',
         'trader_orders.hover_message',
         'trader_orders.contract_signed_type',
+        'trader_orders.show_proceed_btn',
         'history',
     ];
 
