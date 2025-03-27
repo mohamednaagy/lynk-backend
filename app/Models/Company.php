@@ -7,7 +7,6 @@ use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
 use App\Enums\Trader;
-use App\Enums\TraderOrderMode;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,7 +33,6 @@ class Company extends BaseTenant
         'require_initiate_trade_request' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'type' => CompanyType::class,
-        'trading_mode' => TraderOrderMode::class,
         'auto_complete_murabaha_order' => 'boolean',
     ];
 
@@ -60,9 +58,7 @@ class Company extends BaseTenant
             'type',
             'driver',
             'notify_admins_about_new_orders',
-            'trading_mode',
             'deleted_at',
-            'preferred_market_type',
             'auto_complete_murabaha_order',
         ];
     }

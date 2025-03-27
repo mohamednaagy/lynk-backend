@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
+use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyLenderDetail extends Model
@@ -14,6 +15,7 @@ class CompanyLenderDetail extends Model
         'does_order_require_approval' => 'boolean',
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'notify_borrowers_about_order_updates' => 'boolean',
+        'trading_mode' => TraderOrderMode::class,
     ];
 
     protected $fillable = [
@@ -27,6 +29,7 @@ class CompanyLenderDetail extends Model
         'does_order_require_approval',
         'notify_admins_about_new_orders',
         'notify_borrowers_about_order_updates',
+        'trading_mode',
     ];
 
     public function lender()

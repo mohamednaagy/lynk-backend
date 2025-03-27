@@ -47,7 +47,7 @@ class SettingsController extends Controller
         $company = tenant();
 
         $data = $updateSettingsRequest->validated();
-        if ($company->trading_mode->is(TraderOrderMode::Manual)) {
+        if ($company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Manual)) {
             $data['require_initiate_trade_request'] = true;
         }
 
