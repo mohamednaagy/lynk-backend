@@ -33,7 +33,6 @@ class Company extends BaseTenant
         'require_initiate_trade_request' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'type' => CompanyType::class,
-        'auto_complete_murabaha_order' => 'boolean',
     ];
 
     public static function getCustomColumns(): array
@@ -159,7 +158,7 @@ class Company extends BaseTenant
 
     public function isCompanyHasMurabahaAutoCompleteOrder()
     {
-        return $this->auto_complete_murabaha_order;
+        return $this->lender->lenderDetail->auto_complete_murabaha_order;
     }
 
     public function lender()

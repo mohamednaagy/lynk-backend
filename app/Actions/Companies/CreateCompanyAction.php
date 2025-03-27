@@ -56,6 +56,7 @@ class CreateCompanyAction implements CreateCompany
                     'require_initiate_trade_request',
                     'trading_mode',
                     'public_status_comment',
+                    'auto_complete_murabaha_order',
                 ]
             )
         );
