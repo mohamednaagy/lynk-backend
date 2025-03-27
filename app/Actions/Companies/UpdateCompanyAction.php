@@ -26,7 +26,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'driver',
                     'trading_mode',
                     'require_initiate_trade_request',
-                    'force_unique_reference_number',
                     'auto_complete_murabaha_order',
                 ]
             )
@@ -56,6 +55,7 @@ class UpdateCompanyAction implements UpdateCompany
             Arr::only($data, [
                 'default_contract_sign_time_limit',
                 'force_preferred_commodity_type',
+                'force_unique_reference_number',
                 'notifications_email',
                 'company_cr',
                 'contract_number',

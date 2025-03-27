@@ -138,7 +138,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeForceUniqueReferenceNumber(Company $company)
     {
-        return $this->primitive($company->force_unique_reference_number);
+        return $this->primitive($company->lenderDetail?->force_unique_reference_number);
     }
 
     public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
