@@ -373,7 +373,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
         $lender = $traderOrder->order->company->lender;
 
         return
-            $traderOrder->order->company->trading_mode->is(TraderOrderMode::Automatic) &&
+            $traderOrder->order->company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) &&
             $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
                 $traderOrder->cancelDetail->cancel_reason->in([
                     TraderOrderCancelReason::NoEligibleCommoditiesAvailable,

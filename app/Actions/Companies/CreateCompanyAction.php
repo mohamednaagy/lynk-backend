@@ -36,7 +36,6 @@ class CreateCompanyAction implements CreateCompany
                     'driver',
                     'type',
                     'force_unique_reference_number',
-                    'trading_mode',
                     'require_initiate_trade_request',
                 ]
             )
@@ -56,6 +55,7 @@ class CreateCompanyAction implements CreateCompany
                     'notify_admins_about_new_orders',
                     'notify_borrowers_about_order_updates',
                     'require_initiate_trade_request',
+                    'trading_mode',
                 ]
             )
         );

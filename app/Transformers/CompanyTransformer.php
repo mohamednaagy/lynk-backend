@@ -99,7 +99,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeTradingMode(Company $company): Primitive
     {
-        return $this->primitive($company->trading_mode);
+        return $this->primitive($company->lender->lenderDetail->trading_mode);
     }
 
     public function includeWebhookSecretKey(Company $company): Primitive
