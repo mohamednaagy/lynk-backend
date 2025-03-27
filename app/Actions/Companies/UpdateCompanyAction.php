@@ -25,7 +25,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'internal_status_comment',
                     'driver',
                     'trading_mode',
-                    'require_initiate_trade_request',
                     'force_unique_reference_number',
                     'auto_complete_murabaha_order',
                 ]
