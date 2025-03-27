@@ -54,7 +54,7 @@ class ProcessFinancingOrders implements ShouldQueue
                         TraderOrderStatus::InProgress,
                     ]);
             }])
-            ->whereRelation('company', 'trading_mode', TraderOrderMode::Automatic)
+            ->whereRelation('company.lender.lenderDetail', 'trading_mode', TraderOrderMode::Automatic)
             ->having('trader_orders_count', 0)
             ->chunk(10, function (Collection $orderCollection) {
                 $orderCollection->each(function (FinancingOrder $order) {
