@@ -66,17 +66,17 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeCompanyCr(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail?->company_cr);
+        return $this->primitive($company->lender->lenderDetail?->company_cr);
     }
 
     public function includeContractNumber(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail?->contract_number);
+        return $this->primitive($company->lender->lenderDetail?->contract_number);
     }
 
     public function includeNotificationsEmail(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail?->notifications_email);
+        return $this->primitive($company->lender->lenderDetail?->notifications_email);
     }
 
     public function includeStatus(Company $company): Primitive
@@ -94,7 +94,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeDoesOrderRequireApproval(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail?->does_order_require_approval);
+        return $this->primitive($company->lender->lenderDetail?->does_order_require_approval);
     }
 
     public function includeTradingMode(Company $company): Primitive
@@ -133,7 +133,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeNotifyAdminsAboutNewOrders(Company $company)
     {
-        return $this->primitive($company->lenderDetail?->notify_admins_about_new_orders);
+        return $this->primitive($company->lender->lenderDetail?->notify_admins_about_new_orders);
     }
 
     public function includeForceUniqueReferenceNumber(Company $company)
@@ -143,7 +143,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
     {
-        return $this->primitive($company->lenderDetail->notify_borrowers_about_order_updates);
+        return $this->primitive($company->lender->lenderDetail->notify_borrowers_about_order_updates);
     }
 
     public function includeOrderCostTiers(Company $company): Collection
@@ -157,7 +157,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeRequireInitiateTradeRequest(Company $company)
     {
-        return $this->primitive($company->lenderDetail?->require_initiate_trade_request);
+        return $this->primitive($company->lender->lenderDetail?->require_initiate_trade_request);
     }
 
     public function includeAutoCompleteMurabahaOrder(Company $company)
@@ -167,7 +167,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includePreferredMarketType(Company $company): Primitive
     {
-        $market_type = $company->lenderDetail?->preferred_market_type;
+        $market_type = $company->lender->lenderDetail?->preferred_market_type;
         if (is_null($market_type)) {
             return $this->primitive(null);
         }
@@ -196,11 +196,11 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeDefaultContractSignTimeLimit(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail?->default_contract_sign_time_limit);
+        return $this->primitive($company->lender->lenderDetail?->default_contract_sign_time_limit);
     }
 
     public function includeForcePreferredCommodityType(Company $company): Primitive
     {
-        return $this->primitive($company->lenderDetail?->force_preferred_commodity_type);
+        return $this->primitive($company->lender->lenderDetail?->force_preferred_commodity_type);
     }
 }
