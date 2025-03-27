@@ -32,7 +32,6 @@ class CreateCompanyAction implements CreateCompany
                     'status',
                     'webhook_secret_key',
                     'public_status_comment',
-                    'internal_status_comment',
                     'driver',
                     'type',
                     'force_unique_reference_number',
@@ -56,6 +55,7 @@ class CreateCompanyAction implements CreateCompany
                     'notify_borrowers_about_order_updates',
                     'require_initiate_trade_request',
                     'trading_mode',
+                    'internal_status_comment',
                 ]
             )
         );
