@@ -32,6 +32,7 @@ class CompanyLenderDetail extends Model
         'notify_borrowers_about_order_updates',
         'require_initiate_trade_request',
         'trading_mode',
+        'public_status_comment',
     ];
 
     public function lender()
