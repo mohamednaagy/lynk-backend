@@ -20,8 +20,7 @@ class RegisterLenderAction implements RegisterLender
         protected CreateUser $createUser,
         protected CreateCompany $createCompany,
         protected AssignRoleToUser $assignRoleToUser,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws TenantCouldNotBeIdentifiedById
@@ -38,6 +37,17 @@ class RegisterLenderAction implements RegisterLender
             'require_initiate_trade_request' => $data['require_initiate_trade_request'],
             'notify_borrowers_about_order_updates' => $data['notify_borrowers_about_order_updates'],
         ]);
+
+        $company->lender->lenderDetail()->updateOrCreate(
+            ['company_id' => $company->id],
+            Arr::only($data, [
+                'require_initiate_trade_request',
+                'does_order_require_approval',
+                'notify_borrowers_about_order_updates',
+                'company_cr',
+                'notifications_email',
+            ])
+        );
 
         tenancy()->initialize($company);
 

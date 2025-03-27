@@ -12,7 +12,7 @@ class ApproveOrderAction implements ApproveOrder
 {
     public function handle(FinancingOrder $financingOrder, User $user)
     {
-        $status = ($financingOrder->company->require_initiate_trade_request || $financingOrder->company->trading_mode->is(TraderOrderMode::Manual))
+        $status = ($financingOrder->company->lender->lenderDetail->require_initiate_trade_request || $financingOrder->company->trading_mode->is(TraderOrderMode::Manual))
             ? FinancingOrderStatus::PendingTraderOrder
             : FinancingOrderStatus::Approved;
 

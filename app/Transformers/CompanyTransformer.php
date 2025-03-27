@@ -157,7 +157,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeRequireInitiateTradeRequest(Company $company)
     {
-        return $this->primitive($company->require_initiate_trade_request);
+        return $this->primitive($company->lenderDetail?->require_initiate_trade_request);
     }
 
     public function includeAutoCompleteMurabahaOrder(Company $company)

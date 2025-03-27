@@ -121,7 +121,7 @@ class LenderSettingsUpdateTest extends TestCase
         );
 
         $this->assertEquals(
-            Company::find(self::$company->id)->require_initiate_trade_request,
+            Company::find(self::$company->id)->lender->lenderDetail->require_initiate_trade_request,
             self::$updatedLenderSettingsDetails['require_initiate_trade_request']
         );
     }
@@ -144,7 +144,7 @@ class LenderSettingsUpdateTest extends TestCase
         );
 
         $this->assertEquals(
-            Company::find(self::$company->id)->require_initiate_trade_request,
+            Company::find(self::$company->id)->lender->lenderDetail->require_initiate_trade_request,
             self::$updatedLenderSettingsDetails['require_initiate_trade_request']
         );
     }
