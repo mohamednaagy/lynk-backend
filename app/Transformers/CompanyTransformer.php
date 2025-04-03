@@ -114,7 +114,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includePublicStatusComment(Company $company): Primitive
     {
-        return $this->primitive($company->public_status_comment);
+        return $this->primitive($company->lender->lenderDetail->public_status_comment);
     }
 
     public function includeDriver(Company $company): Primitive
@@ -162,7 +162,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeAutoCompleteMurabahaOrder(Company $company)
     {
-        return $this->primitive($company->auto_complete_murabaha_order);
+        return $this->primitive($company->lender->lenderDetail->auto_complete_murabaha_order);
     }
 
     public function includePreferredMarketType(Company $company): Primitive

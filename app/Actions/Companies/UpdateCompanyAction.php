@@ -22,11 +22,11 @@ class UpdateCompanyAction implements UpdateCompany
                     'status',
                     'webhook_secret_key',
                     'public_status_comment',
+                    'internal_status_comment',
                     'driver',
                     'trading_mode',
                     'require_initiate_trade_request',
                     'force_unique_reference_number',
-                    'auto_complete_murabaha_order',
                 ]
             )
         );
@@ -65,6 +65,8 @@ class UpdateCompanyAction implements UpdateCompany
                 'require_initiate_trade_request',
                 'trading_mode',
                 'internal_status_comment',
+                'public_status_comment',
+                'auto_complete_murabaha_order',
             ])
         );
 
