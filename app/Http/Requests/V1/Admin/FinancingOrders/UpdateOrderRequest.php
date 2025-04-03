@@ -46,7 +46,7 @@ class UpdateOrderRequest extends FormRequest
         $financingOrder = $this->route('order');
         /** @var Company $company */
         $company = $financingOrder->company;
-        if ($company?->lender?->lenderDetail?->force_unique_reference_number) {
+        if ($company?->lender->lenderDetail->force_unique_reference_number) {
             return $company->unique('financing_orders', 'reference_number')
                 ->whereNot('status', FinancingOrderStatus::Cancelled)
                 ->ignoreModel($financingOrder);
