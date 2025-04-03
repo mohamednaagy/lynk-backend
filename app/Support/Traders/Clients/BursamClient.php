@@ -19,7 +19,7 @@ class BursamClient
     use Localizable;
 
     private array $lastRequest = [
-        'url' => 'N/A',
+        'url' => '',
         'headers' => [],
         'body' => '',
     ];
@@ -328,7 +328,7 @@ class BursamClient
             Log::channel('bursam')->error('Error in request with BURSAM', [
                 'message' => $e->getMessage(),
                 'status_code' => $response->status(),
-                'url' => $this->lastRequest['url'] ?? 'N/A',
+                'url' => $this->lastRequest['url'] ?? '',
                 'request_headers' => $this->lastRequest['headers'] ?? [],
                 'request_body' => $this->lastRequest['body'] ?? '',
                 'exception' => [
