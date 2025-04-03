@@ -21,12 +21,9 @@ class UpdateCompanyAction implements UpdateCompany
                     'unique_name',
                     'status',
                     'webhook_secret_key',
-                    'public_status_comment',
                     'internal_status_comment',
                     'driver',
                     'trading_mode',
-                    'require_initiate_trade_request',
-                    'auto_complete_murabaha_order',
                 ]
             )
         );
@@ -63,6 +60,10 @@ class UpdateCompanyAction implements UpdateCompany
                 'does_order_require_approval',
                 'notify_admins_about_new_orders',
                 'notify_borrowers_about_order_updates',
+                'require_initiate_trade_request',
+                'trading_mode',
+                'public_status_comment',
+                'auto_complete_murabaha_order',
             ])
         );
 

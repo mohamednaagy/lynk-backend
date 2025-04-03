@@ -9,6 +9,7 @@ use App\Enums\TraderOrderMode;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Settings\UpdateSettingsRequest;
 use App\Transformers\CompanyTransformer;
+use Arr;
 use Illuminate\Http\JsonResponse;
 
 class SettingsController extends Controller
@@ -36,7 +37,6 @@ class SettingsController extends Controller
                 'does_order_require_approval',
                 'webhook_secret_key',
                 'require_initiate_trade_request',
-                'auto_complete_murabaha_order',
                 'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
             ])->respond();
@@ -47,11 +47,21 @@ class SettingsController extends Controller
         $company = tenant();
 
         $data = $updateSettingsRequest->validated();
-        if ($company->trading_mode->is(TraderOrderMode::Manual)) {
+        if ($company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Manual)) {
             $data['require_initiate_trade_request'] = true;
         }
 
         $company->update($data);
+
+        $company->lender->lenderDetail()->updateOrCreate(
+            ['company_id' => $company->id],
+            Arr::only($data, [
+                'require_initiate_trade_request',
+                'does_order_require_approval',
+                'notify_borrowers_about_order_updates',
+                'force_unique_reference_number',
+            ])
+        );
 
         return $this->successResponse([]);
     }

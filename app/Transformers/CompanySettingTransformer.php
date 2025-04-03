@@ -12,7 +12,7 @@ class CompanySettingTransformer extends TransformerAbstract
         return [
             'id' => $company->id,
             'does_order_require_approval' => $company->lender->lenderDetail->does_order_require_approval,
-            'trading_mode' => $company->trading_mode,
+            'trading_mode' => $company->lender->lenderDetail->trading_mode,
         ];
     }
 }
