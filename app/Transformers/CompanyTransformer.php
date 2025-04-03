@@ -162,7 +162,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeAutoCompleteMurabahaOrder(Company $company)
     {
-        return $this->primitive($company->auto_complete_murabaha_order);
+        return $this->primitive($company->lender->lenderDetail->auto_complete_murabaha_order);
     }
 
     public function includePreferredMarketType(Company $company): Primitive

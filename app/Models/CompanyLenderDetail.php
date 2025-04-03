@@ -17,6 +17,8 @@ class CompanyLenderDetail extends Model
         'notify_borrowers_about_order_updates' => 'boolean',
         'require_initiate_trade_request' => 'boolean',
         'trading_mode' => TraderOrderMode::class,
+        'auto_complete_murabaha_order' => 'boolean',
+
     ];
 
     protected $fillable = [
@@ -33,6 +35,7 @@ class CompanyLenderDetail extends Model
         'require_initiate_trade_request',
         'trading_mode',
         'public_status_comment',
+        'auto_complete_murabaha_order',
     ];
 
     public function lender()

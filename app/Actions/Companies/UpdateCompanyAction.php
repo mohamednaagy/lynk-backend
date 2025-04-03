@@ -26,7 +26,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'trading_mode',
                     'require_initiate_trade_request',
                     'force_unique_reference_number',
-                    'auto_complete_murabaha_order',
                 ]
             )
         );
@@ -65,6 +64,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'require_initiate_trade_request',
                 'trading_mode',
                 'public_status_comment',
+                'auto_complete_murabaha_order',
             ])
         );
 

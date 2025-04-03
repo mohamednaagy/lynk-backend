@@ -497,7 +497,7 @@ class MakeOrderProceedTest extends TestCase
 
     public function test_complete_order_if_trader_is_completed_and_company_has_auto_complete_order(): void
     {
-        self::$localCompany->update(['auto_complete_murabaha_order' => true]);
+        self::$localCompany->lender->lenderDetail->update(['auto_complete_murabaha_order' => true]);
 
         TraderOrderScenario::of(self::$localTraderOrder)
             ->reset()
