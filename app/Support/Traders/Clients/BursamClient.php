@@ -18,6 +18,12 @@ class BursamClient
 {
     use Localizable;
 
+    private array $lastRequest = [
+        'url' => 'N/A',
+        'headers' => [],
+        'body' => '',
+    ];
+
     protected $middlewares = [];
 
     protected $fake;
@@ -309,10 +315,32 @@ class BursamClient
             $instance->withMiddleware($middleware);
         }
 
-        $instance->throw(function ($response, $e) {
-            Log::channel('bursam')->error('Error in request with BURSAM', ['message' => $e->getMessage()]);
+        $instance->beforeSending(function ($request) {
+            $this->lastRequest = [
+                'url' => (string) $request->url(),
+                'headers' => $request->headers(),
+                'body' => (string) $request->body(),
+            ];
         });
 
+        // Handle error when an exception occurs
+        $instance->throw(function ($response, $e) {
+            Log::channel('bursam')->error('Error in request with BURSAM', [
+                'message' => $e->getMessage(),
+                'status_code' => $response->status(),
+                'url' => $this->lastRequest['url'] ?? 'N/A',
+                'request_headers' => $this->lastRequest['headers'] ?? [],
+                'request_body' => $this->lastRequest['body'] ?? '',
+                'exception' => [
+                    'type' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => $e->getTraceAsString(),
+                ],
+            ]);
+        });
+
+        // Return the instance to continue the request
         return $instance;
     }
 
