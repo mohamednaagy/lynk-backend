@@ -35,6 +35,7 @@ class CompanyLenderDetail extends Model
         'notify_borrowers_about_order_updates',
         'require_initiate_trade_request',
         'trading_mode',
+        'internal_status_comment',
         'public_status_comment',
         'auto_complete_murabaha_order',
     ];

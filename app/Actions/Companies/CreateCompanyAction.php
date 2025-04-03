@@ -31,6 +31,7 @@ class CreateCompanyAction implements CreateCompany
                     'unique_name',
                     'status',
                     'webhook_secret_key',
+                    'public_status_comment',
                     'internal_status_comment',
                     'driver',
                     'type',
@@ -56,6 +57,7 @@ class CreateCompanyAction implements CreateCompany
                     'force_unique_reference_number',
                     'require_initiate_trade_request',
                     'trading_mode',
+                    'internal_status_comment',
                     'public_status_comment',
                     'auto_complete_murabaha_order',
                 ]
