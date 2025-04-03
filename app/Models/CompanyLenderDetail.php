@@ -15,10 +15,10 @@ class CompanyLenderDetail extends Model
         'does_order_require_approval' => 'boolean',
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'notify_borrowers_about_order_updates' => 'boolean',
+        'force_unique_reference_number' => 'boolean',
         'require_initiate_trade_request' => 'boolean',
         'trading_mode' => TraderOrderMode::class,
         'auto_complete_murabaha_order' => 'boolean',
-
     ];
 
     protected $fillable = [
@@ -26,6 +26,7 @@ class CompanyLenderDetail extends Model
         'force_preferred_commodity_type',
         'company_id',
         'notifications_email',
+        'force_unique_reference_number',
         'company_cr',
         'contract_number',
         'preferred_market_type',

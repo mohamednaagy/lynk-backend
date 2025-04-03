@@ -24,8 +24,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'internal_status_comment',
                     'driver',
                     'trading_mode',
-                    'require_initiate_trade_request',
-                    'force_unique_reference_number',
                 ]
             )
         );
@@ -54,6 +52,7 @@ class UpdateCompanyAction implements UpdateCompany
             Arr::only($data, [
                 'default_contract_sign_time_limit',
                 'force_preferred_commodity_type',
+                'force_unique_reference_number',
                 'notifications_email',
                 'company_cr',
                 'contract_number',
