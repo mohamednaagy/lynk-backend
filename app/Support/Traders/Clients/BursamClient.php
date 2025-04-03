@@ -317,7 +317,6 @@ class BursamClient
             'method' => '',
         ];
 
-        // Use reference to ensure changes persist outside the closure
         $instance->beforeSending(function ($request) use (&$lastRequest) {
             $lastRequest = [
                 'url' => (string) $request->url(),
