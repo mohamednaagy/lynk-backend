@@ -4,6 +4,7 @@ namespace App\Support\Traders\Clients;
 
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
+use Carbon\Carbon;
 use Exception;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
@@ -17,12 +18,6 @@ use Illuminate\Support\Traits\Localizable;
 class BursamClient
 {
     use Localizable;
-
-    private array $lastRequest = [
-        'url' => '',
-        'headers' => [],
-        'body' => '',
-    ];
 
     protected $middlewares = [];
 
@@ -315,22 +310,34 @@ class BursamClient
             $instance->withMiddleware($middleware);
         }
 
-        $instance->beforeSending(function ($request) {
-            $this->lastRequest = [
+        $lastRequest = [
+            'url' => '',
+            'headers' => [],
+            'body' => '',
+            'method' => '',
+        ];
+
+        // Use reference to ensure changes persist outside the closure
+        $instance->beforeSending(function ($request) use (&$lastRequest) {
+            $lastRequest = [
                 'url' => (string) $request->url(),
                 'headers' => $request->headers(),
                 'body' => (string) $request->body(),
+                'method' => $request->method(),
+                'duration' => Carbon::now(),
             ];
         });
 
-        // Handle error when an exception occurs
-        $instance->throw(function ($response, $e) {
+        // Handle error and log request information once the request is completed or failed
+        $instance->throw(function ($response, $e) use (&$lastRequest) {
             Log::channel('bursam')->error('Error in request with BURSAM', [
                 'message' => $e->getMessage(),
                 'status_code' => $response->status(),
-                'url' => $this->lastRequest['url'] ?? '',
-                'request_headers' => $this->lastRequest['headers'] ?? [],
-                'request_body' => $this->lastRequest['body'] ?? '',
+                'url' => $lastRequest['url'] ?? '',
+                'method' => $lastRequest['method'] ?? '',
+                'duration' => $lastRequest['duration'] ?? '',
+                'request_headers' => $lastRequest['headers'] ?? [],
+                'request_body' => $lastRequest['body'] ?? '',
                 'exception' => [
                     'type' => get_class($e),
                     'file' => $e->getFile(),
