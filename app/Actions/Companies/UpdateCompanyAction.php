@@ -20,7 +20,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'name',
                     'unique_name',
                     'status',
-                    'webhook_secret_key',
                     'public_status_comment',
                     'internal_status_comment',
                     'driver',
@@ -66,6 +65,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'internal_status_comment',
                 'public_status_comment',
                 'auto_complete_murabaha_order',
+                'webhook_secret_key',
             ])
         );
 

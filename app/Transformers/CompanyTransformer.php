@@ -104,7 +104,7 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeWebhookSecretKey(Company $company): Primitive
     {
-        return $this->primitive($company->webhook_secret_key);
+        return $this->primitive($company->lender->lenderDetail->webhook_secret_key);
     }
 
     public function includeCreatedAt(Company $company): Primitive

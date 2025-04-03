@@ -19,6 +19,7 @@ class CompanyLenderDetail extends Model
         'require_initiate_trade_request' => 'boolean',
         'trading_mode' => TraderOrderMode::class,
         'auto_complete_murabaha_order' => 'boolean',
+        'webhook_secret_key' => 'encrypted',
     ];
 
     protected $fillable = [
@@ -38,6 +39,7 @@ class CompanyLenderDetail extends Model
         'internal_status_comment',
         'public_status_comment',
         'auto_complete_murabaha_order',
+        'webhook_secret_key',
     ];
 
     public function lender()
