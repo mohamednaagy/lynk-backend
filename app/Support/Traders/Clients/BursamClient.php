@@ -305,6 +305,14 @@ class BursamClient
     private function http(): PendingRequest
     {
         $instance = Http::bursam();
+        $lastRequest = [
+            'url' => '',
+            'headers' => [],
+            'body' => '',
+            'start_time' => '',
+            'end_time' => '',
+            'method' => '',
+        ];
 
         foreach ($this->middlewares as $middleware) {
             $instance->withMiddleware($middleware);
@@ -314,20 +322,19 @@ class BursamClient
             'url' => '',
             'headers' => [],
             'body' => '',
+            'start_time' => '',
             'method' => '',
         ];
 
         $instance->beforeSending(function ($request) use (&$lastRequest) {
             $lastRequest = [
+                'start_time' => Carbon::now()->format('Y-m-d H:i:s.u'),
                 'url' => (string) $request->url(),
                 'headers' => $request->headers(),
                 'body' => (string) $request->body(),
                 'method' => $request->method(),
-                'duration' => Carbon::now(),
             ];
         });
-
-        // Handle error and log request information once the request is completed or failed
         $instance->throw(function ($response, $e) use (&$lastRequest) {
             Log::channel('bursam')->error('Error in request with BURSAM', [
                 'message' => $e->getMessage(),
@@ -335,6 +342,8 @@ class BursamClient
                 'url' => $lastRequest['url'] ?? '',
                 'method' => $lastRequest['method'] ?? '',
                 'duration' => $lastRequest['duration'] ?? '',
+                'start_time' => $lastRequest['start_time'] ?? '',
+                'end_time' => Carbon::now()->format('Y-m-d H:i:s.u') ?? '',
                 'request_headers' => $lastRequest['headers'] ?? [],
                 'request_body' => $lastRequest['body'] ?? '',
                 'exception' => [
