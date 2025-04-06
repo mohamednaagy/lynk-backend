@@ -26,9 +26,7 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
-    {
-    }
+    public function __construct(protected int $traderOrderId) {}
 
     /**
      * Execute the job.

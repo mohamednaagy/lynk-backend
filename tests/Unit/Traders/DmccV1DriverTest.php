@@ -28,7 +28,7 @@ use Tests\Traits\InteractsWithUser;
 
 class DmccV1DriverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 
@@ -113,10 +113,10 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->createTraderOrder(self::$order);
+        (new DmccV1Driver)->createTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount + 1);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), $traderOrderHistoryCount + 1);
     }
 
     /**
@@ -135,11 +135,11 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->createTraderOrder(self::$order);
+        (new DmccV1Driver)->createTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), 0);
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), 0);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), 0);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     public function test_accept_agreement_fail(): void
@@ -157,9 +157,9 @@ class DmccV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new DmccV1Driver())->acceptAgreement();
+        (new DmccV1Driver)->acceptAgreement();
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -179,7 +179,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->fetchNotifications('ACTIONABLE');
+        $response = (new DmccV1Driver)->fetchNotifications('ACTIONABLE');
 
         $this->assertIsArray($response);
     }
@@ -199,9 +199,9 @@ class DmccV1DriverTest extends TestCase
             ], 500);
         });
 
-        (new DmccV1Driver())->fetchNotifications('ACTIONABLE');
+        (new DmccV1Driver)->fetchNotifications('ACTIONABLE');
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -217,7 +217,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->getTtiId(self::$order);
+        $response = (new DmccV1Driver)->getTtiId(self::$order);
 
         $this->assertIsString($response);
         $this->assertEquals(1, $response);
@@ -239,9 +239,9 @@ class DmccV1DriverTest extends TestCase
         });
         $this->expectException(TraderException::class);
 
-        (new DmccV1Driver())->getTtiId(self::$order);
+        (new DmccV1Driver)->getTtiId(self::$order);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -255,7 +255,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->cancelOrder(self::$order);
+        $response = (new DmccV1Driver)->cancelOrder(self::$order);
 
         $this->assertEquals('0000', $response->successCode);
     }
@@ -275,9 +275,9 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->cancelOrder(self::$order);
+        (new DmccV1Driver)->cancelOrder(self::$order);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -291,7 +291,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->respondPtpService(self::$order);
+        $response = (new DmccV1Driver)->respondPtpService(self::$order);
 
         $this->assertEquals('0000', $response->successCode);
     }
@@ -311,9 +311,9 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->respondPtpService(self::$order);
+        (new DmccV1Driver)->respondPtpService(self::$order);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -329,7 +329,7 @@ class DmccV1DriverTest extends TestCase
             ->reset()
             ->moveToStep(MurabhaStep::ContractSigned);
 
-        (new DmccV1Driver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
+        (new DmccV1Driver)->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
@@ -346,10 +346,10 @@ class DmccV1DriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new DmccV1Driver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+        (new DmccV1Driver)->createSellingCommodityToCustomerDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -360,7 +360,7 @@ class DmccV1DriverTest extends TestCase
         Storage::fake();
         UploadedFile::fake();
 
-        (new DmccV1Driver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
+        (new DmccV1Driver)->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
@@ -377,10 +377,10 @@ class DmccV1DriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        (new DmccV1Driver())->createTransferOwnershipToLenderDocument(new TraderOrder());
+        (new DmccV1Driver)->createTransferOwnershipToLenderDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -402,7 +402,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        $response = (new DmccV1Driver)->getDocumentByTypeAndTransaction(1, 'documentType');
 
         $this->assertEquals('document', $response);
     }
@@ -426,9 +426,9 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        (new DmccV1Driver)->getDocumentByTypeAndTransaction(1, 'documentType');
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -464,7 +464,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->getInventoryBasket(self::$traderOrder);
+        $response = (new DmccV1Driver)->getInventoryBasket(self::$traderOrder);
 
         $this->assertEquals('', $response->errorCode);
     }
@@ -484,9 +484,9 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->getInventoryBasket(self::$traderOrder);
+        (new DmccV1Driver)->getInventoryBasket(self::$traderOrder);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -500,7 +500,7 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new DmccV1Driver())->uploadTTIDocumentAndGetVersionNumber('1');
+        $response = (new DmccV1Driver)->uploadTTIDocumentAndGetVersionNumber('1');
 
         $this->assertEquals(1, $response);
     }
@@ -520,9 +520,9 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->uploadTTIDocumentAndGetVersionNumber('1');
+        (new DmccV1Driver)->uploadTTIDocumentAndGetVersionNumber('1');
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -538,9 +538,9 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->issueMurabahaPurchaseOffer(1, 1);
+        (new DmccV1Driver)->issueMurabahaPurchaseOffer(1, 1);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount);
     }
 
     /**
@@ -558,8 +558,8 @@ class DmccV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new DmccV1Driver())->issueMurabahaPurchaseOffer(1, 1);
+        (new DmccV1Driver)->issueMurabahaPurchaseOffer(1, 1);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 }

@@ -14,8 +14,6 @@ class UpdateSettingsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -24,8 +22,6 @@ class UpdateSettingsRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     *
-     * @return array
      */
     public function rules(): array
     {
@@ -34,7 +30,7 @@ class UpdateSettingsRequest extends FormRequest
         ], $this->getCustomRulesByArea($this->area));
     }
 
-    private function getCustomRulesByArea(string $area = null): array
+    private function getCustomRulesByArea(?string $area = null): array
     {
         return match ($area) {
             'General' => [

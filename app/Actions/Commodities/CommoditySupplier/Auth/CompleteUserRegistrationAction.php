@@ -20,7 +20,6 @@ class CompleteUserRegistrationAction implements CompleteUserRegistration
                 ]
             )
         );
-       
 
         $user->markEmailAsVerified();
 

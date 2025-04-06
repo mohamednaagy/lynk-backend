@@ -14,8 +14,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class EnquiryControllerIndexTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -87,7 +87,7 @@ class EnquiryControllerIndexTest extends TestCase
             ->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/enquiries')
             ->assertExactJson(
-                fractal($enquiries, new EnquiryTransformer())
+                fractal($enquiries, new EnquiryTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',

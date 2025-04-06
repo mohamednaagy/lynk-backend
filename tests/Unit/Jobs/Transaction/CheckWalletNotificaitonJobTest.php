@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CheckWalletNotificaitonJobTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected static Company $company;
 

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class LoginUserAction implements LoginUser
 {
-    public function handle(User $user, string $source = null, Request $request = null): array
+    public function handle(User $user, ?string $source = null, ?Request $request = null): array
     {
         $auth = [];
         $auth['token'] = $user->createToken($source)->plainTextToken;

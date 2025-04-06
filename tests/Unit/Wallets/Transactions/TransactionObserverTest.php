@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithCompany;
  */
 class TransactionObserverTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     protected static Company $lender;
 

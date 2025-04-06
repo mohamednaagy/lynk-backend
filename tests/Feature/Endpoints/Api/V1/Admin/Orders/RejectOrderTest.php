@@ -21,9 +21,9 @@ use Tests\Traits\InteractsWithUser;
 
 class RejectOrderTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 

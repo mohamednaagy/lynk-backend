@@ -11,23 +11,14 @@ use Illuminate\Support\Arr;
 
 class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWithRoleAndPermission
 {
-    /**
-     * @param  CreateUser  $createUser
-     * @param  AssignRoleToUser  $assignRoleToUser
-     * @param  AssignPermissionToUser  $assignPermissionToUser
-     */
     public function __construct(
         protected CreateUser $createUser,
         protected AssignRoleToUser $assignRoleToUser,
         protected AssignPermissionToUser $assignPermissionToUser
-    ) {
-    }
+    ) {}
 
     /**
      * Create new user.
-     *
-     * @param  array  $data
-     * @return User
      */
     public function handle(array $data): User
     {

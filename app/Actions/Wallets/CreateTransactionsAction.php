@@ -15,7 +15,7 @@ class CreateTransactionsAction implements CreateTransactions
         int $transactionReason,
         Money $amount,
         array $meta,
-        string $referenceNumber = null
+        ?string $referenceNumber = null
     ): Transaction {
         return app(TransactionUtilInterface::class)->process(
             $wallet,

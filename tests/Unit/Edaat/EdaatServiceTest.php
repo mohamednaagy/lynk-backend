@@ -18,20 +18,14 @@ class EdaatServiceTest extends TestCase
 
     protected static int $amount;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
-        self::$edaatService = new EdaatService();
+        self::$edaatService = new EdaatService;
         self::$randomString = Str::random(10);
         self::$amount = 100;
     }
 
-    /**
-     * @return void
-     */
     public function test_that_create_invoice_success_if_id_is_unique(): void
     {
         Http::fake(function () {
@@ -46,9 +40,6 @@ class EdaatServiceTest extends TestCase
         $this->assertEquals(1, $response);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_create_invoice_fail_if_id_is_not_unique(): void
     {
         Http::fakeSequence()
@@ -71,9 +62,6 @@ class EdaatServiceTest extends TestCase
         $this->assertIsBool($response);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_invoice_is_not_paid(): void
     {
         Http::fakeSequence()
@@ -97,9 +85,6 @@ class EdaatServiceTest extends TestCase
         $this->assertIsBool($response);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_register_webhook_return_success(): void
     {
         Http::fake(function () {

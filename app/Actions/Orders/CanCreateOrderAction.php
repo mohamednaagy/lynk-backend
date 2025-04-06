@@ -25,6 +25,6 @@ class CanCreateOrderAction implements CanCreateOrder
             return true;
         }
 
-        throw new BalanceIsNotEnoughException();
+        throw new BalanceIsNotEnoughException;
     }
 }

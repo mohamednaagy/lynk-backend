@@ -24,11 +24,6 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     use CanOtpifyCode;
 
     /**
-     * @param  Request  $request
-     * @param  Otpifiable  $otpifiable
-     * @param  array  $data
-     * @return OtpifyCode
-     *
      * @throws ConfigurationException
      * @throws TwilioException
      */
@@ -62,10 +57,6 @@ class TwilioSmsDriver implements OtpifyDriverInterface
 
     /**
      * Execute the driver logic.
-     *
-     * @param  Request  $request
-     * @param  Otpifiable  $otpifiable
-     * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool
     {
@@ -73,10 +64,6 @@ class TwilioSmsDriver implements OtpifyDriverInterface
     }
 
     /**
-     * @param  Request  $request
-     * @param $vid
-     * @param $code
-     * @param  Closure|null  $additionalCheckCallback
      * @return bool
      *
      * @throws OtpCodeAlreadyUsedException
@@ -86,7 +73,7 @@ class TwilioSmsDriver implements OtpifyDriverInterface
      * @throws OtpCodeNotFoundException
      * @throws OtpifiableNotEqualAuthUserException
      */
-    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): bool|string
+    public function verify(Request $request, $vid, $code, ?Closure $additionalCheckCallback = null): bool|string
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         $this->verifyOtpifyCode($otpifyCode, $request, $code, $additionalCheckCallback);

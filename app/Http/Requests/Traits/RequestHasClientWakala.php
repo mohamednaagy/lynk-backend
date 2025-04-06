@@ -10,7 +10,6 @@ trait RequestHasClientWakala
     /**
      * Configure the validator instance.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
      * @return void
      */
     public function withValidator(Validator $validator)
@@ -29,7 +28,7 @@ trait RequestHasClientWakala
 
     private function isClientWakalaNotProvidedIfNeeded()
     {
-        return  $this->validated('case') == FinancingOrderProceedCase::ClientWakalaAccepted
+        return $this->validated('case') == FinancingOrderProceedCase::ClientWakalaAccepted
             && $this->route('order')?->is_verification_required === false
             && is_null($this->validated('client_wakala'));
     }

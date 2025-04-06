@@ -10,8 +10,6 @@ class StoreVisitorEnquiryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -32,7 +30,7 @@ class StoreVisitorEnquiryRequest extends FormRequest
             'email' => ['required', 'email:filter', 'max:255'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
     }
 }

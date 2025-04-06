@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithLender;
 
 class TraderHelperTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     private static Company $company;
 

@@ -14,7 +14,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CompleteRegisterTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -22,9 +22,6 @@ class CompleteRegisterTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -39,9 +36,6 @@ class CompleteRegisterTest extends TestCase
         self::$endpoint = 'api/v1/lender/'.self::$userLender->id.'/sign-up';
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_success(): void
     {
         $this->assertFalse(self::$userLender->hasVerifiedEmail());
@@ -79,9 +73,6 @@ class CompleteRegisterTest extends TestCase
             ->assertJsonPath('message', __('This action is unauthorized.'));
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_fail_without_signature(): void
     {
         $this->postJson(self::$endpoint, [
@@ -97,9 +88,6 @@ class CompleteRegisterTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_validation_rules(): void
     {
         $this->withoutMiddleware(ValidateSignature::class)

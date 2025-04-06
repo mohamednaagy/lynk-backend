@@ -17,7 +17,7 @@ class CustomizeLogTimezone
 
         $handler = $monolog->getHandlers()[0];
         $logger->setTimezone(new \DateTimeZone('Asia/Riyadh'));
-        
+
         $formatter = new LineFormatter(null, null, true, true);
         $formatter->setDateFormat('Y-m-d H:i:s');
 

@@ -11,8 +11,6 @@ class UpdateMyProfile extends Controller
     /**
      * Summary of __invoke
      *
-     * @param  UpdateMyProfileRequest  $request
-     * @param  UpdateUser  $updateUser
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(

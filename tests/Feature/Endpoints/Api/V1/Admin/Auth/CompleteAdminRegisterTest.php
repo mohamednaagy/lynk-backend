@@ -12,15 +12,12 @@ use Tests\Traits\InteractsWithUser;
 
 class CompleteAdminRegisterTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser;
+    use InteractsWithUser, RefreshDatabase;
 
     private static User $adminUser;
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -33,9 +30,6 @@ class CompleteAdminRegisterTest extends TestCase
         self::$endpoint = 'api/v1/admin/'.self::$adminUser->id.'/sign-up';
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_success(): void
     {
         $this->assertFalse(self::$adminUser->hasVerifiedEmail());
@@ -63,9 +57,6 @@ class CompleteAdminRegisterTest extends TestCase
         $this->assertNotNull(self::$adminUser->password);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_fail_without_signature(): void
     {
         $this->postJson(self::$endpoint, [
@@ -81,9 +72,6 @@ class CompleteAdminRegisterTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_if_authenticated(): void
     {
         $this->actingAs(self::$adminUser)
@@ -99,9 +87,6 @@ class CompleteAdminRegisterTest extends TestCase
             ->assertJsonPath('message', __('This action is unauthorized.'));
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_register_validation_rules(): void
     {
         $this->withoutMiddleware(ValidateSignature::class)

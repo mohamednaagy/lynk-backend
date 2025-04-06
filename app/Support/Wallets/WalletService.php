@@ -11,8 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 class WalletService implements WalletServiceInterface
 {
     /**
-     * @param  Model  $model
-     * @param  array  $data
      * @return mixed
      */
     public function create(Model $model, array $data): Wallet
@@ -27,8 +25,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  int  $id
-     * @param  bool  $lock
      * @return mixed
      */
     public function findById(int $id, bool $lock = true)
@@ -37,8 +33,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  string  $uuid
-     * @param  bool  $lock
      * @return mixed
      */
     public function findByUuid(string $uuid, bool $lock = true)
@@ -49,9 +43,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  Model  $model
-     * @param  string  $name
-     * @param  bool  $lock
      * @return mixed
      */
     public function findByName(Model $model, string $name, bool $lock = true)
@@ -64,8 +55,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  int  $id
-     * @param  bool  $lock
      * @return mixed
      */
     public function findByIdOrFail(int $id, bool $lock = true)
@@ -74,8 +63,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  string  $uuid
-     * @param  bool  $lock
      * @return mixed
      */
     public function findByUuidOrFail(string $uuid, bool $lock = true)
@@ -86,9 +73,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  Model  $model
-     * @param  string  $name
-     * @param  bool  $lock
      * @return mixed
      */
     public function findByNameOrFail(Model $model, string $name, bool $lock = true)
@@ -101,11 +85,9 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  string|null  $name
-     * @param  bool  $lock
      * @return mixed
      */
-    public function getWallets(Model $model, string $name = null, bool $lock = true)
+    public function getWallets(Model $model, ?string $name = null, bool $lock = true)
     {
         return $this->buildWalletQueryBase($lock)
             ->when($name, fn ($query) => $query->where('name', $name))
@@ -115,8 +97,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  Model  $model
-     * @param  string  $name
      * @return mixed
      */
     public function hasWallet(Model $model, string $name)
@@ -128,7 +108,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  Model  $model
      * @param  string  $name
      * @return mixed
      */
@@ -140,8 +119,6 @@ class WalletService implements WalletServiceInterface
     }
 
     /**
-     * @param  Model  $model
-     * @param  string  $walletName
      * @return mixed
      */
     public function balance(Model $model, string $walletName)
@@ -154,7 +131,6 @@ class WalletService implements WalletServiceInterface
     /**
      * Build base of wallet query
      *
-     * @param  bool  $lock
      * @return \Illuminate\Database\Query\Builder
      */
     protected function buildWalletQueryBase(bool $lock)

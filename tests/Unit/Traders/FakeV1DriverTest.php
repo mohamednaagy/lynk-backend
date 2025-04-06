@@ -69,10 +69,10 @@ class FakeV1DriverTest extends TestCase
             ], 200);
         });
 
-        (new FakeV1Driver())->createTraderOrder(self::$order);
+        (new FakeV1Driver)->createTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount + 1);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), $traderOrderHistoryCount + 1);
     }
 
     /**
@@ -89,16 +89,16 @@ class FakeV1DriverTest extends TestCase
             ], 422);
         });
 
-        (new FakeV1Driver())->createTraderOrder(self::$order);
+        (new FakeV1Driver)->createTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), 0);
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), 0);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), 0);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     public function test_accept_agreement_success(): void
     {
-        $this->assertTrue((new FakeV1Driver())->acceptAgreement());
+        $this->assertTrue((new FakeV1Driver)->acceptAgreement());
     }
 
     /**
@@ -116,7 +116,7 @@ class FakeV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new FakeV1Driver())->fetchNotifications('ACTIONABLE');
+        $response = (new FakeV1Driver)->fetchNotifications('ACTIONABLE');
 
         $this->assertIsArray($response);
     }
@@ -134,9 +134,9 @@ class FakeV1DriverTest extends TestCase
             return Http::response([], 500);
         });
 
-        (new FakeV1Driver())->fetchNotifications('ACTIONABLE');
+        (new FakeV1Driver)->fetchNotifications('ACTIONABLE');
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -150,7 +150,7 @@ class FakeV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new FakeV1Driver())->getTtiId(self::$order);
+        $response = (new FakeV1Driver)->getTtiId(self::$order);
 
         $this->assertIsString($response);
         $this->assertEquals(1, $response);
@@ -171,9 +171,9 @@ class FakeV1DriverTest extends TestCase
             ], 422);
         });
 
-        (new FakeV1Driver())->getTtiId(self::$order);
+        (new FakeV1Driver)->getTtiId(self::$order);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -181,7 +181,7 @@ class FakeV1DriverTest extends TestCase
      */
     public function test_cancel_order_success(): void
     {
-        $response = (new FakeV1Driver())->cancelOrder(self::$order);
+        $response = (new FakeV1Driver)->cancelOrder(self::$order);
 
         $this->assertTrue($response);
     }
@@ -197,7 +197,7 @@ class FakeV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new FakeV1Driver())->respondPtpService(self::$order);
+        $response = (new FakeV1Driver)->respondPtpService(self::$order);
 
         $this->assertEquals((object) ['data' => []], $response);
     }
@@ -217,9 +217,9 @@ class FakeV1DriverTest extends TestCase
             ], 422);
         });
 
-        (new FakeV1Driver())->respondPtpService(self::$order);
+        (new FakeV1Driver)->respondPtpService(self::$order);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -235,9 +235,9 @@ class FakeV1DriverTest extends TestCase
             ->reset()
             ->moveToStep(MurabhaStep::ContractSigned);
 
-        (new FakeV1Driver())->getInventoryBasket(self::$traderOrder);
+        (new FakeV1Driver)->getInventoryBasket(self::$traderOrder);
         self::$traderOrder->fresh();
-        (new FakeV1Driver())->createSellingCommodityToCustomerDocument(self::$traderOrder);
+        (new FakeV1Driver)->createSellingCommodityToCustomerDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
@@ -252,7 +252,7 @@ class FakeV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new FakeV1Driver())->createSellingCommodityToCustomerDocument(new TraderOrder());
+        (new FakeV1Driver)->createSellingCommodityToCustomerDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
@@ -265,9 +265,9 @@ class FakeV1DriverTest extends TestCase
         Event::fake();
         Storage::fake();
         UploadedFile::fake();
-        (new FakeV1Driver())->getInventoryBasket(self::$traderOrder);
+        (new FakeV1Driver)->getInventoryBasket(self::$traderOrder);
         self::$traderOrder->fresh();
-        (new FakeV1Driver())->createTransferOwnershipToLenderDocument(self::$traderOrder);
+        (new FakeV1Driver)->createTransferOwnershipToLenderDocument(self::$traderOrder);
 
         $this->assertNotNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
@@ -282,7 +282,7 @@ class FakeV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        (new FakeV1Driver())->createTransferOwnershipToLenderDocument(new TraderOrder());
+        (new FakeV1Driver)->createTransferOwnershipToLenderDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
     }
@@ -300,7 +300,7 @@ class FakeV1DriverTest extends TestCase
             ], 200);
         });
 
-        $response = (new FakeV1Driver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        $response = (new FakeV1Driver)->getDocumentByTypeAndTransaction(1, 'documentType');
 
         $this->assertEquals('document', $response);
     }
@@ -318,9 +318,9 @@ class FakeV1DriverTest extends TestCase
             return Http::response([], 500);
         });
 
-        (new FakeV1Driver())->getDocumentByTypeAndTransaction(1, 'documentType');
+        (new FakeV1Driver)->getDocumentByTypeAndTransaction(1, 'documentType');
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -353,7 +353,7 @@ class FakeV1DriverTest extends TestCase
 
         $data['exchange_rate'] = '3.75';
 
-        $response = (new FakeV1Driver())->getInventoryBasket(self::$traderOrder);
+        $response = (new FakeV1Driver)->getInventoryBasket(self::$traderOrder);
 
         $this->assertEquals((object) $data, $response);
     }
@@ -363,7 +363,7 @@ class FakeV1DriverTest extends TestCase
      */
     public function test_upload_tti_document_and_get_version_number_success(): void
     {
-        $response = (new FakeV1Driver())->uploadTTIDocumentAndGetVersionNumber('1');
+        $response = (new FakeV1Driver)->uploadTTIDocumentAndGetVersionNumber('1');
 
         $this->assertEquals('001', $response);
     }
@@ -379,9 +379,9 @@ class FakeV1DriverTest extends TestCase
             return Http::response([], 200);
         });
 
-        (new FakeV1Driver())->issueMurabahaPurchaseOffer(1, 1);
+        (new FakeV1Driver)->issueMurabahaPurchaseOffer(1, 1);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount);
     }
 
     /**
@@ -397,8 +397,8 @@ class FakeV1DriverTest extends TestCase
             return Http::response([], 422);
         });
 
-        (new FakeV1Driver())->issueMurabahaPurchaseOffer(1, 1);
+        (new FakeV1Driver)->issueMurabahaPurchaseOffer(1, 1);
 
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 }

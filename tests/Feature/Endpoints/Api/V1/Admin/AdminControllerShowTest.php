@@ -16,15 +16,12 @@ use Tests\Traits\InteractsWithUser;
 
 class AdminControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser;
+    use InteractsWithUser, RefreshDatabase;
 
     private static User $superAdminUser;
 
     private static User $managerAdminUser;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

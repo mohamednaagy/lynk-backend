@@ -13,7 +13,7 @@ use Tests\Traits\InteractsWithEnquiry;
 
 class CreateVisitorEnquiryReplyTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithEnquiry;
+    use InteractsWithEnquiry, RefreshDatabase;
 
     const BaseUrl = 'api/v1/visitor/enquiries/';
 
@@ -27,9 +27,6 @@ class CreateVisitorEnquiryReplyTest extends TestCase
         'body' => 'This is enquiry reply body test',
     ];
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -46,9 +43,6 @@ class CreateVisitorEnquiryReplyTest extends TestCase
             self::$enquiryReplySignature;
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_cannot_create_enquiry_reply_without_signature_url_failed(): void
     {
         $this->postJson(self::BaseUrl.self::$visitorEnquiry->id.'/reply')
@@ -56,9 +50,6 @@ class CreateVisitorEnquiryReplyTest extends TestCase
             ->assertJsonPath('message', __('Invalid signature.'));
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_can_create_enquiry_reply_succeed(): void
     {
         $this->postJson(self::$signedVisitorEnquiryReplyUrl, self::$enquiryReplyData)
@@ -72,9 +63,6 @@ class CreateVisitorEnquiryReplyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_enquiry_reply_has_been_created_and_status_changed_to_be_under_review(): void
     {
         $this->postJson(self::$signedVisitorEnquiryReplyUrl, self::$enquiryReplyData)
@@ -86,9 +74,6 @@ class CreateVisitorEnquiryReplyTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_body_cannot_create_enquiry_reply_failed(): void
     {
         $this->postJson(self::$signedVisitorEnquiryReplyUrl, Arr::except(self::$enquiryReplyData, ['body']))

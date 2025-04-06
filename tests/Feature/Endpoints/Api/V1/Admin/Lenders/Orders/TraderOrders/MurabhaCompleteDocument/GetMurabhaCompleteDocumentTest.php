@@ -21,7 +21,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetMurabhaCompleteDocumentTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -37,9 +37,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 
     private static string $getMurabhaCompleteDocumentUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -71,9 +68,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             '/murabha-complete';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_get_murabha_complete_document(): void
     {
         $this->getJson(self::$getMurabhaCompleteDocumentUrl)
@@ -83,9 +77,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_get_murabha_complete_document(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -101,8 +92,6 @@ class GetMurabhaCompleteDocumentTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */

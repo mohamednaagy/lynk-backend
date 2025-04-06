@@ -32,7 +32,7 @@ class LenderSettingsController extends Controller
      */
     public function index(GetSettingsClassInstance $getSettingsClassInstance): JsonResponse
     {
-        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer())
+        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer)
             ->parseIncludes([
                 'default_order_cost',
                 'email_verification_enabled',

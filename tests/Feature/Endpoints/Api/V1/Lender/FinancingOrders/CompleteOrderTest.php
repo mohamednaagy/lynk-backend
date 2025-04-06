@@ -23,7 +23,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class CompleteOrderTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -35,9 +35,6 @@ class CompleteOrderTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -57,9 +54,6 @@ class CompleteOrderTest extends TestCase
         self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/complete';
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_unauth_user_cant_make_order_completed(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -70,9 +64,6 @@ class CompleteOrderTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_only_lender_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Lender], function ($user, $role) {
@@ -82,9 +73,6 @@ class CompleteOrderTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_that_only_lender_billing_lender_api_user_can_not_access(): void
     {
         $rolesHasNoAccess = [
@@ -140,9 +128,6 @@ class CompleteOrderTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_payment_proof_file_is_not_required(): void
     {
         $this->actingAs(self::$userLender)
@@ -153,9 +138,6 @@ class CompleteOrderTest extends TestCase
         self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$userLender)
@@ -169,9 +151,6 @@ class CompleteOrderTest extends TestCase
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_successfully(): void
     {
         TraderOrderScenario::of(self::$traderOrder)
@@ -186,9 +165,6 @@ class CompleteOrderTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_will_return_error_response_if_flow_is_not_correct(): void
     {
         self::$financingOrder->traderOrders()->update([

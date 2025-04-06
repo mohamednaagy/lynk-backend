@@ -15,8 +15,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class ResendInvitationTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $company;
 

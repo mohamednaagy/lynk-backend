@@ -6,26 +6,14 @@ use Illuminate\Support\Arr;
 
 class Project
 {
-    /**
-     * @param  array  $companyName
-     * @param  string  $companyCr
-     * @param  string  $vatId
-     * @param  float  $vatRate
-     * @param  ProjectAddress  $projectAddress
-     */
     public function __construct(
         private array $companyName,
         private string $companyCr,
         private string $vatId,
         private float $vatRate,
         private ProjectAddress $projectAddress
-    ) {
-    }
+    ) {}
 
-    /**
-     * @param  array  $data
-     * @return Project
-     */
     public static function fromArray(array $data): Project
     {
         return new static(
@@ -37,11 +25,7 @@ class Project
         );
     }
 
-    /**
-     * @param  string|null  $locale
-     * @return array|string
-     */
-    public function getCompanyName(string $locale = null): array|string
+    public function getCompanyName(?string $locale = null): array|string
     {
         if (is_null($locale)) {
             return $this->companyName;
@@ -50,41 +34,26 @@ class Project
         return Arr::get($this->companyName, $locale);
     }
 
-    /**
-     * @return string
-     */
     public function getCompanyCr(): string
     {
         return $this->companyCr;
     }
 
-    /**
-     * @return string
-     */
     public function getVatId(): string
     {
         return $this->vatId;
     }
 
-    /**
-     * @return float
-     */
     public function getVatRate(): float
     {
         return $this->vatRate ?? 0.0;
     }
 
-    /**
-     * @return float
-     */
     public function getVatRateInPercentage(): float
     {
         return $this->vatRate * 100;
     }
 
-    /**
-     * @return ProjectAddress
-     */
     public function getCompanyAddress(): ProjectAddress
     {
         return $this->projectAddress;

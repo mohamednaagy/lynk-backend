@@ -63,10 +63,6 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         self::PendingApproval => self::Approved,
     ];
 
-    /**
-     * @param  Status|int  $status
-     * @return bool
-     */
     public function canMoveTo(Status|int $status): bool
     {
         if ($status instanceof Status) {
@@ -80,18 +76,11 @@ final class FinancingOrderStatus extends Enum implements LocalizedEnum
         return in_array($this->value, self::$state[$status]);
     }
 
-    /**
-     * @param  FinancingOrderStatus|int  $status
-     * @return bool
-     */
     public function cantMoveTo(Status|int $status): bool
     {
         return ! $this->canMoveTo($status);
     }
 
-    /**
-     * @return bool
-     */
     public function canBeUpdated(): bool
     {
         return in_array($this->value, self::$allowedToUpdateStatuses);

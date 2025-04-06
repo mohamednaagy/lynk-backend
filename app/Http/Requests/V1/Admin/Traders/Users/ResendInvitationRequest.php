@@ -24,7 +24,7 @@ class ResendInvitationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
     }
 }

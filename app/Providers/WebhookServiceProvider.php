@@ -17,7 +17,7 @@ class WebhookServiceProvider extends ServiceProvider
         $this->app->singleton(
             'webhookEvent',
             function () {
-                return new WebhookEventManager();
+                return new WebhookEventManager;
             }
         );
     }

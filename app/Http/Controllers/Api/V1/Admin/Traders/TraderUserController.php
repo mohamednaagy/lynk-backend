@@ -53,10 +53,6 @@ class TraderUserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  GetPaginatedTraderUsers  $getPaginatedUsers
-     * @param  Company  $trader
-     * @return JsonResponse
      */
     public function index(
         Company $trader,
@@ -85,9 +81,6 @@ class TraderUserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  StoreUserRequest  $storeUserRequest
-     * @param  Company  $trader
-     * @param  CreateTraderUserWithRoleAndPermission  $createTraderUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function store(
         StoreUserRequest $request,
@@ -105,7 +98,7 @@ class TraderUserController extends Controller
             $invitationUrl = $request->validated('redirect_url');
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Trader));
 
-            return fractal($user, new UserTransformer())
+            return fractal($user, new UserTransformer)
                 ->parseIncludes([
                     'id',
                     'first_name',
@@ -122,10 +115,6 @@ class TraderUserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  Company  $trader
-     * @param  User  $user
-     * @return JsonResponse
      */
     public function show(Company $trader, User $user): JsonResponse
     {
@@ -150,12 +139,6 @@ class TraderUserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  UpdateUserRequest  $updateUserRequest
-     * @param  Company  $trader
-     * @param  User  $user
-     * @param  UpdateTraderUserWithRoleAndPermission  $updateTraderUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $updateUserRequest,
@@ -174,10 +157,6 @@ class TraderUserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  User  $user
-     * @param  Company  $trader
-     * @return JsonResponse
      */
     public function destroy(Company $trader, User $user): JsonResponse
     {
@@ -192,7 +171,7 @@ class TraderUserController extends Controller
     public function checkIfUserDoesNotHaveTraderAreaRole(User $user)
     {
         if (! $user->hasRole(Area::roles(Area::Trader))) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
     }
 }

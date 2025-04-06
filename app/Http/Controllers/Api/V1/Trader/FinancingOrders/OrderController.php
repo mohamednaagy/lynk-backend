@@ -34,7 +34,7 @@ class OrderController extends Controller
             ->handle()
             ->paginate();
 
-        return fractal($financingOrders, new FinancingOrderTransformer())
+        return fractal($financingOrders, new FinancingOrderTransformer)
             ->parseIncludes([
                 'id',
                 'amount',
@@ -62,7 +62,7 @@ class OrderController extends Controller
             },
         ]);
 
-        return fractal($order, (new FinancingOrderTransformer())->setArea(Area::Trader))
+        return fractal($order, (new FinancingOrderTransformer)->setArea(Area::Trader))
             ->parseIncludes([
                 'id',
                 'amount',

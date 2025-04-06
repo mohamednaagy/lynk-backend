@@ -13,7 +13,7 @@ trait CanGrantify
     /**
      * @throws RoleNotFoundException
      */
-    public function findRole(string $roleName, string $guardName = null): Model
+    public function findRole(string $roleName, ?string $guardName = null): Model
     {
         $guardName = $guardName ?? config('grantify.default_guard');
         $role = Role::query()
@@ -21,7 +21,7 @@ trait CanGrantify
             ->first();
 
         if (! $role) {
-            throw new RoleNotFoundException();
+            throw new RoleNotFoundException;
         }
 
         return $role;
@@ -30,7 +30,7 @@ trait CanGrantify
     /**
      * @throws PermissionNotFoundException
      */
-    private function findPermission(string $permissionName, string $guardName = null): Model
+    private function findPermission(string $permissionName, ?string $guardName = null): Model
     {
         $guardName = $guardName ?? config('grantify.default_guard');
         $permission = Permission::query()
@@ -38,7 +38,7 @@ trait CanGrantify
             ->first();
 
         if (! $permission) {
-            throw new PermissionNotFoundException();
+            throw new PermissionNotFoundException;
         }
 
         return $permission;

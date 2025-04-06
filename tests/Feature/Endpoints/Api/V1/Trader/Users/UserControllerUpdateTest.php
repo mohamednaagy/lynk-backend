@@ -16,7 +16,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -34,9 +34,6 @@ class UserControllerUpdateTest extends TestCase
 
     private static array $traderDetails;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -58,9 +55,6 @@ class UserControllerUpdateTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_update_trader_user(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -71,9 +65,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_trader_area_cant_update_trader_user_case(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -89,9 +80,6 @@ class UserControllerUpdateTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_in_another_company(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -100,9 +88,6 @@ class UserControllerUpdateTest extends TestCase
             ->assertNotFound();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_update_trader_user_with_valid_data(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -114,9 +99,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_first_name(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -136,9 +118,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_last_name(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -158,9 +137,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_phone_country_code(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -183,9 +159,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_phone_number(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -205,9 +178,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_email(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -227,9 +197,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_update_trader_user_without_redirect_url(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -244,9 +211,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_role(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -266,9 +230,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_update_trader_user_without_is_active(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -288,9 +249,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_trader_admin_user_cant_update_trader_users_case_when_company_not_approved(): void
     {
         foreach (CompanyStatus::getValues() as $status) {
@@ -315,18 +273,18 @@ class UserControllerUpdateTest extends TestCase
     /**
      * @return void
      */
-//    public function test_that_trader_admin_user_cant_update_trader_user_case_email_not_verified(): void
-//    {
-//        self::$userTraderAdmin->update([
-//            'email_verified_at' => null,
-//        ]);
-//
-//        $this->actingAs(self::$userTraderAdmin)
-//            ->withHeader('X-Company', self::$company->id)
-//            ->putJson(
-//                'api/v1/trader/users/'.self::$otherUserTraderAdminOfSameCompany->id,
-//                self::$traderDetails
-//            )
-//            ->assertForbidden();
-//    }
+    //    public function test_that_trader_admin_user_cant_update_trader_user_case_email_not_verified(): void
+    //    {
+    //        self::$userTraderAdmin->update([
+    //            'email_verified_at' => null,
+    //        ]);
+    //
+    //        $this->actingAs(self::$userTraderAdmin)
+    //            ->withHeader('X-Company', self::$company->id)
+    //            ->putJson(
+    //                'api/v1/trader/users/'.self::$otherUserTraderAdminOfSameCompany->id,
+    //                self::$traderDetails
+    //            )
+    //            ->assertForbidden();
+    //    }
 }

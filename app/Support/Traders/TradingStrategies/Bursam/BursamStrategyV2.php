@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;

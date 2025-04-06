@@ -18,7 +18,7 @@ return new class extends Migration
     {
         if (Schema::hasTable('trader_order_time_limits')) {
             Schema::table('trader_order_time_limits', function (Blueprint $table) {
-                if (!Schema::hasColumn('trader_order_time_limits', 'action')) {
+                if (! Schema::hasColumn('trader_order_time_limits', 'action')) {
                     $table->tinyInteger('action')
                         ->default(TraderOrderTimeLimitAction::AutoCancelOrder)
                         ->comment('Defines the action to be taken when the time limit is reached');

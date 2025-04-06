@@ -13,8 +13,7 @@ class CreateDefaultPricingTierAction implements CreateDefaultPricingTier
 {
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
     public function handle(Company $company)
     {

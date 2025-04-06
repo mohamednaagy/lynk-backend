@@ -16,9 +16,6 @@ class VerifyOtpClientWakala extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  VerifyOtpRequest  $request
-     * @param  VerifyOtpClientWakalaInterface  $verifyOtpClientWakala
-     * @param  VerifiedClientWakala  $verifiedClientWakala
      * @return JsonResponse
      *
      * @throws \Throwable

@@ -34,7 +34,7 @@ class UserTransformer extends TransformerAbstract
         'is_active',
         'is_invitation_accepted',
         'can_manage_orders',
-        'full_name'
+        'full_name',
     ];
 
     public function __construct(?string $area = null)
@@ -88,7 +88,7 @@ class UserTransformer extends TransformerAbstract
 
     public function includeCompany(User $user)
     {
-        return $this->item($user->company->lender, new CompanyTransformer());
+        return $this->item($user->company->lender, new CompanyTransformer);
     }
 
     public function includePermissions(User $user)
@@ -172,6 +172,6 @@ class UserTransformer extends TransformerAbstract
 
     public function includeFullName(User $user): Primitive
     {
-        return $this->primitive($user->first_name . ' ' . $user->last_name);
+        return $this->primitive($user->first_name.' '.$user->last_name);
     }
 }

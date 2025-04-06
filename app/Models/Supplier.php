@@ -30,8 +30,8 @@ class Supplier extends Company
     /**
      * Scope a query to include suppliers with a specific status.
      *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param int $status
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  int  $status
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeWithSupplierStatus($query, $status)

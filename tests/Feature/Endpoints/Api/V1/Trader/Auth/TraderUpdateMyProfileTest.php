@@ -12,15 +12,12 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderUpdateMyProfileTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static User $traderUser;
 
     private static Company $company;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -29,9 +26,6 @@ class TraderUpdateMyProfileTest extends TestCase
         self::$traderUser = $this->createTraderUser(self::$company->id);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_my_profile_un_auth_user_cant_update_update(): void
     {
         $this->putJson('api/v1/trader/auth/profile', [], ['X-Company' => self::$company->id])

@@ -9,20 +9,12 @@ use Modules\Grantify\GrantifySeederManager;
 
 class GrantifyServiceProvider extends ServiceProvider
 {
-    /**
-     * @var string
-     */
     protected string $moduleName = 'Grantify';
 
-    /**
-     * @var string
-     */
     protected string $moduleNameLower = 'grantify';
 
     /**
      * Boot the application events.
-     *
-     * @return void
      */
     public function boot(): void
     {
@@ -34,8 +26,6 @@ class GrantifyServiceProvider extends ServiceProvider
 
     /**
      * Register the service provider.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -55,8 +45,6 @@ class GrantifyServiceProvider extends ServiceProvider
 
     /**
      * Register config.
-     *
-     * @return void
      */
     protected function registerConfig(): void
     {
@@ -70,8 +58,6 @@ class GrantifyServiceProvider extends ServiceProvider
 
     /**
      * Register views.
-     *
-     * @return void
      */
     public function registerViews(): void
     {
@@ -88,8 +74,6 @@ class GrantifyServiceProvider extends ServiceProvider
 
     /**
      * Register translations.
-     *
-     * @return void
      */
     public function registerTranslations(): void
     {
@@ -104,8 +88,6 @@ class GrantifyServiceProvider extends ServiceProvider
 
     /**
      * Get the services provided by the provider.
-     *
-     * @return array
      */
     public function provides(): array
     {

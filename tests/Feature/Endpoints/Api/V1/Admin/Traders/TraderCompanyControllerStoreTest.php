@@ -13,8 +13,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderCompanyControllerStoreTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static User $superAdmin;
 
@@ -22,9 +22,6 @@ class TraderCompanyControllerStoreTest extends TestCase
 
     private static array $companyDetails;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -41,9 +38,6 @@ class TraderCompanyControllerStoreTest extends TestCase
         self::$superAdmin = $this->createSuperAdminUser();
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_company_controller_store_un_auth_user_cant_store_company(): void
     {
         $this->postJson('api/v1/admin/traders', self::$companyDetails)

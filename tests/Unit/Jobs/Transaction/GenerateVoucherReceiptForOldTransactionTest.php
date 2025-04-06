@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class GenerateVoucherReceiptForOldTransactionTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany;
+    use InteractsWithCompany, RefreshDatabase;
 
     protected static Company $lender;
 

@@ -57,7 +57,7 @@ class OrderAmountScope extends QueryScoper
             : null;
 
         if ($amountLTE && $amountGTE) {
-//            dd($amountGTE, $amountLTE);
+            //            dd($amountGTE, $amountLTE);
             return $builder->whereBetween('amount', [$amountGTE->getAmount(), $amountLTE->getAmount()]);
         }
 

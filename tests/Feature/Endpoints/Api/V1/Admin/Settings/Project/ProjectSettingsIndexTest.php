@@ -20,7 +20,7 @@ use Tests\Traits\InteractsWithSettings;
 
 class ProjectSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithSettings, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithSettings, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
@@ -37,8 +37,6 @@ class ProjectSettingsIndexTest extends TestCase
     private static $projectSettings;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -54,9 +52,6 @@ class ProjectSettingsIndexTest extends TestCase
         self::$projectSettings = $this->app->make(GetProjectSettings::class)->handle();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->getJson(self::BaseUrl)
@@ -66,9 +61,6 @@ class ProjectSettingsIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_authorized_user_without_right_role_cant_index_lender_settings_failed(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -78,8 +70,6 @@ class ProjectSettingsIndexTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_admin_role_can_index_project_settings_succeed(): void
@@ -88,15 +78,13 @@ class ProjectSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$projectSettings, new ProjectSettingsTransformer())
+                fractal(self::$projectSettings, new ProjectSettingsTransformer)
                     ->respond()
                     ->getData(true)
             );
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_manager_role_can_index_project_settings_succeed(): void
@@ -105,15 +93,12 @@ class ProjectSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$projectSettings, new ProjectSettingsTransformer())
+                fractal(self::$projectSettings, new ProjectSettingsTransformer)
                     ->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_index_project_settings_failed(): void
     {
         $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN, [

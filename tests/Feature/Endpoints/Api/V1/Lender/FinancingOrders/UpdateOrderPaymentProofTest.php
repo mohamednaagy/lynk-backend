@@ -19,7 +19,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UpdateOrderPaymentProofTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -31,9 +31,6 @@ class UpdateOrderPaymentProofTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -57,9 +54,6 @@ class UpdateOrderPaymentProofTest extends TestCase
         self::$apiUrl = 'api/v1/lender/orders/'.self::$financingOrder->getRawOriginal('id').'/payment-proof';
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_unauth_user_cant_update_proof(): void
     {
         $this->withHeader('X-Company', self::$company->getOriginal('id'))
@@ -70,9 +64,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_only_roles_in_Lender_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Lender], function ($user, $role) {
@@ -82,9 +73,6 @@ class UpdateOrderPaymentProofTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_only_lender_admin_and_supervisor_and_creator_can_access(): void
     {
         $rolesHasAccess = [
@@ -115,9 +103,6 @@ class UpdateOrderPaymentProofTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_payment_proof_file_is_required(): void
     {
         $this->actingAs(self::$userLender)
@@ -126,9 +111,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$userLender)
@@ -142,9 +124,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_order_not_follow_the_sequence(): void
     {
         $statuses = FinancingOrderStatus::getValues();
@@ -167,9 +146,6 @@ class UpdateOrderPaymentProofTest extends TestCase
         }
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_successfully(): void
     {
         self::$financingOrder->update(['status' => FinancingOrderStatus::Completed]);

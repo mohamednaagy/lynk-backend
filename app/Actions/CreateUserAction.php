@@ -9,10 +9,6 @@ use Illuminate\Support\Facades\Config;
 
 class CreateUserAction implements CreateUser
 {
-    /**
-     * @param  array  $data
-     * @return User
-     */
     public function handle(array $data): User
     {
         if (! array_key_exists('password', $data)) {

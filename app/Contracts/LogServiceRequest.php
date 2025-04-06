@@ -18,9 +18,9 @@ interface LogServiceRequest
 
     public function description(): string;
 
-    public function subject(): Model|null;
+    public function subject(): ?Model;
 
-    public function causer(): Model|null;
+    public function causer(): ?Model;
 
     public function timestamp(): Carbon;
 }

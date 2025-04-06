@@ -135,7 +135,7 @@ class OrderControllerUpdateTest extends TestCase
             ->putJson('api/v1/admin/orders/'.self::$order->id, self::$updatedOrderDetails)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$order->refresh(), new FinancingOrderTransformer())
+                fractal(self::$order->refresh(), new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',
@@ -169,7 +169,7 @@ class OrderControllerUpdateTest extends TestCase
             ->putJson('api/v1/admin/orders/'.self::$order->id, self::$updatedOrderDetails)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$order->refresh(), new FinancingOrderTransformer())
+                fractal(self::$order->refresh(), new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'status',

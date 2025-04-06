@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class EnquiryControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithEnquiry;
+    use InteractsWithEnquiry, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/enquiries';
 
@@ -32,9 +32,6 @@ class EnquiryControllerShowTest extends TestCase
 
     private static mixed $paginatedEnquiries;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -48,9 +45,6 @@ class EnquiryControllerShowTest extends TestCase
         self::$paginatedEnquiries = $this->app->make(GetPaginatedEnquiries::class);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_show_enquiry(): void
     {
         $this->getJson(self::BaseUrl)
@@ -60,16 +54,13 @@ class EnquiryControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_admin_role_can_show_enquiry(): void
     {
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl.'/'.self::$visitorEnquiry->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$visitorEnquiry, new EnquiryTransformer())
+                fractal(self::$visitorEnquiry, new EnquiryTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',
@@ -83,16 +74,13 @@ class EnquiryControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_show_enquiry(): void
     {
         $this->actingAs(self::$managerHasPermission)
             ->getJson(self::BaseUrl.'/'.self::$visitorEnquiry->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$visitorEnquiry, new EnquiryTransformer())
+                fractal(self::$visitorEnquiry, new EnquiryTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',
@@ -106,9 +94,6 @@ class EnquiryControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_cannot_show_enquiry_with_no_permission(): void
     {
         $this->actingAs(self::$manager)

@@ -19,7 +19,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class CompleteOrderTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -37,9 +37,6 @@ class CompleteOrderTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -73,9 +70,6 @@ class CompleteOrderTest extends TestCase
             '/complete';
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_unauth_user_cant_make_order_completed(): void
     {
         $this->postJson(self::$apiUrl)
@@ -85,9 +79,6 @@ class CompleteOrderTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_only_roles_of_super_admin_area_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
@@ -122,9 +113,6 @@ class CompleteOrderTest extends TestCase
             ])->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_payment_proof_file_is_not_required(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -134,9 +122,6 @@ class CompleteOrderTest extends TestCase
         self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed);
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -149,9 +134,6 @@ class CompleteOrderTest extends TestCase
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_successfully(): void
     {
         $this->actingAs(self::$superAdminUser)
@@ -162,9 +144,6 @@ class CompleteOrderTest extends TestCase
         $this->assertTrue(self::$financingOrder->fresh()->status->is(FinancingOrderStatus::Completed));
     }
 
-    /**
-     * @return void
-     */
     public function test_complete_order_will_return_error_response_if_flow_is_not_correct(): void
     {
         self::$financingOrder->traderOrders()->update([

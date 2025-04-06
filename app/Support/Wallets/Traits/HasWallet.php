@@ -18,7 +18,7 @@ trait HasWallet
         return app(WalletServiceInterface::class)->findByNameOrFail($this, $name, $lock);
     }
 
-    public function getWallets(string $name = null, bool $lock = true)
+    public function getWallets(?string $name = null, bool $lock = true)
     {
         return app(WalletServiceInterface::class)->getWallets(model: $this, name: $name, lock: $lock);
     }

@@ -9,12 +9,12 @@ class StepHistoriesDictionary
 {
     public \SplDoublyLinkedList $dictionaryNodeList;
 
-    public function __construct($trader = null, $version = null, $contract_type= ContractSignedType::Sell)
+    public function __construct($trader = null, $version = null, $contract_type = ContractSignedType::Sell)
     {
-        $this->dictionaryNodeList = new \SplDoublyLinkedList();
+        $this->dictionaryNodeList = new \SplDoublyLinkedList;
         $trader = $trader ?? config('trader.default');
         $version = $version ?? get_latest_version_of_trader($trader);
-        
+
         foreach (trader_step_histories($trader, $version, $contract_type) as $step => $histories) {
             $this->dictionaryNodeList->push(new StepHistoriesDictionaryNode($step, $histories));
         }

@@ -11,23 +11,15 @@ use Illuminate\Support\Arr;
 
 class UpdateTraderUserWithRoleAndPermissionAction implements UpdateTraderUserWithRoleAndPermission
 {
-    /**
-     * @param  UpdateUser  $updateUser
-     * @param  SyncRoleToUser  $syncRoleToUser
-     * @param  SyncPermissionToUser  $syncPermissionToUser
-     */
     public function __construct(
         protected UpdateUser $updateUser,
         protected SyncRoleToUser $syncRoleToUser,
         protected SyncPermissionToUser $syncPermissionToUser
-    ) {
-    }
+    ) {}
 
     /**
      * Update user.
      *
-     * @param  array  $data
-     * @param  User  $user
      * @return void $user
      */
     public function handle(array $data, User $user): void

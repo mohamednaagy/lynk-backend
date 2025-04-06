@@ -10,9 +10,6 @@ class ReplyToEnquiryAction implements ReplyToEnquiry
 {
     /**
      * Create new enquiry.
-     *
-     * @param  array  $data
-     * @return EnquiryReply
      */
     public function handle(array $data): EnquiryReply
     {

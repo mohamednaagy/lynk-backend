@@ -10,8 +10,6 @@ interface MobileVerifyDriverInterface
      * Execute the driver logic.
      *
      * @param  string  $mobileNumber
-     * @param  string  $personId
-     * @return bool
      */
     public function verify(PhoneNumber $mobileNumber, string $personId): bool;
 }

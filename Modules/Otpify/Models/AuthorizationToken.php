@@ -15,9 +15,6 @@ class AuthorizationToken extends Model
         'user_id', 'token', 'area', 'device_details',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

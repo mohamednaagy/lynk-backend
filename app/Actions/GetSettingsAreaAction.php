@@ -8,10 +8,6 @@ use App\Enums\Area;
 
 class GetSettingsAreaAction implements GetSettingsArea
 {
-    /**
-     * @param  string  $key
-     * @return SettingsInterface
-     */
     public function handle(string $key): SettingsInterface
     {
         return match ($key) {

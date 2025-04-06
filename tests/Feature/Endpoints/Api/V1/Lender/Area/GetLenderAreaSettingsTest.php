@@ -16,7 +16,7 @@ use Tests\Traits\InteractsWithUser;
 
 class GetLenderAreaSettingsTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -26,9 +26,6 @@ class GetLenderAreaSettingsTest extends TestCase
 
     private static $settings;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -39,25 +36,19 @@ class GetLenderAreaSettingsTest extends TestCase
             ->handle(Area::Lender);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_can_get_area_settings(): void
     {
         $this->withHeader('X-Company', self::$company->id)
             ->getJson('api/v1/lender/area-settings')
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$settings, new LenderSettingsTransformer())
+                fractal(self::$settings, new LenderSettingsTransformer)
                     ->parseIncludes(['email_verification_enabled'])
                     ->respond()
                     ->getData(true)
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_can_get_area_settings(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -65,7 +56,7 @@ class GetLenderAreaSettingsTest extends TestCase
             ->getJson('api/v1/lender/area-settings')
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$settings, new LenderSettingsTransformer())
+                fractal(self::$settings, new LenderSettingsTransformer)
                     ->parseIncludes(['email_verification_enabled'])
                     ->respond()
                     ->getData(true)

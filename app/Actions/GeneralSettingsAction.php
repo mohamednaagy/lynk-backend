@@ -9,18 +9,11 @@ class GeneralSettingsAction implements SettingsInterface
 {
     /**
      * UpdateSettingsAction constructor.
-     *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
-    /**
-     * @param  array  $data
-     * @return void
-     */
     public function handle(array $data): void
     {
         $settingInstance = $this->getSettingsClassInstance->handle($data['area']);

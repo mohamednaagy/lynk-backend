@@ -19,13 +19,11 @@ use Illuminate\Support\Traits\Localizable;
 
 class OverwriteOldLenderCertificateForBursaV2Orders implements ShouldQueue
 {
-    use Localizable, TraderHelperTrait, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Localizable, Queueable, SerializesModels, TraderHelperTrait;
 
     public $tries = 1;
 
-    public function __construct(protected $traderOrderId)
-    {
-    }
+    public function __construct(protected $traderOrderId) {}
 
     /**
      * Execute the console command.

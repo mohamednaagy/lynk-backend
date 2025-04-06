@@ -14,8 +14,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderCompanyControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static User $superAdmin;
 
@@ -27,9 +27,6 @@ class TraderCompanyControllerUpdateTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -49,9 +46,6 @@ class TraderCompanyControllerUpdateTest extends TestCase
         self::$endpoint = 'api/v1/admin/traders/'.self::$company->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cant_access_trader_company_controller_update(): void
     {
         $this->putJson(self::$endpoint, self::$companyDetails)
@@ -118,9 +112,6 @@ class TraderCompanyControllerUpdateTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_company_controller_update_successful_with_even_same_unique_name(): void
     {
         $this->actingAs(self::$superAdmin)

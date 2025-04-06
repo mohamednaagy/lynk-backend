@@ -11,6 +11,7 @@ class DeleteSupplierLocationAction implements DeleteSupplierLocation
     public function handle(SupplierLocation $supplierLocation): SupplierLocation
     {
         DeleteSupplierLocationJob::dispatch($supplierLocation);
+
         return $supplierLocation;
     }
 }

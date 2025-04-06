@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class IndexInvoiceTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -28,9 +28,6 @@ class IndexInvoiceTest extends TestCase
 
     private static Builder|Model $edaatInvoice;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -62,7 +59,7 @@ class IndexInvoiceTest extends TestCase
             ->getJson('api/v1/lender/edaat-invoices')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(EdaatInvoice::query()->latest()->paginate(), new EdaatInvoiceTransformer())
+                fractal(EdaatInvoice::query()->latest()->paginate(), new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -84,7 +81,7 @@ class IndexInvoiceTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
 
         $this->assertEquals(
-            fractal(EdaatInvoice::query()->oldest()->paginate(), new EdaatInvoiceTransformer())
+            fractal(EdaatInvoice::query()->oldest()->paginate(), new EdaatInvoiceTransformer)
                 ->parseIncludes([
                     'id',
                     'invoice_number',
@@ -109,7 +106,7 @@ class IndexInvoiceTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
 
         $this->assertNotEquals(
-            fractal(EdaatInvoice::query()->oldest()->paginate(), new EdaatInvoiceTransformer())
+            fractal(EdaatInvoice::query()->oldest()->paginate(), new EdaatInvoiceTransformer)
                 ->parseIncludes([
                     'id',
                     'invoice_number',
@@ -134,7 +131,7 @@ class IndexInvoiceTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
 
         $this->assertEquals(
-            fractal(EdaatInvoice::query()->latest()->paginate(), new EdaatInvoiceTransformer())
+            fractal(EdaatInvoice::query()->latest()->paginate(), new EdaatInvoiceTransformer)
                 ->parseIncludes([
                     'id',
                     'invoice_number',

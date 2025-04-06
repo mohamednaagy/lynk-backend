@@ -14,15 +14,12 @@ use Tests\Traits\InteractsWithUser;
 
 class SetLocalizationUnitTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
     private static User $userLenderAdmin;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -34,7 +31,7 @@ class SetLocalizationUnitTest extends TestCase
     {
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $locale = 'fr';
         $request->headers->add(['X-Locale' => $locale]);
@@ -43,10 +40,9 @@ class SetLocalizationUnitTest extends TestCase
             return self::$userLenderAdmin;
         });
 
-        $middleware = new SetLocalization();
+        $middleware = new SetLocalization;
 
-        $middleware->handle($request, function ($request) {
-        });
+        $middleware->handle($request, function ($request) {});
         $this->assertFalse(app()->getLocale() == $locale);
     }
 
@@ -54,7 +50,7 @@ class SetLocalizationUnitTest extends TestCase
     {
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $locale = 'en';
         $request->headers->add(['X-Locale' => $locale]);
@@ -63,10 +59,9 @@ class SetLocalizationUnitTest extends TestCase
             return self::$userLenderAdmin;
         });
 
-        $middleware = new SetLocalization();
+        $middleware = new SetLocalization;
 
-        $middleware->handle($request, function ($request) {
-        });
+        $middleware->handle($request, function ($request) {});
         $this->assertTrue(app()->getLocale() == $locale);
     }
 
@@ -77,16 +72,15 @@ class SetLocalizationUnitTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $request->setUserResolver(function () {
             return self::$userLenderAdmin;
         });
 
-        $middleware = new SetLocalization();
+        $middleware = new SetLocalization;
 
-        $middleware->handle($request, function ($request) {
-        });
+        $middleware->handle($request, function ($request) {});
         $this->assertTrue(app()->getLocale() == $request->user()->locale);
     }
 
@@ -94,13 +88,13 @@ class SetLocalizationUnitTest extends TestCase
     {
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $request->setUserResolver(function () {
             return self::$userLenderAdmin;
         });
 
-        $middleware = new SetLocalization();
+        $middleware = new SetLocalization;
 
         $middleware->handle($request, function ($request) {
             $this->assertTrue(app()->getLocale() == config('app.locale'));

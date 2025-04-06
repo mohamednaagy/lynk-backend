@@ -22,12 +22,8 @@ class GrantifyManager extends Manager
 
     /**
      * Get Permissions by Area.
-     *
-     * @param  string  $area
-     * @param  string|null  $guardName
-     * @return Collection
      */
-    public function getPermissionsByArea(string $area, string $guardName = null): Collection
+    public function getPermissionsByArea(string $area, ?string $guardName = null): Collection
     {
         $area = $area.'-';
         $guardName = $guardName ?? config('grantify.default_guard');
@@ -40,13 +36,10 @@ class GrantifyManager extends Manager
     /**
      * get Role Permissions
      *
-     * @param  string|Role  $role
-     * @param  string|null  $guardName
-     * @return array
      *
      * @throws RoleNotFoundException
      */
-    public function getRolePermissions(Role|string $role, string $guardName = null): array
+    public function getRolePermissions(Role|string $role, ?string $guardName = null): array
     {
         if (! $role instanceof Role) {
             $role = $this->findRole($role, $guardName);
@@ -57,9 +50,6 @@ class GrantifyManager extends Manager
 
     /**
      * Get All Permissions for Model
-     *
-     * @param  Grantifiable  $grantifiable
-     * @return Collection
      */
     public function getAllPermissionsForModel(Grantifiable $grantifiable): Collection
     {
@@ -68,9 +58,6 @@ class GrantifyManager extends Manager
 
     /**
      * Get All Permissions In Subject Action Format
-     *
-     * @param  Collection  $permissions
-     * @return array
      */
     public function transformPermissionsToSubjectAction(Collection $permissions): array
     {
@@ -91,15 +78,11 @@ class GrantifyManager extends Manager
     /**
      * Assign a permission to a role.
      *
-     * @param  string|Role  $role
-     * @param  string|Permission  $permission
-     * @param  string|null  $guardName
-     * @return void
      *
      * @throws PermissionNotFoundException
      * @throws RoleNotFoundException
      */
-    public function assignPermissionToRole(Role|string $role, string|Permission $permission, string $guardName = null): void
+    public function assignPermissionToRole(Role|string $role, string|Permission $permission, ?string $guardName = null): void
     {
         if (! $role instanceof Role) {
             $role = $this->findRole($role, $guardName);
@@ -115,15 +98,11 @@ class GrantifyManager extends Manager
     /**
      * Remove a permission that is assigned to a role.
      *
-     * @param  string|Role  $role
-     * @param  string|Permission  $permission
-     * @param  string|null  $guardName
-     * @return void
      *
      * @throws PermissionNotFoundException
      * @throws RoleNotFoundException
      */
-    public function removePermissionFromRole(Role|string $role, string|Permission $permission, string $guardName = null): void
+    public function removePermissionFromRole(Role|string $role, string|Permission $permission, ?string $guardName = null): void
     {
         if (! $role instanceof Role) {
             $role = $this->findRole($role, $guardName);
@@ -140,14 +119,10 @@ class GrantifyManager extends Manager
      * Assign a direct permission to a model.
      * The permission argument could be in type of string or Permission object or array of subject action format
      *
-     * @param  Grantifiable  $grantifiable
-     * @param  string|array|Permission  $permission
-     * @param  string|null  $guardName
-     * @return void
      *
      * @throws PermissionNotFoundException
      */
-    public function assignPermissionToModel(Grantifiable $grantifiable, string|array|Permission $permission, string $guardName = null): void
+    public function assignPermissionToModel(Grantifiable $grantifiable, string|array|Permission $permission, ?string $guardName = null): void
     {
         if (is_string($permission)) {
             $permission = $this->findPermission($permission, $guardName);
@@ -162,14 +137,10 @@ class GrantifyManager extends Manager
      * Assign roles to a model.
      * The role argument could be in type of string or Role object or array of roles
      *
-     * @param  Grantifiable  $grantifiable
-     * @param  string|array|Role  $role
-     * @param  string|null  $guardName
-     * @return void
      *
      * @throws RoleNotFoundException
      */
-    public function assignRoleToModel(Grantifiable $grantifiable, string|array|Role $role, string $guardName = null): void
+    public function assignRoleToModel(Grantifiable $grantifiable, string|array|Role $role, ?string $guardName = null): void
     {
         if (is_string($role)) {
             $role = $this->findRole($role, $guardName);
@@ -180,10 +151,6 @@ class GrantifyManager extends Manager
 
     /**
      * Sync direct permissions to a model.
-     *
-     * @param  Grantifiable  $grantifiable
-     * @param  array  $permissions
-     * @return void
      */
     public function syncPermissionToModel(Grantifiable $grantifiable, array $permissions): void
     {
@@ -194,9 +161,7 @@ class GrantifyManager extends Manager
     /**
      * Sync roles to a model.
      *
-     * @param  Grantifiable  $grantifiable
      * @param  string|array|Role  $role
-     * @return void
      */
     public function syncRoleToModel(Grantifiable $grantifiable, ...$role): void
     {
@@ -205,12 +170,6 @@ class GrantifyManager extends Manager
 
     /**
      * Transform TO Permissions Format (Area-Subject.Action).
-     *
-     * @param  string  $area
-     * @param  string  $subject
-     * @param  array  $actions
-     * @param  bool  $forMiddleware
-     * @return string|array
      */
     public function transformToPermissionsFormat(
         string $area,
@@ -238,10 +197,6 @@ class GrantifyManager extends Manager
         return $permissionChain;
     }
 
-    /**
-     * @param  array  $permissions
-     * @return array
-     */
     public function transformSubjectActionToPermissionName(array $permissions): array
     {
         $permissionsList = [];

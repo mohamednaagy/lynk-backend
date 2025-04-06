@@ -39,7 +39,7 @@ class VatPercentageOnDepositTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new VatPercentageOnDepositType();
+        self::$transactionTypeHandler = new VatPercentageOnDepositType;
         [self::$company, self::$wallet] = $this->createCompany();
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(

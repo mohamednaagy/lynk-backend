@@ -13,15 +13,12 @@ use Tests\Traits\InteractsWithAdmin;
 
 class UpdateMyProfileTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithAdmin;
+    use InteractsWithAdmin, RefreshDatabase;
 
     private static User $adminUser;
 
     private static mixed $getSettingsClassInstance;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -29,9 +26,6 @@ class UpdateMyProfileTest extends TestCase
         self::$adminUser = $this->createAdmin('admin@bim.com');
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_update_his_profile(): void
     {
         $this->putJson('api/v1/admin/auth/profile')
@@ -41,9 +35,6 @@ class UpdateMyProfileTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_his_profile_without_updating_password(): void
     {
         $oldPassword = self::$adminUser->password;
@@ -65,9 +56,6 @@ class UpdateMyProfileTest extends TestCase
         $this->assertNotEquals($oldLastName, self::$adminUser->last_name);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_his_profile_with_updating_password(): void
     {
         $oldPassword = self::$adminUser->password;
@@ -87,9 +75,6 @@ class UpdateMyProfileTest extends TestCase
         $this->assertNotEquals($oldPassword, self::$adminUser->password);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_his_profile_when_has_manager_role(): void
     {
         Grantify::syncRoleToModel(self::$adminUser, Role::Manager);
@@ -111,9 +96,6 @@ class UpdateMyProfileTest extends TestCase
         $this->assertNotEquals($oldPassword, self::$adminUser->password);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_update_his_profile_without_first_last_and_email(): void
     {
         $this->actingAs(self::$adminUser)
@@ -124,9 +106,6 @@ class UpdateMyProfileTest extends TestCase
             ->assertJsonValidationErrorFor('email');
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_update_his_profile_without_first_name(): void
     {
         $this->actingAs(self::$adminUser)
@@ -140,9 +119,6 @@ class UpdateMyProfileTest extends TestCase
             ->assertJsonValidationErrorFor('first_name');
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_update_his_profile_without_last_name(): void
     {
         $this->actingAs(self::$adminUser)
@@ -156,9 +132,6 @@ class UpdateMyProfileTest extends TestCase
             ->assertJsonValidationErrorFor('last_name');
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_update_his_profile_without_email(): void
     {
         $this->actingAs(self::$adminUser)

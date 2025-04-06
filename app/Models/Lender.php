@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\Route;
-
 class Lender extends Company
 {
     public function getMorphClass()
@@ -18,7 +16,6 @@ class Lender extends Company
 
     public function getWallet(string $name, bool $lock = true): ?Wallet
     {
-       return parent::getWallet($name, $lock);
+        return parent::getWallet($name, $lock);
     }
-
 }

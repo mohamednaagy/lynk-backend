@@ -7,5 +7,5 @@ use Illuminate\Http\Request;
 
 interface LoginUser
 {
-    public function handle(User $user, string $source, Request|null $request): array;
+    public function handle(User $user, string $source, ?Request $request): array;
 }

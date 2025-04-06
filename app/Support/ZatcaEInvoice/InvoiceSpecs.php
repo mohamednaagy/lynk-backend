@@ -19,8 +19,7 @@ class InvoiceSpecs
         protected Order $order,
         protected string $buyerName,
         protected Transaction $transaction
-    ) {
-    }
+    ) {}
 
     public function getAssociatedModel(): HasMedia
     {

@@ -11,7 +11,7 @@ use App\Models\User;
 trait InteractsWithEnquiry
 {
     public function createEnquiry(
-        User $user = null,
+        ?User $user = null,
         int $enquiryStatus = EnquiryStatus::UnderReview,
         array $data = []
     ): Enquiry {
@@ -42,7 +42,7 @@ trait InteractsWithEnquiry
 
     public function createEnquiryReply(
         Enquiry $enquiry,
-        User $user = null,
+        ?User $user = null,
         array $data = []
     ): EnquiryReply {
         $userId = null;

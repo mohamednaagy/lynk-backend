@@ -15,8 +15,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderCompanyControllerIndexTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static User $superAdmin;
 
@@ -24,9 +24,6 @@ class TraderCompanyControllerIndexTest extends TestCase
 
     private static string $endpoint = 'api/v1/admin/traders';
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -77,9 +74,6 @@ class TraderCompanyControllerIndexTest extends TestCase
         ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cant_access_trader_company_controller_index(): void
     {
         $this->getJson(self::$endpoint)
@@ -109,7 +103,7 @@ class TraderCompanyControllerIndexTest extends TestCase
         );
 
         $response->assertExactJson(
-            fractal($traders, new CompanyTransformer())
+            fractal($traders, new CompanyTransformer)
                 ->parseIncludes([
                     'id',
                     'name',

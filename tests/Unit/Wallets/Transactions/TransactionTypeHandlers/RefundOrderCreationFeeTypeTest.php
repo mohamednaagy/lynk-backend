@@ -39,7 +39,7 @@ class RefundOrderCreationFeeTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new RefundOrderCreationFeeType();
+        self::$transactionTypeHandler = new RefundOrderCreationFeeType;
         [self::$company, self::$wallet] = $this->createCompany();
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(

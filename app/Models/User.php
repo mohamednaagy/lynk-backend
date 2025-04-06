@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\Role;
-use App\Services\AssignOrdersToAdminService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;

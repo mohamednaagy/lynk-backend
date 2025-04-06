@@ -17,9 +17,7 @@ class LenderRegistered extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private Company $company)
-    {
-    }
+    public function __construct(private Company $company) {}
 
     /**
      * Get the notification's delivery channels.

@@ -21,12 +21,6 @@ class GetCommodityCertificateForClient extends Controller
         );
     }
 
-    /**
-     * @param  Company  $lender
-     * @param  int  $order
-     * @param  TraderOrder  $traderOrder
-     * @return JsonResponse
-     */
     public function __invoke(Company $lender, int $order, TraderOrder $traderOrder): JsonResponse
     {
         $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);

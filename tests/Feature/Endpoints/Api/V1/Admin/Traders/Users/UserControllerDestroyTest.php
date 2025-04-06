@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class UserControllerDestroyTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, RefreshDatabase;
 
     private static User $userAdmin;
 
@@ -32,9 +32,6 @@ class UserControllerDestroyTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -46,9 +43,6 @@ class UserControllerDestroyTest extends TestCase
         self::$endpoint = 'api/v1/admin/traders/'.self::$company->id.'/users/'.self::$userTraderAdmin->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_delete_trader_user_unsuccessful(): void
     {
         $this->deleteJson(self::$endpoint)
@@ -58,9 +52,6 @@ class UserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_delete_trader_user_successful(): void
     {
         $tradersUserCount = User::query()->count();
@@ -76,9 +67,6 @@ class UserControllerDestroyTest extends TestCase
         $this->assertEquals($newTradersUserCount, $tradersUserCount - 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_manager_user_cant_delete_trader_user_with_permissions(): void
     {
         Grantify::syncPermissionToModel(self::$managerAdminUser, []);
@@ -89,9 +77,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertJsonPath('message', __('User does not have the right permissions.'));
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_manager_user_can_delete_trader_user_successful(): void
     {
         Grantify::assignPermissionToModel(
@@ -107,9 +92,6 @@ class UserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_cant_delete_trader_user_witout_trader_role_unsuccessful(): void
     {
         foreach (Area::roles() as $area => $roles) {

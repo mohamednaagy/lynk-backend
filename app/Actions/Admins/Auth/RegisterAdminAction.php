@@ -15,8 +15,7 @@ class RegisterAdminAction implements RegisterAdmin
     public function __construct(
         protected CreateUser $createUser,
         protected AssignRoleToUser $assignRoleToUser,
-    ) {
-    }
+    ) {}
 
     /**
      * @throws TenantCouldNotBeIdentifiedById

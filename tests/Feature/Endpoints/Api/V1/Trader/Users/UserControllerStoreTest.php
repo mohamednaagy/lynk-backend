@@ -18,7 +18,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -34,9 +34,6 @@ class UserControllerStoreTest extends TestCase
 
     private static array $traderDetails;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -57,9 +54,6 @@ class UserControllerStoreTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_store_trader_user(): void
     {
         Mail::fake();
@@ -72,9 +66,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_trader_area_cant_store_trader_user_case(): void
     {
         Mail::fake();
@@ -93,9 +84,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_store_trader_user_with_valid_data(): void
     {
         Mail::fake();
@@ -120,9 +108,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertQueued(CompleteRegisterInvitation::class);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_first_name(): void
     {
         Mail::fake();
@@ -141,9 +126,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_last_name(): void
     {
         Mail::fake();
@@ -162,9 +144,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_phone_country_code(): void
     {
         Mail::fake();
@@ -186,9 +165,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_phone_number(): void
     {
         Mail::fake();
@@ -207,9 +183,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_email(): void
     {
         Mail::fake();
@@ -228,9 +201,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_redirect_url(): void
     {
         Mail::fake();
@@ -249,9 +219,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_store_trader_user_without_role(): void
     {
         Mail::fake();
@@ -270,9 +237,6 @@ class UserControllerStoreTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_trader_admin_user_cant_store_trader_user_case_when_company_not_approved(): void
     {
         foreach (CompanyStatus::getValues() as $status) {
@@ -291,18 +255,18 @@ class UserControllerStoreTest extends TestCase
         }
     }
 
-//    /**
-//     * @return void
-//     */
-//    public function test_that_trader_admin_user_cant_store_trader_user_case_email_not_verified(): void
-//    {
-//        self::$userTraderAdmin->update([
-//            'email_verified_at' => null,
-//        ]);
-//
-//        $this->actingAs(self::$userTraderAdmin)
-//            ->withHeader('X-Company', self::$company->id)
-//            ->postJson('api/v1/trader/users', self::$traderDetails)
-//            ->assertForbidden();
-//    }
+    //    /**
+    //     * @return void
+    //     */
+    //    public function test_that_trader_admin_user_cant_store_trader_user_case_email_not_verified(): void
+    //    {
+    //        self::$userTraderAdmin->update([
+    //            'email_verified_at' => null,
+    //        ]);
+    //
+    //        $this->actingAs(self::$userTraderAdmin)
+    //            ->withHeader('X-Company', self::$company->id)
+    //            ->postJson('api/v1/trader/users', self::$traderDetails)
+    //            ->assertForbidden();
+    //    }
 }

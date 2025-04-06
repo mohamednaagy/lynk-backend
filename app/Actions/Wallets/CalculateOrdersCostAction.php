@@ -10,8 +10,7 @@ class CalculateOrdersCostAction implements CalculateOrdersCost
 {
     public function __construct(
         protected GetProjectSettings $getProjectSettings
-    ) {
-    }
+    ) {}
 
     public function handle(int $ordersCount, Money $orderCostWithoutVat): Money
     {

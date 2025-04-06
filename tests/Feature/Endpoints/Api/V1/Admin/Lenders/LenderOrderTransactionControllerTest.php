@@ -68,7 +68,7 @@ class LenderOrderTransactionControllerTest extends TestCase
             ->assertExactJson(
                 fractal(
                     self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
-                    new TransactionTransformer()
+                    new TransactionTransformer
                 )->parseIncludes([
                     'id',
                     'date',
@@ -88,7 +88,7 @@ class LenderOrderTransactionControllerTest extends TestCase
             ->assertExactJson(
                 fractal(
                     self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
-                    new TransactionTransformer()
+                    new TransactionTransformer
                 )->parseIncludes([
                     'id',
                     'date',
@@ -123,7 +123,7 @@ class LenderOrderTransactionControllerTest extends TestCase
             ->assertExactJson(
                 fractal(
                     self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
-                    new TransactionTransformer()
+                    new TransactionTransformer
                 )->parseIncludes([
                     'id',
                     'date',
@@ -158,7 +158,7 @@ class LenderOrderTransactionControllerTest extends TestCase
             ->assertExactJson(
                 fractal(
                     self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
-                    new TransactionTransformer()
+                    new TransactionTransformer
                 )->parseIncludes([
                     'id',
                     'date',
@@ -179,7 +179,7 @@ class LenderOrderTransactionControllerTest extends TestCase
             ->assertExactJson(
                 fractal(
                     self::$lender->transactions(WalletType::CompanyWallet)->paginate(),
-                    new TransactionTransformer()
+                    new TransactionTransformer
                 )->parseIncludes([
                     'id',
                     'date',

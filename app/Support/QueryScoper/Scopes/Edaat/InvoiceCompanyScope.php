@@ -13,8 +13,6 @@ class InvoiceCompanyScope extends QueryScoper
 {
     /**
      * Prepare data for violation
-     *
-     * @return array
      */
     public function prepareData(): array
     {
@@ -27,7 +25,6 @@ class InvoiceCompanyScope extends QueryScoper
      * Get the validator
      *
      * @param  array  $data
-     * @return \Illuminate\Contracts\Validation\Validator
      */
     public function validator($data): \Illuminate\Contracts\Validation\Validator
     {
@@ -44,7 +41,6 @@ class InvoiceCompanyScope extends QueryScoper
      *
      * @param  Builder  $builder
      * @param  array  $data
-     * @return Builder
      */
     public function prepareBuilder($builder, $data): Builder
     {

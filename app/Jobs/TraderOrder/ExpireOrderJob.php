@@ -45,7 +45,7 @@ class ExpireOrderJob implements ShouldQueue
         try {
             match ($this->traderOrderTimeLimit->type->value) {
                 TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => $this->expireOrderDelivery(),
-                TraderOrderTimeLimitType::ContractSignTimeLimit => $this->expireOrderContractSigned(), 
+                TraderOrderTimeLimitType::ContractSignTimeLimit => $this->expireOrderContractSigned(),
                 default => throw new \Exception("Unknown trader order time limit type: {$this->traderOrderTimeLimit->type->value}"),
             };
         } catch (\Exception $exception) {
@@ -102,7 +102,6 @@ class ExpireOrderJob implements ShouldQueue
      * Expires the order when it is contract sign expirable, otherwise cancels the time limit.
      *
      * @param void
-     *
      * @return void
      */
     private function expireOrderContractSigned()
@@ -130,5 +129,4 @@ class ExpireOrderJob implements ShouldQueue
             'time_limit' => $this->traderOrderTimeLimit,
         ]);
     }
-
 }

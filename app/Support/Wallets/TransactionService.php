@@ -13,15 +13,13 @@ use Illuminate\Support\Str;
 
 class TransactionService implements TransactionServiceInterface
 {
-    public function __construct(protected ReferenceNumberGeneratorInterface $referenceNumberGeneratorInterface)
-    {
-    }
+    public function __construct(protected ReferenceNumberGeneratorInterface $referenceNumberGeneratorInterface) {}
 
     public function withdraw(
         Wallet $wallet,
         Money $amount,
         int $type,
-        string $referenceNumber = null,
+        ?string $referenceNumber = null,
         array $meta = []
     ) {
         return Transaction::create([
@@ -37,7 +35,7 @@ class TransactionService implements TransactionServiceInterface
         Wallet $wallet,
         Money $amount,
         int $type,
-        string $referenceNumber = null,
+        ?string $referenceNumber = null,
         array $meta = []
     ) {
         return Transaction::create([
@@ -54,7 +52,7 @@ class TransactionService implements TransactionServiceInterface
         Wallet $toWallet,
         Money $amount,
         int $type,
-        string $referenceNumber = null,
+        ?string $referenceNumber = null,
         array $meta = []
     ) {
         $withdraw = $this->withdraw($fromWallet, $amount, $type, $referenceNumber, $meta);

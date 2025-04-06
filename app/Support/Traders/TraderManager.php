@@ -40,27 +40,27 @@ class TraderManager extends Manager
 
     public function createBursamV1Driver(): TraderInterface
     {
-        return new BursamV1Driver();
+        return new BursamV1Driver;
     }
 
     public function createBursamV2Driver(): TraderInterface
     {
-        return new BursamV2Driver();
+        return new BursamV2Driver;
     }
 
     public function createDmccV1Driver(): TraderInterface
     {
-        return new DmccV1Driver();
+        return new DmccV1Driver;
     }
 
     public function createLynkV1Driver(): TraderInterface
     {
-        return new LynkV1Driver();
+        return new LynkV1Driver;
     }
 
     public function createFakeV1Driver(): TraderInterface
     {
-        return new FakeV1Driver();
+        return new FakeV1Driver;
     }
 
     public function getSuitableDriverForCompany(Company $company)

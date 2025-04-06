@@ -39,7 +39,7 @@ class OrderCreationFeeTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new OrderCreationFeeType();
+        self::$transactionTypeHandler = new OrderCreationFeeType;
         [self::$company, self::$wallet] = $this->createCompany(2000);
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(

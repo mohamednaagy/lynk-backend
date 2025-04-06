@@ -23,7 +23,7 @@ class GrantifyUnitTest extends TestCase
 
     public function test_assign_role_to_user()
     {
-        $assignRoleToUser = new AssignRoleToUserAction();
+        $assignRoleToUser = new AssignRoleToUserAction;
         $assignRoleToUser->handle($this->user, Role::Admin);
 
         $this->assertTrue($this->user->hasRole(Role::Admin));
@@ -31,7 +31,7 @@ class GrantifyUnitTest extends TestCase
 
     public function test_assign_Wrong_role_to_user()
     {
-        $assignRoleToUser = new AssignRoleToUserAction();
+        $assignRoleToUser = new AssignRoleToUserAction;
         $assignRoleToUser->handle($this->user, Role::Admin);
 
         $this->assertFalse($this->user->hasRole(Role::LenderSupervisor));
@@ -41,7 +41,7 @@ class GrantifyUnitTest extends TestCase
     {
         $this->expectException(RoleNotFoundException::class);
 
-        $assignRoleToUser = new AssignRoleToUserAction();
+        $assignRoleToUser = new AssignRoleToUserAction;
         $assignRoleToUser->handle($this->user, 'TestRole');
     }
 
@@ -58,7 +58,7 @@ class GrantifyUnitTest extends TestCase
             ],
         ];
         // assign the permissions to the user
-        $assignPermissionToUser = new AssignPermissionToUserAction();
+        $assignPermissionToUser = new AssignPermissionToUserAction;
         $assignPermissionToUser->handle($this->user, $permission);
 
         $this->assertTrue($this->user->hasAnyDirectPermission(Grantify::transformSubjectActionToPermissionName($permission)));
@@ -74,16 +74,16 @@ class GrantifyUnitTest extends TestCase
                 'subject' => Area::SuperAdmin.'-'.Action::Create.'.'.Subject::Admins,
             ],
         ];
-        $assignPermissionToUser = new AssignPermissionToUserAction();
+        $assignPermissionToUser = new AssignPermissionToUserAction;
         $assignPermissionToUser->handle($this->user, $permission);
     }
 
     public function test_sync_role_to_user()
     {
-        $assignRoleToUser = new AssignRoleToUserAction();
+        $assignRoleToUser = new AssignRoleToUserAction;
         $assignRoleToUser->handle($this->user, Role::Admin);
 
-        $syncRoleToUserAction = new SyncRoleToUserAction();
+        $syncRoleToUserAction = new SyncRoleToUserAction;
         $syncRoleToUserAction->handle($this->user, [Role::Admin]);
 
         $this->assertTrue($this->user->hasExactRoles([Role::Admin]));
@@ -93,10 +93,10 @@ class GrantifyUnitTest extends TestCase
     {
         $this->expectException(RoleDoesNotExist::class);
 
-        $assignRoleToUser = new AssignRoleToUserAction();
+        $assignRoleToUser = new AssignRoleToUserAction;
         $assignRoleToUser->handle($this->user, Role::Admin);
 
-        $syncRoleToUserAction = new SyncRoleToUserAction();
+        $syncRoleToUserAction = new SyncRoleToUserAction;
         $syncRoleToUserAction->handle($this->user, 'testRole');
     }
 
@@ -133,10 +133,10 @@ class GrantifyUnitTest extends TestCase
         ];
 
         // assign the permissions to the user
-        $assignPermissionToUser = new AssignPermissionToUserAction();
+        $assignPermissionToUser = new AssignPermissionToUserAction;
         $assignPermissionToUser->handle($this->user, $permissionAssign);
 
-        $syncPermissionToUserAction = new SyncPermissionToUserAction();
+        $syncPermissionToUserAction = new SyncPermissionToUserAction;
         $syncPermissionToUserAction->handle($this->user, $permissionSync);
 
         $this->assertTrue($this->user->hasAllPermissions(Grantify::transformSubjectActionToPermissionName($permissionSync)));
@@ -165,10 +165,10 @@ class GrantifyUnitTest extends TestCase
         ];
 
         // assign the permissions to the user
-        $assignPermissionToUser = new AssignPermissionToUserAction();
+        $assignPermissionToUser = new AssignPermissionToUserAction;
         $assignPermissionToUser->handle($this->user, $permissionAssign);
 
-        $syncPermissionToUserAction = new SyncPermissionToUserAction();
+        $syncPermissionToUserAction = new SyncPermissionToUserAction;
         $syncPermissionToUserAction->handle($this->user, $permissionSync);
     }
 }

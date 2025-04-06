@@ -59,7 +59,7 @@ class CommoditySupplierControllerIndexTest extends TestCase
             ->getJson($this->endpoint)
             ->assertOk()
             ->assertExactJson(
-                fractal(self::$suppliers, new CommoditySuppliersTransformer())
+                fractal(self::$suppliers, new CommoditySuppliersTransformer)
                     ->parseIncludes([
                         'id',
                         'legal_name',

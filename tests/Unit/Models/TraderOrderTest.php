@@ -13,7 +13,7 @@ use Tests\Traits\InteractsWithUser;
 
 class TraderOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     protected FinancingOrder $financingOrder;
 

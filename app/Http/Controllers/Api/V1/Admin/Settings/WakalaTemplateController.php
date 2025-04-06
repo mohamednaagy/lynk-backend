@@ -26,11 +26,6 @@ class WakalaTemplateController extends Controller
         )->only('update');
     }
 
-    /**
-     * @param  GetWakalaTemplate  $getWakalaTemplate
-     * @param  string  $type
-     * @return JsonResponse
-     */
     public function index(GetWakalaTemplate $getWakalaTemplate, string $type): JsonResponse
     {
         return $this->successResponse($getWakalaTemplate->handle($type));
@@ -38,11 +33,6 @@ class WakalaTemplateController extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  UpdateWakalaTemplateRequest  $updateWakalaTemplateRequest
-     * @param  UpdateWakalaTemplate  $updateWakalaTemplate
-     * @param  string  $type
-     * @return JsonResponse
      */
     public function update(
         UpdateWakalaTemplateRequest $updateWakalaTemplateRequest,

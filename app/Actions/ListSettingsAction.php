@@ -11,17 +11,11 @@ class ListSettingsAction implements ListSettings
 {
     /**
      * UpdateSettingsAction constructor.
-     *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
-    /**
-     * @return array
-     */
     public function handle(): array
     {
         $areas = Area::getValues();

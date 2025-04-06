@@ -16,7 +16,7 @@ class InventoryNotUpdatable extends Exception
      */
     public function render(Request $request)
     {
-        $message =  __('error.inventory_cannot_be_updated');
+        $message = __('error.inventory_cannot_be_updated');
         $code = Response::HTTP_BAD_REQUEST;
 
         if ($request->expectsJson()) {

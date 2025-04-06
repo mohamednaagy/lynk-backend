@@ -25,10 +25,6 @@ class GetEdaatInvoices extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  Request  $request
-     * @param  GetEdaatInvoicesInterface  $getEdaatInvoices
-     * @return JsonResponse
      */
     public function __invoke(Request $request, GetEdaatInvoicesInterface $getEdaatInvoices): JsonResponse
     {
@@ -36,7 +32,7 @@ class GetEdaatInvoices extends Controller
             ->with(['company', 'creator'])
             ->paginate();
 
-        return fractal($edaatInvoices, new EdaatInvoiceTransformer())
+        return fractal($edaatInvoices, new EdaatInvoiceTransformer)
             ->parseIncludes([
                 'id',
                 'invoice_number',

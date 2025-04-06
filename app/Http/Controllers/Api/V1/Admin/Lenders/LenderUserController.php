@@ -115,7 +115,7 @@ class LenderUserController extends Controller
 
             Mail::to($user)->send(new CompleteRegisterInvitation($user, $invitationUrl, CompanyType::Lender));
 
-            return fractal($user, new UserTransformer())
+            return fractal($user, new UserTransformer)
                 ->parseIncludes([
                     'id',
                     'first_name',
@@ -167,7 +167,7 @@ class LenderUserController extends Controller
             Role::LenderApiUser,
 
         ])) {
-            throw new AuthorizationException();
+            throw new AuthorizationException;
         }
     }
 }

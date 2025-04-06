@@ -20,8 +20,6 @@ class AcceptClientWakala extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  AcceptClientWakalaRequest  $request
-     * @param  AcceptWakalaInterface  $acceptClientWakala
      * @return JsonResponse
      *
      * @throws \Throwable
@@ -40,7 +38,7 @@ class AcceptClientWakala extends Controller
             $hashedToken = Cache::get($tokenCacheKey);
 
             if (! Hash::check($request->bearerToken(), $hashedToken)) {
-                throw new AuthorizationException();
+                throw new AuthorizationException;
             }
 
             $traderOrder = $order->activeTraderOrder()->first();

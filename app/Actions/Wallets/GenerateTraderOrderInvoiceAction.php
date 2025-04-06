@@ -18,8 +18,7 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
     public function __construct(
         protected GetProjectSettings $getProjectSettings,
         protected GenerateZatcaInvoice $generateZatcaInvoice,
-    ) {
-    }
+    ) {}
 
     public function handle(TraderOrder $traderOrder, Transaction $creationFeeTransaction)
     {

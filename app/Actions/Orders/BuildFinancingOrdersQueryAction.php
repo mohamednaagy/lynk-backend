@@ -38,16 +38,16 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
     private function scopes(): array
     {
         return [
-            'assignable' => new OrderAssignableScope(),
-            'need_action' => new OrderNeedActionScope(),
-            'search' => new OrderSearchScope(),
-            'status' => new OrderStatusScope(),
-            'sort' => new OrderSortScope(),
-            'amount' => new OrderAmountScope(),
+            'assignable' => new OrderAssignableScope,
+            'need_action' => new OrderNeedActionScope,
+            'search' => new OrderSearchScope,
+            'status' => new OrderStatusScope,
+            'sort' => new OrderSortScope,
+            'amount' => new OrderAmountScope,
             // 'current_step' => new TraderOrderCurrentStepScope(),
-            'filter' => new OrderFilterScope(),
-            'company' => new OrderCompanyScope(),
-            'date' => new OrderDateScope(),
+            'filter' => new OrderFilterScope,
+            'company' => new OrderCompanyScope,
+            'date' => new OrderDateScope,
         ];
     }
 

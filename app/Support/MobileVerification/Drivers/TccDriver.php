@@ -24,10 +24,6 @@ use Propaganistas\LaravelPhone\PhoneNumber;
 class TccDriver implements MobileVerifyDriverInterface
 {
     /**
-     * @param  PhoneNumber  $mobileNumber
-     * @param  string  $personId
-     * @return bool
-     *
      * @throws PersonNotFoundException
      * @throws InvalidPersonIdException
      * @throws InvalidMobileNumberException
@@ -55,10 +51,6 @@ class TccDriver implements MobileVerifyDriverInterface
     }
 
     /**
-     * @param  string  $mobileNumber
-     * @param  string  $personId
-     * @return array
-     *
      * @throws InvalidPersonIdException
      */
     private function prepareRequestData(string $mobileNumber, string $personId): array
@@ -73,9 +65,6 @@ class TccDriver implements MobileVerifyDriverInterface
     }
 
     /**
-     * @param  string  $personId
-     * @return int
-     *
      * @throws InvalidPersonIdException
      */
     private function getPersonIdType(string $personId): int
@@ -83,16 +72,13 @@ class TccDriver implements MobileVerifyDriverInterface
         $typeNumber = substr($personId, 0, 1);
 
         if (! in_array($typeNumber, TccPersonIdType::getValues())) {
-            throw new InvalidPersonIdTypeException();
+            throw new InvalidPersonIdTypeException;
         }
 
         return $typeNumber;
     }
 
     /**
-     * @param  array  $response
-     * @return bool
-     *
      * @throws Exception
      * @throws PersonNotFoundException
      * @throws InvalidPersonIdException
@@ -105,27 +91,27 @@ class TccDriver implements MobileVerifyDriverInterface
             case TccResponseCode::MobileNumberMatched:
                 return true;
             case TccResponseCode::MobileNumberUnmatched:
-                throw new MobileNumberNotMatchedException();
+                throw new MobileNumberNotMatchedException;
             case TccResponseCode::InvalidMobileNumber:
-                throw new InvalidMobileNumberException();
+                throw new InvalidMobileNumberException;
             case TccResponseCode::PersonNotFound:
-                throw new PersonNotFoundException();
+                throw new PersonNotFoundException;
             case TccResponseCode::InvalidPersonId:
-                throw new InvalidPersonIdException();
+                throw new InvalidPersonIdException;
             case TccResponseCode::InvalidRequestFormat:
-                throw new InvalidRequestFormatException();
+                throw new InvalidRequestFormatException;
             case TccResponseCode::InvalidApiKey:
-                throw new InvalidApiKeyException();
+                throw new InvalidApiKeyException;
             case TccResponseCode::ServiceNotAvailable:
-                throw new ServiceNotAvailableException();
+                throw new ServiceNotAvailableException;
             case TccResponseCode::InvalidNationality:
-                throw new InvalidNationalityException();
+                throw new InvalidNationalityException;
             case TccResponseCode::InvalidPersonIdType:
-                throw new InvalidPersonIdTypeException();
+                throw new InvalidPersonIdTypeException;
             case TccResponseCode::InvalidOperatorTcn:
-                throw new InvalidOperatorTcnException();
+                throw new InvalidOperatorTcnException;
             default:
-                throw new Exception();
+                throw new Exception;
         }
     }
 

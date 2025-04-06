@@ -18,8 +18,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class TraderCompanyControllerShowTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static User $superAdmin;
 
@@ -35,9 +35,6 @@ class TraderCompanyControllerShowTest extends TestCase
 
     private static TraderOrder $traderOrder;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -98,9 +95,6 @@ class TraderCompanyControllerShowTest extends TestCase
         self::$endpoint = 'api/v1/admin/traders/'.self::$trader->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cant_access_trader_company_controller_show(): void
     {
         $this->getJson(self::$endpoint)
@@ -142,7 +136,7 @@ class TraderCompanyControllerShowTest extends TestCase
             ->getJson(self::$endpoint);
 
         $response->assertExactJson(
-            fractal(self::$trader, new CompanyTransformer())
+            fractal(self::$trader, new CompanyTransformer)
                 ->parseIncludes([
                     'id',
                     'name',

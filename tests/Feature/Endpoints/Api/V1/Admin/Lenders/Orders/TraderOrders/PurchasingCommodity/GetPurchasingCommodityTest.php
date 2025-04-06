@@ -16,7 +16,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetPurchasingCommodityTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin';
 
@@ -32,9 +32,6 @@ class GetPurchasingCommodityTest extends TestCase
 
     private static string $getPurchasingCommodityUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -68,9 +65,6 @@ class GetPurchasingCommodityTest extends TestCase
             '/purchasing-commodity';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_unauth_user_cant_fetch_purchasing_commodity(): void
     {
         $this->getJson(self::$getPurchasingCommodityUrl)
@@ -80,9 +74,6 @@ class GetPurchasingCommodityTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_super_admin_area_cant_fetch_purchasing_commodity(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -97,9 +88,6 @@ class GetPurchasingCommodityTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_fetch_purchasing_commodity_succeed(): void
     {
         $this->actingAs(self::$superAdminUser)

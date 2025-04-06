@@ -48,7 +48,7 @@ class StoreCommodityTypeRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                new CommodityTypeUniqueNameRole(),
+                new CommodityTypeUniqueNameRole,
                 Rule::unique(CommodityType::class, 'unique_name'),
 
             ],

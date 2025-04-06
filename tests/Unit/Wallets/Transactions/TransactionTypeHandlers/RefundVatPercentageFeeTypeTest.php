@@ -39,7 +39,7 @@ class RefundVatPercentageFeeTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new RefundVatPercentageFeeType();
+        self::$transactionTypeHandler = new RefundVatPercentageFeeType;
         [self::$company, self::$wallet] = $this->createCompany();
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(

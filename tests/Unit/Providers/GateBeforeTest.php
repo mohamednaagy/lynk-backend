@@ -14,7 +14,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GateBeforeTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static User $userLenderAdmin;
 

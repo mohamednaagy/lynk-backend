@@ -41,7 +41,7 @@ class BursamV2DriverTest extends BursamV1DriverTest
 
         $traderOrder = self::$driver->getOrInitiateTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount);
         $this->assertEquals($traderOrder->id, self::$traderOrder->id);
     }
 
@@ -57,7 +57,7 @@ class BursamV2DriverTest extends BursamV1DriverTest
 
         $traderOrder = self::$driver->getOrInitiateTraderOrder($order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount + 1);
         $this->assertInstanceOf(TraderOrder::class, $traderOrder);
     }
 

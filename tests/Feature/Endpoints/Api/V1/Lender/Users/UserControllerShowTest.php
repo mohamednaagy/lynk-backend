@@ -16,7 +16,7 @@ use Tests\Traits\InteractsWithUser;
 
 class UserControllerShowTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -38,9 +38,6 @@ class UserControllerShowTest extends TestCase
 
     private static User $otherUserLenderAdmin;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -55,9 +52,6 @@ class UserControllerShowTest extends TestCase
         self::$otherUserLenderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::LenderAdmin);
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -68,9 +62,6 @@ class UserControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_can_show_lender_user_successful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -93,9 +84,6 @@ class UserControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_supervisor_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -104,9 +92,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_billing_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -115,9 +100,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_api_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderApi)
@@ -126,9 +108,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_order_creator_user_cant_show_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -137,9 +116,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_show_lender_user_in_other_company_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -148,9 +124,6 @@ class UserControllerShowTest extends TestCase
             ->assertNotFound();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_show_api_user_in_same_company_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -159,9 +132,6 @@ class UserControllerShowTest extends TestCase
             ->assertNotFound();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_show_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
@@ -174,9 +144,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_show_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
@@ -189,9 +156,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_show_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
@@ -204,9 +168,6 @@ class UserControllerShowTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_show_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([

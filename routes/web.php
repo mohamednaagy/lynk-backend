@@ -46,4 +46,3 @@
         \Illuminate\Support\Facades\DB::table('random_data')->insert($arr);
     }
 });
-

@@ -74,15 +74,15 @@ class AbsherDriver implements OtpifyDriverInterface
         }
 
         if ($otpifyCode->expired_at != null) {
-            throw new OtpCodeAlreadyUsedException();
+            throw new OtpCodeAlreadyUsedException;
         }
 
         if ($this->isCodeExpired($otpifyCode->expiration_date)) {
-            throw new OtpCodeExpiredException();
+            throw new OtpCodeExpiredException;
         }
 
         if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $otpifyCode)) {
-            throw new OtpCodeAdditionalCheckException();
+            throw new OtpCodeAdditionalCheckException;
         }
 
         $checkUrl = $this->url('confirm');
@@ -105,7 +105,7 @@ class AbsherDriver implements OtpifyDriverInterface
 
             return true;
         } else {
-            throw new OtpCodeIncorrectException();
+            throw new OtpCodeIncorrectException;
         }
     }
 

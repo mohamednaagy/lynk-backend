@@ -16,9 +16,9 @@ use Tests\Traits\InteractsWithUser;
 
 class OrdersVolumeTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -36,25 +36,22 @@ class OrdersVolumeTest extends TestCase
 
     private static Builder|Model $secondorder;
 
-    private static string  $firstDateForFirstCompany;
+    private static string $firstDateForFirstCompany;
 
-    private static string  $secondDateForFirstCompany;
+    private static string $secondDateForFirstCompany;
 
     private static $ordersCountForFirstCompany;
 
     private static $ordersCountForSecondDateInFrstCompany;
 
-    private static string  $firstDateForSecondCompany;
+    private static string $firstDateForSecondCompany;
 
-    private static string  $secondDateForSecondCompany;
+    private static string $secondDateForSecondCompany;
 
     private static $ordersCountForSecondDateSecondCompany;
 
     private static $ordersCountForSecondCompany;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

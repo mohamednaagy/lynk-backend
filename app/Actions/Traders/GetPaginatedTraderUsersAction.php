@@ -13,9 +13,6 @@ class GetPaginatedTraderUsersAction implements GetPaginatedTraderUsers
 {
     protected ?Company $trader = null;
 
-    /**
-     * @return LengthAwarePaginator
-     */
     public function handle(): LengthAwarePaginator
     {
         return User::query()
@@ -36,6 +33,6 @@ class GetPaginatedTraderUsersAction implements GetPaginatedTraderUsers
     {
         $this->trader = $trader;
 
-        return  $this;
+        return $this;
     }
 }

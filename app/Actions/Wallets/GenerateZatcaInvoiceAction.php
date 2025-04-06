@@ -19,9 +19,7 @@ class GenerateZatcaInvoiceAction implements GenerateZatcaInvoice
 {
     protected string $template = 'templates.zatca-invoice';
 
-    public function __construct(protected GetProjectSettings $getProjectSettings)
-    {
-    }
+    public function __construct(protected GetProjectSettings $getProjectSettings) {}
 
     public function handle(InvoiceSpecs $invoiceSpecs, $mediaCollection)
     {

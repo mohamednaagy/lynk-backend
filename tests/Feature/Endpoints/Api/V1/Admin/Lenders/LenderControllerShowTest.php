@@ -66,7 +66,7 @@ class LenderControllerShowTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertOk()
             ->assertJson(
-                fractal(self::$lender, new CompanyTransformer())
+                fractal(self::$lender, new CompanyTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
@@ -97,7 +97,7 @@ class LenderControllerShowTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertOk()
             ->assertJson(
-                fractal(self::$lender, new CompanyTransformer())
+                fractal(self::$lender, new CompanyTransformer)
                     ->parseIncludes([
                         'id',
                         'name',

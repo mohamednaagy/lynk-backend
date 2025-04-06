@@ -2,6 +2,4 @@
 
 namespace App\Enums;
 
-final class TraderOrderCancellationStatus extends OrderCancellationStatus
-{
-}
+final class TraderOrderCancellationStatus extends OrderCancellationStatus {}

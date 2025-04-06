@@ -30,8 +30,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
      */
     public function __construct(
         protected int $traderOrderId,
-    ) {
-    }
+    ) {}
 
     /**
      * Execute the job.

@@ -21,7 +21,7 @@ use Tests\Traits\InteractsWithUser;
 
 class EnquiryReplyControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithEnquiry;
+    use InteractsWithEnquiry, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/enquiries/';
 
@@ -42,9 +42,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
         'redirect_url' => 'http://localhost:8000/api/v1/visitor/enquiries/:enquiry',
     ];
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -58,9 +55,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
         self::$enquiryReplyUrl = self::BaseUrl.self::$visitorEnquiry->id.'/replies';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_create_enquiry_reply(): void
     {
         $this->postJson(self::$enquiryReplyUrl)
@@ -70,9 +64,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_admin_role_can_create_enquiry_reply(): void
     {
         $this->actingAs(self::$admin)
@@ -88,9 +79,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_create_enquiry_reply(): void
     {
         $this->actingAs(self::$managerHasPermission)
@@ -106,9 +94,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_cannot_create_enquiry_reply_with_no_permission(): void
     {
         $this->actingAs(self::$manager)
@@ -117,9 +102,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
-    /**
-     * @return void
-     */
     public function test_that_enquiry_reply_has_been_created_and_mail_sent_to_the_visitor(): void
     {
         Mail::fake();
@@ -142,9 +124,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_that_enquiry_reply_has_been_created_and_status_changed_to_resolved(): void
     {
         $this->actingAs(self::$admin)
@@ -157,9 +136,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_enquiry_reply_has_been_created_and_status_changed_to_specific_status(): void
     {
         $this->actingAs(self::$admin)
@@ -172,9 +148,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_body_cannot_create_enquiry_reply(): void
     {
         $this->actingAs(self::$admin)
@@ -190,9 +163,6 @@ class EnquiryReplyControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_redirect_url_cannot_create_enquiry_reply(): void
     {
         $this->actingAs(self::$admin)

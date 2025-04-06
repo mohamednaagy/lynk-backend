@@ -7,7 +7,6 @@ use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyType;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
-use App\Models\Company;
 use App\Rules\CheckActiveCommodityTypeRule;
 use App\Rules\CompanyUniqueNameRule;
 use App\Rules\OrderCostTiersRangeRule;
@@ -24,7 +23,7 @@ class UpdateCompanyRequest extends FormRequest
     {
         return true;
     }
-    
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -179,11 +178,11 @@ class UpdateCompanyRequest extends FormRequest
             ],
 
             'default_contract_sign_time_limit' => [
-                'nullable', 'integer', 'min:1'
+                'nullable', 'integer', 'min:1',
             ],
 
             'force_preferred_commodity_type' => [
-                'nullable', 
+                'nullable',
                 'required_with:preferred_commodity_types',
                 'boolean',
             ],

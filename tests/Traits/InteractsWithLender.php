@@ -129,7 +129,7 @@ trait InteractsWithLender
         return $request;
     }
 
-    public function assertStatusToSpecificRoles(int $status, array $roles, Company $company = null, $request)
+    public function assertStatusToSpecificRoles(int $status, array $roles, ?Company $company, $request)
     {
         if (is_null($company)) {
             [$company] = $this->createCompany(

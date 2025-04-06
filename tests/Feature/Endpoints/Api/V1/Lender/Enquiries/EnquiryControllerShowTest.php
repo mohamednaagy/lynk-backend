@@ -13,8 +13,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class EnquiryControllerShowTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $company;
 

@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class UserControllerUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, RefreshDatabase;
 
     private static User $userAdmin;
 
@@ -29,9 +29,6 @@ class UserControllerUpdateTest extends TestCase
 
     private static string $endPoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -53,9 +50,6 @@ class UserControllerUpdateTest extends TestCase
         self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users/'.self::$userTraderAdmin->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_can_not_update_trader_user(): void
     {
         $this->putJson(self::$endPoint, self::$userData)
@@ -65,9 +59,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_user_can_update_trader_user_with_valid_data(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -93,9 +84,6 @@ class UserControllerUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_super_admin_roles_can_update_trader_user(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Lender, function ($user, $role) {

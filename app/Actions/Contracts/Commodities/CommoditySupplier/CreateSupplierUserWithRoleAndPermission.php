@@ -9,11 +9,6 @@ use App\Models\User;
 
 interface CreateSupplierUserWithRoleAndPermission
 {
-    /**
-     * @param  CreateUser  $createUser
-     * @param  AssignRoleToUser  $assignRoleToUser
-     * @param  AssignPermissionToUser  $assignPermissionToUser
-     */
     public function __construct(
         CreateUser $createUser,
         AssignRoleToUser $assignRoleToUser,
@@ -22,9 +17,6 @@ interface CreateSupplierUserWithRoleAndPermission
 
     /**
      * Create new user.
-     *
-     * @param  array  $data
-     * @return User
      */
     public function handle(array $data): User;
 }

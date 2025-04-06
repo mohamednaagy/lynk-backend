@@ -17,7 +17,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderControllerDeleteTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $lender;
 
@@ -30,8 +30,6 @@ class LenderControllerDeleteTest extends TestCase
     private static string $endpoint;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -48,9 +46,6 @@ class LenderControllerDeleteTest extends TestCase
         self::$endpoint = 'api/v1/admin/lenders/'.self::$lender->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_delete_lenders(): void
     {
         $this->deleteJson(self::$endpoint)
@@ -60,9 +55,6 @@ class LenderControllerDeleteTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_auth_admin_user_can_delete_lenders_successfully(): void
     {
         $lendersCount = Company::query()->count();
@@ -79,9 +71,6 @@ class LenderControllerDeleteTest extends TestCase
         $this->assertEquals($newLendersCount, $lendersCount - 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_with_permissions_can_delete_lenders_successfully(): void
     {
         $lendersCount = Company::query()->count();
@@ -98,9 +87,6 @@ class LenderControllerDeleteTest extends TestCase
         $this->assertEquals($newLendersCount, $lendersCount - 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_delete_lenders(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);

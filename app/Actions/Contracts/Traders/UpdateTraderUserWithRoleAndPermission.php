@@ -9,11 +9,6 @@ use App\Models\User;
 
 interface UpdateTraderUserWithRoleAndPermission
 {
-    /**
-     * @param  UpdateUser  $updateUser
-     * @param  SyncRoleToUser  $syncRoleToUser
-     * @param  SyncPermissionToUser  $syncPermissionToUser
-     */
     public function __construct(
         UpdateUser $updateUser,
         SyncRoleToUser $syncRoleToUser,
@@ -23,8 +18,6 @@ interface UpdateTraderUserWithRoleAndPermission
     /**
      * Update user.
      *
-     * @param  array  $data
-     * @param  User  $user
      * @return void $user
      */
     public function handle(array $data, User $user): void;

@@ -3,6 +3,7 @@
 namespace App\Support\ZatcaEInvoice;
 
 use Cknow\Money\Money;
+
 use function Psl\Str\format_number;
 
 class PurchaseLine
@@ -13,8 +14,7 @@ class PurchaseLine
         protected string $vatPercentage,
         protected float $discount = 0,
         protected int|float $quantity = 1
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): PurchaseLine
     {

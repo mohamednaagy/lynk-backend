@@ -11,8 +11,6 @@ class MobileVerifyManager extends Manager
 {
     /**
      * Get the default driver name.
-     *
-     * @return string
      */
     public function getDefaultDriver(): string
     {
@@ -21,28 +19,22 @@ class MobileVerifyManager extends Manager
 
     /**
      * Verify mobile number via TCC.
-     *
-     * @return MobileVerifyDriverInterface
      */
     public function createTccDriver(): MobileVerifyDriverInterface
     {
-        return new TccDriver();
+        return new TccDriver;
     }
 
     /**
      * Verify mobile number via Test TCC.
-     *
-     * @return MobileVerifyDriverInterface
      */
     public function createFakeTccDriver(): MobileVerifyDriverInterface
     {
-        return new FakeTccDriver();
+        return new FakeTccDriver;
     }
 
     /**
      * Get all the drivers.
-     *
-     * @return array
      */
     public function getMobileVerifyDrivers(): array
     {

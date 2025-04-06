@@ -23,8 +23,7 @@ class OrderApproved extends Notification implements ShouldQueue
         private FinancingOrder $financingOrder,
         private User $approver,
         private Carbon $approvalTime
-    ) {
-    }
+    ) {}
 
     /**
      * Get the notification's delivery channels.

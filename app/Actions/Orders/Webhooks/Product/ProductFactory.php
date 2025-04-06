@@ -10,13 +10,13 @@ class ProductFactory
     {
         switch ($type) {
             case Trader::Lynk:
-                return new LynkProduct();
+                return new LynkProduct;
             case Trader::Bursam:
-                return new BursamProduct();
+                return new BursamProduct;
             case Trader::Dmcc:
-                return new DmccProduct();
+                return new DmccProduct;
             case Trader::FakeDmcc:
-                return new FakeProduct();
+                return new FakeProduct;
             default:
                 throw new \Exception("Product type $type is not supported.");
         }

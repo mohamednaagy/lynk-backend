@@ -15,12 +15,10 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderRegistrationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithSettings, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_on_all_valid_inputs(): void
     {
@@ -51,8 +49,6 @@ class LenderRegistrationTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_and_check_if_lender_has_wallet(): void
     {
@@ -88,8 +84,6 @@ class LenderRegistrationTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_company_notifications_email_taken_from_lender_email(): void
     {
@@ -126,8 +120,6 @@ class LenderRegistrationTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_and_check_if_lender_order_cost_as_in_default_settings(): void
     {
@@ -163,8 +155,6 @@ class LenderRegistrationTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_and_check_if_lender_status_as_in_default_settings(): void
     {
@@ -200,8 +190,6 @@ class LenderRegistrationTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_and_check_if_lender_does_order_require_approval_as_in_default_settings(): void
     {
@@ -237,8 +225,6 @@ class LenderRegistrationTest extends TestCase
 
     /**
      * A basic feature test example.
-     *
-     * @return void
      */
     public function test_register_and_check_if_lender_user_has_been_created_with_role_lender_admin(): void
     {

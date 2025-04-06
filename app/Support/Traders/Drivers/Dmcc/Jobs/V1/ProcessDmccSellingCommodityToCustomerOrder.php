@@ -14,7 +14,7 @@ use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldBeUnique
+class ProcessDmccSellingCommodityToCustomerOrder implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -23,9 +23,7 @@ class ProcessDmccSellingCommodityToCustomerOrder implements ShouldQueue, ShouldB
      *
      * @return void
      */
-    public function __construct(protected $traderOrderId)
-    {
-    }
+    public function __construct(protected $traderOrderId) {}
 
     /**
      * Execute the job.

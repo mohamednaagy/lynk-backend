@@ -40,8 +40,8 @@ class SendLinkRequest extends FormRequest
         $validationRules = [
             'email' => ['required', 'email:filter', Rule::exists(User::class, 'email')],
             'company_unique_name' => ['nullable', 'string'],
-            'company_type'  => ['required_with:company_unique_name', 'integer', 'in:'.implode(',', CompanyType::getValues())],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'company_type' => ['required_with:company_unique_name', 'integer', 'in:'.implode(',', CompanyType::getValues())],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
 
         return array_merge($recaptchaRoles, $validationRules);

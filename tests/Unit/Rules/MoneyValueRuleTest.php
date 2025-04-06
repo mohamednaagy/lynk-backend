@@ -15,7 +15,7 @@ class MoneyValueRuleTest extends TestCase
     {
         parent::setUp();
 
-        $this->rule = new MoneyValueRule();
+        $this->rule = new MoneyValueRule;
         $this->attribute = 'amount';
     }
 

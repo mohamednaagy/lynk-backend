@@ -17,7 +17,7 @@ use Tests\Traits\InteractsWithUser;
 
 class WakalaTemplateSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/wakala-templates/';
 
@@ -43,9 +43,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
 
     private static array $wakalaSettingsData = [];
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -64,9 +61,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_update_wakala_template_settings_failed(): void
     {
         $this->putJson(self::$clientWakalaUrl)
@@ -76,9 +70,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_authorized_user_without_right_role_cant_update_wakala_template_settings_failed(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -87,9 +78,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ->assertJsonPath('message', 'User does not have the right roles.');
     }
 
-    /**
-     * @return void
-     */
     public function test_update_client_wakala_template_settings_on_empty_wakala_template_failed(): void
     {
         $this->actingAs(self::$admin)
@@ -105,9 +93,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_company_wakala_template_settings_on_empty_wakala_template_failed(): void
     {
         $this->actingAs(self::$admin)
@@ -123,9 +108,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_cannot_update_wakala_template_settings_on_invalid_wakala_template_type_parameter_failed(): void
     {
         $this->actingAs(self::$admin)
@@ -134,9 +116,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ->assertJsonPath('message', 'The route api/v1/admin/wakala-templates/invalidType could not be found.');
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_admin_role_can_update_client_wakala_template_settings_succeed(): void
     {
         $this->actingAs(self::$admin)
@@ -147,9 +126,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_admin_role_can_update_company_wakala_template_settings_succeed(): void
     {
         $this->actingAs(self::$admin)
@@ -160,9 +136,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_update_client_wakala_template_settings_succeed(): void
     {
         $this->actingAs(self::$managerHasPermission)
@@ -173,9 +146,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_update_company_wakala_template_settings_succeed(): void
     {
         $this->actingAs(self::$managerHasPermission)
@@ -186,9 +156,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_update_client_wakala_template_settings_failed(): void
     {
         $this->actingAs(self::$manager)
@@ -197,9 +164,6 @@ class WakalaTemplateSettingsUpdateTest extends TestCase
             ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_update_company_wakala_template_settings_failed(): void
     {
         $this->actingAs(self::$manager)

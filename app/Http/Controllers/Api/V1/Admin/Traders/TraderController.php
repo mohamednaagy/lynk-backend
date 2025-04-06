@@ -50,7 +50,7 @@ class TraderController extends Controller
     {
         $traders = $getPaginatedTraders->handle();
 
-        return fractal($traders, new CompanyTransformer())
+        return fractal($traders, new CompanyTransformer)
             ->parseIncludes([
                 'id',
                 'name',
@@ -81,7 +81,7 @@ class TraderController extends Controller
 
                 $createWallet->handle($company, WalletType::CompanyWallet, Money::getDefaultCurrency());
 
-                return fractal($company, new CompanyTransformer())
+                return fractal($company, new CompanyTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
@@ -101,7 +101,7 @@ class TraderController extends Controller
         $trader->setAttribute('orders_count', $ordersAmountSumAndOrdersCountOfTrader['ordersCount']);
         $trader->setAttribute('orders_sum_amount', $ordersAmountSumAndOrdersCountOfTrader['ordersSumAmount']);
 
-        return fractal($trader, new CompanyTransformer())
+        return fractal($trader, new CompanyTransformer)
             ->parseIncludes([
                 'id',
                 'name',

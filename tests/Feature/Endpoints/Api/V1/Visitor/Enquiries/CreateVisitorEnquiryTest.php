@@ -14,7 +14,7 @@ use Tests\Traits\InteractsWithEnquiry;
 
 class CreateVisitorEnquiryTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithEnquiry;
+    use InteractsWithEnquiry, RefreshDatabase;
 
     const BaseUrl = 'api/v1/visitor/enquiries/';
 
@@ -30,9 +30,6 @@ class CreateVisitorEnquiryTest extends TestCase
         'redirect_url' => 'http://localhost:8000/api/v1/visitor/enquiries/:enquiry',
     ];
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_can_create_enquiry_succeed(): void
     {
         $this->postJson(self::BaseUrl, self::$enquiryData)
@@ -47,9 +44,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_can_create_enquiry_with_sending_email_to_creator_succeed(): void
     {
         Mail::fake();
@@ -71,9 +65,6 @@ class CreateVisitorEnquiryTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_can_create_enquiry_and_status_set_as_under_review_succeed(): void
     {
         $response = $this->postJson(self::BaseUrl, self::$enquiryData)
@@ -93,9 +84,6 @@ class CreateVisitorEnquiryTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_subject_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['subject']))
@@ -110,9 +98,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_body_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['body']))
@@ -127,9 +112,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_name_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['name']))
@@ -144,9 +126,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_email_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['email']))
@@ -161,9 +140,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_phone_number_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['phone_number']))
@@ -178,9 +154,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_phone_country_code_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['phone_country_code']))
@@ -198,9 +171,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_without_redirect_url_cannot_create_enquiry_failed(): void
     {
         $this->postJson(self::BaseUrl, Arr::except(self::$enquiryData, ['redirect_url']))
@@ -215,9 +185,6 @@ class CreateVisitorEnquiryTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_with_invalid_and_not_whitelisted_redirect_url_cannot_create_enquiry_failed(): void
     {
         $this->postJson(

@@ -35,7 +35,7 @@ class WalletServiceTest extends TestCase
             'name' => 'wallet name',
             'currency' => Money::getDefaultCurrency(),
         ];
-        self::$walletService = new WalletService();
+        self::$walletService = new WalletService;
         [self::$company, self::$wallet] = $this->createCompany(2000);
     }
 

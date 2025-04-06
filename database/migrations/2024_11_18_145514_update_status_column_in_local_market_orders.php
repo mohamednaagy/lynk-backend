@@ -16,8 +16,8 @@ return new class extends Migration
     {
         Schema::table('local_market_orders', function (Blueprint $table) {
             $table->unsignedSmallInteger('status')
-                  ->default(OrderStatus::initiate)
-                  ->change();
+                ->default(OrderStatus::initiate)
+                ->change();
         });
     }
 
@@ -30,8 +30,8 @@ return new class extends Migration
     {
         Schema::table('local_market_orders', function (Blueprint $table) {
             $table->unsignedSmallInteger('status')
-                  ->default(null)
-                  ->change();
+                ->default(null)
+                ->change();
         });
     }
 };

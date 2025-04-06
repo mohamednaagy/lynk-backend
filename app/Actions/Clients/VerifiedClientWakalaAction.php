@@ -15,8 +15,7 @@ class VerifiedClientWakalaAction implements VerifiedClientWakala
     public function __construct(
         protected GetWakalaTemplate $getWakalaTemplate,
         protected GetClientWakalaText $getClientWakalaText
-    ) {
-    }
+    ) {}
 
     public function handle(FinancingOrder $order): array
     {

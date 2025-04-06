@@ -14,7 +14,7 @@ use Tests\Traits\InteractsWithUser;
 
 class UserControllerDestroyTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -36,9 +36,6 @@ class UserControllerDestroyTest extends TestCase
 
     private static User $otherUserLenderAdmin;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -53,9 +50,6 @@ class UserControllerDestroyTest extends TestCase
         self::$otherUserLenderAdmin = $this->createLenderUser(self::$otherCompany->id, Role::LenderAdmin);
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -66,9 +60,6 @@ class UserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_can_delete_lender_user_successful(): void
     {
         $lenderUserCount = self::$company->users()->count();
@@ -90,9 +81,6 @@ class UserControllerDestroyTest extends TestCase
         $this->assertEquals($newLenderUserCount, $lenderUserCount - 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_supervisor_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -102,9 +90,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_billing_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderBilling)
@@ -113,9 +98,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_api_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderApi)
@@ -124,9 +106,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_order_creator_user_cant_delete_lender_user_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -135,9 +114,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_delete_lender_user_in_other_company_unsuccessful(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -146,9 +122,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertNotFound();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_delete_lender_users_case_company_pending_unsuccessful(): void
     {
         self::$company->update([
@@ -161,9 +134,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_delete_lender_users_case_company_under_review_unsuccessful(): void
     {
         self::$company->update([
@@ -176,9 +146,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_delete_lender_users_case_company_rejected_unsuccessful(): void
     {
         self::$company->update([
@@ -191,9 +158,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_admin_user_cant_delete_lender_users_case_email_not_verified_unsuccessful(): void
     {
         self::$userLenderAdmin->update([

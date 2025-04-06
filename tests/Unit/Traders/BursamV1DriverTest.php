@@ -68,7 +68,7 @@ class BursamV1DriverTest extends TestCase
             ->commit()
             ->model();
 
-        self::$driver = new static::$driverClass();
+        self::$driver = new static::$driverClass;
 
         $data = [
             'product_code' => $this->faker->randomElement(BursamProductCode::getValues()),
@@ -127,7 +127,7 @@ class BursamV1DriverTest extends TestCase
 
         $traderOrder = self::$driver->getOrInitiateTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount);
         $this->assertEquals($traderOrder->id, self::$traderOrder->id);
     }
 
@@ -143,7 +143,7 @@ class BursamV1DriverTest extends TestCase
 
         $traderOrder = self::$driver->getOrInitiateTraderOrder($order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount + 1);
         $this->assertInstanceOf(TraderOrder::class, $traderOrder);
     }
 
@@ -162,8 +162,8 @@ class BursamV1DriverTest extends TestCase
 
         self::$driver->createTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), $traderOrderCount + 1);
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), $traderOrderCount + 1);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), $traderOrderHistoryCount + 1);
     }
 
     /**
@@ -184,9 +184,9 @@ class BursamV1DriverTest extends TestCase
 
         self::$driver->createTraderOrder(self::$order);
 
-        $this->assertDatabaseCount((new TraderOrder())->getTable(), 2);
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), 0);
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new TraderOrder)->getTable(), 2);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), 0);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -232,7 +232,7 @@ class BursamV1DriverTest extends TestCase
         self::$driver->cancelOrder(self::$order);
 
         Queue::assertNotPushed(ProcessBursamStbCertificateAfterCancellation::class);
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     public function test_cancel_trader_order_manual_mode()
@@ -277,10 +277,10 @@ class BursamV1DriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        self::$driver->createSellingCommodityToCustomerDocument(new TraderOrder());
+        self::$driver->createSellingCommodityToCustomerDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -308,10 +308,10 @@ class BursamV1DriverTest extends TestCase
 
         $activityLogCount = Activity::query()->count();
 
-        self::$driver->createTransferOwnershipToLenderDocument(new TraderOrder());
+        self::$driver->createTransferOwnershipToLenderDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     public function test_fetch_order_result_ynn_success()
@@ -335,7 +335,7 @@ class BursamV1DriverTest extends TestCase
 
         self::$driver->fetchOrderResultYNN(self::$traderOrder);
 
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), $traderOrderHistoryCount + 1);
     }
 
     public function test_fetch_order_result_ynn_if_product_is_not_available_fails()
@@ -402,7 +402,7 @@ class BursamV1DriverTest extends TestCase
 
         self::$driver->fetchOrderResultNYY(self::$traderOrder);
 
-        $this->assertDatabaseCount((new TraderHistory())->getTable(), $traderOrderHistoryCount + 1);
+        $this->assertDatabaseCount((new TraderHistory)->getTable(), $traderOrderHistoryCount + 1);
     }
 
     public function test_fetch_order_result_nyy_fails()

@@ -50,7 +50,7 @@ class EnquiryController extends Controller
     ): JsonResponse {
         $enquiries = $getPaginatedUserEnquiries->handle($request->user()->id);
 
-        return fractal($enquiries, new EnquiryTransformer())
+        return fractal($enquiries, new EnquiryTransformer)
             ->parseIncludes([
                 'id',
                 'subject',
@@ -74,7 +74,7 @@ class EnquiryController extends Controller
 
         $enquiry = $createEnquiry->handle($data);
 
-        return fractal($enquiry, new EnquiryTransformer())
+        return fractal($enquiry, new EnquiryTransformer)
             ->parseIncludes([
                 'id',
                 'subject',
@@ -98,7 +98,7 @@ class EnquiryController extends Controller
             $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
             || $this->doesEnquiryBelongToCurrentLender($authUser, $enquiry)
         ) {
-            return fractal($enquiry, new EnquiryTransformer())
+            return fractal($enquiry, new EnquiryTransformer)
                 ->parseIncludes([
                     'id',
                     'subject',
@@ -110,7 +110,7 @@ class EnquiryController extends Controller
                 ->respond();
         }
 
-        throw new ModelNotFoundException();
+        throw new ModelNotFoundException;
     }
 
     protected function doesEnquiryBelongToCurrentLender($authUser, $enquiry)

@@ -13,7 +13,7 @@ use Tests\Traits\InteractsWithUser;
 
 class SendEmailVerificationTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const Endpoint = 'api/v1/auth/send-email-verification';
 
@@ -31,9 +31,6 @@ class SendEmailVerificationTest extends TestCase
 
     private static string $whitelistedUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

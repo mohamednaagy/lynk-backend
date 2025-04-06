@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class OrderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, InteractsWithUser, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -80,7 +80,7 @@ class OrderControllerIndexTest extends TestCase
             ->getJson('api/v1/trader/orders')
             ->assertOk()
             ->assertExactJson(
-                fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'amount',
@@ -103,7 +103,7 @@ class OrderControllerIndexTest extends TestCase
             ->getJson('api/v1/trader/orders')
             ->assertOk()
             ->assertExactJson(
-                fractal($orders, new FinancingOrderTransformer())
+                fractal($orders, new FinancingOrderTransformer)
                     ->parseIncludes([
                         'id',
                         'amount',

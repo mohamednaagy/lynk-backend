@@ -23,9 +23,7 @@ use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
-    public function __construct(protected GetProjectSettings $getProjectSettings)
-    {
-    }
+    public function __construct(protected GetProjectSettings $getProjectSettings) {}
 
     public function __invoke(
         Request $request,

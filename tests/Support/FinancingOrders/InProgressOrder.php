@@ -11,9 +11,7 @@ use App\Models\TraderOrder;
 
 class InProgressOrder
 {
-    protected function __construct(protected FinancingOrder $financingOrder)
-    {
-    }
+    protected function __construct(protected FinancingOrder $financingOrder) {}
 
     public static function of(FinancingOrder|CommittedOrder $financingOrder)
     {

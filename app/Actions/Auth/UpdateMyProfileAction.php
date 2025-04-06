@@ -12,8 +12,7 @@ class UpdateMyProfileAction implements UpdateMyProfile
     public function __construct(
         protected UpdateUser $updateUser,
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
     public function handle(User $user, $data, string $area): User
     {

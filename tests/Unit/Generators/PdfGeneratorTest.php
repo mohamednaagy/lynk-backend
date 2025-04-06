@@ -8,8 +8,9 @@ use App\Support\PdfGenerator\Generators\BrowserlessGenerator;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
-use function Psl\Type\mixed;
 use Tests\TestCase;
+
+use function Psl\Type\mixed;
 
 class PdfGeneratorTest extends TestCase
 {
@@ -17,9 +18,6 @@ class PdfGeneratorTest extends TestCase
 
     protected static string $pdfGenerator;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -33,8 +31,7 @@ class PdfGeneratorTest extends TestCase
                 return is_callable($options);
             }))->andReturn(mixed());
 
-        PdfGenerator::outputFromHtml('<h1>Hi</h1>', function () {
-        });
+        PdfGenerator::outputFromHtml('<h1>Hi</h1>', function () {});
     }
 
     public function test_second_argument_can_be_a_array()

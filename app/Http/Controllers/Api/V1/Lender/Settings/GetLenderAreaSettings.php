@@ -13,12 +13,11 @@ class GetLenderAreaSettings extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      * @return JsonResponse
      */
     public function __invoke(GetSettingsClassInstance $getSettingsClassInstance)
     {
-        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer())
+        return fractal($getSettingsClassInstance->handle(Area::Lender), new LenderSettingsTransformer)
             ->parseIncludes(['email_verification_enabled'])
             ->respond();
     }

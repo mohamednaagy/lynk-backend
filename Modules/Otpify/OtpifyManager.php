@@ -28,7 +28,7 @@ class OtpifyManager extends Manager
      */
     public function createEmailDriver(): OtpifyDriverInterface
     {
-        return new EmailDriver();
+        return new EmailDriver;
     }
 
     /**
@@ -36,7 +36,7 @@ class OtpifyManager extends Manager
      */
     public function createTwilioDriver(): OtpifyDriverInterface
     {
-        return new TwilioSmsDriver();
+        return new TwilioSmsDriver;
     }
 
     /**
@@ -55,7 +55,7 @@ class OtpifyManager extends Manager
      */
     public function createFakeAbsherDriver(): OtpifyDriverInterface
     {
-        return new FakeAbsherDriver();
+        return new FakeAbsherDriver;
     }
 
     /**

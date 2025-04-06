@@ -17,7 +17,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -33,9 +33,6 @@ class UserControllerIndexTest extends TestCase
 
     private static LengthAwarePaginator $traderUsersCollection;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -51,9 +48,6 @@ class UserControllerIndexTest extends TestCase
         })->paginate();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_trader_users(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -64,9 +58,6 @@ class UserControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_trader_area_cant_index_trader_users_case(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -82,9 +73,6 @@ class UserControllerIndexTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_index_trader_users(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -109,9 +97,6 @@ class UserControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_trader_admin_user_cant_index_trader_users_case_when_company_not_approved(): void
     {
         foreach (CompanyStatus::getValues() as $status) {
@@ -133,15 +118,15 @@ class UserControllerIndexTest extends TestCase
     /**
      * @return void
      */
-//    public function test_that_trader_admin_user_cant_index_trader_users_case_email_not_verified(): void
-//    {
-//        self::$userTraderAdmin->update([
-//            'email_verified_at' => null,
-//        ]);
-//
-//        $this->actingAs(self::$userTraderAdmin->fresh())
-//            ->withHeader('X-Company', self::$company->id)
-//            ->getJson('api/v1/trader/users')
-//            ->assertForbidden();
-//    }
+    //    public function test_that_trader_admin_user_cant_index_trader_users_case_email_not_verified(): void
+    //    {
+    //        self::$userTraderAdmin->update([
+    //            'email_verified_at' => null,
+    //        ]);
+    //
+    //        $this->actingAs(self::$userTraderAdmin->fresh())
+    //            ->withHeader('X-Company', self::$company->id)
+    //            ->getJson('api/v1/trader/users')
+    //            ->assertForbidden();
+    //    }
 }

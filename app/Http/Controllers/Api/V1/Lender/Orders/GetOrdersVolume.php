@@ -12,8 +12,6 @@ class GetOrdersVolume extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  OrderVolumeRequest  $orderVolumeRequest
-     * @param  OrdersGetOrdersVolume  $getOrdersVolume
      * @return \Illuminate\Http\JsonResponse
      */
     public function __invoke(OrderVolumeRequest $orderVolumeRequest, OrdersGetOrdersVolume $getOrdersVolume)

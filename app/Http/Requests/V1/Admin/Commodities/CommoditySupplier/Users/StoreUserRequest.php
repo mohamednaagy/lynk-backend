@@ -39,7 +39,7 @@ class StoreUserRequest extends FormRequest
                 Rule::unique(User::class, 'email')
                     ->where('company_id', $this->supplier->id),
             ],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::CommoditySupplier)),

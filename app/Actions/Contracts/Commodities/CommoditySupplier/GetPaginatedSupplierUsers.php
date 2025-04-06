@@ -2,7 +2,6 @@
 
 namespace App\Actions\Contracts\Commodities\CommoditySupplier;
 
-
 use App\Models\Company;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
