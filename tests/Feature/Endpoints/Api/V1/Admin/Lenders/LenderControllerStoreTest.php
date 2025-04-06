@@ -148,7 +148,7 @@ class LenderControllerStoreTest extends TestCase
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
         $this->assertTrue($isOrderCostCorrect);
-        $this->assertNotNull($lender->webhook_secret_key);
+        $this->assertNotNull($lender->lenderDetail->webhook_secret_key);
     }
 
     public function test_manager_with_permissions_can_store_lender_successfully(): void
@@ -190,7 +190,7 @@ class LenderControllerStoreTest extends TestCase
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
         $this->assertTrue($isOrderCostCorrect);
-        $this->assertNotNull($lender->webhook_secret_key);
+        $this->assertNotNull($lender->lenderDetail->webhook_secret_key);
     }
 
     public function test_manager_with_permissions_can_store_lender_without_preferred_commodity_type_successfully(): void
@@ -232,7 +232,7 @@ class LenderControllerStoreTest extends TestCase
         $this->assertTrue($hasWallet);
         $this->assertTrue($hasOrderCost);
         $this->assertTrue($isOrderCostCorrect);
-        $this->assertNotNull($lender->webhook_secret_key);
+        $this->assertNotNull($lender->lenderDetail->webhook_secret_key);
     }
 
     public function test_manager_without_permissions_cant_store_lender(): void
@@ -346,7 +346,7 @@ class LenderControllerStoreTest extends TestCase
             ->assertExactJson([
                 'message' => 'The force preferred commodity type field is required when preferred commodity types is present.',
                 'errors' => [
-                    "force_preferred_commodity_type" => [
+                    'force_preferred_commodity_type' => [
                         'The force preferred commodity type field is required when preferred commodity types is present.',
                     ],
                 ],

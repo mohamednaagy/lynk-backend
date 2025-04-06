@@ -10,9 +10,6 @@ class WebhookEventManager
     /**
      * fire company webhook by webhook type
      *
-     * @param  Company  $company
-     * @param  string  $webhookType
-     * @param  array  $payload
      * @return void
      */
     public function fire(Company $company, string $webhookType, array $payload)
@@ -27,7 +24,7 @@ class WebhookEventManager
                             WebhookCall::create()
                                 ->url($webhook->url)
                                 ->payload($payload)
-                                ->useSecret($company->webhook_secret_key)
+                                ->useSecret($company->lender->lenderDetail->webhook_secret_key)
                                 ->dispatch();
                         }
                     );
