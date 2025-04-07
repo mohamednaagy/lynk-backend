@@ -138,7 +138,7 @@ return [
     ],
 
     CompanyLenderClientType::class => [
-        CompanyLenderClientType::business => 'Business',
-        CompanyLenderClientType::individual => 'Individual',
+        CompanyLenderClientType::Business => 'Business',
+        CompanyLenderClientType::Individual => 'Individual',
     ],
 ];

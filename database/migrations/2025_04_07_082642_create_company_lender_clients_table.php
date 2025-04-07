@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreign('company_id')->references('id')->on('companies');
             $table->integer('national_id');
             $table->unique(['national_id', 'company_id'], 'unique_client_per_company');
-            $table->tinyInteger('type')->default(CompanyLenderClientType::business)->comment('1: business, 2: individual');
+            $table->tinyInteger('type')->default(CompanyLenderClientType::Business)->comment('1: Business, 2: Individual');
             $table->softDeletes();
             $table->timestamps();
         });

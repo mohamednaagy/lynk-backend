@@ -142,7 +142,7 @@ return [
     ],
 
     CompanyLenderClientType::class => [
-        CompanyLenderClientType::business => 'شركات',
-        CompanyLenderClientType::individual => 'فردي',
+        CompanyLenderClientType::Business => 'شركات',
+        CompanyLenderClientType::Individual => 'فردي',
     ],
 ];

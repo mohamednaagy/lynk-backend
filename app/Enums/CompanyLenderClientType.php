@@ -8,10 +8,10 @@ use BenSampo\Enum\Enum;
 final class CompanyLenderClientType extends Enum implements LocalizedEnum
 {
     /**
-     * @method static static business()
-     * @method static static individual()
+     * @method static static Business()
+     * @method static static Individual()
      */
-    const business = 1;
+    const Business = 1;
 
-    const individual = 2;
+    const Individual = 2;
 }
