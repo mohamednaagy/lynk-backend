@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Transformers;
+
+use App\Models\CompanyLenderClient;
+use League\Fractal\Resource\Primitive;
+use League\Fractal\TransformerAbstract;
+
+class CompanyLenderClientTransformer extends TransformerAbstract
+{
+    protected array $availableIncludes = [
+        'id',
+        'name',
+        'type',
+        'national_id',
+    ];
+
+    public function transform(CompanyLenderClient $companyLenderClient): array
+    {
+        return [];
+    }
+
+    public function includeId(CompanyLenderClient $companyLenderClient): Primitive
+    {
+        return $this->primitive($companyLenderClient->id);
+    }
+
+    public function includeName(CompanyLenderClient $companyLenderClient): Primitive
+    {
+        return $this->primitive($companyLenderClient->name);
+    }
+
+    public function includeNationalId(CompanyLenderClient $companyLenderClient): Primitive
+    {
+        return $this->primitive($companyLenderClient->national_id);
+    }
+
+    public function includeType(CompanyLenderClient $companyLenderClient): Primitive
+    {
+        return $this->primitive([
+            'value' => $companyLenderClient->type->value,
+            'description' => $companyLenderClient->type->description,
+        ]);
+    }
+}
