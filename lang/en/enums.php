@@ -6,6 +6,7 @@ use App\Enums\BursamProductCode;
 use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierMarketType;
 use App\Enums\CommoitySupplierStatus;
+use App\Enums\CompanyLenderClientType;
 use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
@@ -134,5 +135,10 @@ return [
     TraderOrderTimeLimitType::class => [
         TraderOrderTimeLimitType::ContractSignTimeLimit => 'Contract Sign Time Limit',
         TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit => 'Delivery Confirmation Time Limit',
+    ],
+
+    CompanyLenderClientType::class => [
+        CompanyLenderClientType::Business => 'Business',
+        CompanyLenderClientType::Individual => 'Individual',
     ],
 ];

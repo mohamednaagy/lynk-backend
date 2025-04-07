@@ -175,5 +175,7 @@ return [
         'invalid_case_proceed' => 'The case value entered is invalid for this trade request',
 
     ],
-
+    'max_digits' => 'It must contain 10 numbers',
+    'field_is_required' => 'This field is required',
+    'max_string_chars' => 'This field cannot be more than :max characters long',
 ];

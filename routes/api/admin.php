@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderMarketTypes;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderStatuses;
+use App\Http\Controllers\Api\V1\Admin\Lenders\LenderClientController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderLiteList;
 use App\Http\Controllers\Api\V1\Admin\Lenders\LenderUserController;
@@ -131,6 +132,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 ->whereNumber('amount');
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
+            Route::resource('/{lender}/clients', LenderClientController::class);
+
         });
 
         Route::prefix('lenders')->group(function () {
