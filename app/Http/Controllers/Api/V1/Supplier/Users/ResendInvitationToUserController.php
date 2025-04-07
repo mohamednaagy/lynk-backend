@@ -16,7 +16,7 @@ class ResendInvitationToUserController extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::CommoditySupplier, [Subject::CommoditySupplierUsers, Action::Create, Action::Manage])
         );
 
@@ -25,10 +25,9 @@ class ResendInvitationToUserController extends Controller
     /**
      * Handle the incoming request to resend an invitation to a user.
      *
-     * @param ResendInvitationRequest $request The request instance containing validated data.
-     * @param User $user The user to whom the invitation will be resent.
-     * @param ResendInvitationToUserContract $resendInvitationToUserContract The contract handling the resending of the invitation.
-     *
+     * @param  ResendInvitationRequest  $request  The request instance containing validated data.
+     * @param  User  $user  The user to whom the invitation will be resent.
+     * @param  ResendInvitationToUserContract  $resendInvitationToUserContract  The contract handling the resending of the invitation.
      * @return JsonResponse A JSON response indicating the success of the operation.
      */
     public function __invoke(ResendInvitationRequest $request, User $user, ResendInvitationToUserContract $resendInvitationToUserContract): JsonResponse

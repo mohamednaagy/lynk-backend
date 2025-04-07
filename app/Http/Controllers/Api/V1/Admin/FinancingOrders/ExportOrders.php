@@ -9,7 +9,6 @@ use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use App\Models\User;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;

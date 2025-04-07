@@ -12,7 +12,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class EdaatInvoice extends Model
 {
-    use HasFactory, BelongsToTenant, HasScopes;
+    use BelongsToTenant, HasFactory, HasScopes;
 
     protected $fillable = [
         'amount',

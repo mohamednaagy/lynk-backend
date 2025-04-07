@@ -23,11 +23,6 @@ class UpdateLenderStatus extends Controller
 
     /**
      * Summary of __invoke
-     *
-     * @param  UpdateCompanyStatusRequest  $request
-     * @param  Company  $lender
-     * @param  UpdateCompany  $updateCompany
-     * @return JsonResponse
      */
     public function __invoke(
         UpdateCompanyStatusRequest $request,

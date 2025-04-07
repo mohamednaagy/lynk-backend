@@ -21,7 +21,7 @@ class CreateVisitorEnquiry extends Controller
             $invitationUrl = $request->validated('redirect_url');
             Mail::to($enquiry->email)->send(new AccessVisitorEnquiry($enquiry, $invitationUrl));
 
-            return fractal($enquiry, new EnquiryTransformer())
+            return fractal($enquiry, new EnquiryTransformer)
                 ->parseIncludes([
                     'id',
                     'subject',

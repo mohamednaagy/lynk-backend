@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithUser;
 
 class LenderSettingsIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithSettings, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/settings/lender';
 
@@ -35,9 +35,6 @@ class LenderSettingsIndexTest extends TestCase
 
     private static $lenderSettings;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -52,9 +49,6 @@ class LenderSettingsIndexTest extends TestCase
         self::$lenderSettings = $this->getSettingsClass(Area::Lender);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_lender_settings_failed(): void
     {
         $this->getJson(self::BaseUrl)
@@ -64,9 +58,6 @@ class LenderSettingsIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_authorized_user_without_right_role_cant_index_lender_settings_failed(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -76,8 +67,6 @@ class LenderSettingsIndexTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_admin_role_can_index_lender_settings_succeed(): void
@@ -86,7 +75,7 @@ class LenderSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$lenderSettings, new LenderSettingsTransformer())
+                fractal(self::$lenderSettings, new LenderSettingsTransformer)
                     ->parseIncludes([
                         'default_order_cost',
                         'email_verification_enabled',
@@ -101,8 +90,6 @@ class LenderSettingsIndexTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_index_lender_settings_succeed(): void
@@ -111,7 +98,7 @@ class LenderSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$lenderSettings, new LenderSettingsTransformer())
+                fractal(self::$lenderSettings, new LenderSettingsTransformer)
                     ->parseIncludes([
                         'default_order_cost',
                         'email_verification_enabled',
@@ -125,9 +112,6 @@ class LenderSettingsIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_index_lender_settings_failed(): void
     {
         $this->actingAs(self::$manager)

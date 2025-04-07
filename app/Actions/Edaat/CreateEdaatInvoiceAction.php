@@ -12,8 +12,7 @@ class CreateEdaatInvoiceAction implements CreateEdaatInvoice
 {
     public function __construct(
         protected EdaatService $edaatService
-    ) {
-    }
+    ) {}
 
     public function handle(Money $amount): EdaatInvoice
     {

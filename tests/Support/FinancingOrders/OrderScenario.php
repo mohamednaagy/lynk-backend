@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class OrderScenario
 {
-    public static function approved(User $approver, null|Carbon $approvedAt)
+    public static function approved(User $approver, ?Carbon $approvedAt)
     {
         return (new OrderCreator)->approvedAt($approver, $approvedAt ?? now())
             ->status(FinancingOrderStatus::Approved);

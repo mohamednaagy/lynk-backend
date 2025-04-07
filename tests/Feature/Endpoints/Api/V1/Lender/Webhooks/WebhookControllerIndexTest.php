@@ -16,9 +16,9 @@ use Tests\Traits\InteractsWithUser;
 
 class WebhookControllerIndexTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -40,9 +40,6 @@ class WebhookControllerIndexTest extends TestCase
 
     private static string $endpoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -85,7 +82,7 @@ class WebhookControllerIndexTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertStatus(200)
             ->assertExactJson(
-                fractal($webhooks, new WebhookTransformer())
+                fractal($webhooks, new WebhookTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',

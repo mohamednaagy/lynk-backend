@@ -34,7 +34,7 @@ class CommodityTypeController extends Controller
             ->handle()
             ->paginate();
 
-        return fractal($commidityTypes, new CommodityTypeTransformer())
+        return fractal($commidityTypes, new CommodityTypeTransformer)
             ->parseIncludes([
                 'id',
                 'name',

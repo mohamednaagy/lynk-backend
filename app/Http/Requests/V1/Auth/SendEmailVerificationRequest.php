@@ -12,8 +12,6 @@ class SendEmailVerificationRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -33,7 +31,7 @@ class SendEmailVerificationRequest extends FormRequest
 
         return [
             'email' => ['sometimes', 'email', $emailUniqueRule],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
     }
 }

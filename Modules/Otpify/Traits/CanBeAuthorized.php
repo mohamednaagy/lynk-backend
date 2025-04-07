@@ -13,9 +13,6 @@ use Modules\Otpify\Models\AuthorizationToken;
 trait CanBeAuthorized
 {
     /**
-     * @param  array  $data
-     * @return Builder|Model|MessageBag
-     *
      * @throws ValidationException
      */
     private function createAuthorizationToken(array $data): Model|Builder|MessageBag
@@ -31,19 +28,11 @@ trait CanBeAuthorized
         return AuthorizationToken::query()->create($data);
     }
 
-    /**
-     * @return string
-     */
     private function generateRandomToken(): string
     {
         return Str::random(config('otpify.authorized_token_length'));
     }
 
-    /**
-     * @param  string  $token
-     * @param  string  $area
-     * @return bool
-     */
     private function verifyToken(string $token, string $area): bool
     {
         $token = explode('|', $token);

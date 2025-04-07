@@ -16,8 +16,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class DownloadMedia extends Controller
 {
     /**
-     * @param  Request  $request
-     * @param $media
      * @return JsonResponse|StreamedResponse
      *
      * @throws AuthorizationException

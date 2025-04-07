@@ -61,7 +61,7 @@ class LenderSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$company, new CompanyTransformer())
+                fractal(self::$company, new CompanyTransformer)
                     ->parseIncludes([
                         'order_cost',
                         'does_order_require_approval',
@@ -82,7 +82,7 @@ class LenderSettingsIndexTest extends TestCase
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$company, new CompanyTransformer())
+                fractal(self::$company, new CompanyTransformer)
                     ->parseIncludes([
                         'order_cost',
                         'does_order_require_approval',

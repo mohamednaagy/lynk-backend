@@ -12,13 +12,10 @@ class GetWakalaTemplateAction implements GetWakalaTemplate
 
     /**
      * UpdateWakalaTemplateAction constructor.
-     *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
     public function handle(string $templateType): array
     {

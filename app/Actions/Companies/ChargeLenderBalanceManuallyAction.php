@@ -29,8 +29,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         protected CalculateVatAmount $calculateVatAmount,
         protected GetProjectSettings $getProjectSettings,
         protected CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount
-    ) {
-    }
+    ) {}
 
     public function handle(Company $company, array $data)
     {

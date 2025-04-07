@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithUser;
 
 class UpdateMyProfileTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $approvedCompany;
 
@@ -31,9 +31,6 @@ class UpdateMyProfileTest extends TestCase
 
     private static User $userLenderApi;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -52,9 +49,6 @@ class UpdateMyProfileTest extends TestCase
         self::$userLenderApi = $this->createLenderUser(self::$approvedCompany->id, Role::LenderApiUser);
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_update_his_profile(): void
     {
         $this->withHeader('X-Company', self::$approvedCompany->id)
@@ -65,9 +59,6 @@ class UpdateMyProfileTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_can_update_his_profile_without_updating_password(): void
     {
         $oldPassword = self::$userLenderWithApprovedCompany->password;
@@ -82,7 +73,7 @@ class UpdateMyProfileTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$userLenderWithApprovedCompany, new UserTransformer())
+                fractal(self::$userLenderWithApprovedCompany, new UserTransformer)
                     ->parseIncludes([
                         'id',
                         'first_name',
@@ -96,9 +87,6 @@ class UpdateMyProfileTest extends TestCase
         $this->assertEquals($oldPassword, self::$userLenderWithApprovedCompany->password);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_can_update_his_profile__with_updating_password(): void
     {
         $oldPassword = self::$userLenderWithApprovedCompany->password;
@@ -114,7 +102,7 @@ class UpdateMyProfileTest extends TestCase
             ])
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$userLenderWithApprovedCompany, new UserTransformer())
+                fractal(self::$userLenderWithApprovedCompany, new UserTransformer)
                     ->parseIncludes([
                         'id',
                         'first_name',
@@ -128,9 +116,6 @@ class UpdateMyProfileTest extends TestCase
         $this->assertNotEquals($oldPassword, self::$userLenderWithApprovedCompany->password);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_cant_update_his_profile_when_company_not_approved(): void
     {
         $this->actingAs(self::$notApprovedCompanyUserLender)
@@ -149,9 +134,6 @@ class UpdateMyProfileTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_cant_update_his_profile_when_has_role_lender_api(): void
     {
         $this->actingAs(self::$userLenderApi)
@@ -166,9 +148,6 @@ class UpdateMyProfileTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_cant_update_his_profile_when_email_not_verified(): void
     {
         $this->actingAs(self::$emailNotVerifiedUserLender)
@@ -187,9 +166,6 @@ class UpdateMyProfileTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_lender_update_his_profile_validation_rules(): void
     {
         $this->actingAs(self::$userLenderWithApprovedCompany)

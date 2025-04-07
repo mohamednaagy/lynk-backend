@@ -34,7 +34,7 @@ class MediaAuthorizer implements MediaAuthorizerContract
      */
     public function doesAreaHaveAccessToCollection($area)
     {
-        $getCollectionsByArea = new GetCollectionsByArea();
+        $getCollectionsByArea = new GetCollectionsByArea;
 
         return in_array($this->media->collection_name, $getCollectionsByArea($area));
     }
@@ -61,8 +61,6 @@ class MediaAuthorizer implements MediaAuthorizerContract
 
     /**
      * Summary of checker
-     *
-     * @return bool
      */
     public function canAccess(): bool
     {

@@ -15,9 +15,9 @@ use Tests\Traits\InteractsWithUser;
 
 class WebhookControllerStoreTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -39,9 +39,6 @@ class WebhookControllerStoreTest extends TestCase
 
     private static string $url;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

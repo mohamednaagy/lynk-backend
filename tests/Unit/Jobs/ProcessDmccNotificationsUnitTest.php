@@ -31,7 +31,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 200);
         });
 
-        (new ProcessDmccNotifications())->handle();
+        (new ProcessDmccNotifications)->handle();
 
         Bus::assertDispatched(ProcessDmccPtpNotification::class);
     }
@@ -49,7 +49,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 200);
         });
 
-        (new ProcessDmccNotifications())->handle();
+        (new ProcessDmccNotifications)->handle();
 
         Bus::assertDispatched(ProcessDmccPtpDocumentRetrievedOrder::class);
     }
@@ -67,7 +67,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 200);
         });
 
-        (new ProcessDmccNotifications())->handle();
+        (new ProcessDmccNotifications)->handle();
 
         Bus::assertDispatched(ProcessDmccMpoSaleCompleteNotification::class);
     }
@@ -85,7 +85,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 200);
         });
 
-        (new ProcessDmccNotifications())->handle();
+        (new ProcessDmccNotifications)->handle();
 
         Bus::assertDispatched(ProcessDmccMpoSaleCompleteNotification::class);
     }
@@ -103,7 +103,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 200);
         });
 
-        (new ProcessDmccNotifications())->handle();
+        (new ProcessDmccNotifications)->handle();
 
         Bus::assertDispatched(ProcessDmccCancelNotification::class);
     }
@@ -122,8 +122,8 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 500);
         });
 
-        (new ProcessDmccNotifications())->handle();
-        $this->assertDatabaseCount((new Activity())->getTable(), $logCount + 1);
+        (new ProcessDmccNotifications)->handle();
+        $this->assertDatabaseCount((new Activity)->getTable(), $logCount + 1);
     }
 
     public function test_process_dmcc_mpo_sale_complete_notification_error_logged()
@@ -140,7 +140,7 @@ class ProcessDmccNotificationsUnitTest extends TestCase
             ], 500);
         });
 
-        (new ProcessDmccNotifications())->handle();
-        $this->assertDatabaseCount((new Activity())->getTable(), $logCount + 1);
+        (new ProcessDmccNotifications)->handle();
+        $this->assertDatabaseCount((new Activity)->getTable(), $logCount + 1);
     }
 }

@@ -13,16 +13,10 @@ class CheckAreaOtp
 {
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
     /**
      * Handle an incoming request.
-     *
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @param  string  $area
-     * @return JsonResponse|Response
      */
     public function handle(Request $request, Closure $next, string $area): JsonResponse|Response
     {

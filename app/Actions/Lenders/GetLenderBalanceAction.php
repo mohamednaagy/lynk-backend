@@ -10,9 +10,7 @@ use Money\Money;
 
 class GetLenderBalanceAction implements GetLenderBalance
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function handle(Company $company): array
     {

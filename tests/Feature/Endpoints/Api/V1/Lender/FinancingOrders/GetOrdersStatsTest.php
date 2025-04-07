@@ -15,9 +15,9 @@ use Tests\Traits\InteractsWithUser;
 
 class GetOrdersStatsTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -27,9 +27,6 @@ class GetOrdersStatsTest extends TestCase
 
     private static User $userLenderOrderCreator;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

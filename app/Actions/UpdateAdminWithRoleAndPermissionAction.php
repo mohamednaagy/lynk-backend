@@ -10,23 +10,14 @@ use App\Models\User;
 
 class UpdateAdminWithRoleAndPermissionAction implements UpdateAdminWithRoleAndPermission
 {
-    /**
-     * @param  SyncRoleToUser  $syncRoleToUser
-     * @param  SyncPermissionToUser  $syncPermissionToUser
-     */
     public function __construct(
         protected UpdateUser $updateUser,
         protected SyncRoleToUser $syncRoleToUser,
         protected SyncPermissionToUser $syncPermissionToUser
-    ) {
-    }
+    ) {}
 
     /**
      * Create new user.
-     *
-     * @param  array  $data
-     * @param  User  $user
-     * @return void
      */
     public function handle(array $data, User $user): void
     {

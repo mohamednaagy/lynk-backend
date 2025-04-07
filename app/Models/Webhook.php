@@ -10,8 +10,8 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class Webhook extends Model
 {
-    use HasFactory;
     use BelongsToTenant;
+    use HasFactory;
 
     protected $casts = [
         'type' => WebhookType::class,

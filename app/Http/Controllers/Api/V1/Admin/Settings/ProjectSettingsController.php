@@ -31,15 +31,11 @@ class ProjectSettingsController extends Controller
 
     public function index(GetProjectSettings $getProjectSettings): JsonResponse
     {
-        return fractal($getProjectSettings->handle(), new ProjectSettingsTransformer())->respond();
+        return fractal($getProjectSettings->handle(), new ProjectSettingsTransformer)->respond();
     }
 
     /**
      * Handle the incoming request.
-     *
-     * @param  UpdateProjectSettingsRequest  $updateProjectSettingsRequest
-     * @param  UpdateProjectSettings  $updateProjectSettings
-     * @return JsonResponse
      */
     public function update(
         UpdateProjectSettingsRequest $updateProjectSettingsRequest,
@@ -48,6 +44,6 @@ class ProjectSettingsController extends Controller
         $data = $updateProjectSettingsRequest->validated();
         $data['vat_rate'] /= 100;
 
-        return fractal($updateProjectSettings->handle($data), new ProjectSettingsTransformer())->respond();
+        return fractal($updateProjectSettings->handle($data), new ProjectSettingsTransformer)->respond();
     }
 }

@@ -8,9 +8,6 @@ interface GetPaginatedUserEnquiries
 {
     /**
      * Create new enquiry.
-     *
-     * @param  int  $userId
-     * @return LengthAwarePaginator
      */
     public function handle(int $userId): LengthAwarePaginator;
 }

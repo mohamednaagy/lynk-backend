@@ -35,7 +35,7 @@ class GetPaginatedUserEnquiriesAction implements GetPaginatedUserEnquiries
     private function scopes()
     {
         return [
-            'status' => new EnquiryStatusScope(),
+            'status' => new EnquiryStatusScope,
         ];
     }
 }

@@ -30,7 +30,7 @@ class LenderLiteList extends Controller
             ->handle()
             ->get();
 
-        return fractal($companies, new CompanyTransformer())
+        return fractal($companies, new CompanyTransformer)
             ->parseIncludes([
                 'id',
                 'name',

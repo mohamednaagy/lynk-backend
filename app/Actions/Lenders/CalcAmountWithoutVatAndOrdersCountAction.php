@@ -14,8 +14,7 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
     public function __construct(
         protected GetProjectSettings $getProjectSettings,
         protected CalculateVatAmount $calculateVatAmount
-    ) {
-    }
+    ) {}
 
     /**
      * Update user.

@@ -26,10 +26,6 @@ class MakeOrderProceed extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  MakeOrderProceedRequest  $request
-     * @param  ProceedOrderInterface  $makeOrderProceed
-     * @param  FinancingOrder  $order
-     * @return JsonResponse
      *
      * @throws Throwable
      */

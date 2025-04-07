@@ -15,9 +15,9 @@ use Tests\Traits\InteractsWithUser;
 
 class WebhookControllerDestroyTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -43,9 +43,6 @@ class WebhookControllerDestroyTest extends TestCase
 
     private static Webhook $anotherWebhook;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();

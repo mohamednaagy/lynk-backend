@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class GetAuthAdminTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static User $userAdmin;
 
@@ -38,9 +38,6 @@ class GetAuthAdminTest extends TestCase
 
     private static Company $company;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -56,9 +53,6 @@ class GetAuthAdminTest extends TestCase
         self::$userLenderBilling = $this->createLenderUser(self::$company->id, Role::LenderBilling);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_fetch_his_details(): void
     {
         $this->getJson('api/v1/admin/auth')
@@ -68,9 +62,6 @@ class GetAuthAdminTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_can_fetch_his_details(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -92,9 +83,6 @@ class GetAuthAdminTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_manager_can_fetch_his_details(): void
     {
         $this->actingAs(self::$userManager)
@@ -116,9 +104,6 @@ class GetAuthAdminTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_manager_taken_permissions(): void
     {
         $expectedResponse = fractal(self::$userManager, new UserTransformer(Area::SuperAdmin))
@@ -148,9 +133,6 @@ class GetAuthAdminTest extends TestCase
         $this->assertTrue($responsePermissionsFirstItem['action'] == Action::Show);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_admin_can_not_fetch_his_details(): void
     {
         $this->actingAs(self::$userLender)
@@ -162,9 +144,6 @@ class GetAuthAdminTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_api_user_can_not_fetch_his_details(): void
     {
         $this->actingAs(self::$lenderApiUser)
@@ -176,9 +155,6 @@ class GetAuthAdminTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_supervisor_can_not_fetch_his_details(): void
     {
         $this->actingAs(self::$userLenderSupervisor)
@@ -190,9 +166,6 @@ class GetAuthAdminTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_order_creator_can_not_fetch_his_details(): void
     {
         $this->actingAs(self::$userLenderOrderCreator)
@@ -204,9 +177,6 @@ class GetAuthAdminTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_lender_billing_can_not_fetch_his_details(): void
     {
         $this->actingAs(self::$userLenderBilling)

@@ -6,9 +6,5 @@ use Spatie\LaravelSettings\Settings;
 
 interface GetSettingsClassInstance
 {
-    /**
-     * @param  string  $key
-     * @return Settings
-     */
     public function handle(string $key): Settings;
 }

@@ -24,7 +24,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class GetMurabahaPurchaseOfferTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -36,9 +36,6 @@ class GetMurabahaPurchaseOfferTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -78,9 +75,6 @@ class GetMurabahaPurchaseOfferTest extends TestCase
         self::$apiUrl = 'api/v1/trader/orders/'.self::$order->id.'/trader-orders/'.self::$traderOrder->id.'/murabaha-purchase-offer';
     }
 
-    /**
-     * @return void
-     */
     public function test_unauth_user_cannot_access(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -88,9 +82,6 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             ->assertUnauthorized();
     }
 
-    /**
-     * @return void
-     */
     public function test_auth_user_can_get_murabaha_purchase_offer(): void
     {
         $this->actingAs(self::$traderAdminUser)
@@ -104,9 +95,6 @@ class GetMurabahaPurchaseOfferTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_auth_user_cant_get_murabaha_purchase_offer_with_invalid_permissions(): void
     {
         $this->assertStatusCodeExceptForPermissions(Response::HTTP_FORBIDDEN,

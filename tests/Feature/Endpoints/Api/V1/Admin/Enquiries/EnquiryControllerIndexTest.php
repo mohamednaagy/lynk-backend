@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class EnquiryControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, InteractsWithEnquiry;
+    use InteractsWithCompany, InteractsWithEnquiry, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/enquiries';
 
@@ -43,8 +43,6 @@ class EnquiryControllerIndexTest extends TestCase
     private static mixed $paginatedEnquiries;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -63,9 +61,6 @@ class EnquiryControllerIndexTest extends TestCase
         self::$paginatedEnquiries = $this->app->make(GetPaginatedEnquiries::class);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_enquiries(): void
     {
         $this->getJson(self::BaseUrl)
@@ -75,16 +70,13 @@ class EnquiryControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_admin_role_can_index_enquiries(): void
     {
         $this->actingAs(self::$admin)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$paginatedEnquiries->handle(), new EnquiryTransformer())
+                fractal(self::$paginatedEnquiries->handle(), new EnquiryTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',
@@ -98,16 +90,13 @@ class EnquiryControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_index_enquiries(): void
     {
         $this->actingAs(self::$managerHasPermission)
             ->getJson(self::BaseUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$paginatedEnquiries->handle(), new EnquiryTransformer())
+                fractal(self::$paginatedEnquiries->handle(), new EnquiryTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',
@@ -121,9 +110,6 @@ class EnquiryControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_cannot_index_enquiries_with_no_permission(): void
     {
         $this->actingAs(self::$manager)
@@ -132,9 +118,6 @@ class EnquiryControllerIndexTest extends TestCase
             ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
-    /**
-     * @return void
-     */
     public function test_index_filtered_enquiries_by_status_succeed(): void
     {
         $response = $this->actingAs(self::$admin)
@@ -144,9 +127,6 @@ class EnquiryControllerIndexTest extends TestCase
         $this->assertEquals(EnquiryStatus::UnderReview, $response['data'][0]['status']['value']);
     }
 
-    /**
-     * @return void
-     */
     public function test_index_filtered_enquiries_by_creator_succeed(): void
     {
         $response = $this->actingAs(self::$admin)

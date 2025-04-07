@@ -16,8 +16,7 @@ class DeductTraderOrderVatPercentageAction implements DeductTraderOrderVatPercen
     public function __construct(
         protected CreateTransactions $createTransactions,
         protected GetProjectSettings $getProjectSettings
-    ) {
-    }
+    ) {}
 
     public function handle(TraderOrder $traderOrder, Transaction $transaction, Company $company)
     {

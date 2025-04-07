@@ -11,9 +11,6 @@ class CreateEnquiryAction implements CreateEnquiry
 {
     /**
      * Create new enquiry.
-     *
-     * @param  array  $data
-     * @return Enquiry
      */
     public function handle(array $data): Enquiry
     {

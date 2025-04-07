@@ -13,7 +13,6 @@ class GetAuthUser extends Controller
     /**
      * Handle an authentication attempt.
      *
-     * @param  Request  $request
      * @return JsonResponse
      */
     public function __invoke(Request $request)

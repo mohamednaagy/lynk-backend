@@ -21,7 +21,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UpdateOrderPaymentProofTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -39,9 +39,6 @@ class UpdateOrderPaymentProofTest extends TestCase
 
     private static string $apiUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -75,9 +72,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             '/payment-proof';
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_unauth_user_cant_make_order_completed(): void
     {
         $this->putJson(self::$apiUrl)
@@ -87,9 +81,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_only_roles_in_super_admin_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::SuperAdmin], function ($user, $role) {
@@ -116,9 +107,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_payment_proof_file_is_required(): void
     {
         $this->actingAs(self::$admin)
@@ -126,9 +114,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_payment_proof_file_should_be_supported_type(): void
     {
         $this->actingAs(self::$admin)
@@ -141,9 +126,6 @@ class UpdateOrderPaymentProofTest extends TestCase
             ->assertJsonValidationErrorFor('payment_proof');
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_will_return_error_response_if_flow_is_not_correct(): void
     {
         $statuses = FinancingOrderStatus::getValues();
@@ -165,9 +147,6 @@ class UpdateOrderPaymentProofTest extends TestCase
         }
     }
 
-    /**
-     * @return void
-     */
     public function test_update_order_payment_proof_that_successfully(): void
     {
         self::$financingOrder->update(['status' => FinancingOrderStatus::Completed]);

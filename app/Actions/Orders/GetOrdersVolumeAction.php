@@ -19,7 +19,6 @@ class GetOrdersVolumeAction implements GetOrdersVolume
     public const FORMAT_YEAR = 'Y';
 
     /**
-     * @param  array  $data
      * @return mixed
      */
     public function handle(array $data = [])
@@ -126,7 +125,6 @@ class GetOrdersVolumeAction implements GetOrdersVolume
      * determine orders format
      *
      * @param  mixed  $period
-     * @param  array  $orders
      * @return array
      */
     protected function formatOrdersByPeriod(string $period, array $orders)
@@ -140,7 +138,6 @@ class GetOrdersVolumeAction implements GetOrdersVolume
     /**
      * format orders in weeks
      *
-     * @param  array  $orders
      * @return array
      */
     protected function formatOrdersInWeeks(array $orders)

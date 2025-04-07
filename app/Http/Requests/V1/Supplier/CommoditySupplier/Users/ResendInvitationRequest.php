@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\V1\Supplier\CommoditySupplier\Users;
 
-
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,7 +24,7 @@ class ResendInvitationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
     }
 }

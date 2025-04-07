@@ -69,10 +69,10 @@ class MsegatDriver implements SmsDriverInterface
         $code = $response->object()->code;
 
         $match = match ($code) {
-            '1020' => new InvalidLoginInfoException(),
-            '1060' => new BalanceIsNotEnoughException(),
-            '1061' => new MSGDuplicatedException(),
-            '1120' => new MobileNumbersIsNotCorrectException(),
+            '1020' => new InvalidLoginInfoException,
+            '1060' => new BalanceIsNotEnoughException,
+            '1061' => new MSGDuplicatedException,
+            '1120' => new MobileNumbersIsNotCorrectException,
             default => null,
         };
 

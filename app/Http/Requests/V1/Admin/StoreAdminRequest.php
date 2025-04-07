@@ -71,7 +71,7 @@ class StoreAdminRequest extends FormRequest
                 'string',
                 new EnumValue(Action::class),
             ],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
         ];
     }
 }

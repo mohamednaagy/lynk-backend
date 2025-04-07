@@ -19,8 +19,8 @@ return new class extends Migration
 
         });
 
-         // Migrate data from `companies.contract_number` to `company_lender_details`
-         DB::table('companies')->select('id')->chunkById(100, function ($companies) {
+        // Migrate data from `companies.contract_number` to `company_lender_details`
+        DB::table('companies')->select('id')->chunkById(100, function ($companies) {
             foreach ($companies as $company) {
                 DB::table('company_lender_details')->updateOrInsert(
                     ['company_id' => $company->id],

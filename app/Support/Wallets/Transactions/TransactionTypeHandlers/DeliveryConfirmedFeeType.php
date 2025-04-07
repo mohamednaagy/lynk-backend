@@ -16,6 +16,7 @@ class DeliveryConfirmedFeeType implements TransactionTypeHandlerInterface
         $items = Arr::only($transaction->meta, ['type', 'financing_order_id', 'trader_order_id']);
         $traderOrder = isset($items['trader_order_id']) ? TraderOrder::find($items['trader_order_id']) : null;
         $traderReferenceNumber = $traderOrder ? ($traderOrder->reference ? $traderOrder->reference : $traderOrder->id) : '';
+
         return __('transaction-description.order_delivery_confirmed_fee', [
             'order_number' => $items['financing_order_id'] ?? '',
             'trader_order_reference_number' => $traderReferenceNumber,

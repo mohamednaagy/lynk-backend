@@ -24,7 +24,7 @@ class BuildPaginatedCompaniesQueryAction implements BuildPaginatedCompaniesQuery
     private function scopes(): array
     {
         return [
-            'search' => new CompanySearchScope(),
+            'search' => new CompanySearchScope,
         ];
     }
 

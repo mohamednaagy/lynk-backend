@@ -67,7 +67,7 @@ class InitiateTraderOrdersIfTimedOutTest extends TestCase
     {
         Queue::fake();
 
-        (new InitiateTraderOrdersIfTimedOut())->handle();
+        (new InitiateTraderOrdersIfTimedOut)->handle();
 
         Queue::assertPushed(ProcessBursamInitiateTraderOrder::class, 2);
     }

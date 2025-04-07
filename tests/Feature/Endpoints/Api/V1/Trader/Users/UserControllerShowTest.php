@@ -15,7 +15,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerShowTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -29,9 +29,6 @@ class UserControllerShowTest extends TestCase
 
     private static User $otherUserTraderAdmin;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -42,9 +39,6 @@ class UserControllerShowTest extends TestCase
         self::$otherUserTraderAdmin = $this->createTraderUser(self::$otherCompany->id);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_show_trader_user(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -55,9 +49,6 @@ class UserControllerShowTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_other_area_roles_of_not_trader_area_cant_show_trader_users_case(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -73,9 +64,6 @@ class UserControllerShowTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_can_show_trader_user(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -100,9 +88,6 @@ class UserControllerShowTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_user_cant_show_trader_user_in_other_company(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -111,9 +96,6 @@ class UserControllerShowTest extends TestCase
             ->assertNotFound();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_trader_admin_user_cant_show_trader_user_case_when_company_not_approved(): void
     {
         foreach (CompanyStatus::getValues() as $status) {
@@ -132,18 +114,18 @@ class UserControllerShowTest extends TestCase
         }
     }
 
-//    /**
-//     * @return void
-//     */
-//    public function test_that_trader_admin_user_cant_show_trader_user_case_email_not_verified(): void
-//    {
-//        self::$userTraderAdmin->update([
-//            'email_verified_at' => null,
-//        ]);
-//
-//        $this->actingAs(self::$userTraderAdmin)
-//            ->withHeader('X-Company', self::$company->id)
-//            ->getJson('api/v1/trader/users/'.self::$userTraderAdmin->id)
-//            ->assertForbidden();
-//    }
+    //    /**
+    //     * @return void
+    //     */
+    //    public function test_that_trader_admin_user_cant_show_trader_user_case_email_not_verified(): void
+    //    {
+    //        self::$userTraderAdmin->update([
+    //            'email_verified_at' => null,
+    //        ]);
+    //
+    //        $this->actingAs(self::$userTraderAdmin)
+    //            ->withHeader('X-Company', self::$company->id)
+    //            ->getJson('api/v1/trader/users/'.self::$userTraderAdmin->id)
+    //            ->assertForbidden();
+    //    }
 }

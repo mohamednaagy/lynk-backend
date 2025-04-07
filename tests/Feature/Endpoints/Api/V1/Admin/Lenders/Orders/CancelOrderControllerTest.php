@@ -21,9 +21,9 @@ use Tests\Traits\InteractsWithUser;
 
 class CancelOrderControllerTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
-    private static string  $endpoint = 'api/v1/admin/orders/';
+    private static string $endpoint = 'api/v1/admin/orders/';
 
     private static Company $company;
 

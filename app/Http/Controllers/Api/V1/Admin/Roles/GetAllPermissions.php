@@ -9,9 +9,6 @@ use Spatie\Permission\Models\Permission;
 
 class GetAllPermissions extends Controller
 {
-    /**
-     * @return JsonResponse
-     */
     public function __invoke(): JsonResponse
     {
         return $this->successResponse(Grantify::transformPermissionsToSubjectAction(Permission::all()));

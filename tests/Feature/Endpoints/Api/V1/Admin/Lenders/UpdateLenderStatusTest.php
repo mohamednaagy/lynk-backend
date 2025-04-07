@@ -20,7 +20,7 @@ use Tests\Traits\InteractsWithUser;
 
 class UpdateLenderStatusTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $lender;
 
@@ -35,8 +35,6 @@ class UpdateLenderStatusTest extends TestCase
     private static array $lenderStatusDetails;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -56,9 +54,6 @@ class UpdateLenderStatusTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_update_lender_status(): void
     {
         $this->putJson('api/v1/admin/lenders/'.self::$lender->id.'/status', self::$lenderStatusDetails)
@@ -68,9 +63,6 @@ class UpdateLenderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_can_update_lender_status(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -81,9 +73,6 @@ class UpdateLenderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_manager_can_update_lender_status(): void
     {
         $this->actingAs(self::$userManager)
@@ -94,9 +83,6 @@ class UpdateLenderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_manager_without_permissions_cant_update_lender_status(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
@@ -106,9 +92,6 @@ class UpdateLenderStatusTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_can_update_lender_status_and_see_updates_in_get_auth(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -127,9 +110,6 @@ class UpdateLenderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_cant_update_lender_status_without_status(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -145,9 +125,6 @@ class UpdateLenderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_cant_update_lender_status_without_public_status_comment(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -163,9 +140,6 @@ class UpdateLenderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_admin_cant_update_lender_status_without_internal_status_comment(): void
     {
         $this->actingAs(self::$userAdmin)

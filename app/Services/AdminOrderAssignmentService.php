@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\FinancingOrder;
-use App\Settings\Classes\GeneralSettings;
 use App\Models\User;
+use App\Settings\Classes\GeneralSettings;
 
 class AdminOrderAssignmentService
 {
@@ -14,10 +14,9 @@ class AdminOrderAssignmentService
     {
         $this->settings = $settings;
     }
+
     /**
      * Retrieve the list of order responsible admins from cache or database.
-     *
-     * @return array
      */
     public function getOrderResponsibleAdmins(): array
     {
@@ -26,9 +25,6 @@ class AdminOrderAssignmentService
 
     /**
      * Update the list of order responsible admins in the database and cache.
-     *
-     * @param array $admins
-     * @return void
      */
     public function updateOrderResponsibleAdmins(array $admins): void
     {
@@ -39,8 +35,7 @@ class AdminOrderAssignmentService
     /**
      * Remove an admin from the order responsible list.
      *
-     * @param Admin $admin
-     * @return void
+     * @param  Admin  $admin
      */
     public function removeAdmin(User $admin): void
     {
@@ -52,14 +47,13 @@ class AdminOrderAssignmentService
     /**
      * Add an admin to the order responsible list.
      *
-     * @param Admin $admin
-     * @return void
+     * @param  Admin  $admin
      */
     public function addAdmin(User $admin): void
     {
         $admins = $this->settings->order_responsible_admins;
-        if (!in_array($admin->id, $admins)) {
-            $admins[] = $admin->id; 
+        if (! in_array($admin->id, $admins)) {
+            $admins[] = $admin->id;
             $this->updateOrderResponsibleAdmins($admins);
         }
     }
@@ -67,7 +61,7 @@ class AdminOrderAssignmentService
     /**
      * Reorder the responsible admins and move a specific admin to the front.
      *
-     * @param User $admin
+     * @param  User  $admin
      * @return void
      */
     public function reOrderResponsableAdmins(): ?int
@@ -77,7 +71,7 @@ class AdminOrderAssignmentService
         if (empty($admins)) {
             return null;
         }
-        
+
         $nextAdmin = array_shift($admins);
         $admins[] = $nextAdmin;
 
@@ -85,7 +79,6 @@ class AdminOrderAssignmentService
 
         return $nextAdmin;
     }
-
 
     public function assignNextAdminToFinancingOrder(FinancingOrder $financingOrder): void
     {

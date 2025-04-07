@@ -17,9 +17,6 @@ class GetOrdersStatsAction implements GetOrdersStats
         return $this;
     }
 
-    /**
-     * @return array
-     */
     public function handle(): array
     {
         return [

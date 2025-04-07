@@ -11,8 +11,8 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class WalletNotification extends Model
 {
-    use HasFactory;
     use BelongsToTenant;
+    use HasFactory;
 
     protected $fillable = [
         'wallet_id',

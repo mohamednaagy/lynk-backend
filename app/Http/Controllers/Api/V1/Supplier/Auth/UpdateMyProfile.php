@@ -30,7 +30,7 @@ class UpdateMyProfile extends Controller
 
         $updateMyProfile->handle($user, $data, Area::Lender);
 
-        return fractal($user, new UserTransformer())
+        return fractal($user, new UserTransformer)
             ->parseIncludes([
                 'id',
                 'first_name',

@@ -27,8 +27,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
         protected CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount,
         protected GetProjectSettings $getProjectSettings,
         protected CalculateVatAmount $calculateVatAmount
-    ) {
-    }
+    ) {}
 
     public function handle(EdaatInvoice $edaatInvoice): void
     {
@@ -93,7 +92,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
             $ordersCount = 1;
         } else {
             $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
-            [ , , ,$ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
+            [, , ,$ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
                 ->handle($company, $totalAmountWithVat);
         }
 

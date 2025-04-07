@@ -14,18 +14,12 @@ class FakeTccDriverTest extends TestCase
 
     protected static string $phoneCountryCode;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
         self::$phoneCountryCode = 'SA';
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_mobile_number_matched(): void
     {
         $phoneNumber = PhoneNumber::make('500112233', self::$phoneCountryCode);
@@ -35,9 +29,6 @@ class FakeTccDriverTest extends TestCase
         $this->assertTrue($response);
     }
 
-    /**
-     * @return void
-     */
     public function test_mobile_verification_tcc_that_mobile_number_unmatched(): void
     {
         $this->expectException(MobileNumberNotMatchedException::class);

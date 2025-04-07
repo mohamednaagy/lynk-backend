@@ -31,7 +31,7 @@ class LenderTransactionController extends Controller
 
         return fractal(
             $transactions,
-            new TransactionTransformer()
+            new TransactionTransformer
         )
             ->parseIncludes([
                 'id',

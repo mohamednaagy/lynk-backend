@@ -21,8 +21,7 @@ class GenerateClientWakalaAction implements GenerateClientWakala
     public function __construct(
         protected GetWakalaTemplate $getWakalaTemplate,
         protected GetClientWakalaText $getClientWakalaText
-    ) {
-    }
+    ) {}
 
     public function handle(TraderOrder $traderOrder)
     {

@@ -26,10 +26,7 @@ class RejectOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  RejectOrderRequest  $rejectOrderRequest
-     * @param  RejectOrderInterface  $rejectOrder
      * @param  FinancingOrder  $order
-     * @return JsonResponse
      */
     public function __invoke(
         RejectOrderRequest $rejectOrderRequest,

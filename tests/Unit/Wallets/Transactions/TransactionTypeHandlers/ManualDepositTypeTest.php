@@ -39,7 +39,7 @@ class ManualDepositTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new ManualDepositType();
+        self::$transactionTypeHandler = new ManualDepositType;
         [self::$company, self::$wallet] = $this->createCompany(2000);
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)->deposit(self::$wallet, Money::parseByDecimal(-10000, Money::getDefaultCurrency()), 1);
     }

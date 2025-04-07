@@ -10,7 +10,7 @@ use Throwable;
 
 class OrderHasCompletedTraderOrderException extends Exception
 {
-    public function __construct(private int $orderId, string $message = '', int $code = 0, Throwable $previous = null)
+    public function __construct(private int $orderId, string $message = '', int $code = 0, ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }

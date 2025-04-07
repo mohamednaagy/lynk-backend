@@ -11,9 +11,7 @@ class CommittedOrder extends OrderAttributesSetter
 
     protected array $attributes = [];
 
-    protected function __construct(protected FinancingOrder $financingOrder)
-    {
-    }
+    protected function __construct(protected FinancingOrder $financingOrder) {}
 
     public static function of(FinancingOrder $financingOrder)
     {

@@ -12,7 +12,7 @@ use Tests\Traits\InteractsWithEnquiry;
 
 class GetVisitorEnquiryTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithEnquiry;
+    use InteractsWithEnquiry, RefreshDatabase;
 
     const BaseUrl = 'api/v1/visitor/enquiries';
 
@@ -22,9 +22,6 @@ class GetVisitorEnquiryTest extends TestCase
 
     private static string $signedVisitorEnquiryUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -37,15 +34,12 @@ class GetVisitorEnquiryTest extends TestCase
         self::$signedVisitorEnquiryUrl = self::BaseUrl.'/'.self::$visitorEnquiry->id.'?signature='.self::$enquirySignature;
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_can_get_enquiry_with_signature_url_succeed(): void
     {
         $this->getJson(self::$signedVisitorEnquiryUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$visitorEnquiry, new EnquiryTransformer())
+                fractal(self::$visitorEnquiry, new EnquiryTransformer)
                     ->parseIncludes([
                         'id',
                         'subject',
@@ -63,9 +57,6 @@ class GetVisitorEnquiryTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_cannot_get_enquiry_without_signature_url_succeed(): void
     {
         $this->getJson(self::BaseUrl.'/'.self::$visitorEnquiry->id)
@@ -73,9 +64,6 @@ class GetVisitorEnquiryTest extends TestCase
             ->assertJsonPath('message', __('Invalid signature.'));
     }
 
-    /**
-     * @return void
-     */
     public function test_that_visitor_cannot_get_not_found_enquiry_succeed(): void
     {
         $this->getJson(self::BaseUrl.'/111?signature='.self::$enquirySignature)

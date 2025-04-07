@@ -29,7 +29,7 @@ class ResetPasswordRequest extends FormRequest
             'token' => ['required', 'string'],
             'email' => ['required', 'email:filter'],
             'company_unique_name' => ['nullable', 'string'],
-            'company_type'  => ['required_with:company_unique_name', 'integer', 'in:'.implode(',', CompanyType::getValues())],
+            'company_type' => ['required_with:company_unique_name', 'integer', 'in:'.implode(',', CompanyType::getValues())],
             'password' => ['required', 'confirmed', Password::defaults()],
         ];
     }

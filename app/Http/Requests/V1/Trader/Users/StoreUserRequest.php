@@ -13,8 +13,6 @@ class StoreUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
@@ -38,7 +36,7 @@ class StoreUserRequest extends FormRequest
                 'email:filter',
                 tenant()->unique(User::class, 'email'),
             ],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::Trader)),

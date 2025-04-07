@@ -8,9 +8,6 @@ use Spatie\Permission\Models\Role;
 
 class GetAllRoles extends Controller
 {
-    /**
-     * @return JsonResponse
-     */
     public function __invoke(): JsonResponse
     {
         return $this->successResponse(Role::all()->toArray());

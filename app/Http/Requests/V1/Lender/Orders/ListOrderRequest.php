@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
-
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 

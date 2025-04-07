@@ -7,9 +7,6 @@ use Illuminate\Support\Str;
 
 class ReferenceNumberGenerator implements ReferenceNumberGeneratorInterface
 {
-    /**
-     * @return string
-     */
     public function generate(): string
     {
         return Str::random(20);

@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class ProjectSettingsUpdateTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithSettings, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithSettings, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/settings/project';
 
@@ -42,9 +42,6 @@ class ProjectSettingsUpdateTest extends TestCase
 
     private static array $projectSettingsData = [];
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -78,9 +75,6 @@ class ProjectSettingsUpdateTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_update_lender_settings_failed(): void
     {
         $this->putJson(self::BaseUrl)
@@ -90,9 +84,6 @@ class ProjectSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_authorized_user_without_right_role_cant_update_lender_settings_failed(): void
     {
         $this->actingAs(self::$userLenderAdmin)
@@ -102,8 +93,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_company_name_failed(): void
@@ -128,8 +117,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_company_name_en_failed(): void
@@ -151,8 +138,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_company_name_ar_failed(): void
@@ -174,8 +159,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_address_line_one_failed(): void
@@ -200,8 +183,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_address_line_one_en_failed(): void
@@ -223,8 +204,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_address_line_one_ar_failed(): void
@@ -246,8 +225,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_address_line_two_failed(): void
@@ -272,8 +249,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_address_line_two_en_failed(): void
@@ -295,8 +270,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_address_line_two_ar_failed(): void
@@ -318,8 +291,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_company_cr_failed(): void
@@ -338,8 +309,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_vat_id_failed(): void
@@ -358,8 +327,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_empty_vat_rate_failed(): void
@@ -378,8 +345,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_update_project_settings_on_invalid_vat_rate_failed(): void
@@ -401,8 +366,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_admin_role_can_update_project_settings_succeed(): void
@@ -421,8 +384,6 @@ class ProjectSettingsUpdateTest extends TestCase
     }
 
     /**
-     * @return void
-     *
      * @throws Exception
      */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_update_project_settings_succeed(): void
@@ -435,9 +396,6 @@ class ProjectSettingsUpdateTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_without_right_permissions_cannot_update_project_settings_failed(): void
     {
         $this->actingAs(self::$manager)

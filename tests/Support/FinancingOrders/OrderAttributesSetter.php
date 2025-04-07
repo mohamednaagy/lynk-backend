@@ -72,7 +72,7 @@ abstract class OrderAttributesSetter
         return $this;
     }
 
-    public function approvedAt(User $approver, null|Carbon $approvedAt)
+    public function approvedAt(User $approver, ?Carbon $approvedAt)
     {
         $this->attributes['approved_at'] = $approvedAt;
         $this->attributes['approver_id'] = $approver->id;
@@ -87,7 +87,7 @@ abstract class OrderAttributesSetter
         return $this;
     }
 
-    public function statusReason(string|null $reason)
+    public function statusReason(?string $reason)
     {
         $this->attributes['status_reason'] = $reason;
 

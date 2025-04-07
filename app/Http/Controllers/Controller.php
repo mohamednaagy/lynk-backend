@@ -13,11 +13,6 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    /**
-     * @param  array  $data
-     * @param  int  $statusCode
-     * @return JsonResponse
-     */
     protected function successResponse(
         array $data = [],
         int $statusCode = Response::HTTP_OK
@@ -27,16 +22,10 @@ class Controller extends BaseController
         ], $statusCode);
     }
 
-    /**
-     * @param  string  $message
-     * @param  int  $code
-     * @param  int  $statusCode
-     * @return JsonResponse
-     */
     protected function errorResponse(
         string $message = 'something went wrong',
         int $statusCode = Response::HTTP_BAD_REQUEST,
-        int $code = null
+        ?int $code = null
     ): JsonResponse {
         $response = [
             'message' => $message,

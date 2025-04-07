@@ -24,7 +24,7 @@ class TransactionCollection extends Collection
             ->whereIn('reason', [TransactionReason::VatPercentageFee, TransactionReason::VatPercentageOnDeposit])
             ->get();
 
-        $mediaKeyedByModelId = Media::where('model_type', (new Transaction())->getMorphClass())
+        $mediaKeyedByModelId = Media::where('model_type', (new Transaction)->getMorphClass())
             ->whereIn('model_id', $relatedTransactions->pluck('id'))
             ->where('collection_name', TransactionMediaCollection::ZatcaInvoice)
             ->get()

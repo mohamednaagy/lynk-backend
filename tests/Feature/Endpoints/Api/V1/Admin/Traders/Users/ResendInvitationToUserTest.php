@@ -14,7 +14,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class ResendInvitationToUserTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $trader;
 
@@ -43,9 +43,6 @@ class ResendInvitationToUserTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_index_trader_users(): void
     {
         $this->postJson(

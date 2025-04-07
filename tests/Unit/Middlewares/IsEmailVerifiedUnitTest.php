@@ -18,15 +18,12 @@ use Tests\Traits\InteractsWithUser;
 
 class IsEmailVerifiedUnitTest extends TestCase
 {
-    use RefreshDatabase , InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany , InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
     private static User $userLenderAdmin;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -44,13 +41,13 @@ class IsEmailVerifiedUnitTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $request->setUserResolver(function () {
             return self::$userLenderAdmin;
         });
 
-        $settingsClass = new GetSettingsClassInstanceAction();
+        $settingsClass = new GetSettingsClassInstanceAction;
         $middleware = new IsEmailVerified($settingsClass);
 
         foreach (Area::getValues() as $key => $area) {
@@ -59,8 +56,7 @@ class IsEmailVerifiedUnitTest extends TestCase
                 $areaSettingsClass->email_verification_enabled = true;
                 $areaSettingsClass->save();
 
-                $middleware->handle($request, function ($request) {
-                }, $area);
+                $middleware->handle($request, function ($request) {}, $area);
             }
         }
     }
@@ -72,7 +68,7 @@ class IsEmailVerifiedUnitTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $request->headers->add(['Accept' => 'application/json']);
 
@@ -80,7 +76,7 @@ class IsEmailVerifiedUnitTest extends TestCase
             return self::$userLenderAdmin;
         });
 
-        $settingsClass = new GetSettingsClassInstanceAction();
+        $settingsClass = new GetSettingsClassInstanceAction;
         $middleware = new IsEmailVerified($settingsClass);
 
         foreach (Area::getValues() as $key => $area) {
@@ -89,8 +85,7 @@ class IsEmailVerifiedUnitTest extends TestCase
                 $areaSettingsClass->email_verification_enabled = true;
                 $areaSettingsClass->save();
 
-                $response = $middleware->handle($request, function ($request) {
-                }, $area);
+                $response = $middleware->handle($request, function ($request) {}, $area);
 
                 $this->assertEquals(
                     ErrorCode::EMAIL_NOT_VERIFIED,
@@ -111,13 +106,13 @@ class IsEmailVerifiedUnitTest extends TestCase
 
         $this->actingAs(self::$userLenderAdmin);
 
-        $request = new Request();
+        $request = new Request;
 
         $request->setUserResolver(function () {
             return self::$userLenderAdmin;
         });
 
-        $settingsClass = new GetSettingsClassInstanceAction();
+        $settingsClass = new GetSettingsClassInstanceAction;
         $middleware = new IsEmailVerified($settingsClass);
 
         foreach (Area::getValues() as $key => $area) {
@@ -139,23 +134,21 @@ class IsEmailVerifiedUnitTest extends TestCase
         $this->expectException(HttpException::class);
         $this->expectExceptionMessage(__('error.must_verify_email'));
 
-        $request = new Request();
+        $request = new Request;
 
-        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction());
+        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction);
 
-        $middleware->handle($request, function ($request) {
-        }, Area::Lender);
+        $middleware->handle($request, function ($request) {}, Area::Lender);
     }
 
     public function test_is_email_verified_with_request_as_json_when_if_user_is_not_auth()
     {
-        $request = new Request();
+        $request = new Request;
         $request->headers->add(['Accept' => 'application/json']);
 
-        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction());
+        $middleware = new IsEmailVerified(new GetSettingsClassInstanceAction);
 
-        $response = $middleware->handle($request, function ($request) {
-        }, Area::Lender);
+        $response = $middleware->handle($request, function ($request) {}, Area::Lender);
 
         $this->assertEquals(
             ErrorCode::EMAIL_NOT_VERIFIED,

@@ -15,7 +15,7 @@ use Tests\Traits\InteractsWithCompany;
 
 class UserControllerStoreTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithCompany, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, RefreshDatabase;
 
     private static User $userAdmin;
 
@@ -29,9 +29,6 @@ class UserControllerStoreTest extends TestCase
 
     private static string $endPoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -53,9 +50,6 @@ class UserControllerStoreTest extends TestCase
         self::$endPoint = 'api/v1/admin/traders/'.self::$company->id.'/users';
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_store_trader_user(): void
     {
         $this->postJson(self::$endPoint, self::$userData)
@@ -100,9 +94,6 @@ class UserControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_unauthorized_user_roles_can_store_trader_user(): void
     {
         $this->assertStatusCodeForAreaRoles(403, Area::Trader, function ($user, $role) {
@@ -111,9 +102,6 @@ class UserControllerStoreTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_super_admin_roles_can_store_trader_user_successfully(): void
     {
         $this->assertStatusCodeForAreaRoles(200, Area::Trader, function ($user, $role) {

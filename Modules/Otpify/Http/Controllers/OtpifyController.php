@@ -20,14 +20,8 @@ use Twilio\Exceptions\TwilioException;
 
 class OtpifyController extends Controller
 {
-    public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance)
-    {
-    }
+    public function __construct(protected GetSettingsClassInstance $getSettingsClassInstance) {}
 
-    /**
-     * @param  OtpifyRequest  $otpifyRequest
-     * @return JsonResponse
-     */
     public function generateOtp(
         OtpifyRequest $otpifyRequest
     ): JsonResponse {
@@ -47,10 +41,6 @@ class OtpifyController extends Controller
         }
     }
 
-    /**
-     * @param  OtpifyRequest  $otpifyRequest
-     * @return JsonResponse
-     */
     public function verifyOtpCode(OtpifyRequest $otpifyRequest): JsonResponse
     {
         $data = $otpifyRequest->validated();

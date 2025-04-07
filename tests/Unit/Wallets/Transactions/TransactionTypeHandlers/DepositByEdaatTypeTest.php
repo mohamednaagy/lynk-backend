@@ -39,7 +39,7 @@ class DepositByEdaatTypeTest extends TestCase
     {
         parent::setUp();
 
-        self::$transactionTypeHandler = new DepositByEdaatType();
+        self::$transactionTypeHandler = new DepositByEdaatType;
         [self::$company, self::$wallet] = $this->createCompany(2000);
         self::$depositTransaction = app()->make(TransactionServiceInterface::class)
             ->deposit(

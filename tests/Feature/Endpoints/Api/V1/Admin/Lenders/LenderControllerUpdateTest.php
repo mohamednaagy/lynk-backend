@@ -237,7 +237,7 @@ class LenderControllerUpdateTest extends TestCase
             ->assertExactJson([
                 'message' => 'The force preferred commodity type field is required when preferred commodity types is present.',
                 'errors' => [
-                    "force_preferred_commodity_type" => [
+                    'force_preferred_commodity_type' => [
                         'The force preferred commodity type field is required when preferred commodity types is present.',
                     ],
                 ],
@@ -251,7 +251,7 @@ class LenderControllerUpdateTest extends TestCase
             ->postJson(self::$endpoint, self::$lenderDetails)
             ->assertOk();
 
-            $this->assertEquals(false, self::$lender->refresh()->force_preferred_market_type);
+        $this->assertEquals(false, self::$lender->refresh()->force_preferred_market_type);
 
     }
 

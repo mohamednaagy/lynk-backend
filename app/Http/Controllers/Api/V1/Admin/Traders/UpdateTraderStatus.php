@@ -23,11 +23,6 @@ class UpdateTraderStatus extends Controller
 
     /**
      * Summary of __invoke
-     *
-     * @param  UpdateTraderStatusRequest  $request
-     * @param  Company  $trader
-     * @param  UpdateCompany  $updateCompany
-     * @return JsonResponse
      */
     public function __invoke(
         UpdateTraderStatusRequest $request,

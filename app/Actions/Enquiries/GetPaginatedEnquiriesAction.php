@@ -10,11 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class GetPaginatedEnquiriesAction implements GetPaginatedEnquiries
 {
-    /**
-     * @param  int|null  $paginate
-     * @return LengthAwarePaginator
-     */
-    public function handle(int $paginate = null): LengthAwarePaginator
+    public function handle(?int $paginate = null): LengthAwarePaginator
     {
         return Enquiry::query()
             ->with('user.company')
@@ -26,8 +22,8 @@ class GetPaginatedEnquiriesAction implements GetPaginatedEnquiries
     private function scopes(): array
     {
         return [
-            'status' => new EnquiryStatusScope(),
-            'creator' => new EnquiryCreatorScope(),
+            'status' => new EnquiryStatusScope,
+            'creator' => new EnquiryCreatorScope,
         ];
     }
 }

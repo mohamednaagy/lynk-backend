@@ -53,7 +53,7 @@ class WebhookTypeLimitRule implements Rule
         $limit = Config::get('webhook-server.limits');
 
         if (! isset($limit[$type])) {
-            throw new WebhookTypeNotFoundException();
+            throw new WebhookTypeNotFoundException;
         }
 
         return $limit[$type];

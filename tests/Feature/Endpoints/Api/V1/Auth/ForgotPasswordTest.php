@@ -18,7 +18,7 @@ use Tests\Traits\InteractsWithUser;
 
 class ForgotPasswordTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -30,9 +30,6 @@ class ForgotPasswordTest extends TestCase
 
     private static string $resetPasswordUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -48,8 +45,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Sends the password reset email when the user exists.
-     *
-     * @return void
      */
     public function test_sending_reset_password_email_is_successful(): void
     {
@@ -69,8 +64,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Sends the password reset email when the user has super admin role.
-     *
-     * @return void
      */
     public function test_sending_reset_password_email_is_successful_when_user_has_super_admin_role(): void
     {
@@ -90,8 +83,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Sends the password reset email when the user exists.
-     *
-     * @return void
      */
     public function test_sending_reset_password_email_is_successful_when_user_has_lender_admin_role(): void
     {
@@ -110,8 +101,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Sends the password reset email when the user exists.
-     *
-     * @return void
      */
     public function test_sending_reset_password_email_on_invalid_company_unique_name(): void
     {
@@ -129,8 +118,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Does not send a password reset email when the user does not exist.
-     *
-     * @return void
      */
     public function test_failure_of_sending_reset_password_email(): void
     {
@@ -146,8 +133,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Allows a user to reset their password.
-     *
-     * @return void
      */
     public function test_resetting_user_password(): void
     {
@@ -165,8 +150,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Allows a user to reset their password.
-     *
-     * @return void
      */
     public function test_resetting_user_password_when_user_has_super_admin_role(): void
     {
@@ -186,8 +169,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Allows a user to reset their password.
-     *
-     * @return void
      */
     public function test_resetting_user_password_when_user_has_lender_admin_role(): void
     {
@@ -206,8 +187,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Allows a user to reset their password.
-     *
-     * @return void
      */
     public function test_resetting_user_password_on_empty_email(): void
     {
@@ -233,8 +212,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Allows a user to reset their password.
-     *
-     * @return void
      */
     public function test_resetting_user_password_on_invalid_password(): void
     {
@@ -262,8 +239,6 @@ class ForgotPasswordTest extends TestCase
 
     /**
      * Allows a user to reset their password.
-     *
-     * @return void
      */
     public function test_resetting_user_password_on_empty_password_and_password_confirmation(): void
     {

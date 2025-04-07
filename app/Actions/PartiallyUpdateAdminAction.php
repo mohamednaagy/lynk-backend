@@ -11,8 +11,6 @@ class PartiallyUpdateAdminAction implements PartiallyUpdateAdmin
     /**
      * Create new user.
      *
-     * @param  array  $data
-     * @param  User  $user
      * @return void
      */
     public function handle(array $data, User $user): bool

@@ -13,7 +13,6 @@ class SendEmailVerification extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  SendEmailVerificationRequest  $request
      * @return JsonResponse
      */
     public function __invoke(SendEmailVerificationRequest $request)

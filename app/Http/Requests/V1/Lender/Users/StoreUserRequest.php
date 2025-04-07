@@ -38,7 +38,7 @@ class StoreUserRequest extends FormRequest
                 'email:filter',
                 tenant()->unique(User::class, 'email'),
             ],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::Lender)),

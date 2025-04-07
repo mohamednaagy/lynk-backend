@@ -18,10 +18,9 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
         protected TransactionServiceInterface $transactionService,
         protected CreateTransactions $createTransactions,
         protected ReferenceNumberGeneratorInterface $referenceGenerator
-    ) {
-    }
+    ) {}
 
-    public function handle(TraderOrder $traderOrder, int $refundReason = null)
+    public function handle(TraderOrder $traderOrder, ?int $refundReason = null)
     {
         $financingOrder = $traderOrder->order;
         $company = $financingOrder->company()->withTrashed()->first();

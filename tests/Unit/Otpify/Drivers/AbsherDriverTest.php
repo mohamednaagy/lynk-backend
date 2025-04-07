@@ -45,7 +45,7 @@ class AbsherDriverTest extends TestCase
 
     public function test_absher_driver_send_method_return_instanceof_otpify_code()
     {
-        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp = Otpify::send(new Request, self::$financingOrder);
 
         $this->assertInstanceOf(OtpifyCode::class, $otp);
     }
@@ -54,44 +54,44 @@ class AbsherDriverTest extends TestCase
     {
         $this->expectException(OtpCodeNotFoundException::class);
 
-        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp = Otpify::send(new Request, self::$financingOrder);
         $otp->update(['tcn' => null]);
-        Otpify::verify(new Request(), $otp->id, 123);
+        Otpify::verify(new Request, $otp->id, 123);
     }
 
     public function test_absher_driver_verify_method_fails_if_code_is_already_used()
     {
         $this->expectException(OtpCodeAlreadyUsedException::class);
 
-        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp = Otpify::send(new Request, self::$financingOrder);
         $otp->update(['expired_at' => now()]);
-        Otpify::verify(new Request(), $otp->id, 123);
+        Otpify::verify(new Request, $otp->id, 123);
     }
 
     public function test_absher_driver_verify_method_fails_if_code_is_expired()
     {
         $this->expectException(OtpCodeExpiredException::class);
 
-        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp = Otpify::send(new Request, self::$financingOrder);
         $otp->update(['expiration_date' => now()->subDay()]);
-        Otpify::verify(new Request(), $otp->id, 123);
+        Otpify::verify(new Request, $otp->id, 123);
     }
 
     public function test_absher_driver_otp_code_is_fails_if_code_is_not_correct()
     {
         $this->expectException(OtpCodeIncorrectException::class);
 
-        $otp = Otpify::send(new Request(), self::$financingOrder);
-        Otpify::verify(new Request(), $otp->id, 123);
+        $otp = Otpify::send(new Request, self::$financingOrder);
+        Otpify::verify(new Request, $otp->id, 123);
     }
 
     public function test_absher_driver_otp_code_fails_if_additional_check_callback_returns_false()
     {
         $this->expectException(OtpCodeAdditionalCheckException::class);
 
-        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp = Otpify::send(new Request, self::$financingOrder);
 
-        Otpify::verify(new Request(), $otp->id, 123, function ($request, $otp) {
+        Otpify::verify(new Request, $otp->id, 123, function ($request, $otp) {
             return false;
         });
     }
@@ -100,8 +100,8 @@ class AbsherDriverTest extends TestCase
     {
         $this->expectException(OtpCodeNotFoundException::class);
 
-        $otp = Otpify::send(new Request(), self::$financingOrder);
+        $otp = Otpify::send(new Request, self::$financingOrder);
         $otp->update(['driver' => 'fake']);
-        Otpify::verify(new Request(), $otp->id, 123);
+        Otpify::verify(new Request, $otp->id, 123);
     }
 }

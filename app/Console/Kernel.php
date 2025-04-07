@@ -3,7 +3,6 @@
 namespace App\Console;
 
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
-use App\Jobs\checkExpiredContractSignedTimeTraderOrdersJob;
 use App\Jobs\General\ProcessFinancingOrders;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;

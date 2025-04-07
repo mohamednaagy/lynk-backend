@@ -8,8 +8,6 @@ interface UpdateLocalMurabahaSettings
 {
     /**
      * UpdateWakalaTemplateAction constructor.
-     *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(GetSettingsClassInstance $getSettingsClassInstance);
 

@@ -22,7 +22,7 @@ use Tests\Traits\InteractsWithUser;
 
 class UpdateTraderStatusTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Company $company;
 
@@ -37,8 +37,6 @@ class UpdateTraderStatusTest extends TestCase
     private static array $companyStatusDetails;
 
     /**
-     * @return void
-     *
      * @throws BindingResolutionException
      */
     public function setUp(): void
@@ -64,9 +62,6 @@ class UpdateTraderStatusTest extends TestCase
         ];
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_update_company_status_will_fail(): void
     {
         $this->putJson(
@@ -78,9 +73,6 @@ class UpdateTraderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_user_cant_update_company_status_with_invalid_roles_will_fail(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(401, [Area::SuperAdmin], function () {
@@ -93,9 +85,6 @@ class UpdateTraderStatusTest extends TestCase
         });
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_can_update_company_status_will_success(): void
     {
         $activityLogCount = Activity::query()->count();
@@ -112,12 +101,9 @@ class UpdateTraderStatusTest extends TestCase
         $this->assertTrue(self::$company->status->is(CompanyStatus::Approved));
         $this->assertEquals('public_status_comment', self::$company->public_status_comment);
         $this->assertEquals('internal_status_comment', self::$company->internal_status_comment);
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_can_update_company_status_will_success(): void
     {
         $activityLogCount = Activity::query()->count();
@@ -134,12 +120,9 @@ class UpdateTraderStatusTest extends TestCase
         $this->assertTrue(self::$company->status->is(CompanyStatus::Approved));
         $this->assertEquals('public_status_comment', self::$company->public_status_comment);
         $this->assertEquals('internal_status_comment', self::$company->internal_status_comment);
-        $this->assertDatabaseCount((new Activity())->getTable(), $activityLogCount + 1);
+        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_manager_without_permissions_cant_update_company_status_will_fail(): void
     {
         Grantify::syncPermissionToModel(self::$userManager, []);
@@ -149,9 +132,6 @@ class UpdateTraderStatusTest extends TestCase
             ->assertForbidden();
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_company_status_without_status_will_fail(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -167,9 +147,6 @@ class UpdateTraderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_company_status_without_public_status_comment_will_fail(): void
     {
         $this->actingAs(self::$userAdmin)
@@ -185,9 +162,6 @@ class UpdateTraderStatusTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_admin_cant_update_company_status_without_internal_status_comment_will_fail(): void
     {
         $this->actingAs(self::$userAdmin)

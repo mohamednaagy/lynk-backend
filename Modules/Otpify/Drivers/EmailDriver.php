@@ -91,24 +91,24 @@ class EmailDriver implements OtpifyDriverInterface
     {
 
         if ($otpifyCode->driver !== $this->getDriverName()) {
-            throw new OtpCodeNotFoundException();
+            throw new OtpCodeNotFoundException;
         }
 
         if (! Hash::check($code, $otpifyCode->otp_code)) {
-            throw new OtpCodeIncorrectException();
+            throw new OtpCodeIncorrectException;
         }
 
         if ($otpifyCode->expired_at != null) {
-            throw new OtpCodeAlreadyUsedException();
+            throw new OtpCodeAlreadyUsedException;
         }
 
         if ($this->isCodeExpired($otpifyCode->expiration_date)) {
-            throw new OtpCodeExpiredException();
+            throw new OtpCodeExpiredException;
         }
 
         if ($additionalCheckCallback) {
             if (! $additionalCheckCallback($request, $otpifyCode)) {
-                throw new OtpCodeAdditionalCheckException();
+                throw new OtpCodeAdditionalCheckException;
             }
         }
     }

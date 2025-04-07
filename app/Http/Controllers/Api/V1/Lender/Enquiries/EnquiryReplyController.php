@@ -16,9 +16,6 @@ class EnquiryReplyController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      */
     public function index(Enquiry $enquiry): JsonResponse
     {
@@ -28,7 +25,7 @@ class EnquiryReplyController extends Controller
             $query->latest();
         }]);
 
-        return fractal($enquiry->replies, new EnquiryReplyTransformer())
+        return fractal($enquiry->replies, new EnquiryReplyTransformer)
             ->parseIncludes([
                 'id',
                 'body',
@@ -40,11 +37,6 @@ class EnquiryReplyController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  Enquiry  $enquiry
-     * @param  StoreReplyToEnquiryRequest  $request
-     * @param  ReplyToEnquiryInterface  $replyToEnquiry
-     * @return JsonResponse
      */
     public function store(
         StoreReplyToEnquiryRequest $request,
@@ -78,7 +70,7 @@ class EnquiryReplyController extends Controller
                 ]);
             }
 
-            return fractal($enquiryReply, new EnquiryReplyTransformer())
+            return fractal($enquiryReply, new EnquiryReplyTransformer)
                 ->parseIncludes([
                     'id',
                     'body',

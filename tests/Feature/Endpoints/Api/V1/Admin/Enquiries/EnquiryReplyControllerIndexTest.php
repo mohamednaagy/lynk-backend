@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithUser;
 
 class EnquiryReplyControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithEnquiry;
+    use InteractsWithEnquiry, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/admin/enquiries/';
 
@@ -37,9 +37,6 @@ class EnquiryReplyControllerIndexTest extends TestCase
 
     private static string $enquiryReplyUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -55,9 +52,6 @@ class EnquiryReplyControllerIndexTest extends TestCase
         self::$enquiryReplyUrl = self::BaseUrl.self::$visitorEnquiry->id.'/replies';
     }
 
-    /**
-     * @return void
-     */
     public function test_that_un_auth_user_cant_index_enquiry_replies(): void
     {
         $this->getJson(self::$enquiryReplyUrl)
@@ -67,9 +61,6 @@ class EnquiryReplyControllerIndexTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_admin_role_can_index_enquiry_replies(): void
     {
         self::$visitorEnquiry->load('replies');
@@ -78,7 +69,7 @@ class EnquiryReplyControllerIndexTest extends TestCase
             ->getJson(self::$enquiryReplyUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$visitorEnquiry->replies, new EnquiryReplyTransformer())
+                fractal(self::$visitorEnquiry->replies, new EnquiryReplyTransformer)
                     ->parseIncludes([
                         'id',
                         'body',
@@ -90,9 +81,6 @@ class EnquiryReplyControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_and_right_permission_can_index_enquiry_replies(): void
     {
         self::$visitorEnquiry->load('replies');
@@ -101,7 +89,7 @@ class EnquiryReplyControllerIndexTest extends TestCase
             ->getJson(self::$enquiryReplyUrl)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal(self::$visitorEnquiry->replies, new EnquiryReplyTransformer())
+                fractal(self::$visitorEnquiry->replies, new EnquiryReplyTransformer)
                     ->parseIncludes([
                         'id',
                         'body',
@@ -113,9 +101,6 @@ class EnquiryReplyControllerIndexTest extends TestCase
             );
     }
 
-    /**
-     * @return void
-     */
     public function test_that_auth_user_has_manager_role_cannot_index_enquiry_replies_with_no_permission(): void
     {
         $this->actingAs(self::$manager)

@@ -13,8 +13,6 @@ class GetOrdersStats extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  Request  $request
-     * @param  OrdersGetOrdersStats  $getOrdersStats
      * @return JsonResponse
      */
     public function __invoke(Request $request, OrdersGetOrdersStats $getOrdersStats)

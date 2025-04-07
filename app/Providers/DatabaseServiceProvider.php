@@ -12,8 +12,6 @@ class DatabaseServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -23,7 +21,6 @@ class DatabaseServiceProvider extends ServiceProvider
     /**
      * Bootstrap services.
      *
-     * @return void
      *
      * @throws Throwable
      */

@@ -18,25 +18,16 @@ class EnquiryReply extends Model
         'role_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function enquiry(): BelongsTo
     {
         return $this->belongsTo(Enquiry::class);
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);

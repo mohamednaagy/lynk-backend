@@ -47,10 +47,6 @@ class WebhookController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  Request  $request
-     * @param  GetPaginatedWebhooks  $getPaginatedWebhooks
-     * @return JsonResponse
      */
     public function index(
         Request $request,
@@ -58,23 +54,19 @@ class WebhookController extends Controller
     ): JsonResponse {
         $webhooks = $getPaginatedWebhooks->handle();
 
-        return fractal($webhooks, new WebhookTransformer())
+        return fractal($webhooks, new WebhookTransformer)
             ->parseIncludes(['id', 'url', 'type'])
             ->respond();
     }
 
     /**
      * Handle the incoming request.
-     *
-     * @param  StoreWebhookRequest  $request
-     * @param  CreateWebhook  $createWebhook
-     * @return JsonResponse
      */
     public function store(StoreWebhookRequest $request, CreateWebhook $createWebhook): JsonResponse
     {
         $webhook = $createWebhook->handle($request->validated());
 
-        return fractal($webhook, new WebhookTransformer())
+        return fractal($webhook, new WebhookTransformer)
             ->parseIncludes(['id', 'url', 'type'])
             ->respond();
     }
@@ -82,7 +74,6 @@ class WebhookController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  Webhook  $webhook
      * @return JsonResponse
      */
     public function destroy(Webhook $webhook)
@@ -92,17 +83,13 @@ class WebhookController extends Controller
         return $this->successResponse();
     }
 
-    /**
-     * @param  UpdateWebhookSecretKey  $updateWebhookSecretKey
-     * @return JsonResponse
-     */
     public function refreshSecret(UpdateWebhookSecretKey $updateWebhookSecretKey): JsonResponse
     {
         $company = tenant();
 
         $company = $updateWebhookSecretKey->handle($company);
 
-        return fractal($company, new CompanyTransformer())
+        return fractal($company, new CompanyTransformer)
             ->parseIncludes(['webhook_secret_key'])
             ->respond();
     }

@@ -23,20 +23,19 @@ class SmsSent implements LogServiceRequest
         protected array $requestData,
         protected array $responseData,
         protected Carbon $timestamp
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {
         return SmsEvent::Sent;
     }
 
-    public function subject(): null|Model
+    public function subject(): ?Model
     {
         return null;
     }
 
-    public function causer(): null|Model
+    public function causer(): ?Model
     {
         return null;
     }

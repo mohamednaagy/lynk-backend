@@ -52,9 +52,6 @@ class UserController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  GetPaginatedTraderUsers  $getPaginatedTraderUsers
-     * @return JsonResponse
      */
     public function index(GetPaginatedTraderUsers $getPaginatedTraderUsers): JsonResponse
     {
@@ -75,10 +72,6 @@ class UserController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  StoreUserRequest  $request
-     * @param  CreateTraderUserWithRoleAndPermission  $createTraderUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function store(
         StoreUserRequest $request,
@@ -111,9 +104,6 @@ class UserController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  User  $user
-     * @return JsonResponse
      */
     public function show(User $user): JsonResponse
     {
@@ -136,11 +126,6 @@ class UserController extends Controller
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  UpdateUserRequest  $request
-     * @param  User  $user
-     * @param  UpdateTraderUserWithRoleAndPermission  $updateTraderUserWithRoleAndPermission
-     * @return JsonResponse
      */
     public function update(
         UpdateUserRequest $request,
@@ -149,7 +134,7 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction((function () use ($request, $user, $updateTraderUserWithRoleAndPermission) {
             if ($user->id == auth()->user()->getAuthIdentifier()) {
-                throw new AuthorizationException();
+                throw new AuthorizationException;
             }
 
             $updateTraderUserWithRoleAndPermission->handle($request->validated(), $user);
@@ -160,9 +145,6 @@ class UserController extends Controller
 
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  User  $user
-     * @return JsonResponse
      */
     public function destroy(User $user): JsonResponse
     {

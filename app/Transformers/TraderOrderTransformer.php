@@ -3,7 +3,6 @@
 namespace App\Transformers;
 
 use App\Enums\BursamProductCode;
-use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;

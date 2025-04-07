@@ -20,11 +20,6 @@ class FakeAbsherDriver implements OtpifyDriverInterface
 
     /**
      * Execute the driver logic.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Modules\Otpify\Contracts\Otpifiable  $otpifiable
-     * @param  array  $data
-     * @return \Modules\Otpify\Models\OtpifyCode
      */
     public function send(Request $request, Otpifiable $otpifiable, array $data = []): OtpifyCode
     {
@@ -33,10 +28,6 @@ class FakeAbsherDriver implements OtpifyDriverInterface
 
     /**
      * Execute the driver logic.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Modules\Otpify\Contracts\Otpifiable  $otpifiable
-     * @return bool
      */
     public function doesRequireVerifyingByOtp(Request $request, Otpifiable $otpifiable): bool
     {
@@ -46,11 +37,8 @@ class FakeAbsherDriver implements OtpifyDriverInterface
     /**
      * Execute the driver logic.
      *
-     * @param  Request  $request
      * @param  mixed  $vid
      * @param  mixed  $code
-     * @param  \Closure|null  $additionalCheckCallback
-     * @return string|bool
      *
      * @throws OtpCodeAdditionalCheckException
      * @throws OtpCodeAlreadyUsedException
@@ -58,19 +46,19 @@ class FakeAbsherDriver implements OtpifyDriverInterface
      * @throws OtpCodeIncorrectException
      * @throws OtpCodeNotFoundException
      */
-    public function verify(Request $request, $vid, $code, Closure $additionalCheckCallback = null): string|bool
+    public function verify(Request $request, $vid, $code, ?Closure $additionalCheckCallback = null): string|bool
     {
         $otpifyCode = $this->getOtpifyCode($vid);
         if ($otpifyCode->expired_at != null) {
-            throw new OtpCodeAlreadyUsedException();
+            throw new OtpCodeAlreadyUsedException;
         }
 
         if ($this->isCodeExpired($otpifyCode->expiration_date)) {
-            throw new OtpCodeExpiredException();
+            throw new OtpCodeExpiredException;
         }
 
         if ($additionalCheckCallback instanceof Closure && ! $additionalCheckCallback($request, $otpifyCode)) {
-            throw new OtpCodeAdditionalCheckException();
+            throw new OtpCodeAdditionalCheckException;
         }
 
         if ($code === '2023') {
@@ -106,9 +94,9 @@ class FakeAbsherDriver implements OtpifyDriverInterface
             $this->setOtpExpiredAt($otpifyCode);
 
             return true;
-        // return $this->createAuthorizationToken($request->all());
+            // return $this->createAuthorizationToken($request->all());
         } else {
-            throw new OtpCodeIncorrectException();
+            throw new OtpCodeIncorrectException;
         }
     }
 }

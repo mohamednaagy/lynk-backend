@@ -58,28 +58,28 @@ trait CanOtpifyCode
     public function verifyOtpifyCode(OtpifyCode $otpifyCode, Request $request, $code, ?Closure $additionalCheckCallback = null): void
     {
         if ($otpifyCode->driver !== $this->getDriverName()) {
-            throw new OtpCodeNotFoundException();
+            throw new OtpCodeNotFoundException;
         }
 
         if (auth()->user()->getAuthIdentifier() !== $otpifyCode->otpifiable_id) {
-            throw new OtpifiableNotEqualAuthUserException();
+            throw new OtpifiableNotEqualAuthUserException;
         }
 
         if (! Hash::check($code, $otpifyCode->otp_code)) {
-            throw new OtpCodeIncorrectException();
+            throw new OtpCodeIncorrectException;
         }
 
         if ($otpifyCode->expired_at != null) {
-            throw new OtpCodeAlreadyUsedException();
+            throw new OtpCodeAlreadyUsedException;
         }
 
         if ($this->isCodeExpired($otpifyCode->expiration_date)) {
-            throw new OtpCodeExpiredException();
+            throw new OtpCodeExpiredException;
         }
 
         if ($additionalCheckCallback) {
             if (! $additionalCheckCallback($request, $otpifyCode)) {
-                throw new OtpCodeAdditionalCheckException();
+                throw new OtpCodeAdditionalCheckException;
             }
         }
     }
@@ -92,7 +92,7 @@ trait CanOtpifyCode
         $otpifyCode = OtpifyCode::where('id', $vid)->first();
 
         if (! $otpifyCode) {
-            throw new OtpCodeNotFoundException();
+            throw new OtpCodeNotFoundException;
         }
 
         return $otpifyCode;

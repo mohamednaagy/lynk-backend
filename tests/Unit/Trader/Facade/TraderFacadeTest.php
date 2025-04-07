@@ -16,9 +16,6 @@ class TraderFacadeTest extends TestCase
         parent::setUp();
     }
 
-    /**
-     * @return void
-     */
     public function test_underlying_resolved_instance_trader_manager_class(): void
     {
         $this->assertInstanceOf(

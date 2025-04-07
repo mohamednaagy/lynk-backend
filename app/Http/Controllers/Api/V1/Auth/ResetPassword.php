@@ -14,7 +14,6 @@ use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
 class ResetPassword extends Controller
 {
     /**
-     * @param  ResetPasswordRequest  $request
      * @return \Illuminate\Http\JsonResponse
      *
      * @throws TenantCouldNotBeIdentifiedById

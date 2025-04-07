@@ -13,7 +13,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CanPayTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     private static Wallet $firstWallet;
 

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Config;
  */
 class Wallet extends Model
 {
-    use HasFactory, CanPay, HasUuids;
+    use CanPay, HasFactory, HasUuids;
 
     public function uniqueIds()
     {

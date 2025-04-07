@@ -18,10 +18,7 @@ class WalletReachedThreshold extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(protected WalletNotification $walletNotification)
-    {
-
-    }
+    public function __construct(protected WalletNotification $walletNotification) {}
 
     /**
      * Get the notification's delivery channels.

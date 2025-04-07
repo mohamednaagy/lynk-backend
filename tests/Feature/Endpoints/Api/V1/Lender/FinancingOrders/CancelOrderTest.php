@@ -19,7 +19,7 @@ use Tests\Traits\InteractsWithUser;
 
 class CancelOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithUser, InteractsWithCompany;
+    use InteractsWithCompany, InteractsWithUser, RefreshDatabase;
 
     const BaseUrl = 'api/v1/lender/orders/';
 
@@ -31,9 +31,6 @@ class CancelOrderTest extends TestCase
 
     private static string $orderCancledUrl;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -58,9 +55,6 @@ class CancelOrderTest extends TestCase
         ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_cannot_cancel_order_with_unauthorized_user(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -71,9 +65,6 @@ class CancelOrderTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_can_cancel_order_with_lender_admin(): void
     {
         $this->actingAs(self::$userLender)
@@ -92,9 +83,6 @@ class CancelOrderTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_can_cancel_order_with_lender_supervisor(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderSupervisor);
@@ -108,9 +96,6 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    /**
-     * @return void
-     */
     public function test_can_cancel_order_with_lender_api_user(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderApiUser);
@@ -122,9 +107,6 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    /**
-     * @return void
-     */
     public function test_cannot_cancel_order_with_lender_billing(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderBilling);
@@ -136,9 +118,6 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
-    /**
-     * @return void
-     */
     public function test_cannot_cancel_order_with_lender_order_creator(): void
     {
         Grantify::syncRoleToModel(self::$userLender, Role::LenderOrderCreator);
@@ -150,9 +129,6 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('message', 'User does not have the right permissions.');
     }
 
-    /**
-     * @return void
-     */
     public function test_cannot_cancel_order_with_not_verified_email_user(): void
     {
         // update user email verified at to be null
@@ -169,9 +145,6 @@ class CancelOrderTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_cannot_cancel_order_with_company_not_active(): void
     {
         // update user email verified at to be null
@@ -188,9 +161,6 @@ class CancelOrderTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_cancel_order_with_empty_status_reason(): void
     {
         $this->actingAs(self::$userLender)
@@ -205,7 +175,6 @@ class CancelOrderTest extends TestCase
     /**
      * @dataProvider cancellableStatusesDataProvider
      *
-     * @param $status
      * @return void
      */
     public function test_can_cancel_order_with_cancellable_statuses($status)
@@ -221,7 +190,6 @@ class CancelOrderTest extends TestCase
     /**
      * @dataProvider notCancellableStatusesDataProvider
      *
-     * @param $status
      * @return void
      */
     public function test_cannot_cancel_order_with_not_cancellable_statuses($status)

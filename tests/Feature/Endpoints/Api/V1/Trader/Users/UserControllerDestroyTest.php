@@ -14,7 +14,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class UserControllerDestroyTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $company;
 
@@ -30,11 +30,8 @@ class UserControllerDestroyTest extends TestCase
 
     private static User $otherUserTraderAdmin;
 
-    private static String $endPoint;
+    private static string $endPoint;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -47,9 +44,6 @@ class UserControllerDestroyTest extends TestCase
         self::$endPoint = 'api/v1/trader/users/'.self::$otherUserTraderAdminOfSameCompany->id;
     }
 
-    /**
-     * @return void
-     */
     public function test_un_auth_user_cant_delete_trader_user_unsuccessful(): void
     {
         $this->withHeader('X-Company', self::$company->id)
@@ -60,9 +54,6 @@ class UserControllerDestroyTest extends TestCase
             ]);
     }
 
-    /**
-     * @return void
-     */
     public function test_other_area_roles_of_not_trader_area_cant_delete_trader_users_case_successful(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(
@@ -79,9 +70,6 @@ class UserControllerDestroyTest extends TestCase
         );
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_admin_user_can_delete_trader_user_successful(): void
     {
         $traderUserCount = self::$company->users()->count();
@@ -99,9 +87,6 @@ class UserControllerDestroyTest extends TestCase
         $this->assertEquals($newTraderUserCount, $traderUserCount - 1);
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_admin_user_cant_delete_trader_user_in_other_company_unsuccessful(): void
     {
         $this->actingAs(self::$userTraderAdmin)
@@ -110,9 +95,6 @@ class UserControllerDestroyTest extends TestCase
             ->assertNotFound();
     }
 
-    /**
-     * @return void
-     */
     public function test_trader_admin_user_cant_delete_trader_user_case_when_company_not_approved_unsuccessful(): void
     {
         foreach (CompanyStatus::getValues() as $status) {

@@ -16,8 +16,7 @@ class CalculateVatAmountAction implements CalculateVatAmount
 
     public function __construct(
         protected GetProjectSettings $getProjectSettings
-    ) {
-    }
+    ) {}
 
     public function handle(): array
     {

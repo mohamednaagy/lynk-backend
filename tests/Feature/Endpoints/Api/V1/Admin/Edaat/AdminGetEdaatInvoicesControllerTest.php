@@ -21,8 +21,8 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class AdminGetEdaatInvoicesControllerTest extends TestCase
 {
-    use RefreshDatabase;
     use AssertsAccessByRoleAndArea;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -42,9 +42,6 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
 
     private static User $managerHasPermission;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -81,7 +78,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->getJson('api/v1/admin/edaat-invoices')
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($edaatInvoices, new EdaatInvoiceTransformer())
+                fractal($edaatInvoices, new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -108,7 +105,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->getJson('api/v1/admin/edaat-invoices?company_id='.self::$company->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($edaatInvoices, new EdaatInvoiceTransformer())
+                fractal($edaatInvoices, new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -137,7 +134,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->getJson('api/v1/admin/edaat-invoices?invoice_number='.$invoiceNumber)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($edaatInvoices, new EdaatInvoiceTransformer())
+                fractal($edaatInvoices, new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -168,7 +165,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->getJson('api/v1/admin/edaat-invoices?invoice_number='.$edaatInvoice->invoice_number.'&company_id='.self::$secondCompany->id)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($edaatInvoices, new EdaatInvoiceTransformer())
+                fractal($edaatInvoices, new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -194,7 +191,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->getJson('api/v1/admin/edaat-invoices?company_id='. 50)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($edaatInvoices, new EdaatInvoiceTransformer())
+                fractal($edaatInvoices, new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',
@@ -222,7 +219,7 @@ class AdminGetEdaatInvoicesControllerTest extends TestCase
             ->getJson('api/v1/admin/edaat-invoices?invlice_number='.$bigText)
             ->assertStatus(Response::HTTP_OK)
             ->assertExactJson(
-                fractal($edaatInvoices, new EdaatInvoiceTransformer())
+                fractal($edaatInvoices, new EdaatInvoiceTransformer)
                     ->parseIncludes([
                         'id',
                         'invoice_number',

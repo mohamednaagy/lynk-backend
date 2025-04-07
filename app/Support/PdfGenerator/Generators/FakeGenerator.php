@@ -14,9 +14,7 @@ class FakeGenerator implements GeneratorInterface
 
     protected $options = [];
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function outputFromHtml($html, $options = [])
     {
@@ -32,7 +30,7 @@ class FakeGenerator implements GeneratorInterface
                 $storageCallback = $options['storageCallback'];
                 unset($options['storageCallback']);
             } else {
-                throw new MissingStorageCallbackException();
+                throw new MissingStorageCallbackException;
             }
 
             $storedFile = $storageCallback($tmpFileResource);

@@ -15,8 +15,7 @@ class CreateSupplierUserWithRoleAndPermissionAction implements CreateSupplierUse
         protected CreateUser $createUser,
         protected AssignRoleToUser $assignRoleToUser,
         protected AssignPermissionToUser $assignPermissionToUser
-    ) {
-    }
+    ) {}
 
     /**
      * Create new user.

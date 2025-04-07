@@ -14,7 +14,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Transaction extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, HasUuids;
+    use HasFactory, HasUuids, InteractsWithMedia;
 
     public function uniqueIds()
     {

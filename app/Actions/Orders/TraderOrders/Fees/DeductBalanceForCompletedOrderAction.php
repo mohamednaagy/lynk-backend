@@ -10,8 +10,7 @@ class DeductBalanceForCompletedOrderAction implements DeductBalanceForCompletedO
 {
     public function __construct(
         protected DeductOrderCompletedFee $deductOrderCompletedFee
-    ) {
-    }
+    ) {}
 
     public function handle(TraderOrder $traderOrder): void
     {

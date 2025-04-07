@@ -18,8 +18,7 @@ class CommodityProductDto
         protected string $warehouse_or_vault_country = '--',
         protected string $currency = 'SAR',
         protected string $exchange_rate = '1',
-    ) {
-    }
+    ) {}
 
     public function getProduct(): string
     {

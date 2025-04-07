@@ -10,8 +10,6 @@ class FinancingOrderObserver
 {
     /**
      * Handle the TraderOrder "created" event.
-     *
-     * @return void
      */
     public function created(FinancingOrder $financingOrder): void
     {

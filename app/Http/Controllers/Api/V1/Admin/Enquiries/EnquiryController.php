@@ -28,13 +28,10 @@ class EnquiryController extends Controller
 
     /**
      * Display a listing of the resource.
-     *
-     * @param  GetPaginatedEnquiries  $getPaginatedEnquiries
-     * @return JsonResponse
      */
     public function index(GetPaginatedEnquiries $getPaginatedEnquiries): JsonResponse
     {
-        return fractal($getPaginatedEnquiries->handle(), new EnquiryTransformer())
+        return fractal($getPaginatedEnquiries->handle(), new EnquiryTransformer)
             ->parseIncludes([
                 'id',
                 'subject',
@@ -48,13 +45,10 @@ class EnquiryController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  Enquiry  $enquiry
-     * @return JsonResponse
      */
     public function show(Enquiry $enquiry): JsonResponse
     {
-        return fractal($enquiry, new EnquiryTransformer())
+        return fractal($enquiry, new EnquiryTransformer)
             ->parseIncludes([
                 'id',
                 'subject',

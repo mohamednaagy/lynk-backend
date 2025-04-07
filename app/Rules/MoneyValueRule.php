@@ -7,12 +7,9 @@ use Illuminate\Contracts\Validation\Rule;
 class MoneyValueRule implements Rule
 {
     /**
-     * @param  int  $decimal
      * @return void
      */
-    public function __construct(protected ?int $decimal = 2)
-    {
-    }
+    public function __construct(protected ?int $decimal = 2) {}
 
     /**
      * Determine if the validation rule passes.

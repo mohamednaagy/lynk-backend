@@ -10,8 +10,6 @@ class SmsManager extends Manager
 {
     /**
      * Get the default driver name.
-     *
-     * @return string
      */
     public function getDefaultDriver(): string
     {
@@ -34,7 +32,7 @@ class SmsManager extends Manager
      */
     public function createFakeDriver()
     {
-        return new FakeDriver();
+        return new FakeDriver;
     }
 
     /**

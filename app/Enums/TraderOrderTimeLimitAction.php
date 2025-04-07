@@ -12,10 +12,10 @@ final class TraderOrderTimeLimitAction extends Enum
     /**
      * No action is needed when the order reaches its time limit.
      */
-    const NoActionNeeded   =   1;
+    const NoActionNeeded = 1;
 
     /**
      * Automatically cancel the order when it reaches its time limit.
      */
-    const AutoCancelOrder  =   2;
+    const AutoCancelOrder = 2;
 }

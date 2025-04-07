@@ -10,10 +10,6 @@ trait InteractsWithAdmin
 {
     /**
      * Summary of createAdmin
-     *
-     * @param  string  $email
-     * @param  array  $data
-     * @return mixed
      */
     public function createAdmin(
         string $email = 'admin@bim.com',
@@ -33,11 +29,6 @@ trait InteractsWithAdmin
 
     /**
      * Summary of createManager
-     *
-     * @param  string  $email
-     * @param  array  $data
-     * @param  string|array  $permissions
-     * @return mixed
      */
     public function createManager(
         string $email = 'Manager@bim.com',

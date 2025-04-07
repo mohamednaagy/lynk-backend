@@ -15,9 +15,9 @@ use Tests\Traits\InteractsWithUser;
 
 class WebhookControllerRefreshSecretTest extends TestCase
 {
-    use RefreshDatabase;
-    use InteractsWithUser;
     use InteractsWithCompany;
+    use InteractsWithUser;
+    use RefreshDatabase;
 
     private static Company $company;
 
@@ -37,9 +37,6 @@ class WebhookControllerRefreshSecretTest extends TestCase
 
     private static User $lenderApiUser;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         parent::setUp();
@@ -115,16 +112,16 @@ class WebhookControllerRefreshSecretTest extends TestCase
             ]);
     }
 
-     public function test_webhook_controller_refresh_secret_lender_can_not_access_when_company_not_active()
-     {
-         $this->withHeader('X-Company', self::$companyNotActivated->id)
-             ->actingAs(self::$userLenderAdminBelongToCompanyNotActivated)
-             ->putJson('/api/v1/lender/webhooks/refresh-secret')
-             ->assertStatus(403)->assertJsonFragment([
-                 'message' => __('error.company_not_active'),
-                 'code' => ErrorCode::COMPANY_NOT_ACTIVE,
-             ]);
-     }
+    public function test_webhook_controller_refresh_secret_lender_can_not_access_when_company_not_active()
+    {
+        $this->withHeader('X-Company', self::$companyNotActivated->id)
+            ->actingAs(self::$userLenderAdminBelongToCompanyNotActivated)
+            ->putJson('/api/v1/lender/webhooks/refresh-secret')
+            ->assertStatus(403)->assertJsonFragment([
+                'message' => __('error.company_not_active'),
+                'code' => ErrorCode::COMPANY_NOT_ACTIVE,
+            ]);
+    }
 
     public function test_webhook_controller_refresh_secret_lender_billing_can_not_access()
     {

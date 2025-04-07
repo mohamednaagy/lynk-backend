@@ -16,7 +16,7 @@ use Tests\Traits\InteractsWithLender;
 
 class ProcessInProgressOrderTest extends TestCase
 {
-    use RefreshDatabase, InteractsWithLender;
+    use InteractsWithLender, RefreshDatabase;
 
     protected static Company $company;
 

@@ -23,8 +23,6 @@ class RetryProceedOrder extends Controller
     /**
      * Handle the incoming request.
      *
-     * @param  RetryOrder  $retryOrder
-     * @param  int  $order
      * @return JsonResponse
      */
     public function __invoke(

@@ -13,13 +13,10 @@ class UpdateWakalaTemplateAction implements UpdateWakalaTemplate
 
     /**
      * UpdateWakalaTemplateAction constructor.
-     *
-     * @param  GetSettingsClassInstance  $getSettingsClassInstance
      */
     public function __construct(
         protected GetSettingsClassInstance $getSettingsClassInstance
-    ) {
-    }
+    ) {}
 
     public function handle(array $data): void
     {

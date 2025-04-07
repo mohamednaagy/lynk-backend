@@ -11,6 +11,7 @@ class DeleteCommodityItemAction implements DeleteCommodityItem
     public function handle(CommodityItem $commodityItem): CommodityItem
     {
         DeleteCommodityItemJob::dispatch($commodityItem);
+
         return $commodityItem;
     }
 }

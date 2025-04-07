@@ -38,7 +38,7 @@ class TieredPricing extends Model
         $pricing = self::getPricingTier($company, $orderValue);
 
         if (! $pricing) {
-            throw new NoMatchOrderCostAndValueException();
+            throw new NoMatchOrderCostAndValueException;
         }
 
         if ($pricing->fee_type->is(OrderFeeType::Proration)) {

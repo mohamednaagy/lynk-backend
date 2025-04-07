@@ -21,9 +21,7 @@ class ProcessRetrieveOrderCertificates implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId)
-    {
-    }
+    public function __construct(protected int $traderOrderId) {}
 
     /**
      * Execute the job.

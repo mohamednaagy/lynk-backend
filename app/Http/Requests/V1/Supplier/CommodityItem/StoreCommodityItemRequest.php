@@ -33,7 +33,7 @@ class StoreCommodityItemRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:32',
-                new CommodityItemUniqueNameRole(),
+                new CommodityItemUniqueNameRole,
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id)->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:256', new SpecialCharValidation],

@@ -28,7 +28,7 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return  [
+        return [
             'first_name' => ['required', 'string', 'min:3', 'max:100'],
             'last_name' => ['required', 'string', 'min:3', 'max:100'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
@@ -39,7 +39,7 @@ class StoreUserRequest extends FormRequest
                 Rule::unique(User::class, 'email')
                     ->where('company_id', $this->trader->id),
             ],
-            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule(), new HostWhitelistRule()],
+            'redirect_url' => ['bail', 'required', 'url', new UrlProtocolRule, new HostWhitelistRule],
             'role' => [
                 'required',
                 Rule::in(Area::roles(Area::Trader)),

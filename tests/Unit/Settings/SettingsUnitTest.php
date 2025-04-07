@@ -16,7 +16,7 @@ class SettingsUnitTest extends TestCase
 
     public function test_index_get_all_settings()
     {
-        $instanceAction = new GetSettingsClassInstanceAction();
+        $instanceAction = new GetSettingsClassInstanceAction;
         $list = new ListSettingsAction($instanceAction);
 
         $this->assertIsArray($list->handle());
@@ -24,7 +24,7 @@ class SettingsUnitTest extends TestCase
 
     public function test_update_otp_enabled_settings()
     {
-        $getSettingAreaAction = new GetSettingsAreaAction();
+        $getSettingAreaAction = new GetSettingsAreaAction;
         $updateSettingsAction = new UpdateSettingsAction($getSettingAreaAction);
 
         $data = [
@@ -34,7 +34,7 @@ class SettingsUnitTest extends TestCase
         ];
         $updateSettingsAction->handle($data);
 
-        $getSettingsAction = new GetSettingsClassInstanceAction();
+        $getSettingsAction = new GetSettingsClassInstanceAction;
         $superAdminSettings = $getSettingsAction->handle(Area::SuperAdmin);
 
         $this->assertEquals($data['otp_enabled'], $superAdminSettings->otp_enabled);
@@ -42,7 +42,7 @@ class SettingsUnitTest extends TestCase
 
     public function test_update_otp_driver_settings()
     {
-        $getSettingAreaAction = new GetSettingsAreaAction();
+        $getSettingAreaAction = new GetSettingsAreaAction;
         $updateSettingsAction = new UpdateSettingsAction($getSettingAreaAction);
 
         $data = [
@@ -52,7 +52,7 @@ class SettingsUnitTest extends TestCase
         ];
         $updateSettingsAction->handle($data);
 
-        $getSettingsAction = new GetSettingsClassInstanceAction();
+        $getSettingsAction = new GetSettingsClassInstanceAction;
         $generalSettings = $getSettingsAction->handle(Area::SuperAdmin);
 
         $this->assertEquals($data['otp_driver'], $generalSettings->otp_driver);

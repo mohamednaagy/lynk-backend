@@ -13,8 +13,7 @@ class Order
         protected array $items,
         protected Carbon $invoiceDate,
         protected ?FinancingOrder $order = null,
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): Order
     {

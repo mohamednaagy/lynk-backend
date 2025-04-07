@@ -22,10 +22,6 @@ class GetMurabhaCompleteDocument extends Controller
 
     /**
      * Handle the incoming request.
-     *
-     * @param  int  $order
-     * @param  TraderOrder  $traderOrder
-     * @return JsonResponse
      */
     public function __invoke(
         int $order,

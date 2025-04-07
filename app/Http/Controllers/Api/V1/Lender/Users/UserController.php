@@ -129,7 +129,7 @@ class UserController extends Controller
     ): JsonResponse {
         return DB::transaction((function () use ($updateUserRequest, $user, $updateLenderUserWithRoleAndPermission) {
             if ($user->id == auth()->user()->getAuthIdentifier()) {
-                throw new AuthorizationException();
+                throw new AuthorizationException;
             }
 
             $updateLenderUserWithRoleAndPermission->handle($updateUserRequest->validated(), $user);

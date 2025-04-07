@@ -12,10 +12,6 @@ class GetLenderSetting extends Controller
 {
     /**
      * Handle an authentication attempt.
-     *
-     * @param  Request  $request
-     * @param  Company  $lender
-     * @return JsonResponse
      */
     public function __invoke(Request $request, Company $lender): JsonResponse
     {

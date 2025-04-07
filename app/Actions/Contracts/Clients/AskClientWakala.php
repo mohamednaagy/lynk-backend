@@ -6,10 +6,5 @@ use App\Models\FinancingOrder;
 
 interface AskClientWakala
 {
-    /**
-     * @param  FinancingOrder  $order
-     * @param  string  $url
-     * @return bool
-     */
     public function handle(FinancingOrder $order, string $url): bool;
 }

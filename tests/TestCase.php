@@ -34,7 +34,7 @@ abstract class TestCase extends BaseTestCase
         }
     }
 
-    protected function login(string $role = Role::Admin, string $test = null): string
+    protected function login(string $role = Role::Admin, ?string $test = null): string
     {
         $email = 'a@a.aa';
         $password = '12345678';
@@ -71,9 +71,9 @@ abstract class TestCase extends BaseTestCase
         return OtpifyCode::query()->create([
             'id' => (string) Str::uuid(),
             'initiator_id' => auth()->user()->getAuthIdentifier(),
-            'initiator_type' => (new User())->getMorphClass(),
+            'initiator_type' => (new User)->getMorphClass(),
             'otpifiable_id' => $otpifiableId,
-            'otpifiable_type' => (new User())->getMorphClass(),
+            'otpifiable_type' => (new User)->getMorphClass(),
             'otp_code' => Hash::make($code),
             'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
             'data' => $data,

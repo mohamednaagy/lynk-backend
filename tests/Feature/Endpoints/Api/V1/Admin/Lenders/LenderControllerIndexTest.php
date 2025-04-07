@@ -19,7 +19,7 @@ use Tests\Traits\AssertsAccessByRoleAndArea;
 
 class LenderControllerIndexTest extends TestCase
 {
-    use RefreshDatabase, AssertsAccessByRoleAndArea;
+    use AssertsAccessByRoleAndArea, RefreshDatabase;
 
     private static Company $lender;
 
@@ -69,7 +69,7 @@ class LenderControllerIndexTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
-                fractal($lenders, new CompanyTransformer())
+                fractal($lenders, new CompanyTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
@@ -104,7 +104,7 @@ class LenderControllerIndexTest extends TestCase
             ->getJson(self::$endpoint)
             ->assertOk()
             ->assertExactJson(
-                fractal($lenders, new CompanyTransformer())
+                fractal($lenders, new CompanyTransformer)
                     ->parseIncludes([
                         'id',
                         'name',
