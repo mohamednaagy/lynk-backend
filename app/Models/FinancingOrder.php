@@ -363,7 +363,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function isTradingMode(TraderOrderMode|string $mode)
     {
-        return $this->company->trading_mode->is($mode);
+        return $this->company?->lender->lenderDetail->trading_mode->is($mode);
     }
 
     public function isDefaultTraderAvailable()
