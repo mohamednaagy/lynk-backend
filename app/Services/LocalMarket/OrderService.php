@@ -47,7 +47,6 @@ class OrderService
                     'local_market_inventory_id',
                 ])
                 ->where('hold_for', $localMarketOrder->id)
-                ->lockForUpdate()
                 ->orderBy('id')
                 ->chunk($batchSize, function ($chunk) use ($localMarketOrder, $timestamp) {
                     $insertData = collect($chunk)->map(function ($unit) use ($localMarketOrder, $timestamp) {
