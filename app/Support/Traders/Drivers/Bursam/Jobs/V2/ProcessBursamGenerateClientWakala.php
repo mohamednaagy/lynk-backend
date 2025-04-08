@@ -60,12 +60,12 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
 
     public function retryUntil(): Carbon
     {
-        return now()->addMinutes(30);
+        return now()->addMinutes(5);
     }
 
     public function backoff(): array
     {
-        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
+        return [60, 120, 120];
     }
 
     public function middleware(): array

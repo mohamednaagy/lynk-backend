@@ -57,14 +57,14 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
         });
     }
 
-    public function backoff()
-    {
-        return [120, 240, 300];
-    }
-
     public function retryUntil(): Carbon
     {
-        return now()->addMinutes(30);
+        return now()->addMinutes(5);
+    }
+
+    public function backoff()
+    {
+        return [60, 120, 120];
     }
 
     public function middleware(): array
