@@ -18,10 +18,12 @@ class CompanyLenderClient extends Model
         'company_id',
         'type',
         'national_id',
+        'auto_complete_sell',
     ];
 
     protected $casts = [
         'type' => CompanyLenderClientType::class,
+        'auto_complete_sell' => 'boolean',
     ];
 
     public function getActivitylogOptions(): LogOptions
