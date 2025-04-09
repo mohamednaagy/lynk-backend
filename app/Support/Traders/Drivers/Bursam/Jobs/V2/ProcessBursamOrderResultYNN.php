@@ -7,10 +7,8 @@ use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCa
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
-use App\Exceptions\TraderException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
@@ -61,29 +59,9 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 return;
             }
             Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+            Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
-            try {
-                Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
-                Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
-
-            } catch (TraderException $exception) {
-                if ($exception->getContext('failure_code') == TraderErrorCode::INSUFFICIENT_COMMODITY) {
-                    $traderOrder->order->update([
-                        'status' => FinancingOrderStatus::TradingFailure,
-                    ]);
-
-                    app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-                    app(UpdateTraderOrderStatusToCancel::class)->handle(
-                        $traderOrder,
-                        TraderOrderCancelReason::FailureToPurchase,
-                        $exception->getContext('failure_reason')
-                    );
-
-                    $this->delete();
-                } else {
-                    $this->fail($exception);
-                }
-            }
         });
     }
 
