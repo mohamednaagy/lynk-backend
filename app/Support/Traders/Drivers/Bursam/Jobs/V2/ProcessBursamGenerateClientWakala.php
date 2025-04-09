@@ -10,7 +10,6 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -22,6 +21,10 @@ use Illuminate\Support\Facades\Log;
 class ProcessBursamGenerateClientWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    public $tries = 10;
+
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -56,16 +59,6 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
         Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamGenerateClientWakala Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
         app(GenerateClientWakala::class)->handle($traderOrder);
         Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamGenerateClientWakala Job and update can_continue_progress of trader to false', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(5);
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 120];
     }
 
     public function middleware(): array
