@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\CompanyLenderClient;
+use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -13,6 +14,8 @@ class CompanyLenderClientTransformer extends TransformerAbstract
         'name',
         'type',
         'national_id',
+        'auto_complete_sell',
+        'auto_sell_periods',
     ];
 
     public function transform(CompanyLenderClient $companyLenderClient): array
@@ -41,5 +44,27 @@ class CompanyLenderClientTransformer extends TransformerAbstract
             'value' => $companyLenderClient->type->value,
             'description' => $companyLenderClient->type->description,
         ]);
+    }
+
+    public function includeAutoCompleteSell(CompanyLenderClient $companyLenderClient): Primitive
+    {
+        return $this->primitive($companyLenderClient->auto_complete_sell);
+    }
+
+    public function includeAutoSellPeriods(CompanyLenderClient $companyLenderClient): Collection
+    {
+        $autoSellPeriods = $companyLenderClient->autoSellPeriods->map(function ($period) {
+            return [
+                'id' => $period->id,
+                'effective_start' => $period->effective_start,
+                'effective_end' => $period->effective_end,
+                'created_at' => $period->created_at,
+                'updated_at' => $period->updated_at,
+            ];
+        });
+
+        return $this->collection($autoSellPeriods, function ($period) {
+            return $period;
+        });
     }
 }

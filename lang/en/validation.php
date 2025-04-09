@@ -178,4 +178,8 @@ return [
     'max_digits' => 'It must contain 10 numbers',
     'field_is_required' => 'This field is required',
     'max_string_chars' => 'This field cannot be more than :max characters long',
+    'field_should_be_boolean' => 'This field only accepts the values true or false.',
+    'periods_overlapped' => 'Periods overlap is not allowed',
+    'effective_end_after_or_equal_start' => 'The end date must be the same as or after the start date.',
+    'invalid_date_format' => 'Invalid date format.',
 ];
