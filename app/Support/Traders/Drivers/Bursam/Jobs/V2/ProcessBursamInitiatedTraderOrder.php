@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
-use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -23,6 +22,10 @@ use Illuminate\Support\Facades\Log;
 class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
+
+    public $tries = 10;
+
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -60,26 +63,22 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        $traderOrder = null;
-
-        if ($exception instanceof RateLimitExceededException) {
-            Log::channel('bursam')->warning('bursa purchasing step => Rate limit exceeded for ProcessBursamInitiatedTraderOrder we will retry again soon', [
-                'message' => $exception->getMessage(),
-            ]);
-
-            return;
-        }
+        Log::channel('bursam')->error('ProcessBursamInitiatedTraderOrder failed method detail', [
+            'code' => $exception->getCode(),
+            'message' => $exception->getMessage(),
+            'traderOrderId' => $this->traderOrderId,
+        ]);
 
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-        Log::channel('bursam')->error('ProcessBursamInitiatedTraderOrder exception detail', ['code' => $exception->getCode(),  'message' => $exception->getMessage()]);
 
         if (! $traderOrder) {
+            Log::channel('bursam')->error('trader order not found in ProcessBursamInitiatedTraderOrder failed method', ['traderOrderId' => $this->traderOrderId]);
+
             return;
         }
+
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-
-        Log::channel('bursam')->error('bursa purchasing step => ProcessBursamInitiatedTraderOrder', ['financingOrderId' => $traderOrder->order->id,  'message' => $exception->getMessage()]);
 
     }
 

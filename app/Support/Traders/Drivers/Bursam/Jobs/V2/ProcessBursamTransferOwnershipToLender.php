@@ -11,7 +11,6 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,6 +22,10 @@ use Illuminate\Support\Facades\Log;
 class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    public $tries = 10;
+
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -70,16 +73,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(5);
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 120];
     }
 
     public function failed($exception)
