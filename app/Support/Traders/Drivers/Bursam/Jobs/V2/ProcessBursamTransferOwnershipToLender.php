@@ -104,14 +104,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         return __CLASS__.'_'.$this->traderOrderId;
     }
 
-    /*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * The job failed to process.
-     *
-     * @param  \Throwable  $exception
-     * @return void
-     */
-    /*******  9c66e196-0d14-4adf-aa29-6727287e5eba  *******/
     public function failed($exception)
     {
         try {
