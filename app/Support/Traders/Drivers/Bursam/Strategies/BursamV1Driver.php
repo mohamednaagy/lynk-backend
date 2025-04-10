@@ -353,6 +353,11 @@ class BursamV1Driver implements TraderInterface
                     'trader_order_id' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,
+                    'error_message' => $exception->getMessage(),
+                    'error_code' => $exception->getCode(),
+                    'error_file' => $exception->getFile(),
+                    'error_line' => $exception->getLine(),
+                    'error_trace' => $exception->getTraceAsString(),
                 ],
                 $exception
             );
