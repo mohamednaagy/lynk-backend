@@ -3,59 +3,51 @@
 namespace App\Actions\Companies\LenderClients;
 
 use App\Actions\Contracts\Companies\LenderClients\CreateLenderClient;
+use App\Models\ClientAutoSellPeriod;
 use App\Models\Company;
 use App\Models\CompanyLenderClient;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 
 class CreateLenderClientAction implements CreateLenderClient
 {
     public function handle(Company $lender, array $data): CompanyLenderClient
     {
-        // Cast string to boolean
-        $autoCompleteSell = filter_var($data['auto_complete_sell'], FILTER_VALIDATE_BOOLEAN);
+        // Normalize and prepare data
+        $autoCompleteSell = filter_var($data['auto_complete_sell'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $data['company_id'] = $lender->id;
         $data['auto_complete_sell'] = $autoCompleteSell;
 
+        // Create the lender client
         $client = CompanyLenderClient::create(
-            Arr::only(
-                $data,
-                [
-                    'name',
-                    'type',
-                    'national_id',
-                    'company_id',
-                    'auto_complete_sell',
-                ]
-            )
+            Arr::only($data, [
+                'name',
+                'type',
+                'national_id',
+                'company_id',
+                'auto_complete_sell',
+            ])
         );
 
+        // Store auto sell periods if needed
         if ($autoCompleteSell) {
-            $autoSellPeriods = $this->prepareAutoSellPeriods($data['auto_sell_periods'], $client->id);
-
-            // Perform the bulk insert
-            DB::table('client_auto_sell_periods')->insert($autoSellPeriods);
+            $this->storeAutoSellPeriods($client->id, $data['auto_sell_periods']);
         }
 
         return $client;
     }
 
-    private function prepareAutoSellPeriods(array $autoSellPeriods, $clientId): array
+    /**
+     * Store auto-sell periods for a lender client.
+     */
+    private function storeAutoSellPeriods(int $clientId, array $periods): void
     {
-        $currentTimestamp = now();
-
-        return array_map(function ($record) use ($clientId, $currentTimestamp) {
-            $result = Arr::only($record, [
-                'effective_start',
-                'effective_end',
+        foreach ($periods as $period) {
+            ClientAutoSellPeriod::create([
+                'company_lender_client_id' => $clientId,
+                'effective_start' => $period['effective_start'],
+                'effective_end' => $period['effective_end'],
             ]);
-
-            $result['company_lender_client_id'] = $clientId;
-            $result['created_at'] = $currentTimestamp;
-            $result['updated_at'] = $currentTimestamp;
-
-            return $result;
-        }, $autoSellPeriods);
+        }
     }
 }

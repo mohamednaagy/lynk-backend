@@ -20,12 +20,6 @@ class NoOverlappingPeriods implements Rule
             return true;
         }
 
-        if (! is_array($value)) {
-            $this->errorMessage = 'The periods field must be an array.';
-
-            return false;
-        }
-
         $normalized = [];
 
         foreach ($value as $index => $period) {

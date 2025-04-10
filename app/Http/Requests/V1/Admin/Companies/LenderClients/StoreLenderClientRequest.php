@@ -31,9 +31,9 @@ class StoreLenderClientRequest extends FormRequest
                 Rule::unique(CompanyLenderClient::class, 'national_id')->where('company_id', $this->lender->id)],
             'type' => ['required', Rule::in(CompanyLenderClientType::getValues())],
             'auto_complete_sell' => ['required', 'in:true,false'],
-            'auto_sell_periods' => ['required_if:auto_complete_sell,true', new NoOverlappingPeriods],
-            'auto_sell_periods.*.effective_start' => ['required', 'date_format:Y-m-d'],
-            'auto_sell_periods.*.effective_end' => ['required', 'date_format:Y-m-d', 'after_or_equal:auto_sell_periods.*.effective_start'],
+            'auto_sell_periods' => ['required_if:auto_complete_sell,true', 'array', new NoOverlappingPeriods],
+            'auto_sell_periods.*.effective_start' => ['required_if:auto_complete_sell,true', 'date_format:Y-m-d'],
+            'auto_sell_periods.*.effective_end' => ['required_if:auto_complete_sell,true', 'date_format:Y-m-d', 'after_or_equal:auto_sell_periods.*.effective_start'],
         ];
     }
 
