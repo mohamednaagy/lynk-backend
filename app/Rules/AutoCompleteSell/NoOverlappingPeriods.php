@@ -12,14 +12,6 @@ class NoOverlappingPeriods implements Rule
 
     public function passes($attribute, $value): bool
     {
-        // Convert the input value to a boolean
-        $autoCompleteSell = filter_var(request()->input('auto_complete_sell'), FILTER_VALIDATE_BOOLEAN);
-
-        // Skip the check if the auto_complete_sell is false
-        if (! $autoCompleteSell) {
-            return true;
-        }
-
         $normalized = [];
 
         foreach ($value as $index => $period) {

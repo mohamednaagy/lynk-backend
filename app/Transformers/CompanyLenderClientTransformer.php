@@ -58,8 +58,6 @@ class CompanyLenderClientTransformer extends TransformerAbstract
                 'id' => $period->id,
                 'effective_start' => $period->effective_start,
                 'effective_end' => $period->effective_end,
-                'created_at' => $period->created_at,
-                'updated_at' => $period->updated_at,
             ];
         });
 
