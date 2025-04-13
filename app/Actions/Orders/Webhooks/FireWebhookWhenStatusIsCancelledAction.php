@@ -25,7 +25,8 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
         $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
 
-        WebhookEvent::fire($financingOrder->company, WebhookType::OrderUpdates, [
+        $company = $financingOrder->company()->withTrashed()->first();
+        WebhookEvent::fire($company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
             'order_status' => [
                 'value' => $financingOrder->status->value,
