@@ -31,7 +31,6 @@ class CreateCompanyAction implements CreateCompany
                     'unique_name',
                     'status',
                     'public_status_comment',
-                    'internal_status_comment',
                     'driver',
                     'type',
                     'force_unique_reference_number',
