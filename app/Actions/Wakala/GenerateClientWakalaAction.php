@@ -9,6 +9,8 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\PdfGenerator\PdfGenerator;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class GenerateClientWakalaAction implements GenerateClientWakala
 {
@@ -25,23 +27,28 @@ class GenerateClientWakalaAction implements GenerateClientWakala
 
     public function handle(TraderOrder $traderOrder)
     {
-        $financingOrder = $traderOrder->order;
-        $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
-        $template = $this->getClientWakalaText->handle($traderOrder, $lenderTemplate);
+        try {
+            $financingOrder = $traderOrder->order;
+            $lenderTemplate = $this->getWakalaTemplate->handle('client')['wakala_template'];
+            $template = $this->getClientWakalaText->handle($traderOrder, $lenderTemplate);
 
-        $wakalaTemplate = view($this->getTemplate(), [
-            'template' => $template,
-        ])->render();
+            $wakalaTemplate = view($this->getTemplate(), [
+                'template' => $template,
+            ])->render();
 
-        return PdfGenerator::outputFromHtml(
-            $wakalaTemplate,
-            function ($fileResource) use ($financingOrder, $traderOrder) {
-                return $traderOrder
-                    ->addMediaFromStream($fileResource)
-                    ->usingFileName($financingOrder->getNationalId().'.pdf')
-                    ->toMediaCollection($this->getCollectionName());
-            }
-        );
+            return PdfGenerator::outputFromHtml(
+                $wakalaTemplate,
+                function ($fileResource) use ($financingOrder, $traderOrder) {
+                    return $traderOrder
+                        ->addMediaFromStream($fileResource)
+                        ->usingFileName($financingOrder->getNationalId().'.pdf')
+                        ->toMediaCollection($this->getCollectionName());
+                }
+            );
+        } catch (Exception $e) {
+            Log::channel('bursam')->error('error at GenerateClientWakalaAction ', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'message' => $e->getMessage()]);
+            throw $e;
+        }
     }
 
     public function setTemplate(string $template)

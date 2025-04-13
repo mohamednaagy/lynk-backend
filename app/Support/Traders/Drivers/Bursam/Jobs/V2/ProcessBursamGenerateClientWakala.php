@@ -47,7 +47,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
         try {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
-                ->lockForUpdate()
+                //->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (

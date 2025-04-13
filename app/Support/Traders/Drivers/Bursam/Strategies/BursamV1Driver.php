@@ -347,6 +347,8 @@ class BursamV1Driver implements TraderInterface
             Log::channel('bursam')->info('bursa purchasing step => transferOwnershipToLenderDocument certificate generated successfully', ['financingOrderId' => $traderOrder->order->id, 'trader_order_id' => $traderOrder->id]);
 
         } catch (\Throwable $exception) {
+            Log::channel('bursam')->error('exception of transfer ownership to lender', ['financingOrderId' => $traderOrder->order->id, 'trader_order_id' => $traderOrder->id, 'message' => $exception->getMessage()]);
+
             throw new TraderException(
                 'Failed to create lender ownership certificate',
                 [
