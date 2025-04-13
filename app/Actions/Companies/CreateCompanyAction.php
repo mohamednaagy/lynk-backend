@@ -32,7 +32,6 @@ class CreateCompanyAction implements CreateCompany
                     'status',
                     'webhook_secret_key',
                     'public_status_comment',
-                    'internal_status_comment',
                     'driver',
                     'type',
                     'force_unique_reference_number',
