@@ -26,6 +26,11 @@ class LenderClientController extends Controller
 
         $this->middleware(
             'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderClients, Action::Show, Action::Manage])
+        )->only('show');
+
+        $this->middleware(
+            'permission:'.
             perm(Area::SuperAdmin, [Subject::LenderClients, Action::Create, Action::Manage])
         )->only('store');
 
