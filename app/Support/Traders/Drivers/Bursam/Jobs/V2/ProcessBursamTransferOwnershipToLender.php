@@ -48,7 +48,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             $attemptNumber = $this->job->attempts();
 
             Log::channel('bursam')->info("Job attempt #{$attemptNumber} started", [
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
@@ -63,7 +63,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
             ) {
                 Log::channel('bursam')->info('Job skipped - order not found or incorrect action state', [
-                    'job_id' => $this->job->getJobId() ?? 'unknown',
+                    'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                     'trader_order_id' => $this->traderOrderId,
                     'attempt' => $attemptNumber,
                     'timestamp' => saudi_now(),
@@ -74,7 +74,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
             Log::channel('bursam')->info('Processing transfer ownership to lender', [
                 'action' => 'start',
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
                 'attempt' => $attemptNumber,
@@ -93,7 +93,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
             Log::channel('bursam')->info('Successfully processed transfer ownership to lender', [
                 'action' => 'complete',
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
                 'attempt' => $attemptNumber,
@@ -111,7 +111,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'line' => $e->getLine(),
                 'exception_class' => get_class($e),
                 'trace' => $e->getTraceAsString(),
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'attempt' => $currentAttempt,
@@ -145,7 +145,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'exception_class' => get_class($exception),
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'trader_order_id' => $this->traderOrderId,
                 'final_attempt' => $finalAttempt,
@@ -166,7 +166,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'original_error' => $exception->getMessage(),
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
