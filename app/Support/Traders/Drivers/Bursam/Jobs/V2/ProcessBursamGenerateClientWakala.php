@@ -76,6 +76,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
                 'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+
                 'timestamp' => saudi_now(),
             ]);
             app(GenerateClientWakala::class)->handle($traderOrder);
