@@ -42,6 +42,9 @@ class TraderException extends Exception
             $providerResponse,
             $failure_reason,
             $message,
+            $context['error_file'],
+            $context['error_line'],
+            $context['error_trace'],
         ]);
 
         return implode(' | ', $messageParts);
