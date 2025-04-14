@@ -47,7 +47,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
             // Get attempt count from job properties
             $attemptNumber = $this->job->attempts();
             Log::channel('bursam')->info("Job wakala attempt #{$attemptNumber} started", [
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
@@ -62,7 +62,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
             ) {
                 Log::channel('bursam')->info('Job wakala skipped - order not found or incorrect action state', [
-                    'job_id' => $this->job->getJobId() ?? 'unknown',
+                    'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                     'trader_order_id' => $this->traderOrderId,
                     'attempt' => $attemptNumber,
                     'timestamp' => saudi_now(),
@@ -75,14 +75,14 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 'action' => 'start',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'timestamp' => saudi_now(),
             ]);
             app(GenerateClientWakala::class)->handle($traderOrder);
 
             Log::channel('bursam')->info('Successfully generated client wakala', [
                 'action' => 'complete',
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
@@ -97,7 +97,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 'line' => $e->getLine(),
                 'exception_class' => get_class($e),
                 'trace' => $e->getTraceAsString(),
-                'job_id' => $this->job->getJobId() ?? 'unknown',
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'attempt' => $currentAttempt,
