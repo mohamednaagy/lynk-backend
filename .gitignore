@@ -18,5 +18,3 @@ report.html
 storage/.DS_Store
 dump.rdb
 sail-mysql/
-_ide_helper.php
-.qodo
