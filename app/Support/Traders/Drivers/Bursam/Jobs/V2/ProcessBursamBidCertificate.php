@@ -11,6 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,10 +25,6 @@ use Illuminate\Support\Facades\Log;
 class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
-
-    public $tries = 10;
-
-    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -84,5 +81,15 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         (new RunHoldTraderWhenMarketOpenCommand)->handle();
 
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(5);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 120];
     }
 }

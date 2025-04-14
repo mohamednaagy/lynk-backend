@@ -11,6 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -23,10 +24,6 @@ use Throwable;
 class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
-
-    public $tries = 10;
-
-    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -58,7 +55,7 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
-                // ->lockForUpdate()
+                ->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (
@@ -118,9 +115,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'trader_order_id' => $this->traderOrderId,
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'attempt' => $currentAttempt,
-                'max_attempts' => $this->tries,
-                'will_retry' => $currentAttempt < $this->tries,
-                'next_retry_after' => $this->backoff.' seconds',
                 'timestamp' => saudi_now(),
             ]);
 
@@ -155,7 +149,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'trader_order_id' => $this->traderOrderId,
                 'final_attempt' => $finalAttempt,
-                'max_attempts' => $this->tries,
                 'timestamp' => saudi_now(),
             ]);
 
@@ -178,5 +171,15 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'timestamp' => saudi_now(),
             ]);
         }
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(5);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 120];
     }
 }
