@@ -263,5 +263,9 @@ return [
 
     'max_string_chars' => 'يجب أن لا يتجاوز طول نّص حقل  :max حرف.',
     'field_is_required' => 'هذا الحقل مطلوب',
+    'field_should_be_boolean' => 'هذا الحقل يقبل فقط القيمة true أو false.',
+    'periods_overlapped' => 'لا يُسمح بتداخل الفترات',
+    'effective_end_after_or_equal_start' => 'يجب أن يكون تاريخ الانتهاء مساويًا أو بعد تاريخ البداية.',
+    'invalid_date_format' => 'تنسيق التاريخ غير صحيح',
 
 ];

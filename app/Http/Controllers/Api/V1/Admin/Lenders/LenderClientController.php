@@ -75,6 +75,8 @@ class LenderClientController extends Controller
                     'name',
                     'type',
                     'national_id',
+                    'auto_complete_sell',
+                    'auto_sell_periods',
                 ])
                 ->respond();
         });

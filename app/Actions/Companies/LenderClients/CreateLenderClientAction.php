@@ -11,18 +11,28 @@ class CreateLenderClientAction implements CreateLenderClient
 {
     public function handle(Company $lender, array $data): CompanyLenderClient
     {
-        $data['company_id'] = $lender->id;
+        // Normalize and prepare data
+        $autoCompleteSell = filter_var($data['auto_complete_sell'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-        return CompanyLenderClient::create(
-            Arr::only(
-                $data,
-                [
-                    'name',
-                    'type',
-                    'national_id',
-                    'company_id',
-                ]
-            )
+        $data['company_id'] = $lender->id;
+        $data['auto_complete_sell'] = $autoCompleteSell;
+
+        // Create the lender client
+        $client = CompanyLenderClient::create(
+            Arr::only($data, [
+                'name',
+                'type',
+                'national_id',
+                'company_id',
+                'auto_complete_sell',
+            ])
         );
+
+        // Store auto sell periods if needed
+        if ($autoCompleteSell) {
+            $client->autoSellPeriods()->createMany($data['auto_sell_periods']);
+        }
+
+        return $client;
     }
 }
