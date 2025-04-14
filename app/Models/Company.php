@@ -43,7 +43,6 @@ class Company extends BaseTenant
             'company_cr',
             'contract_number',
             'status',
-            'public_status_comment',
             'does_order_require_approval',
             'require_initiate_trade_request',
             'notify_borrowers_about_order_updates',
