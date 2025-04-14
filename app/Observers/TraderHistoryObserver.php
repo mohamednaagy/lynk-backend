@@ -2,8 +2,10 @@
 
 namespace App\Observers;
 
+use App\Enums\FinancingOrderHistory;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
+use App\Services\TraderOrder\AutoCompleteSellService;
 use App\Services\TraderOrder\FeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
@@ -12,7 +14,7 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
-    public function __construct(protected FeesService $feesService) {}
+    public function __construct(private FeesService $feesService, private AutoCompleteSellService $autoCompleteSellService) {}
 
     /**
      * @throws \Exception
@@ -37,6 +39,7 @@ class TraderHistoryObserver
         }
 
         $this->applyOrderFees($traderHistory);
+        $this->processAutoCompleteIfApplicable($traderHistory);
     }
 
     /**
@@ -86,6 +89,13 @@ class TraderHistoryObserver
         $action = $this->feesService->getAction($provider, $status);
         if ($action) {
             $action->handle($traderHistory->traderOrder);
+        }
+    }
+
+    private function processAutoCompleteIfApplicable(TraderHistory $traderHistory): void
+    {
+        if ($traderHistory->action === FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
+            $this->autoCompleteSellService->handleAutoCompleteSell($traderHistory);
         }
     }
 }
