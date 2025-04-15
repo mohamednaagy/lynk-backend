@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypeController;
 use App\Http\Controllers\Api\V1\Supplier\CommodityType\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Supplier\Constant\ConstantController;
 use App\Http\Controllers\Api\V1\Supplier\Inventory\LocalMarketInventoryController;
+use App\Http\Controllers\Api\V1\Supplier\Location\CommodityLocationLiteList;
 use App\Http\Controllers\Api\V1\Supplier\Location\SupplierLocation;
 use App\Http\Controllers\Api\V1\Supplier\Users\ResendInvitationToUserController;
 use App\Http\Controllers\Api\V1\Supplier\Users\UsersController;
@@ -40,6 +41,7 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
             Route::get('/', [CommodityTypeController::class, 'index']);
             Route::get('/dropdown-list', CommodityTypesLiteList::class);
         });
+        Route::get('locations/dropdown-list', CommodityLocationLiteList::class);
         Route::apiResource('locations', SupplierLocation::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
         Route::apiResource('commodity-items/{item}/inventory', LocalMarketInventoryController::class)->middleware('checkDataOfSupplier');
