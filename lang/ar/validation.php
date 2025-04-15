@@ -267,5 +267,6 @@ return [
     'periods_overlapped' => 'لا يُسمح بتداخل الفترات',
     'effective_end_after_or_equal_start' => 'يجب أن يكون تاريخ الانتهاء مساويًا أو بعد تاريخ البداية.',
     'invalid_date_format' => 'تنسيق التاريخ غير صحيح',
+    'field_is_not_editable' => 'لا يمكن تعديل هذا الحقل',
 
 ];
