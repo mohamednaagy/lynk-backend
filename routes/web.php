@@ -28,6 +28,15 @@
 |
 */
 
+use Illuminate\Support\Facades\DB;
+
+\Illuminate\Support\Facades\Route::get('ttt', function () {
+    //
+    //    $t = DB::table('trader_orders')->where('id', 153608)->first();
+    //    $t = \App\Models\TraderOrder::whereId(153608)->first()->refresh()->toArray();
+    //    dd($t);
+});
+
 \Illuminate\Support\Facades\Route::get('test', function () {
     $arr = [];
     $arr = [];

@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -69,6 +68,7 @@ class TraderOrder extends Model implements HasMedia
         'status' => TraderOrderStatus::class,
         'contract_signed_type' => ContractSignedType::class,
         'can_continue_progress' => 'boolean',
+        'created_at' => 'datetime',
     ];
 
     public function registerMediaCollections(): void
@@ -263,7 +263,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return $this->mode === TraderOrderMode::Automatic;
+        return $this->isAutomaticMode();
     }
 
     /**
@@ -424,8 +424,11 @@ class TraderOrder extends Model implements HasMedia
 
     public function setAutoCompletePeriodId(int $periodId): void
     {
-        DB::table('trader_orders')->whereId($this->id)->update([
-            'auto_sell_period_id' => $periodId,
-        ]);
+        $this->update(['auto_sell_period_id' => $periodId]);
+    }
+
+    public function isAutomaticMode(): bool
+    {
+        return $this->mode === TraderOrderMode::Automatic;
     }
 }

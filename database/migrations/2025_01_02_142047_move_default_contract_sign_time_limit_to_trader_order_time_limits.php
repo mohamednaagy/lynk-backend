@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\Trader;
-use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
@@ -27,7 +26,7 @@ return new class extends Migration
             ->chunk(100, function ($traderOrders) {
                 foreach ($traderOrders as $traderOrder) {
                     $isExpired = Carbon::parse($traderOrder->expire_at)->isPast();
-                    $isAutoCancel = $traderOrder->mode === TraderOrderMode::Automatic && $traderOrder->provider === Trader::Lynk;
+                    $isAutoCancel = $traderOrder->isAutomaticMode() && $traderOrder->provider === Trader::Lynk;
 
                     TraderOrderTimeLimit::create([
                         'trader_order_id' => $traderOrder->id,

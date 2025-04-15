@@ -2,31 +2,24 @@
 
 namespace App\Services\Company;
 
+use App\Models\ClientAutoSellPeriod;
 use App\Models\CompanyLenderClient;
-use App\Models\FinancingOrder;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class CompanyLenderClientService
 {
-    public static function findActiveAutoCompletePeriodId(FinancingOrder $financingOrder): ?int
+    public static function getAutoCompleteSellPeriod(CompanyLenderClient $client, Carbon $creationDate): ?ClientAutoSellPeriod
     {
-        $client = CompanyLenderClient::with('autoSellPeriods')->where([
-            'national_id' => $financingOrder->national_id,
-            'company_id' => $financingOrder->company_id,
-        ])->first();
-
-        if (! $client || ! $client->auto_complete_sell) {
+        if (! $client->auto_complete_sell) {
             return null;
         }
 
-        $createdAt = Carbon::parse($financingOrder->created_at);
-
         foreach ($client->autoSellPeriods as $period) {
-            $start = Carbon::parse($period['effective_start'])->startOfDay();
-            $end = Carbon::parse($period['effective_end'])->endOfDay();
+            $start = $period->effective_start->startOfDay();
+            $end = $period->effective_end->endOfDay();
 
-            if ($createdAt->between($start, $end)) {
-                return $period['id'];
+            if ($creationDate->between($start, $end)) {
+                return $period;
             }
         }
 

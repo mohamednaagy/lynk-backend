@@ -2,47 +2,36 @@
 
 namespace App\Jobs\TraderOrder\AutoCompleteSell;
 
-use App\Actions\Contracts\Orders\MakeOrderProceed;
-use App\Enums\FinancingOrderProceedCase;
+use App\Actions\Contracts\Orders\TraderOrders\AutoCompleteSell;
 use App\Jobs\TraderOrder\AutoCompleteSell\Exceptions\AutoCompleteSellFailed;
-use App\Models\TraderOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class AutoCompleteSell implements ShouldQueue
+class ProcessAutoCompleteSell implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable;
 
     public function __construct(private readonly int $traderOrderId, private readonly int $periodId)
     {
-        Log::info('add AutoCompleteSell job to queue default');
+        Log::channel('bursam')->info('add ProcessAutoCompleteSell job to queue default');
     }
 
     public function handle(): void
     {
         try {
-            $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
+            app(AutoCompleteSell::class)->handle($this->traderOrderId, $this->periodId);
 
-            app(MakeOrderProceed::class)->handle(
-                $traderOrder,
-                FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
-                true
-            );
-
-            $traderOrder->setAutoCompletePeriodId($this->periodId);
-
-            Log::info('Auto complete sell performed', [
+            Log::channel('bursam')->info('Auto complete sell performed', [
                 'trader_order' => $this->traderOrderId,
                 'period_id' => $this->periodId,
             ]);
 
         } catch (\Throwable $e) {
-            Log::error('AutoCompleteSell job failed', [
+            Log::channel('bursam')->error('ProcessAutoCompleteSell job failed', [
                 'trader_order' => $this->traderOrderId,
                 'period_id' => $this->periodId,
                 'message' => $e->getMessage(),
@@ -52,11 +41,6 @@ class AutoCompleteSell implements ShouldQueue
             throw new AutoCompleteSellFailed($e->getMessage(), $e->getCode());
         }
 
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
     }
 
     public function middleware(): array

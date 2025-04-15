@@ -29,7 +29,6 @@ use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
-use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCompleteMurabahaAfterSellToMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -478,7 +477,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     {
         match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
-            //            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkCompleteMurabahaAfterSellToMarket::dispatch($traderOrder->id),
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => $this->handleAutoCompleteSell($traderOrder),
             default => null,
         };
     }
