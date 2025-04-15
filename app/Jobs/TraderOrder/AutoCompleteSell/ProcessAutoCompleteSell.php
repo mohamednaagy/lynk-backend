@@ -40,7 +40,6 @@ class ProcessAutoCompleteSell implements ShouldQueue
 
             throw new AutoCompleteSellFailed($e->getMessage(), $e->getCode());
         }
-
     }
 
     public function middleware(): array
