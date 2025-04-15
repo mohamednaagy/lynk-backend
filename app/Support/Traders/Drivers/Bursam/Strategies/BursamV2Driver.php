@@ -140,7 +140,7 @@ class BursamV2Driver extends BursamV1Driver
         $lastHistory = (int) $traderOrder->last_history_action;
 
         $dispatchableJob = match ($traderOrder->mode) {
-            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($lastHistory),
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($traderOrder, $lastHistory),
             TraderOrderMode::Manual => $this->transitionFlowInManualMode($lastHistory),
             default => null,
         };
@@ -159,8 +159,12 @@ class BursamV2Driver extends BursamV1Driver
         };
     }
 
-    protected function transitionFlowInAutomaticMode($lastHistoryAction): ?string
+    protected function transitionFlowInAutomaticMode($traderOrder, $lastHistoryAction): ?string
     {
+        if ($lastHistoryAction === FinancingOrderHistory::CreateTransferOwnershipToLenderDocument) {
+            $this->handleAutoCompleteSell($traderOrder);
+        }
+
         return match ($lastHistoryAction) {
             FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::class,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::class,

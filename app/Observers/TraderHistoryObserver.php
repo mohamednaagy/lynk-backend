@@ -12,7 +12,7 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
-    public function __construct(protected FeesService $feesService) {}
+    public function __construct(private FeesService $feesService) {}
 
     /**
      * @throws \Exception
@@ -37,43 +37,6 @@ class TraderHistoryObserver
         }
 
         $this->applyOrderFees($traderHistory);
-    }
-
-    /**
-     * Handle the TraderHistory "updated" event.
-     *
-     * @return void
-     */
-    public function updated(TraderHistory $traderHistory) {}
-
-    /**
-     * Handle the TraderHistory "deleted" event.
-     *
-     * @return void
-     */
-    public function deleted(TraderHistory $traderHistory)
-    {
-        //
-    }
-
-    /**
-     * Handle the TraderHistory "restored" event.
-     *
-     * @return void
-     */
-    public function restored(TraderHistory $traderHistory)
-    {
-        //
-    }
-
-    /**
-     * Handle the TraderHistory "force deleted" event.
-     *
-     * @return void
-     */
-    public function forceDeleted(TraderHistory $traderHistory)
-    {
-        //
     }
 
     /**

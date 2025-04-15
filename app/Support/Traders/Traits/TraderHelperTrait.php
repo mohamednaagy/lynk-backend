@@ -4,9 +4,12 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
+use App\Models\CompanyLenderClient;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
+use App\Services\Company\CompanyLenderClientService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -167,5 +170,26 @@ trait TraderHelperTrait
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
 
         return Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
+    }
+
+    public function handleAutoCompleteSell(TraderOrder $traderOrder): void
+    {
+        $financingOrder = $traderOrder->order;
+        $client = CompanyLenderClient::with('autoSellPeriods')->where([
+            'national_id' => $financingOrder->national_id,
+            'company_id' => $financingOrder->company_id,
+        ])->first();
+
+        if (! $client) {
+            return;
+        }
+
+        $period = CompanyLenderClientService::getAutoCompleteSellPeriod($client, $traderOrder->created_at);
+
+        if (! $period) {
+            return;
+        }
+
+        ProcessAutoCompleteSell::dispatch($traderOrder->id, $period->id);
     }
 }

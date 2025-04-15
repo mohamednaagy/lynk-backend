@@ -68,6 +68,7 @@ class TraderOrder extends Model implements HasMedia
         'status' => TraderOrderStatus::class,
         'contract_signed_type' => ContractSignedType::class,
         'can_continue_progress' => 'boolean',
+        'created_at' => 'datetime',
     ];
 
     public function registerMediaCollections(): void
@@ -262,7 +263,7 @@ class TraderOrder extends Model implements HasMedia
             return false;
         }
 
-        return $this->mode === TraderOrderMode::Automatic;
+        return $this->isAutomaticMode();
     }
 
     /**
@@ -419,5 +420,15 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->completedSellStep()->exists() &&
         $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
+    }
+
+    public function setAutoCompletePeriodId(int $periodId): void
+    {
+        $this->update(['auto_sell_period_id' => $periodId]);
+    }
+
+    public function isAutomaticMode(): bool
+    {
+        return $this->mode === TraderOrderMode::Automatic;
     }
 }
