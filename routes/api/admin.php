@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\Admin\Auth\ResendAdminInvitation;
 use App\Http\Controllers\Api\V1\Admin\Auth\UpdateMyProfile;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityItemController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityLocationController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityLocationLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
@@ -146,6 +147,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
             Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
+            Route::get('{supplier}/locations/dropdown-list', CommodityLocationLiteList::class);
             Route::apiResource('{supplier}/locations', CommodityLocationController::class);
         });
 
