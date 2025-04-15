@@ -61,6 +61,7 @@ class TraderOrder extends Model implements HasMedia
             'created_at',
             'contract_signed_type',
             'expire_at',
+            'auto_sell_period_id',
         ];
     }
 
