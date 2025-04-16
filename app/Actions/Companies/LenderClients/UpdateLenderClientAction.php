@@ -10,7 +10,6 @@ class UpdateLenderClientAction implements UpdateLenderClient
 {
     public function handle(CompanyLenderClient $companyLenderClient, array $data): CompanyLenderClient
     {
-
         $companyLenderClient->update(
             Arr::only($data, [
                 'name',
@@ -20,24 +19,37 @@ class UpdateLenderClientAction implements UpdateLenderClient
         );
 
         if ($data['auto_complete_sell']) {
-            $this->updateAutoSellPeriods($companyLenderClient, $data['auto_sell_periods']);
+            $this->syncAutoSellPeriods($companyLenderClient, $data['auto_sell_periods']);
         }
 
         return $companyLenderClient;
     }
 
-    protected function updateAutoSellPeriods(CompanyLenderClient $companyLenderClient, array $periods): void
+    protected function syncAutoSellPeriods(CompanyLenderClient $companyLenderClient, array $periods): void
     {
-        foreach ($periods as $period) {
-            $existingPeriod = $companyLenderClient->autoSellPeriods()->where('id', $period['id'])->first();
-            if ($existingPeriod->effective_start !== $period['effective_start'] || $existingPeriod->effective_end !== $period['effective_end']) {
-                $existingPeriod->update(
-                    Arr::only($period, [
-                        'effective_start',
-                        'effective_end',
-                    ])
-                );
+        $periodsCollection = collect($periods);
+
+        $editPeriods = $periodsCollection->filter(fn ($p) => isset($p['id']))->keyBy('id');
+        $newPeriods = $periodsCollection->filter(fn ($p) => ! isset($p['id']))->values();
+
+        $existingPeriods = $companyLenderClient->autoSellPeriods;
+
+        foreach ($existingPeriods as $existingPeriod) {
+            $editPeriod = $editPeriods[$existingPeriod->id] ?? null;
+            if ($editPeriod) {
+                if (
+                    $existingPeriod->effective_start !== $editPeriod['effective_start'] ||
+                    $existingPeriod->effective_end !== $editPeriod['effective_end']
+                ) {
+                    $existingPeriod->update(
+                        Arr::only($editPeriod, ['effective_start', 'effective_end'])
+                    );
+                }
             }
+        }
+
+        if ($newPeriods->isNotEmpty()) {
+            $companyLenderClient->autoSellPeriods()->createMany($newPeriods);
         }
     }
 }

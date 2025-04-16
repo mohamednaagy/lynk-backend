@@ -31,8 +31,8 @@ class UpdateLenderClientRequest extends FormRequest
             'type' => ['prohibited'],
             'auto_complete_sell' => ['required', 'boolean'],
             'auto_sell_periods' => ['required_if:auto_complete_sell,true', 'array', new NoOverlappingPeriods],
-            'auto_sell_periods.*.id' => ['required_if:auto_complete_sell,true',    Rule::exists('client_auto_sell_periods', 'id')
-                ->where('company_lender_client_id', $this->client->id)],
+            'auto_sell_periods.*.id' => ['nullable',    Rule::exists('client_auto_sell_periods', 'id')
+                ->where('company_lender_client_id', $this->client->id)->where('deleted_at', null)],
             'auto_sell_periods.*.effective_start' => ['required_if:auto_complete_sell,true', 'date_format:Y-m-d'],
             'auto_sell_periods.*.effective_end' => ['required_if:auto_complete_sell,true', 'date_format:Y-m-d', 'after_or_equal:auto_sell_periods.*.effective_start'],
         ];
