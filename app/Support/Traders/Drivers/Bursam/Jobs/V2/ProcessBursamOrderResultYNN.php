@@ -64,6 +64,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
+        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+
         DB::transaction(function () use ($exception) {
             $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
@@ -87,7 +89,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             );
         });
 
-        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
 
     }
 
