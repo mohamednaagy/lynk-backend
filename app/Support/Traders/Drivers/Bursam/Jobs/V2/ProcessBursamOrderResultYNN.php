@@ -89,7 +89,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             );
         });
 
-
     }
 
     public function middleware(): array
