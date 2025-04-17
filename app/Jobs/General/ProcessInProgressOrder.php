@@ -73,7 +73,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 ]);
             });
         } catch (\Exception $e) {
-            Log::channel('orders')->error(
+            Log::channel('lynk')->error(
                 'An error occurred while processing the financing order.',
                 [
                     'financing_order_id' => $this->financingOrder,
