@@ -26,8 +26,6 @@ class LenderClientControllerStoreTest extends TestCase
 
     private static Company $company;
 
-    //    private static Wallet $wallet;
-
     private static User $userAdmin;
 
     private static CompanyLenderClient $client;
