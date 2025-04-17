@@ -40,6 +40,9 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 $this->data['auto_generate_financing_institution_certificate'] = 1;
                 (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
                     ->updatePurchasingCommodity($traderOrder, $this->data);
+
+                $traderOrder->allowProgressToNextStep(false); // TODO: Added to explicitly control order transitions (needs refactoring later)
+
                 break;
 
             case OrderStatus::FailedPurchase:

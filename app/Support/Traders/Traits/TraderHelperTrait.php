@@ -4,9 +4,12 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
+use App\Models\CompanyLenderClient;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
+use App\Services\Company\CompanyLenderClientService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;

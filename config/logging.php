@@ -137,10 +137,10 @@ return [
             'level' => 'debug',
             'days' => 30,
         ],
-        'orders' => [
+        'lynk' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/orders/order-log.log'),
-            'level' => 'debug',
+            'path' => storage_path('logs/lynk/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
         ],
         'live_market' => [

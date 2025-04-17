@@ -28,6 +28,7 @@ class LenderClientControllerStoreTest extends TestCase
 
     private static User $superAdminUser;
 
+
     private static User $userManager;
 
     private static LengthAwarePaginator $users;

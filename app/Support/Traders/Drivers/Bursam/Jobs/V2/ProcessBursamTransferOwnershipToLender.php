@@ -11,6 +11,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -18,14 +19,11 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
-
-    public $tries = 10;
-
-    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -38,11 +36,23 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      * Execute the job.
      *
      * @return void
+     *
+     * @throws \Exception
      */
     public function handle()
     {
+        $traderOrder = null;
 
         try {
+            // Get attempt count from job properties
+            $attemptNumber = $this->job->attempts();
+
+            Log::channel('bursam')->info("Job attempt #{$attemptNumber} started", [
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+                'trader_order_id' => $this->traderOrderId,
+                'timestamp' => saudi_now(),
+            ]);
+
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
                 ->lockForUpdate()
@@ -52,13 +62,22 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 is_null($traderOrder)
                 || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
             ) {
+                Log::channel('bursam')->info('Job skipped - order not found or incorrect action state', [
+                    'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+                    'trader_order_id' => $this->traderOrderId,
+                    'attempt' => $attemptNumber,
+                    'timestamp' => saudi_now(),
+                ]);
+
                 return;
             }
 
             Log::channel('bursam')->info('Processing transfer ownership to lender', [
                 'action' => 'start',
-                'financing_order_id' => $traderOrder->order->id,
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+                'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
+                'attempt' => $attemptNumber,
                 'timestamp' => saudi_now(),
             ]);
 
@@ -72,26 +91,38 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             // Dispatch next step job
             ProcessBursamGenerateClientWakala::dispatch($this->traderOrderId);
 
+            $traderOrder->allowProgressToNextStep(false); // TODO: Added to explicitly control order transitions (needs refactoring later)
+
             Log::channel('bursam')->info('Successfully processed transfer ownership to lender', [
                 'action' => 'complete',
-                'financing_order_id' => $traderOrder->order->id,
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+                'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
+                'attempt' => $attemptNumber,
                 'timestamp' => saudi_now(),
             ]);
-        } catch (\Exception $e) {
-            Log::channel('bursam')->error('Failed to process transfer ownership to lender', [
-                'error_message' => $e->getMessage(),
+
+        } catch (Throwable $e) {
+            // Use a specific error channel/identifier for retry exceptions
+            $currentAttempt = $this->job->attempts();
+
+            Log::channel('bursam')->error("Retry exception on attempt #{$currentAttempt}", [
+                'actual_exception' => $e->getMessage(),
                 'error_code' => $e->getCode(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'exception_class' => get_class($e),
                 'trace' => $e->getTraceAsString(),
-                'financing_order_id' => $traderOrder->order->id ?? null,
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
+                'financing_order_id' => $traderOrder?->order?->id ?? null,
+                'attempt' => $currentAttempt,
                 'timestamp' => saudi_now(),
             ]);
+
+            // Rethrow the exception to trigger Laravel's retry mechanism
             throw $e;
         }
-
     }
 
     public function middleware(): array
@@ -108,21 +139,26 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
     {
         try {
             $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+
             Log::channel('bursam')->error('Failed to process transfer ownership to lender - cancelling order', [
-                'error_message' => $exception->getMessage(),
+                'final_exception' => $exception->getMessage(),
                 'error_code' => $exception->getCode(),
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
-                'trace' => $exception->getTraceAsString(),
-                'financing_order_id' => $traderOrder->order->id,
+                'exception_class' => get_class($exception),
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+                'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
 
-            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-            app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-            (new RunHoldTraderWhenMarketOpenCommand)->handle();
-        } catch (\Exception $e) {
+            if ($traderOrder) {
+                app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+                app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+                (new RunHoldTraderWhenMarketOpenCommand)->handle();
+            }
+
+        } catch (Throwable $e) {
             Log::channel('bursam')->error('Failed to handle job failure', [
                 'error_message' => $e->getMessage(),
                 'error_code' => $e->getCode(),
@@ -130,9 +166,20 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'original_error' => $exception->getMessage(),
+                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
         }
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(5);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 120];
     }
 }

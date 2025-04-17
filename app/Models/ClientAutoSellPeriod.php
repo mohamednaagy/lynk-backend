@@ -15,4 +15,9 @@ class ClientAutoSellPeriod extends Model
         'effective_start',
         'effective_end',
     ];
+
+    protected $casts = [
+        'effective_start' => 'date',
+        'effective_end' => 'date',
+    ];
 }

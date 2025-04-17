@@ -20,7 +20,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'name',
                     'unique_name',
                     'status',
-                    'public_status_comment',
                     'driver',
                     'trading_mode',
                 ]

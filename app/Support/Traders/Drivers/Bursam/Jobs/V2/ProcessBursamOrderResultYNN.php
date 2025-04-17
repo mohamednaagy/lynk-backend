@@ -11,6 +11,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,10 +25,6 @@ use Illuminate\Support\Facades\Log;
 class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public $tries = 10;
-
-    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -67,6 +64,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
+        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+
         DB::transaction(function () use ($exception) {
             $traderOrder = TraderOrder::query()
                 ->lockForUpdate()
@@ -90,8 +89,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             );
         });
 
-        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
-
     }
 
     public function middleware(): array
@@ -102,5 +99,15 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
+    }
+
+    public function retryUntil(): Carbon
+    {
+        return now()->addMinutes(5);
+    }
+
+    public function backoff(): array
+    {
+        return [60, 120, 120];
     }
 }

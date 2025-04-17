@@ -3,7 +3,6 @@
 namespace App\Services\TraderOrder;
 
 use App\Enums\Trader;
-use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
@@ -177,7 +176,7 @@ class TimeLimitService
     private function determineAction(TraderOrder $traderOrder): int
     {
         // If mode is automatic and provider is Lynk, set to auto-cancel, otherwise no action needed
-        return ($traderOrder->mode === TraderOrderMode::Automatic && $traderOrder->provider === Trader::Lynk)
+        return ($traderOrder->isAutomaticMode() && $traderOrder->provider === Trader::Lynk)
             ? TraderOrderTimeLimitAction::AutoCancelOrder
             : TraderOrderTimeLimitAction::NoActionNeeded;
     }

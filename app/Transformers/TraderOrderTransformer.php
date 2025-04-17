@@ -6,7 +6,6 @@ use App\Enums\BursamProductCode;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
-use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
@@ -229,7 +228,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeShowProceedBtn(TraderOrder $traderOrder): Primitive
     {
-        $isBursamAutomatic = $traderOrder->provider === Trader::Bursam && $traderOrder->mode === TraderOrderMode::Automatic;
+        $isBursamAutomatic = $traderOrder->provider === Trader::Bursam && $traderOrder->isAutomaticMode();
         $signedWakalaDocumentMediaFile = $isBursamAutomatic ? $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) : null;
 
         return $this->primitive($isBursamAutomatic ? ! empty($signedWakalaDocumentMediaFile) : true);

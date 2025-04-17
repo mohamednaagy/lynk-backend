@@ -2,20 +2,19 @@
 
 namespace App\Http\Requests\V1\Admin\Companies\LenderClients;
 
-use App\Enums\CompanyLenderClientType;
 use App\Models\CompanyLenderClient;
 use App\Rules\AutoCompleteSell\NoOverlappingPeriods;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreLenderClientRequest extends FormRequest
+class UpdateLenderClientRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return CompanyLenderClient::where('id', $this->client->id)->where('company_id', $this->lender->id)->exists();
     }
 
     /**
@@ -28,10 +27,12 @@ class StoreLenderClientRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:100'],
             'national_id' => ['required', 'integer', 'max_digits:10',
-                Rule::unique(CompanyLenderClient::class, 'national_id')->where('company_id', $this->lender->id)],
-            'type' => ['required', Rule::in(CompanyLenderClientType::getValues())],
+                Rule::unique(CompanyLenderClient::class, 'national_id')->where('company_id', $this->lender->id)->ignore($this->client->id)],
+            'type' => ['prohibited'],
             'auto_complete_sell' => ['required', 'boolean'],
             'auto_sell_periods' => ['required_if:auto_complete_sell,true', 'array', new NoOverlappingPeriods],
+            'auto_sell_periods.*.id' => ['nullable',    Rule::exists('client_auto_sell_periods', 'id')
+                ->where('company_lender_client_id', $this->client->id)->where('deleted_at', null)],
             'auto_sell_periods.*.effective_start' => ['required_if:auto_complete_sell,true', 'date_format:Y-m-d'],
             'auto_sell_periods.*.effective_end' => ['required_if:auto_complete_sell,true', 'date_format:Y-m-d', 'after_or_equal:auto_sell_periods.*.effective_start'],
         ];
@@ -42,7 +43,7 @@ class StoreLenderClientRequest extends FormRequest
         return [
             'name.required' => __('validation.field_is_required'),
             'national_id.required' => __('validation.field_is_required'),
-            'type.required' => __('validation.field_is_required'),
+            'type.prohibited' => __('validation.field_is_not_editable'),
             'name.max' => __('validation.max_string_chars'),
             'national_id.unique' => __('validation.unique_input'),
             'auto_complete_sell.required' => __('validation.field_is_required'),

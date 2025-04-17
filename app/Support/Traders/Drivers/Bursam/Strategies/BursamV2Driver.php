@@ -15,6 +15,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
+use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -89,7 +90,8 @@ class BursamV2Driver extends BursamV1Driver
         }
 
         if ($traderOrder->doesLastActionMatchWith([
-            FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::GetTtiId,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ])) {
             throw new Exception(sprintf('Trader order (#%s) cannot be cancelled now', $traderOrder->id));
         }
@@ -112,7 +114,6 @@ class BursamV2Driver extends BursamV1Driver
                 }
 
                 $this->updateFinancingOrderStatus($traderOrder->order);
-
             },
         ])->dispatch();
         app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
@@ -163,6 +164,7 @@ class BursamV2Driver extends BursamV1Driver
     {
         return match ($lastHistoryAction) {
             FinancingOrderHistory::GetTtiId => ProcessBursamOrderResultYNN::class,
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAutoCompleteSell::class,
             FinancingOrderHistory::GetTtiHoldingCertificateDocument => ProcessBursamBidCertificate::class,
             FinancingOrderHistory::AttachTtiHoldingCertificateDocument => ProcessBursamTransferOwnershipToLender::class,
             FinancingOrderHistory::ContractSigned => ProcessBursamTransferOwnershipToCustomer::class,
@@ -203,7 +205,7 @@ class BursamV2Driver extends BursamV1Driver
      */
     public function generatePdfFileName($traderOrder, $collectionName): string
     {
-        return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
+        return $traderOrder->provider . '-' . $traderOrder->reference . '.pdf';
     }
 
     // use it in public api to proceed order after purchasing commodity step by one step
