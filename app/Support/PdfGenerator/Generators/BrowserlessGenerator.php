@@ -150,7 +150,7 @@ class BrowserlessGenerator implements GeneratorInterface
         $storedFile = $storageCallback($tmpFileResource);
         $this->cleanupTmpFile($tmpFileResource);
 
-        Log::channel('local_market')->info('PDF Generation Success', [
+        Log::channel('lynk')->info('PDF Generation Success', [
             'attempt' => $attempt,
             'request_id' => $this->requestId,
         ]);
@@ -165,7 +165,7 @@ class BrowserlessGenerator implements GeneratorInterface
      */
     protected function handleFailedResponse($response, int $attempt)
     {
-        Log::channel('local_market')->error('PDF Generation Failed', [
+        Log::channel('lynk')->error('PDF Generation Failed', [
             'attempt' => $attempt,
             'status' => $response->status(),
             'body' => $response->body(),
@@ -198,7 +198,7 @@ class BrowserlessGenerator implements GeneratorInterface
      */
     protected function logAttempt(int $attempt)
     {
-        Log::channel('local_market')->info('PDF Generation Attempt', [
+        Log::channel('lynk')->info('PDF Generation Attempt', [
             'attempt' => $attempt,
             'max_retries' => $this->maxRetries,
             'url' => $this->baseUrl,
@@ -211,7 +211,7 @@ class BrowserlessGenerator implements GeneratorInterface
      */
     protected function logRetryableError(Throwable $e, int $attempt)
     {
-        Log::channel('local_market')->error('PDF Generation Retryable Error', [
+        Log::channel('lynk')->error('PDF Generation Retryable Error', [
             'attempt' => $attempt,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
@@ -224,7 +224,7 @@ class BrowserlessGenerator implements GeneratorInterface
      */
     protected function logFinalError(Throwable $th, int $attempt)
     {
-        Log::channel('local_market')->error('PDF Generation Final Error', [
+        Log::channel('lynk')->error('PDF Generation Final Error', [
             'error_message' => $th->getMessage(),
             'stack_trace' => $th->getTraceAsString(),
             'attempts' => $attempt,
