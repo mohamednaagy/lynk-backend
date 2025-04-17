@@ -34,20 +34,22 @@ class ProcessAutoCompleteSell implements ShouldQueue
     public function handle(): void
     {
         try {
-            $result = $this->evaluateAutoSellEligibility();
-            $traderOrder = $result['traderOrder'] ?? null;
-
+            $traderOrder = $this->getValidTraderOrder();
             if (! $traderOrder) {
                 return;
             }
 
-            if (! $result['canAutoSell']) {
-                $traderOrder->allowProgressToNextStep();
-
+            $client = $this->getValidClient($traderOrder);
+            if (! $client) {
                 return;
             }
 
-            app(AutoCompleteSell::class)->handle($traderOrder, $result['period']);
+            $period = $this->getValidPeriod($client, $traderOrder);
+            if (! $period) {
+                return;
+            }
+
+            app(AutoCompleteSell::class)->handle($traderOrder, $period);
         } catch (\Throwable $e) {
             $this->handleFailure($e);
         }
@@ -67,12 +69,12 @@ class ProcessAutoCompleteSell implements ShouldQueue
 
         $client = $this->getValidClient($traderOrder);
         if (! $client) {
-            return ['canAutoSell' => false];
+            return ['canAutoSell' => false, 'traderOrder' => $traderOrder];
         }
 
         $period = $this->getValidPeriod($client, $traderOrder);
         if (! $period) {
-            return ['canAutoSell' => false];
+            return ['canAutoSell' => false, 'traderOrder' => $traderOrder];
         }
 
         return [
