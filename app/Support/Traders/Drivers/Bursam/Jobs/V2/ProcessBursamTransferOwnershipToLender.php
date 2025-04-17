@@ -139,7 +139,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
     {
         try {
             $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-            $finalAttempt = $this->job->attempts();
 
             Log::channel('bursam')->error('Failed to process transfer ownership to lender - cancelling order', [
                 'final_exception' => $exception->getMessage(),
@@ -150,7 +149,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
                 'trader_order_id' => $this->traderOrderId,
-                'final_attempt' => $finalAttempt,
                 'timestamp' => saudi_now(),
             ]);
 
