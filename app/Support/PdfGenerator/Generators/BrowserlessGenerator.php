@@ -8,6 +8,7 @@ use App\Support\PdfGenerator\Exceptions\MissingStorageCallbackException;
 use Closure;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 class BrowserlessGenerator implements GeneratorInterface
@@ -26,10 +27,13 @@ class BrowserlessGenerator implements GeneratorInterface
 
     protected $timeout = 120; // seconds
 
+    protected $requestId;
+
     public function __construct($options)
     {
         $this->baseUrl = $options['base_url'];
         $this->storageDisk = $options['storage_disk'];
+        $this->requestId = Str::uuid();
         unset($options['storage_disk'], $options['base_url']);
 
         $this->options = array_merge([
@@ -98,6 +102,7 @@ class BrowserlessGenerator implements GeneratorInterface
                         'status' => $response->status(),
                         'body' => $response->body(),
                         'attempts' => $attempt,
+                        'request_id' => $this->requestId,
                     ]);
                 } catch (Throwable $e) {
                     $this->cleanupTmpFile($tmpFileResource);
@@ -147,6 +152,7 @@ class BrowserlessGenerator implements GeneratorInterface
 
         Log::channel('lynk')->info('PDF Generation Success', [
             'attempt' => $attempt,
+            'request_id' => $this->requestId,
         ]);
 
         return $storedFile;
@@ -163,6 +169,7 @@ class BrowserlessGenerator implements GeneratorInterface
             'attempt' => $attempt,
             'status' => $response->status(),
             'body' => $response->body(),
+            'request_id' => $this->requestId,
         ]);
     }
 
@@ -195,6 +202,7 @@ class BrowserlessGenerator implements GeneratorInterface
             'attempt' => $attempt,
             'max_retries' => $this->maxRetries,
             'url' => $this->baseUrl,
+            'request_id' => $this->requestId,
         ]);
     }
 
@@ -207,6 +215,7 @@ class BrowserlessGenerator implements GeneratorInterface
             'attempt' => $attempt,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
+            'request_id' => $this->requestId,
         ]);
     }
 
@@ -219,6 +228,7 @@ class BrowserlessGenerator implements GeneratorInterface
             'error_message' => $th->getMessage(),
             'stack_trace' => $th->getTraceAsString(),
             'attempts' => $attempt,
+            'request_id' => $this->requestId,
         ]);
     }
 
