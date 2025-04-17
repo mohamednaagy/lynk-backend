@@ -84,7 +84,7 @@ class LenderClientControllerUpdateTest extends TestCase
         self::$userManager = $this->createSuperAdminUser(Role::Manager);
         $this->assignPermissionToUser(
             self::$userManager,
-            perm(Area::SuperAdmin, [Subject::LenderClients, Action::Create])
+            perm(Area::SuperAdmin, [Subject::LenderClients, Action::Edit])
         );
     }
 
