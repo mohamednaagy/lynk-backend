@@ -33,7 +33,7 @@ class BrowserlessGenerator implements GeneratorInterface
     {
         $this->baseUrl = $options['base_url'];
         $this->storageDisk = $options['storage_disk'];
-        $this->requestId = Str::uuid();
+        $this->requestId = (string) Str::uuid();
         unset($options['storage_disk'], $options['base_url']);
 
         $this->options = array_merge([
