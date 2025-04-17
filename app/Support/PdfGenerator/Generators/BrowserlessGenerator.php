@@ -61,7 +61,17 @@ class BrowserlessGenerator implements GeneratorInterface
         $attempt = 0;
 
         try {
-            $storageCallback = $this->resolveStorageCallback($options);
+            $storageCallback = null;
+
+            if ($options instanceof Closure) {
+                $storageCallback = $options;
+                $options = [];
+            } elseif (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
+                $storageCallback = $options['storageCallback'];
+                unset($options['storageCallback']);
+            } else {
+                throw new MissingStorageCallbackException;
+            }
 
             while ($attempt < $this->maxRetries) {
                 $attempt++;
@@ -108,26 +118,6 @@ class BrowserlessGenerator implements GeneratorInterface
             $this->logFinalError($th, $attempt);
             throw $th;
         }
-    }
-
-    /**
-     * Resolve the storage callback from options
-     *
-     * @param  array|Closure  $options
-     *
-     * @throws MissingStorageCallbackException
-     */
-    protected function resolveStorageCallback($options): Closure
-    {
-        if ($options instanceof Closure) {
-            return $options;
-        }
-
-        if (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
-            return $options['storageCallback'];
-        }
-
-        throw new MissingStorageCallbackException;
     }
 
     /**
