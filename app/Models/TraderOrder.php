@@ -405,9 +405,9 @@ class TraderOrder extends Model implements HasMedia
             ->orderBy('id', 'asc');
     }
 
-    public function allowProgressToNextStep()
+    public function allowProgressToNextStep(bool $value = true): void
     {
-        $this->update(['can_continue_progress' => true]);
+        $this->update(['can_continue_progress' => $value]);
     }
 
     public function scopeCompletedSellStep($query)

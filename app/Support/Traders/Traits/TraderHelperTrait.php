@@ -171,25 +171,4 @@ trait TraderHelperTrait
 
         return Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
     }
-
-    public function handleAutoCompleteSell(TraderOrder $traderOrder): void
-    {
-        $financingOrder = $traderOrder->order;
-        $client = CompanyLenderClient::with('autoSellPeriods')->where([
-            'national_id' => $financingOrder->national_id,
-            'company_id' => $financingOrder->company_id,
-        ])->first();
-
-        if (! $client) {
-            return;
-        }
-
-        $period = CompanyLenderClientService::getAutoCompleteSellPeriod($client, $traderOrder->created_at);
-
-        if (! $period) {
-            return;
-        }
-
-        ProcessAutoCompleteSell::dispatch($traderOrder->id, $period->id);
-    }
 }

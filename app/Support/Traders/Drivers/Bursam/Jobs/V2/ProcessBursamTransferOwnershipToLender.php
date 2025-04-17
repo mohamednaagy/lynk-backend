@@ -91,6 +91,8 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
             // Dispatch next step job
             ProcessBursamGenerateClientWakala::dispatch($this->traderOrderId);
 
+            $traderOrder->allowProgressToNextStep(false); // TODO: Added to explicitly control order transitions (needs refactoring later)
+
             Log::channel('bursam')->info('Successfully processed transfer ownership to lender', [
                 'action' => 'complete',
                 'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',

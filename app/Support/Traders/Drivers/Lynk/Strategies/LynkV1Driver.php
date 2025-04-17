@@ -19,6 +19,7 @@ use App\Enums\TraderOrderStatus;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\TraderException;
+use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -477,7 +478,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     {
         match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
-            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => $this->handleAutoCompleteSell($traderOrder),
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAutoCompleteSell::dispatch($traderOrder->id),
             default => null,
         };
     }

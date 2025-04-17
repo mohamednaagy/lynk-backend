@@ -3,7 +3,13 @@
 namespace App\Jobs\TraderOrder\AutoCompleteSell;
 
 use App\Actions\Contracts\Orders\TraderOrders\AutoCompleteSell;
+use App\Enums\FinancingOrderHistory;
+use App\Enums\TraderOrderStatus;
 use App\Jobs\TraderOrder\AutoCompleteSell\Exceptions\AutoCompleteSellFailed;
+use App\Models\ClientAutoSellPeriod;
+use App\Models\CompanyLenderClient;
+use App\Models\TraderOrder;
+use App\Services\Company\CompanyLenderClientService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -15,30 +21,35 @@ class ProcessAutoCompleteSell implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public function __construct(private readonly int $traderOrderId, private readonly int $periodId)
-    {
-        Log::channel('bursam')->info('add ProcessAutoCompleteSell job to queue default');
+    private const LOG_CHANNEL = 'bursam';
+
+    public function __construct(
+        private readonly int $traderOrderId
+    ) {
+        Log::channel(self::LOG_CHANNEL)->info('ProcessAutoCompleteSell job queued', [
+            'trader_order_id' => $this->traderOrderId,
+        ]);
     }
 
     public function handle(): void
     {
         try {
-            app(AutoCompleteSell::class)->handle($this->traderOrderId, $this->periodId);
+            $result = $this->evaluateAutoSellEligibility();
+            $traderOrder = $result['traderOrder'] ?? null;
 
-            Log::channel('bursam')->info('Auto complete sell performed', [
-                'trader_order' => $this->traderOrderId,
-                'period_id' => $this->periodId,
-            ]);
+            if (! $traderOrder) {
+                return;
+            }
 
+            if (! $result['canAutoSell']) {
+                $traderOrder->allowProgressToNextStep();
+
+                return;
+            }
+
+            app(AutoCompleteSell::class)->handle($traderOrder, $result['period']);
         } catch (\Throwable $e) {
-            Log::channel('bursam')->error('ProcessAutoCompleteSell job failed', [
-                'trader_order' => $this->traderOrderId,
-                'period_id' => $this->periodId,
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            throw new AutoCompleteSellFailed($e->getMessage(), $e->getCode());
+            $this->handleFailure($e);
         }
     }
 
@@ -47,7 +58,102 @@ class ProcessAutoCompleteSell implements ShouldQueue
         return [new WithoutOverlapping($this->uniqueId())];
     }
 
-    public function uniqueId(): string
+    private function evaluateAutoSellEligibility(): array
+    {
+        $traderOrder = $this->getValidTraderOrder();
+        if (! $traderOrder) {
+            return ['canAutoSell' => false];
+        }
+
+        $client = $this->getValidClient($traderOrder);
+        if (! $client) {
+            return ['canAutoSell' => false];
+        }
+
+        $period = $this->getValidPeriod($client, $traderOrder);
+        if (! $period) {
+            return ['canAutoSell' => false];
+        }
+
+        return [
+            'canAutoSell' => true,
+            'traderOrder' => $traderOrder,
+            'period' => $period,
+        ];
+    }
+
+    private function getValidTraderOrder(): ?TraderOrder
+    {
+        $traderOrder = TraderOrder::query()
+            ->where('status', TraderOrderStatus::InProgress)
+            ->find($this->traderOrderId);
+
+        if (! $traderOrder || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
+            Log::channel(self::LOG_CHANNEL)->info('Invalid trader order state', [
+                'trader_order_id' => $this->traderOrderId,
+                'exists' => ! is_null($traderOrder),
+                'last_action' => $traderOrder?->last_history_action,
+            ]);
+
+            return null;
+        }
+
+        return $traderOrder;
+    }
+
+    private function getValidClient(TraderOrder $traderOrder): ?CompanyLenderClient
+    {
+        $financingOrder = $traderOrder->order;
+        $client = CompanyLenderClient::with('autoSellPeriods')
+            ->where([
+                'national_id' => $financingOrder->national_id,
+                'company_id' => $financingOrder->company_id,
+            ])
+            ->first();
+
+        if (! $client || ! $client->auto_complete_sell) {
+            Log::channel(self::LOG_CHANNEL)->info('Invalid client state', [
+                'trader_order_id' => $this->traderOrderId,
+                'client_exists' => ! is_null($client),
+                'auto_complete_sell' => $client?->auto_complete_sell,
+                'national_id' => $financingOrder->national_id,
+                'company_id' => $financingOrder->company_id,
+            ]);
+
+            return null;
+        }
+
+        return $client;
+    }
+
+    private function getValidPeriod(CompanyLenderClient $client, TraderOrder $traderOrder): ?ClientAutoSellPeriod
+    {
+        $period = CompanyLenderClientService::getAutoCompleteSellPeriod($client, $traderOrder->created_at);
+
+        if (! $period) {
+            Log::channel(self::LOG_CHANNEL)->info('No valid period found', [
+                'trader_order_id' => $this->traderOrderId,
+                'created_at' => $traderOrder->created_at,
+            ]);
+
+            return null;
+        }
+
+        return $period;
+    }
+
+    private function handleFailure(\Throwable $e): void
+    {
+        Log::channel(self::LOG_CHANNEL)->error('ProcessAutoCompleteSell job failed', [
+            'trader_order_id' => $this->traderOrderId,
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        throw new AutoCompleteSellFailed($e->getMessage(), $e->getCode());
+    }
+
+    private function uniqueId(): string
     {
         return __CLASS__.'_'.$this->traderOrderId;
     }
