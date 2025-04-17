@@ -147,6 +147,8 @@ class SuperAdmin
         Subject::LenderClients => [
             Action::Index,
             Action::Create,
+            Action::Show,
+            Action::Edit,
             Action::Manage,
         ],
     ];
