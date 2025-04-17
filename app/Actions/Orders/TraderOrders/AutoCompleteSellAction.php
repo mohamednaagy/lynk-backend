@@ -12,7 +12,6 @@ class AutoCompleteSellAction implements AutoCompleteSell
 {
     public function handle(TraderOrder $traderOrder, ClientAutoSellPeriod $period): void
     {
-        
         app(MakeOrderProceed::class)->handle(
             $traderOrder,
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted,

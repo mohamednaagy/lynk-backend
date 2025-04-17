@@ -5,6 +5,7 @@ namespace App\Services\Company;
 use App\Models\ClientAutoSellPeriod;
 use App\Models\CompanyLenderClient;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class CompanyLenderClientService
 {
@@ -19,6 +20,7 @@ class CompanyLenderClientService
                     'client' => $client->id,
                     'period' => $period->id,
                 ]);
+
                 return $period;
             }
         }
