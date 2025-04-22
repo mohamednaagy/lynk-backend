@@ -461,4 +461,62 @@ class LenderClientControllerUpdateTest extends TestCase
 
         $this->assertEquals(3, ClientAutoSellPeriod::where('company_lender_client_id', self::$mainCompanyClient->id)->count());
     }
+
+    public function test_authenticated_admin_success_to_update_lender_client_with_periods_and_is_deleted_is_true(): void
+    {
+        self::$sampleUpdateDataWithPeriods['auto_sell_periods'] = [
+            [
+                'id' => self::$autoSellPeriodForMainClient->id,
+                'is_deleted' => true,
+                'effective_start' => '2024-01-01',
+                'effective_end' => '2024-01-01',
+            ],
+            [
+                'effective_start' => '2025-01-01',
+                'effective_end' => '2025-01-01',
+            ],
+        ];
+
+        $this->actingAs(self::$superAdminUser)
+            ->putJson(self::$updateClientEndpoint, self::$sampleUpdateDataWithPeriods)
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    'name',
+                    'type',
+                    'national_id',
+                    'auto_complete_sell',
+                    'auto_sell_periods',
+                ],
+            ]);
+
+        $this->assertEquals(1, ClientAutoSellPeriod::where('company_lender_client_id', self::$mainCompanyClient->id)->count());
+    }
+
+    public function test_authenticated_admin_success_to_update_lender_client_with_periods_and_is_deleted_is_false(): void
+    {
+        self::$sampleUpdateDataWithPeriods['auto_sell_periods'] = [
+            [
+                'id' => self::$autoSellPeriodForMainClient->id,
+                'is_deleted' => false,
+                'effective_start' => '2024-01-01',
+                'effective_end' => '2024-01-01',
+            ],
+        ];
+
+        $this->actingAs(self::$superAdminUser)
+            ->putJson(self::$updateClientEndpoint, self::$sampleUpdateDataWithPeriods)
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    'name',
+                    'type',
+                    'national_id',
+                    'auto_complete_sell',
+                    'auto_sell_periods',
+                ],
+            ]);
+
+        $this->assertEquals(1, ClientAutoSellPeriod::where('company_lender_client_id', self::$mainCompanyClient->id)->count());
+    }
 }
