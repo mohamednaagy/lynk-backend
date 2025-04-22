@@ -15,6 +15,10 @@ class NoOverlappingPeriods implements Rule
         $normalized = [];
 
         foreach ($value as $index => $period) {
+            if (isset($period['is_deleted'])) {
+                continue;
+            }
+
             try {
                 $start = Carbon::parse($period['effective_start'])->startOfDay();
                 $end = Carbon::parse($period['effective_end'])->endOfDay();
