@@ -3,7 +3,6 @@
 namespace App\Actions\Companies\LenderClients;
 
 use App\Actions\Contracts\Companies\LenderClients\UpdateLenderClient;
-use App\Models\ClientAutoSellPeriod;
 use App\Models\CompanyLenderClient;
 use Illuminate\Support\Arr;
 
@@ -38,12 +37,12 @@ class UpdateLenderClientAction implements UpdateLenderClient
 
         // Delete periods
         $deletedPeriods = $periodsCollection->filter(fn ($p) => isset($p['is_deleted']) && $p['is_deleted'])->pluck('id');
-        ClientAutoSellPeriod::whereIn('id', $deletedPeriods)->delete();
+        $companyLenderClient->autoSellPeriods()->whereIn('id', $deletedPeriods)->delete();
 
         // Update periods
         $editPeriods = $periodsCollection->filter(fn ($p) => isset($p['id']))->keyBy('id');
         foreach ($editPeriods as $period) {
-            ClientAutoSellPeriod::where('id', $period['id'])
+            $companyLenderClient->autoSellPeriods()->where('id', $period['id'])
                 ->where(fn ($query) => $query->where('effective_start', '!=', $period['effective_start'])
                     ->orWhere('effective_end', '!=', $period['effective_end']))
                 ->update(
