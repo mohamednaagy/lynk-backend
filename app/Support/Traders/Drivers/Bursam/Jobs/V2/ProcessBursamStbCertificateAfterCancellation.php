@@ -95,7 +95,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
 
     public function backoff(): array
     {
-        return [60, 120, 180, 240, 300];
+        return [60, 120, 120];
     }
 
     public function middleware(): array
