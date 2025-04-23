@@ -4,6 +4,7 @@ namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Clients;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\CompanyLenderClientType;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\Company;
@@ -111,6 +112,132 @@ class LenderClientControllerIndexTest extends TestCase
                         'name',
                         'type',
                         'national_id',
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_authenticated_admin_can_filter_lender_clients_by_name(): void
+    {
+        $client1 = $this->createClient(self::$company, ['name' => 'Test Client 1']);
+        $client2 = $this->createClient(self::$company, ['name' => 'Test Client 2']);
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?name=Test Client 1')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['name' => 'Test Client 1'])
+            ->assertJsonMissing(['name' => 'Test Client 2']);
+    }
+
+    public function test_authenticated_admin_can_filter_lender_clients_by_type(): void
+    {
+        $client1 = $this->createClient(self::$company, ['type' => CompanyLenderClientType::Individual]);
+        $client2 = $this->createClient(self::$company, ['type' => CompanyLenderClientType::Business]);
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?type='.CompanyLenderClientType::Individual)
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['type' => [
+                'value' => CompanyLenderClientType::Individual,
+                'description' => 'Individual',
+            ]])
+            ->assertJsonMissing(['type' => [
+                'value' => CompanyLenderClientType::Business,
+                'description' => 'Business',
+            ]]);
+    }
+
+    public function test_authenticated_admin_can_filter_lender_clients_by_national_id(): void
+    {
+        $client1 = $this->createClient(self::$company, ['national_id' => '1234567890']);
+        $client2 = $this->createClient(self::$company, ['national_id' => '0987654321']);
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?national_id=1234567890')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment(['national_id' => '1234567890'])
+            ->assertJsonMissing(['national_id' => '0987654321']);
+    }
+
+    public function test_authenticated_admin_can_filter_lender_clients_with_multiple_parameters(): void
+    {
+        $client1 = $this->createClient(self::$company, [
+            'name' => 'Test Client 1',
+            'type' => CompanyLenderClientType::Individual,
+            'national_id' => '1234567890',
+        ]);
+        $client2 = $this->createClient(self::$company, [
+            'name' => 'Test Client 2',
+            'type' => CompanyLenderClientType::Business,
+            'national_id' => '0987654321',
+        ]);
+
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?name=Test Client 1&type='.CompanyLenderClientType::Individual.'&national_id=1234567890')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonFragment([
+                'name' => 'Test Client 1',
+                'type' => [
+                    'value' => CompanyLenderClientType::Individual,
+                    'description' => 'Individual',
+                ],
+                'national_id' => '1234567890',
+            ])
+            ->assertJsonMissing([
+                'name' => 'Test Client 2',
+                'type' => [
+                    'value' => CompanyLenderClientType::Business,
+                    'description' => 'Business',
+                ],
+                'national_id' => '0987654321',
+            ]);
+    }
+
+    public function test_authenticated_admin_fails_to_filter_lender_clients_with_invalid_type(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?type=invalid_type')
+            ->assertUnprocessable()
+            ->assertJson([
+                'message' => __('validation.exists', ['attribute' => 'type']),
+                'errors' => [
+                    'type' => [
+                        __('validation.exists', ['attribute' => 'type']),
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_authenticated_admin_fails_to_filter_lender_clients_with_invalid_national_id(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?national_id=invalid_id')
+            ->assertUnprocessable()
+            ->assertJson([
+                'message' => __('validation.integer', ['attribute' => 'national ID']).' (and 1 more error)',
+                'errors' => [
+                    'national_id' => [
+                        __('validation.integer', ['attribute' => 'national ID']),
+                        __('validation.max_digits'),
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_authenticated_admin_fails_to_filter_lender_clients_with_too_long_name(): void
+    {
+        $this->actingAs(self::$userAdmin)
+            ->getJson(self::$endpoint.'?name='.str_repeat('a', 101))
+            ->assertUnprocessable()
+            ->assertJson([
+                'message' => 'The name must not be greater than 100 characters.',
+                'errors' => [
+                    'name' => [
+                        'The name must not be greater than 100 characters.',
                     ],
                 ],
             ]);
