@@ -9,6 +9,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Companies\LenderClients\ListLenderClientRequest;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\StoreLenderClientRequest;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\UpdateLenderClientRequest;
 use App\Models\Company;
@@ -41,9 +42,18 @@ class LenderClientController extends Controller
 
     public function index(
         Company $lender,
-        GetPaginatedLenderClients $getPaginatedLenderClients
+        GetPaginatedLenderClients $getPaginatedLenderClients,
+        ListLenderClientRequest $request
     ): JsonResponse {
-        $clients = $getPaginatedLenderClients->handle($lender);
+        $data = $request->validated();
+
+        $clients = $getPaginatedLenderClients
+            ->setLender($lender)
+            ->setName($data['name'] ?? null)
+            ->setType($data['type'] ?? null)
+            ->setNationalId($data['national_id'] ?? null)
+            ->handle()
+            ->paginate();
 
         return fractal($clients, new CompanyLenderClientTransformer)
             ->parseIncludes([
