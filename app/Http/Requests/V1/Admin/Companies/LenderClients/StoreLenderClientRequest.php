@@ -28,7 +28,7 @@ class StoreLenderClientRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:100'],
             'national_id' => ['required', 'integer', 'max_digits:10',
-                Rule::unique(CompanyLenderClient::class, 'national_id')->where('company_id', $this->lender->id)],
+                Rule::unique(CompanyLenderClient::class, 'national_id')->where('company_id', $this->lender->id)->where('deleted_at', null), ],
             'type' => ['required', Rule::in(CompanyLenderClientType::getValues())],
             'auto_complete_sell' => ['required', 'boolean'],
             'auto_sell_periods' => ['required_if:auto_complete_sell,true', 'array', new NoOverlappingPeriods],

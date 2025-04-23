@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
 use App\Actions\Contracts\Companies\LenderClients\CreateLenderClient;
+use App\Actions\Contracts\Companies\LenderClients\DeleteLenderClient;
 use App\Actions\Contracts\Companies\LenderClients\GetPaginatedLenderClients;
 use App\Actions\Contracts\Companies\LenderClients\UpdateLenderClient;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Companies\LenderClients\DeleteLenderClientRequest;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\StoreLenderClientRequest;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\UpdateLenderClientRequest;
 use App\Models\Company;
@@ -111,5 +113,21 @@ class LenderClientController extends Controller
                 ])
                 ->respond();
         });
+    }
+
+    public function destroy(
+        Lender $lender,
+        CompanyLenderClient $client,
+        DeleteLenderClientRequest $request,
+        DeleteLenderClient $deleteLenderClient,
+    ): JsonResponse {
+        $request->validated();
+
+        return DB::transaction(function () use ($client, $deleteLenderClient) {
+            $deleteLenderClient->handle($client);
+
+            return $this->successResponse();
+        });
+
     }
 }
