@@ -29,27 +29,25 @@ class UpdateLenderClientAction implements UpdateLenderClient
     {
         $periodsCollection = collect($periods);
 
-        $editPeriods = $periodsCollection->filter(fn ($p) => isset($p['id']))->keyBy('id');
+        // Create new periods
         $newPeriods = $periodsCollection->filter(fn ($p) => ! isset($p['id']))->values();
-
-        $existingPeriods = $companyLenderClient->autoSellPeriods;
-
-        foreach ($existingPeriods as $existingPeriod) {
-            $editPeriod = $editPeriods[$existingPeriod->id] ?? null;
-            if ($editPeriod) {
-                if (
-                    $existingPeriod->effective_start !== $editPeriod['effective_start'] ||
-                    $existingPeriod->effective_end !== $editPeriod['effective_end']
-                ) {
-                    $existingPeriod->update(
-                        Arr::only($editPeriod, ['effective_start', 'effective_end'])
-                    );
-                }
-            }
-        }
-
         if ($newPeriods->isNotEmpty()) {
             $companyLenderClient->autoSellPeriods()->createMany($newPeriods);
+        }
+
+        // Delete periods
+        $deletedPeriods = $periodsCollection->filter(fn ($p) => isset($p['is_deleted']) && $p['is_deleted'])->pluck('id');
+        $companyLenderClient->autoSellPeriods()->whereIn('id', $deletedPeriods)->delete();
+
+        // Update periods
+        $editPeriods = $periodsCollection->filter(fn ($p) => isset($p['id']))->keyBy('id');
+        foreach ($editPeriods as $period) {
+            $companyLenderClient->autoSellPeriods()->where('id', $period['id'])
+                ->where(fn ($query) => $query->where('effective_start', '!=', $period['effective_start'])
+                    ->orWhere('effective_end', '!=', $period['effective_end']))
+                ->update(
+                    Arr::only($period, ['effective_start', 'effective_end'])
+                );
         }
     }
 }
