@@ -14,18 +14,18 @@ return new class extends Migration
         DB::statement('
                 ALTER TABLE local_market_inventory_units
                 RENAME INDEX idx_hold_for_optimized TO inventory_units_hold_for_index
-            ');
+           ');
 
         DB::statement('
-                ALTER TABLE local_market_inventory_units 
+                ALTER TABLE local_market_inventory_units
                 ADD INDEX inventory_units_eligibility_index (
-                    local_market_inventory_id, 
-                    status, 
-                    hold_for, 
-                    deleted_at, 
-                    previous_company_id_owner_0, 
-                    previous_company_id_owner_1, 
-                    previous_company_id_owner_2, 
+                    local_market_inventory_id,
+                    status,
+                    hold_for,
+                    deleted_at,
+                    previous_company_id_owner_0,
+                    previous_company_id_owner_1,
+                    previous_company_id_owner_2,
                     previous_company_id_owner_3
                 )
             ');
@@ -39,7 +39,7 @@ return new class extends Migration
     public function down()
     {
         DB::statement('
-            ALTER TABLE local_market_inventory_units 
+            ALTER TABLE local_market_inventory_units
             DROP INDEX inventory_units_eligibility_index
         ');
 
