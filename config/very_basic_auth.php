@@ -5,9 +5,9 @@
  */
 
 return [
-    'user' => config('horizon_username', 'admin'),
+    'user' => config('horizon_username'),
 
-    'password' => config('horizon_password', 'LynkHoriz@2024'),
+    'password' => config('horizon_password'),
 
     // Environments where the middleware is active. Use "*" to protect all envs
     'envs' => [
