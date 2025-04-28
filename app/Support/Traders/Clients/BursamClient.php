@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -392,6 +393,16 @@ class BursamClient
                 $callback,
                 $decaySeconds,
             );
+
+            if ($executed instanceof Response && empty($executed->json())) {
+                Log::channel('bursam')->error('bursa API returned null response', [
+                    'traderOrderId' => $this->traderOrder->id,
+                    'financingOrderId' => $this->traderOrder->order->id,
+                    'remainingRetries' => $remainingRetries,
+                    'response' => $executed,
+                ]);
+                throw new Exception('bursa API returned null response');
+            }
 
             if ($executed === false) {
                 Log::channel('bursam')->warning('bursa Rate limit exceeded, delaying retry without incrementing retries', [
