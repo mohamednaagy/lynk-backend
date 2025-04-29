@@ -89,7 +89,7 @@ class Company extends BaseTenant
 
     public function walletNotification()
     {
-        return $this->hasOne(WalletNotification::class)->ofMany();
+        return $this->hasOne(WalletNotification::class, 'company_id')->ofMany();
     }
 
     public function tieredPricing()
