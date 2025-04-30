@@ -34,7 +34,7 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::info('Starting ProcessBursamBidCertificate Job');
+        Log::channel('bursam')->info('Starting ProcessBursamBidCertificate Job');
 
         DB::transaction(function () {
             $lockedFinancingOrder = FinancingOrder::query()
@@ -54,6 +54,6 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamCancelTimeOutOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('ProcessBursamCancelTimeOutOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
     }
 }

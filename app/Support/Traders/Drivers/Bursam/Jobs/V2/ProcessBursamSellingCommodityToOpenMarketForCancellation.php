@@ -2,7 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -39,7 +39,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
      */
     public function handle(): void
     {
-        Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2) => ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+        Log::channel('bursam')->info('start processing cancel trader order ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
 
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
@@ -51,13 +51,10 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
                 return;
             }
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
-                Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2) => ProcessBursamSellingCommodityToOpenMarketForCancellation => start sellCommodityToBursam', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
-
+            if ($traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
                 Trader::driver('bursam', $traderOrder->version)
                     ->sellCommodityToBursam($traderOrder);
-                Log::channel('bursam')->warning('start processing cancel trader order => start bus chain (2) => ProcessBursamSellingCommodityToOpenMarketForCancellation => finish sellCommodityToBursam', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
-
+                Log::channel('bursam')->info('start processing cancel trader order finish sellCommodityToBursam', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
             }
         });
     }
@@ -74,7 +71,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId ' => $this->traderOrderId, 'trace' => $exception->getTraceAsString(), 'message' => $exception->getMessage()]);
     }
 
     public function retryUntil(): Carbon

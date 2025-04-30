@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Traits\TraderHelperTrait;
 
 class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusToCancel
@@ -27,6 +28,8 @@ class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusTo
             $traderOrder,
             FinancingOrderHistory::SuccessCancelled
         );
+
+        app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
     }
 }
