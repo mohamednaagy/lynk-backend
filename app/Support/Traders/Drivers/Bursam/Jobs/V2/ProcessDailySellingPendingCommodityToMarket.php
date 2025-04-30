@@ -42,7 +42,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             ->select('id')
             ->lazyById()
             ->each(function (FinancingOrder $financingOrder) {
-                Log::info("fire auto cancel job for finance order {$financingOrder->id}");
+                Log::channel('bursam')->info("fire auto cancel job for finance order {$financingOrder->id}");
                 ProcessBursamCancelTimeOutOrder::dispatch($financingOrder);
             });
     }

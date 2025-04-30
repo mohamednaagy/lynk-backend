@@ -21,7 +21,7 @@ class ProcessAutoCompleteSell implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    private const LOG_CHANNEL = 'bursam';
+    private const LOG_CHANNEL = 'bursam_autosell';
 
     public function __construct(
         private readonly int $traderOrderId
