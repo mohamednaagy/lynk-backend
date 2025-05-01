@@ -79,7 +79,7 @@ return [
             },
         ],
         'lynk' => [
-            'latest' => 'v1',
+            'latest' => env('LYNK_DEFAULT_VERSION', 'v2'),
             'fake' => env('LYNK_LOCAL_COMMODITY_MARKET_FAKE', false),
             'rate_limit' => [
                 'decay_seconds' => env('LYNK_LOCAL_COMMODITY_MARKET_LIMIT_DECAY_SECONDS', 1),
@@ -96,6 +96,9 @@ return [
             'modes' => [
                 'v1' => [
                     TraderOrderMode::Automatic,
+                    TraderOrderMode::Manual,
+                ],
+                'v2' => [
                     TraderOrderMode::Manual,
                 ],
             ],

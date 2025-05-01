@@ -672,6 +672,15 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 
+        public function processProceedContractSigned(TraderOrder $traderOrder): void
+    {
+        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
+            app()->make(GenerateClientWakala::class)->handle($traderOrder);
+        }
+
+        app()->make(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
+    }
+
     // use it in public api to proceed order after purchasing commodity step by one step
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
@@ -690,6 +699,11 @@ class BursamV1Driver implements TraderInterface
     }
 
     public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
+
+    public function clientWakalaMessage(TraderOrder $traderOrder)
     {
         return null;
     }

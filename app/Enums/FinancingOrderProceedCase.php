@@ -9,25 +9,44 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
 {
     const ALLOWED_TO_PROCEED_STATUS = [
         Trader::Bursam => [
-            self::ClientWakalaAccepted,
-            self::ContractSigned,
-            self::ContractAndClientWakalaCompleted,
+            'v1' => [
+                self::ClientWakalaAccepted,
+                self::ContractSigned,
+                self::ContractAndClientWakalaCompleted,
+            ],
+            'v2' => [
+                self::ClientWakalaAccepted,
+                self::ContractSigned,
+                self::ContractAndClientWakalaCompleted,
+            ]
         ],
         Trader::Lynk => [
-            self::ContractAndClientWakalaCompleted,
-            self::ContractSignedDelivery,
-            self::IgnoreAndSell,
-            self::ConfirmDeliver,
+            'v1' => [
+                self::ContractAndClientWakalaCompleted,
+                self::ContractSignedDelivery,
+                self::IgnoreAndSell,
+                self::ConfirmDeliver,
+            ],
+            'v2' => [
+                self::ContractSigned,
+                self::ClientWakalaAccepted,
+                self::ConfirmDeliver,
+                self::ContractAndClientWakalaCompleted,
+            ]
         ],
         Trader::Dmcc => [
-            self::ClientWakalaAccepted,
-            self::ContractSigned,
-            self::ContractAndClientWakalaCompleted,
+            'v1' => [
+                self::ClientWakalaAccepted,
+                self::ContractSigned,
+                self::ContractAndClientWakalaCompleted,
+            ]
         ],
         Trader::FakeDmcc => [
-            self::ClientWakalaAccepted,
-            self::ContractSigned,
-            self::ContractAndClientWakalaCompleted,
+            'v1' => [
+                self::ClientWakalaAccepted,
+                self::ContractSigned,
+                self::ContractAndClientWakalaCompleted,
+            ]
         ],
     ];
 

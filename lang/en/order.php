@@ -15,8 +15,19 @@ return [
             'expired_confirmation_time_limit' => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit of :TIME hours has expired.',
             'steps' => [
                 'contract_signed' => [
-                    'sell' => 'Contract Signed - Sell for Customer confirmed by user.',
-                    'deliver' => 'Contract Signed - Delivery for Customer requested by user.',
+                    'v1' => [
+                        'sell' => 'Contract Signed - Sell for Customer confirmed by user.',
+                        'deliver' => 'Contract Signed - Delivery for Customer requested by user.',
+                    ],
+                    'v2' => [
+                        'proceed' => 'Contract Signed confirmed by user.',
+                    ],
+                ],
+                'client_wakala' => [
+                    'v2' => [
+                        'sell' => 'Client Wakala - Sell Customer confirmed by user.',
+                        'deliver' => 'Client Wakala - Deliver for Customer confirmed by user. Please contact a LYNK Administrator to confirm delivery process and logistics',
+                    ],
                 ],
                 'customer_delivery_confirmation' => [
                     'delivery_not_applicable' => 'Contract Signed - Sell confirmed. Delivery Not Applicable.',
