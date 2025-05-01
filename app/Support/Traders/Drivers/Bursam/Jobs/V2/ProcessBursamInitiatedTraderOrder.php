@@ -10,6 +10,7 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -41,21 +42,29 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        DB::beginTransaction();
+        try {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::Initiated)
-                ->lockForUpdate()
                 ->find($this->traderOrderId);
+            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
 
             if (is_null($traderOrder)) {
                 return;
             }
-            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
 
             Trader::driver('bursam', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
             Log::channel('bursam')->info('bursa purchasing step => finishing ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
-
-        });
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::channel('bursam')->error('ProcessBursamInitiatedTraderOrder failed method detail', [
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'traderOrderId' => $this->traderOrderId,
+            ]);
+            throw $exception;
+        }
     }
 
     public function failed($exception)
@@ -63,6 +72,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         Log::channel('bursam')->error('ProcessBursamInitiatedTraderOrder failed method detail', [
             'code' => $exception->getCode(),
             'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
             'traderOrderId' => $this->traderOrderId,
         ]);
 

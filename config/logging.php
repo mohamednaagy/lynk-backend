@@ -131,6 +131,12 @@ return [
             'level' => 'debug',
             'days' => 30,
         ],
+        'bursam_autosell' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/bursam/bursam_autosell.log'),
+            'level' => 'debug',
+            'days' => 30,
+        ],
         'local_market' => [
             'driver' => 'daily',
             'path' => storage_path('logs/local-market/local-market.log'),
