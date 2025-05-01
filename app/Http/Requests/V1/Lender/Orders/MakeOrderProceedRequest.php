@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
-use App\Enums\Trader;
 use App\Http\Requests\Traits\RequestHasClientWakala;
 use App\Models\TraderOrder;
 use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
-use App\Rules\ClientWakalaValidator;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest

@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
-use App\Actions\Contracts\Clients\AskClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -14,8 +13,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Str;
 
 class ProcessLynkAskClientForWakala implements ShouldQueue
 {
@@ -51,7 +48,6 @@ class ProcessLynkAskClientForWakala implements ShouldQueue
         if (! $traderOrder->doesLastActionMatchWith($lastHistoryOfPreviousStep)) {
             return;
         }
-
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::WaitingClientWakala);
     }

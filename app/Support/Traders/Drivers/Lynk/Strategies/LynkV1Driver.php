@@ -31,7 +31,6 @@ use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\Deliverable;
 use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
-use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkAskClientForWakala;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
