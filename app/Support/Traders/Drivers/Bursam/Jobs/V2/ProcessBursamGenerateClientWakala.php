@@ -45,16 +45,14 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
         $traderOrder = null;
         try {
             // Get attempt count from job properties
-            $attemptNumber = $this->job->attempts();
-            Log::channel('bursam')->info("Job wakala attempt #{$attemptNumber} started", [
-                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
+            Log::channel('bursam')->info('Job wakala started', [
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
 
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
-                ->lockForUpdate()
+                // ->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (
@@ -62,9 +60,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
             ) {
                 Log::channel('bursam')->info('Job wakala skipped - order not found or incorrect action state', [
-                    'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                     'trader_order_id' => $this->traderOrderId,
-                    'attempt' => $attemptNumber,
                     'timestamp' => saudi_now(),
                 ]);
 
@@ -75,33 +71,26 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 'action' => 'start',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
-                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
-
                 'timestamp' => saudi_now(),
             ]);
             app(GenerateClientWakala::class)->handle($traderOrder);
 
             Log::channel('bursam')->info('Successfully generated client wakala', [
                 'action' => 'complete',
-                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
         } catch (Throwable $e) {
-            $currentAttempt = $this->job->attempts();
-
-            Log::channel('bursam')->error("Retry Wakala exception on attempt #{$currentAttempt}", [
+            Log::channel('bursam')->error('Retry Wakala exception on attempt', [
                 'actual_exception' => $e->getMessage(),
                 'error_code' => $e->getCode(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'exception_class' => get_class($e),
                 'trace' => $e->getTraceAsString(),
-                'job_id' => $this->job ? $this->job?->getJobId() : 'unknown',
                 'trader_order_id' => $this->traderOrderId,
                 'financing_order_id' => $traderOrder?->order?->id ?? null,
-                'attempt' => $currentAttempt,
                 'timestamp' => saudi_now(),
             ]);
             throw $e;

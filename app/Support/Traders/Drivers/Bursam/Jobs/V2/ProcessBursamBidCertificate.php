@@ -46,7 +46,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
-                ->lockForUpdate()
+                // ->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (
