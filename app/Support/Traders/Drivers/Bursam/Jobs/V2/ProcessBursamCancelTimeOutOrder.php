@@ -38,7 +38,6 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
 
         DB::transaction(function () {
             $lockedFinancingOrder = FinancingOrder::query()
-                ->lockForUpdate()
                 ->find($this->financingOrder->id);
 
             if (is_null($lockedFinancingOrder)) {

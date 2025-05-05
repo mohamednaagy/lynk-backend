@@ -38,7 +38,6 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
-                ->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (

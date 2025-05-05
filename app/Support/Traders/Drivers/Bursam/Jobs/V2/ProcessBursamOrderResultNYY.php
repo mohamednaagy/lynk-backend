@@ -15,7 +15,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
@@ -39,21 +38,18 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
-                ->lockForUpdate()
-                ->find($this->traderOrderId);
+        $traderOrder = TraderOrder::query()
+            ->where('status', TraderOrderStatus::InProgress)
+            ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
-            ) {
-                return;
-            }
+        if (
+            is_null($traderOrder)
+            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
+        ) {
+            return;
+        }
 
-            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultNYY($traderOrder);
-        });
+        Trader::driver('bursam', $traderOrder->version)->fetchOrderResultNYY($traderOrder);
     }
 
     public function middleware(): array
