@@ -65,7 +65,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
         DB::transaction(function () use ($exception) {
             $traderOrder = TraderOrder::query()
-
                 ->find($this->traderOrderId);
 
             if ($traderOrder === null) {
