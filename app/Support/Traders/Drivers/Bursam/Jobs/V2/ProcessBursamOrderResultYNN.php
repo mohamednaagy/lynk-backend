@@ -45,7 +45,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     {
         $traderOrder = TraderOrder::query()
             ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
-             // ->lockForUpdate()
             ->find($this->traderOrderId);
 
         if (
@@ -66,7 +65,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
         DB::transaction(function () use ($exception) {
             $traderOrder = TraderOrder::query()
-                // ->lockForUpdate()
+
                 ->find($this->traderOrderId);
 
             if ($traderOrder === null) {

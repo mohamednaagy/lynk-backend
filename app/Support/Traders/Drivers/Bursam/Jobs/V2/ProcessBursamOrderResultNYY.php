@@ -40,7 +40,6 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     {
         $traderOrder = TraderOrder::query()
             ->where('status', TraderOrderStatus::InProgress)
-            // ->lockForUpdate()
             ->find($this->traderOrderId);
 
         if (

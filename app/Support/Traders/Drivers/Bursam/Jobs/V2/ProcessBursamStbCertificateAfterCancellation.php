@@ -55,7 +55,6 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::PendingCancellation)
-                ->lockForUpdate()
                 ->find($this->traderOrderId);
             Log::channel('bursam')->info('start processing cancel trader order at ProcessBursamStbCertificateAfterCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
 

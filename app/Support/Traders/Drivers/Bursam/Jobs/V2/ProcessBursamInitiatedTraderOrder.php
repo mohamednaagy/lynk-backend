@@ -17,7 +17,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
@@ -41,8 +40,6 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        // DB::beginTransaction();
-        // try {
         $traderOrder = TraderOrder::query()
             ->where('status', TraderOrderStatus::Initiated)
             ->find($this->traderOrderId);
