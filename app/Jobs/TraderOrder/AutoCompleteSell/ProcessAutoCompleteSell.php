@@ -16,6 +16,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
+use Stancl\Tenancy\Tenancy;
 
 class ProcessAutoCompleteSell implements ShouldQueue
 {
@@ -26,6 +27,9 @@ class ProcessAutoCompleteSell implements ShouldQueue
     public function __construct(
         private readonly int $traderOrderId
     ) {
+        // Disable tenancy inside the job
+        app(Tenancy::class)->end();
+
         Log::channel(self::LOG_CHANNEL)->info('ProcessAutoCompleteSell job queued', [
             'trader_order_id' => $this->traderOrderId,
         ]);

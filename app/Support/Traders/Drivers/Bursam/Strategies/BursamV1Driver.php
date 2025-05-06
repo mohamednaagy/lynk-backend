@@ -107,7 +107,6 @@ class BursamV1Driver implements TraderInterface
     {
         // Determine the status of the order
         $status = $this->checkCanInitiateTraderOrder() ? TraderOrderStatus::Initiated : TraderOrderStatus::Hold;
-
         // Call the appropriate method based on the status
         if ($status === TraderOrderStatus::Hold) {
             return $this->createHoldTraderOrder($financingOrder);

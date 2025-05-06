@@ -183,5 +183,5 @@ return [
     'effective_end_after_or_equal_start' => 'The end date must be the same as or after the start date.',
     'invalid_date_format' => 'Invalid date format.',
     'field_is_not_editable' => 'This Field Is Not Editable',
-    'periods_overlapped_with_existing' => 'Periods overlap with existing periods',
+    'periods_overlapped_with_existing' => 'Periods must not overlap with existing ranges',
 ];

@@ -44,7 +44,6 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::PendingCancellation)
-                ->lockForUpdate()
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
