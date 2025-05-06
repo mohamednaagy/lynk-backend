@@ -7,9 +7,9 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Jobs\General\ProcessAskClientForWakala;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
-use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkAskClientForWakala;
 
 class LynkV2Driver extends LynkV1Driver
 {
@@ -21,7 +21,7 @@ class LynkV2Driver extends LynkV1Driver
     {
         match ($lastHistoryAction) {
             FinancingOrderHistory::ContractSigned => $this->createSellingCommodityToCustomerDocument($traderOrder),
-            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkAskClientForWakala::dispatch($traderOrder->id),
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
             FinancingOrderHistory::ClientWakalaAccepted => $this->handleManualSellTransition($traderOrder),
             default => null,
         };

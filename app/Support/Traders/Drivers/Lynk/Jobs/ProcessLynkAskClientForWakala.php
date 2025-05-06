@@ -7,7 +7,6 @@ use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -26,18 +25,13 @@ class ProcessLynkAskClientForWakala implements ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('local_market');
-
     }
 
     /**
      * Execute the job.
-     *
-     *
-     * @throws BindingResolutionException
      */
     public function handle(): void
     {
-        /** @var TraderOrder $traderOrder */
         $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrderId);
 
         $dict = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type);
