@@ -59,6 +59,7 @@ class OrderController extends Controller
         'approver',
         'trader_orders.id',
         'trader_orders.provider',
+        'trader_orders.version',
         'trader_orders.mode',
         'trader_orders.reference',
         'trader_orders.failure_reason',

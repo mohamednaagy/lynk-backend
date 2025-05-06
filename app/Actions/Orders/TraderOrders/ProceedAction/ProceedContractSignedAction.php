@@ -3,13 +3,11 @@
 namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigned;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
-use App\Enums\TraderOrderTimeLimitType;
+use App\Support\Traders\Facades\Trader;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
-use App\Services\TraderOrder\TimeLimitService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -18,7 +16,7 @@ class ProceedContractSignedAction implements ProceedContractSigned
 {
     use TraderHelperTrait;
 
-    public function __construct(protected TimeLimitService $timeLimitService) {}
+    public function __construct() {}
 
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
@@ -35,11 +33,7 @@ class ProceedContractSignedAction implements ProceedContractSigned
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
-        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
-            app()->make(GenerateClientWakala::class)->handle($traderOrder);
-        }
-
-        $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
+        Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractSigned($traderOrder);
 
         return [];
     }

@@ -434,4 +434,27 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->mode === TraderOrderMode::Automatic;
     }
+
+    public function isProvider(string $provider): bool
+    {
+        return $this->provider === $provider;
+    }
+
+    public function isVersion(string $version): bool
+    {
+        return $this->version === $version;
+    }
+
+    public function isPreviousStepNotCompleted(string $currentStep): bool
+    {
+        $dictionary = new StepHistoriesDictionary(
+            $this->provider,
+            $this->version,
+            $this->contract_signed_type
+        );
+
+        $previousStep = $dictionary->getPreviousStepOf($currentStep)->step;
+
+        return ! $this->checkOrderStepComplete($previousStep);
+    }
 }

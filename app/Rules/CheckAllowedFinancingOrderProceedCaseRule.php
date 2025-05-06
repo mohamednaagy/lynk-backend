@@ -3,36 +3,28 @@
 namespace App\Rules;
 
 use App\Enums\FinancingOrderProceedCase;
-use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Contracts\Validation\Rule;
 
 class CheckAllowedFinancingOrderProceedCaseRule implements Rule
 {
-    /**
-     * Create a new rule instance.
-     *
-     * @return void
-     */
-    private FinancingOrder $order;
-
-    public function __construct(FinancingOrder $order)
+    public function __construct(private TraderOrder $traderOrder)
     {
-        $this->order = $order;
     }
 
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
     public function passes($attribute, $value)
     {
-        $traderOrder = $this->order->activeTraderOrder()->firstOrFail();
+        $provider = $this->traderOrder->provider;
+        $version = $this->traderOrder->version;
 
-        return in_array($value, FinancingOrderProceedCase::ALLOWED_TO_PROCEED_STATUS[$traderOrder->provider]);
-
+        return in_array($value, FinancingOrderProceedCase::ALLOWED_TO_PROCEED_STATUS[$provider][$version]);
     }
 
     /**

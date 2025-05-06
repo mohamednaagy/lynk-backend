@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Traits;
 
 use App\Enums\FinancingOrderProceedCase;
+use App\Enums\Trader;
 use Illuminate\Validation\Validator;
 
 trait RequestHasClientWakala
@@ -14,6 +15,10 @@ trait RequestHasClientWakala
      */
     public function withValidator(Validator $validator)
     {
+        if ($this->traderOrder->isProvider(Trader::Lynk)) {
+            return;
+        }
+
         $validator->after(
             function ($validator) {
                 if ($this->isClientWakalaNotProvidedIfNeeded()) {

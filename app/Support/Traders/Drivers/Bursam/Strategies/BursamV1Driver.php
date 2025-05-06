@@ -28,7 +28,6 @@ use App\Support\Traders\Clients\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamStbCertificateAfterCancellation;
-use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -671,6 +670,15 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 
+        public function processProceedContractSigned(TraderOrder $traderOrder): void
+    {
+        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
+            app()->make(GenerateClientWakala::class)->handle($traderOrder);
+        }
+
+        app()->make(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
+    }
+
     // use it in public api to proceed order after purchasing commodity step by one step
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
@@ -689,6 +697,11 @@ class BursamV1Driver implements TraderInterface
     }
 
     public function contractSignedMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
+
+    public function clientWakalaMessage(TraderOrder $traderOrder)
     {
         return null;
     }

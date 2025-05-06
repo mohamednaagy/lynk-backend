@@ -9,6 +9,7 @@ use App\Support\Traders\Drivers\Bursam\Strategies\BursamV2Driver;
 use App\Support\Traders\Drivers\Dmcc\Strategies\DmccV1Driver;
 use App\Support\Traders\Drivers\Fake\Strategies\FakeV1Driver;
 use App\Support\Traders\Drivers\Lynk\Strategies\LynkV1Driver;
+use App\Support\Traders\Drivers\Lynk\Strategies\LynkV2Driver;
 use Illuminate\Support\Manager;
 
 class TraderManager extends Manager
@@ -56,6 +57,11 @@ class TraderManager extends Manager
     public function createLynkV1Driver(): TraderInterface
     {
         return new LynkV1Driver;
+    }
+
+    public function createLynkV2Driver(): TraderInterface
+    {
+        return new LynkV2Driver;
     }
 
     public function createFakeV1Driver(): TraderInterface

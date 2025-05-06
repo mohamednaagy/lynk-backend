@@ -10,6 +10,7 @@ use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
+use App\Enums\MurabhaStep;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
@@ -18,6 +19,7 @@ use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
+use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Exceptions\TraderException;
 use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\FinancingOrder;
@@ -26,6 +28,7 @@ use App\Models\User;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
+use App\Support\Traders\Contracts\Deliverable;
 use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
@@ -43,7 +46,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
 // TODO_LOCAL_MARKET need to review
-class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
+class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface, Deliverable
 {
     use Localizable;
     use TraderHelperTrait {
@@ -83,7 +86,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     private function generateTemporaryReference(Model $financingOrder): string
     {
-        return Str::upper(Str::random(14)).$financingOrder->id;
+        return Str::upper(Str::random(14)) . $financingOrder->id;
     }
 
     private function generateFinalReferenceNumber(Model $traderOrder): string
@@ -123,7 +126,7 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
                 $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
+                $products = collect($traderOrder->products)->map(fn($product) => LynkCommodityProductDto::fromArray($product));
 
                 $this->storeOrderDocumentAsPdf(
                     'local-commodity-market.transfer-ownership-to-lender',
@@ -136,11 +139,11 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
                         'order_number' => $traderOrder->financing_order_id,
                         'amount' => $amount,
                         'previous_owner' => $products->map(
-                            fn ($item) => $item->getPreviousOwnerAsArray()
+                            fn($item) => $item->getPreviousOwnerAsArray()
                         )
                             ->flatten()
                             ->implode('،'),
-                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+                        'product_name' => $products->implode(fn($item) => $item->getProduct(), '،'),
                         'date' => $currentTimeInRiyadhTz->toDateString(),
                         'time' => $currentTimeInRiyadhTz->toTimeString(),
                         'trade_order' => $traderOrder,
@@ -301,10 +304,11 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
-        int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
-        $cancelledByType = TraderOrderCancelType::System,
-        ?User $cancelledBy = null
-    ): int {
+        int         $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled,
+                    $cancelledByType = TraderOrderCancelType::System,
+        ?User       $cancelledBy = null
+    ): int
+    {
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
         match ($traderOrder->mode) {
@@ -318,10 +322,11 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     protected function handleManualOrderCancellation(
         TraderOrder $traderOrder,
-        int $cancelReason,
-        $cancelledByType,
-        ?User $cancelledBy
-    ): void {
+        int         $cancelReason,
+                    $cancelledByType,
+        ?User       $cancelledBy
+    ): void
+    {
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
         // use at cancel financing order
         if ($traderOrder->order->isInPendingCancellationState()) {
@@ -334,10 +339,11 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     protected function handleAutomaticOrderCancellation(
         TraderOrder $traderOrder,
-        int $cancelReason,
-        $cancelledByType,
-        ?User $cancelledBy
-    ): void {
+        int         $cancelReason,
+                    $cancelledByType,
+        ?User       $cancelledBy
+    ): void
+    {
         ProcessLynkCancelOrderAtLocalMarket::dispatch($traderOrder->id, $cancelReason);
     }
 
@@ -345,8 +351,8 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     {
         Bus::chain([
             new ProcessLynkCancelTraderOrder($traderOrder->id),
-            fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
-            fn () => $this->retryOrder($traderOrder),
+            fn() => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
+            fn() => $this->retryOrder($traderOrder),
         ])->dispatch();
     }
 
@@ -375,10 +381,10 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
         return
             $traderOrder->order->company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) &&
             $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
-                $traderOrder->cancelDetail->cancel_reason->in([
-                    TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
-                    TraderOrderCancelReason::FailureToPurchase,
-                ])) && ! $traderOrder->order->activeTraderOrder()->exists();
+            $traderOrder->cancelDetail->cancel_reason->in([
+                TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
+                TraderOrderCancelReason::FailureToPurchase,
+            ])) && !$traderOrder->order->activeTraderOrder()->exists();
     }
 
     public function retryOrder(TraderOrder $traderOrder): void
@@ -404,7 +410,12 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
             TraderOrderMediaCollection::SellConfirmationDocument => 'SellConfCert',
         };
 
-        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
+        return 'LYNK_' . $fileType . '_' . $traderOrder->order->company->unique_name . '_' . $traderOrder->financing_order_id . '_' . $traderOrder->reference . '_' . date('Ymd') . '.pdf';
+    }
+
+    public function processProceedContractSigned(TraderOrder $traderOrder): void
+    {
+
     }
 
     // use it in public api to proceed order after purchasing commodity step by one step
@@ -448,15 +459,20 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
     public function contractSignedMessage(TraderOrder $traderOrder)
     {
         return match ($traderOrder->contract_signed_type->value) {
-            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.sell'),
-            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.deliver'),
+            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.v1.sell'),
+            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.v1.deliver'),
             default => null,
         };
     }
 
+    public function clientWakalaMessage(TraderOrder $traderOrder)
+    {
+        return null;
+    }
+
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
-        $lastHistoryAction = (int) $traderOrder->last_history_action;
+        $lastHistoryAction = (int)$traderOrder->last_history_action;
 
         match ($traderOrder->mode) {
             TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($traderOrder, $lastHistoryAction),
@@ -467,12 +483,16 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     protected function transitionFlowInManualMode(TraderOrder $traderOrder, int $lastHistoryAction): void
     {
-        match (true) {
-            $lastHistoryAction === FinancingOrderHistory::ContractSigned
-            && $traderOrder->contract_signed_type->is(ContractSignedType::Sell) => $this->handleManualSellTransition($traderOrder),
-            default => null,
-        };
+        if ($lastHistoryAction === FinancingOrderHistory::ContractSigned) {
+            $this->createSellingCommodityToCustomerDocument($traderOrder);
+        } elseif (
+            $lastHistoryAction === FinancingOrderHistory::CreateSellingCommodityToCustomerDocument &&
+            $traderOrder->contract_signed_type->is(ContractSignedType::Sell)
+        ) {
+            $this->handleManualSellTransition($traderOrder);
+        }
     }
+
 
     protected function transitionFlowInAutomaticMode(TraderOrder $traderOrder, int $lastHistoryAction): void
     {
@@ -485,7 +505,6 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     protected function handleManualSellTransition(TraderOrder $traderOrder): void
     {
-        $this->createSellingCommodityToCustomerDocument($traderOrder);
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->updateMurabhaCompleteDocument($traderOrder);
     }
@@ -505,11 +524,36 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface
 
     }
 
+    public function validateDeliverySequence(TraderOrder $traderOrder, bool $forceToProceed): void
+    {
+        $invalidSequence =
+            $traderOrder->isPreviousStepNotCompleted(MurabhaStep::CustomerDeliveryConfirmation) ||
+            (!$forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
+
+        if ($invalidSequence) {
+            throw new OrderStatusDoesNotFollowSequenceException;
+        }
+    }
+
+    public function confirmDelivery(TraderOrder $traderOrder): bool
+    {
+        app(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
+
+        return $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            MurabhaStep::CustomerDeliveryConfirmation
+        );
+    }
+
+    protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
+    }
+
     /**
      * Sets the time limit for a specific type based on the provided TraderOrder.
      *
-     * @param  TraderOrder  $traderOrder  The TraderOrder for which the time limit needs to be set.
-     * @param  mixed  $timeLimitType  The type of time limit to be set (DeliveryConfirmationTimeLimit or ContractSignTimeLimit).
+     * @param TraderOrder $traderOrder The TraderOrder for which the time limit needs to be set.
+     * @param mixed $timeLimitType The type of time limit to be set (DeliveryConfirmationTimeLimit or ContractSignTimeLimit).
      */
     private function setTimeLimitByType(TraderOrder $traderOrder, $timeLimitType): void
     {

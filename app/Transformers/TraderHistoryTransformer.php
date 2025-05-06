@@ -84,6 +84,8 @@ class TraderHistoryTransformer extends TransformerAbstract
             'step' => MurabhaStep::ClientWakala,
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
+            'is_deliverable' => $this->traderOrder->isDeliverable(),
+            'client_wakala_message' =>  Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->clientWakalaMessage($this->traderOrder),
             'signed_wakala_document' => [
                 'url' => $signedWakalaDocumentMediaFile?->file_url,
                 'date' => $signedWakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $signedWakalaDocumentMediaFile->created_at) : null,
@@ -100,7 +102,7 @@ class TraderHistoryTransformer extends TransformerAbstract
 
         $wakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::ClientWakala);
 
-        return $this->primitive([
+        $data = [
             'step' => MurabhaStep::ContractSigned,
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
@@ -111,7 +113,13 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'date' => $wakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $wakalaDocumentMediaFile->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
-        ]);
+        ];
+
+        if($this->traderOrder->isVersion('v2')) {
+            unset($data['is_deliverable']);
+        }
+
+        return $this->primitive($data);
     }
 
     public function includeCommoditySoldToCustomer($historiesActions): Primitive

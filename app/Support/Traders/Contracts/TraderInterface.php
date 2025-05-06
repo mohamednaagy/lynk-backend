@@ -29,6 +29,8 @@ interface TraderInterface
 
     public function getDefaultInitialTradeOrderStatus();
 
+    public function processProceedContractSigned(TraderOrder $traderOrder): void;
+
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder);
 
     public function checkCanInitiateTraderOrder();
@@ -38,6 +40,8 @@ interface TraderInterface
     public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string;
 
     public function contractSignedMessage(TraderOrder $traderOrder);
+
+    public function clientWakalaMessage(TraderOrder $traderOrder);
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void;
 
