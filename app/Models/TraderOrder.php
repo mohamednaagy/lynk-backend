@@ -260,7 +260,7 @@ class TraderOrder extends Model implements HasMedia
      */
     public function needsProcessingAfterInitiation()
     {
-        if ($this->provider == EnumsTrader::Bursam && $this->version !== 'v2') {
+        if ($this->provider == EnumsTrader::Bursam && ($this->version !== 'v2' || $this->status->is(TraderOrderStatus::Hold))) {
             return false;
         }
 
