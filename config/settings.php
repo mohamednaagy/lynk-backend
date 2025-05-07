@@ -4,6 +4,7 @@ use App\Settings\Classes\Areas\LenderSettings;
 use App\Settings\Classes\Areas\SuperAdminSettings;
 use App\Settings\Classes\Areas\TraderSettings;
 use App\Settings\Classes\GeneralSettings;
+use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Settings\Classes\LocalMurabahaSettings;
 
 return [
@@ -18,6 +19,7 @@ return [
         LenderSettings::class,
         TraderSettings::class,
         LocalMurabahaSettings::class,
+        InternationalMurabahaSetting::class,
     ],
 
     /*

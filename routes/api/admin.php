@@ -64,6 +64,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
+use App\Http\Controllers\Api\V1\Admin\Settings\InternationalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\LocalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
@@ -114,6 +115,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
             Route::get('/local-commodity', [LocalMurabahaSettingsController::class, 'index']);
             Route::put('/local-commodity', [LocalMurabahaSettingsController::class, 'update']);
+
+            Route::get('/international-murabaha', [InternationalMurabahaSettingsController::class, 'index']);
+            Route::put('/international-murabaha', [InternationalMurabahaSettingsController::class, 'update']);
         });
 
         Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
