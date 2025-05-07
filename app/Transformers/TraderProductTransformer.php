@@ -9,6 +9,10 @@ class TraderProductTransformer extends TransformerAbstract
 {
     public function transform(TraderProduct $traderProduct)
     {
-        return $traderProduct->toArray();
+        return [
+            'id' => $traderProduct->id,
+            'name' => $traderProduct->getTranslation('name', app()->getLocale()),
+            'code' => $traderProduct->code,
+        ];
     }
 }

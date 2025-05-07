@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Actions\Commodities\TraderProduct\BuildTraderProductsQueryAction;
+use App\Actions\Contracts\Commodities\TraderProduct\BuildTraderProductsQuery;
 use App\Listeners\LogActivity;
 use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageStrategy;
@@ -50,6 +52,8 @@ class AppServiceProvider extends ServiceProvider
                 default => new OptimizedLoanCoverageStrategy, // Default to optimized
             };
         });
+
+        $this->app->singleton(BuildTraderProductsQuery::class, BuildTraderProductsQueryAction::class);
     }
 
     /**
