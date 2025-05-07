@@ -4,12 +4,10 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
-use App\Models\CompanyLenderClient;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
-use App\Services\Company\CompanyLenderClientService;
+use App\Settings\Classes\Areas\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -158,17 +156,30 @@ trait TraderHelperTrait
 
     public function getUnusedProductCode($provider)
     {
-        $productCodes = TraderProduct::query()
-            ->where('provider', $provider)
-            ->orderBy('order', 'asc')
-            ->get()
-            ->pluck('code')
-            ->toArray();
+        $productCodes = $this->getProductCodes($provider);
 
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
 
         return Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
+    }
+
+    private function getProductCodes($provider): array
+    {
+        $query = TraderProduct::query();
+
+        $bursam_default_preferred_commodity_type = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
+        if ($bursam_default_preferred_commodity_type) {
+            $query->where('id', $bursam_default_preferred_commodity_type);
+        }
+
+        if ($provider) {
+            $query->where('provider', $provider);
+        }
+
+        return $query->orderBy('order', 'asc')
+            ->pluck('code')
+            ->toArray();
     }
 }
