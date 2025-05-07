@@ -8,6 +8,7 @@ use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\General\ProcessAskClientForWakala;
+use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
 
@@ -60,5 +61,10 @@ class LynkV2Driver extends LynkV1Driver
         return $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::ClientWakala
         );
+    }
+
+    public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
+    {
+        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
 }
