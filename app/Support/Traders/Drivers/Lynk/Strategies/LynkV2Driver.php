@@ -9,14 +9,29 @@ use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
+use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkAskClientForWakala;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 
 class LynkV2Driver extends LynkV1Driver
 {
     protected $provider = 'lynk';
 
     protected $version = 'v2';
+
+    protected function transitionFlowInAutomaticMode(TraderOrder $traderOrder, int $lastHistoryAction): void
+    {
+        match ($lastHistoryAction) {
+            FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAutoCompleteSell::dispatch($traderOrder->id),
+            FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
+            FinancingOrderHistory::ClientWakalaAccepted => ProcessLynkSellingCommodityToOpenMarket::dispatch($traderOrder->id),
+            default => null,
+        };
+    }
 
     protected function transitionFlowInManualMode(TraderOrder $traderOrder, int $lastHistoryAction): void
     {
@@ -61,6 +76,13 @@ class LynkV2Driver extends LynkV1Driver
         return $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::ClientWakala
         );
+    }
+
+    // TODO: This can be refactored later once the BaseTrader class is added.
+    //       The logic will then be implemented there, accepting $action as a second argument.
+    public function isOrderInSellableState(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
     }
 
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)

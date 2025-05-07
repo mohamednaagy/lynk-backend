@@ -33,6 +33,7 @@ use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
+use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -497,8 +498,9 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface, Deli
     protected function transitionFlowInAutomaticMode(TraderOrder $traderOrder, int $lastHistoryAction): void
     {
         match ($lastHistoryAction) {
-            FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAutoCompleteSell::dispatch($traderOrder->id),
+            FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
+            FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessLynkSellingCommodityToOpenMarket::dispatch($traderOrder->id),
             default => null,
         };
     }
@@ -542,6 +544,13 @@ class LynkV1Driver implements SellConfirmationCertifiable, TraderInterface, Deli
         return $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::CustomerDeliveryConfirmation
         );
+    }
+
+    // TODO: This can be refactored later once the BaseTrader class is added.
+    //       The logic will then be implemented there, accepting $action as a second argument.
+    public function isOrderInSellableState(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
     }
 
     protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool

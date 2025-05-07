@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
+namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
+use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +20,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQueue
+class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
@@ -29,7 +31,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('bursam');
+        $this->onQueue('local_market');
     }
 
     /**
@@ -54,7 +56,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
                 return;
             }
 
-            $trader->sellCommodityToOpenMarket($traderOrder);
+            LynkClient::of($traderOrder)->sellProduct();
         });
     }
 
@@ -70,16 +72,6 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamSellingCommodityToOpenMarket', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(5);
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 120];
+        Log::error('ProcessLynkSellingCommodityToOpenMarket', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 }

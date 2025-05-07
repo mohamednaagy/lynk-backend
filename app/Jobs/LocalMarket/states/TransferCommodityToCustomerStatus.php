@@ -29,7 +29,6 @@ class TransferCommodityToCustomerStatus extends BaseStatus
             UnitOwnershipAction::BorrowerOwnershipTransfer
         );
         $this->localMarketWebhook->with(['case' => OrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
-        $this->localMarketOrder->changeStatusTo(OrderStatus::PendingSellCommodities);
         $this->logQueueJob('Transfer Ownership to customer successfully');
     }
 }

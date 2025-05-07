@@ -627,4 +627,9 @@ class DmccV1Driver implements TraderInterface
     public function handleConfirmDelivery(TraderOrder $traderOrder) {}
 
     public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder) {}
+
+    public function isOrderInSellableState(TraderOrder $traderOrder): bool
+    {
+        return false;
+    }
 }

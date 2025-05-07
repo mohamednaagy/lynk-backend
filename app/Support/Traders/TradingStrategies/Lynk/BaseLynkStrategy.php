@@ -8,7 +8,9 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
@@ -103,6 +105,8 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 'status' => TraderOrderStatus::Completed,
             ]);
         }
+
+        app(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
     }
 
     protected function sellCommodityToCustomer($traderOrder, $request)
