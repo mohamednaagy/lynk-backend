@@ -129,7 +129,7 @@ class BursamV2Driver extends BursamV1Driver
 
     private function requiresSellingBeforeCancellation(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity);
+        return $traderOrder->mode === TraderOrderMode::Automatic && ($traderOrder->checkOrderHistoryAction(FinancingOrderHistory::CommoditySoldToMarket) || $traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity));
     }
 
     private function sellCommoditiesBeforeCancellation(
