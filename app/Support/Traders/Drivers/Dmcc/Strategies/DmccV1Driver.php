@@ -586,10 +586,7 @@ class DmccV1Driver implements TraderInterface
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 
-    public function processProceedContractSigned(TraderOrder $traderOrder): void
-    {
-
-    }
+    public function processProceedContractSigned(TraderOrder $traderOrder): void {}
 
     // use it in public api to proceed order after purchasing commodity step by one step
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
@@ -607,7 +604,7 @@ class DmccV1Driver implements TraderInterface
         return true;
     }
 
-    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    public function hoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
     {
         return null;
     }

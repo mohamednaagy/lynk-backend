@@ -117,7 +117,7 @@ return [
 
     TraderOrderCancelReason::class => [
         TraderOrderCancelReason::Manual => '',
-        TraderOrderCancelReason::MurabhaTimeout => '',
+        TraderOrderCancelReason::MurabhaTimeout => 'Trade Request cancelled due to Market Close Time',
         TraderOrderCancelReason::FailureToPurchase => '',
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',

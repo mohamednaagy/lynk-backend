@@ -316,7 +316,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function hoverMessage(): ?string
     {
-        return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+        return Trader::driver($this->provider, $this->version)->hoverMessageOfTraderStatus($this);
     }
 
     public function isDeliverable(): bool
