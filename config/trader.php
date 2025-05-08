@@ -95,11 +95,12 @@ return [
             'purchasing_commodity_job_backoff_time' => env('LYNK_LOCAL_COMMODITY_MARKET_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 10),
             'modes' => [
                 'v1' => [
-                    TraderOrderMode::Automatic,
                     TraderOrderMode::Manual,
+                    TraderOrderMode::Automatic,
                 ],
                 'v2' => [
                     TraderOrderMode::Manual,
+                    TraderOrderMode::Automatic,
                 ],
             ],
             'max_units_per_trader' => env('LYNK_MAX_UNITS_PER_TRADER', 10000),

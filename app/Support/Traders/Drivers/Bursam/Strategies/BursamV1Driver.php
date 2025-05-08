@@ -708,6 +708,13 @@ class BursamV1Driver implements TraderInterface
         return null;
     }
 
+    // TODO: This can be refactored later once the BaseTrader class is added.
+    //       The logic will then be implemented there, accepting $action as a second argument.
+    public function isOrderInSellableState(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
+    }
+
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 
     public function handleConfirmDelivery(TraderOrder $traderOrder) {}
