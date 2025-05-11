@@ -67,6 +67,12 @@ class OrderService
                 ->where('local_market_order_id', $localMarketOrder->id)
                 ->count();
 
+            Log::info('insertOrderUnits', [
+                'order_id' => $localMarketOrder->id,
+                'insertedCount' => $insertedCount,
+                'totalUnits' => $totalUnits,
+            ]);
+
             if ($insertedCount !== $totalUnits) {
                 throw new Exception(
                     "Units count mismatch. Expected: {$totalUnits}, Inserted: {$insertedCount}"
@@ -86,6 +92,10 @@ class OrderService
     public function insertOrderInventories(LocalMarketOrder $localMarketOrder)
     {
         $inventories = OrderCommoditiesDto::getInventoriesFromOrder($localMarketOrder);
+        Log::info('insertOrderInventories', [
+            'order_id' => $localMarketOrder->id,
+            'inventories' => $inventories,
+        ]);
         foreach ($inventories as $inventory_id => $data) {
             LocalMarketOrderHasInventory::create(
                 [
