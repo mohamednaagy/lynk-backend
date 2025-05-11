@@ -33,11 +33,13 @@ class LoanService
         $unitService = new UnitService;
 
         DB::beginTransaction();
+        Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
         try {
             $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
             $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder);
             DB::commit();
+            Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
 
             return true;
         } catch (Exception $e) {
