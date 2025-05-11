@@ -515,4 +515,9 @@ class FakeV1Driver implements TraderInterface
     {
         return false;
     }
+
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool
+    {
+        return false;
+    }
 }

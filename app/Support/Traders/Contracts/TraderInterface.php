@@ -50,4 +50,6 @@ interface TraderInterface
     public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder);
 
     public function isOrderInSellableState(TraderOrder $traderOrder): bool;
+
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool;
 }

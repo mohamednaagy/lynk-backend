@@ -12,7 +12,6 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
-use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkAskClientForWakala;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 
@@ -83,6 +82,11 @@ class LynkV2Driver extends LynkV1Driver
     public function isOrderInSellableState(TraderOrder $traderOrder): bool
     {
         return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
+    }
+
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, FinancingOrderHistory::WaitingClientWakala]);
     }
 
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)

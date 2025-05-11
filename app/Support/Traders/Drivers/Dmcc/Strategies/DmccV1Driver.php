@@ -629,4 +629,9 @@ class DmccV1Driver implements TraderInterface
     {
         return false;
     }
+
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool
+    {
+        return false;
+    }
 }
