@@ -3,10 +3,10 @@
 namespace App\Jobs\General;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedClientWakalaAccepted;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Exception;
@@ -52,7 +52,7 @@ class ProcessProceedClientWakala implements ShouldQueue
             return;
         }
 
-        if ($this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)) {
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala)) {
             Log::channel('bursam')->info('release 10 sec for ProceedClientWakalaAccepted', [
                 'traderOrderId' => $this->traderOrderId,
             ]);
@@ -65,14 +65,6 @@ class ProcessProceedClientWakala implements ShouldQueue
         Log::channel('bursam')->info('ProceedClientWakalaAccepted completed successfully', [
             'traderOrderId' => $this->traderOrderId,
         ]);
-    }
-
-    protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
-    {
-        $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-            ->getPreviousStepOf(MurabhaStep::ClientWakala)->step;
-
-        return ! $traderOrder->checkOrderStepComplete($previousStep);
     }
 
     protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
