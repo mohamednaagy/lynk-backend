@@ -354,11 +354,6 @@ class TraderOrder extends Model implements HasMedia
         return $this->doesLastActionMatchWith([FinancingOrderHistory::PendingDelivery]);
     }
 
-    public function isContractSignLimitExpirable(): bool
-    {
-        return $this->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
-    }
-
     public function getRecentTimeLimit($type, $status)
     {
         return $this->timeLimits()

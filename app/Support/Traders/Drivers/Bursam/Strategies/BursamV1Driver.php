@@ -725,6 +725,11 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
     }
 
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
+    }
+
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
 
     public function handleConfirmDelivery(TraderOrder $traderOrder) {}

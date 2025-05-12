@@ -546,6 +546,11 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument);
     }
 
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
+    }
+
     protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool
     {
         return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
