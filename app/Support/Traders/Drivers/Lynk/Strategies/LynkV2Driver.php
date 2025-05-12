@@ -4,16 +4,21 @@ namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\General\ProcessAskClientForWakala;
+use App\Jobs\General\ProcessProceedClientWakala;
 use App\Jobs\General\ProcessProceedContractAndClientWakala;
+use App\Jobs\General\ProcessProceedContractSigned;
 use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
+use Illuminate\Support\Facades\Log;
 
 class LynkV2Driver extends LynkV1Driver
 {
@@ -91,6 +96,14 @@ class LynkV2Driver extends LynkV1Driver
 
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
-        ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
+        if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value != FinancingOrderProceedCase::ContractSigned) {
+            Log::channel('lynk')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ContractSigned Job');
+            ProcessProceedContractSigned::dispatch($traderOrder->id);
+        }
+
+        if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value == FinancingOrderProceedCase::ContractSigned) {
+            Log::channel('lynk')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ProcessProceedClientWakala Job');
+            ProcessProceedClientWakala::dispatch($traderOrder->id);
+        }
     }
 }
