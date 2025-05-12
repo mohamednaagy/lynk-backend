@@ -33,7 +33,7 @@ trait RequestHasClientWakala
 
     private function isClientWakalaNotProvidedIfNeeded()
     {
-        return $this->validated('case') == FinancingOrderProceedCase::ClientWakalaAccepted
+        return $this->validated('case') == FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted)
             && $this->route('order')?->is_verification_required === false
             && is_null($this->validated('client_wakala'));
     }

@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancellationStatus;
@@ -21,6 +22,7 @@ use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamBidCertificate;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultNYY;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
@@ -34,6 +36,7 @@ use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamTransferOwnershipToL
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class BursamV2Driver extends BursamV1Driver
@@ -238,10 +241,15 @@ class BursamV2Driver extends BursamV1Driver
     // use it in public api to proceed order after purchasing commodity step by one step
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
-        Bus::chain([
-            new ProcessProceedContractSigned($traderOrder->id),
-            new ProcessProceedClientWakala($traderOrder->id),
-        ])->dispatch();
+        if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value != FinancingOrderProceedCase::ContractSigned) {
+            Log::channel('bursam')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ContractSigned Job');
+            ProcessProceedContractSigned::dispatch($traderOrder->id);
+        }
+
+        if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value == FinancingOrderProceedCase::ContractSigned) {
+            Log::channel('bursam')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ProcessProceedClientWakala Job');
+            ProcessProceedClientWakala::dispatch($traderOrder->id);
+        }
     }
 
     public function contractSignedMessage(TraderOrder $traderOrder)

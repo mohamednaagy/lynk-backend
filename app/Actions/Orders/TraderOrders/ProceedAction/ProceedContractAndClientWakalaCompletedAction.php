@@ -3,12 +3,14 @@
 namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractAndClientWakalaCompleted;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumTrader;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -43,6 +45,7 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
         if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($currenttraderOrderStatus)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
 
         Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
 

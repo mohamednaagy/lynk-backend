@@ -7,6 +7,18 @@ use BenSampo\Enum\Enum;
 
 final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
 {
+    const ClientWakalaAccepted = 1;
+
+    const ContractSigned = 2;
+
+    const ContractAndClientWakalaCompleted = 3;
+
+    const ContractSignedDelivery = 4;
+
+    const IgnoreAndSell = 5;
+
+    const ConfirmDeliver = 6;
+
     const ALLOWED_TO_PROCEED_STATUS = [
         Trader::Bursam => [
             'v1' => [
@@ -18,7 +30,7 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
                 self::ClientWakalaAccepted,
                 self::ContractSigned,
                 self::ContractAndClientWakalaCompleted,
-            ]
+            ],
         ],
         Trader::Lynk => [
             'v1' => [
@@ -32,33 +44,48 @@ final class FinancingOrderProceedCase extends Enum implements LocalizedEnum
                 self::ClientWakalaAccepted,
                 self::ConfirmDeliver,
                 self::ContractAndClientWakalaCompleted,
-            ]
+            ],
         ],
         Trader::Dmcc => [
             'v1' => [
                 self::ClientWakalaAccepted,
                 self::ContractSigned,
                 self::ContractAndClientWakalaCompleted,
-            ]
+            ],
         ],
         Trader::FakeDmcc => [
             'v1' => [
                 self::ClientWakalaAccepted,
                 self::ContractSigned,
                 self::ContractAndClientWakalaCompleted,
-            ]
+            ],
         ],
     ];
 
-    const ClientWakalaAccepted = 'CLIENT_WAKALA_ACCEPTED';
+    public static function getDescription($value): string
+    {
+        return match ($value) {
+            self::ClientWakalaAccepted => 'CLIENT_WAKALA_ACCEPTED',
+            self::ContractSigned => 'CONTRACT_SIGNED',
+            self::ContractAndClientWakalaCompleted => 'CONTRACT_AND_CLIENT_WAKALA_COMPLETED',
+            self::ContractSignedDelivery => 'CONTRACT_SIGNED_DELIVERY',
+            self::IgnoreAndSell => 'IGNORE_AND_SELL',
+            self::ConfirmDeliver => 'CONFIRM_DELIVER',
+            default => self::getKey($value),
+        };
+    }
 
-    const ContractSigned = 'CONTRACT_SIGNED';
+    public static function getKeyByDescription(string $description): ?int
+    {
+        $mapping = [
+            'CLIENT_WAKALA_ACCEPTED' => self::ClientWakalaAccepted,
+            'CONTRACT_SIGNED' => self::ContractSigned,
+            'CONTRACT_AND_CLIENT_WAKALA_COMPLETED' => self::ContractAndClientWakalaCompleted,
+            'CONTRACT_SIGNED_DELIVERY' => self::ContractSignedDelivery,
+            'IGNORE_AND_SELL' => self::IgnoreAndSell,
+            'CONFIRM_DELIVER' => self::ConfirmDeliver,
+        ];
 
-    const ContractAndClientWakalaCompleted = 'CONTRACT_AND_CLIENT_WAKALA_COMPLETED';
-
-    const ContractSignedDelivery = 'CONTRACT_SIGNED_DELIVERY';
-
-    const IgnoreAndSell = 'IGNORE_AND_SELL';
-
-    const ConfirmDeliver = 'CONFIRM_DELIVER';
+        return $mapping[$description] ?? null;
+    }
 }

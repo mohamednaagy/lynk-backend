@@ -34,12 +34,12 @@ class MakeOrderProceedAction implements MakeOrderProceed
         $signedClientWakala = $this->signedClientWakala;
 
         return match ($case) {
-            FinancingOrderProceedCase::ClientWakalaAccepted => app(ProceedClientWakalaAccepted::class)->handle($traderOrder, $signedClientWakala, $forceToProceed),
-            FinancingOrderProceedCase::ContractSigned => app(ProceedContractSigned::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::ContractSignedDelivery => app(ProceedContractSignedDelivery::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::IgnoreAndSell => app(ProceedIgnoreAndSell::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::ConfirmDeliver => app(ProceedDeliveryConfirmation::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::ContractAndClientWakalaCompleted => app(ProceedContractAndClientWakalaCompleted::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted) => app(ProceedClientWakalaAccepted::class)->handle($traderOrder, $signedClientWakala, $forceToProceed),
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned) => app(ProceedContractSigned::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery) => app(ProceedContractSignedDelivery::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::IgnoreAndSell) => app(ProceedIgnoreAndSell::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ConfirmDeliver) => app(ProceedDeliveryConfirmation::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted) => app(ProceedContractAndClientWakalaCompleted::class)->handle($traderOrder, $forceToProceed),
             default => []
         };
     }

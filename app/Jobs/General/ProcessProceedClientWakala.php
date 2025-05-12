@@ -2,8 +2,9 @@
 
 namespace App\Jobs\General;
 
-use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedClientWakalaAccepted;
+use App\Actions\Contracts\Orders\MakeOrderProceed;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
@@ -40,7 +41,7 @@ class ProcessProceedClientWakala implements ShouldQueue
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws Exception
      */
-    public function handle(): void
+    public function handle(MakeOrderProceed $makeOrderProceed): void
     {
         $traderOrder = TraderOrder::query()->withLastHistoryAction()->findOrFail($this->traderOrderId);
 
@@ -53,15 +54,13 @@ class ProcessProceedClientWakala implements ShouldQueue
         }
 
         if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala)) {
-            Log::channel('bursam')->info('release 10 sec for ProceedClientWakalaAccepted', [
+            Log::channel('bursam')->info('ProceedClientWakalaAccepted WaitingClientWakala not complete', [
                 'traderOrderId' => $this->traderOrderId,
             ]);
-            $this->release(10);
 
             return;
         }
-
-        app(ProceedClientWakalaAccepted::class)->handle($traderOrder);
+        $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted), false);
         Log::channel('bursam')->info('ProceedClientWakalaAccepted completed successfully', [
             'traderOrderId' => $this->traderOrderId,
         ]);

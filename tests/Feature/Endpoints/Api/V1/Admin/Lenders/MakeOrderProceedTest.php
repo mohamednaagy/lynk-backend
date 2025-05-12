@@ -128,7 +128,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.gif'),
             ])
             ->assertStatus(422)
@@ -166,7 +166,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$adminManagerWithPermissions)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(200);
     }
@@ -183,7 +183,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -201,7 +201,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -222,7 +222,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ])
             ->assertStatus(200)
@@ -246,7 +246,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
             ])
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -269,7 +269,7 @@ class MakeOrderProceedTest extends TestCase
 
         $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
             ])
             ->assertStatus(200)
             ->assertJsonStructure([
@@ -285,7 +285,7 @@ class MakeOrderProceedTest extends TestCase
 
         $response = $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(400)
@@ -301,7 +301,7 @@ class MakeOrderProceedTest extends TestCase
 
         $response = $this->actingAs(self::$admin)
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 

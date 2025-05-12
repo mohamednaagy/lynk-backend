@@ -4,11 +4,13 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedClientWakalaAccepted;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Http\UploadedFile;
@@ -43,6 +45,7 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
             $traderOrder->addMedia($signedClientWakala)
                 ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
         }
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
 
         app(AcceptClientWakala::class)->handle($traderOrder);
 
