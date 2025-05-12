@@ -57,8 +57,8 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
             $nextStepNode = $traderDictionary->getNextStepOf($currentStepNode->step);
 
             $proceedAction = match ($nextStepNode->step) {
-                MurabhaStep::ClientWakala => FinancingOrderProceedCase::ClientWakalaAccepted,
-                MurabhaStep::ContractSigned => FinancingOrderProceedCase::ContractSigned,
+                MurabhaStep::ClientWakala => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
+                MurabhaStep::ContractSigned => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
                 default => null,
             };
 

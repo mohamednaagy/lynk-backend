@@ -2,7 +2,8 @@
 
 namespace App\Jobs\General;
 
-use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigned;
+use App\Actions\Contracts\Orders\MakeOrderProceed;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
@@ -40,7 +41,7 @@ class ProcessProceedContractSigned implements ShouldQueue
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws Exception
      */
-    public function handle(): void
+    public function handle(MakeOrderProceed $makeOrderProceed): void
     {
         $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
         if (
@@ -48,8 +49,8 @@ class ProcessProceedContractSigned implements ShouldQueue
         ) {
             return;
         }
+        $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned), false);
 
-        app(ProceedContractSigned::class)->handle($traderOrder);
         Log::channel('bursam')->info(' finish ProcessProceedContractSigned', [
             'traderOrderId' => $this->traderOrderId,
         ]);

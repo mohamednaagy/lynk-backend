@@ -4,11 +4,13 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigned;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MurabhaStep;
-use App\Support\Traders\Facades\Trader;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
@@ -30,6 +32,7 @@ class ProceedContractSignedAction implements ProceedContractSigned
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 

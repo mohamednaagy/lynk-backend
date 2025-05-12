@@ -14,7 +14,7 @@ class AutoCompleteSellAction implements AutoCompleteSell
     {
         app(MakeOrderProceed::class)->handle(
             $traderOrder,
-            FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted),
             true
         );
 
