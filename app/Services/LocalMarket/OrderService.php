@@ -89,23 +89,43 @@ class OrderService
         }
     }
 
-    public function insertOrderInventories(LocalMarketOrder $localMarketOrder)
+    /**
+     * Insert order inventories into the database.
+     *
+     * @throws \Exception
+     */
+    public function insertOrderInventories(LocalMarketOrder $localMarketOrder): void
     {
-        $inventories = OrderCommoditiesDto::getInventoriesFromOrder($localMarketOrder);
-        Log::info('insertOrderInventories', [
-            'order_id' => $localMarketOrder->id,
-            'inventories' => $inventories,
-        ]);
-        foreach ($inventories as $inventory_id => $data) {
-            LocalMarketOrderHasInventory::create(
-                [
-                    'local_market_order_id' => $localMarketOrder->id,
-                    'local_market_inventory_id' => $inventory_id,
-                    'quantity' => $data['numberOfSuitableUnits'],
-                    'supplier_id' => $data['supplier']['id'],
-                    'price' => $data['price'],
-                ]
-            );
+        try {
+            $timestamp = now()->format('Y-m-d H:i:s');
+            $inventories = OrderCommoditiesDto::getInventoriesFromOrder($localMarketOrder);
+
+            collect($inventories)
+                ->sortKeys()
+                ->map(function (array $data, int $inventoryId) use ($localMarketOrder, $timestamp): array {
+                    return [
+                        'local_market_order_id' => $localMarketOrder->id,
+                        'local_market_inventory_id' => $inventoryId,
+                        'quantity' => $data['numberOfSuitableUnits'],
+                        'supplier_id' => $data['supplier']['id'],
+                        'price' => $data['price'],
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
+                    ];
+                })
+                ->chunk(1000, function ($chunk): void {
+                    DB::table('local_market_order_has_inventories')->insert(
+                        $chunk->toArray()
+                    );
+                });
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error('Error in insertOrderInventories', [
+                'order_id' => $localMarketOrder->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e;
         }
     }
 
