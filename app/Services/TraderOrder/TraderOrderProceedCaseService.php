@@ -17,7 +17,7 @@ class TraderOrderProceedCaseService
     public function getLatestCase(int $traderOrderId): ?FinancingOrderProceedCase
     {
         return TraderOrderProceedCase::where('trader_order_id', $traderOrderId)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->firstOrFail()?->case;
     }
 
