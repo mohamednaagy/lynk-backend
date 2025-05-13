@@ -128,39 +128,43 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         return __CLASS__.'_'.$this->traderOrderId;
     }
 
+    // we commented this function due to unexpected call for it when we have a lot of orders
+    // need to revisit and move it to the StopsTraderOrderOnJobFailure trait
+
     // public function failed($exception)
     // {
-    //     try {
-    //         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+    // try {
+    //     $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
-    //         Log::channel('bursam')->error('Failed to process transfer ownership to lender - cancelling order', [
-    //             'final_exception' => $exception->getMessage(),
-    //             'error_code' => $exception->getCode(),
-    //             'file' => $exception->getFile(),
-    //             'line' => $exception->getLine(),
-    //             'exception_class' => get_class($exception),
-    //             'financing_order_id' => $traderOrder->order->id ?? null,
-    //             'trader_order_id' => $this->traderOrderId,
-    //             'max_attempts' => $this->tries,
-    //             'timestamp' => saudi_now(),
-    //         ]);
-    //         if ($traderOrder) {
-    //             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-    //             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-    //             (new RunHoldTraderWhenMarketOpenCommand)->handle();
-    //         }
+    //     Log::channel('bursam')->error('Failed to process transfer ownership to lender - cancelling order', [
+    //         'final_exception' => $exception->getMessage(),
+    //         'error_code' => $exception->getCode(),
+    //         'file' => $exception->getFile(),
+    //         'line' => $exception->getLine(),
+    //         'exception_class' => get_class($exception),
+    //         'financing_order_id' => $traderOrder->order->id ?? null,
+    //         'trader_order_id' => $this->traderOrderId,
+    //         'max_attempts' => $this->tries,
+    //         'timestamp' => saudi_now(),
+    //     ]);
 
-    //     } catch (Throwable $e) {
-    //         Log::channel('bursam')->error('Failed to handle job failure', [
-    //             'error_message' => $e->getMessage(),
-    //             'error_code' => $e->getCode(),
-    //             'file' => $e->getFile(),
-    //             'line' => $e->getLine(),
-    //             'trace' => $e->getTraceAsString(),
-    //             'original_error' => $exception->getMessage(),
-    //             'trader_order_id' => $this->traderOrderId,
-    //             'timestamp' => saudi_now(),
-    //         ]);
+    //     if ($traderOrder) {
+    //         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+    //         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+    //         (new RunHoldTraderWhenMarketOpenCommand)->handle();
     //     }
+
+    // } catch (Throwable $e) {
+    //     Log::channel('bursam')->error('Failed to handle job failure', [
+    //         'error_message' => $e->getMessage(),
+    //         'error_code' => $e->getCode(),
+    //         'file' => $e->getFile(),
+    //         'line' => $e->getLine(),
+    //         'trace' => $e->getTraceAsString(),
+    //         'original_error' => $exception->getMessage(),
+    //         'trader_order_id' => $this->traderOrderId,
+    //         'timestamp' => saudi_now(),
+    //     ]);
+    // }
     // }
 }
