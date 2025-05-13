@@ -6,6 +6,7 @@ use App\Enums\FinancingOrderProceedCase;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class CheckDuplicateOrderProceedCaseRule implements Rule
 {
@@ -21,6 +22,8 @@ class CheckDuplicateOrderProceedCaseRule implements Rule
     public function passes($attribute, $value)
     {
         if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($this->traderOrder->id, FinancingOrderProceedCase::getKeyByDescription($value))) {
+            Log::info("traderOrderId already proceed this $value before");
+
             return false;
         }
 
