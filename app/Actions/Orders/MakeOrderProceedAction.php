@@ -12,7 +12,6 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell
 use App\Enums\FinancingOrderProceedCase;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
-use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
@@ -33,10 +32,6 @@ class MakeOrderProceedAction implements MakeOrderProceed
     public function handle(TraderOrder $traderOrder, string $case, bool $forceToProceed = false)
     {
         $signedClientWakala = $this->signedClientWakala;
-
-        if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::getKeyByDescription($case))) {
-            throw new OrderStatusDoesNotFollowSequenceException;
-        }
 
         return match ($case) {
             FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted) => app(ProceedClientWakalaAccepted::class)->handle($traderOrder, $signedClientWakala, $forceToProceed),
