@@ -42,6 +42,12 @@ class BursamClient
                 }
             );
         }
+
+        // Constructor logging
+        Log::channel('bursam')->info('Initializing BursamClient', [
+            'trader_order_id' => $traderOrder->id,
+            'fake' => $this->fake,
+        ]);
     }
 
     private function isTraderOrderInitiatedByFake()
@@ -107,6 +113,38 @@ class BursamClient
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
         return $response;
+    }
+
+    private function isValidBuyResponse($response)
+    {
+        if (empty($response)) {
+            Log::channel('bursam')->error(
+                'bursa purchasing step => buy product failed empty response',
+                ['response' => $response]
+            );
+
+            return false;
+        }
+
+        if ($response->getStatusCode() !== 200) {
+            Log::channel('bursam')->error('bursa purchasing step => buy product failed status code not 200', [
+                'response' => $response->json(),
+                'statusCode' => $response->getStatusCode(),
+            ]);
+
+            return false;
+        }
+
+        if (! empty($response->json('header.errorCode'))) {
+            Log::channel('bursam')->error('bursa purchasing step => buy product header error code', [
+                'response' => $response->json(),
+                'errorCode' => $response->json('header.errorCode'),
+            ]);
+
+            return false;
+        }
+
+        return true;
     }
 
     public function sellProduct()
@@ -384,7 +422,8 @@ class BursamClient
                 ]);
                 throw $exception;
             }
-            Log::channel('bursam')->info('bursa send request rate limit', ['time' => now(),
+            Log::channel('bursam')->info('bursa send request rate limit', [
+                'time' => now(),
                 'order' => $this->traderOrder->order->id,
                 'trader_order_id' => $this->traderOrder->id]);
             $executed = RateLimiter::attempt(
@@ -431,6 +470,9 @@ class BursamClient
                 'traderOrderId' => $this->traderOrder->id,
                 'financingOrderId' => $this->traderOrder->order->id,
                 'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace_string' => $e->getTraceAsString(),
                 'decaySeconds' => $decaySeconds,
                 'remainingRetries' => $remainingRetries,
                 'maxRetriesBeforeException' => $maxRetriesBeforeException,

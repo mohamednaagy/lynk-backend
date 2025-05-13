@@ -198,6 +198,16 @@ class BursamV1Driver implements TraderInterface
         } elseif (
             in_array($response->json('body.0.bidErrNo'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES)
         ) {
+            Log::channel('bursam')->error(
+                'bursa purchasing step => Fetching order result YNN bidErrNo is in unavailable product error codes',
+                [
+                    'financingOrderId' => $traderOrder->order->id,
+                    'trader_order_id' => $traderOrder->id,
+                    'response' => $response->json(),
+                    'bidErrNo' => $response->json('body.0.bidErrNo'),
+                    'unavailableProductCodes' => BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES,
+                ]
+            );
             $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
             $unavailableProductCodes[] = $response->json('body.0.productCode');
             Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(30));
@@ -217,6 +227,18 @@ class BursamV1Driver implements TraderInterface
             ($response->json('body.0.bidErrNo') != '999' && $response->json('status.processingCount') == 0)
             || $response->json('status.processingCount') > 0
         ) {
+
+            Log::channel('bursam')->error(
+                'bursa purchasing step => Fetching order result YNN bidErrNo is not 999 and processingCount is 0',
+                [
+                    'financingOrderId' => $traderOrder->order->id,
+                    'trader_order_id' => $traderOrder->id,
+                    'response' => $response->json(),
+                    'bidErrNo' => $response->json('body.0.bidErrNo'),
+                    'processingCount' => $response->json('status.processingCount'),
+                ]
+            );
+
             throw new TraderException(
                 'Failed to fetch order result YNN',
                 [

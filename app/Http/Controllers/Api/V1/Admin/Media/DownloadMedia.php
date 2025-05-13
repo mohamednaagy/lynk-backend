@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,6 +30,11 @@ class DownloadMedia extends Controller
         try {
             return Storage::disk($media->disk)->download($media->getPath());
         } catch (\Throwable $th) {
+            Log::error('Error downloading media', [
+                'message' => $th->getMessage(),
+                'media' => $media->id,
+            ]);
+
             return $this->errorResponse($th->getMessage(), Response::HTTP_NOT_FOUND, ErrorCode::FILE_NOT_FOUND);
         }
     }
