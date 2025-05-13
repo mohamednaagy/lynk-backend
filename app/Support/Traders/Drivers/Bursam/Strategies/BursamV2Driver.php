@@ -246,10 +246,17 @@ class BursamV2Driver extends BursamV1Driver
             ProcessProceedContractSigned::dispatch($traderOrder->id);
         }
 
-        if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value == FinancingOrderProceedCase::ContractSigned) {
+        if ($this->shouldProcessClientWakala($traderOrder)) {
             Log::channel('bursam')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ProcessProceedClientWakala Job');
             ProcessProceedClientWakala::dispatch($traderOrder->id);
         }
+    }
+
+    public function shouldProcessClientWakala($traderOrder)
+    {
+        return app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted) &&
+                app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned) &&
+                ! app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
     }
 
     public function contractSignedMessage(TraderOrder $traderOrder)
