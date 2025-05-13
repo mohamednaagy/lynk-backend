@@ -54,13 +54,21 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-            ) {
+            if (is_null($traderOrder)) {
+                Log::channel('bursam')->info('Job wakala skipped - order not found', [
+                    'trader_order_id' => $this->traderOrderId,
+                    'timestamp' => saudi_now(),
+                ]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
                 Log::channel('bursam')->info('Job wakala skipped - order not found or incorrect action state', [
                     'trader_order_id' => $this->traderOrderId,
                     'timestamp' => saudi_now(),
+                    'last_action' => $traderOrder->traderHistories()->latest('id')->first(),
+                    'expected_action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
                 ]);
 
                 return;
