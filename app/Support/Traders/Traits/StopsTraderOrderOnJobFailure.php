@@ -23,10 +23,6 @@ trait StopsTraderOrderOnJobFailure
             return;
         }
 
-        // To be stopped temoporarily until UI is ready
-        // $traderOrder->update([
-        //     'can_continue_progress' => false,
-        // ]);
         if (property_exists($this, 'channel')) {
             $channel = $this->channel;
         }

@@ -22,6 +22,10 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
+    public $tries = 10;
+
+    public $backoff = 30;
+
     /**
      * Create a new job instance.
      *

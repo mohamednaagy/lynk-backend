@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
@@ -86,16 +87,52 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return Attribute::make(
             get: function () {
-                $traderOrder = $this->activeTraderOrder->first();
+                try {
+                    $traderOrder = $this->activeTraderOrder->first();
+                    if (is_null($traderOrder)) {
+                        Log::channel('bursam')->error(
+                            "No active trader order found for financing  order {$this->id}",
+                            [
+                                'order_id' => $this->id,
+                                'reference_number' => $this->reference_number,
+                            ]
+                        );
 
-                if (is_null($traderOrder) || is_null($traderOrder->last_history_action)) {
+                        return null;
+                    }
+                    $stepDictionary = new StepHistoriesDictionary(
+                        $traderOrder->provider,
+                        $traderOrder->version,
+                        $traderOrder->contract_signed_type
+                    );
+
+                    $currentStepNode = $stepDictionary->getStepByHistory($traderOrder->last_history_action);
+                    if (is_null($currentStepNode)) {
+                        Log::error(
+                            "No step node found for order {$this->id} with history action {$traderOrder->last_history_action}",
+                            [
+                                'order_id' => $this->id,
+                                'reference_number' => $this->reference_number,
+                                'trader_order_id' => $traderOrder->id,
+                                'last_history_action' => $traderOrder->last_history_action,
+                            ]
+                        );
+
+                        return null;
+                    }
+
+                    return MurabhaStep::fromValue($currentStepNode->step);
+                } catch (\Exception $e) {
+                    Log::error(
+                        "Error retrieving current step for order {$this->id}: ".$e->getMessage(),
+                        [
+                            'order_id' => $this->id,
+                            'reference_number' => $this->reference_number,
+                        ]
+                    );
+
                     return null;
                 }
-
-                $currentStepNode = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-                    ->getStepByHistory($traderOrder->last_history_action);
-
-                return MurabhaStep::fromValue($currentStepNode->step);
             }
         );
     }

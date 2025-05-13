@@ -26,6 +26,10 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $tries = 10;
+
+    public $backoff = 30;
+
     /**
      * Create a new job instance.
      *
@@ -84,6 +88,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                     : ''
             );
         });
+        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
 
     }
 

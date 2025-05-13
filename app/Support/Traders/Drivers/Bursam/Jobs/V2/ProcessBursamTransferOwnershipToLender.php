@@ -47,12 +47,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         $traderOrder = null;
 
         try {
-            // Get attempt count from job properties
-
-            Log::channel('bursam')->info('Job attempt started', [
-                'trader_order_id' => $this->traderOrderId,
-                'timestamp' => saudi_now(),
-            ]);
 
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::InProgress)
@@ -70,13 +64,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 return;
             }
 
-            Log::channel('bursam')->info('Processing transfer ownership to lender', [
-                'action' => 'start',
-                'financing_order_id' => $traderOrder?->order?->id,
-                'trader_order_id' => $this->traderOrderId,
-                'timestamp' => saudi_now(),
-            ]);
-
             // Attempt to create transfer ownership document
             Trader::driver('bursam', $traderOrder->version)
                 ->createTransferOwnershipToLenderDocument($traderOrder);
@@ -86,8 +73,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
             // Dispatch next step job
             ProcessBursamGenerateClientWakala::dispatch($this->traderOrderId);
-
-            $traderOrder->allowProgressToNextStep(false); // TODO: Added to explicitly control order transitions (needs refactoring later)
 
             Log::channel('bursam')->info('Successfully processed transfer ownership to lender', [
                 'action' => 'complete',

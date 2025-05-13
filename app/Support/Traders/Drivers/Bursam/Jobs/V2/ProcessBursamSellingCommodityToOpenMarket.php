@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -21,6 +20,10 @@ use Illuminate\Support\Facades\Log;
 class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    public $tries = 10;
+
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -44,13 +47,13 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
                 ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (!$traderOrder) {
+            if (! $traderOrder) {
                 return;
             }
 
             $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
-            if (!$trader->isOrderInSellableState($traderOrder)) {
+            if (! $trader->isOrderInSellableState($traderOrder)) {
                 return;
             }
 
@@ -65,12 +68,12 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
 
     public function uniqueId(): string
     {
-        return __CLASS__ . '_' . $this->traderOrderId;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamSellingCommodityToOpenMarket', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('ProcessBursamSellingCommodityToOpenMarket', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
     }
 
     public function retryUntil(): Carbon
