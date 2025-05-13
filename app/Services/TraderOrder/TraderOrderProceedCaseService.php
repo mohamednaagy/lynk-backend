@@ -28,7 +28,7 @@ class TraderOrderProceedCaseService
      */
     public function createCase(int $traderOrderId, int $case): TraderOrderProceedCase
     {
-        return TraderOrderProceedCase::updateOrCreate([
+        return TraderOrderProceedCase::create([
             'trader_order_id' => $traderOrderId,
             'case' => $case,
         ]);
