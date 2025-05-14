@@ -19,11 +19,11 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
     {
         $startTime = microtime(true);
         $localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
+        $this->createLocalMarketOrderHistory($localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
 
         DB::beginTransaction();
         try {
             app(FindEligibleCommodities::class)->handle($localMarketOrder);
-            $this->createLocalMarketOrderHistory($localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
             DB::commit();
 
         } catch (\Exception $e) {

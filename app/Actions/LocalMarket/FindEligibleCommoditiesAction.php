@@ -17,6 +17,9 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
         try {
+            // TODO hosam handle transaction here and remove it from pending eligible commodities action
+            // DB::beginTransaction();
+
             $startTime = microtime(true);
             $eligibleCommodities = $this->LoanService->getCommoditiesForLoan($localMarketOrder);
 
@@ -47,7 +50,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
             $localMarketOrder->update([
                 'status' => OrderStatus::FailedPurchase,
             ]);
-
         }
     }
 }

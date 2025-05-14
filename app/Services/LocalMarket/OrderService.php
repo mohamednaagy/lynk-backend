@@ -37,9 +37,6 @@ class OrderService
         try {
             $timestamp = Carbon::now()->format('Y-m-d H:i:s');
             $batchSize = 1000;
-            $totalUnits = DB::table('local_market_inventory_units')
-                ->where('hold_for', $localMarketOrder->id)
-                ->count();
 
             DB::table('local_market_inventory_units')
                 ->select([
@@ -61,6 +58,10 @@ class OrderService
 
                     DB::table('local_market_order_has_units')->insert($insertData);
                 });
+
+            $totalUnits = DB::table('local_market_inventory_units')
+                ->where('hold_for', $localMarketOrder->id)
+                ->count();
 
             // Verify final count
             $insertedCount = DB::table('local_market_order_has_units')
