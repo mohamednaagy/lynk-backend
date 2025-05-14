@@ -20,25 +20,13 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
         $startTime = microtime(true);
         $localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
         $this->createLocalMarketOrderHistory($localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
-
-        DB::beginTransaction();
-        try {
-            app(FindEligibleCommodities::class)->handle($localMarketOrder);
-            DB::commit();
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::channel('local_market')->error('Error in Transactions', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            $localMarketOrder->update([
-                'status' => OrderStatus::FailedPurchase,
-            ]);
-        } finally {
-            $duration = microtime(true) - $startTime;
-            Log::channel('local_market')->info('PendingEligibleCommoditiesAction Duration', [
-                'order_id' => $localMarketOrder->id,
-                'duration' => convertMicrotimeToDuration($duration),
-            ]);
-        }
-
+        
+        app(FindEligibleCommodities::class)->handle($localMarketOrder);
+        
+        $duration = microtime(true) - $startTime;
+        Log::channel('local_market')->info('PendingEligibleCommoditiesAction Duration', [
+            'order_id' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration($duration),
+        ]);
     }
 }
