@@ -47,4 +47,11 @@ class TraderOrderProceedCaseService
             ->where('case', $case)
             ->exists();
     }
+
+    public function getTraderCases(int $traderOrderId)
+    {
+        // Check if the case exists for the given financing order ID
+        return TraderOrderProceedCase::where('trader_order_id', $traderOrderId)
+            ->get();
+    }
 }
