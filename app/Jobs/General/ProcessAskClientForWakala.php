@@ -38,7 +38,13 @@ class ProcessAskClientForWakala implements ShouldQueue
      */
     public function handle(TraderOrderProceedCaseService $proceedCaseService): void
     {
-        $traderOrder = TraderOrder::query()->findOrFail($this->traderOrder);
+        $traderOrder = TraderOrder::query()->find($this->traderOrder);
+        if (is_null($traderOrder)) {
+            Log::channel('bursam')->error('ProcessAskClientForWakala not found traderOrderId: '.$this->traderOrder);
+
+            return;
+        }
+        Log::channel('bursam')->info('Start ProcessAskClientForWakala Job traderOrderId: '.$traderOrder->id);
 
         $dict = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type);
         $currentStep = $dict->getStepByHistory(FinancingOrderHistory::WaitingClientWakala);
@@ -54,6 +60,12 @@ class ProcessAskClientForWakala implements ShouldQueue
         if ($proceedCaseService->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted)) {
             Log::channel('bursam')->info('ProcessAskClientForWakala: traderOrderId: '.$traderOrder->id.' - The Trader has ContractAndClientWakalaCompleted Case');
             Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
+        } else {
+            Log::channel('bursam')->info('ProcessAskClientForWakala  : traderOrderId: '.$traderOrder->id.' - Not Proceed Client Wakala Step Because The Trader doesnt has  ContractAndClientWakalaCompleted Case', [
+                'traderOrder' => $traderOrder->id,
+                'last_case' => $proceedCaseService->getLatestCase($traderOrder->id),
+                'cases' => json_encode($proceedCaseService->getTraderCases($traderOrder->id)->pluck('case')->toArray()),
+            ]);
         }
     }
 
