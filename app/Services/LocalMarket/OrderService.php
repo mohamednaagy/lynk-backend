@@ -37,56 +37,85 @@ class OrderService
         try {
             $timestamp = Carbon::now()->format('Y-m-d H:i:s');
             $batchSize = 1000;
-            $totalUnits = DB::table('local_market_inventory_units')
-                ->where('hold_for', $localMarketOrder->id)
-                ->count();
 
-            DB::table('local_market_inventory_units')
-                ->select([
-                    'id',
-                    'local_market_inventory_id',
-                ])
-                ->where('hold_for', $localMarketOrder->id)
-                ->orderBy('id')
-                ->chunk($batchSize, function ($chunk) use ($localMarketOrder, $timestamp) {
-                    $insertData = collect($chunk)->map(function ($unit) use ($localMarketOrder, $timestamp) {
-                        return [
-                            'unit_id' => $unit->id,
-                            'inventory_id' => $unit->local_market_inventory_id,
-                            'local_market_order_id' => $localMarketOrder->id,
-                            'created_at' => $timestamp,
-                            'updated_at' => $timestamp,
-                        ];
-                    })->toArray();
+            $this->processOrderUnits($localMarketOrder, $timestamp, $batchSize);
 
-                    DB::table('local_market_order_has_units')->insert($insertData);
-                });
-
-            // Verify final count
-            $insertedCount = DB::table('local_market_order_has_units')
-                ->where('local_market_order_id', $localMarketOrder->id)
-                ->count();
-
-            Log::info('insertOrderUnits', [
-                'order_id' => $localMarketOrder->id,
-                'insertedCount' => $insertedCount,
-                'totalUnits' => $totalUnits,
-            ]);
-
-            if ($insertedCount !== $totalUnits) {
-                throw new Exception(
-                    "Units count mismatch. Expected: {$totalUnits}, Inserted: {$insertedCount}"
-                );
-            }
+            $this->validateUnitInsertions($localMarketOrder);
         } catch (Exception $e) {
-            Log::channel('local_market')->error('Error in insertOrderUnits', [
-                'order_id' => $localMarketOrder->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
+            $this->logOrderUnitsError($localMarketOrder, $e);
             throw $e;
         }
+    }
+
+    private function processOrderUnits(LocalMarketOrder $localMarketOrder, string $timestamp, int $batchSize): void
+    {
+        DB::table('local_market_inventory_units')
+            ->select(['id', 'local_market_inventory_id'])
+            ->where('hold_for', $localMarketOrder->id)
+            ->orderBy('id')
+            ->chunk($batchSize, function ($chunk) use ($localMarketOrder, $timestamp) {
+                $insertData = $this->prepareOrderUnitInsertData($chunk, $localMarketOrder, $timestamp);
+                DB::table('local_market_order_has_units')->insert($insertData);
+            });
+    }
+
+    private function prepareOrderUnitInsertData($chunk, LocalMarketOrder $localMarketOrder, string $timestamp): array
+    {
+        return collect($chunk)->map(function ($unit) use ($localMarketOrder, $timestamp) {
+            return [
+                'unit_id' => $unit->id,
+                'inventory_id' => $unit->local_market_inventory_id,
+                'local_market_order_id' => $localMarketOrder->id,
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ];
+        })->toArray();
+    }
+
+    private function validateUnitInsertions(LocalMarketOrder $localMarketOrder): void
+    {
+        $totalUnits = $this->countHeldUnits($localMarketOrder);
+        $insertedCount = $this->countInsertedUnits($localMarketOrder);
+
+        $this->logUnitInsertionDetails($localMarketOrder, $insertedCount, $totalUnits);
+
+        if ($insertedCount !== $totalUnits) {
+            throw new Exception(
+                "Units count mismatch. Expected: {$totalUnits}, Inserted: {$insertedCount}"
+            );
+        }
+    }
+
+    private function countHeldUnits(LocalMarketOrder $localMarketOrder): int
+    {
+        return DB::table('local_market_inventory_units')
+            ->where('hold_for', $localMarketOrder->id)
+            ->count();
+    }
+
+    private function countInsertedUnits(LocalMarketOrder $localMarketOrder): int
+    {
+        return DB::table('local_market_order_has_units')
+            ->where('local_market_order_id', $localMarketOrder->id)
+            ->count();
+    }
+
+    private function logUnitInsertionDetails(LocalMarketOrder $localMarketOrder, int $insertedCount, int $totalUnits): void
+    {
+        Log::info('insertOrderUnits', [
+            'order_id' => $localMarketOrder->id,
+            'insertedCount' => $insertedCount,
+            'totalUnits' => $totalUnits,
+        ]);
+    }
+
+    private function logOrderUnitsError(LocalMarketOrder $localMarketOrder, Exception $e): void
+    {
+        Log::channel('local_market')->error('Error in insertOrderUnits', [
+            'order_id' => $localMarketOrder->id,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
     }
 
     /**
