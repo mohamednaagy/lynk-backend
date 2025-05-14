@@ -10,7 +10,7 @@ trait StopsTraderOrderOnJobFailure
     public function failed($exception)
     {
         $traderOrder = null;
-        $channel = 'default';
+        $channel = 'lynk';
 
         if (method_exists($this, 'getTraderOrder')) {
             $traderOrder = $this->getTraderOrder();

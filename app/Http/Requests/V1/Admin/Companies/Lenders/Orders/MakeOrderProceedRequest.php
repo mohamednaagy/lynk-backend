@@ -5,7 +5,6 @@ namespace App\Http\Requests\V1\Admin\Companies\Lenders\Orders;
 use App\Http\Requests\Traits\RequestHasClientWakala;
 use App\Models\TraderOrder;
 use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
-use App\Rules\CheckDuplicateOrderProceedCaseRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest
@@ -34,7 +33,7 @@ class MakeOrderProceedRequest extends FormRequest
         $this->traderOrder = $this->order->activeTraderOrder()->firstOrFail();
 
         return [
-            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->traderOrder),  new CheckDuplicateOrderProceedCaseRule($this->traderOrder)],
+            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->traderOrder)],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg'],
         ];
     }
