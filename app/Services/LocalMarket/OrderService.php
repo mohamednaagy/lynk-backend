@@ -142,11 +142,20 @@ class OrderService
                         'updated_at' => $timestamp,
                     ];
                 })
-                ->chunk(1000, function ($chunk): void {
+                ->chunk(1000)->each(function ($chunk): void {
                     DB::table('local_market_order_has_inventories')->insert(
                         $chunk->toArray()
                     );
                 });
+
+            $expectedInventoryCount = count($inventories);
+            $insertedInventoryCount = LocalMarketOrderHasInventory::where('local_market_order_id', $localMarketOrder->id)->count();
+
+            if ($insertedInventoryCount !== $expectedInventoryCount) {
+                throw new Exception(
+                    "Inventory insertion mismatch: Expected {$expectedInventoryCount} records, but only {$insertedInventoryCount} were found in the database."
+                );
+            }
         } catch (\Exception $e) {
             Log::channel('local_market')->error('Error in insertOrderInventories', [
                 'order_id' => $localMarketOrder->id,
