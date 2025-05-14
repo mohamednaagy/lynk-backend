@@ -153,7 +153,7 @@ class OrderService
 
             if ($insertedInventoryCount !== $expectedInventoryCount) {
                 throw new Exception(
-                    "Inventory insertion mismatch: Expected {$expectedInventoryCount} records for order ID {$localMarketOrder->id}, but only {$insertedInventoryCount} were found in the database."
+                    "Inventory insertion mismatch: Expected {$expectedInventoryCount} records, but only {$insertedInventoryCount} were found in the database."
                 );
             }
         } catch (\Exception $e) {
