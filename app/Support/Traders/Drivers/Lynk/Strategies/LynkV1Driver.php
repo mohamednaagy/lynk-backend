@@ -228,6 +228,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {
+            Log::info('Creating selling commodity to customer document', [
+                'trader_order_id' => $traderOrder->id,
+            ]);
             $this->withLocale('ar', function () use ($traderOrder) {
                 $dateTime = $traderOrder->traderHistories()
                     ->where('action', FinancingOrderHistory::ContractSigned)

@@ -17,8 +17,6 @@ class BrowserlessGenerator implements GeneratorInterface
 
     protected $storageDisk;
 
-    protected $html;
-
     protected $options;
 
     protected $maxRetries = 3;
@@ -65,17 +63,7 @@ class BrowserlessGenerator implements GeneratorInterface
         $attempt = 0;
 
         try {
-            $storageCallback = null;
-
-            if ($options instanceof Closure) {
-                $storageCallback = $options;
-                $options = [];
-            } elseif (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
-                $storageCallback = $options['storageCallback'];
-                unset($options['storageCallback']);
-            } else {
-                throw new MissingStorageCallbackException;
-            }
+            [$options, $storageCallback] = $this->resolveStorageCallback($options);
 
             while ($attempt < $this->maxRetries) {
                 $attempt++;
@@ -119,10 +107,33 @@ class BrowserlessGenerator implements GeneratorInterface
                 }
             }
         } catch (Throwable $th) {
-            $this->cleanupTmpFile($tmpFileResource);
             $this->logFinalError($th, $attempt);
             throw $th;
         }
+    }
+
+    /**
+     * Resolve storage callback from options
+     *
+     * @param  array|Closure  &$options
+     * @return array
+     *
+     * @throws MissingStorageCallbackException
+     */
+    protected function resolveStorageCallback(&$options)
+    {
+        if ($options instanceof Closure) {
+            return [[], $options];
+        }
+
+        if (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
+            $storageCallback = $options['storageCallback'];
+            unset($options['storageCallback']);
+
+            return [$options, $storageCallback];
+        }
+
+        throw new MissingStorageCallbackException;
     }
 
     /**
@@ -131,7 +142,7 @@ class BrowserlessGenerator implements GeneratorInterface
      * @param  resource  $tmpFileResource
      * @return \Illuminate\Http\Client\Response
      */
-    protected function makeHttpRequest($tmpFileResource, string $html, array $options)
+    protected function makeHttpRequest($tmpFileResource, string $html, array|Closure $options)
     {
         return Http::timeout($this->timeout)
             ->baseUrl($this->baseUrl)
@@ -232,16 +243,33 @@ class BrowserlessGenerator implements GeneratorInterface
         ]);
     }
 
+    /**
+     * Get default PDF generation options
+     *
+     * @return array
+     */
     protected function getDefaultOptions()
     {
         return $this->options;
     }
 
+    /**
+     * Get storage disk
+     *
+     * @return mixed
+     */
     public function getStorageDisk()
     {
         return $this->storageDisk;
     }
 
+    /**
+     * Prepare request data for PDF generation
+     *
+     * @param  string  $html
+     * @param  array  $options
+     * @return array
+     */
     public function prepareRequestData($html, $options)
     {
         return [
