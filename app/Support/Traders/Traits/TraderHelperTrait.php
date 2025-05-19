@@ -4,12 +4,9 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
-use App\Models\CompanyLenderClient;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
-use App\Services\Company\CompanyLenderClientService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -18,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 trait TraderHelperTrait
@@ -66,6 +64,11 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
+        Log::info('Creating trader order history', [
+            'trader_order_id' => $traderOrder->id,
+            'action' => $action,
+            'data' => $data,
+        ]);
         $traderOrder->traderHistories()->updateOrCreate(
             [
                 'action' => $action,
@@ -76,6 +79,9 @@ trait TraderHelperTrait
 
     public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
     {
+        Log::info('Storing order document as pdf', [
+            'view' => $view,
+        ]);
         $html = view($view, $data)->render();
 
         PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {

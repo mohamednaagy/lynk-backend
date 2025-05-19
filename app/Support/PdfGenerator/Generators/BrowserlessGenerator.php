@@ -142,7 +142,7 @@ class BrowserlessGenerator implements GeneratorInterface
      * @param  resource  $tmpFileResource
      * @return \Illuminate\Http\Client\Response
      */
-    protected function makeHttpRequest($tmpFileResource, string $html, array $options)
+    protected function makeHttpRequest($tmpFileResource, string $html, array|Closure $options)
     {
         return Http::timeout($this->timeout)
             ->baseUrl($this->baseUrl)
