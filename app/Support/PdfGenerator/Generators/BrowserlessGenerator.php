@@ -63,7 +63,7 @@ class BrowserlessGenerator implements GeneratorInterface
         $attempt = 0;
 
         try {
-            $storageCallback = $this->resolveStorageCallback($options);
+            [$options, $storageCallback] = $this->resolveStorageCallback($options);
 
             while ($attempt < $this->maxRetries) {
                 $attempt++;
@@ -116,21 +116,21 @@ class BrowserlessGenerator implements GeneratorInterface
      * Resolve storage callback from options
      *
      * @param  array|Closure  &$options
-     * @return Closure
+     * @return array
      *
      * @throws MissingStorageCallbackException
      */
     protected function resolveStorageCallback(&$options)
     {
         if ($options instanceof Closure) {
-            return $options;
+            return [[], $options];
         }
 
         if (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
             $storageCallback = $options['storageCallback'];
             unset($options['storageCallback']);
 
-            return $storageCallback;
+            return [$options, $storageCallback];
         }
 
         throw new MissingStorageCallbackException;
@@ -142,7 +142,7 @@ class BrowserlessGenerator implements GeneratorInterface
      * @param  resource  $tmpFileResource
      * @return \Illuminate\Http\Client\Response
      */
-    protected function makeHttpRequest($tmpFileResource, string $html, array $options)
+    protected function makeHttpRequest($tmpFileResource, string $html, array|Closure $options)
     {
         return Http::timeout($this->timeout)
             ->baseUrl($this->baseUrl)
