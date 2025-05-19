@@ -23,9 +23,9 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    // public $tries = 10;
+    public $tries = 10;
 
-    // public $backoff = 30;
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
