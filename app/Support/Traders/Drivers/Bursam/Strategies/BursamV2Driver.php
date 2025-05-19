@@ -111,7 +111,7 @@ class BursamV2Driver extends BursamV1Driver
         }
     }
 
-    private function updateTraderOgeneratePdfFileNamerderToPendingCancellation(
+    private function updateTraderOrderToPendingCancellation(
         TraderOrder $traderOrder,
         int $cancelReason,
         int $cancelledByType,
