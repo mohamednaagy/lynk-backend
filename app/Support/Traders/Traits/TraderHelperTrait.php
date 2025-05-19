@@ -81,6 +81,7 @@ trait TraderHelperTrait
     {
         Log::info('Storing order document as pdf', [
             'view' => $view,
+            'trader_order_id' => $traderOrder->id,
         ]);
         $html = view($view, $data)->render();
 
