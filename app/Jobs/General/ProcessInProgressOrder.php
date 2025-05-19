@@ -22,8 +22,6 @@ class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected mixed $financingOrder;
-
     private int $financingOrderId;
 
     /**
@@ -51,7 +49,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 if ($financingOrder->traderOrders()->whereIn('status', [
                     TraderOrderStatus::InProgress,
                 ])->count() > 0) {
-                    Log::channel('bursam')->info('Financing order '.$financingOrder->id.' has in progress trader order');
+                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has in progress trader order');
 
                     return;
                 }
@@ -59,7 +57,7 @@ class ProcessInProgressOrder implements ShouldQueue
                     $financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
                     || $financingOrder->company->lender->lenderDetail->require_initiate_trade_request
                 ) {
-                    Log::channel('bursam')->info('Financing order '.$financingOrder->id.' has in progress trader order');
+                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has in progress trader order');
 
                     return;
                 }
@@ -67,7 +65,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 try {
                     app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
                 } catch (BalanceIsNotEnoughException $e) {
-                    Log::channel('bursam')->info('Financing order '.$financingOrder->id.' has balance is not enough');
+                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has balance is not enough');
                     Log::alert($financingOrder->id);
 
                     return;
@@ -80,10 +78,9 @@ class ProcessInProgressOrder implements ShouldQueue
                 ]);
             });
         } catch (\Exception $e) {
-            Log::channel('bursam')->error(
+            Log::channel('lynk')->error(
                 'An error occurred while processing the financing order.',
                 [
-                    'financing_order_id' => $this->financingOrder,
                     'financing_order_id' => $this->financingOrderId,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
