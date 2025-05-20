@@ -17,7 +17,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
@@ -41,17 +40,13 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::Initiated)
-                ->find($this->traderOrderId);
+        $traderOrder = TraderOrder::where('status', TraderOrderStatus::Initiated)->find($this->traderOrderId);
 
-            if (is_null($traderOrder)) {
-                return;
-            }
+        if (is_null($traderOrder)) {
+            throw new \Exception('Trader order not found to initiate with reference: '.$this->traderOrderId);
+        }
 
-            Trader::driver(TraderEnum::Lynk, $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
-        });
+        Trader::driver(TraderEnum::Lynk, $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
     }
 
     public function failed($exception)
@@ -61,15 +56,19 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            return;
+            throw new \Exception('Trader order not found to failed to initiate with reference: '.$this->traderOrderId);
         }
+
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         Log::error(
             method_exists('getMessage', $exception)
                 ? $exception->getMesage()
                 : 'Cannot proceed to buy product',
-            [$exception]
+            [
+                'traderOrderId' => $this->traderOrderId,
+                'exception' => $exception,
+            ]
         );
     }
 
