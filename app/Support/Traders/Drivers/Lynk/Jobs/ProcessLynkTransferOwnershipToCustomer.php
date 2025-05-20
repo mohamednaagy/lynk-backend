@@ -14,12 +14,19 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
+
+    public $tries = 3;
+
+    public $maxExceptions = 3;
+
+    public $timeout = 60;
+
+    public $backoff = [30, 60, 120];
 
     /**
      * Create a new job instance.
@@ -38,21 +45,27 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
      */
     public function handle()
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
-                ->lockForUpdate()
-                ->find($this->traderOrderId);
+        try {
+            $traderOrder = TraderOrder::where('status', TraderOrderStatus::InProgress)->find($this->traderOrderId);
 
             if (
                 is_null($traderOrder)
                 || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)
             ) {
-                return;
+                Log::channel('local_market')->info('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
+                throw new \Exception('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
             }
 
             LynkClient::of($traderOrder)->transferOwnershipToCustomer();
-        });
+        } catch (\Exception $e) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer failed', [
+                'traderOrderId' => $this->traderOrderId,
+                'error' => $e->getMessage(),
+                'attempt' => $this->attempts(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $this->fail($e);
+        }
     }
 
     public function middleware(): array
