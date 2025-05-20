@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
@@ -10,7 +11,6 @@ use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedClientWakala;
-use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Jobs\General\ProcessProceedContractSigned;
 use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\TraderOrder;
@@ -65,7 +65,7 @@ class LynkV2Driver extends LynkV1Driver
     {
         $invalidSequence =
             $traderOrder->isPreviousStepNotCompleted(MurabhaStep::ClientWakala) ||
-            (!$forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
+            (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
 
         if ($invalidSequence) {
             throw new OrderStatusDoesNotFollowSequenceException;
@@ -105,5 +105,12 @@ class LynkV2Driver extends LynkV1Driver
             Log::channel('lynk')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ProcessProceedClientWakala Job');
             ProcessProceedClientWakala::dispatch($traderOrder->id);
         }
+    }
+
+    public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
+    {
+        parent::createTransferOwnershipToLenderDocument($traderOrder);
+        app(GenerateClientWakala::class)->handle($traderOrder);
+
     }
 }
