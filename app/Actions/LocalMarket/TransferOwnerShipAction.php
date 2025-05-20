@@ -20,6 +20,7 @@ class TransferOwnerShipAction implements TransferOwnerShip
             Log::channel('local_market')->error('LocalMarketOrder not found', [
                 'reference' => $reference,
             ]);
+            throw new \Exception('LocalMarketOrder not found with reference: '.$reference);
         }
 
     }
