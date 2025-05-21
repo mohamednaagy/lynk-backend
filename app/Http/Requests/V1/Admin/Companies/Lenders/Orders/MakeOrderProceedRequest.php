@@ -2,15 +2,12 @@
 
 namespace App\Http\Requests\V1\Admin\Companies\Lenders\Orders;
 
-use App\Http\Requests\Traits\RequestHasClientWakala;
 use App\Models\TraderOrder;
 use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest
 {
-    use RequestHasClientWakala;
-
     private TraderOrder $traderOrder;
 
     /**
