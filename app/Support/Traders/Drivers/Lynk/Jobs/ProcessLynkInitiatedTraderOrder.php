@@ -40,10 +40,23 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        $traderOrder = TraderOrder::where('status', TraderOrderStatus::Initiated)->find($this->traderOrderId);
+        $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
+            Log::error('ProcessLynkInitiatedTraderOrder', [
+                'trader_order_id' => $this->traderOrderId,
+                'message' => 'Trader order not found to initiate with reference: '.$this->traderOrderId,
+            ]);
             throw new \Exception('Trader order not found to initiate with reference: '.$this->traderOrderId);
+        }
+
+        if ($traderOrder->status !== TraderOrderStatus::Initiated) {
+            Log::error('ProcessLynkInitiatedTraderOrder', [
+                'trader_order_id' => $this->traderOrderId,
+                'current_status' => $traderOrder->status,
+                'message' => 'Trader order is not initiated with reference: '.$this->traderOrderId,
+            ]);
+            throw new \Exception('Trader order is not initiated with reference: '.$this->traderOrderId);
         }
 
         Trader::driver(TraderEnum::Lynk, $traderOrder->version)->processInitiatedTraderOrder($traderOrder);

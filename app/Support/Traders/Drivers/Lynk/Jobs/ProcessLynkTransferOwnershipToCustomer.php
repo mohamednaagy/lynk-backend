@@ -45,15 +45,33 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
      */
     public function handle()
     {
-        $traderOrder = TraderOrder::where('status', TraderOrderStatus::InProgress)->find($this->traderOrderId);
+        $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer', [
+                'trader_order_id' => $this->traderOrderId,
+                'message' => 'Trader order not found to transfer ownership with reference: '.$this->traderOrderId,
+            ]);
             throw new \Exception('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
+        }
+
+        if ($traderOrder->status !== TraderOrderStatus::InProgress) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer', [
+                'trader_order_id' => $this->traderOrderId,
+                'current_status' => $traderOrder->status,
+                'message' => 'Trader order is not in progress with reference: '.$this->traderOrderId,
+            ]);
+            throw new \Exception('Trader order is not in progress with reference: '.$this->traderOrderId);
         }
 
         $isLastActionContractSigned = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned);
 
         if (! $isLastActionContractSigned) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer', [
+                'trader_order_id' => $this->traderOrderId,
+                'last_action' => $isLastActionContractSigned,
+                'message' => 'Trader order does not have contract signed action with reference: '.$this->traderOrderId.' and last action: '.$isLastActionContractSigned,
+            ]);
             throw new \Exception('Trader order does not have contract signed action with reference: '.$this->traderOrderId.' and last action: '.$isLastActionContractSigned);
         }
 
