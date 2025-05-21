@@ -55,7 +55,7 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
             throw new \Exception('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
         }
 
-        if ($traderOrder->status !== TraderOrderStatus::InProgress) {
+        if (! $traderOrder->status->is(TraderOrderStatus::InProgress)) {
             Log::error('ProcessLynkTransferOwnershipToCustomer', [
                 'trader_order_id' => $this->traderOrderId,
                 'current_status' => $traderOrder->status,

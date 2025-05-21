@@ -50,7 +50,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
             throw new \Exception('Trader order not found to initiate with reference: '.$this->traderOrderId);
         }
 
-        if ($traderOrder->status !== TraderOrderStatus::Initiated) {
+        if (! $traderOrder->status->is(TraderOrderStatus::Initiated)) {
             Log::error('ProcessLynkInitiatedTraderOrder', [
                 'trader_order_id' => $this->traderOrderId,
                 'current_status' => $traderOrder->status,
@@ -69,6 +69,10 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
+            Log::error('ProcessLynkInitiatedTraderOrder', [
+                'trader_order_id' => $this->traderOrderId,
+                'message' => 'Trader order not found to failed to initiate with reference: '.$this->traderOrderId,
+            ]);
             throw new \Exception('Trader order not found to failed to initiate with reference: '.$this->traderOrderId);
         }
 
