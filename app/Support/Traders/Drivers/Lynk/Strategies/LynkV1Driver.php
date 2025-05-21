@@ -153,6 +153,11 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     $traderOrder,
                     TraderOrderMediaCollection::TransferOwnershipToLender
                 );
+
+                $this->createTraderOrderHistory(
+                    $traderOrder,
+                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+                );
             });
 
             $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
