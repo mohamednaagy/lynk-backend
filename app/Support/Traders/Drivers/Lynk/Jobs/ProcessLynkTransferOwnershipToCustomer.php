@@ -22,10 +22,6 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
 
     public $tries = 3;
 
-    public $maxExceptions = 3;
-
-    public $timeout = 60;
-
     public $backoff = [30, 60, 120];
 
     /**
