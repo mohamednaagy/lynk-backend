@@ -25,10 +25,6 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 
     public $tries = 3;
 
-    public $maxExceptions = 3;
-
-    public $timeout = 60;
-
     public $backoff = [30, 60, 120];
 
     /**
