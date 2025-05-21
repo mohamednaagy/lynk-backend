@@ -12,11 +12,6 @@ return [
                 FinancingOrderHistory::GetTtiId => null,
             ],
             MurabhaStep::PurchasingCommodity => [
-                FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-                FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-                    'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-                    'file' => 'original_holding_certificate',
-                ],
                 FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => null,
             ],
             MurabhaStep::ContractSigned => [
@@ -37,11 +32,6 @@ return [
                 FinancingOrderHistory::GetTtiId => null,
             ],
             MurabhaStep::PurchasingCommodity => [
-                FinancingOrderHistory::GetTtiHoldingCertificateDocument => null,
-                FinancingOrderHistory::AttachTtiHoldingCertificateDocument => [
-                    'collection' => TraderOrderMediaCollection::TtiHoldingCertificate,
-                    'file' => 'original_holding_certificate',
-                ],
                 FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => null,
             ],
             MurabhaStep::ContractSigned => [

@@ -156,10 +156,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
-                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-                    [
-                        'created_at' => $currentTimeInUtcTz,
-                    ]
+                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
                 );
             });
 

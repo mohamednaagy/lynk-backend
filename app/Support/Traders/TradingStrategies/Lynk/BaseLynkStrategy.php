@@ -33,23 +33,11 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        $this->transferOwnershipToLender($traderOrder, $data);
-
-        $this->createStepHistories(
-            $data,
-            $traderOrder,
-            MurabhaStep::PurchasingCommodity
-        );
-    }
-
-    protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
-    {
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-
-        // this (if) is a special case doesn't exist in history map
         if (isset($data['auto_generate_financing_institution_certificate'])) {
+            $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
         }
+
     }
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request)
