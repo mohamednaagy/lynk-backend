@@ -45,27 +45,37 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
      */
     public function handle()
     {
-        try {
-            $traderOrder = TraderOrder::where('status', TraderOrderStatus::InProgress)->find($this->traderOrderId);
+        $traderOrder = TraderOrder::find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)
-            ) {
-                Log::channel('local_market')->info('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
-                throw new \Exception('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
-            }
-
-            LynkClient::of($traderOrder)->transferOwnershipToCustomer();
-        } catch (\Exception $e) {
-            Log::error('ProcessLynkTransferOwnershipToCustomer failed', [
-                'traderOrderId' => $this->traderOrderId,
-                'error' => $e->getMessage(),
-                'attempt' => $this->attempts(),
-                'trace' => $e->getTraceAsString(),
+        if (is_null($traderOrder)) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer', [
+                'trader_order_id' => $this->traderOrderId,
+                'message' => 'Trader order not found to transfer ownership with reference: '.$this->traderOrderId,
             ]);
-            $this->fail($e);
+            throw new \Exception('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
         }
+
+        if (! $traderOrder->status->is(TraderOrderStatus::InProgress)) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer', [
+                'trader_order_id' => $this->traderOrderId,
+                'current_status' => $traderOrder->status,
+                'message' => 'Trader order is not in progress with reference: '.$this->traderOrderId,
+            ]);
+            throw new \Exception('Trader order is not in progress with reference: '.$this->traderOrderId);
+        }
+
+        $isLastActionContractSigned = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned);
+
+        if (! $isLastActionContractSigned) {
+            Log::error('ProcessLynkTransferOwnershipToCustomer', [
+                'trader_order_id' => $this->traderOrderId,
+                'last_action' => $isLastActionContractSigned,
+                'message' => 'Trader order does not have contract signed action with reference: '.$this->traderOrderId.' and last action: '.$isLastActionContractSigned,
+            ]);
+            throw new \Exception('Trader order does not have contract signed action with reference: '.$this->traderOrderId.' and last action: '.$isLastActionContractSigned);
+        }
+
+        LynkClient::of($traderOrder)->transferOwnershipToCustomer();
     }
 
     public function middleware(): array
