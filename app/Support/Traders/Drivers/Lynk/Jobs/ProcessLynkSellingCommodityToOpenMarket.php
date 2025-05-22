@@ -2,11 +2,8 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
-use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
@@ -41,19 +38,36 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
      */
     public function handle(): void
     {
-        DB::transaction(function () {
-            $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
-                ->find($this->traderOrderId);
+        Log::info('ProcessLynkSellingCommodityToOpenMarket', ['traderOrderId' => $this->traderOrderId]);
 
-            if (!$traderOrder) {
-                return;
+        DB::transaction(function () {
+            $traderOrder = TraderOrder::find($this->traderOrderId);
+
+            if (! $traderOrder) {
+                Log::error('ProcessLynkSellingCommodityToOpenMarket', [
+                    'trader_order_id' => $this->traderOrderId,
+                    'message' => 'Trader order not found with reference: '.$this->traderOrderId,
+                ]);
+                throw new \Exception('Trader order not found with reference: '.$this->traderOrderId);
+            }
+
+            if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
+                Log::error('ProcessLynkSellingCommodityToOpenMarket', [
+                    'trader_order_id' => $this->traderOrderId,
+                    'message' => 'Trader order is in progress with reference: '.$this->traderOrderId,
+                ]);
+                throw new \Exception('Trader order is in progress with reference: '.$this->traderOrderId);
             }
 
             $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-
-            if (!$trader->isOrderInSellableState($traderOrder)) {
-                return;
+            $isOrderInSellableState = $trader->isOrderInSellableState($traderOrder);
+            if (! $isOrderInSellableState) {
+                Log::error('ProcessLynkSellingCommodityToOpenMarket', [
+                    'trader_order_id' => $this->traderOrderId,
+                    'is_order_in_sellable_state' => $isOrderInSellableState,
+                    'message' => 'Trader order is not in sellable state with reference: '.$this->traderOrderId,
+                ]);
+                throw new \Exception('Trader order is not in sellable state with reference: '.$this->traderOrderId);
             }
 
             LynkClient::of($traderOrder)->sellProduct();
@@ -67,7 +81,7 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
 
     public function uniqueId(): string
     {
-        return __CLASS__ . '_' . $this->traderOrderId;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 
     public function failed($exception)
