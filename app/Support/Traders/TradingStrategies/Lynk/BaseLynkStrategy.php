@@ -94,10 +94,9 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 'status' => TraderOrderStatus::Completed,
             ]);
         } else {
-            Log::error('LynkStrategy', [
+            Log::error('LynkStrategy updateMurabhaCompleteDocument failed to update order status to completed', [
                 'trader_order_id' => $traderOrder->id,
                 'last_action' => $traderOrder->traderHistories()->latest('id')->first()->action,
-                'message' => 'Failed to update order status to completed',
             ]);
         }
 
