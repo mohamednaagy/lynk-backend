@@ -51,12 +51,12 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
                 throw new \Exception('Trader order not found with reference: '.$this->traderOrderId);
             }
 
-            if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
+            if (! $traderOrder->status->is(TraderOrderStatus::InProgress)) {
                 Log::error('ProcessLynkSellingCommodityToOpenMarket', [
                     'trader_order_id' => $this->traderOrderId,
-                    'message' => 'Trader order is in progress with reference: '.$this->traderOrderId,
+                    'message' => 'Trader order is not in progress with reference: '.$this->traderOrderId,
                 ]);
-                throw new \Exception('Trader order is in progress with reference: '.$this->traderOrderId);
+                throw new \Exception('Trader order is not in progress with reference: '.$this->traderOrderId);
             }
 
             $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
