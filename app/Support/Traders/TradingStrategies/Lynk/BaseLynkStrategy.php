@@ -17,6 +17,7 @@ use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // TODO_LOCAL_MARKET need to review
 
@@ -91,6 +92,12 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         if ($canUpdateOrderStatus) {
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
+            ]);
+        } else {
+            Log::error('LynkStrategy', [
+                'trader_order_id' => $traderOrder->id,
+                'last_action' => $traderOrder->traderHistories()->latest('id')->first()->action,
+                'message' => 'Failed to update order status to completed',
             ]);
         }
 
