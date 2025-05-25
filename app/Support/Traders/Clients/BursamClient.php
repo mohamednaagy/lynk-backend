@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Clients;
 
+use App\Enums\BursamErrorCode;
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
 use Carbon\Carbon;
@@ -10,6 +11,7 @@ use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -115,36 +117,103 @@ class BursamClient
         return $response;
     }
 
-    private function isValidBuyResponse($response)
+    public function isValidResponse($response, string $context = 'general'): bool
     {
         if (empty($response)) {
-            Log::channel('bursam')->error(
-                'bursa purchasing step => buy product failed empty response',
-                ['response' => $response]
-            );
-
-            return false;
-        }
-
-        if ($response->getStatusCode() !== 200) {
-            Log::channel('bursam')->error('bursa purchasing step => buy product failed status code not 200', [
-                'response' => $response->json(),
-                'statusCode' => $response->getStatusCode(),
-            ]);
+            $this->logError("Response is empty when ($context)", $response);
 
             return false;
         }
 
         if (! empty($response->json('header.errorCode'))) {
-            Log::channel('bursam')->error('bursa purchasing step => buy product header error code', [
-                'response' => $response->json(),
-                'errorCode' => $response->json('header.errorCode'),
-            ]);
+            $this->logError("Header errorCode is not empty when ($context)", $response);
+
+            return false;
+        }
+
+        if ($response->json('body.0.statusCode') != 0) {
+            $this->logError("Body statusCode is not zero when ($context)", $response);
+
+            return false;
+        }
+
+        if ($response->json('SUCCESSYN') == 'N') {
+            $this->logError("SUCCESSYN is equal N when ($context)", $response);
+
+            return false;
+        }
+
+        switch ($context) {
+            case 'fetch_ynn':
+                return $this->validateFetchYNN($response);
+            case 'fetch_nyy':
+                return $this->validateFetchNYY($response);
+            default:
+                return true;
+        }
+    }
+
+    private function validateFetchYNN($response): bool
+    {
+        $bidErrNo = $response->json('body.0.bidErrNo');
+        $processingCount = $response->json('status.processingCount');
+        $productCode = $response->json('body.0.productCode');
+        // Check bidErrNo when processing is complete
+        if ($bidErrNo === '999' && $processingCount == 0) {
+            return true;
+        }
+
+        // Check for unavailable product codes
+        if (in_array($bidErrNo, BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES)) {
+            $this->logError('Unavailable product code detected', $response);
+            $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
+            $unavailableProductCodes[] = $productCode;
+            Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(30));
+
+            return false;
+        }
+
+        // Check processing count
+        if ($processingCount > 0) {
+            $this->logError('Processing count greater than 0', $response);
+
+            return false;
+        }
+        // Check bidErrNo when processing is complete
+        if ($bidErrNo !== '999' && $processingCount == 0) {
+            $this->logError('bidErrNo is not 999 and processingCount is zero', $response);
 
             return false;
         }
 
         return true;
+    }
+
+    private function validateFetchNYY($response): bool
+    {
+        $processingCount = $response->json('status.processingCount');
+        $otcErrNo = $response->json('body.0.otcErrNo');
+        $stbErrNo = $response->json('body.0.stbErrNo');
+
+        if ($processingCount != 0 || $otcErrNo != '999' || $stbErrNo != '999') {
+            $this->logError('NYY validation failed', $response);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function logError(string $message, $response): void
+    {
+        $logData = array_merge([
+            'traderOrderId' => $this->traderOrder->id,
+            'financingOrderId' => $this->traderOrder->order->id,
+            'response' => $response ? $response : null,
+            'time' => now(),
+        ]);
+
+        Log::channel('bursam')->error($message, $logData);
     }
 
     public function sellProduct()
@@ -486,12 +555,31 @@ class BursamClient
     {
         try {
             Http::fake([
-                $this->buildUrl('/api/process/svc/bsas/order.json') => Http::response(),
+                $this->buildUrl('/api/process/svc/bsas/order.json') => function (Request $request) {
+                    return Http::response([
+                        'header' => [
+                            'memberShortName' => 'BANKXYZ',
+                            'uuid' => '550e8400-e29b-41d4-a716-i5jts0bkad',
+                            'errorCode' => '',
+                            'errorMsg' => '',
+                        ],
+                        'body' => [
+                            [
+                                'serialNumber' => '1',
+                                'statusCode' => 0,
+                                'statusMessage' => '',
+                            ],
+                        ],
+                    ]);
+                },
                 $this->buildUrl('/api/process/svc/bsas/orderResult.json') => function (Request $request) {
                     $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
                     return Http::response([
-                        'processingCount' => 0,
+                        'status' => [
+                            'totalOrderCount' => 1,
+                            'processingCount' => 0,
+                        ],
                         'body' => [
                             [
                                 'bidErrNo' => '999',
@@ -532,6 +620,7 @@ class BursamClient
                     $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
                     return Http::response([
+                        'SUCCESSYN' => 'Y',
                         'ECERTNO' => $traderOrder->reference,
                         'BUYER' => 'LYNK LLC',
                         'OWNER' => 'LYNK LLC',
@@ -556,6 +645,7 @@ class BursamClient
                     $traderOrder = $this->getTraderOrderUsingFakeRequest($request);
 
                     return Http::response([
+                        'SUCCESSYN' => 'Y',
                         'ECERTNO' => $traderOrder->reference,
                         'SELLER' => 'LYNK LLC',
                         'BUYER' => 'BSAS',

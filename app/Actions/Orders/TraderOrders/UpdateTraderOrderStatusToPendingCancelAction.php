@@ -4,6 +4,7 @@ namespace App\Actions\Orders\TraderOrders;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderStatus;
@@ -17,7 +18,7 @@ class UpdateTraderOrderStatusToPendingCancelAction implements UpdateTraderOrderS
 
     public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null, $cancelledByType = TraderOrderCancelType::System, ?User $cancelledBy = null): void
     {
-        $currentStep = $traderOrder->getCancelStep();
+        $currentStep = $traderOrder->getCancelStep() ?? MurabhaStep::TraderOrderCreated;
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,

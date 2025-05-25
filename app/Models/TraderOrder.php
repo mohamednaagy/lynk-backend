@@ -301,7 +301,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function getCancelStep(): ?string
     {
-        return (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getCancelStep($this)->step;
+        return (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getCancelStep($this)?->step;
     }
 
     public function cancelDetail()
