@@ -62,10 +62,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            MurabhaStep::MurabahaSaleCompleted
-        );
-
         $trader = Trader::driver($traderOrder->provider);
         $currentTimeInUtcTz = CarbonImmutable::now();
         $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
@@ -83,6 +79,11 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            MurabhaStep::MurabahaSaleCompleted
+        );
+
         $this->createStepHistories(
             $data,
             $traderOrder,

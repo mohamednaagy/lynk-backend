@@ -140,9 +140,7 @@ class TraderOrder extends Model implements HasMedia
             throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
-        return (bool) $this->traderHistories()
-            ->where('action', end($stepToHistoriesDictionary[$step]))
-            ->first();
+        return $this->traderHistories()->where('action', end($stepToHistoriesDictionary[$step]))->exists();
     }
 
     public function doesLastActionMatchWith($actions): bool
