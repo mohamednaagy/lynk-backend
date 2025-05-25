@@ -25,7 +25,7 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
 
     public $tries = 10;
 
-    public $backoff = 30;
+    public $backoff = 10;
 
     /**
      * Create a new job instance.
