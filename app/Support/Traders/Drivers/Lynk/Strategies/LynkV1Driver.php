@@ -475,7 +475,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
-        $lastHistoryAction = (int) $traderOrder->last_history_action;
+        $lastHistoryAction = (int) $traderOrder->traderHistories()->latest('id')->value('action');
 
         match ($traderOrder->mode) {
             TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($traderOrder, $lastHistoryAction),
