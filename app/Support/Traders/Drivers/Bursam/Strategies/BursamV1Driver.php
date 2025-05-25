@@ -438,7 +438,7 @@ class BursamV1Driver implements TraderInterface
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getOtcXml();
-        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response);
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'otc_certificate_details');
         if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to get OTC certificate details',
@@ -498,7 +498,7 @@ class BursamV1Driver implements TraderInterface
     public function getStbCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getStbXml();
-        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response);
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'stb_certificate_details');
         if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to get STB certificate details',
