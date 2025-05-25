@@ -79,13 +79,14 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
-        $this->createStepHistories(
-            $data,
-            $traderOrder,
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::MurabahaSaleCompleted
         );
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+        $this->createStepHistories(
+            $data,
+            $traderOrder,
             MurabhaStep::MurabahaSaleCompleted
         );
 
