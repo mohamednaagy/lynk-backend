@@ -23,7 +23,9 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    public $tries = 5;
+    public $tries = 10;
+
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
@@ -86,11 +88,6 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
         ]);
 
         Log::channel('bursam')->error('ProcessBursamStbCertificateAfterCancellation', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getTraceAsString()]);
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 120];
     }
 
     public function middleware(): array

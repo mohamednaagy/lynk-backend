@@ -22,6 +22,10 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure, TraderHelperTrait;
 
+    public $tries = 10;
+
+    public $backoff = 30;
+
     /**
      * Create a new job instance.
      *
