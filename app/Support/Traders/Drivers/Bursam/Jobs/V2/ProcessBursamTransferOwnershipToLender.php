@@ -44,8 +44,11 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      */
     public function handle()
     {
+        Log::channel('bursam')->info('start transfer to lender', [
+            'trader_order_id' => $this->traderOrderId,
+            'timestamp' => saudi_now(),
+        ]);
         $traderOrder = null;
-
         try {
 
             $traderOrder = TraderOrder::query()
