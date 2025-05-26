@@ -5,13 +5,11 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
-use App\Enums\BursamErrorCode;
 use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
-use App\Enums\TraderErrorCode;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderCancelType;
@@ -36,7 +34,6 @@ use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -136,40 +133,28 @@ class BursamV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        try {
-            $productCode = $this->getUnusedProductCode($traderOrder->provider);
-            $response = BursamClient::of($traderOrder)->buyProduct($productCode);
-
-            if (! empty($response->json('header.errorCode'))) {
-                throw new TraderException(
-                    'Failed to create trader order',
-                    [
-                        'trader_order_id' => $traderOrder->id,
-                        'provider' => $this->provider,
-                        'version' => $this->version,
-                        'provider_response_body' => $response->json(),
-                        'financing_order_id' => $traderOrder->order->id,
-                        'failure_reason' => $response->json('body.0.bidMsg'),
-                    ]
-                );
-            }
-
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
-
-            $traderOrder->update([
-                'status' => TraderOrderStatus::InProgress,
-                'product_code' => $productCode,
-            ]);
-        } catch (Exception $e) {
-            $traderOrder->order->update([
-                'status' => FinancingOrderStatus::TradingFailure,
-            ]);
-            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-            app(UpdateTraderOrderStatusToCancel::class)->handle(
-                $traderOrder,
-                TraderOrderCancelReason::FailureToPurchase
+        $productCode = $this->getUnusedProductCode($traderOrder->provider);
+        $response = BursamClient::of($traderOrder)->buyProduct($productCode);
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'buy_product');
+        if (! $isValidResponse) {
+            throw new TraderException(
+                'Failed to create trader order',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'provider' => $this->provider,
+                    'version' => $this->version,
+                    'provider_response_body' => $response->json(),
+                    'financing_order_id' => $traderOrder->order->id,
+                    'failure_reason' => $response->json('body.0.bidMsg'),
+                ]
             );
         }
+        $traderOrder->update([
+            'status' => TraderOrderStatus::InProgress,
+            'product_code' => $productCode,
+        ]);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }
@@ -185,60 +170,9 @@ class BursamV1Driver implements TraderInterface
 
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
-        $response = BursamClient::of($traderOrder)
-            ->fetchBuyResult();
-
-        if ($response->json('status.processingCount') == 0 && ($response->json('body.0.bidErrNo') == '999')) {
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
-
-            $traderOrder->update([
-                'original_data' => $response->json('body.0'),
-                'reference' => $response->json('body.0.ecertNo'),
-            ]);
-        } elseif (
-            in_array($response->json('body.0.bidErrNo'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES)
-        ) {
-            Log::channel('bursam')->error(
-                'bursa purchasing step => Fetching order result YNN bidErrNo is in unavailable product error codes',
-                [
-                    'financingOrderId' => $traderOrder->order->id,
-                    'trader_order_id' => $traderOrder->id,
-                    'response' => $response->json(),
-                    'bidErrNo' => $response->json('body.0.bidErrNo'),
-                    'unavailableProductCodes' => BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES,
-                ]
-            );
-            $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
-            $unavailableProductCodes[] = $response->json('body.0.productCode');
-            Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(30));
-
-            throw new TraderException(
-                'Failed to fetch order result YNN Insufficient Commodity',
-                [
-                    'trader_order_id' => $traderOrder->id,
-                    'provider' => $traderOrder->provider,
-                    'version' => $traderOrder->version,
-                    'provider_response_body' => $response->json(),
-                    'failure_reason' => $response->json('body.0.bidMsg'),
-                    'failure_code' => TraderErrorCode::INSUFFICIENT_COMMODITY,
-                ]
-            );
-        } elseif (
-            ($response->json('body.0.bidErrNo') != '999' && $response->json('status.processingCount') == 0)
-            || $response->json('status.processingCount') > 0
-        ) {
-
-            Log::channel('bursam')->error(
-                'bursa purchasing step => Fetching order result YNN bidErrNo is not 999 and processingCount is 0',
-                [
-                    'financingOrderId' => $traderOrder->order->id,
-                    'trader_order_id' => $traderOrder->id,
-                    'response' => $response->json(),
-                    'bidErrNo' => $response->json('body.0.bidErrNo'),
-                    'processingCount' => $response->json('status.processingCount'),
-                ]
-            );
-
+        $response = BursamClient::of($traderOrder)->fetchBuyResult();
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'fetch_ynn');
+        if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to fetch order result YNN',
                 [
@@ -252,14 +186,21 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
+
+        $traderOrder->update([
+            'original_data' => $response->json('body.0'),
+            'reference' => $response->json('body.0.ecertNo'),
+        ]);
+
         return $response->json();
     }
 
     public function getBidCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getBidXml();
-
-        if ($response->json('SUCCESSYN') == 'N') {
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'get_bid_certificate_details');
+        if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to get bid certificate',
                 [
@@ -457,8 +398,8 @@ class BursamV1Driver implements TraderInterface
         }
 
         $response = BursamClient::of($traderOrder)->sellProduct();
-
-        if (! empty($response->json('header.errorCode')) || $response->json('body.0.statusCode') != 0) {
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'sell_product');
+        if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to sell commodity to market',
                 [
@@ -476,14 +417,8 @@ class BursamV1Driver implements TraderInterface
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->fetchSellResult($traderOrder->uuid_two);
-
-        if (
-            $response->json('status.processingCount') == 0
-            && $response->json('body.0.otcErrNo') == '999'
-            && $response->json('body.0.stbErrNo') == '999'
-        ) {
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
-        } else {
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'fetch_nyy');
+        if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to fetch order result NYY',
                 [
@@ -495,6 +430,7 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
 
         return $response->json();
     }
@@ -502,8 +438,8 @@ class BursamV1Driver implements TraderInterface
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getOtcXml();
-
-        if ($response->json('SUCCESSYN') == 'N') {
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'otc_certificate_details');
+        if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to get OTC certificate details',
                 [
@@ -562,8 +498,8 @@ class BursamV1Driver implements TraderInterface
     public function getStbCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getStbXml();
-
-        if ($response->json('SUCCESSYN') == 'N') {
+        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'stb_certificate_details');
+        if (! $isValidResponse) {
             throw new TraderException(
                 'Failed to get STB certificate details',
                 [

@@ -57,7 +57,6 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
         ]);
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }
