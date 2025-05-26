@@ -8,7 +8,6 @@ use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
@@ -19,26 +18,14 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
     {
         $startTime = microtime(true);
         $localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
+        $this->createLocalMarketOrderHistory($localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
 
-        DB::beginTransaction();
-        try {
-            app(FindEligibleCommodities::class)->handle($localMarketOrder);
-            $this->createLocalMarketOrderHistory($localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
-            DB::commit();
+        app(FindEligibleCommodities::class)->handle($localMarketOrder);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::channel('local_market')->error('Error in Transactions', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            $localMarketOrder->update([
-                'status' => OrderStatus::FailedPurchase,
-            ]);
-        } finally {
-            $duration = microtime(true) - $startTime;
-            Log::channel('local_market')->info('PendingEligibleCommoditiesAction Duration', [
-                'order_id' => $localMarketOrder->id,
-                'duration' => convertMicrotimeToDuration($duration),
-            ]);
-        }
-
+        $duration = microtime(true) - $startTime;
+        Log::channel('local_market')->info('PendingEligibleCommoditiesAction Duration', [
+            'order_id' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration($duration),
+        ]);
     }
 }

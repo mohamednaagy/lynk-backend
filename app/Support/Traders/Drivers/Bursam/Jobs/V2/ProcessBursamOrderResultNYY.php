@@ -64,7 +64,7 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessBursamOrderResultNYY', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+        Log::channel('bursam')->error('ProcessBursamOrderResultNYY', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace_string' => $exception->getTraceAsString()]);
     }
 
     public function retryUntil(): Carbon

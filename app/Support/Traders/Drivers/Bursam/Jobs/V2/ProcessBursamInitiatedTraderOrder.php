@@ -23,6 +23,10 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
+    public $tries = 10;
+
+    public $backoff = 30;
+
     /**
      * Create a new job instance.
      *
@@ -48,6 +52,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
             return;
         }
 
+        Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
         Trader::driver('bursam', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
         Log::channel('bursam')->info('bursa purchasing step => finishing ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
 

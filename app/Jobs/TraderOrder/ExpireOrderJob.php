@@ -106,11 +106,11 @@ class ExpireOrderJob implements ShouldQueue
      */
     private function expireOrderContractSigned()
     {
+        $trader = Trader::driver($this->traderOrder->provider, $this->traderOrder->version);
         // Check if the order is contract sign limit expirable
-        if ($this->traderOrder->isContractSignLimitExpirable()) {
+        if ($trader->isContractSignLimitEligibleForExpiry($this->traderOrder)) {
             // Cancel the trader order with the expired contract sign time reason
-            Trader::driver($this->traderOrder->provider, $this->traderOrder->version)
-                ->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
+            $trader->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
 
             // Expire the trader order time limit
             $this->traderOrderTimeLimit->expire();

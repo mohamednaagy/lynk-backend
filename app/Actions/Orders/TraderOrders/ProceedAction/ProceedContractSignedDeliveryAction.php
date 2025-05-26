@@ -6,11 +6,13 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigne
 use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
@@ -35,6 +37,8 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         ) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
+
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSignedDelivery);
 
         $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
 

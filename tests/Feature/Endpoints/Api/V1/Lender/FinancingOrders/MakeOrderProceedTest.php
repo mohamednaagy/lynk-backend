@@ -111,7 +111,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(200)
@@ -131,7 +131,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(200)
@@ -151,7 +151,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
@@ -171,7 +171,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(200)
             ->assertJson(
@@ -191,7 +191,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
@@ -213,7 +213,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJson(
@@ -272,7 +272,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(400)
@@ -291,7 +291,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(200)
@@ -311,7 +311,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(400)
@@ -331,7 +331,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
@@ -349,7 +349,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrorFor('client_wakala');
@@ -362,7 +362,7 @@ class MakeOrderProceedTest extends TestCase
         $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.gif'),
             ])
             ->assertStatus(422)
@@ -381,7 +381,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
@@ -404,7 +404,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$userLender)
             ->withHeader('X-Company', self::$company->getOriginal('id'))
             ->postJson(self::$orderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
                 'client_wakala' => UploadedFile::fake()->create('client_wakala.pdf'),
             ]);
 
@@ -420,7 +420,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSigned,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned),
             ]);
 
         $response->assertStatus(422)
@@ -441,7 +441,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ClientWakalaAccepted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted),
             ]);
 
         $response->assertStatus(422)
@@ -462,7 +462,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted),
             ]);
 
         $response->assertStatus(400)
@@ -484,7 +484,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted),
             ]);
 
         $this->assertEquals(TraderOrderStatus::Completed, self::$localTraderOrder->refresh()->status->value);
@@ -506,7 +506,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted),
             ]);
 
         $this->assertEquals(TraderOrderStatus::Completed, self::$localTraderOrder->refresh()->status->value);
@@ -529,7 +529,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSignedDelivery,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery),
             ]);
 
         $this->assertEquals(TraderOrderStatus::InProgress, self::$localTraderOrder->refresh()->status->value);
@@ -549,7 +549,7 @@ class MakeOrderProceedTest extends TestCase
         $response = $this->actingAs(self::$localUserLender)
             ->withHeader('X-Company', self::$localCompany->getOriginal('id'))
             ->postJson(self::$localOrderProceedUrl, [
-                'case' => FinancingOrderProceedCase::ContractSignedDelivery,
+                'case' => FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery),
             ]);
 
         $response->assertStatus(400)

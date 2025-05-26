@@ -8,6 +8,7 @@ use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
+use Log;
 
 class CompleteOrderAction implements CompleteOrder
 {
@@ -20,7 +21,8 @@ class CompleteOrderAction implements CompleteOrder
             ->lockForUpdate()
             ->findOrFail($orderId);
 
-        if ($financingOrder->cantBeCompleted()) {
+        if (! $financingOrder->canBeCompleted()) {
+            Log::error('financing order id '.$financingOrder->id.' cant be completed');
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 

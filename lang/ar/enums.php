@@ -122,7 +122,7 @@ return [
 
     TraderOrderCancelReason::class => [
         TraderOrderCancelReason::Manual => '',
-        TraderOrderCancelReason::MurabhaTimeout => '',
+        TraderOrderCancelReason::MurabhaTimeout => 'تم إلغاء طلب التداول بسبب وقت إغلاق السوق',
         TraderOrderCancelReason::FailureToPurchase => '',
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',

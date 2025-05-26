@@ -140,9 +140,7 @@ class TraderOrder extends Model implements HasMedia
             throw new UnexpectedValueException("No mapping for this step {$step}");
         }
 
-        return (bool) $this->traderHistories()
-            ->where('action', end($stepToHistoriesDictionary[$step]))
-            ->first();
+        return $this->traderHistories()->where('action', end($stepToHistoriesDictionary[$step]))->exists();
     }
 
     public function doesLastActionMatchWith($actions): bool
@@ -316,7 +314,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function hoverMessage(): ?string
     {
-        return Trader::driver($this->provider, $this->version)->HoverMessageOfTraderStatus($this);
+        return Trader::driver($this->provider, $this->version)->hoverMessageOfTraderStatus($this);
     }
 
     public function isDeliverable(): bool
@@ -352,11 +350,6 @@ class TraderOrder extends Model implements HasMedia
     public function isDeliveryExpirable(): bool
     {
         return $this->doesLastActionMatchWith([FinancingOrderHistory::PendingDelivery]);
-    }
-
-    public function isContractSignLimitExpirable(): bool
-    {
-        return $this->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
     }
 
     public function getRecentTimeLimit($type, $status)

@@ -22,16 +22,16 @@ class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected mixed $financingOrder;
+    private int $financingOrderId;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($financingOrder)
+    public function __construct(int $financingOrderId)
     {
-        $this->financingOrder = $financingOrder;
+        $this->financingOrderId = $financingOrderId;
     }
 
     /**
@@ -43,30 +43,35 @@ class ProcessInProgressOrder implements ShouldQueue
     public function handle(): void
     {
         try {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrder);
+            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrderId);
             $trader = Trader::getSuitableDriverForCompany($financingOrder->company);
             DB::multipleTransaction(function () use ($trader, $financingOrder) {
                 if ($financingOrder->traderOrders()->whereIn('status', [
                     TraderOrderStatus::InProgress,
                 ])->count() > 0) {
+                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has in progress trader order');
+
                     return;
                 }
                 if (
                     $financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
                     || $financingOrder->company->lender->lenderDetail->require_initiate_trade_request
                 ) {
+                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has in progress trader order');
+
                     return;
                 }
 
                 try {
                     app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
                 } catch (BalanceIsNotEnoughException $e) {
+                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has balance is not enough');
                     Log::alert($financingOrder->id);
 
                     return;
                 }
 
-                $traderOrder = $trader->createTraderOrder($financingOrder);
+                $trader->createTraderOrder($financingOrder);
 
                 $financingOrder->update([
                     'status' => FinancingOrderStatus::InProgress,
@@ -76,11 +81,10 @@ class ProcessInProgressOrder implements ShouldQueue
             Log::channel('lynk')->error(
                 'An error occurred while processing the financing order.',
                 [
-                    'financing_order_id' => $this->financingOrder,
+                    'financing_order_id' => $this->financingOrderId,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
-                ]
-            );
+                ]);
         }
     }
 
@@ -89,6 +93,6 @@ class ProcessInProgressOrder implements ShouldQueue
      */
     public function middleware(): array
     {
-        return [new WithoutOverlapping('financingOrder'.$this->financingOrder)];
+        return [new WithoutOverlapping('financingOrder'.$this->financingOrderId)];
     }
 }

@@ -8,13 +8,16 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // TODO_LOCAL_MARKET need to review
 
@@ -31,23 +34,11 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             'status' => TraderOrderStatus::InProgress,
         ]);
 
-        $this->transferOwnershipToLender($traderOrder, $data);
-
-        $this->createStepHistories(
-            $data,
-            $traderOrder,
-            MurabhaStep::PurchasingCommodity
-        );
-    }
-
-    protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)
-    {
-        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-
-        // this (if) is a special case doesn't exist in history map
         if (isset($data['auto_generate_financing_institution_certificate'])) {
+            $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
             $trader->createTransferOwnershipToLenderDocument($traderOrder);
         }
+
     }
 
     public function updateMurabahaPurchaseOffer(TraderOrder $traderOrder, $request)
@@ -71,10 +62,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            MurabhaStep::MurabahaSaleCompleted
-        );
-
         $trader = Trader::driver($traderOrder->provider);
         $currentTimeInUtcTz = CarbonImmutable::now();
         $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
@@ -92,6 +79,11 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            MurabhaStep::MurabahaSaleCompleted
+        );
+
         $this->createStepHistories(
             $data,
             $traderOrder,
@@ -102,7 +94,14 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
             ]);
+        } else {
+            Log::error('LynkStrategy updateMurabhaCompleteDocument failed to update order status to completed', [
+                'trader_order_id' => $traderOrder->id,
+                'last_action' => $traderOrder->traderHistories()->latest('id')->first()->action,
+            ]);
         }
+
+        app(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
     }
 
     protected function sellCommodityToCustomer($traderOrder, $request)

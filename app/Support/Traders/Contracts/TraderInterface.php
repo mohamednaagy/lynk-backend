@@ -37,7 +37,7 @@ interface TraderInterface
 
     public function moveHoldTraderOrder(TraderOrder $traderOrder);
 
-    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string;
+    public function hoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string;
 
     public function contractSignedMessage(TraderOrder $traderOrder);
 
@@ -48,4 +48,8 @@ interface TraderInterface
     public function handleConfirmDelivery(TraderOrder $traderOrder);
 
     public function handleRequestDeliverCommodityToCustomer(TraderOrder $traderOrder);
+
+    public function isOrderInSellableState(TraderOrder $traderOrder): bool;
+
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool;
 }

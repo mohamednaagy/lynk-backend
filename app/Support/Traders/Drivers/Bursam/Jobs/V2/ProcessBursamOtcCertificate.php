@@ -38,7 +38,6 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        Log::error('success otc trader id '.$this->traderOrderId);
 
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()

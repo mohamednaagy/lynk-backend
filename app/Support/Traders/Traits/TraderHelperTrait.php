@@ -65,6 +65,11 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
+        Log::info('Creating trader order history', [
+            'trader_order_id' => $traderOrder->id,
+            'action' => $action,
+            'data' => $data,
+        ]);
         $traderOrder->traderHistories()->updateOrCreate(
             [
                 'action' => $action,
@@ -75,6 +80,10 @@ trait TraderHelperTrait
 
     public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
     {
+        Log::info('Storing order document as pdf', [
+            'view' => $view,
+            'trader_order_id' => $traderOrder->id,
+        ]);
         $html = view($view, $data)->render();
 
         PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {

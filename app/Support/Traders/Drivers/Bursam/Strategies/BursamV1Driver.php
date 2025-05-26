@@ -198,6 +198,16 @@ class BursamV1Driver implements TraderInterface
         } elseif (
             in_array($response->json('body.0.bidErrNo'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES)
         ) {
+            Log::channel('bursam')->error(
+                'bursa purchasing step => Fetching order result YNN bidErrNo is in unavailable product error codes',
+                [
+                    'financingOrderId' => $traderOrder->order->id,
+                    'trader_order_id' => $traderOrder->id,
+                    'response' => $response->json(),
+                    'bidErrNo' => $response->json('body.0.bidErrNo'),
+                    'unavailableProductCodes' => BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES,
+                ]
+            );
             $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
             $unavailableProductCodes[] = $response->json('body.0.productCode');
             Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(30));
@@ -217,6 +227,18 @@ class BursamV1Driver implements TraderInterface
             ($response->json('body.0.bidErrNo') != '999' && $response->json('status.processingCount') == 0)
             || $response->json('status.processingCount') > 0
         ) {
+
+            Log::channel('bursam')->error(
+                'bursa purchasing step => Fetching order result YNN bidErrNo is not 999 and processingCount is 0',
+                [
+                    'financingOrderId' => $traderOrder->order->id,
+                    'trader_order_id' => $traderOrder->id,
+                    'response' => $response->json(),
+                    'bidErrNo' => $response->json('body.0.bidErrNo'),
+                    'processingCount' => $response->json('status.processingCount'),
+                ]
+            );
+
             throw new TraderException(
                 'Failed to fetch order result YNN',
                 [
@@ -672,7 +694,7 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder->provider.'-'.$traderOrder->reference.'.pdf';
     }
 
-        public function processProceedContractSigned(TraderOrder $traderOrder): void
+    public function processProceedContractSigned(TraderOrder $traderOrder): void
     {
         if ($traderOrder->isNeedToGenerateWakalaDocument()) {
             app()->make(GenerateClientWakala::class)->handle($traderOrder);
@@ -687,13 +709,23 @@ class BursamV1Driver implements TraderInterface
         ProcessProceedContractAndClientWakala::dispatchSync($traderOrder->id);
     }
 
-    public function HoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
+    public function hoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string
     {
         return match ($traderOrder->status->value) {
+            TraderOrderStatus::Cancelled => $this->getCancellationReasonMessage($traderOrder->cancelDetail->cancel_reason->value) ,
+            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['TIME' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
+            default => null,
+        };
+    }
+
+    public function getCancellationReasonMessage($reason)
+    {
+        return match ($reason) {
             TraderOrderCancelReason::FailureToPurchase => __('order.trader.lynk.internal_technical_error'),
             TraderOrderCancelReason::TraderOrderIsCancelled => __('order.user_cancel_request'),
             TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
-            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['TIME' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
+            TraderOrderCancelReason::MurabhaTimeout => __('order.murabaha_time_out'),
+
             default => null,
         };
     }
@@ -706,6 +738,18 @@ class BursamV1Driver implements TraderInterface
     public function clientWakalaMessage(TraderOrder $traderOrder)
     {
         return null;
+    }
+
+    // TODO: This can be refactored later once the BaseTrader class is added.
+    //       The logic will then be implemented there, accepting $action as a second argument.
+    public function isOrderInSellableState(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
+    }
+
+    public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->doesLastActionMatchWith([FinancingOrderHistory::CreateTransferOwnershipToLenderDocument]);
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
