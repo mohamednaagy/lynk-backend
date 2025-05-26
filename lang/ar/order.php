@@ -10,7 +10,7 @@ return [
         ],
         'lynk' => [
             'cancelled_status' => 'اختار المستخدم إلغاء طلب التجارة هذا.',
-            'no_commodity_available' => 'لا يوجد سلع كافيه داخل السوق المحلي',
+            'no_commodity_available' => 'لا يوجد سلع كافيه',
             'internal_technical_error' => 'يوجد خطا ما',
             'expired_contract_time' => 'انتهى الوقت المحدد لتوقيع العقد بعد :TIME ساعة.',
             'expired_confirmation_time_limit' => 'انتهى الوقت المحدد لتوقيع العقد بعد :TIME ساعة.',

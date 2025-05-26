@@ -75,4 +75,8 @@ final class Subject extends Enum
     const CommoditySupplierInventories = 'CommoditySupplierInventories';
 
     const LenderClients = 'LenderClients';
+
+    const InternationalMurabahaAreaSettings = 'InternationalMurabahaAreaSettings';
+
+    const TraderProducts = 'TraderProducts';
 }
