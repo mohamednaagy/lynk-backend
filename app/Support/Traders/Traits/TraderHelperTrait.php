@@ -174,7 +174,6 @@ trait TraderHelperTrait
     {
         // Retrieve product codes for the provider
         $productCodes = $this->getProductCodes($provider);
-        Log::info('productCodes', [$productCodes]);
 
         // Get cached list of unavailable product codes, defaulting to an empty array
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
@@ -182,12 +181,14 @@ trait TraderHelperTrait
         // Find available product codes by removing unavailable ones
         $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
 
-        // Return the first available product code, or the first non-empty code if no available codes
-        return Arr::first(
+        $selectedProductCode = Arr::first(
             empty($availableProductCodes)
                 ? array_filter($productCodes)
                 : $availableProductCodes
         );
+
+        // Return the first available product code, or the first non-empty code if no available codes
+        return $selectedProductCode;
     }
 
     /**
@@ -208,7 +209,6 @@ trait TraderHelperTrait
 
         // Apply commodity type filtering/sorting if a preferred type exists
         if ($bursam_default_preferred_commodity_type) {
-            Log::info('bursam_default_preferred_commodity_type', [$bursam_default_preferred_commodity_type]);
             $query->orderByRaw(
                 'CASE WHEN id = ? THEN 0 ELSE 1 END',
                 [$bursam_default_preferred_commodity_type]
