@@ -7,7 +7,6 @@ use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -75,15 +74,5 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
     public function failed($exception)
     {
         Log::channel('bursam')->error('ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId ' => $this->traderOrderId, 'trace' => $exception->getTraceAsString(), 'message' => $exception->getMessage()]);
-    }
-
-    public function retryUntil(): Carbon
-    {
-        return now()->addMinutes(5);
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 120];
     }
 }
