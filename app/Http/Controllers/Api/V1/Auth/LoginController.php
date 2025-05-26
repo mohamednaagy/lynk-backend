@@ -51,23 +51,23 @@ class LoginController extends Controller
             ]);
         }
 
-        // if ($otpCode = $sendOtp->handle($user, $request)) {
-        //     return $this->successResponse([
-        //         'vid' => $otpCode->id,
-        //     ]);
-        // }
+        if ($otpCode = $sendOtp->handle($user, $request)) {
+            return $this->successResponse([
+                'vid' => $otpCode->id,
+            ]);
+        }
 
-        // if (! $user->hasRole(Role::LenderApiUser)) {
-        //     $user->notify(
-        //         new LoginNotification(
-        //             $request->ip(),
-        //             Carbon::now()->toDateTimeString(),
-        //             Agent::device(),
-        //             Agent::platform(),
-        //             Agent::browser()
-        //         )
-        //     );
-        // }
+        if (! $user->hasRole(Role::LenderApiUser)) {
+            $user->notify(
+                new LoginNotification(
+                    $request->ip(),
+                    Carbon::now()->toDateTimeString(),
+                    Agent::device(),
+                    Agent::platform(),
+                    Agent::browser()
+                )
+            );
+        }
 
         return $this->successResponse(
             $loginUser->handle($user, $request->validated('source'), $request)
