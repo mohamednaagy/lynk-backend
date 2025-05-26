@@ -186,12 +186,12 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
-
         $traderOrder->update([
             'original_data' => $response->json('body.0'),
             'reference' => $response->json('body.0.ecertNo'),
         ]);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
 
         return $response->json();
     }
