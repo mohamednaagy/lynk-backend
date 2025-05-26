@@ -13,7 +13,7 @@ class GetInternationalMurabahaSettingsAction implements GetInternationalMurabaha
      *
      * @return InternationalMurabaha The InternationalMurabaha settings
      */
-    public function handle()
+    public function handle(): InternationalMurabaha
     {
         $murabahaSettings = app(InternationalMurabahaSetting::class);
 

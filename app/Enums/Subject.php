@@ -78,5 +78,5 @@ final class Subject extends Enum
 
     const InternationalMurabahaAreaSettings = 'InternationalMurabahaAreaSettings';
 
-    const TraderProducts = 'traderProducts';
+    const TraderProducts = 'TraderProducts';
 }

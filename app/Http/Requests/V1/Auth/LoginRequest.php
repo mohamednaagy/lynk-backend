@@ -35,9 +35,9 @@ class LoginRequest extends FormRequest
         //check User doesnt has ApiAdmin Role
         $user = User::where('email', $this->email)->first();
         $recaptchaRoles = [];
-        if ($isRequestFromFromFrontend && ! $user->hasRole('ApiAdmin')) {
-            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
-        }
+        // if ($isRequestFromFromFrontend && ! $user->hasRole('ApiAdmin')) {
+        //     $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
+        // }
 
         $validationRules = [
             'unique_name' => ['nullable', 'string', Rule::exists(Company::class, 'unique_name')->where('type', CompanyType::Lender)],

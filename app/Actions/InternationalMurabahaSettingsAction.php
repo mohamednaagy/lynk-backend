@@ -17,7 +17,6 @@ class InternationalMurabahaSettingsAction implements SettingsInterface
     public function handle(array $data): void
     {
         $settingInstance = $this->getSettingsClassInstance->handle($data['area']);
-
         $settingInstance->bursam_default_preferred_commodity_type = $data['bursam_default_preferred_commodity_type'];
 
         $settingInstance->save();

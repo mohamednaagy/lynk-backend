@@ -199,7 +199,6 @@ trait TraderHelperTrait
      */
     private function getProductCodes(?string $provider): array
     {
-
         // Start with a base query for TraderProduct
         $query = TraderProduct::query();
 
