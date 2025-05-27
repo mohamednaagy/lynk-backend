@@ -64,10 +64,12 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
+use App\Http\Controllers\Api\V1\Admin\Settings\InternationalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\LocalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
+use App\Http\Controllers\Api\V1\Admin\TraderProducts\TraderProductsLiteList;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
@@ -114,6 +116,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
             Route::get('/local-commodity', [LocalMurabahaSettingsController::class, 'index']);
             Route::put('/local-commodity', [LocalMurabahaSettingsController::class, 'update']);
+
+            Route::get('/international-murabaha', [InternationalMurabahaSettingsController::class, 'index']);
+            Route::put('/international-murabaha', [InternationalMurabahaSettingsController::class, 'update']);
         });
 
         Route::get('wakala-templates/{type}', [WakalaTemplateController::class, 'index'])
@@ -221,6 +226,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             ->except(['delete']);
 
         Route::get('constants', [ConstantController::class, 'index']);
+
+        Route::get('trader-products/dropdown-list', TraderProductsLiteList::class);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('sign-up');

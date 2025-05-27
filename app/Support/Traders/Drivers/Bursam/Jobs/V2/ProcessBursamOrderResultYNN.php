@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
+use App\Enums\BursamErrorCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderCancelReason;
@@ -78,10 +79,11 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             $traderOrder->order->update([
                 'status' => FinancingOrderStatus::TradingFailure,
             ]);
-            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
+            $cancel_reason = in_array($exception->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES) ? TraderOrderCancelReason::NoEligibleCommoditiesAvailable : TraderOrderCancelReason::FailureToPurchase;
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancel_reason);
             app(UpdateTraderOrderStatusToCancel::class)->handle(
                 $traderOrder,
-                TraderOrderCancelReason::FailureToPurchase,
+                $cancel_reason,
                 method_exists($exception, 'getContext') ?
                     $exception->getContext('failure_reason')
                     : ''

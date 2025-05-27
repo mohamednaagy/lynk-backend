@@ -32,22 +32,22 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                     'status' => OrderStatus::NoEligibleCommoditiesAvailable,
                 ]);
             }
-            
+
             DB::commit();
-            
+
             Log::channel('local_market')->info('FindEligibleCommoditiesAction Duration', [
                 'order_id' => $localMarketOrder->id,
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             Log::channel('local_market')->error('Error in FindEligibleCommoditiesAction', [
                 'order_id' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             $localMarketOrder->update([
                 'status' => OrderStatus::FailedPurchase,
             ]);

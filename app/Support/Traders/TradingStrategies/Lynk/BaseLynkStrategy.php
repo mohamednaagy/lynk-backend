@@ -17,6 +17,7 @@ use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 // TODO_LOCAL_MARKET need to review
 
@@ -61,10 +62,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
-        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
-            MurabhaStep::MurabahaSaleCompleted
-        );
-
         $trader = Trader::driver($traderOrder->provider);
         $currentTimeInUtcTz = CarbonImmutable::now();
         $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
@@ -82,6 +79,11 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             $traderOrder,
             TraderOrderMediaCollection::LynkSalePledgeCertificate,
         );
+
+        $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
+            MurabhaStep::MurabahaSaleCompleted
+        );
+
         $this->createStepHistories(
             $data,
             $traderOrder,
@@ -91,6 +93,11 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         if ($canUpdateOrderStatus) {
             $traderOrder->update([
                 'status' => TraderOrderStatus::Completed,
+            ]);
+        } else {
+            Log::error('LynkStrategy updateMurabhaCompleteDocument failed to update order status to completed', [
+                'trader_order_id' => $traderOrder->id,
+                'last_action' => $traderOrder->traderHistories()->latest('id')->first()->action,
             ]);
         }
 

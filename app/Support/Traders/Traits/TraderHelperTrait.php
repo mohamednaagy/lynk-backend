@@ -7,6 +7,7 @@ use App\Enums\TraderOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderProduct;
+use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -163,19 +164,54 @@ trait TraderHelperTrait
         return LynkCommodityProductDto::fromArray($product);
     }
 
-    public function getUnusedProductCode($provider)
+    /**
+     * Get an unused product code for a given provider.
+     *
+     * @param  string  $provider  The provider for which to find a product code
+     * @return string|null The first available product code
+     */
+    public function getUnusedProductCode(string $provider): ?string
     {
-        $productCodes = TraderProduct::query()
-            ->where('provider', $provider)
-            ->orderBy('order', 'asc')
-            ->get()
-            ->pluck('code')
-            ->toArray();
+        // Retrieve product codes for the provider
+        $productCodes = $this->getProductCodes($provider);
 
+        // Get cached list of unavailable product codes, defaulting to an empty array
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
-        $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
+        // Find available product codes by removing unavailable ones
+        $availableProductCodes = array_values(array_diff($productCodes, $unavailableProductCodes));
 
-        return Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
+        $selectedProductCode = Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
+
+        // Return the first available product code, or the first non-empty code if no available codes
+        return $selectedProductCode;
+    }
+
+    /**
+     * Retrieve product codes with optional filtering and sorting.
+     *
+     * @param  string|null  $provider  The provider to filter by
+     * @return array List of product codes
+     */
+    private function getProductCodes(?string $provider): array
+    {
+        // Start with a base query for TraderProduct
+        $query = TraderProduct::query();
+
+        // Retrieve the default preferred commodity type
+        $bursam_default_preferred_commodity_type = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
+
+        // Apply commodity type filtering/sorting if a preferred type exists
+        if ($bursam_default_preferred_commodity_type) {
+            $query = $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$bursam_default_preferred_commodity_type]);
+        }
+
+        // Filter by provider if provided
+        if ($provider) {
+            $query = $query->where('provider', $provider);
+        }
+
+        // Return sorted product codes
+        return $query->orderBy('order', 'asc')->pluck('code')->toArray();
     }
 }

@@ -11,7 +11,7 @@ return [
         ],
         'lynk' => [
             'cancelled_status' => 'User has chosen to cancel this trade request.',
-            'no_commodity_available' => 'No commodities found with LOCAL Trader.',
+            'no_commodity_available' => 'No commodities found with Trader.',
             'internal_technical_error' => 'Internal Technical Error',
             'expired_contract_time' => 'Contract Sign Time Limit of :TIME hours has expired.',
             'expired_confirmation_time_limit' => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit of :TIME hours has expired.',

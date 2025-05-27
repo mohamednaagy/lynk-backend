@@ -163,6 +163,7 @@ class BursamClient
                 $this->logError('Unavailable product code detected', $response);
                 $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
                 $unavailableProductCodes[] = $productCode;
+                $unavailableProductCodes = array_values(array_unique($unavailableProductCodes));
                 Cache::put('bursam_unavailable_product_codes', $unavailableProductCodes, now()->addMinutes(30));
 
                 return false;

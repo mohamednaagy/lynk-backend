@@ -29,7 +29,7 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
     {
         $traderOrder = TraderOrder::where('reference', $this->data['external_order_no'])->first();
 
-        if(!$traderOrder) {
+        if (! $traderOrder) {
             Log::channel('local_market')->error("Trader order not found for the given external order no {$this->data['external_order_no']}");
             throw new LocalMarketWebhookException;
         }

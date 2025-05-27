@@ -121,7 +121,7 @@ return [
         TraderOrderCancelReason::FailureToPurchase => '',
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by user ',
-        TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with LOCAL Trader.',
+        TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with Trader.',
         TraderOrderCancelReason::ExpiredContractSignTime => 'Contract Sign Time Limit has expired.',
         TraderOrderCancelReason::ExpiredConfirmationTimeLimit => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit has expired.',
     ],
