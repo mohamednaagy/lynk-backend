@@ -179,13 +179,9 @@ trait TraderHelperTrait
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
 
         // Find available product codes by removing unavailable ones
-        $availableProductCodes = array_diff($productCodes, $unavailableProductCodes);
+        $availableProductCodes = array_values(array_diff($productCodes, $unavailableProductCodes));
 
-        $selectedProductCode = Arr::first(
-            empty($availableProductCodes)
-                ? array_filter($productCodes)
-                : $availableProductCodes
-        );
+        $selectedProductCode = Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
 
         // Return the first available product code, or the first non-empty code if no available codes
         return $selectedProductCode;
@@ -203,20 +199,16 @@ trait TraderHelperTrait
         $query = TraderProduct::query();
 
         // Retrieve the default preferred commodity type
-        $bursam_default_preferred_commodity_type = app(InternationalMurabahaSetting::class)
-            ->bursam_default_preferred_commodity_type;
+        $bursam_default_preferred_commodity_type = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
 
         // Apply commodity type filtering/sorting if a preferred type exists
         if ($bursam_default_preferred_commodity_type) {
-            $query->orderByRaw(
-                'CASE WHEN id = ? THEN 0 ELSE 1 END',
-                [$bursam_default_preferred_commodity_type]
-            );
+            $query = $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$bursam_default_preferred_commodity_type]);
         }
 
         // Filter by provider if provided
         if ($provider) {
-            $query->where('provider', $provider);
+            $query = $query->where('provider', $provider);
         }
 
         // Return sorted product codes
