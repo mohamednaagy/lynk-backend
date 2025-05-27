@@ -32,7 +32,7 @@ return new class extends Migration
         $time = now()->format('Y-m-d H:i:s');
         $nonProductionEnvironmentsData = [
             [
-                'code' => 'AL-MSIA-23',
+                'code' => 'AL-MSIA- 23',
                 'name' => json_encode([
                     'en' => 'Aluminium',
                     'ar' => 'الألومنيوم',
@@ -56,7 +56,7 @@ return new class extends Migration
                 'updated_at' => $time,
             ],
             [
-                'code' => 'PB-LEAD-19',
+                'code' => 'PB-LEAD- 19',
                 'name' => json_encode([
                     'en' => 'Lead',
                     'ar' => 'رصاص',
