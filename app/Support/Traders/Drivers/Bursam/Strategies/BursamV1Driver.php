@@ -133,7 +133,16 @@ class BursamV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        $productCode = $this->getUnusedProductCode($traderOrder->provider);
+        $productCode = $this->getUnusedProductCode($traderOrder);
+        if (empty($productCode)) {
+            throw new TraderException(
+                'No product code available',
+                [
+                    'trader_order_id' => $traderOrder->id,
+                    'company_id' => $traderOrder->order->company_id,
+                ]
+            );
+        }
         $response = BursamClient::of($traderOrder)->buyProduct($productCode);
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'buy_product');
         if (! $isValidResponse) {
