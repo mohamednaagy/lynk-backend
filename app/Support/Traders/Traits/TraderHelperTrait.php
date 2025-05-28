@@ -318,28 +318,17 @@ trait TraderHelperTrait
         ]);
 
         $companyPreferredProductIds = $traderOrder->order->company
-            ->preferredBursaProducts
-            ->pluck('id')
-            ->toArray();
-
-        Log::info('Company preferred product IDs retrieved', [
-            'trader_order_id' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-            'preferred_product_ids' => $companyPreferredProductIds,
-            'count' => count($companyPreferredProductIds),
-        ]);
-
-        $productCodes = TraderProduct::whereIn('id', $companyPreferredProductIds)
+            ->traderProducts
             ->pluck('code')
             ->toArray();
 
         Log::info('Company preferred product codes resolved', [
             'trader_order_id' => $traderOrder->id,
             'company_id' => $traderOrder->order->company_id,
-            'product_codes' => $productCodes,
-            'count' => count($productCodes),
+            'product_codes' => $companyPreferredProductIds,
+            'count' => count($companyPreferredProductIds),
         ]);
 
-        return $productCodes;
+        return $companyPreferredProductIds;
     }
 }

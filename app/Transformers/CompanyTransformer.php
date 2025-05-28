@@ -207,14 +207,14 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includeInternationalPreferredCommodityTypes(Company $company): Primitive
     {
-        $preferredBursaProducts = $company->preferredBursaProducts()->first();
-        if (is_null($preferredBursaProducts)) {
+        $traderProducts = $company->traderProducts()->first();
+        if (is_null($traderProducts)) {
             return $this->primitive(null);
         }
 
         return $this->primitive([
-            'id' => $preferredBursaProducts->id,
-            'name' => $preferredBursaProducts->name,
+            'id' => $traderProducts->id,
+            'name' => $traderProducts->name,
         ]);
     }
 }

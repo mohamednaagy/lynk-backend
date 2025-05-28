@@ -160,7 +160,7 @@ class Company extends BaseTenant
         return $this->hasOne(Lender::class, 'id');
     }
 
-    public function preferredBursaProducts()
+    public function traderProducts()
     {
         return $this->belongsToMany(TraderProduct::class, 'company_preferred_bursa_products', 'company_id', 'trader_product_id');
     }
