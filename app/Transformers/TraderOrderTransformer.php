@@ -229,7 +229,7 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeShowProceedBtn(TraderOrder $traderOrder): Primitive
     {
         $signedWakalaDocumentMediaFile = $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) ?? null;
-        return $this->primitive( empty($signedWakalaDocumentMediaFile) ? false : true);
+
+        return $this->primitive(empty($signedWakalaDocumentMediaFile) ? false : true);
     }
-}
 }
