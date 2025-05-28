@@ -228,9 +228,8 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeShowProceedBtn(TraderOrder $traderOrder): Primitive
     {
-        $isBursamAutomatic = $traderOrder->provider === Trader::Bursam && $traderOrder->isAutomaticMode();
-        $signedWakalaDocumentMediaFile = $isBursamAutomatic ? $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) : null;
+        $signedWakalaDocumentMediaFile = $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) ?? null;
 
-        return $this->primitive($isBursamAutomatic ? ! empty($signedWakalaDocumentMediaFile) : true);
+        return $this->primitive(empty($signedWakalaDocumentMediaFile) ? false : true);
     }
 }
