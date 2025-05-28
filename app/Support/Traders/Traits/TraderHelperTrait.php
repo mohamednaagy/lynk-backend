@@ -176,9 +176,24 @@ trait TraderHelperTrait
      */
     public function getUnusedProductCode(TraderOrder $traderOrder): ?string
     {
+        Log::info('Getting unused product code', [
+            'trader_order_id' => $traderOrder->id,
+            'provider' => $traderOrder->provider,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
+
         $productCodes = $this->getProductCodes($traderOrder);
 
-        return ! empty($productCodes) ? reset($productCodes) : null;
+        $selectedCode = ! empty($productCodes) ? reset($productCodes) : null;
+
+        Log::info('Product code selection result', [
+            'trader_order_id' => $traderOrder->id,
+            'selected_product_code' => $selectedCode,
+            'available_codes_count' => count($productCodes),
+            'all_available_codes' => $productCodes,
+        ]);
+
+        return $selectedCode;
     }
 
     /**
@@ -189,11 +204,22 @@ trait TraderHelperTrait
      */
     private function getProductCodes(TraderOrder $traderOrder): array
     {
+        Log::info('Starting product code selection', [
+            'trader_order_id' => $traderOrder->id,
+            'provider' => $traderOrder->provider,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
+
         // Fallback to existing logic if no override is set
         $query = TraderProduct::query();
 
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
             ->bursam_default_preferred_commodity_type;
+
+        Log::info('Global preferred commodity type retrieved', [
+            'trader_order_id' => $traderOrder->id,
+            'global_preferred_commodity_type_id' => $globalPreferredCommodityType,
+        ]);
 
         if ($globalPreferredCommodityType) {
             $query = $query->orderByRaw(
@@ -208,30 +234,74 @@ trait TraderHelperTrait
 
         $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
 
+        Log::info('Company preferred product codes retrieved', [
+            'trader_order_id' => $traderOrder->id,
+            'company_preferred_product_codes' => $companyPreferredProductCodes,
+            'count' => count($companyPreferredProductCodes),
+        ]);
+
         $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
         if (! is_array($unavailableProductCodes)) {
             $unavailableProductCodes = [];
         }
 
+        Log::info('Unavailable product codes from cache', [
+            'trader_order_id' => $traderOrder->id,
+            'unavailable_product_codes' => $unavailableProductCodes,
+            'count' => count($unavailableProductCodes),
+        ]);
+
         if (! empty($companyPreferredProductCodes)) {
             $availablePreferredProductCodes = array_diff($companyPreferredProductCodes, $unavailableProductCodes);
 
+            Log::info('Available preferred product codes after filtering unavailable', [
+                'trader_order_id' => $traderOrder->id,
+                'available_preferred_product_codes' => $availablePreferredProductCodes,
+                'count' => count($availablePreferredProductCodes),
+                'filtered_out' => array_intersect($companyPreferredProductCodes, $unavailableProductCodes),
+            ]);
+
             if (empty($availablePreferredProductCodes)) {
+                Log::warning('All preferred product codes are unavailable', [
+                    'trader_order_id' => $traderOrder->id,
+                    'preferred_codes' => $companyPreferredProductCodes,
+                    'unavailable_codes' => $unavailableProductCodes,
+                ]);
+
                 return []; // All preferred codes are unavailable
             }
 
             $query = $query->whereIn('code', $availablePreferredProductCodes);
         } else {
+            Log::info('No company preferred product codes found, using global filtering', [
+                'trader_order_id' => $traderOrder->id,
+            ]);
+
             // No preferred product codes; exclude unavailable ones globally
             if (! empty($unavailableProductCodes)) {
                 $query = $query->whereNotIn('code', $unavailableProductCodes);
             }
         }
 
-        return $query
+        $finalProductCodes = $query
             ->orderBy('order', 'asc')
             ->pluck('code')
             ->toArray();
+
+        Log::info('Final product codes selection completed', [
+            'trader_order_id' => $traderOrder->id,
+            'final_product_codes' => $finalProductCodes,
+            'count' => count($finalProductCodes),
+            'selected_first' => ! empty($finalProductCodes) ? $finalProductCodes[0] : null,
+            'selection_criteria' => [
+                'had_company_preferences' => ! empty($companyPreferredProductCodes),
+                'had_global_preference' => ! empty($globalPreferredCommodityType),
+                'had_unavailable_codes' => ! empty($unavailableProductCodes),
+                'provider' => $traderOrder->provider,
+            ],
+        ]);
+
+        return $finalProductCodes;
     }
 
     /**
@@ -242,13 +312,34 @@ trait TraderHelperTrait
      */
     public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
     {
-        $companyPreferredProductIds = $traderOrder->order->company()
-            ->preferredBursaProducts()
-            ->pluck('trader_product_id')
+        Log::info('Retrieving company preferred product codes', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
+
+        $companyPreferredProductIds = $traderOrder->order->company
+            ->preferredBursaProducts
+            ->pluck('id')
             ->toArray();
 
-        return TraderProduct::whereIn('id', $companyPreferredProductIds)
+        Log::info('Company preferred product IDs retrieved', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+            'preferred_product_ids' => $companyPreferredProductIds,
+            'count' => count($companyPreferredProductIds),
+        ]);
+
+        $productCodes = TraderProduct::whereIn('id', $companyPreferredProductIds)
             ->pluck('code')
             ->toArray();
+
+        Log::info('Company preferred product codes resolved', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+            'product_codes' => $productCodes,
+            'count' => count($productCodes),
+        ]);
+
+        return $productCodes;
     }
 }
