@@ -37,6 +37,7 @@ class CompanyTransformer extends TransformerAbstract
         'auto_complete_murabaha_order',
         'default_contract_sign_time_limit',
         'force_preferred_commodity_type',
+        'international_preferred_commodity_types',
     ];
 
     public function transform(Company $company): array
@@ -202,5 +203,18 @@ class CompanyTransformer extends TransformerAbstract
     public function includeForcePreferredCommodityType(Company $company): Primitive
     {
         return $this->primitive($company->lender->lenderDetail?->force_preferred_commodity_type);
+    }
+
+    public function includeInternationalPreferredCommodityTypes(Company $company): Primitive
+    {
+        $preferredBursaProducts = $company->preferredBursaProducts()->first();
+        if (is_null($preferredBursaProducts)) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive([
+            'id' => $preferredBursaProducts->id,
+            'name' => $preferredBursaProducts->name,
+        ]);
     }
 }

@@ -166,7 +166,10 @@ trait TraderHelperTrait
     /**
      * Get an unused product code for a given trader order.
      *
-     * Retrieves available product codes and selects the first unused code.
+     * First checks for company override international commodity type (forced choice).
+     * If override is set and available, returns only that product code.
+     * If override is set but unavailable, returns null to force cancellation.
+     * Otherwise, falls back to preferred product codes or global defaults.
      *
      * @param  TraderOrder  $traderOrder  The trader order to find a product code for
      * @return string|null The first available product code or null if no codes are available
@@ -186,20 +189,21 @@ trait TraderHelperTrait
      */
     private function getProductCodes(TraderOrder $traderOrder): array
     {
+        // Fallback to existing logic if no override is set
         $query = TraderProduct::query();
 
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
             ->bursam_default_preferred_commodity_type;
 
         if ($globalPreferredCommodityType) {
-            $query->orderByRaw(
+            $query = $query->orderByRaw(
                 'CASE WHEN id = ? THEN 0 ELSE 1 END',
                 [$globalPreferredCommodityType]
             );
         }
 
         if ($traderOrder->provider) {
-            $query->where('provider', $traderOrder->provider);
+            $query = $query->where('provider', $traderOrder->provider);
         }
 
         $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
@@ -216,11 +220,11 @@ trait TraderHelperTrait
                 return []; // All preferred codes are unavailable
             }
 
-            $query->whereIn('code', $availablePreferredProductCodes);
+            $query = $query->whereIn('code', $availablePreferredProductCodes);
         } else {
             // No preferred product codes; exclude unavailable ones globally
             if (! empty($unavailableProductCodes)) {
-                $query->whereNotIn('code', $unavailableProductCodes);
+                $query = $query->whereNotIn('code', $unavailableProductCodes);
             }
         }
 
