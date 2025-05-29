@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DispatchOrderSettlementCheck implements ShouldQueue
@@ -28,7 +29,8 @@ class DispatchOrderSettlementCheck implements ShouldQueue
     public function __construct(
         private ?int $mainLocalMarketOrderId = null,
         private ?int $inventoryId = null
-    ) {
+    )
+    {
         $this->onQueue(self::QUEUE_NAME);
 
         Log::channel('local_market')->info(
@@ -50,16 +52,25 @@ class DispatchOrderSettlementCheck implements ShouldQueue
         LocalMarketOrder::query()
             ->where('commodities_settlement_status', CommoditySettlementStatus::PendingSettlement)
             ->when($this->mainLocalMarketOrderId, function ($query) {
-                $query->whereHas('inventoryUnits', function ($subQuery) {
-                    $subQuery->where('hold_for', $this->mainLocalMarketOrderId);
+                // This check ensures that we retrieve only the orders affected by the main purchasing trader order.
+                // NOTE: We cannot use a relationship like inventoryUnits here, as the unit is associated with a different order.
+                $query->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('local_market_inventory_units')
+                        ->where('hold_for', $this->mainLocalMarketOrderId)
+                        ->whereNull('deleted_at');
                 });
             })
             ->when($this->inventoryId, function ($query) {
-                $query->whereHas('inventoryUnits', function ($subQuery) {
-                    $subQuery->where('local_market_inventory_id', $this->inventoryId);
+                // This check ensures that we retrieve only the orders affected by the main purchasing trader order.
+                // NOTE: We cannot use a relationship like inventoryUnits here, as the unit is associated with a different order.
+                $query->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('local_market_inventory_units')
+                        ->where('local_market_inventory_id', $this->inventoryId)
+                        ->whereNull('deleted_at');
                 });
-            })
-            ->chunkById(self::CHUNK_SIZE, function ($orders) {
+            })->chunkById(self::CHUNK_SIZE, function ($orders) {
                 foreach ($orders as $order) {
                     CheckOrderUnitSettlement::dispatch($order->id, $this->inventoryId);
                 }
