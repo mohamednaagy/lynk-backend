@@ -3,8 +3,6 @@
 namespace App\Observers;
 
 use App\Enums\LocalMarket\OrderStatus;
-use App\Jobs\LocalMarket\CommoditiesSettlement\ChangeStatus\SetCommoditiesSettlementStatusCanceled;
-use App\Jobs\LocalMarket\CommoditiesSettlement\ChangeStatus\SetCommoditiesSettlementStatusPending;
 use App\Jobs\LocalMarket\states\CancelledOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
 use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
@@ -111,7 +109,6 @@ class LocalMarketOrderObserver
                 break;
             case OrderStatus::Cancelled:
                 CancelledOrderStatus::dispatch($localMarketOrder->id);
-                SetCommoditiesSettlementStatusCanceled::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::FailedToCancel:
                 FailedCancelOrderStatus::dispatch($localMarketOrder->id);
@@ -121,7 +118,6 @@ class LocalMarketOrderObserver
                 break;
             case OrderStatus::CommoditiesSell:
                 SoldOrderSuccessStatus::dispatch($localMarketOrder->id);
-                SetCommoditiesSettlementStatusPending::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::FailedSell:
                 FailedSoldOrderStatus::dispatch($localMarketOrder->id);
