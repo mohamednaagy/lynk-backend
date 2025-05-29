@@ -24,7 +24,7 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
 
     public $tries = 10;
 
-    public $backoff = 10;
+    public $backoff = 30;
 
     /**
      * Create a new job instance.

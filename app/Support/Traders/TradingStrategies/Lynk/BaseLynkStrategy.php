@@ -60,6 +60,26 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
+        // Idempotency check: If the step is already complete, don't process again
+        if ($traderOrder->checkOrderStepComplete(MurabhaStep::MurabahaSaleCompleted)) {
+            Log::info('LynkStrategy updateMurabhaCompleteDocument: Step already completed, skipping', [
+                'trader_order_id' => $traderOrder->id,
+                'current_status' => $traderOrder->status->key,
+                'last_action' => $traderOrder->traderHistories()->latest('id')->first()?->action,
+            ]);
+
+            // If step is complete but status is not, update it
+            if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
+                $traderOrder->update(['status' => TraderOrderStatus::Completed]);
+                app(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
+                Log::info('LynkStrategy updateMurabhaCompleteDocument: Updated status to completed for already completed step', [
+                    'trader_order_id' => $traderOrder->id,
+                ]);
+            }
+
+            return;
+        }
+
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
 
         $trader = Trader::driver($traderOrder->provider);

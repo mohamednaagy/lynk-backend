@@ -15,6 +15,10 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable;
 
+    public $tries = 10;
+
+    public $backoff = 30;
+
     protected const CHUNK_SIZE = 10;
 
     public function __construct()
@@ -38,11 +42,6 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
     {
         $message = 'CommoditiesSettlement - '.$message;
         Log::channel('local_market')->error($message, $data);
-    }
-
-    public function backoff(): array
-    {
-        return [60, 120, 180, 240, 300, 360, 420, 480, 540, 600];
     }
 
     public function middleware(): array

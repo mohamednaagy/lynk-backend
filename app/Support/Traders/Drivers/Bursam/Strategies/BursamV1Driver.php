@@ -4,7 +4,6 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -136,7 +135,15 @@ class BursamV1Driver implements TraderInterface
         $productCode = $this->getUnusedProductCode($traderOrder);
         $response = BursamClient::of($traderOrder)->buyProduct($productCode);
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'buy_product');
-        if (! $isValidResponse) {
+        if ($isValidResponse) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::InProgress,
+                'product_code' => $productCode,
+            ]);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
+
+            return $traderOrder;
+        } else {
             throw new TraderException(
                 'Failed to create trader order',
                 [
@@ -149,14 +156,7 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
-        $traderOrder->update([
-            'status' => TraderOrderStatus::InProgress,
-            'product_code' => $productCode,
-        ]);
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
-
-        return $traderOrder;
     }
 
     public function moveHoldTraderOrder(TraderOrder $traderOrder)
@@ -171,8 +171,16 @@ class BursamV1Driver implements TraderInterface
     public function fetchOrderResultYNN(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->fetchBuyResult();
-        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'fetch_ynn');
-        if (! $isValidResponse) {
+        $isValidResponse = BursamClient::of($traderOrder)->validateFetchYNN($response);
+        if ($isValidResponse) {
+            $traderOrder->update([
+                'original_data' => $response->json('body.0'),
+                'reference' => $response->json('body.0.ecertNo'),
+            ]);
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
+
+            return $response->json();
+        } else {
             throw new TraderException(
                 'Failed to fetch order result YNN',
                 [
@@ -186,21 +194,60 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiHoldingCertificateDocument);
-
-        $traderOrder->update([
-            'original_data' => $response->json('body.0'),
-            'reference' => $response->json('body.0.ecertNo'),
-        ]);
-
-        return $response->json();
     }
 
     public function getBidCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getBidXml();
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'get_bid_certificate_details');
-        if (! $isValidResponse) {
+        if ($isValidResponse) {
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $traderOrder->update([
+                'products' => [
+                    (new CommodityProductDto(
+                        product: $response->json('PNAME'),
+                        quantity: $response->json('PVOLUME'),
+                        amount: number_unformat($response->json('TOTALVALUE')),
+                        previous_owner: Arr::pluck($response->json('LINE'), 'SUPPLIER'),
+                        date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
+                        uom: collect($traderOrder->original_data)->get('unit'),
+                        currency: $response->json('CURRENCY')
+                    ))->toArray(),
+                ],
+                'original_bid' => $response->json(),
+            ]);
+
+            $productName = $response->json('PNAME');
+            $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
+                'e_cert_no' => $response->json('ECERTNO'),
+                'buyer' => $response->json('BUYER'),
+                'owner' => $response->json('OWNER'),
+                'bid_no' => $response->json('BIDNO'),
+                'total_value' => number_unformat($response->json('TOTALVALUE')),
+                'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
+                'currency' => $response->json('CURRENCY'),
+                'purchase_time_date' => $response->json('PURCHASETIMEDATE').'  Malaysia Time (MYT)',
+                'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
+                'p_name' => in_array($productName, BursamProductCode::getValues())
+                    ? BursamProductCode::fromValue($productName)->description
+                    : $productName,
+                'p_volume' => $response->json('PVOLUME'),
+                'line' => $response->json('LINE'),
+            ])->render();
+
+            PdfGenerator::outputFromHtml(
+                $bidOwnerShipTemplate,
+                function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
+                    return $traderOrder
+                        ->addMediaFromStream($fileResource)
+                        ->usingFileName("holding-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
+                        ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
+                }
+            );
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
+            Log::channel('bursam')->info('bursa purchasing step => Bid certificate generated successfully', ['financingOrderId' => $traderOrder->order->id, 'trader_order_id' => $traderOrder->id]);
+        } else {
             throw new TraderException(
                 'Failed to get bid certificate',
                 [
@@ -211,55 +258,6 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
-
-        $currentTimeInUtcTz = CarbonImmutable::now();
-
-        $traderOrder->update([
-            'products' => [
-                (new CommodityProductDto(
-                    product: $response->json('PNAME'),
-                    quantity: $response->json('PVOLUME'),
-                    amount: number_unformat($response->json('TOTALVALUE')),
-                    previous_owner: Arr::pluck($response->json('LINE'), 'SUPPLIER'),
-                    date_time_of_purchasing_commodity: $response->json('PURCHASETIMEDATE'),
-                    uom: collect($traderOrder->original_data)->get('unit'),
-                    currency: $response->json('CURRENCY')
-                ))->toArray(),
-            ],
-            'original_bid' => $response->json(),
-        ]);
-
-        $productName = $response->json('PNAME');
-        $bidOwnerShipTemplate = view('bursam-templates.bid-certificate-template', [
-            'e_cert_no' => $response->json('ECERTNO'),
-            'buyer' => $response->json('BUYER'),
-            'owner' => $response->json('OWNER'),
-            'bid_no' => $response->json('BIDNO'),
-            'total_value' => number_unformat($response->json('TOTALVALUE')),
-            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
-            'currency' => $response->json('CURRENCY'),
-            'purchase_time_date' => $response->json('PURCHASETIMEDATE').'  Malaysia Time (MYT)',
-            'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
-            'p_name' => in_array($productName, BursamProductCode::getValues())
-                ? BursamProductCode::fromValue($productName)->description
-                : $productName,
-            'p_volume' => $response->json('PVOLUME'),
-            'line' => $response->json('LINE'),
-        ])->render();
-
-        PdfGenerator::outputFromHtml(
-            $bidOwnerShipTemplate,
-            function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
-                return $traderOrder
-                    ->addMediaFromStream($fileResource)
-                    ->usingFileName("holding-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
-                    ->toMediaCollection(TraderOrderMediaCollection::TtiHoldingCertificate);
-            }
-        );
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
-
-        Log::channel('bursam')->info('bursa purchasing step => Bid certificate generated successfully', ['financingOrderId' => $traderOrder->order->id, 'trader_order_id' => $traderOrder->id]);
 
     }
 
@@ -399,7 +397,9 @@ class BursamV1Driver implements TraderInterface
 
         $response = BursamClient::of($traderOrder)->sellProduct();
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'sell_product');
-        if (! $isValidResponse) {
+        if ($isValidResponse) {
+            return $response;
+        } else {
             throw new TraderException(
                 'Failed to sell commodity to market',
                 [
@@ -411,14 +411,17 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        return $response;
     }
 
     public function fetchOrderResultNYY(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->fetchSellResult($traderOrder->uuid_two);
-        $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'fetch_nyy');
-        if (! $isValidResponse) {
+        $isValidResponse = BursamClient::of($traderOrder)->validateFetchNYY($response);
+        if ($isValidResponse) {
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
+
+            return $response->json();
+        } else {
             throw new TraderException(
                 'Failed to fetch order result NYY',
                 [
@@ -430,16 +433,57 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CommoditySoldToMarket);
 
-        return $response->json();
     }
 
     public function getOtcCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getOtcXml();
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'otc_certificate_details');
-        if (! $isValidResponse) {
+        if ($isValidResponse) {
+            $traderOrder->update([
+                'otc_data' => $response->json(),
+            ]);
+
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $productName = $response->json('PNAME');
+            $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
+                'e_cert_no' => $response->json('ECERTNO'),
+                'seller' => $response->json('SELLER'),
+                'buyer' => $response->json('BUYER'),
+                'murabaha_value' => $response->json('MURABAHAVALUE'),
+                'total_value' => number_unformat($response->json('TOTALVALUE')),
+                'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
+                'currency' => $response->json('CURRENCY'),
+                //            'price' => $response->json('PRICE'),
+                //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
+                'reporting_time_date' => $response->json('REPORTINGTIMEDATE').'  Malaysia Time (MYT)',
+                'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
+                'p_name' => in_array($productName, BursamProductCode::getValues())
+                    ? BursamProductCode::fromValue($productName)->description
+                    : $productName,
+                'p_volume' => $response->json('PVOLUME'),
+                'line' => $response->json('LINE'),
+            ])->render();
+
+            PdfGenerator::outputFromHtml(
+                $otcOwnerShipTemplate,
+                function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
+                    return $traderOrder
+                        ->addMediaFromStream($fileResource)
+                        ->usingFileName("otc-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
+                        ->toMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer);
+                }
+            );
+
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::GetOwnershipToCustomerCertificate,
+                [
+                    'created_at' => $currentTimeInUtcTz,
+                ]
+            );
+        } else {
             throw new TraderException(
                 'Failed to get OTC certificate details',
                 [
@@ -451,55 +495,55 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $traderOrder->update([
-            'otc_data' => $response->json(),
-        ]);
-
-        $currentTimeInUtcTz = CarbonImmutable::now();
-        $productName = $response->json('PNAME');
-        $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
-            'e_cert_no' => $response->json('ECERTNO'),
-            'seller' => $response->json('SELLER'),
-            'buyer' => $response->json('BUYER'),
-            'murabaha_value' => $response->json('MURABAHAVALUE'),
-            'total_value' => number_unformat($response->json('TOTALVALUE')),
-            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
-            'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'reporting_time_date' => $response->json('REPORTINGTIMEDATE').'  Malaysia Time (MYT)',
-            'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
-            'p_name' => in_array($productName, BursamProductCode::getValues())
-                ? BursamProductCode::fromValue($productName)->description
-                : $productName,
-            'p_volume' => $response->json('PVOLUME'),
-            'line' => $response->json('LINE'),
-        ])->render();
-
-        PdfGenerator::outputFromHtml(
-            $otcOwnerShipTemplate,
-            function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
-                return $traderOrder
-                    ->addMediaFromStream($fileResource)
-                    ->usingFileName("otc-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
-                    ->toMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer);
-            }
-        );
-
-        $this->createTraderOrderHistory(
-            $traderOrder,
-            FinancingOrderHistory::GetOwnershipToCustomerCertificate,
-            [
-                'created_at' => $currentTimeInUtcTz,
-            ]
-        );
     }
 
     public function getStbCertificateDetails(TraderOrder $traderOrder)
     {
         $response = BursamClient::of($traderOrder)->getStbXml();
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'stb_certificate_details');
-        if (! $isValidResponse) {
+        if ($isValidResponse) {
+            $traderOrder->update([
+                'original_stb' => $response->json(),
+            ]);
+
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $productName = $response->json('PNAME');
+            $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
+                'e_cert_no' => $response->json('ECERTNO'),
+                'seller' => $response->json('SELLER'),
+                'buyer' => $response->json('BUYER'),
+                'total_value' => number_unformat($response->json('TOTALVALUE')),
+                'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
+                'currency' => $response->json('CURRENCY'),
+                //            'price' => $response->json('PRICE'),
+                //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
+                'selling_time_date' => $response->json('SELLINGTIMEDATE').'  Malaysia Time (MYT)',
+                'value_date' => $response->json('VALUEDATE').'  Malaysia Date (MYT)',
+                'p_name' => in_array($productName, BursamProductCode::getValues())
+                    ? BursamProductCode::fromValue($productName)->description
+                    : $productName,
+                'p_volume' => $response->json('PVOLUME'),
+                'line' => $response->json('LINE'),
+            ])->render();
+
+            PdfGenerator::outputFromHtml(
+                $stbOwnerShipTemplate,
+                function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
+                    return $traderOrder
+                        ->addMediaFromStream($fileResource)
+                        ->usingFileName("stb-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
+                        ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
+                }
+            );
+
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::GetSellingToMarketCertificate,
+                [
+                    'created_at' => $currentTimeInUtcTz,
+                ]
+            );
+        } else {
             throw new TraderException(
                 'Failed to get STB certificate details',
                 [
@@ -512,47 +556,6 @@ class BursamV1Driver implements TraderInterface
             );
         }
 
-        $traderOrder->update([
-            'original_stb' => $response->json(),
-        ]);
-
-        $currentTimeInUtcTz = CarbonImmutable::now();
-        $productName = $response->json('PNAME');
-        $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
-            'e_cert_no' => $response->json('ECERTNO'),
-            'seller' => $response->json('SELLER'),
-            'buyer' => $response->json('BUYER'),
-            'total_value' => number_unformat($response->json('TOTALVALUE')),
-            'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
-            'currency' => $response->json('CURRENCY'),
-            //            'price' => $response->json('PRICE'),
-            //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-            'selling_time_date' => $response->json('SELLINGTIMEDATE').'  Malaysia Time (MYT)',
-            'value_date' => $response->json('VALUEDATE').'  Malaysia Date (MYT)',
-            'p_name' => in_array($productName, BursamProductCode::getValues())
-                ? BursamProductCode::fromValue($productName)->description
-                : $productName,
-            'p_volume' => $response->json('PVOLUME'),
-            'line' => $response->json('LINE'),
-        ])->render();
-
-        PdfGenerator::outputFromHtml(
-            $stbOwnerShipTemplate,
-            function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
-                return $traderOrder
-                    ->addMediaFromStream($fileResource)
-                    ->usingFileName("stb-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
-                    ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
-            }
-        );
-
-        $this->createTraderOrderHistory(
-            $traderOrder,
-            FinancingOrderHistory::GetSellingToMarketCertificate,
-            [
-                'created_at' => $currentTimeInUtcTz,
-            ]
-        );
     }
 
     /**
@@ -632,10 +635,6 @@ class BursamV1Driver implements TraderInterface
 
     public function processProceedContractSigned(TraderOrder $traderOrder): void
     {
-        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
-            app()->make(GenerateClientWakala::class)->handle($traderOrder);
-        }
-
         app()->make(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
     }
 
