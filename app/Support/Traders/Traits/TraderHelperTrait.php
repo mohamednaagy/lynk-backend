@@ -240,10 +240,7 @@ trait TraderHelperTrait
             'count' => count($companyPreferredProductCodes),
         ]);
 
-        $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
-        if (! is_array($unavailableProductCodes)) {
-            $unavailableProductCodes = [];
-        }
+        $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
 
         Log::channel('bursam')->info('Unavailable product codes from cache', [
             'trader_order_id' => $traderOrder->id,
