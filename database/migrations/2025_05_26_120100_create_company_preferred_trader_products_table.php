@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('company_preferred_bursa_products', function (Blueprint $table) {
+        Schema::create('company_preferred_trader_products', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('companies');
             $table->foreignId('trader_product_id')->constrained('trader_products');
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('company_preferred_bursa_products');
+        Schema::dropIfExists('company_preferred_trader_products');
     }
 };
