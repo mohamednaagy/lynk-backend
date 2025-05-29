@@ -102,7 +102,7 @@ class UpdateInventoryStock implements ShouldQueue
             Log::info("Successfully decreased {$decreased_amount} units for inventory ID: {$inventory->id}");
 
             // Dispatch a job to verify the settlement status of inventory units.
-            DispatchOrderSettlementCheck::dispatch($inventory->id);
+            DispatchOrderSettlementCheck::dispatch(null, $inventory->id);
         } catch (\Exception $e) {
             Log::error('Error decreasing units for inventory ID: '.$inventory->id, [
                 'error' => $e,

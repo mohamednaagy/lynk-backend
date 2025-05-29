@@ -47,6 +47,6 @@ class LocalMarketInventoryObserver
         DeleteInventoryEligibleQuantities::dispatch($inventory->id);
 
         // Dispatch a job to verify the settlement status of inventory units.
-        DispatchOrderSettlementCheck::dispatch($inventory->id);
+        DispatchOrderSettlementCheck::dispatch(null, $inventory->id);
     }
 }

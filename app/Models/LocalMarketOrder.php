@@ -91,7 +91,7 @@ class LocalMarketOrder extends Model
             'commodities_settlement_status' => $status,
         ]);
 
-        Log::channel('local_market')->info('Change commodities_settlement_status', [
+        Log::channel('local_market')->info('commodities_settlement_status Changed', [
             'order_id' => $localMarketOrderId,
             'status' => $status,
         ]);
