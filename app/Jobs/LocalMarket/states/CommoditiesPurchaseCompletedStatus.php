@@ -21,6 +21,6 @@ class CommoditiesPurchaseCompletedStatus extends BaseStatus
         $this->logQueueJob('Congratulations Commodities purchased');
 
         // Dispatch a job to verify the settlement status of orders that require settlement.
-        DispatchOrderSettlementCheck::dispatch();
+        DispatchOrderSettlementCheck::dispatch($this->localMarketOrder->id);
     }
 }

@@ -9,9 +9,9 @@ use Exception;
 
 class CheckOrderUnitSettlement extends BaseCommoditiesSettlement
 {
-    public function __construct(private int $localMarketOrderId, private ?int $inventoryId = null)
+    public function __construct(protected int $localMarketOrderId, private ?int $inventoryId = null)
     {
-        parent::__construct();
+        parent::__construct($localMarketOrderId);
     }
 
     public function handle(): void

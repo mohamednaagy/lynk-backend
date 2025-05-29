@@ -9,11 +9,6 @@ use Exception;
 
 class ValidateCommoditiesSettlement extends BaseCommoditiesSettlement
 {
-    public function __construct(private int $localMarketOrderId)
-    {
-        parent::__construct();
-    }
-
     public function handle(): void
     {
         try {

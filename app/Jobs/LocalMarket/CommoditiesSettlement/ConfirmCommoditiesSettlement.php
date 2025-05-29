@@ -11,15 +11,10 @@ use Exception;
 
 class ConfirmCommoditiesSettlement extends BaseCommoditiesSettlement
 {
-    public function __construct(private ?int $localMarketOrderId = null)
-    {
-        parent::__construct();
-    }
-
-    public function handle(LocalMarketWebhook $localMarketWebhook): void
+    public function handle(): void
     {
         LocalMarketOrder::query()->where('commodities_settlement_status', CommoditySettlementStatus::CommoditySettled)
-            ->when($this->localMarketOrderId, fn ($q) => $q->where('id', $this->localMarketOrderId))
+            ->where('id', $this->localMarketOrderId)
             ->chunkById(self::CHUNK_SIZE, function ($orders) {
                 try {
                     foreach ($orders as $order) {
