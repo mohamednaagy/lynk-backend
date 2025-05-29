@@ -30,13 +30,6 @@ class CheckOrderUnitSettlement extends BaseCommoditiesSettlement
         }
     }
 
-    public function uniqueId(): string
-    {
-        return $this->localMarketOrderId ?
-            __CLASS__.'_'.$this->localMarketOrderId
-            : parent::uniqueId();
-    }
-
     private function processOrderUnits(int $orderId, ?int $inventoryId = null): void
     {
         LocalMarketOrderHasUnit::with('inventoryUnit')

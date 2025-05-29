@@ -90,7 +90,7 @@ class DispatchOrderSettlementCheck implements ShouldQueue
     }
 
     /**
-     * Generate a unique identifier for job deduplication.
+     * Unique ID for the job instance to prevent overlaps
      *
      * @return string
      */

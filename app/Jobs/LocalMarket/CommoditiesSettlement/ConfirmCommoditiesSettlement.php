@@ -35,14 +35,4 @@ class ConfirmCommoditiesSettlement extends BaseCommoditiesSettlement
 
             });
     }
-
-    /**
-     * Unique identifier for job deduplication.
-     */
-    public function uniqueId(): string
-    {
-        return $this->localMarketOrderId
-            ? __CLASS__.'_'.$this->localMarketOrderId
-            : parent::uniqueId();
-    }
 }
