@@ -3,6 +3,7 @@
 namespace App\Support\Traders\TradingStrategies\Bursam;
 
 use App\Actions\Contracts\Orders\UpdateTraderOrder;
+use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
@@ -34,6 +35,11 @@ abstract class BaseBursamStrategy implements TraderStrategyInterface
         );
 
         $this->transferOwnershipToLender($traderOrder, $data);
+
+        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
+            app()->make(GenerateClientWakala::class)->handle($traderOrder);
+        }
+
     }
 
     protected function transferOwnershipToLender(TraderOrder $traderOrder, $data)

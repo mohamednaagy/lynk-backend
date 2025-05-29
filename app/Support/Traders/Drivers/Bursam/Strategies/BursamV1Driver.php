@@ -4,7 +4,6 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -636,10 +635,6 @@ class BursamV1Driver implements TraderInterface
 
     public function processProceedContractSigned(TraderOrder $traderOrder): void
     {
-        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
-            app()->make(GenerateClientWakala::class)->handle($traderOrder);
-        }
-
         app()->make(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
     }
 
