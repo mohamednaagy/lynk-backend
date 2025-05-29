@@ -71,6 +71,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             // If step is complete but status is not, update it
             if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
                 $traderOrder->update(['status' => TraderOrderStatus::Completed]);
+                app(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
                 Log::info('LynkStrategy updateMurabhaCompleteDocument: Updated status to completed for already completed step', [
                     'trader_order_id' => $traderOrder->id,
                 ]);
