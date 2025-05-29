@@ -176,7 +176,7 @@ trait TraderHelperTrait
      */
     public function getUnusedProductCode(TraderOrder $traderOrder): ?string
     {
-        Log::info('Getting unused product code', [
+        Log::channel('bursam')->info('Getting unused product code', [
             'trader_order_id' => $traderOrder->id,
             'provider' => $traderOrder->provider,
             'company_id' => $traderOrder->order->company_id,
@@ -186,7 +186,7 @@ trait TraderHelperTrait
 
         $selectedCode = ! empty($productCodes) ? reset($productCodes) : null;
 
-        Log::info('Product code selection result', [
+        Log::channel('bursam')->info('Product code selection result', [
             'trader_order_id' => $traderOrder->id,
             'selected_product_code' => $selectedCode,
             'available_codes_count' => count($productCodes),
@@ -204,7 +204,7 @@ trait TraderHelperTrait
      */
     private function getProductCodes(TraderOrder $traderOrder): array
     {
-        Log::info('Starting product code selection', [
+        Log::channel('bursam')->info('Starting product code selection', [
             'trader_order_id' => $traderOrder->id,
             'provider' => $traderOrder->provider,
             'company_id' => $traderOrder->order->company_id,
@@ -216,7 +216,7 @@ trait TraderHelperTrait
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
             ->bursam_default_preferred_commodity_type;
 
-        Log::info('Global preferred commodity type retrieved', [
+        Log::channel('bursam')->info('Global preferred commodity type retrieved', [
             'trader_order_id' => $traderOrder->id,
             'global_preferred_commodity_type_id' => $globalPreferredCommodityType,
         ]);
@@ -234,7 +234,7 @@ trait TraderHelperTrait
 
         $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
 
-        Log::info('Company preferred product codes retrieved', [
+        Log::channel('bursam')->info('Company preferred product codes retrieved', [
             'trader_order_id' => $traderOrder->id,
             'company_preferred_product_codes' => $companyPreferredProductCodes,
             'count' => count($companyPreferredProductCodes),
@@ -245,7 +245,7 @@ trait TraderHelperTrait
             $unavailableProductCodes = [];
         }
 
-        Log::info('Unavailable product codes from cache', [
+        Log::channel('bursam')->info('Unavailable product codes from cache', [
             'trader_order_id' => $traderOrder->id,
             'unavailable_product_codes' => $unavailableProductCodes,
             'count' => count($unavailableProductCodes),
@@ -254,7 +254,7 @@ trait TraderHelperTrait
         if (! empty($companyPreferredProductCodes)) {
             $availablePreferredProductCodes = array_diff($companyPreferredProductCodes, $unavailableProductCodes);
 
-            Log::info('Available preferred product codes after filtering unavailable', [
+            Log::channel('bursam')->info('Available preferred product codes after filtering unavailable', [
                 'trader_order_id' => $traderOrder->id,
                 'available_preferred_product_codes' => $availablePreferredProductCodes,
                 'count' => count($availablePreferredProductCodes),
@@ -273,7 +273,7 @@ trait TraderHelperTrait
 
             $query = $query->whereIn('code', $availablePreferredProductCodes);
         } else {
-            Log::info('No company preferred product codes found, using global filtering', [
+            Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
                 'trader_order_id' => $traderOrder->id,
             ]);
 
@@ -288,7 +288,7 @@ trait TraderHelperTrait
             ->pluck('code')
             ->toArray();
 
-        Log::info('Final product codes selection completed', [
+        Log::channel('bursam')->info('Final product codes selection completed', [
             'trader_order_id' => $traderOrder->id,
             'final_product_codes' => $finalProductCodes,
             'count' => count($finalProductCodes),
@@ -312,7 +312,7 @@ trait TraderHelperTrait
      */
     public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
     {
-        Log::info('Retrieving company preferred product codes', [
+        Log::channel('bursam')->info('Retrieving company preferred product codes', [
             'trader_order_id' => $traderOrder->id,
             'company_id' => $traderOrder->order->company_id,
         ]);
@@ -322,7 +322,7 @@ trait TraderHelperTrait
             ->pluck('code')
             ->toArray();
 
-        Log::info('Company preferred product codes resolved', [
+        Log::channel('bursam')->info('Company preferred product codes resolved', [
             'trader_order_id' => $traderOrder->id,
             'company_id' => $traderOrder->order->company_id,
             'product_codes' => $companyPreferredProductIds,
