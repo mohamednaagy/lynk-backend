@@ -58,7 +58,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
      */
     public function uniqueId(): string
     {
-        return __CLASS__;
+        return __CLASS__.'_'.$this->localMarketOrderId;
     }
 
     public function failed(Throwable $e): void
