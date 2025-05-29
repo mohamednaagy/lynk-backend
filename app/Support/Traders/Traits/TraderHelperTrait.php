@@ -315,7 +315,8 @@ trait TraderHelperTrait
         ]);
 
         $companyPreferredProductIds = $traderOrder->order->company
-            ->traderProducts
+            ->traderProducts()
+            ->where('provider', $traderOrder->provider)
             ->pluck('code')
             ->toArray();
 
