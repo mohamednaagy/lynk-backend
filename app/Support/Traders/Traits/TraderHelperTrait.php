@@ -13,7 +13,6 @@ use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -165,53 +164,169 @@ trait TraderHelperTrait
     }
 
     /**
-     * Get an unused product code for a given provider.
+     * Get an unused product code for a given trader order.
      *
-     * @param  string  $provider  The provider for which to find a product code
-     * @return string|null The first available product code
+     * First checks for company override international commodity type (forced choice).
+     * If override is set and available, returns only that product code.
+     * If override is set but unavailable, returns null to force cancellation.
+     * Otherwise, falls back to preferred product codes or global defaults.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order to find a product code for
+     * @return string|null The first available product code or null if no codes are available
      */
-    public function getUnusedProductCode(string $provider): ?string
+    public function getUnusedProductCode(TraderOrder $traderOrder): ?string
     {
-        // Retrieve product codes for the provider
-        $productCodes = $this->getProductCodes($provider);
+        Log::channel('bursam')->info('Getting unused product code', [
+            'trader_order_id' => $traderOrder->id,
+            'provider' => $traderOrder->provider,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
 
-        // Get cached list of unavailable product codes, defaulting to an empty array
-        $unavailableProductCodes = Cache::get('bursam_unavailable_product_codes', []);
+        $productCodes = $this->getProductCodes($traderOrder);
 
-        // Find available product codes by removing unavailable ones
-        $availableProductCodes = array_values(array_diff($productCodes, $unavailableProductCodes));
+        $selectedCode = ! empty($productCodes) ? reset($productCodes) : null;
 
-        $selectedProductCode = Arr::first(empty($availableProductCodes) ? array_filter($productCodes) : $availableProductCodes);
+        Log::channel('bursam')->info('Product code selection result', [
+            'trader_order_id' => $traderOrder->id,
+            'selected_product_code' => $selectedCode,
+            'available_codes_count' => count($productCodes),
+            'all_available_codes' => $productCodes,
+        ]);
 
-        // Return the first available product code, or the first non-empty code if no available codes
-        return $selectedProductCode;
+        return $selectedCode;
     }
 
     /**
-     * Retrieve product codes with optional filtering and sorting.
+     * Retrieve product codes based on various filtering criteria.
      *
-     * @param  string|null  $provider  The provider to filter by
-     * @return array List of product codes
+     * @param  TraderOrder  $traderOrder  The trader order to base product code selection on
+     * @return array List of filtered and sorted product codes
      */
-    private function getProductCodes(?string $provider): array
+    private function getProductCodes(TraderOrder $traderOrder): array
     {
-        // Start with a base query for TraderProduct
+        Log::channel('bursam')->info('Starting product code selection', [
+            'trader_order_id' => $traderOrder->id,
+            'provider' => $traderOrder->provider,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
+
+        // Fallback to existing logic if no override is set
         $query = TraderProduct::query();
 
-        // Retrieve the default preferred commodity type
-        $bursam_default_preferred_commodity_type = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
+        $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
+            ->bursam_default_preferred_commodity_type;
 
-        // Apply commodity type filtering/sorting if a preferred type exists
-        if ($bursam_default_preferred_commodity_type) {
-            $query = $query->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$bursam_default_preferred_commodity_type]);
+        Log::channel('bursam')->info('Global preferred commodity type retrieved', [
+            'trader_order_id' => $traderOrder->id,
+            'global_preferred_commodity_type_id' => $globalPreferredCommodityType,
+        ]);
+
+        if ($globalPreferredCommodityType) {
+            $query = $query->orderByRaw(
+                'CASE WHEN id = ? THEN 0 ELSE 1 END',
+                [$globalPreferredCommodityType]
+            );
         }
 
-        // Filter by provider if provided
-        if ($provider) {
-            $query = $query->where('provider', $provider);
+        if ($traderOrder->provider) {
+            $query = $query->where('provider', $traderOrder->provider);
         }
 
-        // Return sorted product codes
-        return $query->orderBy('order', 'asc')->pluck('code')->toArray();
+        $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
+
+        Log::channel('bursam')->info('Company preferred product codes retrieved', [
+            'trader_order_id' => $traderOrder->id,
+            'company_preferred_product_codes' => $companyPreferredProductCodes,
+            'count' => count($companyPreferredProductCodes),
+        ]);
+
+        $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
+
+        Log::channel('bursam')->info('Unavailable product codes from cache', [
+            'trader_order_id' => $traderOrder->id,
+            'unavailable_product_codes' => $unavailableProductCodes,
+            'count' => count($unavailableProductCodes),
+        ]);
+
+        if (! empty($companyPreferredProductCodes)) {
+            $availablePreferredProductCodes = array_diff($companyPreferredProductCodes, $unavailableProductCodes);
+
+            Log::channel('bursam')->info('Available preferred product codes after filtering unavailable', [
+                'trader_order_id' => $traderOrder->id,
+                'available_preferred_product_codes' => $availablePreferredProductCodes,
+                'count' => count($availablePreferredProductCodes),
+                'filtered_out' => array_intersect($companyPreferredProductCodes, $unavailableProductCodes),
+            ]);
+
+            if (empty($availablePreferredProductCodes)) {
+                Log::warning('All preferred product codes are unavailable', [
+                    'trader_order_id' => $traderOrder->id,
+                    'preferred_codes' => $companyPreferredProductCodes,
+                    'unavailable_codes' => $unavailableProductCodes,
+                ]);
+
+                return []; // All preferred codes are unavailable
+            }
+
+            $query = $query->whereIn('code', $availablePreferredProductCodes);
+        } else {
+            Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
+                'trader_order_id' => $traderOrder->id,
+            ]);
+
+            // No preferred product codes; exclude unavailable ones globally
+            if (! empty($unavailableProductCodes)) {
+                $query = $query->whereNotIn('code', $unavailableProductCodes);
+            }
+        }
+
+        $finalProductCodes = $query
+            ->orderBy('order', 'asc')
+            ->pluck('code')
+            ->toArray();
+
+        Log::channel('bursam')->info('Final product codes selection completed', [
+            'trader_order_id' => $traderOrder->id,
+            'final_product_codes' => $finalProductCodes,
+            'count' => count($finalProductCodes),
+            'selected_first' => ! empty($finalProductCodes) ? $finalProductCodes[0] : null,
+            'selection_criteria' => [
+                'had_company_preferences' => ! empty($companyPreferredProductCodes),
+                'had_global_preference' => ! empty($globalPreferredCommodityType),
+                'had_unavailable_codes' => ! empty($unavailableProductCodes),
+                'provider' => $traderOrder->provider,
+            ],
+        ]);
+
+        return $finalProductCodes;
+    }
+
+    /**
+     * Retrieve preferred product codes for a company associated with a trader order.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order to extract company from
+     * @return array List of preferred product codes
+     */
+    public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
+    {
+        Log::channel('bursam')->info('Retrieving company preferred product codes', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
+
+        $companyPreferredProductIds = $traderOrder->order->company
+            ->traderProducts()
+            ->where('provider', $traderOrder->provider)
+            ->pluck('code')
+            ->toArray();
+
+        Log::channel('bursam')->info('Company preferred product codes resolved', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+            'product_codes' => $companyPreferredProductIds,
+            'count' => count($companyPreferredProductIds),
+        ]);
+
+        return $companyPreferredProductIds;
     }
 }
