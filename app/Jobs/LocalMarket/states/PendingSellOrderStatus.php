@@ -8,6 +8,7 @@ use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PendingSellOrderStatus extends BaseStatus
 {
@@ -37,7 +38,13 @@ class PendingSellOrderStatus extends BaseStatus
         } catch (\Throwable $e) {
             DB::rollBack();
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
-            throw new $e;
+            $this->logQueueJob('failed to sell order');
+            Log::channel('local_market')->error('failed to sell order', [
+                'order_id' => $this->localMarketOrder->id,
+                'order_reference' => $this->localMarketOrder->order_reference,
+                'message' => $e->getMessage(),
+            ]);
+            throw $e;
         }
     }
 }
