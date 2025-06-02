@@ -62,13 +62,14 @@ class DispatchOrderSettlementCheck implements ShouldQueue
                 });
             })
             ->when($this->inventoryId, function ($query) {
-                // This check ensures that we retrieve only the orders affected by the main purchasing trader order.
-                // NOTE: We cannot use a relationship like inventoryUnits here, as the unit is associated with a different order.
+                // This check ensures that we retrieve only the orders affected by the deleted the given inventory
+                // NOTE: We cannot use a relationship like inventoryUnits here, as the unit isn't associated with the order anymore.
                 $query->whereExists(function ($query) {
                     $query->select(DB::raw(1))
                         ->from('local_market_inventory_units')
                         ->where('local_market_inventory_id', $this->inventoryId)
-                        ->whereNull('deleted_at');
+                        ->whereRaw('last_purchasing_order_id = local_market_orders.id')
+                        ->whereNotNull('deleted_at');
                 });
             })->chunkById(self::CHUNK_SIZE, function ($orders) {
                 foreach ($orders as $order) {
