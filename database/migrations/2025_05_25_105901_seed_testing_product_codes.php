@@ -32,7 +32,7 @@ return new class extends Migration
         $time = now()->format('Y-m-d H:i:s');
         $nonProductionEnvironmentsData = [
             [
-                'code' => 'AL-MSIA-23',
+                'code' => 'AL-MSIA- 23',
                 'name' => json_encode([
                     'en' => 'Aluminium',
                     'ar' => 'الألومنيوم',
@@ -46,8 +46,8 @@ return new class extends Migration
             [
                 'code' => 'CPO-MSIA-09',
                 'name' => json_encode([
-                    'en' => 'Palm Oil',
-                    'ar' => 'زيت زيتون',
+                    'en' => 'Crude Palm Oil',
+                    'ar' => 'زيت النخيل الخام',
                 ]),
                 'provider' => 'bursam',
                 'order' => 1,
@@ -56,7 +56,7 @@ return new class extends Migration
                 'updated_at' => $time,
             ],
             [
-                'code' => 'PB-LEAD-19',
+                'code' => 'PB-LEAD- 19',
                 'name' => json_encode([
                     'en' => 'Lead',
                     'ar' => 'رصاص',
@@ -71,7 +71,7 @@ return new class extends Migration
                 'code' => 'PR-B-MSIA14',
                 'name' => json_encode([
                     'en' => 'Plastic Resin B',
-                    'ar' => 'بلاستيك رصاص B',
+                    'ar' => 'راتنج بلاستيك B',
                 ]),
                 'provider' => 'bursam',
                 'order' => 1,
@@ -121,8 +121,8 @@ return new class extends Migration
             [
                 'code' => 'CPO-MSIA-09',
                 'name' => json_encode([
-                    'en' => 'Palm Oil',
-                    'ar' => 'زيت زيتون',
+                    'en' => 'Crude Palm Oil',
+                    'ar' => 'زيت النخيل الخام',
                 ]),
                 'provider' => 'bursam',
                 'order' => 1,
@@ -146,7 +146,7 @@ return new class extends Migration
                 'code' => 'PR-B MSIA14',
                 'name' => json_encode([
                     'en' => 'Plastic Resin B',
-                    'ar' => 'بلاستيك رصاص B',
+                    'ar' => 'راتنج بلاستيك B',
                 ]),
                 'provider' => 'bursam',
                 'order' => 1,
