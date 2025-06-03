@@ -45,9 +45,9 @@ class UpdateCompanyAction implements UpdateCompany
             }
         }
 
-        if (isset($data['international_preferred_commodity_types'])) {
-            $lender->traderProducts()->sync($data['international_preferred_commodity_types']);
-        }
+        // if (isset($data['international_preferred_commodity_types'])) {
+        //     $lender->traderProducts()->sync($data['international_preferred_commodity_types']);
+        // }
 
         $lender->lenderDetail()->updateOrCreate(
             ['company_id' => $lender->id],

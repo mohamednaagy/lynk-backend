@@ -14,13 +14,18 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 
     private ?int $active = null;
 
+    private $provider;
+
     public function handle(): Builder
     {
         return CommodityType::when($this->status, function ($query) {
             $query->where('status', $this->status);
         })->when($this->name, function ($query) {
             $query->where('name', 'like', "%{$this->name}%");
-        })->when($this->active, fn ($q) => $q->active($this->active));
+        })->when($this->active, fn ($q) => $q->active($this->active))
+            ->when($this->provider, function ($query) {
+                $query->where('provider', 'like', $this->provider);
+            });
     }
 
     public function setStatus($status = null)
@@ -53,6 +58,17 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     public function setActive(?int $value): self
     {
         $this->active = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param  string|null  $provider
+     * @return $this
+     */
+    public function setProvider($provider = null)
+    {
+        $this->provider = $provider;
 
         return $this;
     }

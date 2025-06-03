@@ -13,4 +13,6 @@ interface BuildPaginatedCommodityTypeQuery
     public function setName($name = null);
 
     public function setActive(?int $value): self;
+
+    public function setProvider($provider = null);
 }

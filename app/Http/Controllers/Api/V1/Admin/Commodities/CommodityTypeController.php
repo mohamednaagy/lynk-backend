@@ -51,6 +51,7 @@ class CommodityTypeController extends Controller
         $commidityTypes = $buildPaginatedCommodityTypesQuery
             ->setStatus($request->status)
             ->setActive($request->validated('active'))
+            ->setProvider($request->validated('provider'))
             ->handle()
             ->paginate();
 
