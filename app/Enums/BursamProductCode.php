@@ -7,6 +7,10 @@ use BenSampo\Enum\Enum;
 
 final class BursamProductCode extends Enum implements LocalizedEnum
 {
+    const Aluminium = 'AL-MSIA-23';
+
+    const AluminiumDev = 'AL-MSIA- 23';
+
     const CrudePalmOil = 'CPO-MSIA-09';
 
     const PlasticResinB = 'PR-B MSIA14';
@@ -31,6 +35,7 @@ final class BursamProductCode extends Enum implements LocalizedEnum
     {
         return match ($env) {
             default => [
+                self::AluminiumDev,
                 self::CrudePalmOil,
                 self::PlasticResinBDev,
                 self::RbdPalmOlein,
@@ -38,12 +43,12 @@ final class BursamProductCode extends Enum implements LocalizedEnum
                 self::PlasticResinADev,
             ],
             'production' => [
+                self::Aluminium,
                 self::PlasticResinB,
                 self::PlasticResinA,
                 self::CrudePalmOil,
                 self::PlumbumLead,
                 self::RbdPalmOlein,
-                self::TimberHardwood,
                 self::TimberHardwood,
             ],
         };
