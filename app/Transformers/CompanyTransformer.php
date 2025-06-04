@@ -181,17 +181,19 @@ class CompanyTransformer extends TransformerAbstract
 
     public function includePreferredCommodityTypes(Company $company): Primitive
     {
-        $type = $company->commodityTypes()->first();
+        $types = $company->commodityTypes;
 
-        if (is_null($type)) {
-            return $this->primitive(null);
+        if ($types->isEmpty()) {
+            return $this->primitive([]);
         }
 
-        return $this->primitive([
-            'id' => $type->id,
-            'name' => $type->name,
-            'provider' => $type->provider->value,
-        ]);
+        return $this->primitive(
+            $types->map(fn ($type) => [
+                'id' => $type->id,
+                'name' => $type->name,
+                'provider' => $type->provider->value,
+            ])->all()
+        );
 
     }
 
