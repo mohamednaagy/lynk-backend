@@ -145,11 +145,15 @@ class InventoryService
 
     public function completeOrderUnits(LocalMarketOrder $localMarketOrder)
     {
+        $inventoriesToRefresh = collect();
+
         foreach ($localMarketOrder->orderInventories as $orderInventory) {
             $inventory = $orderInventory->inventory;
+            $inventoriesToRefresh->push($inventory);
+
             LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
                 ->where('local_market_inventory_id', $inventory->id)
-                ->chunkById(100, function ($units) use ($localMarketOrder) {
+                ->chunkById(500, function ($units) use ($localMarketOrder) {
                     foreach ($units as $unit) {
                         LocalMarketInventoryUnits::where('id', $unit->id)->update([
                             'status' => InventoryUnitsStatus::Free,
@@ -159,9 +163,13 @@ class InventoryService
                         ]);
                     }
                 });
-            // Refresh stock quantities for the current inventory after processing all units
-            $inventory->refreshStockQuantities();
         }
+
+        $inventoriesToRefresh->unique('id')
+            ->sortBy('id')
+            ->each(function ($inventory) {
+                $inventory->refreshStockQuantities();
+            });
     }
 
     private function getUpdatedPreviousOwners(LocalMarketInventoryUnits $unit, $ownerId)
