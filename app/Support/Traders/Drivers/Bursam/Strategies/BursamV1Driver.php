@@ -660,6 +660,7 @@ class BursamV1Driver implements TraderInterface
             TraderOrderCancelReason::TraderOrderIsCancelled => __('order.user_cancel_request'),
             TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
             TraderOrderCancelReason::MurabhaTimeout => __('order.murabaha_time_out'),
+            TraderOrderCancelReason::NoEligibleCommoditiesAvailable => __('order.no_eligible_commodities_available'),
 
             default => null,
         };
