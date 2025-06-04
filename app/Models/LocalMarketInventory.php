@@ -9,6 +9,7 @@ use App\Services\LocalMarket\EligibleQuantityService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -124,11 +125,22 @@ class LocalMarketInventory extends Model
      */
     public function refreshStockQuantities($forceRebuildEligibility = false)
     {
-        $this->available_quantity = $this->units()->where('status', InventoryUnitsStatus::Free)->count();
-        $this->reserved_items = $this->units()->where('status', InventoryUnitsStatus::Reserved)->count();
+        $freeUnits = $this->units()->where('status', InventoryUnitsStatus::Free)->count();
+        $reservedUnits = $this->units()->where('status', InventoryUnitsStatus::Reserved)->count();
+        $this->available_quantity = $freeUnits;
+        $this->reserved_items = $reservedUnits;
 
-        $this->save();
-
+        $saved = $this->save();
+        Log::channel('local-market')->info('Refreshing stock quantities for inventory: ', [
+            'inventory_id' => $this->id,
+            'current_available_quantity' => $this->available_quantity,
+            'current_reserved_items' => $this->reserved_items,
+            'new_free_units' => $freeUnits,
+            'new_reserved_units' => $reservedUnits,
+            'saved' => $saved,
+            'error' => $saved ? null : $this->getErrors(),
+            'forceRebuildEligibility' => $forceRebuildEligibility,
+        ]);
         if ($forceRebuildEligibility) {
             app(EligibleQuantityService::class)->rebuildForInventory($this);
         } else {
