@@ -26,11 +26,12 @@ class CommodityTypesLiteList extends Controller
         $commidityTypes = $buildPaginatedCommodityTypeQuery
             ->setName($request->validated('search'))
             ->setStatus($request->validated('status'))
+            ->setProvider($request->validated('provider'))
             ->handle()
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'provider']);
 
         return fractal($commidityTypes, new CommodityTypeTransformer)
-            ->parseIncludes(['id', 'name'])
+            ->parseIncludes(['id', 'name', 'provider'])
             ->respond();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Commodities\CommodityType;
 
+use App\Enums\CommodityTypeProvider;
 use App\Enums\CommodityTypeStatus;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
@@ -29,6 +30,8 @@ class ListCommodityTypeRequest extends FormRequest
         return [
             'status' => ['nullable',  new EnumValue(CommodityTypeStatus::class)],
             'active' => ['nullable', 'integer', Rule::in([1, 2, 3])],
+            'provider' => ['nullable', 'string', new EnumValue(CommodityTypeProvider::class)],
+
         ];
     }
 }

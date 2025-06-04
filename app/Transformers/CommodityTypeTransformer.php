@@ -13,6 +13,7 @@ class CommodityTypeTransformer extends TransformerAbstract
         'name',
         'unique_name',
         'status',
+        'provider',
         'description',
         'created_at',
     ];
@@ -40,6 +41,11 @@ class CommodityTypeTransformer extends TransformerAbstract
     public function includeDescription(CommodityType $commodityType): Primitive
     {
         return $this->primitive($commodityType->description);
+    }
+
+    public function includeProvider(CommodityType $commodityType): Primitive
+    {
+        return $this->primitive($commodityType->provider->value);
     }
 
     public function includeStatus(CommodityType $commodityType): Primitive

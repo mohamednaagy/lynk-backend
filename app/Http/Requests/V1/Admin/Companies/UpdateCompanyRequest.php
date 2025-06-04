@@ -186,13 +186,6 @@ class UpdateCompanyRequest extends FormRequest
                 'required_with:preferred_commodity_types',
                 'boolean',
             ],
-            'international_preferred_commodity_types' => [
-                'nullable', 'array',
-            ],
-            'international_preferred_commodity_types.*' => [
-                'required',
-                'exists:trader_products,id',
-            ],
         ];
     }
 }
