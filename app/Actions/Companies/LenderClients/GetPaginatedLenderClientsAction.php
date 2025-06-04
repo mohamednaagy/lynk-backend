@@ -40,7 +40,8 @@ class GetPaginatedLenderClientsAction implements GetPaginatedLenderClients
     public function setType(?string $type): self
     {
         if (filled($type)) {
-            $this->query->where('type', $type);
+            $typeIds = explode(',', $type);
+            $this->query->whereIn('type', $typeIds);
         }
 
         return $this;

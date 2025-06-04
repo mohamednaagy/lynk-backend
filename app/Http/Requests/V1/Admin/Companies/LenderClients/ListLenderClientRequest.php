@@ -25,7 +25,16 @@ class ListLenderClientRequest extends FormRequest
     {
         return [
             'name' => ['nullable', 'string', 'max:100'],
-            'type' => ['nullable', Rule::in(CompanyLenderClientType::getValues())],
+            'type' => ['nullable', 'string', function ($attribute, $value, $fail) {
+                $values = explode(',', $value);
+                $allowed = CompanyLenderClientType::getValues();
+
+                foreach ($values as $val) {
+                    if (!in_array((int) $val, $allowed, true)) {
+                        return $fail("The selected {$attribute} is invalid.");
+                    }
+                }
+            }],
             'national_id' => ['nullable', 'integer', 'max_digits:10'],
         ];
     }
