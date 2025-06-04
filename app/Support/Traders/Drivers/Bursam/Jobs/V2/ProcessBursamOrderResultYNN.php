@@ -53,10 +53,15 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
-            ) {
+            if (is_null($traderOrder)) {
+                Log::channel('bursam')->info('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+                Log::channel('bursam')->info('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+
                 return;
             }
             Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
