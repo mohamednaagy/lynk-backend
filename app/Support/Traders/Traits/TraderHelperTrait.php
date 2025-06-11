@@ -4,9 +4,9 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Models\CommodityType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Models\TraderProduct;
 use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
@@ -211,7 +211,7 @@ trait TraderHelperTrait
         ]);
 
         // Fallback to existing logic if no override is set
-        $query = TraderProduct::query();
+        $query = CommodityType::query();
 
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
             ->bursam_default_preferred_commodity_type;
@@ -268,7 +268,7 @@ trait TraderHelperTrait
                 return []; // All preferred codes are unavailable
             }
 
-            $query = $query->whereIn('code', $availablePreferredProductCodes);
+            $query = $query->whereIn('unique_name', $availablePreferredProductCodes);
         } else {
             Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
                 'trader_order_id' => $traderOrder->id,
@@ -276,13 +276,12 @@ trait TraderHelperTrait
 
             // No preferred product codes; exclude unavailable ones globally
             if (! empty($unavailableProductCodes)) {
-                $query = $query->whereNotIn('code', $unavailableProductCodes);
+                $query = $query->whereNotIn('unique_name', $unavailableProductCodes);
             }
         }
 
         $finalProductCodes = $query
-            ->orderBy('order', 'asc')
-            ->pluck('code')
+            ->pluck('unique_name')
             ->toArray();
 
         Log::channel('bursam')->info('Final product codes selection completed', [
@@ -315,9 +314,9 @@ trait TraderHelperTrait
         ]);
 
         $companyPreferredProductIds = $traderOrder->order->company
-            ->traderProducts()
+            ->commodityTypes()
             ->where('provider', $traderOrder->provider)
-            ->pluck('code')
+            ->pluck('unique_name')
             ->toArray();
 
         Log::channel('bursam')->info('Company preferred product codes resolved', [
