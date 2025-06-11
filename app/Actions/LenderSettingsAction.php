@@ -23,7 +23,6 @@ class LenderSettingsAction implements SettingsInterface
         $settingInstance->notify_admins_about_new_orders = (int) $data['notify_admins_about_new_orders'];
         $settingInstance->require_initiate_trade_request = $data['require_initiate_trade_request'];
         $settingInstance->notify_borrowers_about_order_updates = $data['notify_borrowers_about_order_updates'];
-        $settingInstance->allow_preferred_commodity_in_order = $data['allow_preferred_commodity_in_order'];
 
         $settingInstance->save();
     }
