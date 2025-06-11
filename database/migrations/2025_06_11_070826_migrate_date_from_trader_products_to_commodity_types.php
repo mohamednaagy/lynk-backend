@@ -20,6 +20,7 @@ return new class extends Migration
         try {
             DB::beginTransaction();
             $traderProducts = TraderProduct::all();
+            $countTraderProducts = count($traderProducts);
             $data = [];
             foreach ($traderProducts as $traderProduct) {
                 $data[] = [
@@ -34,6 +35,11 @@ return new class extends Migration
             }
 
             CommodityType::insert($data);
+            $insertedDataCount = count($data);
+            if ($insertedDataCount !== $countTraderProducts) {
+                Log::error('Error migrating data from trader products to commodity types: '.$insertedDataCount.' out of '.$countTraderProducts.' trader products migrated successfully.');
+                throw new \Exception('Error migrating data from trader products to commodity types: '.$insertedDataCount.' out of '.$countTraderProducts.' trader products migrated successfully.');
+            }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
