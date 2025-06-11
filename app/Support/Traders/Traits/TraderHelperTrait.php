@@ -4,9 +4,9 @@ namespace App\Support\Traders\Traits;
 
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
+use App\Models\CommodityType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use App\Models\TraderProduct;
 use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
@@ -211,7 +211,7 @@ trait TraderHelperTrait
         ]);
 
         // Fallback to existing logic if no override is set
-        $query = TraderProduct::query();
+        $query = CommodityType::query();
 
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
             ->bursam_default_preferred_commodity_type;
@@ -315,7 +315,7 @@ trait TraderHelperTrait
         ]);
 
         $companyPreferredProductIds = $traderOrder->order->company
-            ->traderProducts()
+            ->commodityTypes()
             ->where('provider', $traderOrder->provider)
             ->pluck('code')
             ->toArray();
