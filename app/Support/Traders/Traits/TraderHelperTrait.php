@@ -268,7 +268,7 @@ trait TraderHelperTrait
                 return []; // All preferred codes are unavailable
             }
 
-            $query = $query->whereIn('code', $availablePreferredProductCodes);
+            $query = $query->whereIn('unique_name', $availablePreferredProductCodes);
         } else {
             Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
                 'trader_order_id' => $traderOrder->id,
@@ -276,13 +276,12 @@ trait TraderHelperTrait
 
             // No preferred product codes; exclude unavailable ones globally
             if (! empty($unavailableProductCodes)) {
-                $query = $query->whereNotIn('code', $unavailableProductCodes);
+                $query = $query->whereNotIn('unique_name', $unavailableProductCodes);
             }
         }
 
         $finalProductCodes = $query
-            ->orderBy('order', 'asc')
-            ->pluck('code')
+            ->pluck('unique_name')
             ->toArray();
 
         Log::channel('bursam')->info('Final product codes selection completed', [
@@ -317,7 +316,7 @@ trait TraderHelperTrait
         $companyPreferredProductIds = $traderOrder->order->company
             ->commodityTypes()
             ->where('provider', $traderOrder->provider)
-            ->pluck('code')
+            ->pluck('unique_name')
             ->toArray();
 
         Log::channel('bursam')->info('Company preferred product codes resolved', [
