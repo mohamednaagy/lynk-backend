@@ -37,6 +37,7 @@ class CompanyTransformer extends TransformerAbstract
         'auto_complete_murabaha_order',
         'default_contract_sign_time_limit',
         'force_preferred_commodity_type',
+        'allow_preferred_commodity_in_order',
     ];
 
     public function transform(Company $company): array
@@ -144,6 +145,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
     {
         return $this->primitive($company->lender->lenderDetail->notify_borrowers_about_order_updates);
+    }
+
+    public function includeAllowPreferredCommodityInOrder(Company $company)
+    {
+        return $this->primitive($company->lender->lenderDetail->allow_preferred_commodity_in_order);
     }
 
     public function includeOrderCostTiers(Company $company): Collection

@@ -58,6 +58,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'does_order_require_approval',
                 'notify_admins_about_new_orders',
                 'notify_borrowers_about_order_updates',
+                'allow_preferred_commodity_in_order',
                 'require_initiate_trade_request',
                 'trading_mode',
                 'internal_status_comment',

@@ -153,6 +153,10 @@ class UpdateCompanyRequest extends FormRequest
                 'required',
                 'boolean',
             ],
+            'allow_preferred_commodity_in_order' => [
+                'nullable',
+                'boolean',
+            ],
             'force_unique_reference_number' => [
                 'required',
                 'boolean',
