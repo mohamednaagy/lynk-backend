@@ -69,7 +69,6 @@ use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\LocalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\TraderProducts\TraderProductsLiteList;
 use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
 use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
@@ -226,8 +225,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             ->except(['delete']);
 
         Route::get('constants', [ConstantController::class, 'index']);
-
-        Route::get('trader-products/dropdown-list', TraderProductsLiteList::class);
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('sign-up');
