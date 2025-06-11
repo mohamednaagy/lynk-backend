@@ -12,6 +12,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -47,20 +48,39 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        $traderOrder = TraderOrder::query()
-            ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
-            ->find($this->traderOrderId);
+        try {
+            $traderOrder = TraderOrder::query()
+                ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
+                ->find($this->traderOrderId);
 
-        if (
-            is_null($traderOrder)
-            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
-        ) {
-            return;
+            if (is_null($traderOrder)) {
+                Log::channel('bursam')->info('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+                Log::channel('bursam')->info('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+
+                return;
+            }
+            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+            Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+
+        } catch (Exception $e) {
+            if ($this->shouldSkipRetry($e)) {
+                $this->fail($e);
+
+                return;
+            }
+            throw $e;
         }
-        Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
-        Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
-        Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+    }
 
+    private function shouldSkipRetry(Exception $e): bool
+    {
+        return in_array($e->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES);
     }
 
     public function failed($exception)
@@ -89,8 +109,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                     : ''
             );
         });
-        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
-
     }
 
     public function middleware(): array

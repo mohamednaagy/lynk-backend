@@ -82,6 +82,8 @@ return [
     ],
 
     BursamProductCode::class => [
+        BursamProductCode::Aluminium => 'Aluminium',
+        BursamProductCode::AluminiumDev => 'Aluminium',
         BursamProductCode::CrudePalmOil => 'Crude Palm Oil',
         BursamProductCode::PlasticResinA => 'Plastic Resin A',
         BursamProductCode::PlasticResinADev => 'Plastic Resin A',
