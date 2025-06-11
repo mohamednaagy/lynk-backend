@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\V1\Admin\Settings;
 
-use App\Enums\TraderProductStatus;
-use App\Models\TraderProduct;
+use App\Enums\CommodityTypeStatus;
+use App\Enums\Trader;
+use App\Models\CommodityType;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -35,8 +36,8 @@ class UpdateInternationalMurabahaSettingsRequest extends FormRequest
 
     private function getAllowedCommodityTypes(): array
     {
-        return TraderProduct::where('provider', 'Bursam')
-            ->where('status', TraderProductStatus::Enabled)
+        return CommodityType::where('provider', Trader::Bursam)
+            ->where('status', CommodityTypeStatus::Active)
             ->pluck('id')
             ->toArray();
     }
