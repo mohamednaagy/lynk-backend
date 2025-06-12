@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->foreignId('preferred_commodity_type_id')->nullable()->after('creator_type')->constrained('commodity_types');
+            $table->foreignId('commodity_type_id')->nullable()->after('creator_type')->constrained('commodity_types');
         });
     }
 
@@ -26,8 +26,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropForeign(['preferred_commodity_type_id']);
-            $table->dropColumn('preferred_commodity_type_id');
+            $table->dropForeign(['commodity_type_id']);
+            $table->dropColumn('commodity_type_id');
         });
     }
 };
