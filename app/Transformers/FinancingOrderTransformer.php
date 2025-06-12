@@ -64,6 +64,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'can_be_completed',
         'payment_proof_url',
         'can_create_trader_order',
+        'commodity_type_unique_id',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -196,6 +197,11 @@ class FinancingOrderTransformer extends TransformerAbstract
     public function includeStatusReason(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->status_reason);
+    }
+
+    public function includeCommodityTypeUniqueId(FinancingOrder $financingOrder)
+    {
+        return $this->primitive($financingOrder->commodityType?->unique_name);
     }
 
     public function includeCreatedAt(FinancingOrder $financingOrder)
