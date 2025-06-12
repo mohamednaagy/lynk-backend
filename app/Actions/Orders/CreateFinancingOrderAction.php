@@ -4,6 +4,7 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\CreateFinancingOrder;
 use App\Enums\WalletType;
+use App\Models\CommodityType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use Cknow\Money\Money;
@@ -29,6 +30,8 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
         $data['contract_number'] = $lender->lenderDetail->contract_number;
 
+        $data['commodity_type_id'] = $this->getCommodityTypeId($data['commodity_type_id'] ?? null, $company);
+
         return $company->orders()->create(
             Arr::only($data, [
                 'customer_name',
@@ -44,7 +47,23 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
                 'creator_type',
                 'approved_at',
                 'is_verification_required',
+                'commodity_type_id',
             ])
         );
+    }
+
+    private function getCommodityTypeId(?string $uniqueName, Company $company): ?int
+    {
+        $allowCommoditySelection = $company?->lender?->lenderDetail?->allow_preferred_commodity_in_order ?? false;
+
+        // If no unique name provided, return null
+        if (! $allowCommoditySelection || is_null($uniqueName) || $uniqueName === '') {
+            return null;
+        }
+
+        // Validation already ensured this commodity type exists and is valid
+        $commodityType = CommodityType::where('unique_name', $uniqueName)->first();
+
+        return $commodityType?->id;
     }
 }
