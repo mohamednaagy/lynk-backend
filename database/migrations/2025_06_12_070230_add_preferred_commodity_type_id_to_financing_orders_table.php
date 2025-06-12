@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('financing_orders', function (Blueprint $table) {
+            $table->foreignId('preferred_commodity_type_id')->nullable()->after('creator_type')->constrained('commodity_types');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('financing_orders', function (Blueprint $table) {
+            $table->dropForeign(['preferred_commodity_type_id']);
+            $table->dropColumn('preferred_commodity_type_id');
+        });
+    }
+};
