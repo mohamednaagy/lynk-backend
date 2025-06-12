@@ -40,14 +40,14 @@ class StoreOrderRequest extends FormRequest
             'amount' => ['required', 'numeric', 'gte:1'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
             'is_verification_required' => ['required', 'boolean'],
-            'commodity_type_unique_id' => ['nullable', 'string', function ($attribute, $value, $fail) {
+            'commodity_type_id' => ['nullable', 'string', function ($attribute, $value, $fail) {
                 $this->validateCommodityType($attribute, $value, $fail);
             }],
         ];
     }
 
     /**
-     * Custom validation for commodity_type_unique_id
+     * Custom validation for commodity_type_id
      *
      * @param  mixed  $value
      */

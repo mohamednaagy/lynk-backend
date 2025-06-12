@@ -64,7 +64,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'can_be_completed',
         'payment_proof_url',
         'can_create_trader_order',
-        'commodity_type_unique_id',
+        'commodity_type_id',
     ];
 
     public function transform(FinancingOrder $financingOrder)

@@ -30,7 +30,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
         $data['contract_number'] = $lender->lenderDetail->contract_number;
 
-        $data['commodity_type_id'] = $this->getCommodityTypeId($data['commodity_type_unique_id'] ?? null, $company);
+        $data['commodity_type_id'] = $this->getCommodityTypeId($data['commodity_type_id'] ?? null, $company);
 
         return $company->orders()->create(
             Arr::only($data, [
