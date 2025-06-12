@@ -64,6 +64,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'can_be_completed',
         'payment_proof_url',
         'can_create_trader_order',
+        'company',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -318,5 +319,14 @@ class FinancingOrderTransformer extends TransformerAbstract
             'id' => $financingOrder->responsableAdmin->id,
             'name' => $financingOrder->responsableAdmin->full_name,
         ]);
+    }
+
+    public function includeCompany(FinancingOrder $financingOrder)
+    {
+        $company = $this->company ?? $financingOrder->company;
+
+        return $this->primitive([
+            'name' => $company->name,
+            'allow_preferred_commodity_in_order' => $company->lender->lenderDetail->allow_preferred_commodity_in_order]);
     }
 }

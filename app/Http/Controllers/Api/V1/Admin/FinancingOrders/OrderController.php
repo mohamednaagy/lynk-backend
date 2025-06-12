@@ -146,6 +146,7 @@ class OrderController extends Controller
                 'creator',
                 'created_at',
                 'payment_proof_url',
+                'company',
             ])
             ->respond();
     }
