@@ -7,6 +7,7 @@ use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
+use Illuminate\Support\Facades\Log;
 
 class TraderHistoryObserver
 {
@@ -19,24 +20,36 @@ class TraderHistoryObserver
      */
     public function created(TraderHistory $traderHistory)
     {
-        $traderOrder = $traderHistory->traderOrder()
-            ->withLastHistoryAction()
-            ->first();
+        try {
+            $traderOrder = $traderHistory->traderOrder()
+                ->withLastHistoryAction()
+                ->first();
 
-        Trader::driver($traderOrder->provider, $traderOrder->version)
-            ->dispatchJobForTransitioningFlow($traderOrder);
+            Trader::driver($traderOrder->provider, $traderOrder->version)
+                ->dispatchJobForTransitioningFlow($traderOrder);
 
-        $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
-        $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
+            $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
+            $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
 
-        $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
-        $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
+            $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
+            $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
 
-        foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $actionClass) {
-            app($actionClass)->handle($traderOrder->order, $traderHistory->traderOrder);
+            foreach ($this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode) as $actionClass) {
+                app($actionClass)->handle($traderOrder->order, $traderHistory->traderOrder);
+            }
+
+            $this->applyOrderFees($traderHistory);
+        } catch (\Exception $e) {
+            Log::error('TraderHistoryObserver::created failed', [
+                'trader_history_id' => $traderHistory->id,
+                'trader_order_id' => $traderHistory->trader_order_id,
+                'action' => $traderHistory->action,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e;
         }
-
-        $this->applyOrderFees($traderHistory);
     }
 
     /**
@@ -44,6 +57,12 @@ class TraderHistoryObserver
      */
     protected function applyOrderFees(TraderHistory $traderHistory): void
     {
+        Log::info('TraderHistoryObserver::applyOrderFees', [
+            'trader_history_id' => $traderHistory->id,
+            'trader_order_id' => $traderHistory->trader_order_id,
+            'action' => $traderHistory->action,
+            'action_class' => $this->feesService->getAction($traderHistory->traderOrder->provider, $traderHistory->action),
+        ]);
         $provider = $traderHistory->traderOrder->provider;
         $status = $traderHistory->action;
         $action = $this->feesService->getAction($provider, $status);
