@@ -8,6 +8,7 @@ use App\Models\Wallet;
 use App\Support\Wallets\Contracts\TransactionTypeHandlerInterface;
 use Cknow\Money\Money;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class OrderCreationFeeType implements TransactionTypeHandlerInterface
 {
@@ -30,6 +31,38 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
         ?string $referenceNumber,
         array $meta
     ): Transaction {
-        return $wallet->withdraw($amount, $reason, $referenceNumber, $meta);
+        try {
+            Log::info('OrderCreationFeeType::process START', [
+                'wallet_id' => $wallet->getKey(),
+                'amount' => $amount->jsonSerialize(),
+                'reason' => $reason,
+                'reference_number' => $referenceNumber,
+                'trader_order_id' => $meta['trader_order_id'] ?? 'unknown',
+            ]);
+
+            $startTime = microtime(true);
+
+            $result = $wallet->withdraw($amount, $reason, $referenceNumber, $meta);
+
+            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
+
+            Log::info('OrderCreationFeeType::process SUCCESS', [
+                'wallet_id' => $wallet->getKey(),
+                'transaction_id' => $result->id,
+                'execution_time_ms' => $executionTime,
+            ]);
+
+            return $result;
+
+        } catch (\Exception $e) {
+            Log::error('OrderCreationFeeType::process FAILED', [
+                'wallet_id' => $wallet->getKey(),
+                'reason' => $reason,
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
     }
 }
