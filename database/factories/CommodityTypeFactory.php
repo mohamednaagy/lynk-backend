@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\CommodityTypeStatus;
+use App\Enums\Trader;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CommodityTypeFactory extends Factory
@@ -22,6 +23,7 @@ class CommodityTypeFactory extends Factory
                 CommodityTypeStatus::Active,
                 CommodityTypeStatus::Inactive,
             ]),
+            'provider' => $this->faker->randomElement([Trader::Lynk, Trader::Bursam]),
         ];
     }
 }
