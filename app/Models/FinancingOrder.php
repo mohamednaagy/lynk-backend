@@ -193,6 +193,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->belongsTo(User::class, 'approver_id', 'id');
     }
 
+    public function commodityType()
+    {
+        return $this->belongsTo(CommodityType::class);
+    }
+
     public function getPowerOfAttorneyAttribute()
     {
         return $this->getFirstMediaUrl(FinancingOrderMediaCollection::PowerOfAttorney);

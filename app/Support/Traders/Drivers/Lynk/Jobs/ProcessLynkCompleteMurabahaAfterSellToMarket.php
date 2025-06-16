@@ -4,7 +4,6 @@ namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
 use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
-use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\StopsTraderOrderOnJobFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -42,15 +41,40 @@ class ProcessLynkCompleteMurabahaAfterSellToMarket implements ShouldBeUnique, Sh
                 ->lockForUpdate()
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)
-            ) {
-                return;
+            if (is_null($traderOrder)) {
+                Log::warning('ProcessLynkCompleteMurabahaAfterSellToMarket: TraderOrder not found', [
+                    'trader_order_id' => $this->traderOrderId,
+                ]);
+                throw new \Exception('TraderOrder not found with reference: '.$this->traderOrderId);
             }
 
-            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))->updateMurabhaCompleteDocument($traderOrder);
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
+                Log::info('ProcessLynkCompleteMurabahaAfterSellToMarket: Order not in expected state', [
+                    'trader_order_id' => $this->traderOrderId,
+                    'last_action' => $traderOrder->traderHistories()->latest('id')->first()?->action,
+                    'expected_action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                ]);
+                throw new \Exception('Trader order is not in expected state with reference: '.$this->traderOrderId);
+            }
 
+            // Enhanced completion with better error handling
+            try {
+                (new \App\Support\Traders\TradingStrategies\TraderStrategyContext(
+                    $traderOrder->provider,
+                    $traderOrder->version
+                ))->updateMurabhaCompleteDocument($traderOrder, []);
+
+                Log::info('ProcessLynkCompleteMurabahaAfterSellToMarket: Successfully completed', [
+                    'trader_order_id' => $this->traderOrderId,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('ProcessLynkCompleteMurabahaAfterSellToMarket: Failed to complete', [
+                    'trader_order_id' => $this->traderOrderId,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+                throw $e;
+            }
         });
     }
 
