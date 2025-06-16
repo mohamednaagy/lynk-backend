@@ -46,6 +46,6 @@ class CheckCommodityTypeActiveRule implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return __('validation.select_commodity_not_valid');
     }
 }

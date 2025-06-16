@@ -184,4 +184,5 @@ return [
     'invalid_date_format' => 'Invalid date format.',
     'field_is_not_editable' => 'This Field Is Not Editable',
     'periods_overlapped_with_existing' => 'Periods must not overlap with existing ranges',
+    'select_commodity_not_valid' => 'The selected commodity type is not active or does not exist for the specified provider',
 ];
