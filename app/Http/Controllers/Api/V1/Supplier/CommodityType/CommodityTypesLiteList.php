@@ -7,6 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Supplier\CommodityType\CommodityTypesLiteListRequest;
 use App\Transformers\CommodityTypeTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -23,15 +24,17 @@ class CommodityTypesLiteList extends Controller
     /**
      * Handle the incoming request to list commodity types.
      */
-    public function __invoke(BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypeQuery): JsonResponse
+    public function __invoke(CommodityTypesLiteListRequest $request, BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypeQuery): JsonResponse
     {
         $commidityTypes = $buildPaginatedCommodityTypeQuery
-            ->setName(request('search'))
+            ->setName($request->validated('search'))
+            ->setStatus($request->validated('status'))
+            ->setProvider($request->validated('provider'))
             ->handle()
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'provider']);
 
         return fractal($commidityTypes, new CommodityTypeTransformer)
-            ->parseIncludes(['id', 'name'])
+            ->parseIncludes(['id', 'name', 'provider'])
             ->respond();
     }
 }
