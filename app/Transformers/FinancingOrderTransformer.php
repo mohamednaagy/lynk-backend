@@ -64,6 +64,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'can_be_completed',
         'payment_proof_url',
         'can_create_trader_order',
+        'commodity_type',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -318,5 +319,10 @@ class FinancingOrderTransformer extends TransformerAbstract
             'id' => $financingOrder->responsableAdmin->id,
             'name' => $financingOrder->responsableAdmin->full_name,
         ]);
+    }
+
+    public function includeCommodityType(FinancingOrder $financingOrder)
+    {
+        return $this->primitive(optional($financingOrder->commodityType)->only(['id', 'name']));
     }
 }

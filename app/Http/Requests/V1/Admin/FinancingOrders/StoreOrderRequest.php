@@ -40,6 +40,7 @@ class StoreOrderRequest extends FormRequest
             'amount' => ['required', 'numeric', 'gte:1'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
             'is_verification_required' => ['required', 'boolean'],
+            'commodity_type_id' => ['nullable', 'numeric', 'exists:commodity_types,id'],
         ];
     }
 

@@ -35,6 +35,8 @@ class LenderLiteList extends Controller
                 'id',
                 'name',
                 'contract_number',
+                'allow_preferred_commodity_in_order',
+                'preferred_market_type',
             ])
             ->respond();
     }

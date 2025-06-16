@@ -17,6 +17,7 @@ use App\Support\QueryScoper\HasScopes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Http\Request;
@@ -434,5 +435,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function retry()
     {
         $this->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+    }
+
+    public function commodityType(): BelongsTo
+    {
+        return $this->belongsTo(CommodityType::class);
     }
 }
