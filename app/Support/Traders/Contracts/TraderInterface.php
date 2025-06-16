@@ -10,7 +10,7 @@ use App\Models\User;
 
 interface TraderInterface
 {
-    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder;
+    public function createTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): TraderOrder;
 
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder);
 

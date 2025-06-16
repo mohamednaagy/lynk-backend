@@ -451,4 +451,9 @@ class TraderOrder extends Model implements HasMedia
 
         return ! $this->checkOrderStepComplete($previousStep);
     }
+
+    public function commodityType()
+    {
+        return $this->belongsTo(CommodityType::class, 'commodity_type_id');
+    }
 }

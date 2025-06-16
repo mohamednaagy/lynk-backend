@@ -57,10 +57,10 @@ class FakeV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): TraderOrder
     {
         $ttiId = $this->getTtiId($financingOrder);
-        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'fake');
+        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'fake', $commodityTypeId);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;

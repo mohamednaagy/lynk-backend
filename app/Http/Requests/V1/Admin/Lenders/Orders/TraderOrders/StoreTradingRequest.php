@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\TraderOrderMode;
+use App\Rules\CheckCommodityTypeActiveRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -30,6 +31,16 @@ class StoreTradingRequest extends FormRequest
             'trader' => ['required', 'string', Rule::in(['fake', 'dmcc', 'bursam', 'lynk'])],
             'reference_number' => ['nullable', 'required_if:mode,'.TraderOrderMode::Manual, 'string', 'max:100'],
             'mode' => ['required', 'string', new EnumValue(TraderOrderMode::class)],
+            'commodity_type_id' => ['nullable', 'numeric', new CheckCommodityTypeActiveRule($this->trader)],
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        if ($this->input('commodity_type_id') == -1 || $this->input('mode') == TraderOrderMode::Manual) {
+            $this->merge([
+                'commodity_type_id' => null,
+            ]);
+        }
     }
 }

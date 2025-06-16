@@ -58,14 +58,14 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
     protected $version = 'v1';
 
-    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder): ?Model
+    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): ?Model
     {
 
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $traderOrder = $this->createInitialTraderOrder($financingOrder);
+        $traderOrder = $this->createInitialTraderOrder($financingOrder, $commodityTypeId);
         $this->updateReferenceNumber($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
@@ -73,7 +73,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         return $traderOrder;
     }
 
-    private function createInitialTraderOrder(FinancingOrder $financingOrder): Model
+    private function createInitialTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): Model
     {
         return $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
@@ -82,6 +82,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'commodity_type_id' => $commodityTypeId,
         ]);
     }
 
@@ -220,9 +221,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, $commodityTypeId = null): TraderOrder
     {
-        return $this->getOrInitiateTraderOrder($financingOrder);
+        return $this->getOrInitiateTraderOrder($financingOrder, $commodityTypeId);
     }
 
     public function getDefaultInitialTradeOrderStatus()
@@ -382,11 +383,11 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
     protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
-        $lender = $traderOrder->order->company->lender;
+        $lenderDetail = $traderOrder->order->company->lender->lenderDetail;
 
         return
-            $traderOrder->order->company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) &&
-            $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
+            $lenderDetail->trading_mode->is(TraderOrderMode::Automatic) &&
+            $lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
                 $traderOrder->cancelDetail->cancel_reason->in([
                     TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
                     TraderOrderCancelReason::FailureToPurchase,
