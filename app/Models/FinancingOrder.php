@@ -440,9 +440,4 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         $this->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
     }
-
-    public function commodityType()
-    {
-        return $this->belongsTo(CommodityType::class, 'commodity_type_id');
-    }
 }
