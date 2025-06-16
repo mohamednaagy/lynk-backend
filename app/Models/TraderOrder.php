@@ -62,6 +62,7 @@ class TraderOrder extends Model implements HasMedia
             'contract_signed_type',
             'expire_at',
             'auto_sell_period_id',
+            'commodity_type_id',
         ];
     }
 
@@ -449,5 +450,10 @@ class TraderOrder extends Model implements HasMedia
         $previousStep = $dictionary->getPreviousStepOf($currentStep)->step;
 
         return ! $this->checkOrderStepComplete($previousStep);
+    }
+
+    public function commodityType()
+    {
+        return $this->belongsTo(CommodityType::class, 'commodity_type_id');
     }
 }

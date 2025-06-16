@@ -51,6 +51,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'hover_message',
         'contract_signed_type',
         'show_proceed_btn',
+        'commodity_type',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -231,5 +232,19 @@ class TraderOrderTransformer extends TransformerAbstract
         $signedWakalaDocumentMediaFile = $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) ?? null;
 
         return $this->primitive(empty($signedWakalaDocumentMediaFile) ? false : true);
+    }
+
+    public function includeCommodityType(TraderOrder $traderOrder): Primitive
+    {
+        $commodityType = $traderOrder->commodityType;
+        if ($commodityType) {
+            return $this->primitive([
+                'id' => $commodityType->id,
+                'name' => $commodityType->name,
+            ]);
+        }
+
+        return $this->primitive(null);
+
     }
 }

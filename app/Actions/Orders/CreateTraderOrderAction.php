@@ -47,10 +47,11 @@ class CreateTraderOrderAction implements CreateTraderOrder
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
+        $commodityTypeId = isset($data['commodity_type_id']) ? $data['commodity_type_id'] : null;
         $traderOrder = match ($data['mode']) {
             TraderOrderMode::Manual => $this->createTraderOrder($financingOrder, $data),
             TraderOrderMode::Automatic => Trader::driver($data['trader'], $data['version'])
-                ->createTraderOrder($financingOrder),
+                ->createTraderOrder($financingOrder, $commodityTypeId),
         };
 
         $financingOrder->update([
