@@ -10,7 +10,14 @@ use App\Settings\Classes\Areas\InternationalMurabahaSetting;
 use Cache;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
+use RuntimeException;
 
+/**
+ * Service for resolving suitable commodity types for trader orders
+ *
+ * Implements hierarchical fallback strategy:
+ * 1. TraderOrder -> 2. FinancingOrder -> 3. Company -> 4. GlobalSettings
+ */
 final class GetSuitableCommodityTypeService
 {
     public function __construct(
@@ -21,10 +28,17 @@ final class GetSuitableCommodityTypeService
         ]);
     }
 
+    /**
+     * Resolve the best-fit commodity for the trader order
+     *
+     * @return CommodityType The resolved commodity type
+     *
+     * @throws RuntimeException If no suitable commodity found
+     */
     public function resolve(): CommodityType
     {
         $commodityType = $this->resolveCommodityTypeWithFallbacks();
-        if (empty($commodityType)) {
+        if (is_null($commodityType)) {
             Log::error('No suitable commodity type found');
             throw new \RuntimeException('No suitable commodity type found for the given order');
         }
@@ -32,8 +46,16 @@ final class GetSuitableCommodityTypeService
         return $commodityType;
     }
 
-    private function resolveCommodityTypeWithFallbacks(): CommodityType
+    /**
+     * Resolves a suitable commodity by checking multiple sources in order of importance:
+     * - TraderOrder (if a commodity_type_id is already set).
+     * - FinancingOrder (if the financing order has a default commodity).
+     * - Company preferences (via allowed commodity types).
+     * - Global application-wide defaults (based on the trader/provider).
+     */
+    private function resolveCommodityTypeWithFallbacks(): ?CommodityType
     {
+
         if ($commodity = $this->resolveFromTraderOrder()) {
             Log::info('CommodityType resolved directly from TraderOrder', [
                 'commodity_type_id' => $commodity->id,
@@ -63,6 +85,9 @@ final class GetSuitableCommodityTypeService
         return $this->resolveFromGlobalSettings();
     }
 
+    /**
+     * Get commodity from trader order if explicitly set
+     */
     private function resolveFromTraderOrder(): ?CommodityType
     {
         return $this->traderOrder->commodity_type_id
@@ -70,6 +95,10 @@ final class GetSuitableCommodityTypeService
             : null;
     }
 
+    /**
+     * Get commodity from financing order with provider validation
+     * used when the trader order does not have a specific commodity type set
+     */
     private function resolveFromFinancingOrder(): ?CommodityType
     {
         $financingOrder = $this->traderOrder->order;
@@ -79,6 +108,10 @@ final class GetSuitableCommodityTypeService
             : null;
     }
 
+    /**
+     * Get active commodity from company preferences
+     * Used when the company has assigned active commodities specific to a trader provider, and neither the trader order nor the financing order has a specific commodity type set
+     */
     private function resolveFromCompany(): ?CommodityType
     {
         $company = $this->traderOrder->order->company;
@@ -89,7 +122,13 @@ final class GetSuitableCommodityTypeService
             ->first();
     }
 
-    private function resolveFromGlobalSettings(): CommodityType
+    /**
+     *Resolve from global settings based on trader provider
+     * Used when the order, company, and financing order don't provide a commodity type.
+     *
+     * @throws InvalidArgumentException For unsupported providers.
+     */
+    private function resolveFromGlobalSettings(): ?CommodityType
     {
         $preferredTrader = $this->traderOrder->provider;
 
@@ -100,7 +139,13 @@ final class GetSuitableCommodityTypeService
         };
     }
 
-    private function resolveBursamFromGlobalSettings(): CommodityType
+    /**
+     * Get Default commodity type of bursa with preference ordering and availability filtering
+     * This is used when no specific preference when trader provider is Bursam and no commodity type is set in the trader order or financing order or company.
+     *
+     * @throws \RuntimeException If no eligible commodity is found.
+     */
+    private function resolveBursamFromGlobalSettings(): ?CommodityType
     {
         $defaultId = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
         $query = CommodityType::query()->where('status', CommodityTypeStatus::Active)->where('provider', Trader::Bursam);
@@ -132,11 +177,18 @@ final class GetSuitableCommodityTypeService
 
             return $commodity;
         }
-        Log::error("GlobalSettings failed to resolve commodity type for Bursam with ID: {$defaultId}");
-        throw new \RuntimeException('Failed to resolve commodity type for Bursam from global settings');
+        Log::warning('No active Bursa commodity found in GlobalSettings');
+
+        return null;
     }
 
-    private function resolveLynkFromGlobalSettings(): CommodityType
+    /**
+     * Randomly selects an active commodity type for Lynk from the database.
+     * This is used when no specific preference when trader provider is Lynk and no commodity type is set in the trader order or financing order or company.
+     *
+     * @throws \RuntimeException If no active Lynk commodity is found.
+     */
+    private function resolveLynkFromGlobalSettings(): ?CommodityType
     {
         $commodity = CommodityType::query()
             ->where('provider', Trader::Lynk)
@@ -144,16 +196,16 @@ final class GetSuitableCommodityTypeService
             ->inRandomOrder()
             ->first();
 
-        if (! $commodity) {
-            Log::error('GlobalSettings failed to resolve commodity type for Lynk (no active records found)');
-            throw new \RuntimeException('Failed to resolve commodity type for Lynk from global settings');
+        if ($commodity) {
+            Log::info('Resolved from GlobalSettings (Lynk random selection)', [
+                'commodity_type_id' => $commodity->id,
+                'commodity_name' => $commodity->name,
+            ]);
+
+            return $commodity;
         }
+        Log::warning('No active Lynk commodity found in GlobalSettings');
 
-        Log::info('Resolved from GlobalSettings (Lynk random selection)', [
-            'commodity_type_id' => $commodity->id,
-            'commodity_name' => $commodity->name,
-        ]);
-
-        return $commodity;
+        return null;
     }
 }

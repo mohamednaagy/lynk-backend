@@ -50,13 +50,13 @@ class BursamV1Driver implements TraderInterface
 
     protected $version = 'v1';
 
-    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): ?Model
+    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): ?Model
     {
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Initiated, $commodityTypeId);
+        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Initiated, $preferredCommodityTypeId);
 
         return $traderOrder;
     }
@@ -73,9 +73,9 @@ class BursamV1Driver implements TraderInterface
         return $differenceInHours;
     }
 
-    public function createHoldTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): ?Model
+    public function createHoldTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): ?Model
     {
-        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Hold, $commodityTypeId);
+        $traderOrder = $this->createBaseTraderOrder($financingOrder, TraderOrderStatus::Hold, $preferredCommodityTypeId);
 
         // If it's a hold order, create history entry
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::OnHold);
@@ -83,7 +83,7 @@ class BursamV1Driver implements TraderInterface
         return $traderOrder;
     }
 
-    public function createBaseTraderOrder(FinancingOrder $financingOrder, string $status, ?int $commodityTypeId = null): TraderOrder
+    public function createBaseTraderOrder(FinancingOrder $financingOrder, string $status, ?int $preferredCommodityTypeId = null): TraderOrder
     {
         // Create the base trader order
         $data = [
@@ -93,7 +93,7 @@ class BursamV1Driver implements TraderInterface
             'status' => $status,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'commodity_type_id' => $commodityTypeId,
+            'commodity_type_id' => $preferredCommodityTypeId,
 
         ];
 
@@ -104,16 +104,16 @@ class BursamV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): TraderOrder
     {
         // Determine the status of the order
         $status = $this->checkCanInitiateTraderOrder() ? TraderOrderStatus::Initiated : TraderOrderStatus::Hold;
         // Call the appropriate method based on the status
         if ($status === TraderOrderStatus::Hold) {
-            return $this->createHoldTraderOrder($financingOrder, $commodityTypeId);
+            return $this->createHoldTraderOrder($financingOrder, $preferredCommodityTypeId);
         }
 
-        return $this->getOrInitiateTraderOrder($financingOrder, $commodityTypeId);
+        return $this->getOrInitiateTraderOrder($financingOrder, $preferredCommodityTypeId);
     }
 
     public function checkCanInitiateTraderOrder()

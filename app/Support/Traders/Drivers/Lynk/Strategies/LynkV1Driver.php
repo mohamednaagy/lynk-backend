@@ -58,14 +58,14 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
     protected $version = 'v1';
 
-    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): ?Model
+    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): ?Model
     {
 
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $traderOrder = $this->createInitialTraderOrder($financingOrder, $commodityTypeId);
+        $traderOrder = $this->createInitialTraderOrder($financingOrder, $preferredCommodityTypeId);
         $this->updateReferenceNumber($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
@@ -73,7 +73,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         return $traderOrder;
     }
 
-    private function createInitialTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): Model
+    private function createInitialTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): Model
     {
         return $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
@@ -82,7 +82,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'commodity_type_id' => $commodityTypeId,
+            'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }
 
@@ -221,9 +221,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder, $commodityTypeId = null): TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, $preferredCommodityTypeId = null): TraderOrder
     {
-        return $this->getOrInitiateTraderOrder($financingOrder, $commodityTypeId);
+        return $this->getOrInitiateTraderOrder($financingOrder, $preferredCommodityTypeId);
     }
 
     public function getDefaultInitialTradeOrderStatus()

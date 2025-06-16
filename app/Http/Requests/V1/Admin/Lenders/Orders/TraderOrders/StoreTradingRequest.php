@@ -35,6 +35,13 @@ class StoreTradingRequest extends FormRequest
         ];
     }
 
+    /**
+     * It transforms the commodity_type_id field to null in the following cases:
+     * - When the commodity_type_id is explicitly set to -1 (used to represent 'any selection' in UI).
+     * - When the mode is set to Manual, meaning commodity selection is not required.
+     *
+     * @return void
+     */
     protected function prepareForValidation()
     {
         if ($this->input('commodity_type_id') == -1 || $this->input('mode') == TraderOrderMode::Manual) {

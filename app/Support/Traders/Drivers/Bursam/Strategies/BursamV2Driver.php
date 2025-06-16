@@ -43,7 +43,7 @@ class BursamV2Driver extends BursamV1Driver
 {
     protected $version = 'v2';
 
-    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $commodityTypeId = null): ?Model
+    public function getOrInitiateTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): ?Model
     {
         if ($financingOrder->initiatedTraderOrders()->exists()) {
             return $financingOrder->initiatedTraderOrders()->first();
@@ -57,7 +57,7 @@ class BursamV2Driver extends BursamV1Driver
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
             'mode' => TraderOrderMode::Automatic,
-            'commodity_type_id' => $commodityTypeId,
+            'commodity_type_id' => $preferredCommodityTypeId,
         ]);
 
         return $traderOrder;

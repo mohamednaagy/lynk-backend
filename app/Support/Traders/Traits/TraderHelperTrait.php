@@ -44,7 +44,7 @@ trait TraderHelperTrait
         }
     }
 
-    public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider, ?int $commodityTypeId = null): Model|TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider, ?int $preferredCommodityTypeId = null): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
             'provider' => $provider,
@@ -52,7 +52,7 @@ trait TraderHelperTrait
             'status' => TraderOrderStatus::InProgress,
             'mode' => TraderOrderMode::Automatic,
             'version' => get_latest_version_of_trader($provider),
-            'commodity_type_id' => $commodityTypeId,
+            'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }
 
