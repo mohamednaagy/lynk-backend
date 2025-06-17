@@ -65,7 +65,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'payment_proof_url',
         'can_create_trader_order',
         'company',
-        'commodity_type_id',
+        'commodity_type',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -334,5 +334,10 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive([
             'name' => $company->name,
             'allow_preferred_commodity_in_order' => $company->lender->lenderDetail->allow_preferred_commodity_in_order]);
+    }
+
+    public function includeCommodityType(FinancingOrder $financingOrder)
+    {
+        return $this->primitive(optional($financingOrder->commodityType)->only(['id', 'name']));
     }
 }

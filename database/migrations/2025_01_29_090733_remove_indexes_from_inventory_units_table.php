@@ -21,7 +21,13 @@ return new class extends Migration
         ];
         Schema::table('local_market_inventory_units', function (Blueprint $table) use ($indexes) {
             foreach ($indexes as $index) {
-                $existingIndexes = DB::table('INFORMATION_SCHEMA.STATISTICS')->select('INDEX_NAME')->where('TABLE_SCHEMA', config('database.connections.mysql.database'))->where('TABLE_NAME', 'local_market_inventory_units')->distinct()->where('INDEX_NAME', 'idx_previous_company_id_owners')->exists();
+                $existingIndexes = DB::table('INFORMATION_SCHEMA.STATISTICS')
+                    ->select('INDEX_NAME')
+                    ->where('TABLE_SCHEMA', config('database.connections.mysql.database'))
+                    ->where('TABLE_NAME', 'local_market_inventory_units')
+                    ->distinct()
+                    ->where('INDEX_NAME', $index)
+                    ->exists();
                 if ($existingIndexes) {
                     $table->dropIndex($index);
                 }

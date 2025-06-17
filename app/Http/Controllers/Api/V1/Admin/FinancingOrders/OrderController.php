@@ -148,6 +148,7 @@ class OrderController extends Controller
                 'created_at',
                 'payment_proof_url',
                 'company',
+                'commodity_type',
             ])
             ->respond();
     }
@@ -213,6 +214,7 @@ class OrderController extends Controller
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
+                        'commodity_type',
                     ])->respond();
             }
         );
