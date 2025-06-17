@@ -30,7 +30,11 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
 
         $data['contract_number'] = $lender->lenderDetail->contract_number;
 
-        $data['commodity_type_id'] = $this->getCommodityTypeId($data['commodity_type_id'] ?? null, $company);
+        $commodityTypeId = $data['commodity_type_id'] ?? null;
+
+        $data['commodity_type_id'] = is_numeric($commodityTypeId)
+            ? (int) $commodityTypeId
+            : $this->findCommodityTypeIdByUniqueName($commodityTypeId, $company);
 
         return $company->orders()->create(
             Arr::only($data, [
@@ -52,18 +56,15 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
         );
     }
 
-    private function getCommodityTypeId(?string $uniqueName, Company $company): ?int
+    private function findCommodityTypeIdByUniqueName(?string $uniqueName, Company $company): ?int
     {
-        $allowCommoditySelection = $company?->lender?->lenderDetail?->allow_preferred_commodity_in_order ?? false;
+        $allowCommoditySelection = $company->lender?->lenderDetail?->allow_preferred_commodity_in_order ?? false;
 
         // If no unique name provided, return null
         if (! $allowCommoditySelection || is_null($uniqueName) || $uniqueName === '') {
             return null;
         }
 
-        // Validation already ensured this commodity type exists and is valid
-        $commodityType = CommodityType::where('unique_name', $uniqueName)->first();
-
-        return $commodityType?->id;
+        return CommodityType::where('unique_name', $uniqueName)->value('id');
     }
 }
