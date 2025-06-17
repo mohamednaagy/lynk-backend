@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('local_market_inventories', function (Blueprint $table) {
-            $table->dropForeign('inventories_commodity_type_id_foreign');
+            $table->dropForeign(['commodity_type_id']);
             $table->dropColumn('commodity_type_id');
             $table->dropColumn('min_price');
             $table->dropColumn('max_price');
