@@ -20,7 +20,7 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Services\GetSuitableCommodityTypeService;
+use App\Services\GetSuitableCommoditiesTypeService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -135,14 +135,20 @@ class BursamV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        $commodityType = (new GetSuitableCommodityTypeService($traderOrder))->resolve();
-        $productCode = $commodityType->unique_name;
+        $commoditiesData = (new GetSuitableCommoditiesTypeService($traderOrder))->resolve();
+        // we always use the first commodity type from the list
+        $productCode = $commoditiesData['commodities_type_id'][0];
+        Log::channel('bursam')->info('Using the first commodity type from the list as the product code for the trader order', [
+            'trader_order_id' => $traderOrder->id,
+            'product_code' => $productCode,
+        ]);
         $response = BursamClient::of($traderOrder)->buyProduct($productCode);
         $isValidResponse = BursamClient::of($traderOrder)->isValidResponse($response, 'buy_product');
         if ($isValidResponse) {
             $traderOrder->update([
                 'status' => TraderOrderStatus::InProgress,
                 'product_code' => $productCode,
+                'force_commodity_type' => $commoditiesData['force_commodity_type'],
             ]);
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 

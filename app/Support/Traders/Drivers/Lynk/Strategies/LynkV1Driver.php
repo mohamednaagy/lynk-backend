@@ -25,6 +25,7 @@ use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\GetSuitableCommoditiesTypeService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
@@ -113,9 +114,11 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
         Log::channel('local_market')->info("Create New Order at Local Market For Trader Order id => {$traderOrder->id} and financing order => {$traderOrder->order->id}");
-        LynkClient::of($traderOrder)->createOrder();
+        $commodityData = (new GetSuitableCommoditiesTypeService($traderOrder))->resolve();
+        LynkClient::of($traderOrder)->createOrder($commodityData['commodities_type_id'], $commodityData['force_commodity_type']);
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
+            'force_commodity_type' => $commodityData['force_commodity_type'],
         ]);
 
         return $traderOrder;
