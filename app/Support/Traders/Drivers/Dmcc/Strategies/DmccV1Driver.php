@@ -85,7 +85,7 @@ class DmccV1Driver implements TraderInterface
     /**
      * @throws TraderException
      */
-    public function createTraderOrder(FinancingOrder $financingOrder): TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, ?int $preferredCommodityTypeId = null): TraderOrder
     {
         $ttiId = $this->getTtiId($financingOrder);
 
@@ -100,7 +100,7 @@ class DmccV1Driver implements TraderInterface
             );
         }
 
-        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc');
+        $traderOrder = $this->traitCreateTraderOrder($financingOrder, $ttiId, 'dmcc', $preferredCommodityTypeId);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;

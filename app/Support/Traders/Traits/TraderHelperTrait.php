@@ -44,7 +44,7 @@ trait TraderHelperTrait
         }
     }
 
-    public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider): Model|TraderOrder
+    public function createTraderOrder(FinancingOrder $financingOrder, string $ttiId, string $provider, ?int $preferredCommodityTypeId = null): Model|TraderOrder
     {
         return $financingOrder->traderOrders()->create([
             'provider' => $provider,
@@ -52,6 +52,7 @@ trait TraderHelperTrait
             'status' => TraderOrderStatus::InProgress,
             'mode' => TraderOrderMode::Automatic,
             'version' => get_latest_version_of_trader($provider),
+            'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }
 
@@ -213,8 +214,7 @@ trait TraderHelperTrait
         // Fallback to existing logic if no override is set
         $query = CommodityType::query();
 
-        $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)
-            ->bursam_default_preferred_commodity_type;
+        $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
 
         Log::channel('bursam')->info('Global preferred commodity type retrieved', [
             'trader_order_id' => $traderOrder->id,

@@ -143,9 +143,11 @@ class OrderController extends Controller
                 'trader_orders.hover_message',
                 'trader_orders.contract_signed_type',
                 'trader_orders.show_proceed_btn',
+                'trader_orders.commodity_type',
                 'creator',
                 'created_at',
                 'payment_proof_url',
+                'company',
                 'commodity_type',
             ])
             ->respond();
