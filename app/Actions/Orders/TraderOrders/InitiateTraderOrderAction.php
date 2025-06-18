@@ -24,7 +24,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
             throw new OrderAlreadyHasActiveTraderOrderException;
         }
 
-        $driver = $financingOrder->company->getPreferredTrader();
+        $driver = $financingOrder->getPreferredTrader();
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $traderOrder = $trader->createTraderOrder($financingOrder);
 

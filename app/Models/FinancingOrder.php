@@ -8,6 +8,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
+use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Enums\TransactionReason;
@@ -439,5 +440,18 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function commodityType()
     {
         return $this->belongsTo(CommodityType::class, 'commodity_type_id');
+    }
+
+    public function getPreferredTrader()
+    {
+        if ($this->commodity_type_id) {
+            return $this->commodityType->provider->value;
+        } else {
+            if ($this->company->isInternationalMarketType()) {
+                return Trader::Bursam;
+            }
+
+            return Trader::Lynk;
+        }
     }
 }
