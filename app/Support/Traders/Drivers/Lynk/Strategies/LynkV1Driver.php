@@ -388,13 +388,24 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     {
         $lenderDetail = $traderOrder->order->company->lender->lenderDetail;
 
-        return
+        // Check if the order can be retried based on several conditions:
+        // 1. No previous trader orders with a commodity type exist for this order
+        return ! $traderOrder->order->traderOrders()->whereNotNull('commodity_type_id')->exists() &&
+            // 2. The current order has no commodity type assigned
+            $traderOrder->order->commodity_type_id == null &&
+            // 3. The lender's trading mode is set to automatic
             $lenderDetail->trading_mode->is(TraderOrderMode::Automatic) &&
+            // 4. The lender's preferred market type is set to 'Any'
             $lenderDetail->preferred_market_type->is(CompanyMarketType::Any) && (
+                // 5. The cancellation reason is either:
+                // - No eligible commodities were available
+                // - Failed to purchase
                 $traderOrder->cancelDetail->cancel_reason->in([
                     TraderOrderCancelReason::NoEligibleCommoditiesAvailable,
                     TraderOrderCancelReason::FailureToPurchase,
-                ])) && ! $traderOrder->order->activeTraderOrder()->exists();
+                ])) &&
+            // 6. There are no active trader orders for this order
+            ! $traderOrder->order->activeTraderOrder()->exists();
     }
 
     public function retryOrder(TraderOrder $traderOrder): void
