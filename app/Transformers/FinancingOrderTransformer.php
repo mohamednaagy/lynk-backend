@@ -200,7 +200,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive($financingOrder->status_reason);
     }
 
-    public function includeCommodityTypeUniqueId(FinancingOrder $financingOrder)
+    public function includeCommodityTypeId(FinancingOrder $financingOrder)
     {
         return $this->primitive($financingOrder->commodityType?->unique_name);
     }
