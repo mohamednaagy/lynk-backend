@@ -44,7 +44,8 @@ class ProcessInProgressOrder implements ShouldQueue
     {
         try {
             $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrderId);
-            $trader = Trader::getSuitableDriverForCompany($financingOrder->company);
+            $trader = Trader::getSuitableDriverForCompany($financingOrder);
+
             DB::multipleTransaction(function () use ($trader, $financingOrder) {
                 if ($financingOrder->traderOrders()->whereIn('status', [
                     TraderOrderStatus::InProgress,

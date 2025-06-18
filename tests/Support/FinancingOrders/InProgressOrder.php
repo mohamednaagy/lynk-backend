@@ -44,7 +44,7 @@ class InProgressOrder
             return $this->financingOrder
                 ->traderOrders()
                 ->create(array_merge([
-                    'provider' => $driver ?? $this->financingOrder->Company->getPreferredTrader(),
+                    'provider' => $driver ?? $this->financingOrder->getPreferredTrader(),
                     'reference' => $reference,
                     'status' => $status,
                 ], $data));
