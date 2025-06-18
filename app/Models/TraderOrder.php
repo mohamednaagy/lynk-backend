@@ -63,6 +63,8 @@ class TraderOrder extends Model implements HasMedia
             'expire_at',
             'auto_sell_period_id',
             'commodity_type_id',
+            'force_commodity_type',
+
         ];
     }
 
@@ -71,6 +73,8 @@ class TraderOrder extends Model implements HasMedia
         'contract_signed_type' => ContractSignedType::class,
         'can_continue_progress' => 'boolean',
         'created_at' => 'datetime',
+        'force_commodity_type' => 'boolean',
+
     ];
 
     public function registerMediaCollections(): void

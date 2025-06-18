@@ -34,13 +34,14 @@ class LynkClient
         return new static($traderOrder);
     }
 
-    public function createOrder()
+    public function createOrder(array $commodityTypesId = [], $forceCommodityType = false)
     {
         try {
             $financingOrder = $this->traderOrder->order;
 
             $data = $this->prepareOrderData($financingOrder);
-
+            $data['force_commodity_type'] = $forceCommodityType;
+            $data['preferred_commodity_type'] = $commodityTypesId;
             Log::channel('local_market')->info("Data prepared for Trader Order ID: {$this->traderOrder->id}", $data);
 
             return app(CreateLocalMarketOrder::class)->handle($data);
@@ -93,17 +94,6 @@ class LynkClient
             'source' => $this->traderOrder->provider,
             'company_id' => $financingOrder->company_id,
             'buying_uuid' => $this->traderOrder->uuid_one,
-            'preferred_commodity_type' => $this->getPreferredCommodityTypes($financingOrder->company),
         ];
-    }
-
-    /**
-     * Get preferred commodity types for a company.
-     *
-     * @param  \App\Models\Company  $company
-     */
-    private function getPreferredCommodityTypes($company): array
-    {
-        return $company->commodityTypes()->pluck('commodity_type_id')->toArray() ?? [];
     }
 }

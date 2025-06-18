@@ -35,10 +35,7 @@ class InventoryService
         $companyId = $localMarketOrder->company_id;
         $preferredItemTypes = $localMarketOrder->preferred_commodity_type;
 
-        $forcePreferredCommodityType = $localMarketOrder
-            ->lender
-            ->lenderDetail
-            ->force_preferred_commodity_type;
+        $forcePreferredCommodityType = $localMarketOrder->force_commodity_type;
 
         // First try with preferred commodity types
         $preferredInventories = $this->findEligibleInventoriesForLoan(
