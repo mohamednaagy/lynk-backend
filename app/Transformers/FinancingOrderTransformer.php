@@ -66,6 +66,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'can_create_trader_order',
         'company',
         'commodity_type',
+        'commodity_type_id',
     ];
 
     public function transform(FinancingOrder $financingOrder)
