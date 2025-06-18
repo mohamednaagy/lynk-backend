@@ -34,14 +34,14 @@ class LynkClient
         return new static($traderOrder);
     }
 
-    public function createOrder(array $commoditiesTypeId = [], $forceCommodityType = false)
+    public function createOrder(array $commodityTypesId = [], $forceCommodityType = false)
     {
         try {
             $financingOrder = $this->traderOrder->order;
 
             $data = $this->prepareOrderData($financingOrder);
             $data['force_commodity_type'] = $forceCommodityType;
-            $data['preferred_commodity_type'] = $commoditiesTypeId;
+            $data['preferred_commodity_type'] = $commodityTypesId;
             Log::channel('local_market')->info("Data prepared for Trader Order ID: {$this->traderOrder->id}", $data);
 
             return app(CreateLocalMarketOrder::class)->handle($data);

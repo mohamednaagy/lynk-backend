@@ -19,7 +19,7 @@ use RuntimeException;
  * Implements hierarchical fallback strategy:
  * 1. TraderOrder -> 2. FinancingOrder -> 3. Company -> 4. GlobalSettings
  */
-final class GetSuitableCommoditiesTypeService
+final class GetSuitableCommodityTypesService
 {
     private $isForced = false;
 
@@ -44,7 +44,7 @@ final class GetSuitableCommoditiesTypeService
      */
     public function resolve(): array
     {
-        $commodityTypes = $this->resolveCommoditiesTypeWithFallbacks();
+        $commodityTypes = $this->resolvecommodityTypesWithFallbacks();
 
         if ($commodityTypes->isEmpty()) {
             Log::channel($this->logChannel)->error('No suitable commodity type found', [
@@ -54,10 +54,8 @@ final class GetSuitableCommoditiesTypeService
             throw new \RuntimeException('No suitable commodity type found for the given order');
         }
 
-        $identifier_key = $this->traderOrder->provider === Trader::Bursam ? 'unique_name' : 'id';
-
         return [
-            'commodities_type_id' => $commodityTypes->pluck($identifier_key)->toArray(),
+            'commodity_types_id' => $commodityTypes->pluck($this->getIdentifierKey())->toArray(),
             'force_commodity_type' => $this->isForced,
         ];
     }
@@ -69,7 +67,7 @@ final class GetSuitableCommoditiesTypeService
      * - Company preferences (via allowed commodity types).
      * - Global application-wide defaults (based on the trader/provider).
      */
-    private function resolveCommoditiesTypeWithFallbacks(): ?Collection
+    private function resolvecommodityTypesWithFallbacks(): ?Collection
     {
         if ($commodities = $this->resolveFromTraderOrder()) {
             $this->isForced = true;
@@ -200,7 +198,7 @@ final class GetSuitableCommoditiesTypeService
 
         if ($commodities->isNotEmpty()) {
             Log::channel($this->logChannel)->info('CommodityType resolved from GlobalSettings', [
-                'commodities_type_id' => $commodities->pluck('id')->toArray(),
+                'commodity_types_id' => $commodities->pluck('id')->toArray(),
                 'force_commodity_type' => $this->isForced,
 
             ]);
@@ -228,7 +226,7 @@ final class GetSuitableCommoditiesTypeService
 
         if ($commodities->isNotEmpty()) {
             Log::channel($this->logChannel)->info('Resolved from GlobalSettings (Lynk random selection)', [
-                'commodities_type_id' => $commodities->pluck('id')->toArray(),
+                'commodity_types_id' => $commodities->pluck('id')->toArray(),
                 'force_commodity_type' => $this->isForced,
             ]);
 
@@ -237,5 +235,10 @@ final class GetSuitableCommoditiesTypeService
         Log::channel($this->logChannel)->warning('No active Lynk commodity found in GlobalSettings');
 
         return null;
+    }
+
+    private function getIdentifierKey(): string
+    {
+        return $this->traderOrder->provider === Trader::Bursam ? 'unique_name' : 'id';
     }
 }

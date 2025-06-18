@@ -20,7 +20,7 @@ use App\Jobs\General\ProcessProceedContractAndClientWakala;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Services\GetSuitableCommoditiesTypeService;
+use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\PdfGenerator\PdfGenerator;
@@ -135,9 +135,9 @@ class BursamV1Driver implements TraderInterface
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        $commoditiesData = (new GetSuitableCommoditiesTypeService($traderOrder))->resolve();
+        $commoditiesData = (new GetSuitableCommodityTypesService($traderOrder))->resolve();
         // we always use the first commodity type from the list
-        $productCode = $commoditiesData['commodities_type_id'][0];
+        $productCode = $commoditiesData['commodity_types_id'][0];
         Log::channel('bursam')->info('Using the first commodity type from the list as the product code for the trader order', [
             'trader_order_id' => $traderOrder->id,
             'product_code' => $productCode,
