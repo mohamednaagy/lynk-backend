@@ -6,7 +6,7 @@ use App\Enums\CommodityTypeStatus;
 use App\Enums\Trader;
 use App\Models\CommodityType;
 use App\Models\TraderOrder;
-use App\Settings\Classes\Areas\InternationalMurabahaSetting;
+use App\Settings\Classes\InternationalMurabahaSetting;
 use Cache;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -45,7 +45,6 @@ final class GetSuitableCommodityTypesService
     public function resolve(): array
     {
         $commodityTypes = $this->resolvecommodityTypesWithFallbacks();
-
         if ($commodityTypes->isEmpty()) {
             Log::channel($this->logChannel)->error('No suitable commodity type found', [
                 'traderOrderId' => $this->traderOrder->id,
@@ -70,33 +69,41 @@ final class GetSuitableCommodityTypesService
     private function resolvecommodityTypesWithFallbacks(): ?Collection
     {
         if ($commodities = $this->resolveFromTraderOrder()) {
-            $this->isForced = true;
-            Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder', [
-                'commodity_type_id' => $commodities->pluck('id')->toArray(),
-                'force_commodity_type' => $this->isForced,
-            ]);
+            if ($commodities->isNotEmpty()) {
+                $this->isForced = true;
+                Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder', [
+                    'commodity_type_id' => $commodities->pluck('id')->toArray(),
+                    'force_commodity_type' => $this->isForced,
+                ]);
 
-            return $commodities;
+                return $commodities;
+            }
+
         }
 
         if ($commodities = $this->resolveFromFinancingOrder()) {
-            $this->isForced = true;
-            Log::channel($this->logChannel)->info('CommodityType resolved directly from FinancingOrder', [
-                'commodity_type_id' => $commodities->pluck('id')->toArray(),
-                'force_commodity_type' => $this->isForced,
-            ]);
+            if ($commodities->isNotEmpty()) {
+                $this->isForced = true;
+                Log::channel($this->logChannel)->info('CommodityType resolved directly from FinancingOrder', [
+                    'commodity_type_id' => $commodities->pluck('id')->toArray(),
+                    'force_commodity_type' => $this->isForced,
+                ]);
 
-            return $commodities;
+                return $commodities;
+            }
+
         }
 
         if ($commodities = $this->resolveFromCompany()) {
-            $this->isForced = $this->traderOrder->provider == Trader::Bursam ? true : $this->traderOrder->order->company->lender->lenderDetail->force_preferred_commodity_type;
-            Log::channel($this->logChannel)->info('CommodityType resolved directly from Company', [
-                'commodity_type_id' => $commodities->pluck('id')->toArray(),
-                'force_commodity_type' => $this->isForced,
-            ]);
+            if ($commodities->isNotEmpty()) {
+                $this->isForced = $this->traderOrder->provider == Trader::Bursam ? true : $this->traderOrder->order->company->lender->lenderDetail->force_preferred_commodity_type;
+                Log::channel($this->logChannel)->info('CommodityType resolved directly from Company', [
+                    'commodity_type_id' => $commodities->pluck('id')->toArray(),
+                    'force_commodity_type' => $this->isForced,
+                ]);
 
-            return $commodities;
+                return $commodities;
+            }
         }
 
         Log::channel($this->logChannel)->warning('Falling back to GlobalSettings', [
@@ -123,6 +130,10 @@ final class GetSuitableCommodityTypesService
     private function resolveFromFinancingOrder(): ?collection
     {
         $financingOrder = $this->traderOrder->order;
+        Log::channel($this->logChannel)->info('Resolving commodity from FinancingOrder', [
+            'financingOrderId' => $financingOrder->id,
+            'commodity' => $financingOrder->commodityType()->where('provider', $this->traderOrder->provider)->where('status', CommodityTypeStatus::Active)->get(),
+        ]);
 
         return $financingOrder->commodity_type_id
             ? $financingOrder->commodityType()->where('provider', $this->traderOrder->provider)->where('status', CommodityTypeStatus::Active)->get()
