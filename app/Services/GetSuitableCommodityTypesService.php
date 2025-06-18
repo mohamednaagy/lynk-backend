@@ -29,10 +29,6 @@ final class GetSuitableCommodityTypesService
         private readonly TraderOrder $traderOrder
     ) {
         $this->logChannel = $this->traderOrder->provider === Trader::Bursam ? 'bursam' : 'local_market';
-        Log::withContext([
-            'traderOrderId' => $this->traderOrder->id,
-            'provider' => $this->traderOrder->provider,
-        ]);
     }
 
     /**
@@ -47,6 +43,7 @@ final class GetSuitableCommodityTypesService
         $commodityTypes = $this->resolvecommodityTypesWithFallbacks();
         if ($commodityTypes->isEmpty()) {
             Log::channel($this->logChannel)->error('No suitable commodity type found', [
+                'financingOrderId' => $this->traderOrder->order->id,
                 'traderOrderId' => $this->traderOrder->id,
                 'provider' => $this->traderOrder->provider,
             ]);
@@ -72,6 +69,8 @@ final class GetSuitableCommodityTypesService
             if ($commodities->isNotEmpty()) {
                 $this->isForced = true;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder', [
+                    'financingOrderId' => $this->traderOrder->order->id,
+                    'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
                     'force_commodity_type' => $this->isForced,
                 ]);
@@ -85,6 +84,8 @@ final class GetSuitableCommodityTypesService
             if ($commodities->isNotEmpty()) {
                 $this->isForced = true;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from FinancingOrder', [
+                    'financingOrderId' => $this->traderOrder->order->id,
+                    'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
                     'force_commodity_type' => $this->isForced,
                 ]);
@@ -98,6 +99,8 @@ final class GetSuitableCommodityTypesService
             if ($commodities->isNotEmpty()) {
                 $this->isForced = $this->traderOrder->provider == Trader::Bursam ? true : $this->traderOrder->order->company->lender->lenderDetail->force_preferred_commodity_type;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from Company', [
+                    'financingOrderId' => $this->traderOrder->order->id,
+                    'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
                     'force_commodity_type' => $this->isForced,
                 ]);
@@ -107,6 +110,8 @@ final class GetSuitableCommodityTypesService
         }
 
         Log::channel($this->logChannel)->warning('Falling back to GlobalSettings', [
+            'financingOrderId' => $this->traderOrder->order->id,
+            'traderOrderId' => $this->traderOrder->id,
             'reason' => 'TraderOrder, FinancingOrder, and Company all returned null',
         ]);
 
@@ -130,10 +135,6 @@ final class GetSuitableCommodityTypesService
     private function resolveFromFinancingOrder(): ?collection
     {
         $financingOrder = $this->traderOrder->order;
-        Log::channel($this->logChannel)->info('Resolving commodity from FinancingOrder', [
-            'financingOrderId' => $financingOrder->id,
-            'commodity' => $financingOrder->commodityType()->where('provider', $this->traderOrder->provider)->where('status', CommodityTypeStatus::Active)->get(),
-        ]);
 
         return $financingOrder->commodity_type_id
             ? $financingOrder->commodityType()->where('provider', $this->traderOrder->provider)->where('status', CommodityTypeStatus::Active)->get()
@@ -196,6 +197,7 @@ final class GetSuitableCommodityTypesService
 
         $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
         Log::channel($this->logChannel)->info('Unavailable product codes from cache', [
+            'financingOrderId' => $this->traderOrder->order->id,
             'traderOrderId' => $this->traderOrder->id,
             'unavailable_product_codes' => $unavailableProductCodes,
             'count' => count($unavailableProductCodes),
@@ -209,6 +211,8 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities->isNotEmpty()) {
             Log::channel($this->logChannel)->info('CommodityType resolved from GlobalSettings', [
+                'financingOrderId' => $this->traderOrder->order->id,
+                'traderOrderId' => $this->traderOrder->id,
                 'commodity_types_id' => $commodities->pluck('id')->toArray(),
                 'force_commodity_type' => $this->isForced,
 
@@ -237,6 +241,8 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities->isNotEmpty()) {
             Log::channel($this->logChannel)->info('Resolved from GlobalSettings (Lynk random selection)', [
+                'financingOrderId' => $this->traderOrder->order->id,
+                'traderOrderId' => $this->traderOrder->id,
                 'commodity_types_id' => $commodities->pluck('id')->toArray(),
                 'force_commodity_type' => $this->isForced,
             ]);
