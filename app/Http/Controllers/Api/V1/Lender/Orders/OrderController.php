@@ -215,7 +215,7 @@ class OrderController extends Controller
                         'phone_country_code',
                         'phone_number',
                         'phone_number_formatted',
-                        ...(optional('commodity_type_id', fn () => $financingOrder->commodity_type_id ? ['commodity_type_id'] : [])),
+                        'commodity_type',
                     ])->respond();
             }
         );
