@@ -337,8 +337,27 @@ class FinancingOrderTransformer extends TransformerAbstract
             'allow_preferred_commodity_in_order' => $company->lender->lenderDetail->allow_preferred_commodity_in_order]);
     }
 
+    /**
+     * Include commodity type details for the financing order.
+     * If a company is present, return the unique_name as id.
+     */
     public function includeCommodityType(FinancingOrder $financingOrder)
     {
-        return $this->primitive(optional($financingOrder->commodityType)->only(['id', 'name']));
+        if (blank($financingOrder->commodity_type_id)) {
+            return $this->primitive(null);
+        }
+
+        $company = tenant();
+        $commodityType = optional($financingOrder->commodityType);
+
+        if ($company) {
+            return $this->primitive([
+                'id' => $commodityType->unique_name,
+                'name' => $commodityType->name,
+            ]);
+        }
+
+        return $this->primitive($commodityType->only(['id', 'name']));
     }
+
 }
