@@ -2,7 +2,7 @@
 
 namespace App\Support\Traders;
 
-use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver;
 use App\Support\Traders\Drivers\Bursam\Strategies\BursamV2Driver;
@@ -69,11 +69,10 @@ class TraderManager extends Manager
         return new FakeV1Driver;
     }
 
-    public function getSuitableDriverForCompany(Company $company)
+    public function getSuitableDriverForCompany(FinancingOrder $order)
     {
-        $driver = $company->getPreferredTrader();
+        $driver = $order->getPreferredTrader();
 
         return $this->driver($driver, get_latest_version_of_trader($driver));
-
     }
 }
