@@ -15,4 +15,6 @@ interface BuildPaginatedCommodityTypeQuery
     public function setActive(?int $value): self;
 
     public function setProvider($provider = null);
+
+    public function setCompanyId(?int $companyId): self;
 }

@@ -20,6 +20,7 @@ class CommodityTypesLiteListRequest extends FormRequest
             'search' => ['nullable', 'string', 'max:255'],
             'status' => ['nullable', 'integer', 'in:'.CommodityTypeStatus::Active.','.CommodityTypeStatus::Inactive],
             'provider' => ['nullable', 'string', new EnumValue(CommodityTypeProvider::class)],
+            'company_id' => ['nullable', 'integer', 'exists:companies,id'],
         ];
     }
 }
