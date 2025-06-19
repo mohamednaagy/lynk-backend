@@ -80,7 +80,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     private function shouldSkipRetry(Exception $e): bool
     {
-        return in_array($e->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES);
+        return in_array($e->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES) || in_array($e->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_INVENTORY_ERROR_CODES);
     }
 
     public function failed($exception)
@@ -99,7 +99,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             $traderOrder->order->update([
                 'status' => FinancingOrderStatus::TradingFailure,
             ]);
-            $cancel_reason = in_array($exception->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES) ? TraderOrderCancelReason::NoEligibleCommoditiesAvailable : TraderOrderCancelReason::FailureToPurchase;
+            $cancel_reason = in_array($exception->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES) || in_array($exception->getContext('failure_code'), BursamErrorCode::UNAVAILABLE_INVENTORY_ERROR_CODES) ? TraderOrderCancelReason::NoEligibleCommoditiesAvailable : TraderOrderCancelReason::FailureToPurchase;
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancel_reason);
             app(UpdateTraderOrderStatusToCancel::class)->handle(
                 $traderOrder,
