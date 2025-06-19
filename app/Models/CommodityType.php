@@ -69,6 +69,5 @@ class CommodityType extends Model
         }
 
         return $query;
-
     }
 }

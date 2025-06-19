@@ -25,10 +25,8 @@ class CommodityTypesLiteList extends Controller
 
     public function __invoke(CommodityTypesLiteListRequest $request, BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypeQuery): JsonResponse
     {
-        if ($request->has('company_id')) {
-            if (! $this->checkIfCompanyAllowedToSelectPreferredCommodity($request->validated('company_id'))) {
-                return $this->respondWithEmptyData();
-            }
+        if ($request->filled('company_id') && ! $this->canCompanySelectPreferredCommodityForOrder($request->validated('company_id'))) {
+            return $this->respondWithEmptyData();
         }
 
         $commodityTypes = $buildPaginatedCommodityTypeQuery
@@ -44,7 +42,7 @@ class CommodityTypesLiteList extends Controller
             ->respond();
     }
 
-    private function checkIfCompanyAllowedToSelectPreferredCommodity(int $companyId)
+    private function canCompanySelectPreferredCommodityForOrder(int $companyId): bool
     {
         $company = Company::with('lender.lenderDetail')->find($companyId);
 
