@@ -21,7 +21,7 @@ use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderCreated;
 use App\Models\FinancingOrder;
 use App\Traits\HandlesFractal;
-use App\Transformers\FinancingOrderTransformer;
+use App\Transformers\Lender\Order\FinancingOrderTransformer;
 use Cknow\Money\Money;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
