@@ -14,4 +14,8 @@ class BursamErrorCode
         '115',
         '976',
     ];
+
+    public const UNAVAILABLE_INVENTORY_ERROR_CODES = [
+        '108',
+    ];
 }
