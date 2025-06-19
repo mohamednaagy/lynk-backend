@@ -16,6 +16,8 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 
     private $provider;
 
+    private ?int $companyId = null;
+
     public function handle(): Builder
     {
         return CommodityType::when($this->status, function ($query) {
@@ -25,7 +27,8 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
         })->when($this->active, fn ($q) => $q->active($this->active))
             ->when($this->provider, function ($query) {
                 $query->where('provider', 'like', $this->provider);
-            });
+            })->when($this->companyId, fn ($q) => $q->getCommoditiesBasedOnCompany(($this->companyId))
+            );
     }
 
     public function setStatus($status = null)
@@ -69,6 +72,17 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     public function setProvider($provider = null)
     {
         $this->provider = $provider;
+
+        return $this;
+    }
+
+    /**
+     * @param  int|null  $companyId
+     * @return $this
+     */
+    public function setCompanyId($companyId = null): self
+    {
+        $this->companyId = $companyId;
 
         return $this;
     }
