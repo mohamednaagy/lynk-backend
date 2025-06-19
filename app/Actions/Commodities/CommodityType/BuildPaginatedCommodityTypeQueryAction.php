@@ -77,10 +77,9 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     }
 
     /**
-     * @param  int|null  $companyId
      * @return $this
      */
-    public function setCompanyId($companyId = null): self
+    public function setCompanyId(?int $companyId): self
     {
         $this->companyId = $companyId;
 
