@@ -61,12 +61,63 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'order_amount' => $financingOrder->amount->jsonSerialize(),
             ]);
 
-            $wallet = $company->getWallet(WalletType::CompanyWallet);
+            Log::info('DeductOrderCompletedFeeAction: Attempting to get company wallet', [
+                'trader_order_id' => $traderOrder->id,
+                'company_id' => $company->id,
+                'wallet_type' => WalletType::CompanyWallet,
+            ]);
+
+            try {
+                $wallet = $company->getWallet(WalletType::CompanyWallet);
+
+                Log::info('DeductOrderCompletedFeeAction: Wallet retrieval completed', [
+                    'trader_order_id' => $traderOrder->id,
+                    'company_id' => $company->id,
+                    'wallet_found' => $wallet !== null,
+                    'wallet_id' => $wallet?->id,
+                ]);
+
+            } catch (\Exception $walletException) {
+                Log::error('DeductOrderCompletedFeeAction: Exception during wallet retrieval', [
+                    'trader_order_id' => $traderOrder->id,
+                    'company_id' => $company->id,
+                    'exception_class' => get_class($walletException),
+                    'exception_message' => $walletException->getMessage(),
+                    'exception_trace' => $walletException->getTraceAsString(),
+                ]);
+                throw $walletException;
+            }
+
             if (! $wallet) {
                 Log::error('DeductOrderCompletedFeeAction: Company wallet not found', [
                     'trader_order_id' => $traderOrder->id,
                     'company_id' => $company->id,
+                    'company_name' => $company->name,
+                    'wallet_type_requested' => WalletType::CompanyWallet,
                 ]);
+
+                // Let's also check what wallets this company DOES have
+                try {
+                    $allWallets = $company->wallets()->get();
+                    Log::info('DeductOrderCompletedFeeAction: Company existing wallets', [
+                        'trader_order_id' => $traderOrder->id,
+                        'company_id' => $company->id,
+                        'total_wallets' => $allWallets->count(),
+                        'wallet_details' => $allWallets->map(function ($w) {
+                            return [
+                                'id' => $w->id,
+                                'type' => $w->type,
+                                'currency' => $w->currency,
+                            ];
+                        })->toArray(),
+                    ]);
+                } catch (\Exception $walletListException) {
+                    Log::error('DeductOrderCompletedFeeAction: Failed to retrieve company wallets list', [
+                        'trader_order_id' => $traderOrder->id,
+                        'company_id' => $company->id,
+                        'exception' => $walletListException->getMessage(),
+                    ]);
+                }
 
                 return null;
             }
