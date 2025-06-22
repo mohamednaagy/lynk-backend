@@ -60,13 +60,31 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
 
     public function updateMurabhaCompleteDocument(TraderOrder $traderOrder, array $data)
     {
-        // Idempotency check: If the step is already complete, don't process again
-        if ($traderOrder->checkOrderStepComplete(MurabhaStep::MurabahaSaleCompleted)) {
-            Log::info('LynkStrategy updateMurabhaCompleteDocument: Step already completed, skipping', [
+        // Check if step is already complete
+        $stepAlreadyComplete = $traderOrder->checkOrderStepComplete(MurabhaStep::MurabahaSaleCompleted);
+
+        if ($stepAlreadyComplete) {
+            Log::info('LynkStrategy updateMurabhaCompleteDocument: Step already completed', [
                 'trader_order_id' => $traderOrder->id,
                 'current_status' => $traderOrder->status->key,
                 'last_action' => $traderOrder->traderHistories()->latest('id')->first()?->action,
             ]);
+
+            // Check if the history record was created but observer wasn't triggered
+            $lastMurabahaSaleHistory = $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::MurabahaSaleCompleted)
+                ->latest('id')
+                ->first();
+
+            if ($lastMurabahaSaleHistory) {
+                Log::info('LynkStrategy updateMurabhaCompleteDocument: Manually triggering observer for existing history', [
+                    'trader_order_id' => $traderOrder->id,
+                    'history_id' => $lastMurabahaSaleHistory->id,
+                ]);
+
+                // Manually trigger the observer to ensure wallet charging happens
+                app(\App\Observers\TraderHistoryObserver::class)->created($lastMurabahaSaleHistory);
+            }
 
             // If step is complete but status is not, update it
             if ($traderOrder->status->is(TraderOrderStatus::InProgress)) {
