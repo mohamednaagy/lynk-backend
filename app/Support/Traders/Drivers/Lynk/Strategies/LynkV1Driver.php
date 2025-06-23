@@ -132,7 +132,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                 $currentTimeInUtcTz = CarbonImmutable::now();
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
-
+                $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
                 $this->storeOrderDocumentAsPdf(
                     'local-commodity-market.transfer-ownership-to-lender',
                     [
@@ -163,8 +163,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
                 );
             });
-
-            $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
 
         } catch (\Throwable $exception) {
             throw new TraderException(
