@@ -13,21 +13,15 @@ use Throwable;
 
 class BrowserlessGenerator implements GeneratorInterface
 {
-    protected $baseUrl;
+    protected string $baseUrl;
+    protected string $storageDisk;
+    protected array $options;
+    protected int $maxRetries = 5;
+    protected int $retryBaseDelaySeconds = 5;
+    protected int $timeout = 120; // seconds
+    protected string $requestId;
 
-    protected $storageDisk;
-
-    protected $options;
-
-    protected $maxRetries = 3;
-
-    protected $retryDelay = 5000; // milliseconds
-
-    protected $timeout = 120; // seconds
-
-    protected $requestId;
-
-    public function __construct($options)
+    public function __construct(array $options)
     {
         $this->baseUrl = $options['base_url'];
         $this->storageDisk = $options['storage_disk'];
@@ -52,22 +46,21 @@ class BrowserlessGenerator implements GeneratorInterface
      * @param  string  $html
      * @param  array|Closure  $options
      * @return mixed
-     *
-     * @throws GeneratingPdfException
-     * @throws MissingStorageCallbackException
      * @throws Throwable
      */
-    public function outputFromHtml($html, $options = [])
+    public function outputFromHtml($html, $options)
     {
-        $tmpFileResource = null;
-        $attempt = 0;
+        $attempt = 1;
 
         try {
             [$options, $storageCallback] = $this->resolveStorageCallback($options);
 
-            while ($attempt < $this->maxRetries) {
-                $attempt++;
+            while ($attempt <= $this->maxRetries) {
+
                 $tmpFileResource = tmpfile();
+                if ($tmpFileResource === false) {
+                    throw new \RuntimeException("Failed to create temporary file.");
+                }
 
                 try {
                     $this->logAttempt($attempt);
@@ -80,31 +73,30 @@ class BrowserlessGenerator implements GeneratorInterface
 
                     $this->handleFailedResponse($response, $attempt);
 
-                    if ($attempt < $this->maxRetries) {
-                        $this->waitBeforeRetry();
-
-                        continue;
+                    if ($attempt <= $this->maxRetries) {
+                        $this->waitBeforeRetry($attempt);
+                    } else {
+                        throw new GeneratingPdfException([
+                            'status' => $response->status(),
+                            'body' => $response->body(),
+                            'attempts' => $attempt,
+                            'request_id' => $this->requestId,
+                        ]);
                     }
-
-                    throw new GeneratingPdfException([
-                        'status' => $response->status(),
-                        'body' => $response->body(),
-                        'attempts' => $attempt,
-                        'request_id' => $this->requestId,
-                    ]);
                 } catch (Throwable $e) {
-                    $this->cleanupTmpFile($tmpFileResource);
+                    $this->logRetryableError($e, $attempt);
 
-                    if ($attempt < $this->maxRetries) {
-                        $this->logRetryableError($e, $attempt);
-                        $this->waitBeforeRetry();
-
-                        continue;
+                    if ($attempt <= $this->maxRetries) {
+                        $this->waitBeforeRetry($attempt);
+                    } else {
+                        $this->logFinalError($e, $attempt);
+                        throw $e;
                     }
-
-                    $this->logFinalError($e, $attempt);
-                    throw $e;
+                } finally {
+                    $this->cleanupTmpFile($tmpFileResource);
                 }
+
+                $attempt++;
             }
         } catch (Throwable $th) {
             $this->logFinalError($th, $attempt);
@@ -112,15 +104,7 @@ class BrowserlessGenerator implements GeneratorInterface
         }
     }
 
-    /**
-     * Resolve storage callback from options
-     *
-     * @param  array|Closure  &$options
-     * @return array
-     *
-     * @throws MissingStorageCallbackException
-     */
-    protected function resolveStorageCallback(&$options)
+    protected function resolveStorageCallback(array|Closure &$options): array
     {
         if ($options instanceof Closure) {
             return [[], $options];
@@ -129,20 +113,13 @@ class BrowserlessGenerator implements GeneratorInterface
         if (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
             $storageCallback = $options['storageCallback'];
             unset($options['storageCallback']);
-
             return [$options, $storageCallback];
         }
 
         throw new MissingStorageCallbackException;
     }
 
-    /**
-     * Make HTTP request to generate PDF
-     *
-     * @param  resource  $tmpFileResource
-     * @return \Illuminate\Http\Client\Response
-     */
-    protected function makeHttpRequest($tmpFileResource, string $html, array|Closure $options)
+    protected function makeHttpRequest($tmpFileResource, string $html, array $options)
     {
         return Http::timeout($this->timeout)
             ->baseUrl($this->baseUrl)
@@ -150,16 +127,9 @@ class BrowserlessGenerator implements GeneratorInterface
             ->post('pdf', $this->prepareRequestData($html, $options));
     }
 
-    /**
-     * Handle successful PDF generation response
-     *
-     * @param  resource  $tmpFileResource
-     * @return mixed
-     */
-    protected function handleSuccessfulResponse($tmpFileResource, Closure $storageCallback, int $attempt)
+    protected function handleSuccessfulResponse($tmpFileResource, Closure $storageCallback, int $attempt): mixed
     {
         $storedFile = $storageCallback($tmpFileResource);
-        $this->cleanupTmpFile($tmpFileResource);
 
         Log::channel('lynk')->info('PDF Generation Success', [
             'attempt' => $attempt,
@@ -169,12 +139,7 @@ class BrowserlessGenerator implements GeneratorInterface
         return $storedFile;
     }
 
-    /**
-     * Handle failed PDF generation response
-     *
-     * @param  \Illuminate\Http\Client\Response  $response
-     */
-    protected function handleFailedResponse($response, int $attempt)
+    protected function handleFailedResponse($response, int $attempt): void
     {
         Log::channel('lynk')->error('PDF Generation Failed', [
             'attempt' => $attempt,
@@ -184,30 +149,20 @@ class BrowserlessGenerator implements GeneratorInterface
         ]);
     }
 
-    /**
-     * Wait before retrying
-     */
-    protected function waitBeforeRetry()
+    protected function waitBeforeRetry(int $attempt): void
     {
-        usleep($this->retryDelay * 1000);
+        $seconds = $attempt * $this->retryBaseDelaySeconds;
+        usleep($seconds * 1_000_000);
     }
 
-    /**
-     * Clean up temporary file
-     *
-     * @param  resource|null  $tmpFileResource
-     */
-    protected function cleanupTmpFile($tmpFileResource)
+    protected function cleanupTmpFile($tmpFileResource): void
     {
         if (is_resource($tmpFileResource)) {
             fclose($tmpFileResource);
         }
     }
 
-    /**
-     * Log attempt information
-     */
-    protected function logAttempt(int $attempt)
+    protected function logAttempt(int $attempt): void
     {
         Log::channel('lynk')->info('PDF Generation Attempt', [
             'attempt' => $attempt,
@@ -217,10 +172,7 @@ class BrowserlessGenerator implements GeneratorInterface
         ]);
     }
 
-    /**
-     * Log retryable error
-     */
-    protected function logRetryableError(Throwable $e, int $attempt)
+    protected function logRetryableError(Throwable $e, int $attempt): void
     {
         Log::channel('lynk')->error('PDF Generation Retryable Error', [
             'attempt' => $attempt,
@@ -230,10 +182,7 @@ class BrowserlessGenerator implements GeneratorInterface
         ]);
     }
 
-    /**
-     * Log final error
-     */
-    protected function logFinalError(Throwable $th, int $attempt)
+    protected function logFinalError(Throwable $th, int $attempt): void
     {
         Log::channel('lynk')->error('PDF Generation Final Error', [
             'error_message' => $th->getMessage(),
@@ -243,39 +192,22 @@ class BrowserlessGenerator implements GeneratorInterface
         ]);
     }
 
-    /**
-     * Get default PDF generation options
-     *
-     * @return array
-     */
-    protected function getDefaultOptions()
+    protected function getDefaultOptions(): array
     {
         return $this->options;
     }
 
-    /**
-     * Get storage disk
-     *
-     * @return mixed
-     */
-    public function getStorageDisk()
+    public function getStorageDisk(): string
     {
         return $this->storageDisk;
     }
 
-    /**
-     * Prepare request data for PDF generation
-     *
-     * @param  string  $html
-     * @param  array  $options
-     * @return array
-     */
-    public function prepareRequestData($html, $options)
+    public function prepareRequestData(string $html, array $options): array
     {
         return [
             'html' => $html,
             'gotoOptions' => ['waitUntil' => 'networkidle0'],
-            'options' => array_merge($this->getDefaultOptions(), $options),
+            'options' => array_replace_recursive($this->getDefaultOptions(), $options),
         ];
     }
 }
