@@ -460,4 +460,20 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->belongsTo(CommodityType::class, 'commodity_type_id');
     }
+
+    /**
+     * Check if the trader order has "any" commodity type selected (commodity_type_id = -1)
+     */
+    public function hasAnyCommodityType(): bool
+    {
+        return $this->commodity_type_id === -1;
+    }
+
+    /**
+     * Check if the trader order has a specific commodity type selected
+     */
+    public function hasSpecificCommodityType(): bool
+    {
+        return $this->commodity_type_id > 0;
+    }
 }

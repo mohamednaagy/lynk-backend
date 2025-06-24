@@ -250,6 +250,96 @@ class TraderOrderControllerStoreTest extends TestCase
         $this->assertTrue(self::$financingOrder->activeTraderOrder()->exists());
     }
 
+    public function test_trader_order_controller_store_with_commodity_type_id_any_selection(): void
+    {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$apiUrl, [
+                'trader' => 'bursam',
+                'reference_number' => '102030',
+                'mode' => TraderOrderMode::Manual,
+                'commodity_type_id' => -1, // User selected "any"
+            ])
+            ->assertStatus(Response::HTTP_OK);
+
+        $traderOrder = self::$financingOrder->activeTraderOrder();
+        $this->assertTrue($traderOrder->exists());
+        $this->assertEquals(-1, $traderOrder->first()->commodity_type_id);
+        $this->assertTrue($traderOrder->first()->hasAnyCommodityType());
+    }
+
+    public function test_trader_order_controller_store_with_commodity_type_id_any_selection_in_automatic_mode(): void
+    {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$apiUrl, [
+                'trader' => 'bursam',
+                'mode' => TraderOrderMode::Automatic,
+                'commodity_type_id' => -1, // User selected "any"
+            ])
+            ->assertStatus(Response::HTTP_OK);
+
+        $traderOrder = self::$financingOrder->activeTraderOrder();
+        $this->assertTrue($traderOrder->exists());
+        $this->assertEquals(-1, $traderOrder->first()->commodity_type_id);
+        $this->assertTrue($traderOrder->first()->hasAnyCommodityType());
+    }
+
+    public function test_trader_order_controller_store_with_commodity_type_id_specific_selection(): void
+    {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
+        // Create a commodity type for testing
+        $commodityType = \App\Models\CommodityType::factory()->create([
+            'provider' => 'bursam',
+            'status' => \App\Enums\CommodityTypeStatus::Active,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$apiUrl, [
+                'trader' => 'bursam',
+                'reference_number' => '102030',
+                'mode' => TraderOrderMode::Manual,
+                'commodity_type_id' => $commodityType->id,
+            ])
+            ->assertStatus(Response::HTTP_OK);
+
+        $traderOrder = self::$financingOrder->activeTraderOrder();
+        $this->assertTrue($traderOrder->exists());
+        $this->assertEquals($commodityType->id, $traderOrder->first()->commodity_type_id);
+        $this->assertTrue($traderOrder->first()->hasSpecificCommodityType());
+    }
+
+    public function test_trader_order_controller_store_manual_mode_sets_commodity_type_id_to_null_when_not_provided(): void
+    {
+        Event::fake([
+            'eloquent.created: '.TraderHistory::class,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->postJson(self::$apiUrl, [
+                'trader' => 'bursam',
+                'reference_number' => '102030',
+                'mode' => TraderOrderMode::Manual,
+                // Not providing commodity_type_id for manual mode (system initiated)
+            ])
+            ->assertStatus(Response::HTTP_OK);
+
+        $traderOrder = self::$financingOrder->activeTraderOrder();
+        $this->assertTrue($traderOrder->exists());
+        $this->assertNull($traderOrder->first()->commodity_type_id);
+        $this->assertFalse($traderOrder->first()->hasAnyCommodityType());
+        $this->assertFalse($traderOrder->first()->hasSpecificCommodityType());
+    }
+
     public function traderWithAvailableModesDataProvider(): array
     {
         return [
