@@ -40,7 +40,8 @@ final class GetSuitableCommodityTypesService
      */
     public function resolve(): array
     {
-        $commodityTypes = $this->resolvecommodityTypesWithFallbacks();
+
+        $commodityTypes = $this->resolveCommodityTypesWithFallbacks();
         if ($commodityTypes->isEmpty()) {
             Log::channel($this->logChannel)->error('No suitable commodity type found', [
                 'financingOrderId' => $this->traderOrder->order->id,
@@ -63,8 +64,22 @@ final class GetSuitableCommodityTypesService
      * - Company preferences (via allowed commodity types).
      * - Global application-wide defaults (based on the trader/provider).
      */
-    private function resolvecommodityTypesWithFallbacks(): ?Collection
+    private function resolveCommodityTypesWithFallbacks(): ?Collection
     {
+
+        if ($this->traderOrder->hasAnyCommodityType()) {
+            $this->isForced = true;
+            $commodities = $this->resolveFromGlobalSettings();
+            Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder (ANY)', [
+                'financingOrderId' => $this->traderOrder->order->id,
+                'traderOrderId' => $this->traderOrder->id,
+                'commodity_type_id' => $commodities->pluck($this->getIdentifierKey())->toArray(),
+                'force_commodity_type' => $this->isForced,
+            ]);
+
+            return $commodities;
+        }
+
         if ($commodities = $this->resolveFromTraderOrder()) {
             if ($commodities->isNotEmpty()) {
                 $this->isForced = true;
