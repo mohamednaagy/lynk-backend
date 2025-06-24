@@ -26,7 +26,7 @@ class ProcessLynkCompleteMurabahaAfterSellToMarket implements ShouldBeUnique, Sh
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('local_market_sell_commodity');
+        $this->onQueue('local_market');
     }
 
     /**
