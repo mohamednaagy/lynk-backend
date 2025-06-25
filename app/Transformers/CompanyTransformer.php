@@ -38,6 +38,8 @@ class CompanyTransformer extends TransformerAbstract
         'default_contract_sign_time_limit',
         'force_preferred_commodity_type',
         'allow_preferred_commodity_in_order',
+        'token_expire_in',
+
     ];
 
     public function transform(Company $company): array
@@ -211,5 +213,10 @@ class CompanyTransformer extends TransformerAbstract
     public function includeForcePreferredCommodityType(Company $company): Primitive
     {
         return $this->primitive($company->lender->lenderDetail?->force_preferred_commodity_type);
+    }
+
+    public function includeTokenExpireIn(Company $company): Primitive
+    {
+        return $this->primitive($company->lender->lenderDetail?->token_expire_in);
     }
 }

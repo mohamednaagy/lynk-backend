@@ -42,6 +42,7 @@ class CompanyLenderDetail extends Model
         'auto_complete_murabaha_order',
         'webhook_secret_key',
         'allow_preferred_commodity_in_order',
+        'token_expire_in',
     ];
 
     public function lender()

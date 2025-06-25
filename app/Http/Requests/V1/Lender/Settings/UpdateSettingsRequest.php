@@ -27,6 +27,14 @@ class UpdateSettingsRequest extends FormRequest
             'require_initiate_trade_request' => ['required', 'boolean'],
             'notify_borrowers_about_order_updates' => ['required', 'boolean'],
             'force_unique_reference_number' => ['required', 'boolean'],
+            'token_expire_in' => ['nullable', 'numeric', 'gt:0'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'token_expire_in.gt' => __('validation.greater_than_zero'),
         ];
     }
 }

@@ -39,6 +39,7 @@ class SettingsController extends Controller
                 'require_initiate_trade_request',
                 'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
+                'token_expire_in',
             ])->respond();
     }
 
@@ -47,19 +48,23 @@ class SettingsController extends Controller
         $company = tenant();
 
         $data = $updateSettingsRequest->validated();
-        if ($company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Manual)) {
+
+        $lenderDetail = $company->lender->lenderDetail;
+
+        if ($lenderDetail->trading_mode->is(TraderOrderMode::Manual)) {
             $data['require_initiate_trade_request'] = true;
         }
 
         $company->update($data);
 
-        $company->lender->lenderDetail()->updateOrCreate(
+        $lenderDetail->updateOrCreate(
             ['company_id' => $company->id],
             Arr::only($data, [
                 'require_initiate_trade_request',
                 'does_order_require_approval',
                 'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
+                'token_expire_in',
             ])
         );
 

@@ -56,6 +56,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
 
     Route::middleware([
         'auth:sanctum',
+        'ensureLenderApiAdminTokenNotExpired',
         'role:'.implode('|', [
             Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser,
         ]),
