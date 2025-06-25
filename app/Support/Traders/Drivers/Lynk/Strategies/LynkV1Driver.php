@@ -475,10 +475,13 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function contractSignedMessage(TraderOrder $traderOrder)
     {
         $isContractSignedCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        if (! $isContractSignedCompleted) {
+            return null;
+        }
 
         return match ($traderOrder->contract_signed_type->value) {
-            ContractSignedType::Sell && $isContractSignedCompleted => __('order.trader.lynk.steps.contract_signed.v1.sell'),
-            ContractSignedType::Delivery && $isContractSignedCompleted => __('order.trader.lynk.steps.contract_signed.v1.deliver'),
+            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.v1.sell'),
+            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.v1.deliver'),
             default => null,
         };
     }
