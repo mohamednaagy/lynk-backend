@@ -2,11 +2,10 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\Role;
 use Closure;
 use Illuminate\Http\Request;
 
-class EnsureLenderApiAdminTokenNotExpiredMiddleware
+class EnsureTokenNotExpiredMiddleware
 {
     /**
      * Handle an incoming request.
@@ -19,11 +18,8 @@ class EnsureLenderApiAdminTokenNotExpiredMiddleware
         $user = auth()->user();
         $token = $user?->currentAccessToken();
         if ($token) {
-            $isUserHasLenderApiUserRole = $user->hasRole(Role::LenderApiUser);
-            if ($isUserHasLenderApiUserRole) {
-                if ($token->expire_at?->isPast()) {
-                    return response()->json(['message' => __('Unauthenticated.')], 401);
-                }
+            if ($token->expire_at?->isPast()) {
+                return response()->json(['message' => __('Unauthenticated.')], 401);
             }
         }
 

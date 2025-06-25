@@ -12,10 +12,11 @@ class LoginUserAction implements LoginUser
     public function handle(User $user, ?string $source = null, ?Request $request = null): array
     {
         $company = $user->company;
-        $tokenTtl = $company?->lender?->lenderDetail?->token_expire_in;
         $token = $user->createToken($source);
         $accessToken = $token->accessToken;
-        if ($company && $tokenTtl && $user->hasRole(Role::LenderApiUser)) {
+        $tokenTtl = null;
+        if ($user->hasRole(Role::LenderApiUser) && ! is_null($company->getTokenExpireValue())) {
+            $tokenTtl = $company->getTokenExpireValue();
             $accessToken->expire_at = now()->addSeconds($tokenTtl);
             $accessToken->save();
         }
