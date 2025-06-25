@@ -159,4 +159,9 @@ class Company extends BaseTenant
     {
         return $this->hasOne(Lender::class, 'id');
     }
+
+    public function getTokenExpireValue()
+    {
+        return $this->lender->lenderDetail->token_expire_in;
+    }
 }

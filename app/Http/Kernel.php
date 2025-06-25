@@ -76,5 +76,6 @@ class Kernel extends HttpKernel
         'setAppLocale' => \App\Http\Middleware\SetLocalization::class,
         'checkCompanyStatus' => \App\Http\Middleware\CheckCompanyStatus::class,
         'checkDataOfSupplier' => \App\Http\Middleware\EnsureDataOfUserSupplier::class,
+        'ensureTokenNotExpired' => \App\Http\Middleware\EnsureTokenNotExpiredMiddleware::class,
     ];
 }

@@ -270,4 +270,6 @@ return [
     'field_is_not_editable' => 'لا يمكن تعديل هذا الحقل',
     'periods_overlapped_with_existing' => 'فترات متداخلة مع الفترات الموجودة',
     'select_commodity_not_valid' => 'السلعة المختارة غير صالحة أو غير نشطة. الرجاء اختيار سلعة أخرى.',
+    'greater_than_zero' => 'يجب أن تكون القيمة أكبر من صفر',
+
 ];
