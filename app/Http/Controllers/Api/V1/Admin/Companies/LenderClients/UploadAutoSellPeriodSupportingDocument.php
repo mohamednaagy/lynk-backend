@@ -35,6 +35,7 @@ class UploadAutoSellPeriodSupportingDocument extends Controller
             'data' => [
                 'id' => $media->id,
                 'name' => $media->name,
+                'collection' => $media->collection_name,
                 'url' => $media->getUrl(),
             ],
         ], Response::HTTP_CREATED);

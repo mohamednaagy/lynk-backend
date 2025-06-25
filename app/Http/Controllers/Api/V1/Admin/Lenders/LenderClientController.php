@@ -69,6 +69,9 @@ class LenderClientController extends Controller
 
     public function show(Company $lender, CompanyLenderClient $client): JsonResponse
     {
+        // Load relationships to avoid N+1 queries
+        $client->load(['autoSellPeriods.media']);
+
         return fractal($client, new CompanyLenderClientTransformer)
             ->parseIncludes([
                 'name',
@@ -113,7 +116,11 @@ class LenderClientController extends Controller
         return DB::transaction(function () use ($client, $data, $updateLenderClient) {
             $client = $updateLenderClient->handle($client, $data);
 
-            return fractal($client->refresh(), new CompanyLenderClientTransformer)
+            // Load relationships to avoid N+1 queries
+            $updatedClient = $client->refresh();
+            $updatedClient->load(['autoSellPeriods.media']);
+
+            return fractal($updatedClient, new CompanyLenderClientTransformer)
                 ->parseIncludes([
                     'name',
                     'type',
