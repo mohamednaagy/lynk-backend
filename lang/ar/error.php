@@ -49,4 +49,6 @@ return [
     'location_cannot_be_deleted' => 'لا يمكن حذف الموقع لأن الوحدات المحجوزة تتجاوز الصفر. لا يمكن حذف موقع السلعة.',
     'failed_to_delete_location' => 'حدث خطأ أثناء محاولة حذف موقع السلعة. يرجى المحاولة مرة أخرى لاحقاً.',
     'invalid_case_local_market' => 'خطا ف حاله الرساله',
+    'client_does_not_belong_to_lender' => 'العميل لا ينتمي للمُقرض المحدد.',
+    'auto_sell_period_does_not_belong_to_client' => 'فترة البيع التلقائي لا تنتمي للعميل المحدد.',
 ];

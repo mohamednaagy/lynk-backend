@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Enums\CompanyType;
+use App\Models\ClientAutoSellPeriod;
 use App\Models\Company;
+use App\Models\CompanyLenderClient;
 use App\Models\Lender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -86,6 +88,31 @@ class RouteServiceProvider extends ServiceProvider
             return Lender::where('id', $id)
                 ->where('type', CompanyType::Lender)
                 ->firstOrFail();
+        });
+
+        Route::bind('client', function ($id, $route) {
+            // Get the lender from the route to scope the client lookup
+            $lender = $route->parameter('lender');
+            if ($lender) {
+                return CompanyLenderClient::withoutTrashed()
+                    ->where('id', $id)
+                    ->where('company_id', $lender->id)
+                    ->firstOrFail();
+            }
+
+            return CompanyLenderClient::withoutTrashed()->findOrFail($id);
+        });
+
+        Route::bind('client_auto_sell_period', function ($id, $route) {
+            // Get the client from the route to scope the auto sell period lookup
+            $client = $route->parameter('client');
+            if ($client) {
+                return ClientAutoSellPeriod::where('id', $id)
+                    ->where('company_lender_client_id', $client->id)
+                    ->firstOrFail();
+            }
+
+            return ClientAutoSellPeriod::findOrFail($id);
         });
 
     }

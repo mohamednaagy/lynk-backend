@@ -270,4 +270,10 @@ return [
     'field_is_not_editable' => 'لا يمكن تعديل هذا الحقل',
     'periods_overlapped_with_existing' => 'فترات متداخلة مع الفترات الموجودة',
     'select_commodity_not_valid' => 'السلعة المختارة غير صالحة أو غير نشطة. الرجاء اختيار سلعة أخرى.',
+    'supporting_document_required' => 'المستند الداعم مطلوب.',
+    'supporting_document_must_be_file' => 'المستند الداعم يجب أن يكون ملف.',
+    'supporting_document_must_be_pdf' => 'المستند الداعم يجب أن يكون ملف PDF.',
+    'supporting_document_max_size' => 'حجم المستند الداعم يجب ألا يتجاوز 10 ميجابايت.',
+    'client_invalid_for_lender' => 'العميل المحدد لا ينتمي للمُقرض المعطى.',
+    'auto_sell_period_invalid_for_client' => 'فترة البيع التلقائي المحددة لا تنتمي للعميل المعطى.',
 ];

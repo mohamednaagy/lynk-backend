@@ -185,4 +185,10 @@ return [
     'field_is_not_editable' => 'This Field Is Not Editable',
     'periods_overlapped_with_existing' => 'Periods must not overlap with existing ranges',
     'select_commodity_not_valid' => 'The selected commodity type is not active or does not exist for the specified provider',
+    'supporting_document_required' => 'Supporting document is required.',
+    'supporting_document_must_be_file' => 'Supporting document must be a file.',
+    'supporting_document_must_be_pdf' => 'Supporting document must be a PDF file.',
+    'supporting_document_max_size' => 'Supporting document size must not exceed 10MB.',
+    'client_invalid_for_lender' => 'The specified client does not belong to the given lender.',
+    'auto_sell_period_invalid_for_client' => 'The specified auto sell period does not belong to the given client.',
 ];

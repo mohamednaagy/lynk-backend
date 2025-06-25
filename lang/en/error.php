@@ -50,5 +50,7 @@ return [
     'location_cannot_be_deleted' => 'Reserved Units is greater than 0. Commodity Location cannot be deleted.',
     'failed_to_delete_location' => 'An error occurred while attempting to delete the Commodity Location. Please try again later.',
     'invalid_case_local_market' => 'Invalid Case',
+    'client_does_not_belong_to_lender' => 'Client does not belong to the specified lender.',
+    'auto_sell_period_does_not_belong_to_client' => 'Auto sell period does not belong to the specified client.',
 
 ];
