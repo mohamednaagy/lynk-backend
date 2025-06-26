@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Companies\LenderClients;
 
+use App\Enums\Action;
+use App\Enums\Area;
 use App\Enums\MediaCollections\ClientAutoSellPeriodMediaCollection;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\UploadAutoSellPeriodSupportingDocumentRequest;
 use App\Models\ClientAutoSellPeriod;
@@ -13,6 +16,15 @@ use Illuminate\Http\Response;
 
 class UploadAutoSellPeriodSupportingDocument extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderClientAutoSellPeriodDocuments, Action::Create, Action::Manage])
+        );
+
+    }
+
     /**
      * Upload a supporting document for the auto sell period.
      */

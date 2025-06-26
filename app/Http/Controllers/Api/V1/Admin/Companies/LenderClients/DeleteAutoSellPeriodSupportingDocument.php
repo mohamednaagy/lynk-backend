@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Companies\LenderClients;
 
+use App\Enums\Action;
+use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Models\ClientAutoSellPeriod;
 use App\Models\CompanyLenderClient;
@@ -11,6 +14,15 @@ use Illuminate\Http\JsonResponse;
 
 class DeleteAutoSellPeriodSupportingDocument extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::SuperAdmin, [Subject::LenderClientAutoSellPeriodDocuments, Action::Delete, Action::Manage])
+        );
+
+    }
+
     /**
      * Delete a supporting document for the auto sell period.
      */
