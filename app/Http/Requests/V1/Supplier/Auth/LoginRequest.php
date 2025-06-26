@@ -30,9 +30,9 @@ class LoginRequest extends FormRequest
         // check it if is get from api integration or from api of system
         $isRequestFromFromFrontend = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
         $recaptchaRoles = [];
-        // if ($isRequestFromFromFrontend) {
-        //     $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
-        // }
+        if ($isRequestFromFromFrontend) {
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
+        }
 
         $validationRules = [
             'unique_name' => ['required', 'string',
