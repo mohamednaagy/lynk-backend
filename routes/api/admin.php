@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Companies\LenderClients\DeleteAutoSellPeriodSupportingDocument;
 use App\Http\Controllers\Api\V1\Admin\Companies\LenderClients\UploadAutoSellPeriodSupportingDocument;
 use App\Http\Controllers\Api\V1\Admin\Constants\ConstantController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -140,6 +141,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/{lender}/settings ', GetLenderSetting::class);
             Route::resource('/{lender}/clients', LenderClientController::class);
             Route::post('/{lender}/clients/{client}/client_auto_sell_periods/{client_auto_sell_period}/media', UploadAutoSellPeriodSupportingDocument::class);
+            Route::delete('/{lender}/clients/{client}/client_auto_sell_periods/{client_auto_sell_period}/media/{media}', DeleteAutoSellPeriodSupportingDocument::class);
         });
 
         Route::prefix('lenders')->group(function () {
