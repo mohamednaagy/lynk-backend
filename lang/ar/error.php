@@ -52,4 +52,5 @@ return [
     'client_does_not_belong_to_lender' => 'العميل لا ينتمي للمُقرض المحدد.',
     'supporting_document_not_found' => 'المستند الداعم غير موجود أو لا ينتمي لفترة البيع التلقائي المحددة.',
     'auto_sell_period_does_not_belong_to_client' => 'فترة البيع التلقائي لا تنتمي للعميل المحدد.',
+    'invalid_media_collection_type' => 'نوع مجموعة الوسائط المحدد غير صالح.',
 ];

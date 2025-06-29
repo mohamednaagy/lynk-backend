@@ -53,5 +53,6 @@ return [
     'client_does_not_belong_to_lender' => 'Client does not belong to the specified lender.',
     'supporting_document_not_found' => 'Supporting document not found or does not belong to the specified auto sell period.',
     'auto_sell_period_does_not_belong_to_client' => 'Auto sell period does not belong to the specified client.',
+    'invalid_media_collection_type' => 'The specified media collection type is invalid.',
 
 ];

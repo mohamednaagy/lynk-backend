@@ -191,4 +191,11 @@ return [
     'supporting_document_max_size' => 'Supporting document size must not exceed 10MB.',
     'client_invalid_for_lender' => 'The specified client does not belong to the given lender.',
     'auto_sell_period_invalid_for_client' => 'The specified auto sell period does not belong to the given client.',
+    'media_file_required' => 'A file is required when media is provided.',
+    'media_file_must_be_file' => 'The media file must be a valid file.',
+    'media_file_must_be_pdf' => 'The media file must be a PDF document.',
+    'media_file_max_size' => 'The media file may not be greater than 10 MB.',
+    'media_type_required' => 'A media type is required when media is provided.',
+    'media_type_invalid' => 'The selected media type is invalid.',
+    'media_or_delete_required' => 'You must either provide media files or choose to delete existing media.',
 ];

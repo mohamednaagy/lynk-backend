@@ -139,7 +139,7 @@ return [
     'url_protocol' => ':attribute يجب ان  يبدأ بأحد القيم التالية: :values',
     'amount_not_multiples_of_order_cost' => 'القيمة المدخلة يجب أن تكون من مضاعفات :order_cost_with_vat',
     'custom_validation' => [
-        'phone_number_does_not_belong_to_national_id' => 'Phone number doesn’t belong to National ID/Iqama',
+        'phone_number_does_not_belong_to_national_id' => 'Phone number doesn\'t belong to National ID/Iqama',
         'invalid_person_id' => 'Invalid National ID',
         'person_id_not_found' => 'National ID not found',
         'invalid_mobile_number' => 'Invalid mobile number',
@@ -276,4 +276,11 @@ return [
     'supporting_document_max_size' => 'حجم المستند الداعم يجب ألا يتجاوز 10 ميجابايت.',
     'client_invalid_for_lender' => 'العميل المحدد لا ينتمي للمُقرض المعطى.',
     'auto_sell_period_invalid_for_client' => 'فترة البيع التلقائي المحددة لا تنتمي للعميل المعطى.',
+    'media_file_required' => 'مطلوب ملف عند تقديم وسائط.',
+    'media_file_must_be_file' => 'يجب أن يكون ملف الوسائط ملفًا صالحًا.',
+    'media_file_must_be_pdf' => 'يجب أن يكون ملف الوسائط مستند PDF.',
+    'media_file_max_size' => 'يجب ألا يتجاوز حجم ملف الوسائط 10 ميجابايت.',
+    'media_type_required' => 'مطلوب نوع الوسائط عند تقديم وسائط.',
+    'media_type_invalid' => 'نوع الوسائط المحدد غير صالح.',
+    'media_or_delete_required' => 'يجب إما تقديم ملفات وسائط أو اختيار حذف الوسائط الموجودة.',
 ];
