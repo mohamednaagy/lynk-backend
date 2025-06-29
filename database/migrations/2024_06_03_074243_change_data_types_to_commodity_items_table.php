@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('commodity_items', function (Blueprint $table) {
-            $table->string('name', '256')->change();
-            $table->string('description', '512')->nullable()->change();
+            $table->string('name', 256)->change();
+            $table->string('description', 512)->nullable()->change();
 
         });
     }

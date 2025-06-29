@@ -15,7 +15,7 @@ return new class extends Migration
     {
         //
         Schema::table('company_lender_clients', function (Blueprint $table) {
-            $table->string('national_id', 10)->change();
+            $table->string('national_id', 10)->nullable(false)->change();
         });
 
     }
@@ -28,7 +28,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('company_lender_clients', function (Blueprint $table) {
-            $table->integer('national_id')->change();
+            $table->integer('national_id')->nullable(false)->change();
         });
 
     }

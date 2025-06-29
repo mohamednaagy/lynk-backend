@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->string('national_id')->change();
+            $table->string('national_id')->nullable(false)->change();
         });
     }
 
@@ -26,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->bigInteger('national_id')->change();
+            $table->bigInteger('national_id')->nullable(false)->change();
         });
     }
 };
