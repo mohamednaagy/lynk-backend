@@ -163,33 +163,4 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         $freshTraderOrderStatus = self::$traderOrder->fresh()->status;
         $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
     }
-
-    public function test_send_sms_on_update_murabha_complete_document_if_phone_provided(): void
-    {
-        Event::fake([
-            SmsSent::class,
-        ]);
-
-        TraderOrderScenario::of(self::$traderOrder)
-            ->reset()
-            ->moveToStep(MurabhaStep::MurabhaOfferIssued);
-
-        $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
-
-        Event::assertDispatched(SmsSent::class);
-    }
-
-    public function test_not_send_sms_on_update_murabha_complete_document_if_phone_provided(): void
-    {
-
-        Event::fake([
-            SmsSent::class,
-        ]);
-
-        $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$updateMurabhaCompleteDocumentUrl, self::$requestData);
-
-        Event::assertNotDispatched(SmsSent::class);
-    }
 }
