@@ -139,7 +139,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
             Route::resource('/{lender}/clients', LenderClientController::class);
-            Route::post('/{lender}/clients/{client}/client_auto_sell_periods/{client_auto_sell_period}', [ClientAutoSellPeriodController::class, 'update']);
+            Route::post('/{lender}/clients/{client}/auto_sell_periods/{client_auto_sell_period}', [ClientAutoSellPeriodController::class, 'update']);
         });
 
         Route::prefix('lenders')->group(function () {

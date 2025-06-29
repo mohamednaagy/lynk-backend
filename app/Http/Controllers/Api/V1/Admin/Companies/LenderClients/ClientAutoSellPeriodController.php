@@ -41,20 +41,7 @@ class ClientAutoSellPeriodController extends Controller
         // Handle media upload if provided
         if ($request->has('media')) {
             foreach ($request->input('media') as $index => $mediaItem) {
-                if (isset($mediaItem['type']) && $request->hasFile("media.{$index}.file")) {
-                    $collectionName = $mediaItem['type'];
-
-                    // Validate that the collection name exists in our enum
-                    if (! in_array($collectionName, ClientAutoSellPeriodMediaCollection::getValues())) {
-                        return response()->json([
-                            'message' => __('error.invalid_media_collection_type'),
-                            'errors' => ['media' => [__('error.invalid_media_collection_type')]],
-                        ], Response::HTTP_UNPROCESSABLE_ENTITY);
-                    }
-
-                    // Add the media to the specified collection
-                    $clientAutoSellPeriod->addMediaFromRequest("media.{$index}.file")->toMediaCollection($collectionName);
-                }
+                $clientAutoSellPeriod->addMediaFromRequest("media.{$index}.file")->toMediaCollection($mediaItem['type']);
             }
         }
 

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Enums\CompanyType;
-use App\Models\ClientAutoSellPeriod;
 use App\Models\Company;
 use App\Models\CompanyLenderClient;
 use App\Models\Lender;
@@ -102,19 +101,6 @@ class RouteServiceProvider extends ServiceProvider
 
             return CompanyLenderClient::withoutTrashed()->findOrFail($id);
         });
-
-        Route::bind('client_auto_sell_period', function ($id, $route) {
-            // Get the client from the route to scope the auto sell period lookup
-            $client = $route->parameter('client');
-            if ($client) {
-                return ClientAutoSellPeriod::where('id', $id)
-                    ->where('company_lender_client_id', $client->id)
-                    ->firstOrFail();
-            }
-
-            return ClientAutoSellPeriod::findOrFail($id);
-        });
-
     }
 
     /**
