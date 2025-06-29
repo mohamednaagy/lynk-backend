@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Companies\LenderClients\ClientAutoSellPeriodController;
 use App\Http\Controllers\Api\V1\Admin\Constants\ConstantController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
 use App\Http\Controllers\Api\V1\Admin\Enquiries\EnquiryController;
@@ -138,7 +139,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
             Route::get('/{lender}/settings ', GetLenderSetting::class);
             Route::resource('/{lender}/clients', LenderClientController::class);
-
+            Route::post('/{lender}/clients/{client}/auto_sell_periods/{client_auto_sell_period}', [ClientAutoSellPeriodController::class, 'update']);
         });
 
         Route::prefix('lenders')->group(function () {

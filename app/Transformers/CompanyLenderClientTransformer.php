@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Enums\MediaCollections\ClientAutoSellPeriodMediaCollection;
 use App\Models\CompanyLenderClient;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
@@ -54,10 +55,20 @@ class CompanyLenderClientTransformer extends TransformerAbstract
     public function includeAutoSellPeriods(CompanyLenderClient $companyLenderClient): Collection
     {
         $autoSellPeriods = $companyLenderClient->autoSellPeriods->map(function ($period) {
+            $supportingDocuments = $period->getMedia(ClientAutoSellPeriodMediaCollection::SupportingDocument)->map(function ($media) {
+                return [
+                    'id' => $media->id,
+                    'name' => $media->name,
+                    'collection_name' => $media->collection_name,
+                    'url' => $media->getUrl(),
+                ];
+            });
+
             return [
                 'id' => $period->id,
                 'effective_start' => $period->effective_start,
                 'effective_end' => $period->effective_end,
+                'supporting_documents' => $supportingDocuments,
             ];
         });
 
