@@ -25,7 +25,7 @@ class LoginUserAction implements LoginUser
             'type' => 'token',
             'token' => $token->plainTextToken,
             'company_id' => $company?->id,
-            'expire_in' => $tokenTtl,
+            'expires_in' => $tokenTtl,
         ];
     }
 }
