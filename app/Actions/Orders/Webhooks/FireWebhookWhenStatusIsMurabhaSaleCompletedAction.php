@@ -31,7 +31,7 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
         };
 
         $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
-        $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::ClientWakala);
+        $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SignedClientWakala);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $company = $financingOrder->company()->withTrashed()->first();

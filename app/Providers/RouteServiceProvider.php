@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\CompanyType;
 use App\Models\Company;
+use App\Models\CompanyLenderClient;
 use App\Models\Lender;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -88,6 +89,18 @@ class RouteServiceProvider extends ServiceProvider
                 ->firstOrFail();
         });
 
+        Route::bind('client', function ($id, $route) {
+            // Get the lender from the route to scope the client lookup
+            $lender = $route->parameter('lender');
+            if ($lender) {
+                return CompanyLenderClient::withoutTrashed()
+                    ->where('id', $id)
+                    ->where('company_id', $lender->id)
+                    ->firstOrFail();
+            }
+
+            return CompanyLenderClient::withoutTrashed()->findOrFail($id);
+        });
     }
 
     /**
