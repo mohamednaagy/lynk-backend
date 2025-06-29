@@ -226,10 +226,8 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ]);
     }
 
-    public function test_send_sms_on_update_selling_commodity_certificate_if_notify_borrowers_settings_on_and_phone_provided(): void
+    public function test_send_sms_on_update_selling_commodity_certificate_if_phone_provided(): void
     {
-        self::$lender->update(['notify_borrowers_about_order_updates' => true]);
-
         Event::fake([
             SmsSent::class,
         ]);
@@ -241,39 +239,5 @@ class UpdateCommodityCertificateForClientTest extends TestCase
             ]);
 
         Event::assertDispatched(SmsSent::class);
-    }
-
-    public function test_not_send_sms_on_update_selling_commodity_certificate_if_notify_borrowers_settings_off_and_phone_provided(): void
-    {
-        self::$lender->update(['notify_borrowers_about_order_updates' => false]);
-
-        Event::fake([
-            SmsSent::class,
-        ]);
-
-        $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$endpoint, [
-                'document' => null,
-                'automatically_generate_file' => true,
-            ]);
-
-        Event::assertNotDispatched(SmsSent::class);
-    }
-
-    public function test_not_send_sms_on_update_selling_commodity_certificate_if_notify_borrowers_settings_on_and_phone_not_provided(): void
-    {
-        self::$lender->update(['notify_borrowers_about_order_updates' => false]);
-
-        Event::fake([
-            SmsSent::class,
-        ]);
-
-        $this->actingAs(self::$superAdminUser)
-            ->postJson(self::$endpoint, [
-                'document' => null,
-                'automatically_generate_file' => true,
-            ]);
-
-        Event::assertNotDispatched(SmsSent::class);
     }
 }

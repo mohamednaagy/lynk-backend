@@ -57,7 +57,6 @@ class LenderSettingsUpdateTest extends TestCase
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
             'default_does_order_require_approval' => false,
             'require_initiate_trade_request' => false,
-            'notify_borrowers_about_order_updates' => false,
             'default_company_registration_status' => CompanyStatus::UnderReview,
             'default_company_status_created_by_operation' => CompanyStatus::UnderReview,
         ];
@@ -227,24 +226,6 @@ class LenderSettingsUpdateTest extends TestCase
                 'errors' => [
                     'require_initiate_trade_request' => [
                         'The require initiate trade request field is required.',
-                    ],
-                ],
-            ]);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function test_update_lender_settings_on_empty_notify_borrowers_about_order_updates_failed(): void
-    {
-        $this->actingAs(self::$admin)
-            ->putJson(self::BaseUrl, Arr::except(self::$lenderSettingsData, ['notify_borrowers_about_order_updates']))
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonFragment([
-                'message' => 'The notify borrowers about order updates field is required.',
-                'errors' => [
-                    'notify_borrowers_about_order_updates' => [
-                        'The notify borrowers about order updates field is required.',
                     ],
                 ],
             ]);

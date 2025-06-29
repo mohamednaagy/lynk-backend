@@ -15,7 +15,7 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
 {
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        if (! $this->isNotifyBorrowersAboutOrderUpdatesOn($financingOrder) || ! $financingOrder->getPhoneNumber()) {
+        if (! $financingOrder->getPhoneNumber()) {
             return;
         }
 
@@ -84,12 +84,5 @@ class SendSmsWhenStatusIsCommoditySoldToCustomerAction implements SendSmsWhenSta
         }
 
         return $documentShortUrl;
-    }
-
-    private function isNotifyBorrowersAboutOrderUpdatesOn(FinancingOrder $financingOrder): bool
-    {
-        $company = $financingOrder->company->lender;
-
-        return $company->lenderDetail->notify_borrowers_about_order_updates;
     }
 }

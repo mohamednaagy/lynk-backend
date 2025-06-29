@@ -45,7 +45,6 @@ class Company extends BaseTenant
             'status',
             'does_order_require_approval',
             'require_initiate_trade_request',
-            'notify_borrowers_about_order_updates',
             'created_at',
             'updated_at',
             'type',

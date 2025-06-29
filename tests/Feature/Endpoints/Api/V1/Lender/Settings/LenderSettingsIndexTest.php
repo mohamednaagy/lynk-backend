@@ -66,7 +66,6 @@ class LenderSettingsIndexTest extends TestCase
                         'order_cost',
                         'does_order_require_approval',
                         'force_unique_reference_number',
-                        'notify_borrowers_about_order_updates',
                         'require_initiate_trade_request',
                         'webhook_secret_key',
                     ])
@@ -87,7 +86,6 @@ class LenderSettingsIndexTest extends TestCase
                         'order_cost',
                         'does_order_require_approval',
                         'force_unique_reference_number',
-                        'notify_borrowers_about_order_updates',
                         'require_initiate_trade_request',
                         'webhook_secret_key',
                     ])
