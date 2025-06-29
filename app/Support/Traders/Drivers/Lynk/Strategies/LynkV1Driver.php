@@ -163,7 +163,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
                 );
             });
-
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
@@ -201,7 +200,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                 $traderOrder,
                 FinancingOrderHistory::AttachSellConfirmationDocument,
             );
-
         } catch (\Throwable $e) {
             Log::channel('local_market')->error('Failed to create sell-confirmation-certificate', [
                 'message' => $e->getMessage(),
@@ -474,11 +472,15 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
     public function contractSignedMessage(TraderOrder $traderOrder)
     {
-        return match ($traderOrder->contract_signed_type->value) {
-            ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.v1.sell'),
-            ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.v1.deliver'),
-            default => null,
-        };
+        if ($traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
+            return match ($traderOrder->contract_signed_type->value) {
+                ContractSignedType::Sell => __('order.trader.lynk.steps.contract_signed.v1.sell'),
+                ContractSignedType::Delivery => __('order.trader.lynk.steps.contract_signed.v1.deliver'),
+                default => null,
+            };
+        }
+
+        return null;
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder)
@@ -537,7 +539,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         if ($traderOrder->mode == TraderOrderMode::Automatic) {
             LynkClient::of($traderOrder)->requestDeliverProducts();
         }
-
     }
 
     public function validateDeliverySequence(TraderOrder $traderOrder, bool $forceToProceed): void

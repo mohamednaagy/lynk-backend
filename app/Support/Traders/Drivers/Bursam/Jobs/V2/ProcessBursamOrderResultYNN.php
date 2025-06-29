@@ -95,9 +95,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                 return;
             }
             (new RunHoldTraderWhenMarketOpenCommand)->handle();
-
             $traderOrder->order->update([
-                'status' => FinancingOrderStatus::TradingFailure,
+                'status' => $this->isUnavailableCommoditiesCode($exception->getContext('failure_code')) ? FinancingOrderStatus::PendingTraderOrder : FinancingOrderStatus::TradingFailure,
             ]);
             $cancel_reason = $this->isUnavailableCommoditiesCode($exception->getContext('failure_code')) ? TraderOrderCancelReason::NoEligibleCommoditiesAvailable : TraderOrderCancelReason::FailureToPurchase;
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancel_reason);

@@ -198,4 +198,5 @@ return [
     'media_type_required' => 'A media type is required when media is provided.',
     'media_type_invalid' => 'The selected media type is invalid.',
     'media_or_delete_required' => 'You must either provide media files or choose to delete existing media.',
+    'greater_than_zero' => 'Must be greater than zero',
 ];

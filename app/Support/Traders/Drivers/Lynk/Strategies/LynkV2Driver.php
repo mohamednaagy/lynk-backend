@@ -49,16 +49,22 @@ class LynkV2Driver extends LynkV1Driver
 
     public function contractSignedMessage(TraderOrder $traderOrder)
     {
-        return __('order.trader.lynk.steps.contract_signed.v2.proceed');
+        $isContractSignedCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+
+        return $isContractSignedCompleted ? __('order.trader.lynk.steps.contract_signed.v2.proceed') : null;
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder)
     {
-        return match ($traderOrder->contract_signed_type->value) {
-            ContractSignedType::Sell => __('order.trader.lynk.steps.client_wakala.v2.sell'),
-            ContractSignedType::Delivery => __('order.trader.lynk.steps.client_wakala.v2.deliver'),
-            default => null,
-        };
+        if ($traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
+            return match ($traderOrder->contract_signed_type->value) {
+                ContractSignedType::Sell => __('order.trader.lynk.steps.client_wakala.v2.sell'),
+                ContractSignedType::Delivery => __('order.trader.lynk.steps.client_wakala.v2.deliver'),
+                default => null,
+            };
+        }
+
+        return null;
     }
 
     public function validateDeliverySequence(TraderOrder $traderOrder, bool $forceToProceed): void
@@ -111,6 +117,5 @@ class LynkV2Driver extends LynkV1Driver
     {
         parent::createTransferOwnershipToLenderDocument($traderOrder);
         app(GenerateClientWakala::class)->handle($traderOrder);
-
     }
 }
