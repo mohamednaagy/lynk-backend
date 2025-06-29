@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     libreadline-dev \
     libonig-dev \
     libzip-dev \
+    libxml2-dev \
+    libxslt1-dev \
     sudo \
     unzip \
     default-mysql-client \
@@ -43,12 +45,15 @@ RUN docker-php-ext-install \
     bcmath \
     bz2 \
     calendar \
+    exif \
     iconv \
     intl \
     mbstring \
     opcache \
     pdo_mysql \
     gd \
+    soap \
+    xsl \
     zip
 
 RUN docker-php-ext-install mysqli

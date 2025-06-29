@@ -49,7 +49,7 @@ class InventoryControllerUpdateTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Queue::fake();
@@ -78,7 +78,7 @@ class InventoryControllerUpdateTest extends TestCase
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
@@ -242,7 +242,7 @@ class InventoryControllerUpdateTest extends TestCase
 
         // Manually dispatch the job immediately
         $job = new UpdateInventoryStock(self::$inventory, self::$inventory2['total_units']);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Ensure the units were created
 

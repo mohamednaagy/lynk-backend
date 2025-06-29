@@ -53,7 +53,7 @@ class SupplierLocationControllerDeleteTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Queue::fake();
@@ -82,7 +82,7 @@ class SupplierLocationControllerDeleteTest extends TestCase
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
@@ -160,7 +160,7 @@ class SupplierLocationControllerDeleteTest extends TestCase
 
         // Manually dispatch the job immediately
         $job = new DeleteSupplierLocation(self::$invLocation);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Assert the inventory is soft deleted
         $this->assertDatabaseMissing('local_market_inventories', [
@@ -196,7 +196,7 @@ class SupplierLocationControllerDeleteTest extends TestCase
 
         // Manually dispatch the job immediately
         $job = new DeleteSupplierLocation(self::$invLocation);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Assert the inventory units are soft deleted
         $this->assertSoftDeleted('local_market_inventory_units', [

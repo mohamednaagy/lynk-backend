@@ -47,7 +47,7 @@ class CommodityItemControllerDestroyTest extends TestCase
 
     private static $location;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         // Create a admin, admin user, supplier, and a commodity item
@@ -100,7 +100,7 @@ class CommodityItemControllerDestroyTest extends TestCase
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Set the endpoint for the API
         self::$endpoint = '/api/v1/admin/commodity-items/'.self::$item->id;
