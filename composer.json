@@ -47,7 +47,8 @@
         "stillat/numeral.php": "^2.0",
         "symfony/http-client": "^6.1",
         "symfony/mailgun-mailer": "^6.1",
-        "twilio/sdk": "^6.37"
+        "twilio/sdk": "^6.37",
+        "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
         "andyabih/laravel-to-uml": "^1.0",
