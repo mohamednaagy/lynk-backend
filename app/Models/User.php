@@ -16,7 +16,6 @@ use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\HasApiTokens;
 use Modules\Grantify\Contracts\Grantifiable;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Models\AuthorizationToken;
@@ -24,13 +23,14 @@ use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Permission\Traits\HasRoles;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * @method static create(array $data)
  */
-class User extends Authenticatable implements Grantifiable, HasLocalePreference, MustVerifyEmail, Otpifiable
+class User extends Authenticatable implements Grantifiable, HasLocalePreference, JWTSubject, MustVerifyEmail, Otpifiable
 {
-    use BelongsToTenant, HasApiTokens, HasFactory, HasRoles, Notifiable, SoftDeletes;
+    use BelongsToTenant, HasFactory, HasRoles, Notifiable, SoftDeletes;
 
     const DELETED_MODEL_EMAIL_AND_STRING_SEPARATOR = '@@@';
 
@@ -174,5 +174,15 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         }
 
         return $this->email;
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

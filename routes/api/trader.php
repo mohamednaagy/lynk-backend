@@ -31,7 +31,7 @@
 //Route::prefix('v1/trader')->name('api.v1.trader.')->group(function () {
 //    Route::middleware([
 //        InitializeTenancyByRequestData::class,
-//        'auth:sanctum',
+//        'auth:api',
 //        'role:'.implode('|', [
 //            Role::TraderAdmin,
 //        ]),
