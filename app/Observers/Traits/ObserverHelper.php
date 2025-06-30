@@ -2,8 +2,6 @@
 
 namespace App\Observers\Traits;
 
-use App\Actions\Contracts\Orders\SendSmsWhenStatusIsCommoditySoldToCustomer;
-use App\Actions\Contracts\Orders\SendSmsWhenStatusIsMurabahaSaleCompleted;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommodityPurchased;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaOfferIssued;
@@ -63,20 +61,16 @@ trait ObserverHelper
         return match ($provider) {
             Trader::FakeDmcc, Trader::Dmcc => match ($stepNode->step) {
                 MurabhaStep::CommoditySoldToCustomer => [
-                    SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
                 ],
-                MurabhaStep::MurabahaSaleCompleted => [SendSmsWhenStatusIsMurabahaSaleCompleted::class],
                 MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],
                 default => []
             },
             Trader::Bursam => match ($stepNode->step) {
                 MurabhaStep::CommoditySoldToCustomer => [
-                    SendSmsWhenStatusIsCommoditySoldToCustomer::class,
                     FireWebhookWhenStatusIsCommoditySoldToCustomer::class,
                 ],
                 MurabhaStep::MurabahaSaleCompleted => [
-                    SendSmsWhenStatusIsMurabahaSaleCompleted::class,
                     FireWebhookWhenStatusIsMurabhaSaleCompleted::class,
                 ],
                 MurabhaStep::PurchasingCommodity => [FireWebhookWhenStatusIsCommodityPurchased::class],

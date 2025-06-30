@@ -34,7 +34,6 @@ class RegisterLenderAction implements RegisterLender
             'company_cr' => $data['company_cr'],
             'status' => $data['company_status'],
             'does_order_require_approval' => $data['does_order_require_approval'],
-            'notify_borrowers_about_order_updates' => $data['notify_borrowers_about_order_updates'],
         ]);
 
         $company->lender->lenderDetail()->updateOrCreate(
@@ -42,7 +41,6 @@ class RegisterLenderAction implements RegisterLender
             Arr::only($data, [
                 'require_initiate_trade_request',
                 'does_order_require_approval',
-                'notify_borrowers_about_order_updates',
                 'company_cr',
                 'notifications_email',
             ])

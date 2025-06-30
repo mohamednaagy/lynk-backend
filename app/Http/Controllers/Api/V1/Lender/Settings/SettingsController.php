@@ -37,7 +37,6 @@ class SettingsController extends Controller
                 'does_order_require_approval',
                 'webhook_secret_key',
                 'require_initiate_trade_request',
-                'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
                 'token_expire_in',
             ])->respond();
@@ -62,7 +61,6 @@ class SettingsController extends Controller
             Arr::only($data, [
                 'require_initiate_trade_request',
                 'does_order_require_approval',
-                'notify_borrowers_about_order_updates',
                 'force_unique_reference_number',
                 'token_expire_in',
             ])
