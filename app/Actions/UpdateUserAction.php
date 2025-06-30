@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UpdateUserAction implements UpdateUser
 {
@@ -58,6 +59,6 @@ class UpdateUserAction implements UpdateUser
 
     public function removeTokensOfUser(User $user): void
     {
-        $user->tokens()->delete();
+        JWTAuth::invalidate(JWTAuth::getToken());
     }
 }
