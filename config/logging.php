@@ -128,6 +128,7 @@ return [
         'nightwatch' => [
             'driver' => 'nightwatch',
             'token' => env('NIGHTWATCH_TOKEN'),
+            'level' => env('NIGHTWATCH_LOG_LEVEL', 'debug'),
         ],
 
         'bursam' => [

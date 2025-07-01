@@ -28,7 +28,7 @@ class GateBeforeTest extends TestCase
 
     private static FinancingOrder $order;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -37,7 +37,7 @@ class GateBeforeTest extends TestCase
         self::$traderAdmin = $this->createTraderUser(self::$company->id);
         self::$userLenderOrderCreator = $this->createLenderUser(self::$company->id, Role::LenderOrderCreator);
         self::$order = $this->createOrder(self::$company->id, self::$userLenderOrderCreator->id);
-        $this->withoutMiddleware([\Spatie\Permission\Middlewares\RoleMiddleware::class]);
+        $this->withoutMiddleware([\Spatie\Permission\Middleware\RoleMiddleware::class]);
     }
 
     public function test_gate_before_order_in_lender_area_only_lender_admin_can_access()
