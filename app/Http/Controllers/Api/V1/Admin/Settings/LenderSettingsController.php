@@ -41,7 +41,6 @@ class LenderSettingsController extends Controller
                 'default_company_status_created_by_operation',
                 'notify_admins_about_new_orders',
                 'require_initiate_trade_request',
-                'notify_borrowers_about_order_updates',
             ])
             ->respond();
     }

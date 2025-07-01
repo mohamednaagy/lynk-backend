@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
 {
@@ -87,8 +88,7 @@ class LoginController extends Controller
             tenancy()->initialize($companyId);
         }
         Cache::forget('has_verified_otp_'.$request->user()->id);
-
-        $request->user()->currentAccessToken()->delete();
+        JWTAuth::invalidate(JWTAuth::getToken());
 
         return $this->successResponse(statusCode: Response::HTTP_NO_CONTENT);
     }

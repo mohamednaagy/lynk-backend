@@ -53,7 +53,7 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -86,7 +86,6 @@ class LenderControllerStoreTest extends TestCase
             ],
             'contract_number' => '1234567'.rand('111', '999'),
             'does_order_require_approval' => '1',
-            'notify_borrowers_about_order_updates' => '1',
             'force_unique_reference_number' => '1',
             'require_initiate_trade_request' => '1',
             'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
@@ -109,7 +108,7 @@ class LenderControllerStoreTest extends TestCase
             ]);
     }
 
-    public function test_admin_can_store_lender_with_Standard_order_cost_successfully(): void
+    public function test_admin_can_store_lender_with_standard_order_cost_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, self::$standardLenderDetails)
@@ -125,7 +124,6 @@ class LenderControllerStoreTest extends TestCase
                     'does_order_require_approval',
                     'force_unique_reference_number',
                     'require_initiate_trade_request',
-                    'notify_borrowers_about_order_updates',
                     'preferred_market_type',
                     'preferred_commodity_types',
                     'force_preferred_commodity_type',
@@ -167,7 +165,6 @@ class LenderControllerStoreTest extends TestCase
                     'does_order_require_approval',
                     'force_unique_reference_number',
                     'require_initiate_trade_request',
-                    'notify_borrowers_about_order_updates',
                     'preferred_market_type',
                     'preferred_commodity_types',
                     'force_preferred_commodity_type',
@@ -209,7 +206,6 @@ class LenderControllerStoreTest extends TestCase
                     'does_order_require_approval',
                     'force_unique_reference_number',
                     'require_initiate_trade_request',
-                    'notify_borrowers_about_order_updates',
                     'preferred_market_type',
                     'preferred_commodity_types',
                     'force_preferred_commodity_type',

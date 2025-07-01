@@ -89,7 +89,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
-    Route::middleware(['auth:sanctum', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
+    Route::middleware(['auth:api', 'role:'.implode('|', [Role::Admin, Role::Manager])])->group(function () {
         Route::get('auth', GetAuthUser::class);
         Route::put('auth/profile', UpdateMyProfile::class);
 

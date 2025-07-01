@@ -28,7 +28,7 @@ use Stancl\Tenancy\Middleware\InitializeTenancyByRequestData;
 
 Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
     Route::middleware([
-        'auth:sanctum',
+        'auth:api',
         'role:'.implode('|', [
             Role::SupplierAdmin,
             Role::SupplierApiAdmin,
