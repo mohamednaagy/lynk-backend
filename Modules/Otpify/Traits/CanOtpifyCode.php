@@ -40,7 +40,7 @@ trait CanOtpifyCode
             'otpifiable_id' => $otpifiable->getKey(),
             'otpifiable_type' => $otpifiable->getMorphClass(),
             'otp_code' => $code,
-            'expiration_date' => now()->addMinutes(config('otpify.code_expiration_time')),
+            'expiration_date' => now()->addMinutes((int) config('otpify.code_expiration_time')),
             'data' => $data,
             'driver' => $this->getDriverName(),
             'verification_method' => $this->getVerificationMethod(),
