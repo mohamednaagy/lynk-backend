@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single,nightwatch')),
+            'channels' => explode(',', env('LOG_STACK', 'daily,nightwatch')),
             'ignore_exceptions' => false,
             'tap' => [App\Logging\CustomizeLogTimezone::class],
         ],
