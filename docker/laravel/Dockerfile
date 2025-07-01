@@ -1,4 +1,4 @@
-FROM php:8.2.5-apache
+FROM php:8.3.22-apache
 
 # 1. Install development packages and clean up apt cache.
 RUN apt-get update && apt-get install -y \
@@ -26,7 +26,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y jq
 
-RUN apt-get install -y openjdk-11-jdk ca-certificates-java
+# Install Java - use default-jdk which is more reliable across different Debian versions
+RUN apt-get update && apt-get install -y default-jdk ca-certificates-java
 
 # 2. Apache configs + document root.
 RUN echo "ServerName lynkapp.local" >> /etc/apache2/apache2.conf
