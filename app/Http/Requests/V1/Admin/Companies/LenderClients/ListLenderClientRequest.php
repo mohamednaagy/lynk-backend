@@ -4,7 +4,6 @@ namespace App\Http\Requests\V1\Admin\Companies\LenderClients;
 
 use App\Enums\CompanyLenderClientType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ListLenderClientRequest extends FormRequest
 {
@@ -30,8 +29,8 @@ class ListLenderClientRequest extends FormRequest
                 $allowed = CompanyLenderClientType::getValues();
 
                 foreach ($values as $val) {
-                    if (!in_array((int) $val, $allowed, true)) {
-                        return $fail("The selected {$attribute} is invalid.");
+                    if (! in_array((int) $val, $allowed, true)) {
+                        return $fail($attribute, "The selected {$attribute} is invalid.");
                     }
                 }
             }],

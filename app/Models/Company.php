@@ -25,12 +25,11 @@ class Company extends BaseTenant
 
     public $incrementing = true;
 
-    protected $dates = ['deleted_at'];
-
     protected $casts = [
         'status' => CompanyStatus::class,
         'require_initiate_trade_request' => 'boolean',
         'type' => CompanyType::class,
+        'deleted_at' => 'datetime',
     ];
 
     public static function getCustomColumns(): array

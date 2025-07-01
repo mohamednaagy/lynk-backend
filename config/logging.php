@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily'],
+            'channels' => explode(',', env('LOG_STACK', 'daily,nightwatch')),
             'ignore_exceptions' => false,
             'tap' => [App\Logging\CustomizeLogTimezone::class],
         ],
@@ -123,6 +123,12 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'nightwatch' => [
+            'driver' => 'nightwatch',
+            'token' => env('NIGHTWATCH_TOKEN'),
+            'level' => env('NIGHTWATCH_LOG_LEVEL', 'debug'),
         ],
 
         'bursam' => [

@@ -1,4 +1,4 @@
-FROM php:8.2.5-apache
+FROM php:8.3.22-apache
 
 # 1. Install development packages and clean up apt cache.
 RUN apt-get update && apt-get install -y \
@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
     libreadline-dev \
     libonig-dev \
     libzip-dev \
+    libxml2-dev \
+    libxslt1-dev \
     sudo \
     unzip \
     default-mysql-client \
@@ -24,7 +26,8 @@ RUN apt-get update && apt-get install -y \
 
 RUN apt-get update && apt-get install -y jq
 
-RUN apt-get install -y openjdk-11-jdk ca-certificates-java
+# Install Java - use default-jdk which is more reliable across different Debian versions
+RUN apt-get update && apt-get install -y default-jdk ca-certificates-java
 
 # 2. Apache configs + document root.
 RUN echo "ServerName lynkapp.local" >> /etc/apache2/apache2.conf
@@ -43,12 +46,15 @@ RUN docker-php-ext-install \
     bcmath \
     bz2 \
     calendar \
+    exif \
     iconv \
     intl \
     mbstring \
     opcache \
     pdo_mysql \
     gd \
+    soap \
+    xsl \
     zip
 
 RUN docker-php-ext-install mysqli

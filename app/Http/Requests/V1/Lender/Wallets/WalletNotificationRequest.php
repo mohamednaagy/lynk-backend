@@ -22,7 +22,7 @@ class WalletNotificationRequest extends FormRequest
                 $company->isTiered()
                     ? function (string $attribute, mixed $value, Closure $fail) {
                         if ($value !== WalletNotificationType::WALLET_BALANCE) {
-                            $fail(trans('validation.not_in', ['attribute' => $attribute]));
+                            $fail($attribute, trans('validation.not_in', ['attribute' => $attribute]));
                         }
                     }
                     : new EnumValue(WalletNotificationType::class),

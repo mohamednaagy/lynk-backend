@@ -53,7 +53,7 @@ class LenderControllerStoreTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -108,7 +108,7 @@ class LenderControllerStoreTest extends TestCase
             ]);
     }
 
-    public function test_admin_can_store_lender_with_Standard_order_cost_successfully(): void
+    public function test_admin_can_store_lender_with_standard_order_cost_successfully(): void
     {
         $this->actingAs(self::$userAdmin)
             ->postJson(self::$endpoint, self::$standardLenderDetails)
