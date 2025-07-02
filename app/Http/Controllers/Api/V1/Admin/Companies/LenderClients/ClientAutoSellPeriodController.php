@@ -58,7 +58,7 @@ class ClientAutoSellPeriodController extends Controller
                         'id' => $media->id,
                         'name' => $media->name,
                         'collection_name' => $media->collection_name,
-                        'url' => get_file_url($media),
+                        'url' => $media->fileUrl,
                     ];
                 }),
             ],
