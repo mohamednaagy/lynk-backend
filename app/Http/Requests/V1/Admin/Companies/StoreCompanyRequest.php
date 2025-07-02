@@ -136,10 +136,6 @@ class StoreCompanyRequest extends FormRequest
                 'integer',
                 new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
             ],
-            'notify_borrowers_about_order_updates' => [
-                'required',
-                'boolean',
-            ],
             'allow_preferred_commodity_in_order' => [
                 'nullable',
                 'boolean',

@@ -44,14 +44,14 @@ class StoreOrderRequest extends FormRequest
             'is_verification_required' => ['required', 'boolean'],
             'commodity_type_id' => ['nullable', 'numeric', function ($attribute, $value, $fail) {
                 $this->validateCommodityType($attribute, $value, $fail);
-            }]
+            }],
         ];
     }
 
     /**
      * Custom validation for commodity_type_id
      *
-     * @param mixed $value
+     * @param  mixed  $value
      */
     protected function validateCommodityType(string $attribute, $value, \Closure $fail): void
     {
@@ -67,8 +67,8 @@ class StoreOrderRequest extends FormRequest
         $allowCommoditySelection = $company->lender?->lenderDetail?->allow_preferred_commodity_in_order ?? false;
 
         // If field is provided (not null/empty) but setting is OFF, fail
-        if (!$allowCommoditySelection) {
-            $fail('Order not created. Commodity type selection is not allowed for this company.');
+        if (! $allowCommoditySelection) {
+            $fail($attribute, 'Order not created. Commodity type selection is not allowed for this company.');
 
             return;
         }
@@ -77,8 +77,8 @@ class StoreOrderRequest extends FormRequest
         $commodityTypeExists = CommodityType::where(['id' => $value, 'status' => CommodityTypeStatus::Active])
             ->exists();
 
-        if (!$commodityTypeExists) {
-            $fail('Order not created. Invalid commodity type ' . $value . ' for this company.');
+        if (! $commodityTypeExists) {
+            $fail($attribute, 'Order not created. Invalid commodity type '.$value.' for this company.');
         }
     }
 

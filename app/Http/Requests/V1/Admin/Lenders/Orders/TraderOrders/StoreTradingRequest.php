@@ -43,7 +43,7 @@ class StoreTradingRequest extends FormRequest
                     // For other values, use the existing validation rule
                     $rule = new CheckCommodityTypeActiveRule($this->trader);
                     if (! $rule->passes($attribute, $value)) {
-                        $fail($rule->message());
+                        $fail($attribute, $rule->message());
                     }
                 },
             ],

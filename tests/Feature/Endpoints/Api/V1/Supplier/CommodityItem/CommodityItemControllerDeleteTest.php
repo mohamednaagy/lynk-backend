@@ -51,7 +51,7 @@ class CommodityItemControllerDeleteTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         Queue::fake();
@@ -80,7 +80,7 @@ class CommodityItemControllerDeleteTest extends TestCase
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         self::$location = $this->createSupplierLocation(
             self::$supplier,
@@ -158,7 +158,7 @@ class CommodityItemControllerDeleteTest extends TestCase
 
         // Manually dispatch the job immediately
         $job = new DeleteCommodityItem(CommodityItem::find(self::$inventory->commodity_item_id));
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Assert the inventory is soft deleted
         $this->assertDatabaseMissing('local_market_inventories', [
@@ -194,7 +194,7 @@ class CommodityItemControllerDeleteTest extends TestCase
 
         // Manually dispatch the job immediately
         $job = new DeleteCommodityItem(CommodityItem::find(self::$inventory->commodity_item_id));
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Assert the inventory units are soft deleted
         $this->assertSoftDeleted('local_market_inventory_units', [

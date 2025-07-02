@@ -90,7 +90,7 @@ services:
       container_name: worker-1
       restart: always
       working_dir: /var/www/html/
-      command: php artisan queue:work redis --verbose --tries=3 --queue=local_market
+      command: php artisan queue:work redis --verbose --tries=3 --queue=local_market,initiate_local_market_orders
       depends_on:
           - laravel-app
       volumes:

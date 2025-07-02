@@ -34,7 +34,7 @@ class LenderControllerShowTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -75,7 +75,6 @@ class LenderControllerShowTest extends TestCase
                         'unique_name',
                         'company_cr',
                         'does_order_require_approval',
-                        'notify_borrowers_about_order_updates',
                         'force_unique_reference_number',
                         'require_initiate_trade_request',
                         'order_cost_tiers',
@@ -106,7 +105,6 @@ class LenderControllerShowTest extends TestCase
                         'unique_name',
                         'company_cr',
                         'does_order_require_approval',
-                        'notify_borrowers_about_order_updates',
                         'force_unique_reference_number',
                         'require_initiate_trade_request',
                         'order_cost_tiers',

@@ -48,7 +48,7 @@ class LenderControllerUpdateTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -102,7 +102,6 @@ class LenderControllerUpdateTest extends TestCase
             'does_order_require_approval' => '1',
             'notify_admins_about_new_orders' => '1',
             'force_unique_reference_number' => '1',
-            'notify_borrowers_about_order_updates' => '1',
             'require_initiate_trade_request' => '1',
             'webhook_secret_key' => Str::random(Config::get('webhook-server.secret_key_length', 40)),
             'trading_mode' => TraderOrderMode::Automatic,

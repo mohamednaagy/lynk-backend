@@ -33,7 +33,6 @@ class UpdateLenderSettingsRequest extends FormRequest
             'default_company_registration_status' => ['required', 'integer', new EnumValue(CompanyStatus::class)],
             'default_company_status_created_by_operation' => ['required', 'integer', new EnumValue(CompanyStatus::class)],
             'require_initiate_trade_request' => ['required', 'boolean'],
-            'notify_borrowers_about_order_updates' => ['required', 'boolean'],
         ];
     }
 }

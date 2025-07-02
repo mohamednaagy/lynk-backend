@@ -55,8 +55,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
     Route::post('/register', Register::class);
 
     Route::middleware([
-        'auth:sanctum',
-        'ensureTokenNotExpired',
+        'auth:api',
         'role:'.implode('|', [
             Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser,
         ]),

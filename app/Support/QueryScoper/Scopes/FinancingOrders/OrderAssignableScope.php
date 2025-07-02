@@ -70,7 +70,7 @@ class OrderAssignableScope extends QueryScoper
                 'integer',
                 function ($attribute, $value, $fail) use ($validUserIds) {
                     if ($value != self::NOT_ASSIGNED_FILTER_VALUE && ! in_array($value, $validUserIds)) {
-                        $fail('The '.$attribute.' is invalid.');
+                        $fail($attribute, 'The '.$attribute.' is invalid.');
                     }
                 },
             ],

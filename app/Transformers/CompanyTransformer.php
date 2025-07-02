@@ -27,7 +27,6 @@ class CompanyTransformer extends TransformerAbstract
         'notifications_email',
         'orders_sum_amount',
         'notify_admins_about_new_orders',
-        'notify_borrowers_about_order_updates',
         'force_unique_reference_number',
         'trading_mode',
         'require_initiate_trade_request',
@@ -142,11 +141,6 @@ class CompanyTransformer extends TransformerAbstract
     public function includeForceUniqueReferenceNumber(Company $company)
     {
         return $this->primitive($company->lender->lenderDetail?->force_unique_reference_number);
-    }
-
-    public function includeNotifyBorrowersAboutOrderUpdates(Company $company)
-    {
-        return $this->primitive($company->lender->lenderDetail->notify_borrowers_about_order_updates);
     }
 
     public function includeAllowPreferredCommodityInOrder(Company $company)
