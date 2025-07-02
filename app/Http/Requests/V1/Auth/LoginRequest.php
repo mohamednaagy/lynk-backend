@@ -32,11 +32,11 @@ class LoginRequest extends FormRequest
         // check it if is get from api integration or from api of system
         $isRequestFromFromFrontend = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
 
-        //check User doesnt has ApiAdmin Role
+        // check User doesnt has ApiAdmin Role
         $user = User::where('email', $this->email)->first();
         $recaptchaRoles = [];
         if ($isRequestFromFromFrontend && ! $user->hasRole('ApiAdmin')) {
-            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'captcha'];
         }
 
         $validationRules = [

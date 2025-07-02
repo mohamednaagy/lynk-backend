@@ -35,7 +35,7 @@ class SendLinkRequest extends FormRequest
 
         $recaptchaRoles = [];
         if ($isRequestFromFromFrontend) {
-            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'captcha'];
         }
         $validationRules = [
             'email' => ['required', 'email:filter', Rule::exists(User::class, 'email')],

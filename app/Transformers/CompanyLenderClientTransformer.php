@@ -60,7 +60,7 @@ class CompanyLenderClientTransformer extends TransformerAbstract
                     'id' => $media->id,
                     'name' => $media->name,
                     'collection_name' => $media->collection_name,
-                    'url' => $media->getUrl(),
+                    'url' => $media->fileUrl,
                 ];
             });
 

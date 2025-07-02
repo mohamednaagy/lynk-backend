@@ -34,7 +34,7 @@ class LenderSettingsUpdateTest extends TestCase
 
     private static array $updatedLenderSettingsDetails;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -47,7 +47,6 @@ class LenderSettingsUpdateTest extends TestCase
         self::$updatedLenderSettingsDetails = [
             'does_order_require_approval' => true,
             'force_unique_reference_number' => true,
-            'notify_borrowers_about_order_updates' => true,
             'require_initiate_trade_request' => true,
         ];
     }
@@ -80,15 +79,6 @@ class LenderSettingsUpdateTest extends TestCase
             ->assertJsonValidationErrorFor('force_unique_reference_number');
     }
 
-    public function test_update_lender_settings_on_empty_notify_borrowers_about_order_updates_fails(): void
-    {
-        $this->actingAs(self::$userLender)
-            ->withHeader('X-Company', self::$company->id)
-            ->putJson(self::BaseUrl, \Arr::except(self::$updatedLenderSettingsDetails, 'notify_borrowers_about_order_updates'))
-            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->assertJsonValidationErrorFor('notify_borrowers_about_order_updates');
-    }
-
     public function test_update_lender_settings_on_empty_require_initiate_trade_request_fails(): void
     {
         $this->actingAs(self::$userLender)
@@ -116,11 +106,6 @@ class LenderSettingsUpdateTest extends TestCase
         );
 
         $this->assertEquals(
-            Lender::find(self::$company->id)->lenderDetail->notify_borrowers_about_order_updates,
-            self::$updatedLenderSettingsDetails['notify_borrowers_about_order_updates']
-        );
-
-        $this->assertEquals(
             Company::find(self::$company->id)->lender->lenderDetail->require_initiate_trade_request,
             self::$updatedLenderSettingsDetails['require_initiate_trade_request']
         );
@@ -136,11 +121,6 @@ class LenderSettingsUpdateTest extends TestCase
         $this->assertEquals(
             Lender::find(self::$company->id)->lenderDetail->does_order_require_approval,
             self::$updatedLenderSettingsDetails['does_order_require_approval']
-        );
-
-        $this->assertEquals(
-            Lender::find(self::$company->id)->lenderDetail->notify_borrowers_about_order_updates,
-            self::$updatedLenderSettingsDetails['notify_borrowers_about_order_updates']
         );
 
         $this->assertEquals(

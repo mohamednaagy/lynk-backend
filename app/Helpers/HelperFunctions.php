@@ -217,7 +217,7 @@ if (! function_exists('cast_phone_number_if_exist')) {
     function cast_phone_number_if_exist(array &$data): array
     {
         if (array_key_exists('phone_number', $data) && array_key_exists('phone_country_code', $data)) {
-            $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
+            $data['phone_number'] = new PhoneNumber($data['phone_number'], $data['phone_country_code']);
         }
 
         return $data;

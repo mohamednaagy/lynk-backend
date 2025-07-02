@@ -46,7 +46,7 @@ class CommodityInventoryControllerStoreTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         LocalMarketInventory::observe(LocalMarketInventoryObserver::class);
@@ -177,7 +177,7 @@ class CommodityInventoryControllerStoreTest extends TestCase
 
         // Manually dispatch the job immediately
         $job = new UpdateInventoryStock($inventory, $inventory->available_quantity, $inventory->wasRecentlyCreated);
-        Bus::dispatchNow($job);
+        Bus::dispatchSync($job);
 
         // Ensure the units were created
         $this->assertCount($numberOfUnits, $inventory->units);

@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        //
-        Schema::table('company_lender_clients', function (Blueprint $table) {
-            $table->string('national_id', 10)->nullable(false)->change();
+        Schema::table('company_lender_details', function (Blueprint $table) {
+            $table->dropColumn('notify_borrowers_about_order_updates');
         });
-
     }
 
     /**
@@ -27,9 +25,10 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('company_lender_clients', function (Blueprint $table) {
-            $table->integer('national_id')->nullable(false)->change();
+        Schema::table('company_lender_details', function (Blueprint $table) {
+            $table->boolean('notify_borrowers_about_order_updates')
+                ->default(false)
+                ->after('notify_admins_about_new_orders');
         });
-
     }
 };

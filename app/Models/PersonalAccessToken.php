@@ -9,6 +9,14 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
 {
     use SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'token',
+        'abilities',
+        'last_used_at',
+        'expire_at',
+    ];
+
     protected $casts = [
         'abilities' => 'json',
         'last_used_at' => 'datetime',

@@ -45,7 +45,7 @@ trait RequestHasMobileVerification
     {
         $errors = [];
         try {
-            $phone = PhoneNumber::make($this->validated($this->phoneNumber), $this->validated($this->phoneCountryCode));
+            $phone = new PhoneNumber($this->validated($this->phoneNumber), $this->validated($this->phoneCountryCode));
             MobileVerify::verify($phone, $this->validated($this->nationalId));
         } catch (MobileNumberNotMatchedException $e) {
             $errors['national_id'] = __('error.phone_number_does_not_belong_to_national_id');
