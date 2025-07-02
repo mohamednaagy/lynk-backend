@@ -31,7 +31,7 @@ class LoginRequest extends FormRequest
         $isRequestFromFromFrontend = EnsureFrontendRequestsAreStatefulWithoutCookie::fromFrontend(request());
         $recaptchaRoles = [];
         if ($isRequestFromFromFrontend) {
-            $recaptchaRoles['g-recaptcha-response'] = ['required', 'recaptcha'];
+            $recaptchaRoles['g-recaptcha-response'] = ['required', 'captcha'];
         }
 
         $validationRules = [
