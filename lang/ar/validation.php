@@ -214,6 +214,7 @@ return [
         'postal_code' => 'الرمز البريدي',
         'price' => 'السعر',
         'province' => 'المحافظة',
+        'captcha' => 'فشل التحقق من :attribute.',
         'recaptcha_response_field' => 'حقل استجابة recaptcha',
         'remember' => 'تذكير',
         'restored_at' => 'تاريخ الاستعادة',
