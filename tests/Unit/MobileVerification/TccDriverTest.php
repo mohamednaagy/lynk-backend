@@ -21,7 +21,7 @@ class TccDriverTest extends TestCase
 
     protected static string $phoneCountryCode;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         self::$phoneCountryCode = 'SA';
@@ -34,7 +34,7 @@ class TccDriverTest extends TestCase
                 'code' => TccResponseCode::MobileNumberMatched,
             ]);
         });
-        $phoneNumber = PhoneNumber::make('966547125919', self::$phoneCountryCode);
+        $phoneNumber = new PhoneNumber('966547125919', self::$phoneCountryCode);
         $nationalId = '1001280070';
         $response = MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
 
@@ -44,7 +44,7 @@ class TccDriverTest extends TestCase
     public function test_mobile_verification_tcc_that_mobile_number_does_not_match_the_provided_country(): void
     {
         $this->expectException(NumberParseException::class);
-        $phoneNumber = PhoneNumber::make('96654712591999', self::$phoneCountryCode);
+        $phoneNumber = new PhoneNumber('96654712591999', self::$phoneCountryCode);
         $nationalId = '1001280070';
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
@@ -57,7 +57,7 @@ class TccDriverTest extends TestCase
             ]);
         });
         $this->expectException(MobileNumberNotMatchedException::class);
-        $phoneNumber = PhoneNumber::make('500112233', self::$phoneCountryCode);
+        $phoneNumber = new PhoneNumber('500112233', self::$phoneCountryCode);
         $nationalId = '2553451234';
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
@@ -70,7 +70,7 @@ class TccDriverTest extends TestCase
             ]);
         });
         $this->expectException(InvalidPersonIdException::class);
-        $phoneNumber = PhoneNumber::make('500112233', self::$phoneCountryCode);
+        $phoneNumber = new PhoneNumber('500112233', self::$phoneCountryCode);
         $nationalId = '2553451236';
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
@@ -83,7 +83,7 @@ class TccDriverTest extends TestCase
             ]);
         });
         $this->expectException(InvalidPersonIdTypeException::class);
-        $phoneNumber = PhoneNumber::make('500112233', self::$phoneCountryCode);
+        $phoneNumber = new PhoneNumber('500112233', self::$phoneCountryCode);
         $nationalId = '8553451236';
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }
@@ -97,7 +97,7 @@ class TccDriverTest extends TestCase
         });
         Config::set('mobile-verify.drivers.tcc.api_key', '122385904480654204103/UjUEigInUUt8dzlpTP2PllXBsPQXHuPIqjYVDmg=');
         $this->expectException(InvalidApiKeyException::class);
-        $phoneNumber = PhoneNumber::make('500112233', self::$phoneCountryCode);
+        $phoneNumber = new PhoneNumber('500112233', self::$phoneCountryCode);
         $nationalId = '2553451234';
         MobileVerify::driver('tcc')->verify($phoneNumber, $nationalId);
     }

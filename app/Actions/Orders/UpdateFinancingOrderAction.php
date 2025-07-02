@@ -18,7 +18,7 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
     public function handle(FinancingOrder $financingOrder, array $data): FinancingOrder
     {
         if (isset($data['phone_number'])) {
-            $data['phone_number'] = PhoneNumber::make($data['phone_number'], $data['phone_country_code']);
+            $data['phone_number'] = new PhoneNumber($data['phone_number'], $data['phone_country_code']);
         }
 
         if (isset($data['amount'])) {
