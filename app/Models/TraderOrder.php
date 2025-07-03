@@ -162,6 +162,10 @@ class TraderOrder extends Model implements HasMedia
 
         $lastAction = $this->traderHistories()->latest('id')->first();
 
+        if (! $lastAction) {
+            return false;
+        }
+
         return in_array($lastAction->action, $actions);
     }
 
