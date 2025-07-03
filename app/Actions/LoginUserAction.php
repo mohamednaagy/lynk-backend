@@ -12,30 +12,35 @@ class LoginUserAction implements LoginUser
 {
     public function handle(User $user, ?string $source = null, ?Request $request = null): array
     {
-        $company = $user->company;
+        [$ttlMinutes, $expiresIn] = $this->getJwtTtlForUser($user);
 
-        $tokenTtlSeconds = null;
-
-        if (
-            $user->hasRole(Role::LenderApiUser) &&
-            ! is_null($company?->getTokenExpireValue())
-        ) {
-            $customTtlMinutes = $company->getTokenExpireValue();
-            $tokenTtlSeconds = $customTtlMinutes * 60;
-
-            JWTAuth::factory()->setTTL($customTtlMinutes);
-        } else {
-            // Disable expiration (no exp claim in the token)
-            JWTAuth::factory()->setTTL(10 * 365 * 24 * 60); // 10 years in minutes
-        }
-
+        JWTAuth::factory()->setTTL($ttlMinutes);
         $token = JWTAuth::fromUser($user);
 
         return [
             'type' => 'token',
             'token' => $token,
-            'company_id' => $company?->id,
-            'expires_in' => $tokenTtlSeconds, // could be null
+            'company_id' => $user->company?->id,
+            'expires_in' => $expiresIn,
         ];
+    }
+
+    /**
+     * Get the JWT TTL (in minutes), and expiration time(in seconds) for the given user.
+     *
+     * @return array [$ttlMinutes, $expiresIn]
+     */
+    private function getJwtTtlForUser(User $user): array
+    {
+        $defaultTtl = 10 * 365 * 24 * 60; // 10 years in minutes
+
+        if (
+            $user->hasRole(Role::LenderApiUser) &&
+            ($customTtl = $user->company?->getTokenExpireValue())
+        ) {
+            return [$customTtl, $customTtl * 60];
+        }
+
+        return [$defaultTtl, null];
     }
 }
