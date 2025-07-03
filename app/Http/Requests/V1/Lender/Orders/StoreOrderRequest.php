@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Enums\CommodityTypeStatus;
+use App\Enums\CompanyMarketType;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Models\CommodityType;
@@ -71,12 +72,17 @@ class StoreOrderRequest extends FormRequest
             return;
         }
 
+        $marketType = $company?->lender?->lenderDetail?->preferred_market_type;
         // If we reach here, value is provided and setting is ON, so validate the commodity type
-        $commodityTypeExists = CommodityType::where('unique_name', $value)
-            ->where('status', CommodityTypeStatus::Active)
-            ->exists();
+        $commodityTypeExistsQuery = CommodityType::where('unique_name', $value)
+            ->where('status', CommodityTypeStatus::Active);
 
-        if (! $commodityTypeExists) {
+        if ($marketType && $marketType !== CompanyMarketType::Any) {
+            $marketType = $marketType->is(CompanyMarketType::Local) ? 'local' : 'bursam';
+            $commodityTypeExistsQuery->where('provider', $marketType);
+        }
+
+        if (! $commodityTypeExistsQuery->exists()) {
             $fail($attribute, 'Order not created. Invalid commodity type '.$value.' for this company.');
 
             return;
