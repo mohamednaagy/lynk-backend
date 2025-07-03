@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Lender\Orders;
 use App\Actions\Contracts\Lenders\GetValidCommodityTypes;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -26,10 +27,11 @@ class GetValidCommodityType extends Controller
      */
     public function __invoke(Request $request, GetValidCommodityTypes $getValidCommodityTypes)
     {
-        $company = $request->user()->company;
+        $user = $request->user();
+        $company = $user->company;
         $commodities = $getValidCommodityTypes->handle($company);
 
-        if (empty($commodities)) {
+        if ($user->hasRole(Role::LenderApiUser) && empty($commodities)) {
             return $this->errorResponse('This action is not allowed for this company.', 400);
         }
 
