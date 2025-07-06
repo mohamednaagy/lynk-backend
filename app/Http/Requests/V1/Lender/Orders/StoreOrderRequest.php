@@ -77,7 +77,7 @@ class StoreOrderRequest extends FormRequest
         $commodityTypeExistsQuery = CommodityType::where('unique_name', $value)
             ->where('status', CommodityTypeStatus::Active);
 
-        if ($marketType && $marketType !== CompanyMarketType::Any) {
+        if ($marketType && ! $marketType->is(CompanyMarketType::Any)) {
             $marketType = $marketType->is(CompanyMarketType::Local) ? 'local' : 'bursam';
             $commodityTypeExistsQuery->where('provider', $marketType);
         }
