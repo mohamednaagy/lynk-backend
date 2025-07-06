@@ -3,10 +3,13 @@
 namespace App\Http\Requests\V1\Lender\Orders;
 
 use App\Enums\CommodityTypeStatus;
+use App\Enums\CompanyMarketType;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\Trader;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Models\CommodityType;
 use App\Models\Company;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Unique;
 
@@ -72,11 +75,12 @@ class StoreOrderRequest extends FormRequest
         }
 
         // If we reach here, value is provided and setting is ON, so validate the commodity type
-        $commodityTypeExists = CommodityType::where('unique_name', $value)
-            ->where('status', CommodityTypeStatus::Active)
-            ->exists();
+        $commodityTypeExistsQuery = CommodityType::where('unique_name', $value)
+            ->where('status', CommodityTypeStatus::Active);
 
-        if (! $commodityTypeExists) {
+        $this->applyMarketTypeFilter($commodityTypeExistsQuery); // Apply market type filter to the query
+
+        if (! $commodityTypeExistsQuery->exists()) {
             $fail($attribute, 'Order not created. Invalid commodity type '.$value.' for this company.');
 
             return;
@@ -93,5 +97,14 @@ class StoreOrderRequest extends FormRequest
         }
 
         return null;
+    }
+
+    private function applyMarketTypeFilter(Builder &$query): void
+    {
+        $marketType = tenant()?->lender?->lenderDetail?->preferred_market_type;
+        if ($marketType && ! $marketType->is(CompanyMarketType::Any)) {
+            $marketType = $marketType->is(CompanyMarketType::Local) ? Trader::Lynk : Trader::Bursam;
+            $query->where('provider', $marketType);
+        }
     }
 }
