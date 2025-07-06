@@ -72,11 +72,11 @@ class StoreOrderRequest extends FormRequest
             return;
         }
 
-        $marketType = $company?->lender?->lenderDetail?->preferred_market_type;
         // If we reach here, value is provided and setting is ON, so validate the commodity type
         $commodityTypeExistsQuery = CommodityType::where('unique_name', $value)
             ->where('status', CommodityTypeStatus::Active);
 
+        $marketType = $company?->lender?->lenderDetail?->preferred_market_type;
         if ($marketType && ! $marketType->is(CompanyMarketType::Any)) {
             $marketType = $marketType->is(CompanyMarketType::Local) ? 'local' : 'bursam';
             $commodityTypeExistsQuery->where('provider', $marketType);
