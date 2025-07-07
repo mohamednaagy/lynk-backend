@@ -15,7 +15,7 @@ class LoginUserAction implements LoginUser
         [$ttlMinutes, $expiresIn] = $this->getJwtTtlForUser($user);
 
         JWTAuth::factory()->setTTL($ttlMinutes);
-        $token = JWTAuth::fromUser($user);
+        $token = JWTAuth::claims(['version' => 1])->fromUser($user);
 
         return [
             'type' => 'token',
