@@ -32,9 +32,7 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
      */
     public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
     {
-        $order = FinancingOrder::query()
-            ->lockForUpdate()
-            ->findOrFail($traderOrder->financing_order_id);
+        $order = $traderOrder->order;
 
         if ($order->is_verification_required) {
             throw new OrderRequiresClientVerification;

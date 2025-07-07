@@ -29,9 +29,7 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
      */
     public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): array
     {
-        $order = FinancingOrder::query()
-            ->lockForUpdate()
-            ->findOrFail($traderOrder->financing_order_id);
+        $order = $traderOrder->order;
 
         if (
             $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
