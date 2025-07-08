@@ -126,11 +126,16 @@ class LocalMarketInventory extends Model
      */
     public function refreshStockQuantities($forceRebuildEligibility = false)
     {
+        $currentAvailableQuantity = $this->available_quantity;
+        $currentReservedItems = $this->reserved_items;
         $updated = $this->updateQuantities();
-        Log::channel('local-market')->info('Refreshing stock quantities for inventory: ', [
+        $this->refresh();
+        Log::channel('local_market')->info('Refreshing stock quantities for inventory: ', [
             'inventory_id' => $this->id,
-            'current_available_quantity' => $this->available_quantity,
-            'current_reserved_items' => $this->reserved_items,
+            'current_available_quantity' => $currentAvailableQuantity,
+            'current_reserved_items' => $currentReservedItems,
+            'new_available_quantity' => $this->available_quantity,
+            'new_reserved_items' => $this->reserved_items,
             'updated' => $updated,
             'forceRebuildEligibility' => $forceRebuildEligibility,
         ]);
@@ -163,7 +168,7 @@ class LocalMarketInventory extends Model
                 AND local_market_inventory_units.deleted_at IS NULL
             ),
             updated_at = NOW()
-        WHERE id IN ({$this->id})
+        WHERE id = {$this->id}
     ", [
             InventoryUnitsStatus::Free,
             InventoryUnitsStatus::Reserved,
