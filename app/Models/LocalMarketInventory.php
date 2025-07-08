@@ -9,6 +9,7 @@ use App\Services\LocalMarket\EligibleQuantityService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -94,7 +95,7 @@ class LocalMarketInventory extends Model
 
     public function getIsEditableAttribute()
     {
-        //save for later if business changes and want to update inventory with a specified criteriea
+        // save for later if business changes and want to update inventory with a specified criteriea
         return true;
     }
 
@@ -125,20 +126,17 @@ class LocalMarketInventory extends Model
      */
     public function refreshStockQuantities($forceRebuildEligibility = false)
     {
-        $freeUnits = $this->units()->where('status', InventoryUnitsStatus::Free)->count();
-        $reservedUnits = $this->units()->where('status', InventoryUnitsStatus::Reserved)->count();
-        $this->available_quantity = $freeUnits;
-        $this->reserved_items = $reservedUnits;
-
-        $saved = $this->save();
-        Log::channel('local-market')->info('Refreshing stock quantities for inventory: ', [
+        $currentAvailableQuantity = $this->available_quantity;
+        $currentReservedItems = $this->reserved_items;
+        $updated = $this->updateQuantities();
+        $this->refresh();
+        Log::channel('local_market')->info('Refreshing stock quantities for inventory: ', [
             'inventory_id' => $this->id,
-            'current_available_quantity' => $this->available_quantity,
-            'current_reserved_items' => $this->reserved_items,
-            'new_free_units' => $freeUnits,
-            'new_reserved_units' => $reservedUnits,
-            'saved' => $saved,
-            'error' => $saved ? null : $this->getErrors(),
+            'current_available_quantity' => $currentAvailableQuantity,
+            'current_reserved_items' => $currentReservedItems,
+            'new_available_quantity' => $this->available_quantity,
+            'new_reserved_items' => $this->reserved_items,
+            'updated' => $updated,
             'forceRebuildEligibility' => $forceRebuildEligibility,
         ]);
         if ($forceRebuildEligibility) {
@@ -146,5 +144,34 @@ class LocalMarketInventory extends Model
         } else {
             RebuildInventory::dispatch($this->id);
         }
+    }
+
+    public function updateQuantities()
+    {
+        return DB::update("
+        UPDATE local_market_inventories 
+        SET 
+            available_quantity = (
+                SELECT COUNT(*) 
+                FROM local_market_inventory_units 
+                USE INDEX (idx_units_status_optimized, idx_units_count_covering)
+                WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id 
+                AND local_market_inventory_units.status = ? 
+                AND local_market_inventory_units.deleted_at IS NULL
+            ),
+            reserved_items = (
+                SELECT COUNT(*) 
+                FROM local_market_inventory_units 
+                USE INDEX (idx_units_status_optimized, idx_units_count_covering)
+                WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id 
+                AND local_market_inventory_units.status = ? 
+                AND local_market_inventory_units.deleted_at IS NULL
+            ),
+            updated_at = NOW()
+        WHERE id = {$this->id}
+    ", [
+            InventoryUnitsStatus::Free,
+            InventoryUnitsStatus::Reserved,
+        ]);
     }
 }
