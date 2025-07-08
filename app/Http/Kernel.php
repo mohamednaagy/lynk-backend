@@ -77,5 +77,6 @@ class Kernel extends HttpKernel
         'checkCompanyStatus' => \App\Http\Middleware\CheckCompanyStatus::class,
         'checkDataOfSupplier' => \App\Http\Middleware\EnsureDataOfUserSupplier::class,
         'ensureTokenNotExpired' => \App\Http\Middleware\EnsureTokenNotExpiredMiddleware::class,
+        'verify.token.version' => \App\Http\Middleware\VerifyTokenVersion::class,
     ];
 }

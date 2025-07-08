@@ -13,9 +13,10 @@ class LoginUserAction implements LoginUser
     public function handle(User $user, ?string $source = null, ?Request $request = null): array
     {
         [$ttlMinutes, $expiresIn] = $this->getJwtTtlForUser($user);
+        $version = $this->getJwtVersionForUser($user);
 
         JWTAuth::factory()->setTTL($ttlMinutes);
-        $token = JWTAuth::claims(['version' => 1])->fromUser($user);
+        $token = JWTAuth::claims(['version' => $version])->fromUser($user);
 
         return [
             'type' => 'token',
@@ -26,7 +27,7 @@ class LoginUserAction implements LoginUser
     }
 
     /**
-     * Get the JWT TTL (in minutes), and expiration time(in seconds) for the given user.
+     * Get the JWT TTL (in minutes), and expiration time (in seconds) for the given user.
      *
      * @return array [$ttlMinutes, $expiresIn]
      */
@@ -42,5 +43,21 @@ class LoginUserAction implements LoginUser
         }
 
         return [$defaultTtl, null];
+    }
+
+    /**
+     * Get the token version claim for the given user.
+     */
+    private function getJwtVersionForUser(User $user): int
+    {
+        if (
+            $user->hasRole(Role::LenderApiUser)
+            &&
+            $user->company?->lender?->lenderDetail?->token_version
+        ) {
+            return (int) $user->company?->lender?->lenderDetail?->token_version;
+        }
+
+        return 1;
     }
 }

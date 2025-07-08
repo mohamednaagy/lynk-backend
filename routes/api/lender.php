@@ -56,10 +56,15 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
 
     Route::middleware([
         'auth:api',
+        InitializeTenancyByRequestData::class,   // Tenant must be resolved first
+        'verify.token.version',
         'role:'.implode('|', [
-            Role::LenderAdmin, Role::LenderSupervisor, Role::LenderBilling, Role::LenderOrderCreator, Role::LenderApiUser,
+            Role::LenderAdmin,
+            Role::LenderSupervisor,
+            Role::LenderBilling,
+            Role::LenderOrderCreator,
+            Role::LenderApiUser,
         ]),
-        InitializeTenancyByRequestData::class,
     ])->group(
         function () {
             Route::get('auth', GetAuthUser::class);
