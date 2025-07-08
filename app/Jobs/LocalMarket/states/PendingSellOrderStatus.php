@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Log;
 
 class PendingSellOrderStatus extends BaseStatus
 {
+    public $tries = 3;
+
+    public $backoff = [30, 60, 120];
+
     private InventoryService $inventoryService;
 
     private UnitService $unitService;

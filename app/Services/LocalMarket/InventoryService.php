@@ -6,6 +6,7 @@ use App\Enums\CommodityTypeStatus;
 use App\Enums\CommoitySupplierStatus;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Enums\LocalMarket\InventoryUnitsStatus;
+use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildInventory;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -162,11 +163,23 @@ class InventoryService
                 });
         }
 
-        $inventoriesToRefresh->unique('id')
-            ->sortBy('id')
-            ->each(function ($inventory) {
-                $inventory->refreshStockQuantities();
-            });
+        // Only use bulk update to avoid duplicate processing and deadlocks
+        $inventoryIds = $inventoriesToRefresh->unique('id')->pluck('id')->toArray();
+
+        if (! empty($inventoryIds)) {
+            $updated = $this->updateInventoriesStockQuantities($inventoryIds);
+
+            Log::channel('local_market')->info('Completed order units processing', [
+                'order_id' => $localMarketOrder->id,
+                'inventory_ids' => $inventoryIds,
+                'updated_count' => $updated,
+            ]);
+
+            // Only trigger eligibility rebuild for successfully updated inventories
+            foreach ($inventoryIds as $inventoryId) {
+                RebuildInventory::dispatch($inventoryId);
+            }
+        }
     }
 
     private function getUpdatedPreviousOwners(LocalMarketInventoryUnits $unit, $ownerId)
@@ -212,6 +225,63 @@ class InventoryService
                 'localMarketOrderId' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
             ]);
+        }
+    }
+
+    public function updateInventoriesStockQuantities(array $inventoryIds): int
+    {
+        if (empty($inventoryIds)) {
+            return 0;
+        }
+
+        try {
+            // Sort inventory IDs to ensure consistent lock ordering and prevent deadlocks
+            sort($inventoryIds);
+            $inventoryIdsString = implode(',', array_map('intval', $inventoryIds));
+
+            // Optimized bulk update with minimal lock scope
+            $updated = DB::update("
+                UPDATE local_market_inventories 
+                SET 
+                    available_quantity = (
+                        SELECT COUNT(*) 
+                        FROM local_market_inventory_units 
+                        USE INDEX (idx_units_status_optimized, idx_units_count_covering)
+                        WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id 
+                        AND local_market_inventory_units.status = ? 
+                        AND local_market_inventory_units.deleted_at IS NULL
+                    ),
+                    reserved_items = (
+                        SELECT COUNT(*) 
+                        FROM local_market_inventory_units 
+                        USE INDEX (idx_units_status_optimized, idx_units_count_covering)
+                        WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id 
+                        AND local_market_inventory_units.status = ? 
+                        AND local_market_inventory_units.deleted_at IS NULL
+                    ),
+                    updated_at = NOW()
+                WHERE id IN ({$inventoryIdsString})
+            ", [
+                InventoryUnitsStatus::Free,
+                InventoryUnitsStatus::Reserved,
+            ]);
+
+            Log::channel('local_market')->info('Bulk updated inventory stock quantities with optimized query', [
+                'inventory_ids' => $inventoryIds,
+                'updated_count' => $updated,
+                'query_execution_time' => microtime(true) - LARAVEL_START,
+            ]);
+
+            return $updated;
+
+        } catch (\Exception $e) {
+            Log::channel('local_market')->error('Failed to bulk update inventory stock quantities', [
+                'inventory_ids' => $inventoryIds,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e;
         }
     }
 }
