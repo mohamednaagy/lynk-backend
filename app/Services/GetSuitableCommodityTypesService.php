@@ -21,8 +21,6 @@ use RuntimeException;
  */
 final class GetSuitableCommodityTypesService
 {
-    private $isForced = false;
-
     private $logChannel = '';
 
     public function __construct(
@@ -67,7 +65,6 @@ final class GetSuitableCommodityTypesService
     {
 
         if ($this->traderOrder->hasAnyCommodityType()) {
-            // $this->isForced = true;
             $commodities = $this->resolveFromGlobalSettings();
             Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder (ANY)', [
                 'financingOrderId' => $this->traderOrder->order->id,
@@ -80,7 +77,6 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromTraderOrder()) {
             if ($commodities->isNotEmpty()) {
-                // $this->isForced = true;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder', [
                     'financingOrderId' => $this->traderOrder->order->id,
                     'traderOrderId' => $this->traderOrder->id,
@@ -94,7 +90,6 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromFinancingOrder()) {
             if ($commodities->isNotEmpty()) {
-                // $this->isForced = true;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from FinancingOrder', [
                     'financingOrderId' => $this->traderOrder->order->id,
                     'traderOrderId' => $this->traderOrder->id,
@@ -108,7 +103,6 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromCompany()) {
             if ($commodities->isNotEmpty()) {
-                // $this->isForced = $this->traderOrder->provider == Trader::Bursam ? true : $this->traderOrder->order->company->commodityTypes()->count() > 0;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from Company', [
                     'financingOrderId' => $this->traderOrder->order->id,
                     'traderOrderId' => $this->traderOrder->id,
