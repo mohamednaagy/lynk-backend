@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
@@ -582,6 +583,8 @@ class BursamV1Driver implements TraderInterface
         ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, TraderOrderCancelType::User,
             auth()->user());
 
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
+        
         return OrderCancellationStatus::PendingCancellation;
     }
 
@@ -619,6 +622,7 @@ class BursamV1Driver implements TraderInterface
                 'status' => FinancingOrderStatus::PendingTraderOrder,
             ]);
         }
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
 
         return TraderOrderCancellationStatus::Cancelled;

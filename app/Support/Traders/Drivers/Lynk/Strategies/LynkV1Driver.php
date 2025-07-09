@@ -5,6 +5,7 @@ namespace App\Support\Traders\Drivers\Lynk\Strategies;
 use App\Actions\Contracts\Orders\CancelOrder;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\CompanyMarketType;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
@@ -342,6 +343,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         if ($traderOrder->order->status->is(FinancingOrderStatus::InProgress) && $traderOrder->order->activeTraderOrder()->count() == 0) {
             $traderOrder->order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
         }
+
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
+
     }
 
     protected function handleAutomaticOrderCancellation(
@@ -359,6 +363,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             new ProcessLynkCancelTraderOrder($traderOrder->id),
             fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
             fn () => $this->retryOrder($traderOrder),
+            fn () => app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder)
         ])->dispatch();
     }
 

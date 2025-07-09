@@ -4,6 +4,7 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
@@ -130,6 +131,7 @@ class BursamV2Driver extends BursamV1Driver
     {
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
         $this->updateFinancingOrderStatus($traderOrder->order);
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
     }
 
     private function requiresSellingBeforeCancellation(TraderOrder $traderOrder): bool
