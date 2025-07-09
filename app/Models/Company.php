@@ -162,4 +162,9 @@ class Company extends BaseTenant
     {
         return $this->lender->lenderDetail->token_expire_in;
     }
+
+    public function getTokenExpireVersion(): int
+    {
+        return (int) $this->lender->lenderDetail->token_version;
+    }
 }

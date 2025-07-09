@@ -41,6 +41,7 @@ class CompanyLenderDetail extends Model
         'webhook_secret_key',
         'allow_preferred_commodity_in_order',
         'token_expire_in',
+        'token_version',
     ];
 
     public function lender()
