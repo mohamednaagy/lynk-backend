@@ -35,8 +35,6 @@ class InventoryService
         $companyId = $localMarketOrder->company_id;
         $preferredItemTypes = $localMarketOrder->preferred_commodity_type;
 
-        $forcePreferredCommodityType = $localMarketOrder->force_commodity_type;
-
         // First try with preferred commodity types
         $preferredInventories = $this->findEligibleInventoriesForLoan(
             $loanAmount,
@@ -46,7 +44,7 @@ class InventoryService
         $combination = $this->findOptimalCombination($loanAmount, $preferredInventories);
 
         // Return combination if found or if we must use preferred types
-        if ($forcePreferredCommodityType || ! empty($combination)) {
+        if (! empty($preferredItemTypes) || ! empty($combination)) {
             return $combination;
         } else {
             // Fallback to all inventory types if allowed

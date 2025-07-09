@@ -42,7 +42,6 @@ class CreateCompanyAction implements CreateCompany
             Arr::only(
                 $data,
                 [
-                    'force_preferred_commodity_type',
                     'notifications_email',
                     'company_cr',
                     'default_contract_sign_time_limit',

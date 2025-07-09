@@ -83,7 +83,6 @@ class LenderControllerShowTest extends TestCase
                         'trading_mode',
                         'preferred_market_type',
                         'preferred_commodity_types',
-                        'force_preferred_commodity_type',
                     ])
                     ->respond()
                     ->getData(true)
@@ -112,7 +111,6 @@ class LenderControllerShowTest extends TestCase
                         'notify_admins_about_new_orders',
                         'trading_mode',
                         'preferred_market_type',
-                        'force_preferred_commodity_type',
                     ])
                     ->respond()
                     ->getData(true)

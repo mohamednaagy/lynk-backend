@@ -149,7 +149,6 @@ class BursamV1Driver implements TraderInterface
             $traderOrder->update([
                 'status' => TraderOrderStatus::InProgress,
                 'product_code' => $productCode,
-                'force_commodity_type' => $commoditiesData['force_commodity_type'],
             ]);
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 

@@ -11,7 +11,6 @@ class CompanyLenderDetail extends Model
 {
     protected $casts = [
         'preferred_market_type' => CompanyMarketType::class,
-        'force_preferred_commodity_type' => 'boolean',
         'does_order_require_approval' => 'boolean',
         'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'force_unique_reference_number' => 'boolean',
@@ -24,7 +23,6 @@ class CompanyLenderDetail extends Model
 
     protected $fillable = [
         'default_contract_sign_time_limit',
-        'force_preferred_commodity_type',
         'company_id',
         'notifications_email',
         'force_unique_reference_number',
