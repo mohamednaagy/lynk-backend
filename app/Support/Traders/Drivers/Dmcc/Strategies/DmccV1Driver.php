@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
@@ -265,6 +266,7 @@ class DmccV1Driver implements TraderInterface
             );
         }
         app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
 
         return $response->object();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Fake\Strategies;
 
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
@@ -190,6 +191,7 @@ class FakeV1Driver implements TraderInterface
         ?User $cancelledBy = null
     ): bool {
         app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
 
         return true;
     }

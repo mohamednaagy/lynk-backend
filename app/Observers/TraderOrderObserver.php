@@ -72,7 +72,6 @@ class TraderOrderObserver
     {
         if ($traderOrder->status->is(TraderOrderStatus::Cancelled)) {
             TraderOrderCancelled::dispatch($traderOrder);
-            app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         }
 
         if ($traderOrder->status->is(TraderOrderStatus::Completed)) {
