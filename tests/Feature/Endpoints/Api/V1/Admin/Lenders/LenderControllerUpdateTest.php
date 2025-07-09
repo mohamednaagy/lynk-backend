@@ -108,7 +108,6 @@ class LenderControllerUpdateTest extends TestCase
             'preferred_market_type' => CompanyMarketType::International,
             'contract_number' => '1234567'.rand('111', '999'),
             'preferred_commodity_types' => [self::$activeCommodityType->id],
-            'force_preferred_commodity_type' => true,
             'auto_complete_murabaha_order' => true,
 
         ];
@@ -225,33 +224,6 @@ class LenderControllerUpdateTest extends TestCase
                     ],
                 ],
             ]);
-    }
-
-    public function test_admin_force_preferred_commodity_type_is_required_with_preferred_market_type(): void
-    {
-        self::$lenderDetails['preferred_market_type'] = 2;
-        $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$lenderDetails, 'force_preferred_commodity_type'))
-            ->assertUnprocessable()
-            ->assertExactJson([
-                'message' => 'The force preferred commodity type field is required when preferred commodity types is present.',
-                'errors' => [
-                    'force_preferred_commodity_type' => [
-                        'The force preferred commodity type field is required when preferred commodity types is present.',
-                    ],
-                ],
-            ]);
-    }
-
-    public function test_admin_can_update_force_preferred_commodity_type(): void
-    {
-        self::$lenderDetails['force_preferred_commodity_type'] = false;
-        $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, self::$lenderDetails)
-            ->assertOk();
-
-        $this->assertEquals(false, self::$lender->refresh()->force_preferred_market_type);
-
     }
 
     public function test_admin_cant_update_lender_without_name(): void

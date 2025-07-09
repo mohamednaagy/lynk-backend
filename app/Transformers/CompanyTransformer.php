@@ -35,7 +35,6 @@ class CompanyTransformer extends TransformerAbstract
         'preferred_commodity_types',
         'auto_complete_murabaha_order',
         'default_contract_sign_time_limit',
-        'force_preferred_commodity_type',
         'allow_preferred_commodity_in_order',
         'token_expire_in',
 
@@ -202,11 +201,6 @@ class CompanyTransformer extends TransformerAbstract
     public function includeDefaultContractSignTimeLimit(Company $company): Primitive
     {
         return $this->primitive($company->lender->lenderDetail?->default_contract_sign_time_limit);
-    }
-
-    public function includeForcePreferredCommodityType(Company $company): Primitive
-    {
-        return $this->primitive($company->lender->lenderDetail?->force_preferred_commodity_type);
     }
 
     public function includeTokenExpireIn(Company $company): Primitive

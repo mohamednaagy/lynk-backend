@@ -115,10 +115,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     {
         Log::channel('local_market')->info("Create New Order at Local Market For Trader Order id => {$traderOrder->id} and financing order => {$traderOrder->order->id}");
         $commodityData = (new GetSuitableCommodityTypesService($traderOrder))->resolve();
-        LynkClient::of($traderOrder)->createOrder($commodityData['commodity_types_id'], $commodityData['force_commodity_type']);
+        LynkClient::of($traderOrder)->createOrder($commodityData['commodity_types_id']);
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
-            'force_commodity_type' => $commodityData['force_commodity_type'],
         ]);
 
         return $traderOrder;

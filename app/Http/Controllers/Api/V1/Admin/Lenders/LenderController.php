@@ -104,7 +104,6 @@ class LenderController extends Controller
                     'order_cost',
                     'preferred_market_type',
                     'preferred_commodity_types',
-                    'force_preferred_commodity_type',
                 ])
                 ->respond();
         });
@@ -138,7 +137,6 @@ class LenderController extends Controller
                 'preferred_market_type',
                 'preferred_commodity_types',
                 'default_contract_sign_time_limit',
-                'force_preferred_commodity_type',
                 'allow_preferred_commodity_in_order',
             ])
             ->respond();

@@ -181,12 +181,6 @@ class UpdateCompanyRequest extends FormRequest
             'default_contract_sign_time_limit' => [
                 'nullable', 'integer', 'min:1',
             ],
-
-            'force_preferred_commodity_type' => [
-                'nullable',
-                'required_with:preferred_commodity_types',
-                'boolean',
-            ],
         ];
     }
 }

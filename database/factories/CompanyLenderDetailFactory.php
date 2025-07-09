@@ -26,7 +26,6 @@ class CompanyLenderDetailFactory extends Factory
             'does_order_require_approval' => $this->faker->boolean,
             'notify_admins_about_new_orders' => $this->faker->boolean,
             'default_contract_sign_time_limit' => $this->faker->numberBetween(1, 48), // in hours
-            'force_preferred_commodity_type' => $this->faker->boolean,
             'require_initiate_trade_request' => $this->faker->boolean,
             'internal_status_comment' => $this->faker->optional()->sentence,
             'public_status_comment' => $this->faker->optional()->sentence,

@@ -93,7 +93,6 @@ class LenderControllerStoreTest extends TestCase
             'trading_mode' => TraderOrderMode::Automatic,
             'preferred_market_type' => CompanyMarketType::International,
             'preferred_commodity_types' => [self::$activeCommodityType->id],
-            'force_preferred_commodity_type' => false,
             'auto_complete_murabaha_order' => true,
         ];
         self::$endpoint = 'api/v1/admin/lenders';
@@ -126,7 +125,6 @@ class LenderControllerStoreTest extends TestCase
                     'require_initiate_trade_request',
                     'preferred_market_type',
                     'preferred_commodity_types',
-                    'force_preferred_commodity_type',
                 ],
             ]);
 
@@ -167,7 +165,6 @@ class LenderControllerStoreTest extends TestCase
                     'require_initiate_trade_request',
                     'preferred_market_type',
                     'preferred_commodity_types',
-                    'force_preferred_commodity_type',
                 ],
             ]);
 
@@ -208,7 +205,6 @@ class LenderControllerStoreTest extends TestCase
                     'require_initiate_trade_request',
                     'preferred_market_type',
                     'preferred_commodity_types',
-                    'force_preferred_commodity_type',
                 ],
             ]);
 
@@ -328,22 +324,6 @@ class LenderControllerStoreTest extends TestCase
                 'errors' => [
                     'preferred_market_type' => [
                         'The value you have entered is invalid.',
-                    ],
-                ],
-            ]);
-    }
-
-    public function test_admin_force_preferred_commodity_type_is_required_with_preferred_market_type(): void
-    {
-        self::$standardLenderDetails['preferred_market_type'] = 2;
-        $this->actingAs(self::$userAdmin)
-            ->postJson(self::$endpoint, Arr::except(self::$standardLenderDetails, 'force_preferred_commodity_type'))
-            ->assertUnprocessable()
-            ->assertExactJson([
-                'message' => 'The force preferred commodity type field is required when preferred commodity types is present.',
-                'errors' => [
-                    'force_preferred_commodity_type' => [
-                        'The force preferred commodity type field is required when preferred commodity types is present.',
                     ],
                 ],
             ]);
@@ -489,7 +469,6 @@ class LenderControllerStoreTest extends TestCase
                     'does_order_require_approval',
                     'preferred_market_type',
                     'preferred_commodity_types',
-                    'force_preferred_commodity_type',
                 ],
             ]);
     }

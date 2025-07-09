@@ -33,7 +33,6 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
                 'preferred_commodity_type',
                 'buying_uuid',
                 'selling_uuid',
-                'force_commodity_type',
             ])
         );
         $this->createLocalMarketOrderHistory($order, OrderHistoryStatus::initiate);

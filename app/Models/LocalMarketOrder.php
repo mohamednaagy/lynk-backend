@@ -32,7 +32,6 @@ class LocalMarketOrder extends Model
         'order_no',
         'preferred_commodity_type',
         'commodities_settlement_status',
-        'force_commodity_type',
     ];
 
     protected $attributes = [
@@ -42,7 +41,6 @@ class LocalMarketOrder extends Model
     protected $casts = [
         'preferred_commodity_type' => 'array',
         'data' => 'array',
-        'force_commodity_type' => 'boolean',
     ];
 
     public function orderInventories()

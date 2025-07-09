@@ -53,7 +53,6 @@ final class GetSuitableCommodityTypesService
 
         return [
             'commodity_types_id' => $commodityTypes->pluck($this->getIdentifierKey())->toArray(),
-            'force_commodity_type' => $this->isForced,
         ];
     }
 
@@ -68,13 +67,12 @@ final class GetSuitableCommodityTypesService
     {
 
         if ($this->traderOrder->hasAnyCommodityType()) {
-            $this->isForced = true;
+            // $this->isForced = true;
             $commodities = $this->resolveFromGlobalSettings();
             Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder (ANY)', [
                 'financingOrderId' => $this->traderOrder->order->id,
                 'traderOrderId' => $this->traderOrder->id,
                 'commodity_type_id' => $commodities->pluck($this->getIdentifierKey())->toArray(),
-                'force_commodity_type' => $this->isForced,
             ]);
 
             return $commodities;
@@ -82,12 +80,11 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromTraderOrder()) {
             if ($commodities->isNotEmpty()) {
-                $this->isForced = true;
+                // $this->isForced = true;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder', [
                     'financingOrderId' => $this->traderOrder->order->id,
                     'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
-                    'force_commodity_type' => $this->isForced,
                 ]);
 
                 return $commodities;
@@ -97,12 +94,11 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromFinancingOrder()) {
             if ($commodities->isNotEmpty()) {
-                $this->isForced = true;
+                // $this->isForced = true;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from FinancingOrder', [
                     'financingOrderId' => $this->traderOrder->order->id,
                     'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
-                    'force_commodity_type' => $this->isForced,
                 ]);
 
                 return $commodities;
@@ -112,12 +108,11 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromCompany()) {
             if ($commodities->isNotEmpty()) {
-                $this->isForced = $this->traderOrder->provider == Trader::Bursam ? true : $this->traderOrder->order->company->lender->lenderDetail->force_preferred_commodity_type;
+                // $this->isForced = $this->traderOrder->provider == Trader::Bursam ? true : $this->traderOrder->order->company->commodityTypes()->count() > 0;
                 Log::channel($this->logChannel)->info('CommodityType resolved directly from Company', [
                     'financingOrderId' => $this->traderOrder->order->id,
                     'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
-                    'force_commodity_type' => $this->isForced,
                 ]);
 
                 return $commodities;
@@ -229,8 +224,6 @@ final class GetSuitableCommodityTypesService
                 'financingOrderId' => $this->traderOrder->order->id,
                 'traderOrderId' => $this->traderOrder->id,
                 'commodity_types_id' => $commodities->pluck('id')->toArray(),
-                'force_commodity_type' => $this->isForced,
-
             ]);
 
             return $commodities;
@@ -259,7 +252,6 @@ final class GetSuitableCommodityTypesService
                 'financingOrderId' => $this->traderOrder->order->id,
                 'traderOrderId' => $this->traderOrder->id,
                 'commodity_types_id' => $commodities->pluck('id')->toArray(),
-                'force_commodity_type' => $this->isForced,
             ]);
 
             return $commodities;
