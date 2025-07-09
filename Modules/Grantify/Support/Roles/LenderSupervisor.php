@@ -8,6 +8,10 @@ use App\Enums\Subject;
 class LenderSupervisor
 {
     public static array $basePermissions = [
+        Subject::LenderUsers => [
+            Action::Show,
+            Action::Edit,
+        ],
         Subject::Dashboard => [
             Action::Show,
         ],
@@ -31,6 +35,9 @@ class LenderSupervisor
         ],
         Subject::LenderWallet => [
             Action::Manage,
+        ],
+        Subject::CommodityMarketCommodityTypes => [
+            Action::Index,
         ],
     ];
 }
