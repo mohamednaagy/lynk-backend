@@ -17,23 +17,20 @@ class UpdateLenderSettingsAction implements UpdateLenderSettings
     private function updateLenderDetails(Company $company, array $data): void
     {
         $lenderDetail = $company->lender->lenderDetail;
-        $oldExpireIn = (int) ($lenderDetail->token_expire_in);
-        $newExpireIn = (int) ($data['token_expire_in'] ?? $oldExpireIn);
 
-        $lenderDetailData = Arr::only($data, [
+        // Update model attributes without saving yet
+        $lenderDetail->fill(Arr::only($data, [
             'require_initiate_trade_request',
             'does_order_require_approval',
             'force_unique_reference_number',
             'token_expire_in',
-        ]);
+        ]));
 
-        if ($newExpireIn !== $oldExpireIn) {
-            $lenderDetailData['token_version'] = $lenderDetail->token_version + 1;
+        // If token_expire_in has changed, bump the version
+        if ($lenderDetail->isDirty('token_expire_in')) {
+            $lenderDetail->token_version += 1;
         }
 
-        $lenderDetail->updateOrCreate(
-            ['company_id' => $company->id],
-            $lenderDetailData
-        );
+        $lenderDetail->save();
     }
 }
