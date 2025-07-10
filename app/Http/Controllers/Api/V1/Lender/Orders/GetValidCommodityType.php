@@ -16,7 +16,7 @@ class GetValidCommodityType extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::CommodityMarketCommodityTypes, Action::Index, Action::Manage])
+            perm(Area::Lender, [Subject::CommodityMarketCommodityTypes, Action::Index])
         );
     }
 

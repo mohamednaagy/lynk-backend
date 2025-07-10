@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1\Lender\Auth;
 
 use App\Actions\Contracts\Auth\UpdateMyProfile as UpdateMyProfileInterface;
+use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\UpdateMyProfileRequest;
 use App\Models\User;
@@ -13,6 +15,14 @@ use Illuminate\Support\Arr;
 
 class UpdateMyProfile extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(
+            'permission:'.
+            perm(Area::Lender, [Subject::LenderUsers, Action::Edit])
+        );
+    }
+
     /**
      * Handle the incoming request.
      *
