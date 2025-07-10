@@ -83,6 +83,6 @@ class ProcessBursamOrderResultYNNTest extends TestCase
 
         $this->assertTrue(self::$financingOrder->model()->status->is(FinancingOrderStatus::TradingFailure));
         $this->assertEquals($failureCode, self::$traderOrder->failure_reason);
-        $this->assertEquals(TraderOrderCancelReason::FailureToPurchase, self::$traderOrder->cancel_reason);
+        $this->assertEquals(TraderOrderCancelReason::FailureToPurchase, self::$traderOrder->cancelDetail->cancel_reason);
     }
 }

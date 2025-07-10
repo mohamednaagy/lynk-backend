@@ -46,11 +46,13 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
         FinancingOrder::query()
             ->whereHas('latestTraderOrder', function ($query) use ($marketOpeningEndTime, $marketOpeningStartTime) {
                 return $query->where('status', TraderOrderStatus::Cancelled)
-                    ->where('data->cancel_reason', TraderOrderCancelReason::MurabhaTimeout)
                     ->where('provider', 'bursam')
                     ->where('version', 'v2')
                     ->where('mode', TraderOrderMode::Automatic)
-                    ->whereBetween('created_at', [$marketOpeningStartTime, $marketOpeningEndTime]);
+                    ->whereBetween('created_at', [$marketOpeningStartTime, $marketOpeningEndTime])
+                     ->whereHas('cancelDetail', function ($q) {
+                        $q->where('cancel_reason', TraderOrderCancelReason::MurabhaTimeout);
+                    });
             })
             ->select('id')
             ->lazyById()
