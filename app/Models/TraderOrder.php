@@ -298,9 +298,21 @@ class TraderOrder extends Model implements HasMedia
 
     public function canBeCancelled(): bool
     {
+
+        if($this->isTraderManualAndPurchaseStepNotComplete()){
+            return true ;
+        }
+
         return ! $this->doesLastActionMatchWith([
             FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ]) && ($this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold));
+    }
+
+    public function isTraderManualAndPurchaseStepNotComplete(): bool
+    {
+        return ($this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated))
+            && $this->mode === TraderOrderMode::Manual
+            && $this->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId);
     }
 
     public function getCancelStep(): ?string
