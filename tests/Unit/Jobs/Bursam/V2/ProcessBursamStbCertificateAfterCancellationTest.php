@@ -51,7 +51,7 @@ class ProcessBursamStbCertificateAfterCancellationTest extends TestCase
         self::$traderOrder->refresh();
 
         $this->assertTrue(self::$traderOrder->status->is(TraderOrderStatus::Cancelled));
-        $this->assertEquals(TraderOrderCancelReason::Manual, self::$traderOrder->cancel_reason);
+        $this->assertEquals(TraderOrderCancelReason::Manual, self::$traderOrder->cancelDetail->cancel_reason);
     }
 
     public function test_get_owner_to_customer_certificate_after_cancellation_if_commodity_not_sold()

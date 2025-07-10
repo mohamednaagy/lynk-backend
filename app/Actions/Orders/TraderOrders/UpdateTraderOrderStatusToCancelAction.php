@@ -19,9 +19,7 @@ class UpdateTraderOrderStatusToCancelAction implements UpdateTraderOrderStatusTo
 
         $traderOrder->update([
             'status' => TraderOrderStatus::Cancelled,
-            'cancel_reason' => $cancelReason,
             'failure_reason' => $failureReason,
-            'cancelled_at' => now(),
         ]);
 
         $this->createTraderOrderHistory(
