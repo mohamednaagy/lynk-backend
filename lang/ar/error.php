@@ -35,6 +35,7 @@ return [
     'order_is_already_cancelled' => 'الطلب ملغي مسبقا',
     'order_has_completed_trader_order' => 'الطلب رقم :order_id لديه طلب مرابحة مكتمل.',
     'order_already_has_active_trader_order' => 'هناك طلب قيد التنفيذ بالفعل',
+    'trade_request_creation_not_allowed' => 'لا يمكن إنشاء طلب التداول بسبب إعدادات الشركة',
     'commodity_market_is_unavailable' => 'سوق السلع غير متاح فى الوقت الحالي.',
     'trader_mode_not_supported' => 'لا يمكن إنشاء طلب باستخدام الوضع المعطى',
     'no_match_for_order_cost_and_value' => 'لا يمكن حساب تكلفة طلب المرابحة',

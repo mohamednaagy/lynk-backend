@@ -97,4 +97,6 @@ class ErrorCode
     public const LOCAL_MARKET_WEBHOOK_INVALID_CASE = 1048;
 
     public const LOCAL_MARKET_CANT_PURCHASING = 1049;
+
+    public const TRADE_REQUEST_CREATION_NOT_ALLOWED = 1050;
 }

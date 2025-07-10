@@ -36,6 +36,7 @@ return [
 
     'order_has_completed_trader_order' => 'Order ID #:order_id already has a completed trading request.',
     'order_already_has_active_trader_order' => 'Order already has active trading request',
+    'trade_request_creation_not_allowed' => 'Trade request cannot be created due to company settings',
     'commodity_market_is_unavailable' => 'The commodity market service is currently unavailable.',
     'trader_mode_not_supported' => 'Selected mode is not available for this trader',
     'no_match_for_order_cost_and_value' => 'Not able to match order cost with order value',
