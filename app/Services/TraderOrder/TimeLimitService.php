@@ -122,7 +122,7 @@ class TimeLimitService
      */
     private function getConfirmDeliveryTimeConfig()
     {
-        $defaultValue = app(LocalMurabahaSettings::class)->default_customer_delivery_confirmation_time_limit ?? 72;
+        $defaultValue = (int) (app(LocalMurabahaSettings::class)->default_customer_delivery_confirmation_time_limit ?? 72);
         $effectiveAt = Carbon::now()
             ->timezone('UTC')
             ->addHours($defaultValue)
@@ -149,13 +149,13 @@ class TimeLimitService
                 get_bursam_contract_signed_deadline(), // Effective time
             ],
             Trader::Lynk => [
-                $company->lender->lenderDetail->default_contract_sign_time_limit
-                    ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit, //default value
+                (int) ($company->lender->lenderDetail->default_contract_sign_time_limit
+                    ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit), // default value
                 Carbon::now()
                     ->timezone('UTC')
                     ->addHours(
-                        $company->lender->lenderDetail->default_contract_sign_time_limit
-                            ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit
+                        (int) ($company->lender->lenderDetail->default_contract_sign_time_limit
+                            ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit)
                     )
                     ->format('Y-m-d H:i:s'), // Effective time
             ],
