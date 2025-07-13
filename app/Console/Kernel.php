@@ -31,11 +31,6 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->onOneServer();
 
-        $schedule->job(new ProcessDmccNotifications)
-            ->when(is_bursam_service_available())
-            ->everyMinute()
-            ->withoutOverlapping()
-            ->onOneServer();
 
         $sellingCommodityStartTime = Config::get('services.bursam.selling_commodity_start_time');
         $sellingCommodityEndTime = Config::get('services.bursam.selling_commodity_end_time');
