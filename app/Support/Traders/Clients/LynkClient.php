@@ -8,6 +8,8 @@ use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\RequestDeliverProducts;
 use App\Actions\Contracts\LocalMarket\SellCommodities;
 use App\Actions\Contracts\LocalMarket\TransferOwnerShip;
+use App\Enums\Trader;
+use App\Models\CommodityType;
 use App\Models\TraderOrder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Localizable;
@@ -34,13 +36,13 @@ class LynkClient
         return new static($traderOrder);
     }
 
-    public function createOrder(array $commodityTypesId = [])
+    public function createOrder(array $commodityTypesUniqueNames = [])
     {
         try {
             $financingOrder = $this->traderOrder->order;
 
             $data = $this->prepareOrderData($financingOrder);
-            $data['preferred_commodity_type'] = $commodityTypesId;
+            $data['preferred_commodity_type'] = $this->getCommodityTypeIds($commodityTypesUniqueNames);
             Log::channel('local_market')->info("Data prepared for Trader Order ID: {$this->traderOrder->id}", $data);
 
             return app(CreateLocalMarketOrder::class)->handle($data);
@@ -50,6 +52,14 @@ class LynkClient
             ]);
         }
 
+    }
+
+    private function getCommodityTypeIds(array $uniqueNames): array
+    {
+        return CommodityType::where('provider', Trader::Lynk)
+            ->whereIn('unique_name', $uniqueNames)
+            ->pluck('id')
+            ->toArray();
     }
 
     public function sellProduct()
