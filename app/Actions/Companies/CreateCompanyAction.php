@@ -32,8 +32,6 @@ class CreateCompanyAction implements CreateCompany
                     'status',
                     'driver',
                     'type',
-                    'force_unique_reference_number',
-                    'require_initiate_trade_request',
                 ]
             )
         );

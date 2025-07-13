@@ -27,7 +27,6 @@ class Company extends BaseTenant
 
     protected $casts = [
         'status' => CompanyStatus::class,
-        'require_initiate_trade_request' => 'boolean',
         'type' => CompanyType::class,
         'deleted_at' => 'datetime',
     ];
@@ -37,20 +36,13 @@ class Company extends BaseTenant
         return [
             'id',
             'name',
-            'notifications_email',
             'unique_name',
-            'company_cr',
-            'contract_number',
             'status',
-            'does_order_require_approval',
-            'require_initiate_trade_request',
-            'created_at',
-            'updated_at',
             'type',
             'driver',
-            'notify_admins_about_new_orders',
+            'created_at',
+            'updated_at',
             'deleted_at',
-            'auto_complete_murabaha_order',
         ];
     }
 
