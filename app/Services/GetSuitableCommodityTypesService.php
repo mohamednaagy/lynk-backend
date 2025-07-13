@@ -50,7 +50,7 @@ final class GetSuitableCommodityTypesService
         }
 
         return [
-            'commodity_types_id' => $commodityTypes->pluck($this->getIdentifierKey())->toArray(),
+            'commodity_types_id' => $commodityTypes->pluck('unique_name')->toArray(),
         ];
     }
 
@@ -69,7 +69,7 @@ final class GetSuitableCommodityTypesService
             Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder (ANY)', [
                 'financingOrderId' => $this->traderOrder->order->id,
                 'traderOrderId' => $this->traderOrder->id,
-                'commodity_type_id' => $commodities->pluck($this->getIdentifierKey())->toArray(),
+                'commodity_type_id' => $commodities->pluck('unique_name')->toArray(),
             ]);
 
             return $commodities;
@@ -253,10 +253,5 @@ final class GetSuitableCommodityTypesService
         Log::channel($this->logChannel)->warning('No active Lynk commodity found in GlobalSettings');
 
         return null;
-    }
-
-    private function getIdentifierKey(): string
-    {
-        return $this->traderOrder->provider === Trader::Bursam ? 'unique_name' : 'id';
     }
 }
