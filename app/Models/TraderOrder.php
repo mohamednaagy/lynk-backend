@@ -298,9 +298,8 @@ class TraderOrder extends Model implements HasMedia
 
     public function canBeCancelled(): bool
     {
-
-        if($this->isTraderManualAndPurchaseStepNotComplete()){
-            return true ;
+        if ($this->isTraderManualAndPurchaseStepNotComplete()) {
+            return true;
         }
 
         return ! $this->doesLastActionMatchWith([

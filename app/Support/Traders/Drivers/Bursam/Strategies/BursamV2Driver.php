@@ -212,7 +212,7 @@ class BursamV2Driver extends BursamV1Driver
 
     public function isTraderOrderCancellable(TraderOrder $traderOrder, ?string $area)
     {
-        if($traderOrder->isTraderManualAndPurchaseStepNotComplete()){
+        if ($traderOrder->isTraderManualAndPurchaseStepNotComplete()) {
             return true;
         }
 
@@ -223,6 +223,7 @@ class BursamV2Driver extends BursamV1Driver
         return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
             && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
     }
+    
     protected function isNotInTransitionStateForSellingOrBuying(TraderOrder $traderOrder)
     {
         return ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
