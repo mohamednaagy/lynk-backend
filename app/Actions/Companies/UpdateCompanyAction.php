@@ -20,8 +20,6 @@ class UpdateCompanyAction implements UpdateCompany
                     'name',
                     'unique_name',
                     'status',
-                    'driver',
-                    'trading_mode',
                 ]
             )
         );

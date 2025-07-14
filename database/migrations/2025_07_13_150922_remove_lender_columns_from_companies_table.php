@@ -27,6 +27,8 @@ return new class extends Migration
                 'internal_status_comment',
                 'webhook_secret_key',
                 'auto_complete_murabaha_order',
+                'driver',
+                'data',
             ]);
         });
     }
@@ -37,6 +39,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('companies', function (Blueprint $table) {
+            $table->json('data')->nullable();
+            $table->string('driver')->after('unique_name')->unique()->nullable();
             $table->string('notifications_email')->nullable();
             $table->string('company_cr')->nullable()->unique();
             $table->string('contract_number')->nullable();

@@ -39,7 +39,6 @@ class Company extends BaseTenant
             'unique_name',
             'status',
             'type',
-            'driver',
             'created_at',
             'updated_at',
             'deleted_at',
@@ -158,5 +157,16 @@ class Company extends BaseTenant
     public function getTokenExpireVersion(): int
     {
         return (int) $this->lender->lenderDetail->token_version;
+    }
+
+    public function getAttributes()
+    {
+        $attributes = parent::getAttributes();
+
+        // We don't want the 'data' field to appear here,
+        // as it's not part of the companies table and is added by the tenancy package.
+        unset($attributes['data']);
+
+        return $attributes;
     }
 }
