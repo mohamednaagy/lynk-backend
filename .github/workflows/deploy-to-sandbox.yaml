@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - sandbox
-      
+
 jobs:
   deploy:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
@@ -19,10 +19,10 @@ jobs:
 
       - name: pulling and build code
         id: pull-and-build
-        run: | 
+        run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SANDBOX_USER_NAME }}@144.24.208.157 \
-           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo php artisan migrate && sudo supervisorctl stop all && sudo supervisorctl start all"
-        
+           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate && sudo supervisorctl stop all && sudo supervisorctl start all"
+
       - name: set pr url
         if: always()
         id: pr-url
@@ -34,8 +34,8 @@ jobs:
             | jq -r 'if type == "array" and length > 0 then .[0].html_url else "" end')
 
           echo "pr-url=$PR_URL" >> $GITHUB_OUTPUT
-        
-        
+
+
       - name: print info
         if: always()
         run: |
