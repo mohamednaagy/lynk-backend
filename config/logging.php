@@ -126,7 +126,8 @@ return [
         ],
 
         'nightwatch' => [
-            'driver' => 'nightwatch',
+            'driver' => 'custom',
+            'via' => \Laravel\Nightwatch\Factories\Logger::class,
             'token' => env('NIGHTWATCH_TOKEN'),
             'level' => env('NIGHTWATCH_LOG_LEVEL', 'debug'),
         ],
