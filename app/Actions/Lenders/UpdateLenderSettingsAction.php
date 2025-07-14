@@ -10,12 +10,6 @@ class UpdateLenderSettingsAction implements UpdateLenderSettings
 {
     public function handle(Company $company, array $data): void
     {
-        $company->update($data);
-        $this->updateLenderDetails($company, $data);
-    }
-
-    private function updateLenderDetails(Company $company, array $data): void
-    {
         $lenderDetail = $company->lender->lenderDetail;
 
         // Update model attributes without saving yet

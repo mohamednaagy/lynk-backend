@@ -27,7 +27,6 @@ class Company extends BaseTenant
 
     protected $casts = [
         'status' => CompanyStatus::class,
-        'require_initiate_trade_request' => 'boolean',
         'type' => CompanyType::class,
         'deleted_at' => 'datetime',
     ];
@@ -37,20 +36,12 @@ class Company extends BaseTenant
         return [
             'id',
             'name',
-            'notifications_email',
             'unique_name',
-            'company_cr',
-            'contract_number',
             'status',
-            'does_order_require_approval',
-            'require_initiate_trade_request',
+            'type',
             'created_at',
             'updated_at',
-            'type',
-            'driver',
-            'notify_admins_about_new_orders',
             'deleted_at',
-            'auto_complete_murabaha_order',
         ];
     }
 
@@ -166,5 +157,16 @@ class Company extends BaseTenant
     public function getTokenExpireVersion(): int
     {
         return (int) $this->lender->lenderDetail->token_version;
+    }
+
+    public function getAttributes()
+    {
+        $attributes = parent::getAttributes();
+
+        // We don't want the 'data' field to appear here,
+        // as it's not part of the companies table and is added by the tenancy package.
+        unset($attributes['data']);
+
+        return $attributes;
     }
 }
