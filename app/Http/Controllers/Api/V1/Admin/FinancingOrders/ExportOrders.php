@@ -26,7 +26,7 @@ class ExportOrders extends Controller
     public function __invoke(Request $request, BuildFinancingOrdersQuery $buildOrdersQuery)
     {
         $query = $buildOrdersQuery->setRelations([
-            'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            'activeTraderOrder' => fn ($query) => $query->latest(),
             'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'responsableAdmin' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),

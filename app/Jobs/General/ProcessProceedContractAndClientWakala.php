@@ -46,7 +46,7 @@ class ProcessProceedContractAndClientWakala implements ShouldQueue
     {
         \DB::transaction(function () use ($makeOrderProceed) {
             /** @var TraderOrder $traderOrder */
-            $traderOrder = TraderOrder::query()->withLastHistoryAction()->lockForUpdate()->findOrFail($this->traderOrderId);
+            $traderOrder = TraderOrder::query()->lockForUpdate()->findOrFail($this->traderOrderId);
 
             if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
                 return;

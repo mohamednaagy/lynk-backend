@@ -34,7 +34,7 @@ class TraderHistoryObserver
             ]);
 
             $traderOrder = $traderHistory->traderOrder()
-                ->withLastHistoryAction()
+
                 ->first();
 
             Log::info('TraderHistoryObserver::created - Trader order retrieved', [
@@ -132,7 +132,16 @@ class TraderHistoryObserver
 
             $this->applyOrderFees($traderHistory);
 
-            Log::info('TraderHistoryObserver::created - Order fees applied, COMPLETED SUCCESSFULLY', [
+            Log::info('TraderHistoryObserver::created - Order fees applied, updating cached last history action', [
+                'trader_history_id' => $traderHistory->id,
+                'trader_order_id' => $traderOrder->id,
+                'action' => $traderHistory->action,
+            ]);
+
+            // Update cached last history action for performance
+            $traderOrder->updateCachedLastHistoryAction();
+
+            Log::info('TraderHistoryObserver::created - Cached last history action updated, COMPLETED SUCCESSFULLY', [
                 'trader_history_id' => $traderHistory->id,
                 'trader_order_id' => $traderOrder->id,
                 'action' => $traderHistory->action,

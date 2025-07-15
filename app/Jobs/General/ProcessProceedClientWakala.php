@@ -43,7 +43,7 @@ class ProcessProceedClientWakala implements ShouldQueue
      */
     public function handle(MakeOrderProceed $makeOrderProceed): void
     {
-        $traderOrder = TraderOrder::query()->withLastHistoryAction()->findOrFail($this->traderOrderId);
+        $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
 
         if ($this->isClientWakalaStepCompleted($traderOrder)) {
             Log::channel('bursam')->info('Skipped ProceedClientWakalaAccepted: already completed', [

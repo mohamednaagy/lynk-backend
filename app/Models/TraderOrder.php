@@ -40,7 +40,10 @@ class TraderOrder extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, VirtualColumn;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'last_history_action',
+        'last_history_action_updated_at',
+    ];
 
     protected $guarded = [];
 
@@ -145,6 +148,24 @@ class TraderOrder extends Model implements HasMedia
         return $this->traderHistories()->where('action', end($stepToHistoriesDictionary[$step]))->exists();
     }
 
+    /**
+     * Update cached last history action for performance optimization
+     */
+    public function updateCachedLastHistoryAction(): void
+    {
+        $lastAction = $this->traderHistories()
+            ->latest('id')
+            ->value('action');
+
+        $this->update([
+            'last_history_action' => $lastAction,
+            'last_history_action_updated_at' => now(),
+        ]);
+    }
+
+    /**
+     * Optimized version using cached values when available
+     */
     public function doesLastActionMatchWith($actions): bool
     {
         if (! is_array($actions)) {
@@ -157,13 +178,24 @@ class TraderOrder extends Model implements HasMedia
             }
         }
 
-        $lastAction = $this->traderHistories()->latest('id')->first();
+        // Use cached value if available and recent
+        if ($this->last_history_action && $this->last_history_action_updated_at) {
+            return in_array($this->last_history_action, $actions);
+        }
+
+        // Fallback to database query with optimized index
+        $lastAction = $this->traderHistories()
+            ->latest('id')
+            ->value('action');
 
         if (! $lastAction) {
             return false;
         }
 
-        return in_array($lastAction->action, $actions);
+        // Update cache for future use
+        $this->updateCachedLastHistoryAction();
+
+        return in_array($lastAction, $actions);
     }
 
     public function checkOrderHistoryAction($actions): bool
@@ -186,20 +218,6 @@ class TraderOrder extends Model implements HasMedia
         return $this->traderHistories()
             ->whereIn('action', $actions)
             ->get();
-    }
-
-    public function scopeWithLastHistoryAction($query)
-    {
-        return $query->addSelect([
-            'last_history_action' => TraderHistory::select('action')
-                ->whereColumn('trader_order_id', 'trader_orders.id')
-                ->latest('id')
-                ->take(1),
-            'last_history_created_at' => TraderHistory::select('created_at')
-                ->whereColumn('trader_order_id', 'trader_orders.id')
-                ->latest('id')
-                ->take(1),
-        ]);
     }
 
     protected function currentStep(): Attribute

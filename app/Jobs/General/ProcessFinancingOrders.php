@@ -63,7 +63,6 @@ class ProcessFinancingOrders implements ShouldQueue
             });
 
         TraderOrder::query()
-            ->withLastHistoryAction()
             ->where('provider', 'bursam')
             ->where('version', 'v2')
             ->where('status', TraderOrderStatus::Initiated)
@@ -74,7 +73,6 @@ class ProcessFinancingOrders implements ShouldQueue
             });
 
         TraderOrder::query()
-            ->withLastHistoryAction()
             ->where($this->scopeToProvidersWithVersionsClosure())
             ->where('can_continue_progress', true)
             ->whereIn('status', [

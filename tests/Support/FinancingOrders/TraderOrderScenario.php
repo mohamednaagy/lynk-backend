@@ -31,7 +31,7 @@ class TraderOrderScenario
         return new static(
             TraderOrder::query()
                 ->where('id', $traderOrder->id)
-                ->withLastHistoryAction()
+
                 ->first()
         );
     }
