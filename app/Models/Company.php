@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
-use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
@@ -159,16 +158,16 @@ class Company extends BaseTenant
         return (int) $this->lender->lenderDetail->token_version;
     }
 
-    public function getAttributes()
-    {
-        $attributes = parent::getAttributes();
+    // public function getAttributes()
+    // {
+    //     $attributes = parent::getAttributes();
 
-        // Task: LYNKMRBHA-2204
-        // The 'data' field is not part of the companies table,
-        // but is injected by the tenancy package.
-        // We explicitly remove it to avoid unexpected behavior during persistence.
-        unset($attributes['data']);
+    //     // Task: LYNKMRBHA-2204
+    //     // The 'data' field is not part of the companies table,
+    //     // but is injected by the tenancy package.
+    //     // We explicitly remove it to avoid unexpected behavior during persistence.
+    //     unset($attributes['data']);
 
-        return $attributes;
-    }
+    //     return $attributes;
+    // }
 }
