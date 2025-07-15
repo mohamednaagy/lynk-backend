@@ -163,8 +163,10 @@ class Company extends BaseTenant
     {
         $attributes = parent::getAttributes();
 
-        // We don't want the 'data' field to appear here,
-        // as it's not part of the companies table and is added by the tenancy package.
+        // Task: LYNKMRBHA-2204
+        // The 'data' field is not part of the companies table,
+        // but is injected by the tenancy package.
+        // We explicitly remove it to avoid unexpected behavior during persistence.
         unset($attributes['data']);
 
         return $attributes;
