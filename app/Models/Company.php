@@ -158,16 +158,4 @@ class Company extends BaseTenant
         return (int) $this->lender->lenderDetail->token_version;
     }
 
-    // public function getAttributes()
-    // {
-    //     $attributes = parent::getAttributes();
-
-    //     // Task: LYNKMRBHA-2204
-    //     // The 'data' field is not part of the companies table,
-    //     // but is injected by the tenancy package.
-    //     // We explicitly remove it to avoid unexpected behavior during persistence.
-    //     unset($attributes['data']);
-
-    //     return $attributes;
-    // }
 }
