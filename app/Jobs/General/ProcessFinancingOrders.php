@@ -75,18 +75,18 @@ class ProcessFinancingOrders implements ShouldBeUnique, ShouldQueue
                 });
             });
 
-        TraderOrder::query()
-            ->withLastHistoryAction()
-            ->where($this->scopeToProvidersWithVersionsClosure())
-            ->where('can_continue_progress', true)
-            ->whereIn('status', [
-                TraderOrderStatus::InProgress,
-            ])->chunk(10, function ($traderOrderCollection) {
-                $traderOrderCollection->each(function (TraderOrder $traderOrder) {
-                    TraderManager::driver($traderOrder->provider, $traderOrder->version)
-                        ->dispatchJobForTransitioningFlow($traderOrder);
-                });
-            });
+        // TraderOrder::query()
+        //     ->withLastHistoryAction()
+        //     ->where($this->scopeToProvidersWithVersionsClosure())
+        //     ->where('can_continue_progress', true)
+        //     ->whereIn('status', [
+        //         TraderOrderStatus::InProgress,
+        //     ])->chunk(10, function ($traderOrderCollection) {
+        //         $traderOrderCollection->each(function (TraderOrder $traderOrder) {
+        //             TraderManager::driver($traderOrder->provider, $traderOrder->version)
+        //                 ->dispatchJobForTransitioningFlow($traderOrder);
+        //         });
+        //     });
     }
 
     protected function scopeToProvidersWithVersionsClosure(): \Closure
@@ -126,5 +126,5 @@ class ProcessFinancingOrders implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__;
-    }
+    }   
 }
