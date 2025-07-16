@@ -151,11 +151,8 @@ class TraderOrder extends Model implements HasMedia
     /**
      * Update cached last history action for performance optimization
      */
-    public function updateCachedLastHistoryAction($lastAction = null): void
+    public function updateLastHistoryAction($lastAction): void
     {
-        $lastAction = $lastAction ?? $this->traderHistories()
-            ->latest('id')->first(['action', 'created_at']);
-
         $this->update([
             'last_history_action' => $lastAction->action,
             'last_history_action_updated_at' => $lastAction->created_at,
@@ -177,24 +174,11 @@ class TraderOrder extends Model implements HasMedia
             }
         }
 
-        // Use cached value if available and recent
-        if ($this->last_history_action) {
-            return in_array($this->last_history_action, $actions);
+        if (! $this->last_history_action) {
+            throw new \Exception('Last history action is not set');
         }
 
-        // Fallback to database query with optimized index
-        $lastAction = $this->traderHistories()
-            ->latest('id')
-            ->first(['action', 'created_at']);
-
-        if (! $lastAction) {
-            return false;
-        }
-
-        // Update cache for future use
-        $this->updateCachedLastHistoryAction($lastAction);
-
-        return in_array($lastAction, $actions);
+        return in_array($this->last_history_action, $actions);
     }
 
     public function checkOrderHistoryAction($actions): bool

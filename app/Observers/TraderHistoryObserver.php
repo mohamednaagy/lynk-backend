@@ -27,30 +27,7 @@ class TraderHistoryObserver
                 'action' => $traderHistory->action,
             ]);
 
-            Log::info('TraderHistoryObserver::created - Getting trader order', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderHistory->trader_order_id,
-                'action' => $traderHistory->action,
-            ]);
-
-            $traderOrder = $traderHistory->traderOrder()
-
-                ->first();
-
-            Log::info('TraderHistoryObserver::created - Trader order retrieved', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
-                'action' => $traderHistory->action,
-                'provider' => $traderOrder->provider,
-                'version' => $traderOrder->version,
-            ]);
-
-            Log::info('TraderHistoryObserver::created - Dispatching job for transitioning flow', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
-                'action' => $traderHistory->action,
-                'provider' => $traderOrder->provider,
-            ]);
+            $traderOrder = $traderHistory->traderOrder()->first();
 
             Trader::driver($traderOrder->provider, $traderOrder->version)
                 ->dispatchJobForTransitioningFlow($traderOrder);
@@ -107,21 +84,7 @@ class TraderHistoryObserver
             ]);
 
             foreach ($providerActions as $actionClass) {
-                Log::info('TraderHistoryObserver::created - Executing provider action', [
-                    'trader_history_id' => $traderHistory->id,
-                    'trader_order_id' => $traderOrder->id,
-                    'action' => $traderHistory->action,
-                    'action_class' => $actionClass,
-                ]);
-
                 app($actionClass)->handle($traderOrder->order, $traderHistory->traderOrder);
-
-                Log::info('TraderHistoryObserver::created - Provider action executed', [
-                    'trader_history_id' => $traderHistory->id,
-                    'trader_order_id' => $traderOrder->id,
-                    'action' => $traderHistory->action,
-                    'action_class' => $actionClass,
-                ]);
             }
 
             Log::info('TraderHistoryObserver::created - All provider actions completed, applying order fees', [
@@ -138,8 +101,7 @@ class TraderHistoryObserver
                 'action' => $traderHistory->action,
             ]);
 
-            // Update cached last history action for performance
-            $traderOrder->updateCachedLastHistoryAction($traderHistory);
+            $traderOrder->updateLastHistoryAction($traderHistory);
 
             Log::info('TraderHistoryObserver::created - Cached last history action updated, COMPLETED SUCCESSFULLY', [
                 'trader_history_id' => $traderHistory->id,
