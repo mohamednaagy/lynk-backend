@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
+use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
@@ -152,10 +153,15 @@ class Company extends BaseTenant
     {
         return $this->lender->lenderDetail->token_expire_in;
     }
-
-    public function getTokenExpireVersion(): int
+    /**
+     * This function is a temporary workaround to avoid removing the HasDataColumn trait from the Tenant model.
+     * It will be removed once we upgrade to version 4 of the package.
+     */
+    public function getAttributes()
     {
-        return (int) $this->lender->lenderDetail->token_version;
+        $attributes = parent::getAttributes();
+        unset($attributes['data']);
+        return $attributes;
     }
 
 }
