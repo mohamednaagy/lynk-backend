@@ -154,14 +154,12 @@ class TraderOrder extends Model implements HasMedia
     public function updateCachedLastHistoryAction($lastAction = null): void
     {
         $lastAction = $lastAction ?? $this->traderHistories()
-            ->latest('id')
-            ->value('action');
-        
+            ->latest('id')->first(['action', 'created_at']);
+
         $this->update([
-                'last_history_action' => $lastAction,
-                'last_history_action_updated_at' => now(),
-            ]);
-        }
+            'last_history_action' => $lastAction->action,
+            'last_history_action_updated_at' => $lastAction->created_at,
+        ]);
     }
 
     /**
@@ -180,14 +178,14 @@ class TraderOrder extends Model implements HasMedia
         }
 
         // Use cached value if available and recent
-        if ($this->last_history_action && $this->last_history_action_updated_at) {
+        if ($this->last_history_action) {
             return in_array($this->last_history_action, $actions);
         }
 
         // Fallback to database query with optimized index
         $lastAction = $this->traderHistories()
             ->latest('id')
-            ->value('action');
+            ->first(['action', 'created_at']);
 
         if (! $lastAction) {
             return false;
@@ -320,7 +318,8 @@ class TraderOrder extends Model implements HasMedia
         }
 
         return ! $this->doesLastActionMatchWith([
-            FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::GetTtiId,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ]) && ($this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold));
     }
 
@@ -449,7 +448,7 @@ class TraderOrder extends Model implements HasMedia
     public function hasAutoCompleteFinancingOrder()
     {
         return $this->completedSellStep()->exists() &&
-        $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
+            $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
     }
 
     public function setAutoCompletePeriodId(int $periodId): void
