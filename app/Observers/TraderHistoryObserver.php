@@ -139,7 +139,7 @@ class TraderHistoryObserver
             ]);
 
             // Update cached last history action for performance
-            $traderOrder->updateCachedLastHistoryAction();
+            $traderOrder->updateCachedLastHistoryAction($traderHistory->action);
 
             Log::info('TraderHistoryObserver::created - Cached last history action updated, COMPLETED SUCCESSFULLY', [
                 'trader_history_id' => $traderHistory->id,

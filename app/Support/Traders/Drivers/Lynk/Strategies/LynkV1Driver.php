@@ -362,7 +362,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             new ProcessLynkCancelTraderOrder($traderOrder->id),
             fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
             fn () => $this->retryOrder($traderOrder),
-            fn () => app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder)
+            fn () => app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder),
         ])->dispatch();
     }
 
@@ -494,11 +494,10 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
 
     public function dispatchJobForTransitioningFlow(TraderOrder $traderOrder): void
     {
-        $lastHistoryAction = (int) $traderOrder->traderHistories()->latest('id')->value('action');
 
         match ($traderOrder->mode) {
-            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($traderOrder, $lastHistoryAction),
-            TraderOrderMode::Manual => $this->transitionFlowInManualMode($traderOrder, $lastHistoryAction),
+            TraderOrderMode::Automatic => $this->transitionFlowInAutomaticMode($traderOrder, $traderOrder->last_history_action),
+            TraderOrderMode::Manual => $this->transitionFlowInManualMode($traderOrder, $traderOrder->last_history_action),
             default => null,
         };
     }

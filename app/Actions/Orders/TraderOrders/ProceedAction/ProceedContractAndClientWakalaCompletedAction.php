@@ -8,7 +8,6 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumTrader;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -38,9 +37,7 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
             throw new OrderRequiresClientVerification;
         }
 
-        $currenttraderOrderStatus = $traderOrder->traderHistories()->latest('id')->first();
-
-        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($currenttraderOrderStatus)) {
+        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($traderOrder->last_history_action)) {
             throw new OrderStatusDoesNotFollowSequenceException;
         }
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);

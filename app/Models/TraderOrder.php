@@ -151,16 +151,17 @@ class TraderOrder extends Model implements HasMedia
     /**
      * Update cached last history action for performance optimization
      */
-    public function updateCachedLastHistoryAction(): void
+    public function updateCachedLastHistoryAction($lastAction = null): void
     {
-        $lastAction = $this->traderHistories()
+        $lastAction = $lastAction ?? $this->traderHistories()
             ->latest('id')
             ->value('action');
-
+        
         $this->update([
-            'last_history_action' => $lastAction,
-            'last_history_action_updated_at' => now(),
-        ]);
+                'last_history_action' => $lastAction,
+                'last_history_action_updated_at' => now(),
+            ]);
+        }
     }
 
     /**
@@ -193,7 +194,7 @@ class TraderOrder extends Model implements HasMedia
         }
 
         // Update cache for future use
-        $this->updateCachedLastHistoryAction();
+        $this->updateCachedLastHistoryAction($lastAction);
 
         return in_array($lastAction, $actions);
     }
@@ -222,9 +223,7 @@ class TraderOrder extends Model implements HasMedia
 
     protected function currentStep(): Attribute
     {
-        $lastAction = $this->traderHistories()->latest('id')->first();
-
-        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getStepByHistory($lastAction?->action);
+        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getStepByHistory($this->last_history_action);
 
         return new Attribute(
             get: fn () => $stepNode?->step,

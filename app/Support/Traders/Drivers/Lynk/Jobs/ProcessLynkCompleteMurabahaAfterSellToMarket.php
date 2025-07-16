@@ -51,7 +51,7 @@ class ProcessLynkCompleteMurabahaAfterSellToMarket implements ShouldBeUnique, Sh
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
                 Log::info('ProcessLynkCompleteMurabahaAfterSellToMarket: Order not in expected state', [
                     'trader_order_id' => $this->traderOrderId,
-                    'last_action' => $traderOrder->traderHistories()->latest('id')->first()?->action,
+                    'last_action' => $traderOrder->last_history_action,
                     'expected_action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
                 ]);
                 throw new \Exception('Trader order is not in expected state with reference: '.$this->traderOrderId);

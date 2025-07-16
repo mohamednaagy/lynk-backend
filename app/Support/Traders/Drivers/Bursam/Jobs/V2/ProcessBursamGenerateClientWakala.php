@@ -70,7 +70,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 Log::channel('bursam')->info('Job wakala skipped - order not found or incorrect action state', [
                     'trader_order_id' => $this->traderOrderId,
                     'timestamp' => saudi_now(),
-                    'last_action' => $traderOrder->traderHistories()->latest('id')->first(),
+                    'last_action' => $traderOrder->last_history_action,
                     'expected_action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
                 ]);
 
