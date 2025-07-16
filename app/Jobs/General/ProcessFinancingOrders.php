@@ -11,13 +11,15 @@ use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader as TraderManager;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
-class ProcessFinancingOrders implements ShouldQueue
+class ProcessFinancingOrders implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -114,5 +116,15 @@ class ProcessFinancingOrders implements ShouldQueue
     {
         return fn ($query) => $query->where('provider', $provider)
             ->whereIn('version', $verions);
+    }
+
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__;
     }
 }
