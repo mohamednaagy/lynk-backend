@@ -20,7 +20,7 @@ return new class extends Migration
         $traderOrdersOldCount = TraderOrder::whereNull('last_history_action')->count();
         $totalAffectedRows = 0;
 
-        TraderOrder::whereNull('last_history_action')->chunkById(1000, function ($traderOrders) use (&$totalAffectedRows) {
+        TraderOrder::whereNull('last_history_action')->chunkById(self::BATCH_SIZE, function ($traderOrders) use (&$totalAffectedRows) {
             foreach ($traderOrders as $traderOrder) {
                 $traderHistory = $traderOrder->traderHistories()->latest('id')->first();
                 if ($traderHistory) {
