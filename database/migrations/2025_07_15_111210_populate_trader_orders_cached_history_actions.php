@@ -75,20 +75,18 @@ return new class extends Migration
                     LIMIT 1
                 ', [$orderId]);
 
-                if ($latestHistory) {
-                    DB::update('
+                DB::update('
                         UPDATE trader_orders 
                         SET 
                             last_history_action = ?,
                             last_history_action_updated_at = ?
                         WHERE id = ?
                     ', [
-                        $latestHistory->action,
-                        $latestHistory->created_at,
-                        $orderId,
-                    ]);
-                    $affectedRows++;
-                }
+                    $latestHistory->action,
+                    $latestHistory->created_at,
+                    $orderId,
+                ]);
+                $affectedRows++;
             }
 
             $processedCount += $affectedRows;
