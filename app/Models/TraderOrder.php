@@ -40,7 +40,10 @@ class TraderOrder extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, VirtualColumn;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'last_history_action',
+        'last_history_action_updated_at',
+    ];
 
     protected $guarded = [];
 
@@ -145,6 +148,20 @@ class TraderOrder extends Model implements HasMedia
         return $this->traderHistories()->where('action', end($stepToHistoriesDictionary[$step]))->exists();
     }
 
+    /**
+     * Update cached last history action for performance optimization
+     */
+    public function updateLastHistoryAction(TraderHistory $lastAction): void
+    {
+        $this->update([
+            'last_history_action' => $lastAction->action,
+            'last_history_action_updated_at' => $lastAction->created_at,
+        ]);
+    }
+
+    /**
+     * Optimized version using cached values when available
+     */
     public function doesLastActionMatchWith($actions): bool
     {
         if (! is_array($actions)) {
@@ -157,13 +174,11 @@ class TraderOrder extends Model implements HasMedia
             }
         }
 
-        $lastAction = $this->traderHistories()->latest('id')->first();
-
-        if (! $lastAction) {
-            return false;
+        if (! $this->last_history_action) {
+            throw new \Exception('Last history action is not set');
         }
 
-        return in_array($lastAction->action, $actions);
+        return in_array($this->last_history_action, $actions);
     }
 
     public function checkOrderHistoryAction($actions): bool
@@ -188,25 +203,9 @@ class TraderOrder extends Model implements HasMedia
             ->get();
     }
 
-    public function scopeWithLastHistoryAction($query)
-    {
-        return $query->addSelect([
-            'last_history_action' => TraderHistory::select('action')
-                ->whereColumn('trader_order_id', 'trader_orders.id')
-                ->latest('id')
-                ->take(1),
-            'last_history_created_at' => TraderHistory::select('created_at')
-                ->whereColumn('trader_order_id', 'trader_orders.id')
-                ->latest('id')
-                ->take(1),
-        ]);
-    }
-
     protected function currentStep(): Attribute
     {
-        $lastAction = $this->traderHistories()->latest('id')->first();
-
-        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getStepByHistory($lastAction?->action);
+        $stepNode = (new StepHistoriesDictionary($this->provider, $this->version, $this->contract_signed_type))->getStepByHistory($this->last_history_action);
 
         return new Attribute(
             get: fn () => $stepNode?->step,
@@ -303,7 +302,8 @@ class TraderOrder extends Model implements HasMedia
         }
 
         return ! $this->doesLastActionMatchWith([
-            FinancingOrderHistory::GetTtiId, FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            FinancingOrderHistory::GetTtiId,
+            FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ]) && ($this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold));
     }
 
@@ -432,7 +432,7 @@ class TraderOrder extends Model implements HasMedia
     public function hasAutoCompleteFinancingOrder()
     {
         return $this->completedSellStep()->exists() &&
-        $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
+            $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
     }
 
     public function setAutoCompletePeriodId(int $periodId): void

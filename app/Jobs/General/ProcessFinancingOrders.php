@@ -65,7 +65,6 @@ class ProcessFinancingOrders implements ShouldBeUnique, ShouldQueue
             });
 
         TraderOrder::query()
-            ->withLastHistoryAction()
             ->where('provider', 'bursam')
             ->where('version', 'v2')
             ->where('status', TraderOrderStatus::Initiated)

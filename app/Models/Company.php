@@ -153,6 +153,7 @@ class Company extends BaseTenant
     {
         return $this->lender->lenderDetail->token_expire_in;
     }
+
     /**
      * This function is a temporary workaround to avoid removing the HasDataColumn trait from the Tenant model.
      * It will be removed once we upgrade to version 4 of the package.
@@ -161,7 +162,7 @@ class Company extends BaseTenant
     {
         $attributes = parent::getAttributes();
         unset($attributes['data']);
+
         return $attributes;
     }
-
 }

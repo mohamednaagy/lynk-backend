@@ -57,7 +57,7 @@ class MakeOrderProceedTest extends TestCase
 
     private static string $localOrderProceedUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -533,7 +533,7 @@ class MakeOrderProceedTest extends TestCase
             ]);
 
         $this->assertEquals(TraderOrderStatus::InProgress, self::$localTraderOrder->refresh()->status->value);
-        $this->assertEquals(self::$localTraderOrder->traderHistories()->latest('id')->first()->action, FinancingOrderHistory::PendingDelivery);
+        $this->assertEquals(self::$localTraderOrder->last_history_action, FinancingOrderHistory::PendingDelivery);
 
         $response->assertStatus(200)
             ->assertJson(

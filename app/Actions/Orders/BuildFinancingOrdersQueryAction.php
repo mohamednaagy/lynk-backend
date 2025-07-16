@@ -90,7 +90,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
         if ($this->company?->type?->is(CompanyType::Lender)) {
             $baseQuery->with([
                 'creator',
-                'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+                'activeTraderOrder' => fn ($query) => $query->latest(),
             ])
                 ->where('company_id', $this->company->id);
         }

@@ -114,7 +114,7 @@ class OrderController extends Controller
 
         $financingOrders = $buildOrdersQuery->setCompany(tenant())
             ->setRelations([
-                'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+                'activeTraderOrder' => fn ($query) => $query->latest(),
             ])
             ->handle()
             ->paginate();

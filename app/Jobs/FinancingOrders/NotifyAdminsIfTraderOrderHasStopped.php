@@ -38,7 +38,7 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
         $traderOrder = TraderOrder::query()
             ->where('id', $this->traderOrder->id)
             ->withoutGlobalScope(TenantScope::class)
-            ->withLastHistoryAction()
+
             ->first();
 
         if ($traderOrder->last_history_action == $this->historyActionBeforeDispatching) {

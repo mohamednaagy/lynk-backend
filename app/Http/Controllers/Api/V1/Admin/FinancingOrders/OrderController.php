@@ -60,7 +60,7 @@ class OrderController extends Controller
     public function index(ListOrderRequest $request, BuildFinancingOrdersQuery $buildFinancingOrdersQuery): JsonResponse
     {
         $orders = $buildFinancingOrdersQuery->setRelations([
-            'activeTraderOrder' => fn ($query) => $query->withLastHistoryAction()->latest(),
+            'activeTraderOrder' => fn ($query) => $query->latest(),
             'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'creator',
         ])

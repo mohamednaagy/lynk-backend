@@ -73,7 +73,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
      */
     public function test_process_cannot_proceed_with_invalid_trader_order_provider()
     {
-        //change the trader order provider with invalid one
+        // change the trader order provider with invalid one
         self::$traderOrder->update(['provider' => 'invalid']);
 
         $process = new ProcessDmccCancelNotification(self::$notification);
@@ -97,7 +97,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
                 continue;
             }
 
-            //change the order status with invalid one
+            // change the order status with invalid one
             self::$financingOrder->model()->update(['status' => $status]);
 
             $process = new ProcessDmccCancelNotification(self::$notification);
@@ -119,7 +119,7 @@ class ProcessDmccCancelNotificationTest extends TestCase
 
         $this->assertEquals(
             FinancingOrderHistory::OrderCancelled,
-            self::$traderOrder->traderHistories()->latest('id')->first()->action
+            self::$traderOrder->last_history_action
         );
     }
 

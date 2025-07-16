@@ -65,7 +65,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             Log::info('LynkStrategy updateMurabhaCompleteDocument: Step already completed, skipping', [
                 'trader_order_id' => $traderOrder->id,
                 'current_status' => $traderOrder->status->key,
-                'last_action' => $traderOrder->traderHistories()->latest('id')->first()?->action,
+                'last_action' => $traderOrder->last_history_action,
             ]);
 
             // If step is complete but status is not, update it
@@ -117,7 +117,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         } else {
             Log::error('LynkStrategy updateMurabhaCompleteDocument failed to update order status to completed', [
                 'trader_order_id' => $traderOrder->id,
-                'last_action' => $traderOrder->traderHistories()->latest('id')->first()->action,
+                'last_action' => $traderOrder->last_history_action,
             ]);
         }
 
