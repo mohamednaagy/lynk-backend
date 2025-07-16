@@ -49,7 +49,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        TraderOrder::whereNotNull('last_history_action')->chunk(self::BATCH_SIZE, function ($traderOrders) {
+        TraderOrder::whereNotNull('last_history_action')->chunkById(self::BATCH_SIZE, function ($traderOrders) {
             DB::table('trader_orders')->whereIn('id', $traderOrders->pluck('id'))->update([
                 'last_history_action' => null,
                 'last_history_action_updated_at' => null,

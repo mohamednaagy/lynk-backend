@@ -7,6 +7,7 @@ use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TraderHistoryObserver
@@ -101,7 +102,10 @@ class TraderHistoryObserver
                 'action' => $traderHistory->action,
             ]);
 
-            $traderOrder->updateLastHistoryAction($traderHistory);
+            DB::table('trader_orders')->where('id', $traderOrder->id)->update([
+                'last_history_action' => $traderHistory->action,
+                'last_history_action_updated_at' => $traderHistory->created_at,
+            ]);
 
             Log::info('TraderHistoryObserver::created - Cached last history action updated, COMPLETED SUCCESSFULLY', [
                 'trader_history_id' => $traderHistory->id,
