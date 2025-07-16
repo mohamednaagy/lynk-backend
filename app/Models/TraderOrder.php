@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -153,7 +154,8 @@ class TraderOrder extends Model implements HasMedia
      */
     public function updateLastHistoryAction(TraderHistory $lastAction): void
     {
-        $this->update([
+        // Note: this is a workaround to avoid the issue of the update method not working for some reason
+        DB::table('trader_orders')->where('id', $this->id)->update([
             'last_history_action' => $lastAction->action,
             'last_history_action_updated_at' => $lastAction->created_at,
         ]);

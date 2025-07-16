@@ -3,6 +3,7 @@
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 return new class extends Migration
@@ -19,13 +20,13 @@ return new class extends Migration
         $traderOrdersOldCount = TraderOrder::whereNull('last_history_action')->count();
         $totalAffectedRows = 0;
 
-        TraderOrder::whereNull('last_history_action')->chunk(self::BATCH_SIZE, function ($traderOrders) use (&$totalAffectedRows) {
+        TraderOrder::whereNull('last_history_action')->chunkById(self::BATCH_SIZE, function ($traderOrders) use (&$totalAffectedRows) {
             foreach ($traderOrders as $traderOrder) {
                 $traderHistory = $traderOrder->traderHistories()->latest('id')->first();
                 if ($traderHistory) {
                     $traderOrder->updateLastHistoryAction($traderHistory);
                 } else {
-                    $traderOrder->update([
+                    DB::table('trader_orders')->where('id', $traderOrder->id)->update([
                         'last_history_action' => TraderOrderStatus::Initiated,
                         'last_history_action_updated_at' => now(),
                     ]);
@@ -49,7 +50,7 @@ return new class extends Migration
     public function down(): void
     {
         TraderOrder::whereNotNull('last_history_action')->chunk(self::BATCH_SIZE, function ($traderOrders) {
-            TraderOrder::whereIn('id', $traderOrders->pluck('id'))->update([
+            DB::table('trader_orders')->whereIn('id', $traderOrders->pluck('id'))->update([
                 'last_history_action' => null,
                 'last_history_action_updated_at' => null,
             ]);
