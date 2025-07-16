@@ -154,19 +154,13 @@ class Company extends BaseTenant
         return $this->lender->lenderDetail->token_expire_in;
     }
 
-    public function getTokenExpireVersion(): int
-    {
-        return (int) $this->lender->lenderDetail->token_version;
-    }
-
+    /**
+     * This function is a temporary workaround to avoid removing the HasDataColumn trait from the Tenant model.
+     * It will be removed once we upgrade to version 4 of the package.
+     */
     public function getAttributes()
     {
         $attributes = parent::getAttributes();
-
-        // Task: LYNKMRBHA-2204
-        // The 'data' field is not part of the companies table,
-        // but is injected by the tenancy package.
-        // We explicitly remove it to avoid unexpected behavior during persistence.
         unset($attributes['data']);
 
         return $attributes;

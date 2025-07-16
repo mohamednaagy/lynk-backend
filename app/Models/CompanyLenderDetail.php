@@ -19,6 +19,7 @@ class CompanyLenderDetail extends Model
         'auto_complete_murabaha_order' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'allow_preferred_commodity_in_order' => 'boolean',
+        'default_contract_sign_time_limit' => 'integer',
     ];
 
     protected $fillable = [
