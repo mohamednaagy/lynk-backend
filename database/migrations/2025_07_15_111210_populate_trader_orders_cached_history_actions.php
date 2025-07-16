@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Log;
 
 return new class extends Migration
 {
+    private const BATCH_SIZE = 1000;
+
+    private const SLEEP_MICROSECONDS = 100000; // 0.1 second delay
+
     /**
      * Run the migrations.
      */
@@ -14,17 +18,36 @@ return new class extends Migration
     {
         Log::info('Starting population of cached history actions for trader orders');
 
-        $traderOrdersOldCount = TraderOrder::whereNull('last_history_action')->count();
-        $totalAffectedRows = 0;
-        $batchSize = 1000;
+        $ordersToProcess = $this->getOrdersToProcess();
+
+        $this->processOrdersWithHistory();
+        $this->processOrdersWithoutHistory();
+
+        $this->validateMigration($ordersToProcess);
+    }
+
+    /**
+     * Get count of orders that need processing
+     */
+    private function getOrdersToProcess(): int
+    {
+        $count = TraderOrder::whereNull('last_history_action')->count();
 
         Log::info('Processing trader orders in batches', [
-            'total_orders_to_process' => $traderOrdersOldCount,
-            'batch_size' => $batchSize,
+            'total_orders_to_process' => $count,
+            'batch_size' => self::BATCH_SIZE,
         ]);
 
-        // Process orders with history records in batches
+        return $count;
+    }
+
+    /**
+     * Process orders that have history records
+     */
+    private function processOrdersWithHistory(): void
+    {
         $processedCount = 0;
+
         do {
             $affectedRows = DB::update('
                 UPDATE trader_orders 
@@ -45,9 +68,8 @@ return new class extends Migration
                     trader_orders.last_history_action_updated_at = latest_histories.last_action_updated_at
                 WHERE trader_orders.last_history_action IS NULL
                 LIMIT ?
-            ', [$batchSize]);
+            ', [self::BATCH_SIZE]);
 
-            $totalAffectedRows += $affectedRows;
             $processedCount += $affectedRows;
 
             Log::info('Processed batch with history records', [
@@ -55,15 +77,19 @@ return new class extends Migration
                 'total_processed' => $processedCount,
             ]);
 
-            // Small delay to prevent overwhelming the database
             if ($affectedRows > 0) {
-                usleep(100000); // 0.1 second delay
+                usleep(self::SLEEP_MICROSECONDS);
             }
-
         } while ($affectedRows > 0);
+    }
 
-        // Process orders without history records in batches
+    /**
+     * Process orders that have no history records
+     */
+    private function processOrdersWithoutHistory(): void
+    {
         $processedCount = 0;
+
         do {
             $affectedRows = DB::update('
                 UPDATE trader_orders
@@ -72,9 +98,8 @@ return new class extends Migration
                     last_history_action_updated_at = NOW()
                 WHERE last_history_action IS NULL
                 LIMIT ?
-            ', [$batchSize]);
+            ', [self::BATCH_SIZE]);
 
-            $totalAffectedRows += $affectedRows;
             $processedCount += $affectedRows;
 
             Log::info('Processed batch without history records', [
@@ -82,25 +107,28 @@ return new class extends Migration
                 'total_processed' => $processedCount,
             ]);
 
-            // Small delay to prevent overwhelming the database
             if ($affectedRows > 0) {
-                usleep(100000); // 0.1 second delay
+                usleep(self::SLEEP_MICROSECONDS);
             }
-
         } while ($affectedRows > 0);
+    }
 
-        $traderOrdersNewCount = TraderOrder::whereNotNull('last_history_action')->count();
+    /**
+     * Validate the migration completed successfully
+     */
+    private function validateMigration(int $expectedCount): void
+    {
+        $processedCount = TraderOrder::whereNotNull('last_history_action')->count();
 
         Log::info('Completed migration with cached history actions', [
-            'total_affected_rows' => $totalAffectedRows,
-            'trader_orders_old_count' => $traderOrdersOldCount,
-            'trader_orders_new_count' => $traderOrdersNewCount,
+            'trader_orders_old_count' => $expectedCount,
+            'trader_orders_new_count' => $processedCount,
         ]);
 
-        if ($traderOrdersOldCount !== $totalAffectedRows) {
+        if ($expectedCount !== $processedCount) {
             Log::error('Trader orders count mismatch after migration', [
-                'expected' => $traderOrdersOldCount,
-                'actual' => $totalAffectedRows,
+                'expected' => $expectedCount,
+                'actual' => $processedCount,
             ]);
             throw new \Exception('Trader orders count mismatch after migration');
         }
@@ -113,7 +141,6 @@ return new class extends Migration
     {
         Log::info('Starting rollback of cached history actions');
 
-        $batchSize = 1000;
         $totalAffectedRows = 0;
 
         do {
@@ -124,7 +151,7 @@ return new class extends Migration
                     last_history_action_updated_at = NULL
                 WHERE last_history_action IS NOT NULL
                 LIMIT ?
-            ', [$batchSize]);
+            ', [self::BATCH_SIZE]);
 
             $totalAffectedRows += $affectedRows;
 
@@ -133,11 +160,9 @@ return new class extends Migration
                 'total_rolled_back' => $totalAffectedRows,
             ]);
 
-            // Small delay to prevent overwhelming the database
             if ($affectedRows > 0) {
-                usleep(100000); // 0.1 second delay
+                usleep(self::SLEEP_MICROSECONDS);
             }
-
         } while ($affectedRows > 0);
 
         Log::info('Completed rollback of cached history actions', [
