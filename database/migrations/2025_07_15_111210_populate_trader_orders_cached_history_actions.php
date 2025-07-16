@@ -49,26 +49,47 @@ return new class extends Migration
         $processedCount = 0;
 
         do {
-            $affectedRows = DB::update('
-                UPDATE trader_orders 
-                INNER JOIN (
-                    SELECT 
-                        trader_order_id,
-                        action as last_action,
-                        created_at as last_action_updated_at
-                    FROM trader_histories th1
-                    WHERE th1.id = (
-                        SELECT MAX(th2.id) 
-                        FROM trader_histories th2 
-                        WHERE th2.trader_order_id = th1.trader_order_id
-                    )
-                ) latest_histories ON trader_orders.id = latest_histories.trader_order_id
-                SET 
-                    trader_orders.last_history_action = latest_histories.last_action,
-                    trader_orders.last_history_action_updated_at = latest_histories.last_action_updated_at
+            // Get batch of order IDs that need processing and have history
+            $orderIds = DB::select('
+                SELECT DISTINCT trader_orders.id
+                FROM trader_orders
+                INNER JOIN trader_histories ON trader_orders.id = trader_histories.trader_order_id
                 WHERE trader_orders.last_history_action IS NULL
                 LIMIT ?
             ', [self::BATCH_SIZE]);
+
+            if (empty($orderIds)) {
+                break;
+            }
+
+            $ids = collect($orderIds)->pluck('id')->toArray();
+            $affectedRows = 0;
+
+            // Process each order individually to get its latest history
+            foreach ($ids as $orderId) {
+                $latestHistory = DB::selectOne('
+                    SELECT action, created_at
+                    FROM trader_histories
+                    WHERE trader_order_id = ?
+                    ORDER BY id DESC
+                    LIMIT 1
+                ', [$orderId]);
+
+                if ($latestHistory) {
+                    DB::update('
+                        UPDATE trader_orders 
+                        SET 
+                            last_history_action = ?,
+                            last_history_action_updated_at = ?
+                        WHERE id = ?
+                    ', [
+                        $latestHistory->action,
+                        $latestHistory->created_at,
+                        $orderId,
+                    ]);
+                    $affectedRows++;
+                }
+            }
 
             $processedCount += $affectedRows;
 
@@ -80,7 +101,7 @@ return new class extends Migration
             if ($affectedRows > 0) {
                 usleep(self::SLEEP_MICROSECONDS);
             }
-        } while ($affectedRows > 0);
+        } while (! empty($orderIds));
     }
 
     /**
@@ -91,14 +112,34 @@ return new class extends Migration
         $processedCount = 0;
 
         do {
-            $affectedRows = DB::update('
-                UPDATE trader_orders
-                SET 
-                    last_history_action = 0,
-                    last_history_action_updated_at = NOW()
-                WHERE last_history_action IS NULL
+            // Get order IDs that still need processing (no history)
+            $orderIds = DB::select('
+                SELECT trader_orders.id 
+                FROM trader_orders 
+                LEFT JOIN trader_histories ON trader_orders.id = trader_histories.trader_order_id
+                WHERE trader_orders.last_history_action IS NULL 
+                AND trader_histories.trader_order_id IS NULL
                 LIMIT ?
             ', [self::BATCH_SIZE]);
+
+            if (empty($orderIds)) {
+                break;
+            }
+
+            $ids = collect($orderIds)->pluck('id')->toArray();
+
+            if (! empty($ids)) {
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $affectedRows = DB::update('
+                    UPDATE trader_orders
+                    SET 
+                        last_history_action = 0,
+                        last_history_action_updated_at = NOW()
+                    WHERE id IN ('.$placeholders.')
+                ', $ids);
+            } else {
+                $affectedRows = 0;
+            }
 
             $processedCount += $affectedRows;
 
@@ -110,7 +151,7 @@ return new class extends Migration
             if ($affectedRows > 0) {
                 usleep(self::SLEEP_MICROSECONDS);
             }
-        } while ($affectedRows > 0);
+        } while (! empty($orderIds));
     }
 
     /**
@@ -144,14 +185,32 @@ return new class extends Migration
         $totalAffectedRows = 0;
 
         do {
-            $affectedRows = DB::update('
-                UPDATE trader_orders 
-                SET 
-                    last_history_action = NULL,
-                    last_history_action_updated_at = NULL
-                WHERE last_history_action IS NOT NULL
+            // Get batch of order IDs to rollback
+            $orderIds = DB::select('
+                SELECT id 
+                FROM trader_orders 
+                WHERE last_history_action IS NOT NULL 
                 LIMIT ?
             ', [self::BATCH_SIZE]);
+
+            if (empty($orderIds)) {
+                break;
+            }
+
+            $ids = collect($orderIds)->pluck('id')->toArray();
+
+            if (! empty($ids)) {
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $affectedRows = DB::update('
+                    UPDATE trader_orders 
+                    SET 
+                        last_history_action = NULL,
+                        last_history_action_updated_at = NULL
+                    WHERE id IN ('.$placeholders.')
+                ', $ids);
+            } else {
+                $affectedRows = 0;
+            }
 
             $totalAffectedRows += $affectedRows;
 
@@ -163,7 +222,7 @@ return new class extends Migration
             if ($affectedRows > 0) {
                 usleep(self::SLEEP_MICROSECONDS);
             }
-        } while ($affectedRows > 0);
+        } while (! empty($orderIds));
 
         Log::info('Completed rollback of cached history actions', [
             'total_affected_rows' => $totalAffectedRows,
