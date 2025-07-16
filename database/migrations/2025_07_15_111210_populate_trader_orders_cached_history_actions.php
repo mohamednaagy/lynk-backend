@@ -33,6 +33,15 @@ return new class extends Migration
                 trader_orders.last_history_action_updated_at = latest_histories.last_action_updated_at
             WHERE trader_orders.last_history_action IS NULL
         ');
+
+        // Set all trader orders with no history records to initiate status
+        $affectedRows += DB::update('
+            UPDATE trader_orders
+            SET 
+                last_history_action = 0,
+                last_history_action_updated_at = NOW()
+            WHERE last_history_action IS NULL
+        ');
         $traderOrdersNewCount = TraderOrder::whereNotNull('last_history_action')->count();
         Log::info('Updated trader orders with cached history actions', [
             'affectedRows' => $affectedRows,
