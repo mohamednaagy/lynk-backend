@@ -126,5 +126,5 @@ class ProcessFinancingOrders implements ShouldBeUnique, ShouldQueue
     public function uniqueId(): string
     {
         return __CLASS__;
-    }   
+    }
 }
