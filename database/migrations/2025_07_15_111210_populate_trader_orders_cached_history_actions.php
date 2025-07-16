@@ -21,9 +21,9 @@ return new class extends Migration
 
         TraderOrder::whereNull('last_history_action')->chunk(self::BATCH_SIZE, function ($traderOrders) use (&$totalAffectedRows) {
             foreach ($traderOrders as $traderOrder) {
-                $traderHistoriesCount = $traderOrder->traderHistories()->count();
-                if ($traderHistoriesCount > 0) {
-                    $traderOrder->updateLastHistoryAction($traderOrder->traderHistories()->latest()->first());
+                $traderHistory = $traderOrder->traderHistories()->latest('id')->first();
+                if ($traderHistory) {
+                    $traderOrder->updateLastHistoryAction($traderHistory);
                 } else {
                     $traderOrder->update([
                         'last_history_action' => TraderOrderStatus::Initiated,
