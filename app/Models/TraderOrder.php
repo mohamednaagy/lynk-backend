@@ -40,6 +40,11 @@ class TraderOrder extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, VirtualColumn;
 
+    protected $fillable = [
+        'last_history_action',
+        'last_history_action_updated_at',
+    ];
+
     protected $guarded = [];
 
     public static function getCustomColumns(): array
