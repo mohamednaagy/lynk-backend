@@ -30,7 +30,7 @@ class EmailDriver implements OtpifyDriverInterface
         $code = app()->runningUnitTests()
             ? '123456'
             : generateRandomCode(config('otpify.drivers.email.code_length'));
-        $data['expiration_date'] = now()->addMinutes(config('otpify.drivers.email.code_expiration_time'));
+        $data['expiration_date'] = now()->addMinutes((int) config('otpify.drivers.email.code_expiration_time'));
         $otpifyCode = $this->createOtpifyCode($code, $otpifiable, auth()->user(), $data);
         $otpifiable->notify(new OtpifyCodeMessage($code, $otpifyCode->expiration_date));
 

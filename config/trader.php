@@ -53,9 +53,9 @@ return [
             'latest' => 'v2',
             'fake' => env('BURSAM_FAKE', false),
             'rate_limit' => [
-                'decay_seconds' => env('BURSAM_RATE_LIMIT_DECAY_SECONDS', 1),
-                'max_attempts' => env('BURSAM_RATE_LIMIT_MAX_ATTEMPTS', 1),
-                'max_retries_before_exception' => env('BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION', 1),
+                'decay_seconds' => (int) env('BURSAM_RATE_LIMIT_DECAY_SECONDS', 1),
+                'max_attempts' => (int) env('BURSAM_RATE_LIMIT_MAX_ATTEMPTS', 1),
+                'max_retries_before_exception' => (int) env('BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION', 1),
             ],
             'base_url' => env('BURSAM_BASE_URL', 'https://traderdcthh-erfmbxcc1323421.uselynk.com'),
             'verify_tls' => env('BURSAM_VERIFY_TLS', false),
@@ -63,7 +63,7 @@ return [
             'client_secret_key' => env('BURSAM_CLIENT_SECRET_KEY', 'B347B6AFEA16EFA062B6DA'),
             'grant_type' => env('BURSAM_GRANT_TYPE', 'client_credentials'),
             'tenor' => env('BURSAM_TENOR', '00090'),
-            'purchasing_commodity_job_backoff_time' => env('BURSAM_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 10),
+            'purchasing_commodity_job_backoff_time' => (int) env('BURSAM_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 10),
             'modes' => [
                 'v1' => [
                     TraderOrderMode::Manual,
@@ -90,9 +90,9 @@ return [
                     TraderOrderMode::Automatic,
                 ],
             ],
-            'max_units_per_trader' => env('LYNK_MAX_UNITS_PER_TRADER', 10000),
+            'max_units_per_trader' => (int) env('LYNK_MAX_UNITS_PER_TRADER', 10000),
             'loan_coverage_strategy' => env('LOAN_COVERAGE_STRATEGY', 'optimized'),
-            'loan_coverage_timeout' => env('LOAN_COVERAGE_TIMEOUT', 3), // 3sec
+            'loan_coverage_timeout' => (int) env('LOAN_COVERAGE_TIMEOUT', 3), // 3sec
             'default_contract_sign_time_limit' => function () {
                 return app(LocalMurabahaSettings::class)->default_contract_sign_time_limit * 60;
             },
