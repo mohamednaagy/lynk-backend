@@ -13,43 +13,95 @@ return new class extends Migration
     public function up(): void
     {
         Log::info('Starting population of cached history actions for trader orders');
-        $traderOrdersOldCount = TraderOrder::whereNull('last_history_action')->count();
-        $affectedRows = DB::update('
-            UPDATE trader_orders 
-            INNER JOIN (
-                SELECT 
-                    trader_order_id,
-                    action as last_action,
-                    created_at as last_action_updated_at
-                FROM trader_histories th1
-                WHERE th1.id = (
-                    SELECT MAX(th2.id) 
-                    FROM trader_histories th2 
-                    WHERE th2.trader_order_id = th1.trader_order_id
-                )
-            ) latest_histories ON trader_orders.id = latest_histories.trader_order_id
-            SET 
-                trader_orders.last_history_action = latest_histories.last_action,
-                trader_orders.last_history_action_updated_at = latest_histories.last_action_updated_at
-            WHERE trader_orders.last_history_action IS NULL
-        ');
 
-        // Set all trader orders with no history records to initiate status
-        $affectedRows += DB::update('
-            UPDATE trader_orders
-            SET 
-                last_history_action = 0,
-                last_history_action_updated_at = NOW()
-            WHERE last_history_action IS NULL
-        ');
-        $traderOrdersNewCount = TraderOrder::whereNotNull('last_history_action')->count();
-        Log::info('Updated trader orders with cached history actions', [
-            'affectedRows' => $affectedRows,
-            'traderOrdersOldCount' => $traderOrdersOldCount,
-            'traderOrdersNewCount' => $traderOrdersNewCount,
+        $traderOrdersOldCount = TraderOrder::whereNull('last_history_action')->count();
+        $totalAffectedRows = 0;
+        $batchSize = 1000;
+
+        Log::info('Processing trader orders in batches', [
+            'total_orders_to_process' => $traderOrdersOldCount,
+            'batch_size' => $batchSize,
         ]);
-        if ($traderOrdersOldCount !== $affectedRows) {
-            Log::error('Trader orders count mismatch after migration');
+
+        // Process orders with history records in batches
+        $processedCount = 0;
+        do {
+            $affectedRows = DB::update('
+                UPDATE trader_orders 
+                INNER JOIN (
+                    SELECT 
+                        trader_order_id,
+                        action as last_action,
+                        created_at as last_action_updated_at
+                    FROM trader_histories th1
+                    WHERE th1.id = (
+                        SELECT MAX(th2.id) 
+                        FROM trader_histories th2 
+                        WHERE th2.trader_order_id = th1.trader_order_id
+                    )
+                ) latest_histories ON trader_orders.id = latest_histories.trader_order_id
+                SET 
+                    trader_orders.last_history_action = latest_histories.last_action,
+                    trader_orders.last_history_action_updated_at = latest_histories.last_action_updated_at
+                WHERE trader_orders.last_history_action IS NULL
+                LIMIT ?
+            ', [$batchSize]);
+
+            $totalAffectedRows += $affectedRows;
+            $processedCount += $affectedRows;
+
+            Log::info('Processed batch with history records', [
+                'batch_affected_rows' => $affectedRows,
+                'total_processed' => $processedCount,
+            ]);
+
+            // Small delay to prevent overwhelming the database
+            if ($affectedRows > 0) {
+                usleep(100000); // 0.1 second delay
+            }
+
+        } while ($affectedRows > 0);
+
+        // Process orders without history records in batches
+        $processedCount = 0;
+        do {
+            $affectedRows = DB::update('
+                UPDATE trader_orders
+                SET 
+                    last_history_action = 0,
+                    last_history_action_updated_at = NOW()
+                WHERE last_history_action IS NULL
+                LIMIT ?
+            ', [$batchSize]);
+
+            $totalAffectedRows += $affectedRows;
+            $processedCount += $affectedRows;
+
+            Log::info('Processed batch without history records', [
+                'batch_affected_rows' => $affectedRows,
+                'total_processed' => $processedCount,
+            ]);
+
+            // Small delay to prevent overwhelming the database
+            if ($affectedRows > 0) {
+                usleep(100000); // 0.1 second delay
+            }
+
+        } while ($affectedRows > 0);
+
+        $traderOrdersNewCount = TraderOrder::whereNotNull('last_history_action')->count();
+
+        Log::info('Completed migration with cached history actions', [
+            'total_affected_rows' => $totalAffectedRows,
+            'trader_orders_old_count' => $traderOrdersOldCount,
+            'trader_orders_new_count' => $traderOrdersNewCount,
+        ]);
+
+        if ($traderOrdersOldCount !== $totalAffectedRows) {
+            Log::error('Trader orders count mismatch after migration', [
+                'expected' => $traderOrdersOldCount,
+                'actual' => $totalAffectedRows,
+            ]);
             throw new \Exception('Trader orders count mismatch after migration');
         }
     }
@@ -59,10 +111,37 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Clear the cached values
-        DB::table('trader_orders')->update([
-            'last_history_action' => null,
-            'last_history_action_updated_at' => null,
+        Log::info('Starting rollback of cached history actions');
+
+        $batchSize = 1000;
+        $totalAffectedRows = 0;
+
+        do {
+            $affectedRows = DB::update('
+                UPDATE trader_orders 
+                SET 
+                    last_history_action = NULL,
+                    last_history_action_updated_at = NULL
+                WHERE last_history_action IS NOT NULL
+                LIMIT ?
+            ', [$batchSize]);
+
+            $totalAffectedRows += $affectedRows;
+
+            Log::info('Rolled back batch', [
+                'batch_affected_rows' => $affectedRows,
+                'total_rolled_back' => $totalAffectedRows,
+            ]);
+
+            // Small delay to prevent overwhelming the database
+            if ($affectedRows > 0) {
+                usleep(100000); // 0.1 second delay
+            }
+
+        } while ($affectedRows > 0);
+
+        Log::info('Completed rollback of cached history actions', [
+            'total_affected_rows' => $totalAffectedRows,
         ]);
     }
 };
