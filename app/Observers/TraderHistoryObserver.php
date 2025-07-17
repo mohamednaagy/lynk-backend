@@ -28,11 +28,9 @@ class TraderHistoryObserver
             ]);
 
             $traderOrder = $traderHistory->traderOrder()->first();
-
-            $traderOrder->update([
-                'last_history_action' => $traderHistory->action,
-                'last_history_action_updated_at' => $traderHistory->created_at,
-            ]);
+            $traderOrder->last_history_action = $traderHistory->action;
+            $traderOrder->last_history_action_updated_at = $traderHistory->created_at;
+            $traderOrder->save();
 
             Trader::driver($traderOrder->provider, $traderOrder->version)
                 ->dispatchJobForTransitioningFlow($traderOrder);
