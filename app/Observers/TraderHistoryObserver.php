@@ -7,7 +7,6 @@ use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class TraderHistoryObserver
@@ -28,12 +27,12 @@ class TraderHistoryObserver
                 'action' => $traderHistory->action,
             ]);
 
-            DB::table('trader_orders')->where('id', $traderHistory->trader_order_id)->update([
+            $traderOrder = $traderHistory->traderOrder()->first();
+
+            $traderOrder->update([
                 'last_history_action' => $traderHistory->action,
                 'last_history_action_updated_at' => $traderHistory->created_at,
             ]);
-
-            $traderOrder = $traderHistory->traderOrder()->first();
 
             Trader::driver($traderOrder->provider, $traderOrder->version)
                 ->dispatchJobForTransitioningFlow($traderOrder);
