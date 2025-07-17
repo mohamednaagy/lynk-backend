@@ -154,6 +154,11 @@ class Company extends BaseTenant
         return $this->lender->lenderDetail->token_expire_in;
     }
 
+    public function getTokenExpireVersion(): int
+    {
+        return (int) $this->lender->lenderDetail->token_version;
+    }
+
     /**
      * This function is a temporary workaround to avoid removing the HasDataColumn trait from the Tenant model.
      * It will be removed once we upgrade to version 4 of the package.
