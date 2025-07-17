@@ -24,7 +24,9 @@ return new class extends Migration
             foreach ($traderOrders as $traderOrder) {
                 $traderHistory = $traderOrder->traderHistories()->latest('id')->first();
                 if ($traderHistory) {
-                    $traderOrder->updateLastHistoryAction($traderHistory);
+                    $traderOrder->last_history_action = $traderHistory->action;
+                    $traderOrder->last_history_action_updated_at = $traderHistory->created_at;
+                    $traderOrder->save();
                 } else {
                     DB::table('trader_orders')->where('id', $traderOrder->id)->update([
                         'last_history_action' => FinancingOrderHistory::GetTtiId,
