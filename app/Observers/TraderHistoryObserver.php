@@ -28,6 +28,11 @@ class TraderHistoryObserver
                 'action' => $traderHistory->action,
             ]);
 
+            DB::table('trader_orders')->where('id', $traderHistory->trader_order_id)->update([
+                'last_history_action' => $traderHistory->action,
+                'last_history_action_updated_at' => $traderHistory->created_at,
+            ]);
+
             $traderOrder = $traderHistory->traderOrder()->first();
 
             Trader::driver($traderOrder->provider, $traderOrder->version)
@@ -97,17 +102,6 @@ class TraderHistoryObserver
             $this->applyOrderFees($traderHistory);
 
             Log::info('TraderHistoryObserver::created - Order fees applied, updating cached last history action', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
-                'action' => $traderHistory->action,
-            ]);
-
-            DB::table('trader_orders')->where('id', $traderOrder->id)->update([
-                'last_history_action' => $traderHistory->action,
-                'last_history_action_updated_at' => $traderHistory->created_at,
-            ]);
-
-            Log::info('TraderHistoryObserver::created - Cached last history action updated, COMPLETED SUCCESSFULLY', [
                 'trader_history_id' => $traderHistory->id,
                 'trader_order_id' => $traderOrder->id,
                 'action' => $traderHistory->action,
