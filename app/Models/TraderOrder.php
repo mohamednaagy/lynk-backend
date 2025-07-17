@@ -144,17 +144,6 @@ class TraderOrder extends Model implements HasMedia
     }
 
     /**
-     * Update cached last history action for performance optimization
-     */
-    public function updateLastHistoryAction(TraderHistory $lastAction): void
-    {
-        $this->update([
-            'last_history_action' => $lastAction->action,
-            'last_history_action_updated_at' => $lastAction->created_at,
-        ]);
-    }
-
-    /**
      * Optimized version using cached values when available
      */
     public function doesLastActionMatchWith($actions): bool

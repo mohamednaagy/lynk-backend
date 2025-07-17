@@ -28,6 +28,9 @@ class TraderHistoryObserver
             ]);
 
             $traderOrder = $traderHistory->traderOrder()->first();
+            $traderOrder->last_history_action = $traderHistory->action;
+            $traderOrder->last_history_action_updated_at = $traderHistory->created_at;
+            $traderOrder->save();
 
             Trader::driver($traderOrder->provider, $traderOrder->version)
                 ->dispatchJobForTransitioningFlow($traderOrder);
@@ -96,14 +99,6 @@ class TraderHistoryObserver
             $this->applyOrderFees($traderHistory);
 
             Log::info('TraderHistoryObserver::created - Order fees applied, updating cached last history action', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
-                'action' => $traderHistory->action,
-            ]);
-
-            $traderOrder->updateLastHistoryAction($traderHistory);
-
-            Log::info('TraderHistoryObserver::created - Cached last history action updated, COMPLETED SUCCESSFULLY', [
                 'trader_history_id' => $traderHistory->id,
                 'trader_order_id' => $traderOrder->id,
                 'action' => $traderHistory->action,
