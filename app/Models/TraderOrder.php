@@ -61,7 +61,8 @@ class TraderOrder extends Model implements HasMedia
             'expire_at',
             'auto_sell_period_id',
             'commodity_type_id',
-
+            'last_history_action',
+            'last_history_action_updated_at',
         ];
     }
 
