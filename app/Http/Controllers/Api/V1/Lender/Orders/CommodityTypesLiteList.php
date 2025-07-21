@@ -41,7 +41,11 @@ class CommodityTypesLiteList extends Controller
             ->handle();
 
         return $this->successResponse(
-            $commodities->get(['id', 'name'])->toArray()
+            $commodities->get(['unique_name', 'name'])
+                ->map(fn ($commodity) => [
+                    'id' => $commodity->unique_name,
+                    'name' => $commodity->name,
+                ])->values()->toArray()
         );
     }
 }

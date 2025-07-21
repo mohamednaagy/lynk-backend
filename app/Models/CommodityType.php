@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Enums\CommodityTypeProvider;
 use App\Enums\CommodityTypeStatus;
+use App\Enums\CompanyMarketType;
+use App\Enums\Trader;
+use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -48,19 +51,32 @@ class CommodityType extends Model
     /**
      * Scope a query to filter commodities based on the company's allowed commodity types.
      *
-     * This scope filters commodity types to only include those that the specified company
-     * is allowed to use in their orders, based on the company_lender_order_allowed_commodity_types
-     * pivot table relationship.
+     * This scope filters commodity types based on two scenarios:
+     * 1. For automatic trading mode without preferred commodity:
+     *    - Returns Lynk commodities for local market type
+     *    - Returns Bursam commodities for international market type
+     * 2. When preferred commodities are allowed:
+     *    - Returns only the commodity types explicitly allowed for the company
+     *    through the company_lender_order_allowed_commodity_types pivot table
      *
      * @param  Builder  $query  The query builder instance
      * @param  int  $value  The company ID to filter by
-     * @return Builder The filtered query
+     * @return Builder The filtered query based on company's trading preferences
      */
     public function scopeGetCommoditiesBasedOnCompany(Builder $query, int $value): Builder
     {
-        $company = Company::with(['lenderOrderAllowedCommodityTypes'])->find($value);
-        $commodityTypeIds = $company->lenderOrderAllowedCommodityTypes->pluck('id');
-        $query = $query->whereIn('id', $commodityTypeIds);
+        $company = Company::with(['lenderOrderAllowedCommodityTypes', 'lender.lenderDetail'])->find($value);
+        $lenderDetail = $company->lender->lenderDetail;
+        if (! $lenderDetail->allow_preferred_commodity_in_order && $lenderDetail->trading_mode->is(TraderOrderMode::Automatic)) {
+            return match (true) {
+                $lenderDetail->preferred_market_type->is(CompanyMarketType::Local()) => $query->where('provider', Trader::Lynk),
+                $lenderDetail->preferred_market_type->is(CompanyMarketType::International()) => $query->where('provider', Trader::Bursam),
+                default => $query,
+            };
+        } elseif ($lenderDetail->allow_preferred_commodity_in_order) {
+            $commodityTypeIds = $company->lenderOrderAllowedCommodityTypes->pluck('id');
+            $query = $query->whereIn('id', $commodityTypeIds);
+        }
 
         return $query;
     }
