@@ -50,10 +50,10 @@ class OrderDateScope extends QueryScoper
     public function prepareBuilder($builder, $data)
     {
         $startDate = isset($data['creation_start_date'])
-            ? Carbon::parse($data['creation_start_date'], 'Asia/Riyadh')->setTimezone('UTC')
+            ? toUtc($data['creation_start_date'], 'Asia/Riyadh')
             : null;
         $endDate = isset($data['creation_end_date'])
-            ? Carbon::parse($data['creation_end_date'], 'Asia/Riyadh')->endOfDay()->setTimezone('UTC')
+            ? toUtc(Carbon::parse($data['creation_end_date'], 'Asia/Riyadh')->endOfDay())
             : null;
 
         if ($startDate && $endDate) {
