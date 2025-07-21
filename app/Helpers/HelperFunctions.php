@@ -301,10 +301,9 @@ if (! function_exists('toUtc')) {
     /**
      * Convert a Carbon instance or datetime string from any timezone to UTC.
      *
-     * @param  Carbon|string  $date
      * @param  string|null  $timezone  If null, uses system default or embedded Carbon timezone
      */
-    function toUtc($date, ?string $timezone = null): Carbon
+    function toUtc(Carbon|string $date, ?string $timezone = null): Carbon
     {
         // Parse input if string
         $carbon = $date instanceof Carbon
