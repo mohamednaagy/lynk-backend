@@ -178,7 +178,7 @@ class StoreCompanyRequest extends FormRequest
             ],
 
             'lender_order_allowed_commodity_types' => [
-                'nullable', 'array',
+                'nullable', 'array', 'required_if:allow_preferred_commodity_in_order,true',
             ],
 
             'lender_order_allowed_commodity_types.*' => [
