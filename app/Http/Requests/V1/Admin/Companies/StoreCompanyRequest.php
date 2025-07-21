@@ -176,6 +176,14 @@ class StoreCompanyRequest extends FormRequest
             'default_contract_sign_time_limit' => [
                 'nullable', 'integer', 'min:1',
             ],
+
+            'lender_order_allowed_commodity_types' => [
+                'nullable', 'array',
+            ],
+
+            'lender_order_allowed_commodity_types.*' => [
+                'required', new CheckActiveCommodityTypeRule,
+            ],
         ];
     }
 }

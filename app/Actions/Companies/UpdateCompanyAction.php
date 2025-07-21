@@ -40,6 +40,10 @@ class UpdateCompanyAction implements UpdateCompany
             $lender->commodityTypes()->sync($data['preferred_commodity_types']);
         }
 
+        if (isset($data['lender_order_allowed_commodity_types'])) {
+            $lender->lenderOrderAllowedCommodityTypes()->sync($data['lender_order_allowed_commodity_types']);
+        }
+
         $lender->lenderDetail()->updateOrCreate(
             ['company_id' => $lender->id],
             Arr::only($data, [
