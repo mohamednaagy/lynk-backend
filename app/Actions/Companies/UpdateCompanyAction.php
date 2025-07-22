@@ -40,7 +40,7 @@ class UpdateCompanyAction implements UpdateCompany
             $lender->commodityTypes()->sync($data['preferred_commodity_types']);
         }
 
-        if (isset($data['lender_order_allowed_commodity_types'])) {
+        if ($this->isAllowedToUpdatePreferredCommodityInOrder($lender, $data['allow_preferred_commodity_in_order'])) {
             $lender->lenderOrderAllowedCommodityTypes()->sync($data['lender_order_allowed_commodity_types']);
         }
 
@@ -86,5 +86,10 @@ class UpdateCompanyAction implements UpdateCompany
         foreach ($newTiers as $tier) {
             $lender->tieredPricing()->create($tier);
         }
+    }
+
+    private function isAllowedToUpdatePreferredCommodityInOrder(Lender $lender, bool $allowPreferredCommodityInOrder)
+    {
+        return $lender->isPreferredCommoditySelectionAllowed() && $allowPreferredCommodityInOrder;
     }
 }

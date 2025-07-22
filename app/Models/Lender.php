@@ -18,4 +18,16 @@ class Lender extends Company
     {
         return parent::getWallet($name, $lock);
     }
+
+    /**
+     * Check if the company is allowed to select preferred commodity types in their orders.
+     *
+     * This method checks if the company's lender has the 'allow_preferred_commodity_in_order' flag set to true.
+     *
+     * @return bool True if preferred commodity selection is allowed, false otherwise
+     */
+    public function isPreferredCommoditySelectionAllowed()
+    {
+        return $this->lenderDetail?->allow_preferred_commodity_in_order ?? false;
+    }
 }
