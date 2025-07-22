@@ -26,6 +26,9 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
             ->when($this->name, function ($query) {
                 $query->where('name', 'like', "%{$this->name}%");
             })
+            ->when($this->provider, function ($query) {
+                $query->where('provider', $this->provider);
+            })
             ->when($this->active, function ($query) {
                 $query->active($this->active);
             })
