@@ -28,6 +28,6 @@ class Lender extends Company
      */
     public function isPreferredCommoditySelectionAllowed()
     {
-        return $this->lenderDetail?->allow_preferred_commodity_in_order ?? false;
+        return $this->lenderDetail->allow_preferred_commodity_in_order;
     }
 }
