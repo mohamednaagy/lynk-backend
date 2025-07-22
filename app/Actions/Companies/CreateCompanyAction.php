@@ -63,7 +63,7 @@ class CreateCompanyAction implements CreateCompany
             $lender->commodityTypes()->attach($data['preferred_commodity_types']);
         }
 
-        if ($this->isAllowedToUpdatePreferredCommodityInOrder($lender, $data['allow_preferred_commodity_in_order'])) {
+        if (isset($data['lender_order_allowed_commodity_types']) && $this->isAllowedToUpdatePreferredCommodityInOrder($lender, $data['allow_preferred_commodity_in_order'])) {
             $lender->lenderOrderAllowedCommodityTypes()->attach($data['lender_order_allowed_commodity_types']);
         }
 
