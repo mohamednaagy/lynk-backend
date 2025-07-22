@@ -474,7 +474,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         };
     }
 
-    public function contractSignedMessage(TraderOrder $traderOrder)
+    public function contractSignedMessage(TraderOrder $traderOrder): ?string
     {
         if ($traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
             return match ($traderOrder->contract_signed_type->value) {
@@ -487,7 +487,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         return null;
     }
 
-    public function clientWakalaMessage(TraderOrder $traderOrder)
+    public function clientWakalaMessage(TraderOrder $traderOrder): ?string
     {
         return null;
     }

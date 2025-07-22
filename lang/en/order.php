@@ -8,6 +8,18 @@ return [
     'trader' => [
         'bursa' => [
             'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until :TIME KSA time.',
+            'steps' => [
+                'contract_signed' => [
+                    'v2' => [
+                        'proceed' => 'Contract Signed confirmed by user.',
+                    ],
+                ],
+                'client_wakala' => [
+                    'v2' => [
+                        'sell' => 'Client Wakala - Sell Customer confirmed by user.',
+                    ],
+                ],
+            ],
         ],
         'lynk' => [
             'cancelled_status' => 'User has chosen to cancel this trade request.',

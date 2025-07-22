@@ -47,14 +47,14 @@ class LynkV2Driver extends LynkV1Driver
         };
     }
 
-    public function contractSignedMessage(TraderOrder $traderOrder)
+    public function contractSignedMessage(TraderOrder $traderOrder): ?string
     {
         $isContractSignedCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
 
         return $isContractSignedCompleted ? __('order.trader.lynk.steps.contract_signed.v2.proceed') : null;
     }
 
-    public function clientWakalaMessage(TraderOrder $traderOrder)
+    public function clientWakalaMessage(TraderOrder $traderOrder): ?string
     {
         if ($traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
             return match ($traderOrder->contract_signed_type->value) {

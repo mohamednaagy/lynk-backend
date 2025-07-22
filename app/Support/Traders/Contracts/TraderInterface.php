@@ -39,9 +39,9 @@ interface TraderInterface
 
     public function hoverMessageOfTraderStatus(TraderOrder $traderOrder): ?string;
 
-    public function contractSignedMessage(TraderOrder $traderOrder);
+    public function contractSignedMessage(TraderOrder $traderOrder): ?string;
 
-    public function clientWakalaMessage(TraderOrder $traderOrder);
+    public function clientWakalaMessage(TraderOrder $traderOrder): ?string;
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void;
 
