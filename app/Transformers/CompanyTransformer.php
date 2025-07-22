@@ -37,6 +37,7 @@ class CompanyTransformer extends TransformerAbstract
         'default_contract_sign_time_limit',
         'allow_preferred_commodity_in_order',
         'token_expire_in',
+        'lender_order_allowed_commodity_types',
 
     ];
 
@@ -206,5 +207,21 @@ class CompanyTransformer extends TransformerAbstract
     public function includeTokenExpireIn(Company $company): Primitive
     {
         return $this->primitive($company->lender->lenderDetail?->token_expire_in);
+    }
+
+    public function includeLenderOrderAllowedCommodityTypes(Company $company): Primitive
+    {
+        $types = $company->lenderOrderAllowedCommodityTypes;
+
+        if ($types->isEmpty()) {
+            return $this->primitive([]);
+        }
+
+        return $this->primitive(
+            $types->map(fn ($type) => [
+                'id' => $type->id,
+                'name' => $type->name,
+            ])->all()
+        );
     }
 }

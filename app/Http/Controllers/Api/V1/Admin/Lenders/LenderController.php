@@ -138,6 +138,7 @@ class LenderController extends Controller
                 'preferred_commodity_types',
                 'default_contract_sign_time_limit',
                 'allow_preferred_commodity_in_order',
+                'lender_order_allowed_commodity_types',
             ])
             ->respond();
     }

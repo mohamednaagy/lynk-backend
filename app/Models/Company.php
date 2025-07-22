@@ -170,4 +170,17 @@ class Company extends BaseTenant
 
         return $attributes;
     }
+
+    /**
+     * Get the commodity types that are allowed to be used in orders for this company.
+     *
+     * This relationship is defined through the pivot table 'company_lender_order_allowed_commodity_types'
+     * which maps companies to commodity types that they are allowed to use in their orders.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function lenderOrderAllowedCommodityTypes()
+    {
+        return $this->belongsToMany(CommodityType::class, 'company_lender_order_allowed_commodity_types', 'company_id', 'commodity_type_id');
+    }
 }
