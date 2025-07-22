@@ -5,7 +5,6 @@ namespace App\Http\Requests\V1\Admin\FinancingOrders;
 use App\Enums\CommodityTypeStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
-use App\Models\CommodityType;
 use App\Models\Company;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -74,7 +73,9 @@ class StoreOrderRequest extends FormRequest
         }
 
         // If we reach here, value is provided and setting is ON, so validate the commodity type
-        $commodityTypeExists = CommodityType::where(['id' => $value, 'status' => CommodityTypeStatus::Active])
+        $commodityTypeExists = $company->lenderOrderAllowedCommodityTypes()
+            ->where('unique_name', $value)
+            ->where('status', CommodityTypeStatus::Active)
             ->exists();
 
         if (! $commodityTypeExists) {
