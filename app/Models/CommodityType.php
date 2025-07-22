@@ -4,9 +4,6 @@ namespace App\Models;
 
 use App\Enums\CommodityTypeProvider;
 use App\Enums\CommodityTypeStatus;
-use App\Enums\CompanyMarketType;
-use App\Enums\Trader;
-use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,25 +46,33 @@ class CommodityType extends Model
     }
 
     /**
-     * Scope a query to filter commodities based on the company's trading setup.
+     * Scope a query to filter commodities based on the company's allowed commodity types.
      *
-     * - If the company's trading mode is manual, return all commodities.
-     * - If it's automatic:
-     *     - Return commodities matching the preferred market type.
-     *     - If the preferred market type is "any", return all commodities.
+     * This scope filters commodity types based on the company's allowed commodity types.
+     *
+     * @param  Builder  $query  The query builder instance
+     * @param  int  $value  The company ID to filter by
+     * @return Builder The filtered query based on company's trading preferences
      */
     public function scopeGetCommoditiesBasedOnCompany(Builder $query, int $value): Builder
     {
-        $company = Company::with(['lender.lenderDetail'])->find($value);
-        $lenderDetail = $company->lender->lenderDetail;
-        if ($lenderDetail->trading_mode->is(TraderOrderMode::Automatic)) {
-            return match (true) {
-                $lenderDetail->preferred_market_type->is(CompanyMarketType::Local()) => $query->where('provider', Trader::Lynk),
-                $lenderDetail->preferred_market_type->is(CompanyMarketType::International()) => $query->where('provider', Trader::Bursam),
-                default => $query,
-            };
-        }
+        $company = Company::with(['lenderOrderAllowedCommodityTypes'])->find($value);
+        $commodityTypeIds = $company->lenderOrderAllowedCommodityTypes->pluck('id');
+        $query = $query->whereIn('id', $commodityTypeIds);
 
         return $query;
+    }
+
+    /**
+     * Get the companies that are allowed to use this commodity type in their orders.
+     *
+     * This relationship is defined through the pivot table 'company_lender_order_allowed_commodity_types'
+     * which maps commodity types to companies that can use them.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function companiesWithOrderAccess()
+    {
+        return $this->belongsToMany(Company::class, 'company_lender_order_allowed_commodity_types', 'commodity_type_id', 'company_id');
     }
 }

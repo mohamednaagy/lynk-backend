@@ -24,11 +24,13 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
             $query->where('status', $this->status);
         })->when($this->name, function ($query) {
             $query->where('name', 'like', "%{$this->name}%");
-        })->when($this->active, fn ($q) => $q->active($this->active))
-            ->when($this->provider, function ($query) {
-                $query->where('provider', 'like', $this->provider);
-            })->when($this->companyId, fn ($q) => $q->getCommoditiesBasedOnCompany(($this->companyId))
-            );
+        })->when($this->provider, function ($query) {
+            $query->where('provider', $this->provider);
+        })->when($this->active, function ($query) {
+            $query->active($this->active);
+        })->when($this->companyId, function ($query) {
+            $query->getCommoditiesBasedOnCompany(($this->companyId));
+        });
     }
 
     public function setStatus($status = null)

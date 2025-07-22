@@ -14,13 +14,13 @@ use App\Http\Controllers\Api\V1\Lender\Media\DownloadMediaFile;
 use App\Http\Controllers\Api\V1\Lender\Orders\ApproveOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CancelTraderOrder;
+use App\Http\Controllers\Api\V1\Lender\Orders\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Lender\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\ExportOrders;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrderStatus;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersVolume;
-use App\Http\Controllers\Api\V1\Lender\Orders\GetValidCommodityType;
 use App\Http\Controllers\Api\V1\Lender\Orders\MakeOrderProceed;
 use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
@@ -116,7 +116,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                     Route::put('/settings', [SettingsController::class, 'update']);
                 });
 
-                Route::get('/commodity-types/dropdown-list', GetValidCommodityType::class);
+                Route::get('/commodity-types/dropdown-list', CommodityTypesLiteList::class);
             });
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
