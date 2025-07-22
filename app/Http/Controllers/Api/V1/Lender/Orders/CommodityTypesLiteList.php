@@ -17,7 +17,7 @@ class CommodityTypesLiteList extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::Lender, [Subject::CommodityMarketCommodityTypes, Action::Index])
+            perm(Area::Lender, [Subject::CommodityMarketCommodityTypes, Action::Index])
         );
     }
 
@@ -31,7 +31,7 @@ class CommodityTypesLiteList extends Controller
         $user = $request->user();
         $company = $user->company;
 
-        if ($user->hasRole(Role::LenderApiUser) && ! $company->isPreferredCommoditySelectionAllowed()) {
+        if ($user->hasRole(Role::LenderApiUser) && ! $company->lender?->isPreferredCommoditySelectionAllowed()) {
             return $this->errorResponse('This action is not allowed for this company.', 400);
         }
 

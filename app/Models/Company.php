@@ -183,18 +183,4 @@ class Company extends BaseTenant
     {
         return $this->belongsToMany(CommodityType::class, 'company_lender_order_allowed_commodity_types', 'company_id', 'commodity_type_id');
     }
-
-    /**
-     * Check if the company is allowed to select preferred commodity types in their orders.
-     *
-     * This method checks if the company's lender has the 'allow_preferred_commodity_in_order' flag set to true.
-     *
-     * @return bool True if preferred commodity selection is allowed, false otherwise
-     */
-    public function isPreferredCommoditySelectionAllowed()
-    {
-        $lender = $this->lender;
-
-        return $lender && $lender->lenderDetail && ($lender->lenderDetail->allow_preferred_commodity_in_order ?? false);
-    }
 }
