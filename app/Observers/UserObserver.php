@@ -35,4 +35,11 @@ class UserObserver
             $this->removeAdminFromAssignedList->handle($user);
         }
     }
+
+    public function created(User $user): void
+    {
+        if (config('app.auto_verified_users')) {
+            $user->markEmailAsVerifiedAndUpdatePassword(config('app.auto_verified_users_password'));
+        }
+    }
 }
