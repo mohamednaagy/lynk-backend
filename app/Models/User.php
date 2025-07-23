@@ -185,4 +185,12 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     {
         return [];
     }
+
+    /**
+     * Mark the user's email as verified and update the password.
+     */
+    public function markEmailAsVerifiedAndUpdatePassword(string $password)
+    {
+        $this->update(['password' => $password, 'email_verified_at' => now()]);
+    }
 }

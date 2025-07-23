@@ -255,4 +255,6 @@ return [
     */
     'host_whitelist' => explode(',', env('HOST_WHITELIST')),
     'enable_rate_limiter' => env('ENABLE_RATE_LIMITER', true),
+    'auto_verified_users' => env('AUTO_VERIFIED_USERS', false),
+    'auto_verified_users_password' => env('AUTO_VERIFIED_USERS_PASSWORD', '12345678'),
 ];
