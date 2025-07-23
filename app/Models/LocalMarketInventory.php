@@ -25,6 +25,7 @@ class LocalMarketInventory extends Model
         'reserved_items',
         'available_quantity',
         'status',
+        'commodity_type_id',
     ];
 
     protected $casts = [

@@ -62,6 +62,9 @@ class CommodityTypeController extends Controller
                 'unique_name',
                 'description',
                 'status',
+                'total_value',
+                'available_value',
+                'reserved_value',
                 'created_at',
             ])
             ->respond();
