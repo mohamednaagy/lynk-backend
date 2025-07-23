@@ -223,7 +223,7 @@ class BursamV2Driver extends BursamV1Driver
         return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
             && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
     }
-    
+
     protected function isNotInTransitionStateForSellingOrBuying(TraderOrder $traderOrder)
     {
         return ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
@@ -265,9 +265,18 @@ class BursamV2Driver extends BursamV1Driver
                 ! app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
     }
 
-    public function contractSignedMessage(TraderOrder $traderOrder)
+    public function contractSignedMessage(TraderOrder $traderOrder): ?string
     {
-        return null;
+        $isContractSignedCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+
+        return $isContractSignedCompleted ? __('order.trader.bursa.steps.contract_signed.v2.proceed') : null;
+    }
+
+    public function clientWakalaMessage(TraderOrder $traderOrder): ?string
+    {
+        $isClientWakalaCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
+
+        return $isClientWakalaCompleted ? __('order.trader.bursa.steps.client_wakala.v2.sell') : null;
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}

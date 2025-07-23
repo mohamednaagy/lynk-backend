@@ -611,12 +611,12 @@ class DmccV1Driver implements TraderInterface
         return null;
     }
 
-    public function contractSignedMessage(TraderOrder $traderOrder)
+    public function contractSignedMessage(TraderOrder $traderOrder): ?string
     {
         return null;
     }
 
-    public function clientWakalaMessage(TraderOrder $traderOrder)
+    public function clientWakalaMessage(TraderOrder $traderOrder): ?string
     {
         return null;
     }
