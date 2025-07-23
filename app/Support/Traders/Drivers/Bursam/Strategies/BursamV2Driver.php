@@ -267,16 +267,24 @@ class BursamV2Driver extends BursamV1Driver
 
     public function contractSignedMessage(TraderOrder $traderOrder): ?string
     {
-        $isContractSignedCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
+            return null;
+        }
 
-        return $isContractSignedCompleted ? __('order.trader.bursa.steps.contract_signed.v2.proceed') : null;
+        return $this->isContractAndWakalaCompleted($traderOrder)
+            ? __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell')
+            : __('order.trader.bursa.steps.contract_signed.v2.proceed');
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder): ?string
     {
-        $isClientWakalaCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
+        if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
+            return null;
+        }
 
-        return $isClientWakalaCompleted ? __('order.trader.bursa.steps.client_wakala.v2.sell') : null;
+        return $this->isContractAndWakalaCompleted($traderOrder)
+            ? __('order.trader.bursa.steps.client_wakala.v2.wakalaAndSell')
+            : __('order.trader.bursa.steps.client_wakala.v2.sell');
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}

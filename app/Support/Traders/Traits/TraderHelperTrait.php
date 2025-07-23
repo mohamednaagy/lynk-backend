@@ -2,11 +2,13 @@
 
 namespace App\Support\Traders\Traits;
 
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\CommodityType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
@@ -135,6 +137,44 @@ trait TraderHelperTrait
                 return $productCollection->map(fn (array $product) => $this->mapProductToDto($product));
             });
 
+    }
+
+    /**
+     * Retrieve preferred product codes for a company associated with a trader order.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order to extract company from
+     * @return array List of preferred product codes
+     */
+    public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
+    {
+        Log::channel('bursam')->info('Retrieving company preferred product codes', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+        ]);
+
+        $companyPreferredProductIds = $traderOrder->order->company
+            ->commodityTypes()
+            ->where('provider', $traderOrder->provider)
+            ->pluck('unique_name')
+            ->toArray();
+
+        Log::channel('bursam')->info('Company preferred product codes resolved', [
+            'trader_order_id' => $traderOrder->id,
+            'company_id' => $traderOrder->order->company_id,
+            'product_codes' => $companyPreferredProductIds,
+            'count' => count($companyPreferredProductIds),
+        ]);
+
+        return $companyPreferredProductIds;
+    }
+
+    protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
+    {
+        return app(TraderOrderProceedCaseService::class)
+            ->checkIfTraderHasCase(
+                $traderOrder->id,
+                FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+            );
     }
 
     private function generateGroupKey(array $item, array $keys): string
@@ -298,34 +338,5 @@ trait TraderHelperTrait
         ]);
 
         return $finalProductCodes;
-    }
-
-    /**
-     * Retrieve preferred product codes for a company associated with a trader order.
-     *
-     * @param  TraderOrder  $traderOrder  The trader order to extract company from
-     * @return array List of preferred product codes
-     */
-    public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
-    {
-        Log::channel('bursam')->info('Retrieving company preferred product codes', [
-            'trader_order_id' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-        ]);
-
-        $companyPreferredProductIds = $traderOrder->order->company
-            ->commodityTypes()
-            ->where('provider', $traderOrder->provider)
-            ->pluck('unique_name')
-            ->toArray();
-
-        Log::channel('bursam')->info('Company preferred product codes resolved', [
-            'trader_order_id' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-            'product_codes' => $companyPreferredProductIds,
-            'count' => count($companyPreferredProductIds),
-        ]);
-
-        return $companyPreferredProductIds;
     }
 }

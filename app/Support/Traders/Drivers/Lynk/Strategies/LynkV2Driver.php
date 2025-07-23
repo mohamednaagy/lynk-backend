@@ -49,22 +49,30 @@ class LynkV2Driver extends LynkV1Driver
 
     public function contractSignedMessage(TraderOrder $traderOrder): ?string
     {
-        $isContractSignedCompleted = $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
+        if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
+            return null;
+        }
 
-        return $isContractSignedCompleted ? __('order.trader.lynk.steps.contract_signed.v2.proceed') : null;
+        return $this->isContractAndWakalaCompleted($traderOrder)
+            ? __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell')
+            : __('order.trader.lynk.steps.contract_signed.v2.proceed');
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder): ?string
     {
-        if ($traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
-            return match ($traderOrder->contract_signed_type->value) {
-                ContractSignedType::Sell => __('order.trader.lynk.steps.client_wakala.v2.sell'),
-                ContractSignedType::Delivery => __('order.trader.lynk.steps.client_wakala.v2.deliver'),
-                default => null,
-            };
+        if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala)) {
+            return null;
         }
 
-        return null;
+        if ($this->isContractAndWakalaCompleted($traderOrder)) {
+            return __('order.trader.lynk.steps.client_wakala.v2.wakalaAndSell');
+        }
+
+        return match ($traderOrder->contract_signed_type->value) {
+            ContractSignedType::Sell => __('order.trader.lynk.steps.client_wakala.v2.sell'),
+            ContractSignedType::Delivery => __('order.trader.lynk.steps.client_wakala.v2.deliver'),
+            default => null,
+        };
     }
 
     public function validateDeliverySequence(TraderOrder $traderOrder, bool $forceToProceed): void
