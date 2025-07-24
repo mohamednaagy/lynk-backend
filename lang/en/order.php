@@ -12,11 +12,13 @@ return [
                 'contract_signed' => [
                     'v2' => [
                         'proceed' => 'Contract Signed confirmed by user.',
+                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by user.',
                     ],
                 ],
                 'client_wakala' => [
                     'v2' => [
                         'sell' => 'Client Wakala - Sell Customer confirmed by user.',
+                        'wakalaAndSell' => '',
                     ],
                 ],
             ],
@@ -35,12 +37,14 @@ return [
                     ],
                     'v2' => [
                         'proceed' => 'Contract Signed confirmed by user.',
+                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by user.',
                     ],
                 ],
                 'client_wakala' => [
                     'v2' => [
                         'sell' => 'Client Wakala - Sell Customer confirmed by user.',
                         'deliver' => 'Client Wakala - Deliver for Customer confirmed by user. Please contact a LYNK Administrator to confirm delivery process and logistics',
+                        'wakalaAndSell' => '',
                     ],
                 ],
                 'customer_delivery_confirmation' => [
