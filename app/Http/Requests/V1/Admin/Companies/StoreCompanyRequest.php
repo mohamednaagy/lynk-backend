@@ -208,7 +208,8 @@ class StoreCompanyRequest extends FormRequest
             $errors = $validator->errors();
             $field = 'lender_order_allowed_commodity_types';
             $hasItemError = false;
-            foreach ($this->input($field, []) as $idx => $val) {
+            $items = $this->input($field, []);
+            foreach ($items as $idx => $val) {
                 if ($errors->has("$field.$idx")) {
                     $hasItemError = true;
                     break;
