@@ -23,7 +23,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
            "cd /var/www/lynk-backend/ && \
             git pull origin dev && \
-            composer install && \
+            composer install --ignore-platform-reqs && \
             php artisan migrate && \
             sudo supervisorctl stop all && \
             sudo supervisorctl start all"
