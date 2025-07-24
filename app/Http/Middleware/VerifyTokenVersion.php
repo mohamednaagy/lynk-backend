@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\Role;
 use Closure;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class VerifyTokenVersion
 {

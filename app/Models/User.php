@@ -19,11 +19,11 @@ use Illuminate\Support\Str;
 use Modules\Grantify\Contracts\Grantifiable;
 use Modules\Otpify\Contracts\Otpifiable;
 use Modules\Otpify\Models\AuthorizationToken;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\Permission\Traits\HasRoles;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * @method static create(array $data)

@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Enums\Role;
 use App\Models\User;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class JWTService
 {

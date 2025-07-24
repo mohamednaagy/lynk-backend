@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Jenssegers\Agent\Facades\Agent;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedById;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class LoginController extends Controller
 {
