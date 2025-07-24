@@ -207,23 +207,26 @@ class UpdateCompanyRequest extends FormRequest
         ];
     }
 
-    public function withValidator($validator)
+    public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
-            $errors = $validator->errors();
+        $validator->after(function ($validator): void {
             $field = 'lender_order_allowed_commodity_types';
+            $errors = $validator->errors();
             $hasItemError = false;
             $items = $this->input($field, []);
+
             foreach ($items as $idx => $val) {
                 if ($errors->has("$field.$idx")) {
                     $hasItemError = true;
                     break;
                 }
             }
-            if ($hasItemError) {
-                if (! $errors->has($field)) {
-                    $validator->errors()->add($field, 'The selected Allowed order commodity types is invalid or inactive.');
-                }
+
+            if ($hasItemError && ! $errors->has($field)) {
+                $validator->errors()->add(
+                    $field,
+                    'The selected Allowed order commodity types is invalid or inactive.'
+                );
             }
         });
     }
