@@ -191,4 +191,43 @@ class UpdateCompanyRequest extends FormRequest
             ],
         ];
     }
+
+    public function attributes()
+    {
+        return [
+            'lender_order_allowed_commodity_types' => 'Allowed order commodity types',
+            'allow_preferred_commodity_in_order' => 'Allow Commodity Type by Order',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'lender_order_allowed_commodity_types.required_if' => 'The :attribute field is required when :other field is On.',
+        ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            $field = 'lender_order_allowed_commodity_types';
+            $errors = $validator->errors();
+            $hasItemError = false;
+            $items = $this->input($field, []);
+
+            foreach ($items as $idx => $val) {
+                if ($errors->has("$field.$idx")) {
+                    $hasItemError = true;
+                    break;
+                }
+            }
+
+            if ($hasItemError && ! $errors->has($field)) {
+                $validator->errors()->add(
+                    $field,
+                    'The selected Allowed order commodity types is invalid or inactive.'
+                );
+            }
+        });
+    }
 }
