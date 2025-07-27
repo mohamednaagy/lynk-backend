@@ -159,6 +159,12 @@ class TraderOrder extends Model implements HasMedia
             }
         }
 
+        // if the trader order has no histories, it means that the trader order is not initiated yet
+        // so we need to return false
+        if ($this->traderHistories()->count() === 0) {
+            return false;
+        }
+
         if (! $this->last_history_action) {
             throw new \Exception('Last history action is not set');
         }
