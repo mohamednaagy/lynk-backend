@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
-use App\Models\TraderOrder;
+use App\Exceptions\OrderHasNoActiveTradeRequestException;
 use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class MakeOrderProceedRequest extends FormRequest
 {
-    private TraderOrder $traderOrder;
-
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -25,10 +23,14 @@ class MakeOrderProceedRequest extends FormRequest
      */
     public function rules(): array
     {
-        $this->traderOrder = $this->order->activeTraderOrder()->firstOrFail();
+        $traderOrder = $this->order->activeTraderOrder()->first();
+
+        if (! $traderOrder) {
+            throw new OrderHasNoActiveTradeRequestException;
+        }
 
         return [
-            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->traderOrder)],
+            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($traderOrder)],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg'],
         ];
     }

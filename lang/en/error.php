@@ -55,5 +55,7 @@ return [
     'supporting_document_not_found' => 'Supporting document not found or does not belong to the specified auto sell period.',
     'auto_sell_period_does_not_belong_to_client' => 'Auto sell period does not belong to the specified client.',
     'invalid_media_collection_type' => 'The specified media collection type is invalid.',
+    'order_has_no_active_trade_request' => 'This order has been cancelled or does not have an active trade request.',
+    'item_not_found' => 'This item was not found.',
 
 ];

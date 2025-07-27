@@ -54,4 +54,6 @@ return [
     'supporting_document_not_found' => 'المستند الداعم غير موجود أو لا ينتمي لفترة البيع التلقائي المحددة.',
     'auto_sell_period_does_not_belong_to_client' => 'فترة البيع التلقائي لا تنتمي للعميل المحدد.',
     'invalid_media_collection_type' => 'نوع مجموعة الوسائط المحدد غير صالح.',
+    'order_has_no_active_trade_request' => 'تم إلغاء هذا الطلب أو لا يحتوي على طلب تداول نشط.',
+    'item_not_found' => 'هذا العنصر غير موجود',
 ];

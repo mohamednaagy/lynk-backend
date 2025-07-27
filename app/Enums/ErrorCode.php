@@ -99,4 +99,8 @@ class ErrorCode
     public const LOCAL_MARKET_CANT_PURCHASING = 1049;
 
     public const TRADE_REQUEST_CREATION_NOT_ALLOWED = 1050;
+
+    public const ORDER_HAS_NO_ACTIVE_TRADE_REQUEST = 1051;
+
+    public const ITEM_NOT_FOUND = 1052;
 }
