@@ -18,6 +18,7 @@ class LocalMarketInventoryObserver
     public function creating(LocalMarketInventory $inventory): void
     {
         $inventory->status = InventoryStatus::Active();
+        $inventory->commodity_type_id = $inventory->item->commodity_type_id ?? null;
     }
 
     /**
