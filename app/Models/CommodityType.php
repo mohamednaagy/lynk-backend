@@ -75,4 +75,9 @@ class CommodityType extends Model
     {
         return $this->belongsToMany(Company::class, 'company_lender_order_allowed_commodity_types', 'commodity_type_id', 'company_id');
     }
+
+    public function statistics()
+    {
+        return $this->hasOne(CommodityTypeStatisticsView::class, 'commodity_type_id', 'id');
+    }
 }

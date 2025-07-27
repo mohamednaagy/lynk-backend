@@ -20,7 +20,9 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 
     public function handle(): Builder
     {
-        return CommodityType::when($this->status, function ($query) {
+        return CommodityType::
+        with('statistics')
+        ->when($this->status, function ($query) {
             $query->where('status', $this->status);
         })->when($this->name, function ($query) {
             $query->where('name', 'like', "%{$this->name}%");
