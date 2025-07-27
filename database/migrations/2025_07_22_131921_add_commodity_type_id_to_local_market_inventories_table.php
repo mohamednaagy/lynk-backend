@@ -14,9 +14,6 @@ return new class extends Migration
     {
         
         Schema::table('local_market_inventories', function (Blueprint $table) {
-            $table->dropForeign(['commodity_type_id']);
-            $table->dropColumn('commodity_type_id');
-
             $table->unsignedBigInteger('commodity_type_id')->nullable()->after('commodity_item_id');
             $table->index('commodity_type_id');
             $table->foreign('commodity_type_id')
