@@ -129,7 +129,7 @@ return [
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه',
-        TraderOrderCancelReason::ExpiredContractSignTime => 'انتهى الوقت المحدد لتوقيع العقد.',
+        TraderOrderCancelReason::ExpiredContractSignTime => 'تم إلغاء طلب التجارة من قبل النظام بسبب انتهاء وقت توقيع العقد المحدد بـ :value ساعة.',
     ],
     UnitOwnershipAction::class => [
         UnitOwnershipAction::SellCommodity => 'بيع السلعة',
