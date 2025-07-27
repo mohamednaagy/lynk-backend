@@ -2,9 +2,12 @@
 
 namespace App\Support\FinancingOrders;
 
+use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
+use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
 use App\Listeners\RefundOrderCost;
 use App\Models\TraderOrder;
 use Carbon\Carbon;
@@ -45,5 +48,14 @@ trait TraderOrderHelper
     private function formatRefundStatus(string $refundReason, TraderOrder $baseTraderOrder): string
     {
         return str_replace(':base_tr', $baseTraderOrder->reference, $refundReason);
+    }
+
+
+    public function formatCancelReasonMessage(TraderOrder $traderOrder)
+    {
+        return match ($traderOrder->cancelDetail?->cancel_reason->value) {
+            TraderOrderCancelReason::ExpiredContractSignTime => str_replace(':value', $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value , $traderOrder->cancelDetail?->cancel_reason->description),
+            default => $traderOrder->cancelDetail?->cancel_reason->description
+        };
     }
 }
