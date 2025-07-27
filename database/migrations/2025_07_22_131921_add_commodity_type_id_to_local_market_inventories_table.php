@@ -23,19 +23,18 @@ return new class extends Migration
                 ->onUpdate('cascade');
         });
 
-          LocalMarketInventory::withTrashed()
-            ->with(['item' => fn ($q) => $q->withTrashed()])
-            ->chunkById(100, function ($inventories) {
-                foreach ($inventories as $inventory) {
-                    $commodityTypeId = $inventory->item?->commodity_type_id;
-
-                    if ($commodityTypeId) {
-                        DB::table('local_market_inventories')
-                            ->where('id', $inventory->id)
-                            ->update(['commodity_type_id' => $commodityTypeId]);
-                    }
+        LocalMarketInventory::withTrashed()
+        ->with(['item' => fn($q) => $q->withTrashed()])
+        ->chunk(100, function ($inventories) {
+            foreach ($inventories as $inventory) {
+                $commodityTypeId = $inventory->item?->commodity_type_id;
+                if ($commodityTypeId) {
+                    DB::table('local_market_inventories')
+                        ->where('id', $inventory->id)
+                        ->update(['commodity_type_id' => $commodityTypeId]);
                 }
-            });
+            }
+        });
     }
 
     /**
@@ -44,8 +43,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('local_market_inventories', function (Blueprint $table) {
-             $table->dropForeign('fk_lmi_commodity_type_id');
-            $table->dropIndex('idx_lmi_commodity_type_id');
+            $table->dropForeign(['commodity_type_id']);
+            $table->dropIndex(['commodity_type_id']);
             $table->dropColumn('commodity_type_id');
         });
     }
