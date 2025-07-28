@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Actions\Contracts\LoginUser;
 use App\Models\User;
-use App\Services\JWTService;
+use App\Services\Tokens\JWTService;
 use Illuminate\Http\Request;
 
 class LoginUserAction implements LoginUser
@@ -13,6 +13,6 @@ class LoginUserAction implements LoginUser
 
     public function handle(User $user, ?string $source = null, ?Request $request = null): array
     {
-        return $this->jwtService->generateToken($user);
+        return $this->jwtService->generateToken($user)->toArray();
     }
 }
