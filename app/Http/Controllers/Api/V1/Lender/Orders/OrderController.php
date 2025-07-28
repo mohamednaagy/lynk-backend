@@ -199,24 +199,29 @@ class OrderController extends Controller
                 );
 
                 dispatch(new NotifyAdminsAboutOrderCreated($financingOrder, $user));
+                $includes = [
+                    'id',
+                    'status',
+                    'reference_number',
+                    'national_id',
+                    'amount',
+                    'selling_price',
+                    'amount_formatted',
+                    'selling_price_formatted',
+                    'is_approved',
+                    'status_reason',
+                    'phone_country_code',
+                    'phone_number',
+                    'phone_number_formatted',
+                ];
+
+                if ($financingOrder->commodity_type_id) {
+                    $includes[] = 'commodity_type';
+                }
+
 
                 return fractal($financingOrder, new FinancingOrderTransformer)
-                    ->parseIncludes([
-                        'id',
-                        'status',
-                        'reference_number',
-                        'national_id',
-                        'amount',
-                        'selling_price',
-                        'amount_formatted',
-                        'selling_price_formatted',
-                        'is_approved',
-                        'status_reason',
-                        'phone_country_code',
-                        'phone_number',
-                        'phone_number_formatted',
-                        'commodity_type',
-                    ])->respond();
+                    ->parseIncludes($includes)->respond();
             }
         );
     }
