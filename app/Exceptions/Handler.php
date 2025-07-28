@@ -4,7 +4,9 @@ namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedByRequestDataException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -51,6 +53,13 @@ class Handler extends ExceptionHandler
 
         $this->renderable(function (TenantCouldNotBeIdentifiedByRequestDataException $e, $request) {
             return response()->errorResponse(trans('error.x_company_invalid'), code: ErrorCode::X_COMPANY_INVALID);
+        });
+
+        $this->renderable(function (NotFoundHttpException $e, $request) {
+            $message = trans('error.item_not_found');
+            $code = Response::HTTP_NOT_FOUND;
+
+            return response()->errorResponse($message, $code, ErrorCode::ITEM_NOT_FOUND);
         });
     }
 }
