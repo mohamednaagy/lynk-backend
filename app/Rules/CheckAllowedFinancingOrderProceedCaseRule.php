@@ -52,7 +52,6 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
         }
 
         return true;
-
     }
 
     /**
