@@ -217,6 +217,8 @@ return [
         Jenssegers\Agent\AgentServiceProvider::class,
         App\Providers\MoneyServiceProvider::class,
         Anhskohbo\NoCaptcha\NoCaptchaServiceProvider::class,
+
+        App\Providers\TokenServiceProvider::class,
     ],
 
     /*

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Tokens;
+namespace App\Services\Tokens\Config;
 
 use App\Enums\Role;
 use App\Models\User;

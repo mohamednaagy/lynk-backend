@@ -6,8 +6,6 @@ use App\Listeners\LogActivity;
 use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\OptimizedLoanCoverageStrategy;
-use App\Services\Tokens\JWTService;
-use App\Services\Tokens\TokenConfigResolver;
 use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\TraderManager;
 use Illuminate\Support\Facades\Config;
@@ -16,12 +14,6 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Jose\Component\Core\AlgorithmManager;
-use Jose\Component\Core\JWK;
-use Jose\Component\Core\Util\Base64UrlSafe;
-use Jose\Component\Signature\Algorithm\HS256;
-use Jose\Component\Signature\JWSBuilder;
-use Jose\Component\Signature\Serializer\CompactSerializer;
 use Stillat\Numeral\Languages\LanguageManager;
 use Stillat\Numeral\Numeral;
 
@@ -57,21 +49,6 @@ class AppServiceProvider extends ServiceProvider
                 'greedy' => new GreedyLoanCoverageStrategy,
                 default => new OptimizedLoanCoverageStrategy, // Default to optimized
             };
-        });
-
-        $this->app->singleton(JWTService::class, function ($app) {
-            $secret = config('jwt.secret');
-
-            return new JWTService(
-                secret: $secret,
-                builder: new JWSBuilder(new AlgorithmManager([new HS256])),
-                serializer: new CompactSerializer,
-                key: new JWK([
-                    'kty' => 'oct',
-                    'k' => Base64UrlSafe::encodeUnpadded($secret),
-                ]),
-                configResolver: new TokenConfigResolver
-            );
         });
     }
 
