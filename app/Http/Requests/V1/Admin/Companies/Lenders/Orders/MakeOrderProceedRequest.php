@@ -27,10 +27,8 @@ class MakeOrderProceedRequest extends FormRequest
      */
     public function rules()
     {
-        $this->traderOrder = $this->order->activeTraderOrder()->firstOrFail();
-
         return [
-            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->traderOrder)],
+            'case' => ['required', 'string', new CheckAllowedFinancingOrderProceedCaseRule($this->order)],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg'],
         ];
     }

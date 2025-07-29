@@ -3,14 +3,14 @@
 namespace App\Rules;
 
 use App\Enums\FinancingOrderProceedCase;
-use App\Models\TraderOrder;
+use App\Models\FinancingOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
 class CheckAllowedFinancingOrderProceedCaseRule implements Rule
 {
-    public function __construct(private TraderOrder $traderOrder) {}
+    public function __construct(private FinancingOrder $financingOrder) {}
 
     private string $errorMessage;
 
@@ -23,8 +23,16 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $provider = $this->traderOrder->provider;
-        $version = $this->traderOrder->version;
+        $traderOrder = $this->financingOrder->activeTraderOrder()->first();
+
+        if (! $traderOrder) {
+            $this->errorMessage = __('error.order_has_no_active_trade_request');
+
+            return false;
+        }
+
+        $provider = $traderOrder->provider;
+        $version = $traderOrder->version;
         $value = FinancingOrderProceedCase::getKeyByDescription($value);
 
         if (! in_array($value, FinancingOrderProceedCase::ALLOWED_TO_PROCEED_STATUS[$provider][$version])) {
@@ -33,7 +41,7 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
             return false;
         }
 
-        if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($this->traderOrder->id, $value)) {
+        if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, $value)) {
             Log::info("traderOrderId already proceed this $value before");
             $this->errorMessage = __('error.order_status_doesnt_follow_sequence');
 
