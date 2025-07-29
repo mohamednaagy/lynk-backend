@@ -269,6 +269,55 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $query->whereStatus(FinancingOrderStatus::Rejected);
     }
 
+    public function scopeReadyForProcessing($query)
+    {
+        $providersWithVersions = [
+            [
+                'provider' => Trader::Dmcc,
+                'versions' => ['v1'],
+            ],
+            [
+                'provider' => Trader::FakeDmcc,
+                'versions' => ['v1'],
+            ],
+            [
+                'provider' => Trader::Bursam,
+                'versions' => ['v2'],
+            ],
+            [
+                'provider' => Trader::Lynk,
+                'versions' => ['v1'],
+            ],
+        ];
+
+        return $query
+            ->where('status', FinancingOrderStatus::Approved)
+            ->withCount(['traderOrders' => function ($query) use ($providersWithVersions) {
+                $query->where(function ($subQuery) use ($providersWithVersions) {
+                    $isFirstLoopComplete = false;
+
+                    foreach ($providersWithVersions as $providerWithVersions) {
+                        $whereClosure = function ($q) use ($providerWithVersions) {
+                            return $q->where('provider', $providerWithVersions['provider'])
+                                ->whereIn('version', $providerWithVersions['versions']);
+                        };
+
+                        if ($isFirstLoopComplete) {
+                            $subQuery->orWhere($whereClosure);
+                        } else {
+                            $subQuery->where($whereClosure);
+                            $isFirstLoopComplete = true;
+                        }
+                    }
+                })
+                    ->whereIn('status', [
+                        TraderOrderStatus::InProgress,
+                    ]);
+            }])
+            ->whereRelation('company.lender.lenderDetail', 'trading_mode', TraderOrderMode::Automatic)
+            ->having('trader_orders_count', 0);
+    }
+
     public function scopeByCreator($query, Model $model)
     {
         $query->whereHasMorph(

@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Jobs\General\ProcessFinancingOrders;
+use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;
 
@@ -15,7 +15,9 @@ class FinancingOrderObserver
     {
         app(AdminOrderAssignmentService::class)->assignNextAdminToFinancingOrder($financingOrder);
         // Dispatch the job to process financing orders
-        ProcessFinancingOrders::dispatch();
+        if (FinancingOrder::readyForProcessing()->exists()) {
+            ProcessInProgressOrder::dispatch($financingOrder->id);
+        }
     }
 
     /**
@@ -25,8 +27,8 @@ class FinancingOrderObserver
      */
     public function updated(FinancingOrder $financingOrder)
     {
-        if ($financingOrder->wasChanged(['status'])) {
-            ProcessFinancingOrders::dispatch();
+        if ($financingOrder->wasChanged(['status']) && FinancingOrder::readyForProcessing()->exists()) {
+            ProcessInProgressOrder::dispatch($financingOrder->id);
         }
     }
 }

@@ -11,7 +11,6 @@ use App\Enums\Subject;
 use App\Enums\Trader;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Jobs\General\ProcessFinancingOrders;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
@@ -55,7 +54,7 @@ class OrderControllerStoreTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         [self::$company, self::$wallet] = $this->createCompany('2000');
@@ -310,7 +309,7 @@ class OrderControllerStoreTest extends TestCase
 
     public function test_create_hold_trader_when_bursa_in_cutting_time()
     {
-        //override the start and end time of bursa
+        // override the start and end time of bursa
         config()->set('services.bursam.market_opening_end_time', now(Config::get('services.bursam.timezone'))->subMinute()->toTimeString());
         config()->set('services.bursam.market_opening_start_time', now(Config::get('services.bursam.timezone'))->addMinute()->toTimeString());
         $response = $this->actingAs(self::$admin)
@@ -324,7 +323,7 @@ class OrderControllerStoreTest extends TestCase
 
     public function test_handle_hold_trader_when_bursa_closing_time_is_outside_cutting_period()
     {
-        //override the start and end time of bursa
+        // override the start and end time of bursa
         config()->set('services.bursam.market_opening_end_time', now(Config::get('services.bursam.timezone'))->subMinute()->toTimeString());
         $response = $this->actingAs(self::$admin)
             ->postJson('api/v1/admin/orders', self::$orderDetails2)
@@ -335,9 +334,8 @@ class OrderControllerStoreTest extends TestCase
         $this->assertEquals(TraderOrderStatus::Hold, $traderOrder->status->value);
         config()->set('services.bursam.market_opening_start_time', now(Config::get('services.bursam.timezone'))->toTimeString());
         Queue::fake();
-        //call the command RunHoldTraderWhenMarketOpenCommand to start move hold trader to initiate trader when market bursa market is opening
+        // call the command RunHoldTraderWhenMarketOpenCommand to start move hold trader to initiate trader when market bursa market is opening
         Artisan::call('run:hold-bursa-traders');
-        Queue::assertPushed(ProcessFinancingOrders::class);
         $this->assertEquals(TraderOrderStatus::Initiated, $traderOrder->refresh()->status->value);
 
     }
