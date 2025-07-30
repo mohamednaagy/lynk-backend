@@ -174,16 +174,10 @@ class StaticGenerator implements GeneratorInterface
 
             return $result;
         } catch (Throwable $e) {
-            // Restore original memory limit in case of error
-            if (isset($originalMemoryLimit)) {
-                ini_set('memory_limit', $originalMemoryLimit);
-            }
-
             Log::channel('lynk')->error('mPDF Generation Error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_id' => $this->requestId,
-                'memory_limit' => ini_get('memory_limit'),
             ]);
 
             return false;
