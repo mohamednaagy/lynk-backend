@@ -32,6 +32,7 @@
         "nwidart/laravel-modules": "^9.0",
         "olssonm/l5-very-basic-auth": "^7.1",
         "php-open-source-saver/jwt-auth": "^2.8",
+        "omaralalwi/gpdf": "^1.0",
         "predis/predis": "^2.0",
         "propaganistas/laravel-phone": "^5.0",
         "salla/zatca": "^2.0",

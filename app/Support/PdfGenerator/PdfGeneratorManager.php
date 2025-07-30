@@ -4,6 +4,7 @@ namespace App\Support\PdfGenerator;
 
 use App\Support\PdfGenerator\Generators\BrowserlessGenerator;
 use App\Support\PdfGenerator\Generators\FakeGenerator;
+use App\Support\PdfGenerator\Generators\StaticGenerator;
 
 class PdfGeneratorManager
 {
@@ -86,6 +87,11 @@ class PdfGeneratorManager
     protected function createFakeGenerator($config)
     {
         return new FakeGenerator($config);
+    }
+
+    protected function createStaticGenerator($config)
+    {
+        return new StaticGenerator($config);
     }
 
     /**
