@@ -143,10 +143,6 @@ class StaticGenerator implements GeneratorInterface
     protected function generatePdf(string $html, array $options): string|false
     {
         try {
-            // Increase memory limit for PDF generation
-            $originalMemoryLimit = ini_get('memory_limit');
-            ini_set('memory_limit', '512M');
-
             // Create new mPDF instance for each generation
             $mpdf = $this->createMpdfInstance();
 
@@ -175,9 +171,6 @@ class StaticGenerator implements GeneratorInterface
 
             // Get PDF content
             $result = $mpdf->Output('', 'S');
-
-            // Restore original memory limit
-            ini_set('memory_limit', $originalMemoryLimit);
 
             return $result;
         } catch (Throwable $e) {
