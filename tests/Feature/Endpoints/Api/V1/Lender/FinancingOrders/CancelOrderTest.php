@@ -31,7 +31,7 @@ class CancelOrderTest extends TestCase
 
     private static string $orderCancledUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -172,11 +172,6 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    /**
-     * @dataProvider cancellableStatusesDataProvider
-     *
-     * @return void
-     */
     public function test_can_cancel_order_with_cancellable_statuses($status)
     {
         self::$financingOrder->update(['status' => $status]);
@@ -187,11 +182,6 @@ class CancelOrderTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    /**
-     * @dataProvider notCancellableStatusesDataProvider
-     *
-     * @return void
-     */
     public function test_cannot_cancel_order_with_not_cancellable_statuses($status)
     {
         self::$financingOrder->update(['status' => $status]);

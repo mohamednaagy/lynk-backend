@@ -116,9 +116,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
     }
 
-    /**
-     * @dataProvider unsuitableTraderHistoryDataProvider
-     */
     public function test_update_murabha_complete_document_not_follow_sequence($action)
     {
         Queue::fake();
