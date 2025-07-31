@@ -12,7 +12,7 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
 {
     public function __construct(private FinancingOrder $financingOrder) {}
 
-    private string $errorMessage;
+    private ?string $errorMessage = null;
 
     /**
      * Determine if the validation rule passes.
@@ -24,8 +24,13 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
     public function passes($attribute, $value)
     {
         $traderOrder = $this->financingOrder->activeTraderOrder()->first();
-
         if (! $traderOrder) {
+            Log::info(__('error.order_has_no_active_trade_request'), [
+                'context' => __CLASS__,
+                'user_id' => auth()->user()?->id,
+                'financing_order_id' => $this->financingOrder->id,
+            ]);
+
             $this->errorMessage = __('error.order_has_no_active_trade_request');
 
             return false;
