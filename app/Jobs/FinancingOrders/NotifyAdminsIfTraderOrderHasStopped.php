@@ -3,6 +3,7 @@
 namespace App\Jobs\FinancingOrders;
 
 use App\Enums\Role;
+use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Notifications\FinancingOrders\TraderOrders\TraderOrderProgressStopped;
@@ -41,7 +42,9 @@ class NotifyAdminsIfTraderOrderHasStopped implements ShouldQueue
 
             ->first();
 
-        if ($traderOrder->last_history_action == $this->historyActionBeforeDispatching) {
+        if ($traderOrder->last_history_action == $this->historyActionBeforeDispatching &&
+            $traderOrder->status->is(TraderOrderStatus::InProgress)
+        ) {
             $admins = User::role([Role::Admin])->get();
             Notification::send($admins, new TraderOrderProgressStopped($traderOrder));
         }
