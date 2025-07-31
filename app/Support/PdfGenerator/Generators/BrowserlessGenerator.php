@@ -14,11 +14,17 @@ use Throwable;
 class BrowserlessGenerator implements GeneratorInterface
 {
     protected string $baseUrl;
+
     protected string $storageDisk;
+
     protected array $options;
+
     protected int $maxRetries = 5;
+
     protected int $retryBaseDelaySeconds = 5;
+
     protected int $timeout = 120; // seconds
+
     protected string $requestId;
 
     public function __construct(array $options)
@@ -46,6 +52,7 @@ class BrowserlessGenerator implements GeneratorInterface
      * @param  string  $html
      * @param  array|Closure  $options
      * @return mixed
+     *
      * @throws Throwable
      */
     public function outputFromHtml($html, $options)
@@ -59,10 +66,11 @@ class BrowserlessGenerator implements GeneratorInterface
 
                 $tmpFileResource = tmpfile();
                 if ($tmpFileResource === false) {
-                    throw new \RuntimeException("Failed to create temporary file.");
+                    throw new \RuntimeException('Failed to create temporary file.');
                 }
 
                 try {
+                    $start = microtime(true);
                     $this->logAttempt($attempt);
 
                     $response = $this->makeHttpRequest($tmpFileResource, $html, $options);
@@ -94,6 +102,12 @@ class BrowserlessGenerator implements GeneratorInterface
                     }
                 } finally {
                     $this->cleanupTmpFile($tmpFileResource);
+                    $end = microtime(true);
+                    $duration = $end - $start;
+                    Log::channel('lynk')->info('PDF Generation Duration', [
+                        'duration' => $duration,
+                        'request_id' => $this->requestId,
+                    ]);
                 }
 
                 $attempt++;
@@ -113,6 +127,7 @@ class BrowserlessGenerator implements GeneratorInterface
         if (isset($options['storageCallback']) && $options['storageCallback'] instanceof Closure) {
             $storageCallback = $options['storageCallback'];
             unset($options['storageCallback']);
+
             return [$options, $storageCallback];
         }
 

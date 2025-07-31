@@ -143,6 +143,7 @@ class StaticGenerator implements GeneratorInterface
     protected function generatePdf(string $html, array $options): string|false
     {
         try {
+            $start = microtime(true);
             // Create new mPDF instance for each generation
             $mpdf = $this->createMpdfInstance();
 
@@ -171,6 +172,13 @@ class StaticGenerator implements GeneratorInterface
 
             // Get PDF content
             $result = $mpdf->Output('', 'S');
+
+            $end = microtime(true);
+            $duration = $end - $start;
+            Log::channel('lynk')->info('PDF Generation Duration', [
+                'duration' => $duration,
+                'request_id' => $this->requestId,
+            ]);
 
             return $result;
         } catch (Throwable $e) {
