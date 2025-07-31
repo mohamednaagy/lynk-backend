@@ -178,6 +178,7 @@ class StaticGenerator implements GeneratorInterface
             Log::channel('lynk')->info('PDF Generation Duration', [
                 'duration' => $duration,
                 'request_id' => $this->requestId,
+                'generator' => 'static',
             ]);
 
             return $result;
