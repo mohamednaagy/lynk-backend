@@ -25,7 +25,7 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
     {
         $traderOrder = $this->financingOrder->activeTraderOrder()->first();
         if (! $traderOrder) {
-            Log::info(__('error.order_has_no_active_trade_request'), [
+            Log::info('No active trader order found for financing order.', [
                 'context' => __CLASS__,
                 'user_id' => auth()->user()?->id,
                 'financing_order_id' => $this->financingOrder->id,
