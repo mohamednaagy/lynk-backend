@@ -41,7 +41,7 @@ class TraderOrderControllerStoreTest extends TestCase
 
     private static string $apiUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         self::$company = $this->createLenderCompanyWithStandardOrderCost('2000', ['company_cr' => '1234567891']);
@@ -87,9 +87,6 @@ class TraderOrderControllerStoreTest extends TestCase
         });
     }
 
-    /**
-     * @dataProvider traderWithAvailableModesDataProvider
-     */
     public function test_trader_order_controller_store_super_admin_can_access($trader, $mode)
     {
         Event::fake([
@@ -105,9 +102,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertStatus(Response::HTTP_OK);
     }
 
-    /**
-     * @dataProvider traderWithAvailableModesDataProvider
-     */
     public function test_trader_order_controller_store_that_manager_with_permissions_can_access($trader, $mode)
     {
         Event::fake([
@@ -142,9 +136,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('trader');
     }
 
-    /**
-     * @dataProvider traderWithAvailableModesDataProvider
-     */
     public function test_trader_order_controller_store_reference_number_is_required($trader, $mode): void
     {
         Event::fake([
@@ -177,9 +168,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ->assertJsonValidationErrorFor('trader');
     }
 
-    /**
-     * @dataProvider traderWithAvailableModesDataProvider
-     */
     public function test_trader_order_controller_store_will_return_error_response_if_order_is_completed($trader, $mode): void
     {
         self::$financingOrder->update([
@@ -201,9 +189,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @dataProvider traderWithAvailableModesDataProvider
-     */
     public function test_trader_order_controller_store_will_return_error_response_if_order_has_active_trader($trader, $mode): void
     {
         self::$financingOrder->traderOrders()->create(
@@ -230,9 +215,6 @@ class TraderOrderControllerStoreTest extends TestCase
             ]);
     }
 
-    /**
-     * @dataProvider traderWithAvailableModesDataProvider
-     */
     public function test_trader_order_controller_store_successfully($trader, $mode): void
     {
         Event::fake([

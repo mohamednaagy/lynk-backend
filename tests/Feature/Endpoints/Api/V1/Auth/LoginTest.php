@@ -11,9 +11,6 @@ class LoginTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_body(): void
     {
         $response = $this->postJson('api/v1/auth/login');
@@ -36,9 +33,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_password_and_source(): void
     {
         $response = $this->postJson('api/v1/auth/login', ['email' => 'a@a.a']);
@@ -57,9 +51,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_source_and_email(): void
     {
         $response = $this->postJson('api/v1/auth/login', ['password' => '12345678']);
@@ -78,9 +69,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_email_and_password(): void
     {
         $response = $this->postJson('api/v1/auth/login', ['source' => 'admin']);
@@ -99,9 +87,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_email(): void
     {
         $response = $this->postJson('api/v1/auth/login', [
@@ -120,9 +105,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_password(): void
     {
         $response = $this->postJson('api/v1/auth/login', [
@@ -141,9 +123,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_empty_source(): void
     {
         $response = $this->postJson('api/v1/auth/login', [
@@ -162,9 +141,6 @@ class LoginTest extends TestCase
         );
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_throw_exception_for_not_exist_user(): void
     {
         $response = $this->postJson('api/v1/auth/login', [
@@ -182,9 +158,6 @@ class LoginTest extends TestCase
         ]);
     }
 
-    /**
-     * @covers \App\Http\Controllers\Api\V1\Auth\LoginController::authenticate
-     */
     public function test_login_success_for_exist_user(): void
     {
         $email = 'a@a.aa';
@@ -213,7 +186,7 @@ class LoginTest extends TestCase
         );
     }
 
-    public function testTwoUsersWithSameEmailAndDifferentCompanyNotPassed()
+    public function test_two_users_with_same_email_and_different_company_not_passed()
     {
         $email = 'a@a.aa';
         $password = '12345678';
@@ -245,7 +218,7 @@ class LoginTest extends TestCase
         ]);
     }
 
-    public function testTwoUsersWithSameEmailAndDifferentCompanyPassedByUniqueName()
+    public function test_two_users_with_same_email_and_different_company_passed_by_unique_name()
     {
         $email = 'a@a.aa';
         $password = '12345678';

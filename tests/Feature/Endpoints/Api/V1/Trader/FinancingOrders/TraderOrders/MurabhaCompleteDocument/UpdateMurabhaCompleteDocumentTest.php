@@ -45,7 +45,7 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static array $requestData;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -125,9 +125,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
         //        $this->assertTrue($freshTraderOrderStatus->is(TraderOrderStatus::Completed));
     }
 
-    /**
-     * @dataProvider unsuitableTraderHistoryDataProvider
-     */
     public function test_update_murabha_complete_document_not_follow_sequence($unsuitableTraderHistoryData): void
     {
         TraderOrderScenario::of(self::$traderOrder)
