@@ -72,8 +72,8 @@ class StoreOrderRequest extends FormRequest
 
         // If we reach here, value is provided and setting is ON, so validate the commodity type
         $commodityTypeExists = $company->lenderOrderAllowedCommodityTypes()
-            ->where('unique_name', $value)
-            ->where('status', CommodityTypeStatus::Active)
+            ->where('commodity_types.unique_name', $value)
+            ->where('commodity_types.status', CommodityTypeStatus::Active)
             ->exists();
 
         if (! $commodityTypeExists) {

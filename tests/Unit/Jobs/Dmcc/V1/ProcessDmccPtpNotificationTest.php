@@ -108,9 +108,6 @@ class ProcessDmccPtpNotificationTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider unsuitableOrderStatusDataProvider
-     */
     public function test_job_not_processed_if_current_financing_order_is_unsuitable_status($unsuitableOrderStatusData)
     {
         self::$traderOrder = TraderOrderScenario::of(self::$traderOrder)

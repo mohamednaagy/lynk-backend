@@ -43,7 +43,7 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
 
     private static array $requestData;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -108,9 +108,6 @@ class UpdateMurabhaSellConfirmationDocumentTest extends TestCase
         $this->assertTrue(self::$traderOrder->hasMedia(TraderOrderMediaCollection::SellConfirmationDocument));
     }
 
-    /**
-     * @dataProvider unsuitableTraderHistoryDataProvider
-     */
     public function test_update_sell_confirmation_document_not_follow_sequence($action)
     {
         Queue::fake();

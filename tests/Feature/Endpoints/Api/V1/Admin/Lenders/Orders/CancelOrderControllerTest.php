@@ -39,7 +39,7 @@ class CancelOrderControllerTest extends TestCase
 
     private static User $managerHasNoPermissionPermissions;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -119,11 +119,6 @@ class CancelOrderControllerTest extends TestCase
             ->assertJsonPath('data', []);
     }
 
-    /**
-     * @dataProvider notCancellableStatusesDataProvider
-     *
-     * @return void
-     */
     public function test_admin_cant_cancel_order_with_not_cancellable_statuses($status)
     {
         self::$financingOrder->update(['status' => $status]);
@@ -136,11 +131,6 @@ class CancelOrderControllerTest extends TestCase
             ]);
     }
 
-    /**
-     * @dataProvider cancellableStatusesDataProvider
-     *
-     * @return void
-     */
     public function test_admin_can_cancel_order_with_cancellable_statuses_successfully($status)
     {
         self::$financingOrder->update(['status' => $status]);
