@@ -51,6 +51,13 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
             return false;
         }
 
+        if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, $value)) {
+            Log::info("traderOrderId already proceed this $value before");
+            $this->errorMessage = __('error.order_status_doesnt_follow_sequence');
+
+            return false;
+        }
+
         return true;
     }
 
