@@ -17,7 +17,6 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     private TraderOrder $traderOrder;
     private FinancingOrder $financingOrder;
 
-
     /**
      * Create a new notification instance.
      */
@@ -25,7 +24,6 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     {
         $this->traderOrder = $traderOrder;
         $this->financingOrder = $traderOrder->order;
-
     }
 
     /**
