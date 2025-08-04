@@ -2,6 +2,7 @@
 
 namespace App\Notifications\FinancingOrders;
 
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,6 +15,7 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     use Queueable;
 
     private TraderOrder $traderOrder;
+    private FinancingOrder $financingOrder;
 
     /**
      * Create a new notification instance.
@@ -21,6 +23,7 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     public function __construct(TraderOrder $traderOrder)
     {
         $this->traderOrder = $traderOrder;
+        $this->financingOrder = $traderOrder->order;
     }
 
     /**
@@ -77,5 +80,13 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
         return new Content(
             markdown: 'emails.order-delivery-confirmed',
         );
+    }
+
+    public function toDatabase($notifiable)
+    {
+        return [
+            'trader_order_id' => $this->traderOrder->id,
+            'order_id' => $this->financingOrder->id,
+        ];
     }
 }
