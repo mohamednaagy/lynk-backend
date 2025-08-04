@@ -443,7 +443,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -490,7 +490,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -629,17 +629,17 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .bg-slate-600 {
             --tw-bg-opacity: 1;
-            background-color: rgb(71 85 105 / var(--tw-bg-opacity));
+            background-color: rgb(71, 85, 105);
         }
 
         .bg-slate-700 {
             --tw-bg-opacity: 1;
-            background-color: rgb(51 65 85 / var(--tw-bg-opacity));
+            background-color: rgb(51, 65, 85);
         }
 
         .bg-slate-800 {
             --tw-bg-opacity: 1;
-            background-color: rgb(30 41 59 / var(--tw-bg-opacity));
+            background-color: rgb(30, 41, 59);
         }
 
         .p-2\.5 {
@@ -690,26 +690,38 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .text-gray-600 {
             --tw-text-opacity: 1;
-            color: rgb(75 85 99 / var(--tw-text-opacity));
+            color: rgb(75, 85, 99);
         }
 
         .text-gray-500 {
             --tw-text-opacity: 1;
-            color: rgb(107 114 128 / var(--tw-text-opacity));
+            color: rgb(107, 114, 128);
         }
 
         .text-white {
             --tw-text-opacity: 1;
-            color: rgb(255 255 255 / var(--tw-text-opacity));
+            color: rgb(255, 255, 255);
         }
 
         .text-gray-800 {
             --tw-text-opacity: 1;
-            color: rgb(31 41 55 / var(--tw-text-opacity));
+            color: rgb(31, 41, 55);
         }
 
         [dir="rtl"] .rtl\:space-x-reverse> :not([hidden])~ :not([hidden]) {
             --tw-space-x-reverse: 1;
+        }
+        
+        /* mPDF-specific adjustments */
+        .logo-container {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        
+        .logo-container img {
+            height: 100px;
+            width: 100px;
         }
     </style>
 </head>
@@ -717,9 +729,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 <body>
     <div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
         <div class="mb-6 flex items-center justify-between">
-            <div>
-                <img class="mx-auto h-20 w-auto"
-                    src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" />
+            <div class="logo-container">
+                <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;" />
             </div>
             <div>
                 <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
@@ -860,6 +871,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </div>
         </div>
     </div>
+    
+    @include('local-commodity-market.shared.address-footer')
 
     <!-- Code injected by live-server -->
     <script>

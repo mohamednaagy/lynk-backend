@@ -442,7 +442,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -489,7 +489,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -536,7 +536,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -618,7 +618,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         }
 
         .divide-gray-300\/50> :not([hidden])~ :not([hidden]) {
-            border-color: rgb(209 213 219 / 0.5);
+            border-color: rgb(209, 213, 219);
         }
 
         .border {
@@ -627,7 +627,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .border-black {
             --tw-border-opacity: 1;
-            border-color: rgb(0 0 0 / var(--tw-border-opacity));
+            border-color: rgb(0, 0, 0);
         }
 
         .py-8 {
@@ -689,17 +689,17 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .text-black {
             --tw-text-opacity: 1;
-            color: rgb(0 0 0 / var(--tw-text-opacity));
+            color: rgb(0, 0, 0);
         }
 
         .text-cyan-900 {
             --tw-text-opacity: 1;
-            color: rgb(22 78 99 / var(--tw-text-opacity));
+            color: rgb(22, 78, 99);
         }
 
         .text-cyan-600 {
             --tw-text-opacity: 1;
-            color: rgb(8 145 178 / var(--tw-text-opacity));
+            color: rgb(8, 145, 178);
         }
 
         .mt-4 {
@@ -711,64 +711,127 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             text-align: center;
             padding: 8px;
         }
-
-        .justify-center{justify-content:center}
+        
+        /* mPDF-specific adjustments */
+        .logo-container {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        
+        .logo-container img {
+            height: 100px;
+            width: 100px;
+        }
+        
+        .content-wrapper {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .section-spacing {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .title-main {
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .title-section {
+            font-size: 18px;
+            text-align: center;
+            font-weight: 600;
+            margin: 20px 0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .data-table td {
+            border: 1px solid black;
+            padding: 10px 8px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            border: 1px solid black;
+            padding: 10px 8px;
+            text-align: center;
+            vertical-align: middle;
+            font-weight: 600;
+            background-color: #f8f9fa;
+            font-size: 14px;
+        }
+        
+        .footer-text {
+            font-size: 16px;
+            text-align: right;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
     </style>
 </head>
 
 <body dir="rtl">
-<div class="flex justify-end">
-    <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo">
-</div>
-<div class="divide-y divide-gray-300/50">
-    <div class="divide-y divide-gray-300/50">
-        <div class="py-8 space-y-6 text-base leading-7">
-            <p class="text-black">التاريخ: {{ $current_date ?? '' }}</p>
-            <p class="text-black">الوقت: {{ $current_time ?? '' }}</p>
-            <p class="text-xl text-center text-black">  شهادة إتمام بالبيع </p>
-            <p class="text-center text-black">
-                نؤكد
-                نحن لينك من تاريخ وتوقيت هذه الشهادة بيع السلع المشار لها بناء على طلب {{ $customer_name }}
+    <div class="logo-container">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;">
+    </div>
+    <div class="content-wrapper">
+        <div class="section-spacing">
+            <p class="text-black text-right">التاريخ: {{ $current_date ?? '' }}</p>
+            <p class="text-black text-right">الوقت: {{ $current_time ?? '' }}</p>
+            <p class="title-main text-black">شهادة إتمام بالبيع</p>
+            <p class="text-right text-black section-spacing">
+                نؤكد نحن لينك من تاريخ وتوقيت هذه الشهادة بيع السلع المشار لها بناء على طلب {{ $customer_name }}
                 مقابل مبلغ وقدره {{ $amount }} ريال سعودي
                 إلى <span style="font-weight: bold">عملاء متفرقين.</span>
-            <p class="text-lg font-semibold text-center text-black">بيانات السلع/ـة</p>
-            <table class="min-w-full mt-4">
+            </p>
+            <p class="title-section text-black">بيانات السلع/ـة</p>
+            <table class="data-table">
                 <tbody>
-                @if (isset($trader_order_reference))
+                    @if (isset($trader_order_reference))
+                        <tr>
+                            <td>رقم الشهادة</td>
+                            <td colspan="6">{{ $trader_order_reference }}</td>
+                        </tr>
+                    @endif
                     <tr>
-                        <td class="w-1/2 px-4 text-center border border-black">رقم الشهادة</td>
-                        <td colspan="6" class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
+                        <th>السلعة</th>
+                        <th>نوع السلعة</th>
+                        <th>الكمية</th>
+                        <th>قيمة السلعة</th>
+                        <th>المالك السابق</th>
+                        <th>المورد الأصلي</th>
+                        <th>مكان السلعة</th>
                     </tr>
-                @endif
-                <tr>
-                    <td class="w-1/2 px-4 text-center border border-black"> السلعة</td>
-                    <td class="w-1/2 px-4 text-center border border-black"> نوع السلعة</td>
-                    <td class="w-1/2 px-4 text-center border border-black"> الكمية</td>
-                    <td class="w-1/2 px-4 text-center border border-black"> قيمة السلعة</td>
-                    <td class="w-1/2 px-4 text-center border border-black"> المالك السابق</td>
-                    <td class="w-1/2 px-4 text-center border border-black"> المورد الأصلي</td>
-                    <td class="w-1/2 px-4 text-center border border-black"> مكان السلعة</td>
-                </tr>
-                @foreach ($products ?? [] as $product)
-                    <tr>
-                        <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
-                        <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
-                        <td class="w-1/2 border border-black">{{ $product->getQuantity() }}
-                            {{ $product->getUom() }}</td>
-                        <td class="w-1/2 border border-black">{{ $product->getAmount() }}
-                            {{ $product->getCurrency() }}</td>
-                        <td class="w-1/2 border border-black">{{ $customer_name }}</td>
-                        <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
-                        <td class="w-1/2 border border-black">{{ $product->getLocation() }}</td>
-                    </tr>
-                @endforeach
+                    @foreach ($products ?? [] as $product)
+                        <tr>
+                            <td>{{ $product->getProduct() }}</td>
+                            <td>{{ $product->getType() }}</td>
+                            <td>{{ $product->getQuantity() }} {{ $product->getUom() }}</td>
+                            <td>{{ $product->getAmount() }} {{ $product->getCurrency() }}</td>
+                            <td>{{ $customer_name }}</td>
+                            <td>{{ $product->getOriginalSupplier() }}</td>
+                            <td>{{ $product->getLocation() }}</td>
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
 
-            <div class="flex justify-center">
-                <img style="height: 12rem;" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('radised-logo.png'))) }}" alt="Stamp">
+            <div class="logo-container">
+                <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('radised-logo.png'))) }}" alt="Stamp" style="height: 50px; max-width: 120px;">
             </div>
         </div>
+        
         @include('local-commodity-market.shared.address-footer')
     </div>
 </body>

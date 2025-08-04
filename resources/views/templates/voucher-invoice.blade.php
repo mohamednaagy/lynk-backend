@@ -442,7 +442,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -489,7 +489,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -536,7 +536,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -618,7 +618,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         }
 
         .divide-gray-300\/50> :not([hidden])~ :not([hidden]) {
-            border-color: rgb(209 213 219 / 0.5);
+            border-color: rgb(209, 213, 219);
         }
 
         .border {
@@ -627,7 +627,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .border-black {
             --tw-border-opacity: 1;
-            border-color: rgb(0 0 0 / var(--tw-border-opacity));
+            border-color: rgb(0, 0, 0);
         }
 
         .py-8 {
@@ -689,29 +689,41 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .text-black {
             --tw-text-opacity: 1;
-            color: rgb(0 0 0 / var(--tw-text-opacity));
+            color: rgb(0, 0, 0);
         }
 
         .text-cyan-900 {
             --tw-text-opacity: 1;
-            color: rgb(22 78 99 / var(--tw-text-opacity));
+            color: rgb(22, 78, 99);
         }
 
         .text-cyan-600 {
             --tw-text-opacity: 1;
-            color: rgb(8 145 178 / var(--tw-text-opacity));
+            color: rgb(8, 145, 178);
         }
 
         .mt-4 {
             margin-top: 1rem;
+        }
+        
+        /* mPDF-specific adjustments */
+        .logo-container {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        
+        .logo-container img {
+            height: 100px;
+            width: 100px;
         }
 
     </style>
 </head>
 
 <body dir="rtl">
-    <div class="flex justify-end">
-        <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="">
+    <div class="logo-container">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;">
     </div>
     <div class="divide-y divide-gray-300/50">
         <div class="py-8 space-y-6 text-base leading-7">
@@ -728,6 +740,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </p>
         </div>
     </div>
+    
+    @include('local-commodity-market.shared.address-footer')
 
 </body>
 
