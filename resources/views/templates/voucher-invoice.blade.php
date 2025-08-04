@@ -718,13 +718,19 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             width: 100px;
         }
 
+        .content-wrapper {
+            margin: 0;
+            padding: 0;
+        }
+
     </style>
 </head>
 
 <body dir="rtl">
-    <div class="logo-container">
-        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;">
-    </div>
+    <div class="content-wrapper">
+        <div class="logo-container">
+            <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;">
+        </div>
     <div class="divide-y divide-gray-300/50">
         <div class="py-8 space-y-6 text-base leading-7">
             <p class="text-black">{{__('invoices/voucher-receipt.day', [], 'ar')}} : {{ $day }}</p>
@@ -740,8 +746,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </p>
         </div>
     </div>
-
     @include('local-commodity-market.shared.address-footer')
+
+    </div>
 
 </body>
 
