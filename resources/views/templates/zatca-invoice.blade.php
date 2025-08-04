@@ -1,121 +1,918 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZATCA Invoice</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Selling to Customer</title>
+
+    <style>
+        /* ! tailwindcss v3.2.4 | MIT License | https://tailwindcss.com */
+
+        /*
+1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
+2. Allow adding a border to an element by just adding a border-width. (https://github.com/tailwindcss/tailwindcss/pull/116)
+*/
+
+        *,
+        ::before,
+        ::after {
+            box-sizing: border-box;
+            /* 1 */
+            border-width: 0;
+            /* 2 */
+            border-style: solid;
+            /* 2 */
+            border-color: #e5e7eb;
+            /* 2 */
+        }
+
+        ::before,
+        ::after {
+            --tw-content: '';
+        }
+
+        /*
+1. Use a consistent sensible line-height in all browsers.
+2. Prevent adjustments of font size after orientation changes in iOS.
+3. Use a more readable tab size.
+4. Use the user's configured `sans` font-family by default.
+5. Use the user's configured `sans` font-feature-settings by default.
+*/
+
+        html {
+            line-height: 1.5;
+            /* 1 */
+            -webkit-text-size-adjust: 100%;
+            /* 2 */
+            -moz-tab-size: 4;
+            /* 3 */
+            tab-size: 4;
+            /* 3 */
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            /* 4 */
+            font-feature-settings: normal;
+            /* 5 */
+        }
+
+        /*
+1. Remove the margin in all browsers.
+2. Inherit line-height from `html` so users can set them as a class directly on the `html` element.
+*/
+
+        body {
+            margin: 0;
+            /* 1 */
+            line-height: inherit;
+            /* 2 */
+        }
+
+        /*
+1. Add the correct height in Firefox.
+2. Correct the inheritance of border color in Firefox. (https://bugzilla.mozilla.org/show_bug.cgi?id=190655)
+3. Ensure horizontal rules are visible by default.
+*/
+
+        hr {
+            height: 0;
+            /* 1 */
+            color: inherit;
+            /* 2 */
+            border-top-width: 1px;
+            /* 3 */
+        }
+
+        /*
+Add the correct text decoration in Chrome, Edge, and Safari.
+*/
+
+        abbr:where([title]) {
+            -webkit-text-decoration: underline dotted;
+            text-decoration: underline dotted;
+        }
+
+        /*
+Remove the default font size and weight for headings.
+*/
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-size: inherit;
+            font-weight: inherit;
+        }
+
+        /*
+Reset links to optimize for opt-in styling instead of opt-out.
+*/
+
+        a {
+            color: inherit;
+            text-decoration: inherit;
+        }
+
+        /*
+Add the correct font weight in Edge and Safari.
+*/
+
+        b,
+        strong {
+            font-weight: bolder;
+        }
+
+        /*
+1. Use the user's configured `mono` font family by default.
+2. Correct the odd `em` font sizing in all browsers.
+*/
+
+        code,
+        kbd,
+        samp,
+        pre {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            /* 1 */
+            font-size: 1em;
+            /* 2 */
+        }
+
+        /*
+Add the correct font size in all browsers.
+*/
+
+        small {
+            font-size: 80%;
+        }
+
+        /*
+Prevent `sub` and `sup` elements from affecting the line height in all browsers.
+*/
+
+        sub,
+        sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline;
+        }
+
+        sub {
+            bottom: -0.25em;
+        }
+
+        sup {
+            top: -0.5em;
+        }
+
+        /*
+1. Remove text indentation from table contents in Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=999088, https://bugs.webkit.org/show_bug.cgi?id=201297)
+2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
+3. Remove gaps between table borders by default.
+*/
+
+        table {
+            text-indent: 0;
+            /* 1 */
+            border-color: inherit;
+            /* 2 */
+            border-collapse: collapse;
+            /* 3 */
+        }
+
+        /*
+1. Change the font styles in all browsers.
+2. Remove the margin in Firefox and Safari.
+3. Remove default padding in all browsers.
+*/
+
+        button,
+        input,
+        optgroup,
+        select,
+        textarea {
+            font-family: inherit;
+            /* 1 */
+            font-size: 100%;
+            /* 1 */
+            font-weight: inherit;
+            /* 1 */
+            line-height: inherit;
+            /* 1 */
+            color: inherit;
+            /* 1 */
+            margin: 0;
+            /* 2 */
+            padding: 0;
+            /* 3 */
+        }
+
+        /*
+Remove the inheritance of text transform in Edge and Firefox.
+*/
+
+        button,
+        select {
+            text-transform: none;
+        }
+
+        /*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Remove default button styles.
+*/
+
+        button,
+        [type='button'],
+        [type='reset'],
+        [type='submit'] {
+            -webkit-appearance: button;
+            /* 1 */
+            background-color: transparent;
+            /* 2 */
+            background-image: none;
+            /* 2 */
+        }
+
+        /*
+Use the modern Firefox focus style for all focusable elements.
+*/
+
+        :-moz-focusring {
+            outline: auto;
+        }
+
+        /*
+Remove the additional `:invalid` styles in Firefox. (https://github.com/mozilla/gecko-dev/blob/2f9eacd9d3d995c937b4251a5557d95d494c9be1/layout/style/res/forms.css#L728-L737)
+*/
+
+        :-moz-ui-invalid {
+            box-shadow: none;
+        }
+
+        /*
+Add the correct vertical alignment in Chrome and Firefox.
+*/
+
+        progress {
+            vertical-align: baseline;
+        }
+
+        /*
+Correct the cursor style of increment and decrement buttons in Safari.
+*/
+
+        ::-webkit-inner-spin-button,
+        ::-webkit-outer-spin-button {
+            height: auto;
+        }
+
+        /*
+1. Correct the odd appearance in Chrome and Safari.
+2. Correct the outline style in Safari.
+*/
+
+        [type='search'] {
+            -webkit-appearance: textfield;
+            /* 1 */
+            outline-offset: -2px;
+            /* 2 */
+        }
+
+        /*
+Remove the inner padding in Chrome and Safari on macOS.
+*/
+
+        ::-webkit-search-decoration {
+            -webkit-appearance: none;
+        }
+
+        /*
+1. Correct the inability to style clickable types in iOS and Safari.
+2. Change font properties to `inherit` in Safari.
+*/
+
+        ::-webkit-file-upload-button {
+            -webkit-appearance: button;
+            /* 1 */
+            font: inherit;
+            /* 2 */
+        }
+
+        /*
+Add the correct display in Chrome and Safari.
+*/
+
+        summary {
+            display: list-item;
+        }
+
+        /*
+Removes the default spacing and border for appropriate elements.
+*/
+
+        blockquote,
+        dl,
+        dd,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        hr,
+        figure,
+        p,
+        pre {
+            margin: 0;
+        }
+
+        fieldset {
+            margin: 0;
+            padding: 0;
+        }
+
+        legend {
+            padding: 0;
+        }
+
+        ol,
+        ul,
+        menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        /*
+Prevent resizing textareas horizontally by default.
+*/
+
+        textarea {
+            resize: vertical;
+        }
+
+        /*
+1. Reset the default placeholder opacity in Firefox. (https://github.com/tailwindlabs/tailwindcss/issues/3300)
+2. Set the default placeholder color to the user's configured gray 400 color.
+*/
+
+        input::placeholder,
+        textarea::placeholder {
+            opacity: 1;
+            /* 1 */
+            color: #9ca3af;
+            /* 2 */
+        }
+
+        /*
+Set the default cursor for buttons.
+*/
+
+        button,
+        [role="button"] {
+            cursor: pointer;
+        }
+
+        /*
+Make sure disabled buttons don't get the pointer cursor.
+*/
+
+        :disabled {
+            cursor: default;
+        }
+
+        /*
+1. Make replaced elements `display: block` by default. (https://github.com/mozdevs/cssremedy/issues/14)
+2. Add `vertical-align: middle` to align replaced elements more sensibly by default. (https://github.com/jensimmons/cssremedy/issues/14#issuecomment-634934210)
+   This can trigger a poorly considered lint error in some tools but is included by design.
+*/
+
+        img,
+        svg,
+        video,
+        canvas,
+        audio,
+        iframe,
+        embed,
+        object {
+            display: block;
+            /* 1 */
+            vertical-align: middle;
+            /* 2 */
+        }
+
+        /*
+Constrain images and videos to the parent width and preserve their intrinsic aspect ratio. (https://github.com/mozdevs/cssremedy/issues/14)
+*/
+
+        img,
+        video {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Make elements with the HTML hidden attribute stay hidden by default */
+
+        [hidden] {
+            display: none;
+        }
+
+        *,
+        ::before,
+        ::after {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59, 130, 246);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+        }
+
+        ::backdrop {
+            --tw-border-spacing-x: 0;
+            --tw-border-spacing-y: 0;
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59, 130, 246);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia: ;
+        }
+
+        .col-span-3 {
+            grid-column: span 3 / span 3;
+        }
+
+        .col-span-9 {
+            grid-column: span 9 / span 9;
+        }
+
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .my-10 {
+            margin-top: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .mb-6 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.25rem;
+        }
+
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .grid {
+            display: grid;
+        }
+
+        .h-20 {
+            height: 5rem;
+        }
+
+        .h-px {
+            height: 1px;
+        }
+
+        .h-40 {
+            height: 10rem;
+        }
+
+        .w-auto {
+            width: auto;
+        }
+
+        .w-3\/12 {
+            width: 25%;
+        }
+
+        .w-2\/12 {
+            width: 16.666667%;
+        }
+
+        .w-1\/12 {
+            width: 8.333333%;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        .w-40 {
+            width: 10rem;
+        }
+
+        .w-1\/2 {
+            width: 50%;
+        }
+
+        .flex-1 {
+            flex: 1 1 0%;
+        }
+
+        .grid-cols-12 {
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .gap-2 {
+            gap: 0.5rem;
+        }
+
+        .gap-4 {
+            gap: 1rem;
+        }
+
+        .space-x-8> :not([hidden])~ :not([hidden]) {
+            --tw-space-x-reverse: 0;
+            margin-right: calc(2rem * var(--tw-space-x-reverse));
+            margin-left: calc(2rem * calc(1 - var(--tw-space-x-reverse)));
+        }
+
+        .bg-slate-600 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(71, 85, 105);
+        }
+
+        .bg-slate-700 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(51, 65, 85);
+        }
+
+        .bg-slate-800 {
+            --tw-bg-opacity: 1;
+            background-color: rgb(30, 41, 59);
+        }
+
+        .p-2\.5 {
+            padding: 0.625rem;
+        }
+
+        .p-2 {
+            padding: 0.5rem;
+        }
+
+        .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        .py-3 {
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .text-2xl {
+            font-size: 1.5rem;
+            line-height: 2rem;
+        }
+
+        .text-lg {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+
+        .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+            line-height: 1rem;
+        }
+
+        .font-bold {
+            font-weight: 700;
+        }
+
+        .font-semibold {
+            font-weight: 600;
+        }
+
+        .text-gray-600 {
+            --tw-text-opacity: 1;
+            color: rgb(75, 85, 99);
+        }
+
+        .text-gray-500 {
+            --tw-text-opacity: 1;
+            color: rgb(107, 114, 128);
+        }
+
+        .text-white {
+            --tw-text-opacity: 1;
+            color: rgb(255, 255, 255);
+        }
+
+        .text-gray-800 {
+            --tw-text-opacity: 1;
+            color: rgb(31, 41, 55);
+        }
+
+        [dir="rtl"] .rtl\:space-x-reverse> :not([hidden])~ :not([hidden]) {
+            --tw-space-x-reverse: 1;
+        }
+
+        /* mPDF-specific adjustments */
+        .logo-container {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+
+        .logo-container img {
+            height: 100px;
+            width: 100px;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.4; padding: 20px; direction: ltr; margin: 0;">
-    <div style="max-width: 800px; margin: 0 auto; background: white;">
-        
-        <!-- Row 1: Logo + Header -->
-        <table style="width: 100%; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
-            <tr>
-                <td style="width: 50%; vertical-align: middle;">
-                    <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;" />
-                </td>
-                <td style="width: 50%; vertical-align: middle; text-align: left;">
-                    <h1 style="font-size: 22px; font-weight: bold; margin: 0 0 5px 0; color: #000;">{{ __('zatca/e-invoice.tax_invoice') }}</h1>
-                    <p style="font-size: 16px; color: #666; margin: 0;">{{ __('zatca/e-invoice.invoice_number', ['number' => $invoice_number]) }}</p>
-                </td>
-            </tr>
-        </table>
 
-        <!-- Row 2: Bill From, Bill To, Order Details - HORIZONTAL LAYOUT -->
-        <table style="width: 100%; margin-bottom: 30px;">
-            <tr>
-                <td style="width: 33.33%; vertical-align: top; padding: 0 15px; text-align: left;">
-                    <h3 style="font-size: 14px; color: #666; font-weight: bold; margin: 0 0 8px 0;">{{ __('zatca/e-invoice.bill_from') }}</h3>
-                    <h4 style="font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: #000;">{{ $seller->getCompanyName(Config::get('app.locale', 'en')) }}</h4>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 2px;">{{ $seller->getCompanyAddress()->getAddressLineOne(Config::get('app.locale', 'en')) }}</div>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 2px;">{{ $seller->getCompanyAddress()->getAddressLineTwo(Config::get('app.locale', 'en')) }}</div>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 2px;">{{ __('zatca/e-invoice.vat_number') }}: {{ $seller->getVatId() }}</div>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 2px;">{{ __('zatca/e-invoice.cr_number') }}: {{ $seller->getCompanyCr() }}</div>
-                </td>
-                <td style="width: 33.33%; vertical-align: top; padding: 0 15px; text-align: left;">
-                    <h3 style="font-size: 14px; color: #666; font-weight: bold; margin: 0 0 8px 0;">{{ __('zatca/e-invoice.bill_to') }}</h3>
-                    <h4 style="font-size: 16px; font-weight: 600; margin: 0 0 8px 0; color: #000;">{{ $buyer }}</h4>
-                </td>
-                <td style="width: 33.33%; vertical-align: top; padding: 0 15px; text-align: left;">
-                    <h3 style="font-size: 14px; color: #666; font-weight: bold; margin: 0 0 8px 0;">{{ __('zatca/e-invoice.order_details') }}</h3>
-                    <div style="font-size: 12px; color: #666; margin-bottom: 2px;"><strong>{{ __('zatca/e-invoice.issue_date') }}:</strong> {{ $order->getInvoiceDate() }}</div>
-                </td>
-            </tr>
-        </table>
+<body>
+    <div dir="{{ App::getLocale() === 'en' ? 'ltr' : 'rtl' }}">
+        <div class="mb-6 flex items-center justify-between">
+            <div class="logo-container">
+                <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;" />
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold">{{ __('zatca/e-invoice.tax_invoice') }}</h2>
+                <p class="text-lg">
+                    {{ __('zatca/e-invoice.invoice_number', ['number' => $invoice_number]) }}
+                </p>
+            </div>
+        </div>
 
-        <!-- Row 3: Invoice Items Table -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
-            <thead>
-                <tr>
-                    <th style="background-color: #475569; color: white; border: 1px solid #475569; padding: 12px; text-align: center; font-weight: 600; font-size: 14px;">{{ __('zatca/e-invoice.item') }}</th>
-                    <th style="background-color: #475569; color: white; border: 1px solid #475569; padding: 12px; text-align: center; font-weight: 600; font-size: 14px;">{{ __('zatca/e-invoice.qty') }}</th>
-                    <th style="background-color: #475569; color: white; border: 1px solid #475569; padding: 12px; text-align: center; font-weight: 600; font-size: 14px;">{{ __('zatca/e-invoice.unit_price') }}</th>
-                    <th style="background-color: #475569; color: white; border: 1px solid #475569; padding: 12px; text-align: center; font-weight: 600; font-size: 14px;">{{ __('zatca/e-invoice.discount') }}</th>
-                    <th style="background-color: #475569; color: white; border: 1px solid #475569; padding: 12px; text-align: center; font-weight: 600; font-size: 14px;">{{ __('zatca/e-invoice.vat') }}</th>
-                    <th style="background-color: #475569; color: white; border: 1px solid #475569; padding: 12px; text-align: center; font-weight: 600; font-size: 14px;">{{ __('zatca/e-invoice.total_price') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($order->getItems() as $item)
-                <tr>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; background-color: white;">{{ $item->getName() }}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getQuantity() }}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getItemPrice()->convertAndFormatByDecimal(sperator: ',') }}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getDiscountPercentage() }}%</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getVatPercentage() ? 'V' : 'N' }}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getLineTotalWithoutVat()->convertAndFormatByDecimal(sperator: ',') }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div class="my-10 flex space-x-8 rtl:space-x-reverse">
+            <div class="w-3/12">
+                <div class="mb-1">
+                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_from') }}</h2>
+                </div>
+                <h2 class="mb-1 font-semibold">{{ $seller->getCompanyName(Config::get('app.locale', 'en')) }}</h2>
+                <ul class="text-xs text-gray-500">
+                    <li>{{ $seller->getCompanyAddress()->getAddressLineOne(Config::get('app.locale', 'en')) }}</li>
+                    <li>{{ $seller->getCompanyAddress()->getAddressLineTwo(Config::get('app.locale', 'en')) }}</li>
+                    <li>{{ __('zatca/e-invoice.vat_number') }}: {{ $seller->getVatId() }}</li>
+                    <li>{{ __('zatca/e-invoice.cr_number') }}: {{ $seller->getCompanyCr() }}</li>
+                </ul>
+            </div>
 
-        <!-- Row 4: QR Code, Tax Rates, Totals - HORIZONTAL LAYOUT -->
-        <table style="width: 100%; margin-top: 30px;">
-            <tr>
-                <td style="width: 30%; vertical-align: top; text-align: center;">
-                    <img src="{{ $qr_code }}" alt="QR Code" style="width: 120px; height: 120px; border: 1px solid #ddd;" />
-                </td>
-                <td style="width: 70%; vertical-align: top; padding-left: 30px;">
-                    <div style="margin-bottom: 20px; text-align: left;">
-                        <h3 style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #000;">{{ __('zatca/e-invoice.tax_rates') }}</h3>
-                        <div style="font-size: 14px; line-height: 1.5; margin-bottom: 5px; color: #666;">"V" {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => collect($order->getItems())->filter(fn($item) => $item->getVatPercentage() !== null)->first()->getVatPercentage()]) }}</div>
-                        <div style="font-size: 14px; line-height: 1.5; margin-bottom: 5px; color: #666;">"N" {{ __('zatca/e-invoice.vat_symbol_n') }}</div>
+            <div class="w-3/12">
+                <div class="mb-1">
+                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.bill_to') }}</h2>
+                </div>
+                <h2 class="mb-1 font-semibold">{{ $buyer }}</h2>
+                <ul class="text-xs text-gray-500">
+                    {{--                <li>{{ __('zatca/e-invoice.contact_number') }}: {{ $buyer->mobile_dialing_phone_number }}</li> --}}
+                </ul>
+            </div>
+
+            <div class="flex-1">
+                <div class="mb-1">
+                    <h2 class="text-sm text-gray-600">{{ __('zatca/e-invoice.order_details') }}</h2>
+                </div>
+                <div class="grid grid-cols-12 gap-2 text-xs text-gray-500">
+                    <div class="col-span-3">{{ __('zatca/e-invoice.issue_date') }}</div>
+                    <div class="col-span-9">{{ $order->getInvoiceDate() }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-600 flex px-2 py-3 text-white">
+            <div class="w-3/12">
+                <div>{{ __('zatca/e-invoice.item') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.qty') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.unit_price') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.discount') }}</div>
+            </div>
+
+            <div class="w-1/12">
+                <div>{{ __('zatca/e-invoice.vat_symbol') }}</div>
+            </div>
+
+            <div class="w-2/12">
+                <div>{{ __('zatca/e-invoice.total_price') }}</div>
+            </div>
+        </div>
+
+        @foreach ($order->getItems() as $item)
+            <div class="flex px-2 py-3 text-gray-600">
+                <div class="w-3/12">
+                    <div>{{ $item->getName() }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getQuantity() }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getItemPrice()->convertAndFormatByDecimal(sperator: ',') }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getDiscountPercentage() ?? 0 }}%</div>
+                </div>
+
+                <div class="w-1/12">
+                    <div>{{ $item->getVatPercentage() === null ? 'N' : 'V' }}</div>
+                </div>
+
+                <div class="w-2/12">
+                    <div>{{ $item->getLineTotalWithoutVat()->convertAndFormatByDecimal(sperator: ',') }}</div>
+                </div>
+            </div>
+        @endforeach
+        <div class="bg-slate-700 h-px w-full"></div>
+
+        <div class="flex items-center justify-between">
+            <div class="flex">
+                <img class="h-40 w-40" src="{{ $qr_code }}" />
+                <div class="p-2.5">
+                    <h2 class="text-lg font-bold">{{ __('zatca/e-invoice.tax_rates') }}</h2>
+                    <ul class="mt-2 text-sm">
+                        <li>"V"
+                            {{ __('zatca/e-invoice.vat_symbol_v', ['percentage' => collect($order->getItems())->filter(fn($item) => $item->getVatPercentage() !== null)->first()->getVatPercentage()]) }}
+                        </li>
+                        <li>"N" {{ __('zatca/e-invoice.vat_symbol_n') }}</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="w-1/2">
+                <div class="grid grid-cols-2 gap-4 py-3">
+                    @if ($order->getTotalDiscount()->getAmount() > 0)
+                        <div>{{ __('zatca/e-invoice.total_discount') }}</div>
+                        <div>
+                            {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->convertAndFormatByDecimal(sperator: ',')]) }}
+                        </div>
+                    @endif
+
+                    <div>{{ __('zatca/e-invoice.total_before_vat') }}</div>
+                    <div>
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->convertAndFormatByDecimal(sperator: ',')]) }}
                     </div>
 
-                    <div style="text-align: left; border-top: 1px solid #ddd; padding-top: 15px;">
-                        @if ($order->getTotalDiscount()->getAmount() > 0)
-                        <table style="width: 100%; margin-bottom: 8px; font-size: 14px;">
-                            <tr>
-                                <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.total_discount') }}</td>
-                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
-                            </tr>
-                        </table>
-                        @endif
-
-                        <table style="width: 100%; margin-bottom: 8px; font-size: 14px;">
-                            <tr>
-                                <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.total_before_vat') }}</td>
-                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
-                            </tr>
-                        </table>
-
-                        <table style="width: 100%; margin-bottom: 8px; font-size: 14px;">
-                            <tr>
-                                <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.vat_total') }}</td>
-                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
-                            </tr>
-                        </table>
-
-                        <table style="width: 100%; margin-bottom: 8px; font-size: 16px; font-weight: bold; color: #000; margin-top: 10px; padding-top: 10px; border-top: 1px solid #000;">
-                            <tr>
-                                <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.total') }}</td>
-                                <td style="width: 40%; text-align: right;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
-                            </tr>
-                        </table>
+                    <div>{{ __('zatca/e-invoice.vat_total') }}</div>
+                    <div>
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->convertAndFormatByDecimal(sperator: ',')]) }}
                     </div>
-                </td>
-            </tr>
-        </table>
+
+                    <div>{{ __('zatca/e-invoice.total') }}</div>
+                    <div class="font-bold text-gray-800">
+                        {{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->convertAndFormatByDecimal(sperator: ',')]) }}
+                    </div>
+                </div>
+                <div class="bg-slate-800 h-px w-full"></div>
+            </div>
+        </div>
     </div>
+
+    @include('local-commodity-market.shared.address-footer')
+
+    <!-- Code injected by live-server -->
+    <script>
+        // <![CDATA[  <-- For SVG support
+        if ('WebSocket' in window) {
+            (function() {
+                function refreshCSS() {
+                    var sheets = [].slice.call(document.getElementsByTagName("link"));
+                    var head = document.getElementsByTagName("head")[0];
+                    for (var i = 0; i < sheets.length; ++i) {
+                        var elem = sheets[i];
+                        var parent = elem.parentElement || head;
+                        parent.removeChild(elem);
+                        var rel = elem.rel;
+                        if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() ==
+                            "stylesheet") {
+                            var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+                            elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date()
+                                .valueOf());
+                        }
+                        parent.appendChild(elem);
+                    }
+                }
+                var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+                var address = protocol + window.location.host + window.location.pathname + '/ws';
+                var socket = new WebSocket(address);
+                socket.onmessage = function(msg) {
+                    if (msg.data == 'reload') window.location.reload();
+                    else if (msg.data == 'refreshcss') refreshCSS();
+                };
+                if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+                    console.log('Live reload enabled.');
+                    sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+                }
+            })();
+        } else {
+            console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+        }
+        // ]]>
+    </script>
 </body>
+
 </html>

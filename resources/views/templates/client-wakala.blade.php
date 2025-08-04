@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -596,24 +596,24 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-text-opacity: 1;
             color: rgb(22, 78, 99);
         }
-        
+
         /* mPDF-specific adjustments */
         .logo-container {
             text-align: left;
             margin-bottom: 15px;
             padding-right: 20px;
         }
-        
+
         .logo-container img {
             height: 100px;
             width: 100px;
         }
-        
+
         .content-wrapper {
             margin: 0;
             padding: 0;
         }
-        
+
         .footer-text {
             font-size: 16px;
             text-align: center;
@@ -624,7 +624,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 </head>
 
 <body>
-    <div class="h-screen flex flex-col justify-between">
+    <div dir="rtl" class="h-screen flex flex-col justify-between">
         <div class="content-wrapper">
             <div class="logo-container">
                 <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;" />
@@ -641,8 +641,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </p>
             </div>
         </div>
+        @include('local-commodity-market.shared.address-footer')
     </div>
-    @include('local-commodity-market.shared.address-footer')
+
 </body>
 
 </html>

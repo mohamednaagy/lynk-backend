@@ -705,32 +705,26 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         .mt-4 {
             margin-top: 1rem;
         }
-        
+
         /* mPDF-specific adjustments */
         .logo-container {
             text-align: left;
             margin-bottom: 15px;
             padding-right: 20px;
         }
-        
+
         .logo-container img {
             height: 100px;
             width: 100px;
-        }
-
-        .content-wrapper {
-            margin: 0;
-            padding: 0;
         }
 
     </style>
 </head>
 
 <body dir="rtl">
-    <div class="content-wrapper">
-        <div class="logo-container">
-            <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;">
-        </div>
+    <div class="logo-container">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;">
+    </div>
     <div class="divide-y divide-gray-300/50">
         <div class="py-8 space-y-6 text-base leading-7">
             <p class="text-black">{{__('invoices/voucher-receipt.day', [], 'ar')}} : {{ $day }}</p>
@@ -746,9 +740,8 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             </p>
         </div>
     </div>
-    @include('local-commodity-market.shared.address-footer')
 
-    </div>
+    @include('local-commodity-market.shared.address-footer')
 
 </body>
 
