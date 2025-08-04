@@ -442,7 +442,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -489,7 +489,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -536,7 +536,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -644,7 +644,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         }
 
         .divide-gray-300\/50> :not([hidden])~ :not([hidden]) {
-            border-color: rgb(209 213 219 / 0.5);
+            border-color: rgb(209, 213, 219);
         }
 
         .border {
@@ -653,12 +653,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .border-black {
             --tw-border-opacity: 1;
-            border-color: rgb(0 0 0 / var(--tw-border-opacity));
+            border-color: rgb(0, 0, 0);
         }
 
         .bg-gray-700 {
             --tw-bg-opacity: 1;
-            background-color: rgb(55 65 81 / var(--tw-bg-opacity));
+            background-color: rgb(55, 65, 81);
         }
 
         .py-8 {
@@ -719,91 +719,135 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .text-gray-600 {
             --tw-text-opacity: 1;
-            color: rgb(75 85 99 / var(--tw-text-opacity));
+            color: rgb(75, 85, 99);
         }
 
         .text-black {
             --tw-text-opacity: 1;
-            color: rgb(0 0 0 / var(--tw-text-opacity));
+            color: rgb(0, 0, 0);
         }
 
         .text-cyan-900 {
             --tw-text-opacity: 1;
-            color: rgb(22 78 99 / var(--tw-text-opacity));
+            color: rgb(22, 78, 99);
         }
 
         .text-cyan-600 {
             --tw-text-opacity: 1;
-            color: rgb(8 145 178 / var(--tw-text-opacity));
+            color: rgb(8, 145, 178);
+        }
+        
+        /* mPDF-specific adjustments */
+        .logo-container {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        
+        .logo-container img {
+            height: 100px;
+            width: 100px;
+        }
+        
+        .content-wrapper {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .section-spacing {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+        
+        .title-main {
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .title-section {
+            font-size: 16px;
+            text-align: center;
+            font-weight: 600;
+            margin: 15px 0;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .data-table td {
+            border: 1px solid black;
+            padding: 8px;
+            vertical-align: middle;
+        }
+        
+        .footer-text {
+            font-size: 16px;
+            text-align: center;
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+        
+        .signature-line {
+            margin: 20px auto;
+            height: 2px;
+            width: 200px;
+            background-color: rgb(55, 65, 81);
         }
     </style>
 </head>
 
 <body>
-    <div class="flex justify-end">
-        <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="" />
+    <div class="logo-container">
+        <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;" />
     </div>
-    <div class="mx-4 divide-y divide-gray-300/50" dir="rtl">
-        <div class="py-8 space-y-6 text-base leading-7">
-            <div>
-                <div class="py-8 space-y-6 text-base leading-7 text-gray-600">
-                    <img />
-                    <p>التاريخ: {{ $contract_signed_date }}</p>
-                    <p>الوقت: {{ $contract_signed_time }}</p>
-                    <p class="text-center">رقم المرجع: {{ $reference_number }}</p>
-                    <p class="text-xl text-center text-black">شهادة ملكية</p>
-                    <p class="text-center text-black">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ \
-                        {{ $customer_name }} وهو\هي
-                        المالك\ة الوحيد\ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{ $company_name }} بناء على
-                        العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{ $amount }}
-                        ريال سعودي
-                    </p>
-                </div>
-                <h5 class="py-3 font-extrabold text-center">بيانات السلع/ـة</h5>
-                @foreach ($products ?? [] as $product)
-                    <table class="min-w-full mt-4">
-                        <tbody>
-                            @if (isset($trader_order_reference))
-                                <tr>
-                                    <td class="w-1/2 px-4 text-right border border-black">رقم الشهادة</td>
-                                    <td class="w-1/2 border border-black">{{ $trader_order_reference }}</td>
-                                </tr>
-                            @endif
+    <div class="content-wrapper" dir="rtl">
+        <div class="section-spacing">
+            <p style="color: rgb(75, 85, 99);">التاريخ: {{ $contract_signed_date }}</p>
+            <p style="color: rgb(75, 85, 99);">الوقت: {{ $contract_signed_time }}</p>
+            <p class="text-center" style="color: rgb(75, 85, 99);">رقم المرجع: {{ $reference_number }}</p>
+            <p class="title-main text-black">شهادة ملكية</p>
+            <p class="text-center text-black section-spacing">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ {{ $customer_name }} وهو/هي المالك/ة الوحيد/ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{ $company_name }} بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{ $amount }} ريال سعودي</p>
+            <p class="title-section text-black">بيانات السلع/ـة</p>
+            @foreach ($products ?? [] as $product)
+                <table class="data-table">
+                    <tbody>
+                        @if (isset($trader_order_reference))
                             <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">نوع السلعة</td>
-                                <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
+                                <td style="text-align: right; width: 50%;">رقم الشهادة</td>
+                                <td style="width: 50%;">{{ $trader_order_reference }}</td>
                             </tr>
+                        @endif
+                        <tr>
+                            <td style="text-align: right; width: 50%;">نوع السلعة</td>
+                            <td style="width: 50%;">{{ $product->getProduct() }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right; width: 50%;">الكمية</td>
+                            <td style="width: 50%;">{{ $product->getQuantity() }} {{ $product->getUom() }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right; width: 50%;">قيمة السلعة</td>
+                            <td style="width: 50%;">{{ number_format((float) $product->getAmount(), 2) }} ريال سعودي</td>
+                        </tr>
+                        @if ($product->getWarehouse())
                             <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">الكمية</td>
-                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }}
-                                    {{ $product->getUom() }}</td>
+                                <td style="text-align: right; width: 50%;">موقع السلعة</td>
+                                <td style="width: 50%;">{{ $product->getWarehouse() }}</td>
                             </tr>
-                            <tr>
-                                <td class="w-1/2 px-4 text-right border border-black">قيمة السلعة</td>
-                                <td class="w-1/2 border border-black">{{ number_format((float) $product->getAmount(), 2) }} ريال سعودي</td>
-                            </tr>
-                            @if ($product->getWarehouse())
-                                <tr>
-                                    <td class="w-1/2 px-4 text-right border border-black">موقع السلعة</td>
-                                    <td class="w-1/2 border border-black">{{ $product->getWarehouse() }}</td>
-                                </tr>
-                            @endif
-                        </tbody>
-                    </table>
-                @endforeach
-                <p class="text-center text-black pt-7">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
-                <hr class="mx-auto mt-10 h-[2px] w-48 bg-gray-700" />
-            </div>
+                        @endif
+                    </tbody>
+                </table>
+            @endforeach
+            <p class="footer-text text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
+            <div class="signature-line"></div>
         </div>
-        <div class="flex flex-row justify-between pt-8 font-semibold">
-            <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
-            <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 12271</p>
-            <div class="flex flex-row-reverse gap-0.5">
-                <p class="text-right text-[11px] text-cyan-900">3781 الملك عبدالله ابن عبدالعزيز سعود الفرعي  حي الملك فهد 6460</p>
-            </div>
-            <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
-            <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
-        </div>
+        
+        @include('local-commodity-market.shared.address-footer')
     </div>
 
 </body>

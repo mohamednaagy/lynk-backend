@@ -442,7 +442,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -489,7 +489,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-ring-inset: ;
             --tw-ring-offset-width: 0px;
             --tw-ring-offset-color: #fff;
-            --tw-ring-color: rgb(59 130 246 / 0.5);
+            --tw-ring-color: rgb(59, 130, 246);
             --tw-ring-offset-shadow: 0 0 #0000;
             --tw-ring-shadow: 0 0 #0000;
             --tw-shadow: 0 0 #0000;
@@ -589,21 +589,45 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
         .text-cyan-600 {
             --tw-text-opacity: 1;
-            color: rgb(8 145 178 / var(--tw-text-opacity));
+            color: rgb(8, 145, 178);
         }
 
         .text-cyan-900 {
             --tw-text-opacity: 1;
-            color: rgb(22 78 99 / var(--tw-text-opacity));
+            color: rgb(22, 78, 99);
+        }
+        
+        /* mPDF-specific adjustments */
+        .logo-container {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        
+        .logo-container img {
+            height: 100px;
+            width: 100px;
+        }
+        
+        .content-wrapper {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .footer-text {
+            font-size: 16px;
+            text-align: center;
+            margin: 15px 0;
+            line-height: 1.5;
         }
     </style>
 </head>
 
 <body>
     <div dir="rtl" class="h-screen flex flex-col justify-between">
-        <div>
-            <div class="flex justify-end">
-                <img class="h-20" src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="" />
+        <div class="content-wrapper">
+            <div class="logo-container">
+                <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('color-logo.png'))) }}" alt="Logo" style="height: 50px; max-width: 120px;" />
             </div>
             <div class="mx-4">
                 {!! $template !!}
@@ -617,16 +641,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </p>
             </div>
         </div>
-
-        <div class="flex flex-row justify-between pt-8 font-semibold">
-            <p class="text-right text-[11px] text-cyan-900">www.lynk.sa</p>
-            <p class="text-right text-[11px] text-cyan-900">الرمز البريدي 12271</p>
-            <div class="flex flex-row-reverse gap-0.5">
-                <p class="text-right text-[11px] text-cyan-900">3781 الملك عبدالله ابن عبدالعزيز سعود الفرعي  حي الملك فهد 6460</p>
-            </div>
-            <p class="text-right text-[11px] text-cyan-900">السجل التجاري 1010828018</p>
-            <p class="text-right text-[11px] text-cyan-600">شركة تقنيات صلة المالية</p>
-        </div>
+        @include('local-commodity-market.shared.address-footer')
     </div>
 
 </body>
