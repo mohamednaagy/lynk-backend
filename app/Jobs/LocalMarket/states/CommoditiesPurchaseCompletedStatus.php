@@ -8,6 +8,12 @@ use App\Jobs\LocalMarket\CommoditiesSettlement\DispatchOrderSettlementCheck;
 
 class CommoditiesPurchaseCompletedStatus extends BaseStatus
 {
+    public function __construct(protected int $localMarketOrderID)
+    {
+        parent::__construct($localMarketOrderID);
+        $this->onQueue('complete_commodities_purchased_local_market');
+    }
+
     /**
      * Execute the job.
      */

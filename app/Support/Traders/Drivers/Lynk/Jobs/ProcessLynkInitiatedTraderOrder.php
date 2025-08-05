@@ -23,9 +23,9 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
 
-    public $tries = 3;
+    public $tries = 5;
 
-    public $backoff = [30, 60, 120];
+    public $backoff = [1, 2, 3, 5, 30];
 
     /**
      * Create a new job instance.
