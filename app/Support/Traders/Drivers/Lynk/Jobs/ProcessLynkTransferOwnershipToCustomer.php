@@ -20,9 +20,9 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure;
 
-    public $tries = 3;
+    public $tries = 5;
 
-    public $backoff = [30, 60, 120];
+    public $backoff = [1, 2, 3, 5, 30];
 
     /**
      * Create a new job instance.
