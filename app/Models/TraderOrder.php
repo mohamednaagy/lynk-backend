@@ -166,7 +166,7 @@ class TraderOrder extends Model implements HasMedia
         }
 
         if (! $this->last_history_action) {
-            throw new \Exception('Last history action is not set');
+            throw new \Exception('Last history action is not set for trader order: '.$this->id);
         }
 
         return in_array($this->last_history_action, $actions);
