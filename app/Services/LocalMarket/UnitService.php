@@ -7,11 +7,13 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Exceptions\LocalMarket\ErrorPurchasingAtLocalMarket;
+use App\Jobs\LocalMarket\states\ClearEligibleFlagAndRefreshInventory;
 use App\Models\Company;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +29,6 @@ class UnitService
         $inventories = [];
         foreach ($eligibleInventories as $eligibleInventory) {
             $inventory = LocalMarketInventory::find($eligibleInventory['id']);
-            $this->holdEligibleUnits($localMarketOrder, $inventory, $eligibleInventory['numberOfUnits']);
             $inventories[$inventory->id] = $this->buildResponseArray($inventory, $eligibleInventory['numberOfUnits']);
         }
 
@@ -74,7 +75,66 @@ class UnitService
 
     }
 
-    private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
+    public function holdEligibleUnits(LocalMarketOrder $localMarketOrder): void
+    {
+        $eligibleInventories = $localMarketOrder->data['inventories'];
+        $inventoryIds = array_keys($eligibleInventories);
+
+        Log::channel('local_market')->info('Time of hold eligible units start at '.now(), [
+            'order_id' => $localMarketOrder->id,
+            'inventory_ids' => $inventoryIds,
+        ]);
+
+        try {
+            $this->executeHoldProcedures($localMarketOrder, $eligibleInventories);
+
+            foreach ($inventoryIds as $inventoryId) {
+                ClearEligibleFlagAndRefreshInventory::dispatch($localMarketOrder->id, $inventoryId);
+            }
+        } catch (Exception $e) {
+            Log::channel('local_market')->error('Failed to hold eligible units', [
+                'order_id' => $localMarketOrder->id,
+                'inventory_ids' => $inventoryIds,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
+
+        Log::channel('local_market')->info('Hold eligible units completed', [
+            'order_id' => $localMarketOrder->id,
+            'inventory_ids' => $inventoryIds,
+            'time' => now(),
+        ]);
+    }
+
+    private function executeHoldProcedures(LocalMarketOrder $localMarketOrder, array $eligibleInventories): void
+    {
+        foreach ($eligibleInventories as $inventoryId => $data) {
+            try {
+                DB::statement('CALL hold_order_unit(?, ?, ?, ?)', [
+                    $localMarketOrder->id,
+                    $data['numberOfSuitableUnits'],
+                    $localMarketOrder->company_id,
+                    $inventoryId,
+                ]);
+            } catch (Exception $e) {
+                Log::channel('local_market')->error('Stored procedure hold_order_unit failed', [
+                    'order_id' => $localMarketOrder->id,
+                    'inventory_id' => $inventoryId,
+                    'error' => $e->getMessage(),
+                ]);
+                throw $e;
+            }
+        }
+
+        Log::channel('local_market')->info('All hold procedures executed successfully', [
+            'order_id' => $localMarketOrder->id,
+            'inventories_processed' => count($eligibleInventories),
+        ]);
+    }
+
+    private function old_holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
         $startTime = microtime(true);
 
@@ -222,7 +282,43 @@ class UnitService
     private function buildEligibleUnitsQuery(int $inventoryId, int $companyId): \Illuminate\Database\Query\Builder
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
+        // The business logic should be stored procedure "hold_order_unit"
 
+        /*
+         * DELIMITER //
+
+CREATE PROCEDURE hold_order_unit(
+    IN p_order_id INT,
+    IN p_number_of_units INT
+)
+BEGIN
+    DECLARE v_local_market_inventory_id INT DEFAULT 8;
+
+    UPDATE local_market_inventory_units_dummy
+    SET hold_for = p_order_id
+    WHERE local_market_inventory_id = v_local_market_inventory_id
+    AND STATUS = 1
+    AND hold_for = 0
+    AND deleted_at IS NULL
+    AND (previous_company_id_owner_0 != 244 OR previous_company_id_owner_0 IS NULL)
+    AND (previous_company_id_owner_1 != 244 OR previous_company_id_owner_1 IS NULL)
+    AND (previous_company_id_owner_2 != 244 OR previous_company_id_owner_2 IS NULL)
+    LIMIT p_number_of_units;
+
+    -- Optional: Return the number of affected rows
+    SELECT ROW_COUNT() as units_held;
+
+END //
+
+DELIMITER ;
+
+         *
+         *
+         *
+         *
+         *
+         *
+         */
         $query = DB::table('local_market_inventory_units')
             ->where('local_market_inventory_id', $inventoryId)
             ->where('status', InventoryUnitsStatus::Free)
@@ -295,8 +391,8 @@ class UnitService
 
                     Log::channel('local_market')->info(
                         'Swapping unit ID '.$unit->id.
-                            ' to owner '.$newCurrentOwner.
-                            ' of type '.$newCurrentOwnerType
+                        ' to owner '.$newCurrentOwner.
+                        ' of type '.$newCurrentOwnerType
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer

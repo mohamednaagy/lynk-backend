@@ -10,10 +10,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 abstract class BaseStatus implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable;
+
+    protected const LOG_CHANNEL = 'local_market';
 
     protected LocalMarketWebhook $localMarketWebhook;
 
@@ -49,7 +52,7 @@ abstract class BaseStatus implements ShouldQueue
             ['order_id' => $this->localMarketOrder->id]);
     }
 
-    public function failed(\Exception $exception): void
+    public function failed(Throwable $exception): void
     {
         $errorMessage = "failed {$this->className}, the given order: ".$this->localMarketOrderID;
         Log::channel('local_market')->error(
