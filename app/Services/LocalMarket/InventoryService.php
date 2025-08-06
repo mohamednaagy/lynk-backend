@@ -42,7 +42,7 @@ class InventoryService
             $preferredItemTypes,
             $localMarketOrder
         );
-        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories);
+        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories, $localMarketOrder);
 
         // Return combination if found or if we must use preferred types
         if (! empty($preferredItemTypes) || ! empty($combination)) {
@@ -52,7 +52,7 @@ class InventoryService
 
             $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId, [], $localMarketOrder);
 
-            return $this->findOptimalCombination($loanAmount, $allInventories);
+            return $this->findOptimalCombination($loanAmount, $allInventories, $localMarketOrder);
         }
     }
 
@@ -100,7 +100,7 @@ class InventoryService
         return $data;
     }
 
-    private function findOptimalCombination($loanAmount, $inventories)
+    private function findOptimalCombination($loanAmount, $inventories, $localMarketOrder)
     {
         $startTime = microtime(true);
         if ($inventories->isEmpty()) {
@@ -119,6 +119,7 @@ class InventoryService
 
         Log::channel('local_market')->info('findOptimalCombination Duration', [
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'order_id' => $localMarketOrder->id,
         ]);
 
         return empty($result) ? false : $result;
