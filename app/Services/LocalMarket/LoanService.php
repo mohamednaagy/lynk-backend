@@ -13,6 +13,7 @@ class LoanService
 {
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
+        $startTime = microtime(true);
         $inventoryService = app(InventoryService::class);
         $unitsService = app(UnitService::class);
 
@@ -23,6 +24,11 @@ class LoanService
         if (empty($eligibleInventories)) {
             return false;
         }
+
+        Log::channel('local_market')->info('getCommoditiesForLoan Duration', [
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'order_id' => $localMarketOrder->id,
+        ]);
 
         return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
