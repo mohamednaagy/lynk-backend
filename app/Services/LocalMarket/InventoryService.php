@@ -39,7 +39,8 @@ class InventoryService
         $preferredInventories = $this->findEligibleInventoriesForLoan(
             $loanAmount,
             $companyId,
-            $preferredItemTypes
+            $preferredItemTypes,
+            $localMarketOrder
         );
         $combination = $this->findOptimalCombination($loanAmount, $preferredInventories);
 
@@ -49,13 +50,13 @@ class InventoryService
         } else {
             // Fallback to all inventory types if allowed
 
-            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId);
+            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId, [], $localMarketOrder);
 
             return $this->findOptimalCombination($loanAmount, $allInventories);
         }
     }
 
-    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes = [])
+    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes, $localMarketOrder)
     {
         $startTime = microtime(true);
         $data = LocalMarketInventory::query()
@@ -93,6 +94,7 @@ class InventoryService
             'loan_amount' => $loanAmount,
             'company_id' => $companyId,
             'preferred_item_types' => $preferredItemTypes,
+            'order_id' => $localMarketOrder->id,
         ]);
 
         return $data;
