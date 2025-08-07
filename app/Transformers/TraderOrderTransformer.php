@@ -236,15 +236,20 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeCommodityType(TraderOrder $traderOrder): Primitive
     {
+
         $commodityType = $traderOrder->commodityType;
+        
         if ($commodityType) {
             return $this->primitive([
                 'id' => $commodityType->id,
                 'name' => $commodityType->name,
             ]);
+        }elseif($traderOrder->hasAnyCommodityType()){
+            return $this->primitive($traderOrder->commodity_type_id);
         }
 
         return $this->primitive(null);
-
     }
+    
+    
 }
