@@ -52,7 +52,6 @@ class TraderOrderTransformer extends TransformerAbstract
         'contract_signed_type',
         'show_proceed_btn',
         'commodity_type',
-        'is_any_commodity_type',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -237,20 +236,19 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeCommodityType(TraderOrder $traderOrder): Primitive
     {
+
         $commodityType = $traderOrder->commodityType;
+        
         if ($commodityType) {
             return $this->primitive([
                 'id' => $commodityType->id,
                 'name' => $commodityType->name,
             ]);
+        }elseif($traderOrder->hasAnyCommodityType()){
+            return $this->primitive($traderOrder->commodity_type_id);
         }
 
         return $this->primitive(null);
-    }
-
-    public function includeIsAnyCommodityType(TraderOrder $traderOrder): Primitive
-    {
-        return $this->primitive($traderOrder->hasAnyCommodityType());
     }
     
     
