@@ -38,6 +38,8 @@ class LoanService
         $orderService = new OrderService;
         $unitService = new UnitService;
 
+        DB::statement('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+
         DB::beginTransaction();
         Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
         try {
