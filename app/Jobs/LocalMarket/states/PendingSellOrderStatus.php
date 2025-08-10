@@ -7,6 +7,7 @@ use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -28,6 +29,8 @@ class PendingSellOrderStatus extends BaseStatus
      */
     public function handle(): void
     {
+        DB::statement('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
+
         DB::beginTransaction();
         try {
             $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no, UnitOwnershipAction::SellCommodity);
@@ -46,5 +49,15 @@ class PendingSellOrderStatus extends BaseStatus
             ]);
             throw $e;
         }
+    }
+
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->localMarketOrder->id;
     }
 }
