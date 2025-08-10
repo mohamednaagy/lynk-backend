@@ -27,6 +27,7 @@ class PendingCancelOrderStatus extends BaseStatus
      */
     public function handle(): void
     {
+        DB::statement('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
         DB::beginTransaction();
         try {
             $this->logCancellationDetails();
