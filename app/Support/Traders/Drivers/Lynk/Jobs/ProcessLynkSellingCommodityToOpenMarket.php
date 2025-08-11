@@ -28,7 +28,7 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_process');
     }
 
     /**
