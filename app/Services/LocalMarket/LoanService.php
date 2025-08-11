@@ -5,19 +5,31 @@ namespace App\Services\LocalMarket;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
-use Exception;
-use Illuminate\Support\Facades\DB;
+use App\Services\Traits\WithAutocommitDisabledTrait;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
+    use WithAutocommitDisabledTrait;
+
+    private $orderService;
+
+    private $unitService;
+
+    private $inventoryService;
+
+    public function __construct()
+    {
+        $this->orderService = app(OrderService::class);
+        $this->unitService = app(UnitService::class);
+        $this->inventoryService = app(InventoryService::class);
+    }
+
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
         $startTime = microtime(true);
-        $inventoryService = app(InventoryService::class);
-        $unitsService = app(UnitService::class);
 
-        $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
+        $eligibleInventories = $this->inventoryService->findEligibleInventoryForLoan(
             $localMarketOrder
         );
 
@@ -30,32 +42,20 @@ class LoanService
             'order_id' => $localMarketOrder->id,
         ]);
 
-        return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
+        return $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder)
     {
-        $orderService = new OrderService;
-        $unitService = new UnitService;
-
-        DB::statement('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
-
-        DB::beginTransaction();
-        Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
-        try {
-            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
-            $orderService->insertOrderUnits($localMarketOrder);
-            $orderService->insertOrderInventories($localMarketOrder);
-            DB::commit();
+        return $this->withAutocommitDisabled(function () use ($localMarketOrder) {
+            Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
+            $this->orderService->insertOrderInventories($localMarketOrder);
+            $this->orderService->insertOrderUnits($localMarketOrder);
+            $this->unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
             Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
 
             return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-
-            return false;
-        }
+        }, 'READ COMMITTED');
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)
