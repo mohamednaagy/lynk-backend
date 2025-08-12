@@ -2,8 +2,12 @@
 
 namespace App\Jobs\LocalMarket;
 
+use App\Enums\LocalMarket\OrderStatus;
+use App\Enums\LocalMarket\OwnershipTypes;
+use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\OrderService;
+use App\Services\LocalMarket\UnitService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,16 +21,20 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
 
     public $tries = 3;
 
-    public $timeout = [60, 120, 180];
+    public $backoff = [60, 120, 180];
 
     /** @var OrderService */
     private $orderService;
+
+    /** @var UnitService */
+    private $unitService;
 
     public function __construct(
         public readonly int $localMarketOrderId
     ) {
         $this->orderService = app(OrderService::class);
-        $this->onQueue('local_market');
+        $this->unitService = app(UnitService::class);
+        $this->onQueue('local_market_order_inventories_units_logging');
     }
 
     public function handle(): void
@@ -34,10 +42,20 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
         try {
             $order = LocalMarketOrder::findOrFail($this->localMarketOrderId);
 
-            // Only insert order inventories and order units
             $this->orderService->insertOrderInventories($order);
             $this->orderService->insertOrderUnits($order);
+            $this->unitService->changeOrderUnitsOwnershipTo(
+                $order,
+                OwnershipTypes::Company,
+                $order->company_id,
+                UnitOwnershipAction::PurchaseCommodity
+            );
         } catch (\Throwable $e) {
+            if ($order) {
+                $order->update([
+                    'status' => OrderStatus::FailedPurchase,
+                ]);
+            }
             Log::channel('local_market')->error('InsertOrderInventoriesAndUnits failed', [
                 'order_id' => $this->localMarketOrderId,
                 'error' => $e->getMessage(),
