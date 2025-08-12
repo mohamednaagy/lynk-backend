@@ -2,9 +2,6 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\LocalMarket\OwnershipTypes;
-use App\Enums\LocalMarket\UnitOwnershipAction;
-use App\Jobs\LocalMarket\InsertOrderInventoriesAndUnits;
 use App\Models\LocalMarketOrder;
 use Illuminate\Support\Facades\Log;
 
@@ -41,16 +38,6 @@ class LoanService
         ]);
 
         return $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-    }
-
-    public function buyCommodities(LocalMarketOrder $localMarketOrder)
-    {
-        Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
-        InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
-        $this->unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
-        Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
-
-        return true;
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)
