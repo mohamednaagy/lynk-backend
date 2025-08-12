@@ -4,14 +4,12 @@ namespace App\Services\LocalMarket;
 
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
+use App\Jobs\LocalMarket\InsertOrderInventoriesAndUnits;
 use App\Models\LocalMarketOrder;
-use App\Services\Traits\WithAutocommitDisabledTrait;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
-    use WithAutocommitDisabledTrait;
-
     private $orderService;
 
     private $unitService;
@@ -47,15 +45,12 @@ class LoanService
 
     public function buyCommodities(LocalMarketOrder $localMarketOrder)
     {
-        return $this->withAutocommitDisabled(function () use ($localMarketOrder) {
-            Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
-            $this->orderService->insertOrderInventories($localMarketOrder);
-            $this->orderService->insertOrderUnits($localMarketOrder);
-            $this->unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
-            Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
+        Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
+        InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
+        $this->unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
+        Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
 
-            return true;
-        }, 'READ COMMITTED');
+        return true;
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)
