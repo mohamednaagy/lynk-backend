@@ -21,7 +21,7 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
 
     public $tries = 3;
 
-    public $backoff = [60, 120, 180];
+    public $backoff = [5, 10, 15];
 
     /** @var OrderService */
     private $orderService;
