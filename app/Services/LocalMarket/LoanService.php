@@ -3,13 +3,10 @@
 namespace App\Services\LocalMarket;
 
 use App\Models\LocalMarketOrder;
-use App\Services\Traits\WithAutocommitDisabledTrait;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
-    use WithAutocommitDisabledTrait;
-
     private $orderService;
 
     private $unitService;
