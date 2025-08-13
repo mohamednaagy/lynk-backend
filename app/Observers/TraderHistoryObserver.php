@@ -13,6 +13,7 @@ class TraderHistoryObserver
 {
     use ObserverHelper;
 
+    public $afterCommit = true;
     public function __construct(private FeesService $feesService) {}
 
     /**

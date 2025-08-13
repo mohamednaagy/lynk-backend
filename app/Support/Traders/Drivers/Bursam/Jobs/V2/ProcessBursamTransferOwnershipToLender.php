@@ -55,15 +55,18 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
                 ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)
-            ) {
-                Log::channel('bursam')->info('Job skipped - order not found or incorrect action state', [
+                if (is_null($traderOrder)) {
+                    Log::channel('bursam')->warning('trader order not found with status in progress in ProcessBursamTransferOwnershipToLender job', ['traderOrderId' => $this->traderOrderId , 'traderOrder' => $traderOrder]);
+                    return;
+                }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
+                Log::channel('bursam')->warning(' ProcessBursamTransferOwnershipToLender Job skipped - incorrect action state', [
                     'trader_order_id' => $this->traderOrderId,
+                    'expected_action' => FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                     'timestamp' => saudi_now(),
                 ]);
-
                 return;
             }
 

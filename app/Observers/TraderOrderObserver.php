@@ -11,6 +11,7 @@ use App\Models\TraderOrder;
 
 class TraderOrderObserver
 {
+    public $afterCommit = true;
     /**
      * Handle the TraderOrder "creating" event.
      *

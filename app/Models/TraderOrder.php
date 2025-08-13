@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -270,6 +271,7 @@ class TraderOrder extends Model implements HasMedia
     public function processInitiatedTraderOrder()
     {
         if ($this->provider == EnumsTrader::Bursam) {
+            Log::channel('bursam')->info('bursa purchasing step => will fire processInitiatedTraderOrder Job by trader order observer', ['traderOrderId' => $this->id]);
             ProcessBursamInitiatedTraderOrder::dispatch($this->id);
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
