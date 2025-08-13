@@ -35,6 +35,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('bursa purchasing step => firing ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId , 'afterCommit' => $this->afterCommit]);
     }
 
     /**
@@ -49,6 +50,8 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
             ->find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
+            $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+            Log::channel('bursam')->error('trader order not found with status initiated in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder] );
             return;
         }
 
