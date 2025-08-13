@@ -180,7 +180,7 @@ class BursamV2Driver extends BursamV1Driver
         };
 
         if ($dispatchableJob) {
-            $dispatchableJob::dispatch($traderOrder->id)->afterCommit();   
+            $dispatchableJob::dispatch($traderOrder->id);   
         }
     }
 

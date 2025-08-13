@@ -33,7 +33,10 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId) {}
+    public function __construct(protected int $traderOrderId) {
+        $this->afterCommit = true;
+        Log::channel('bursam')->info('ProcessBursamTransferOwnershipToLender: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId , 'afterCommit' => $this->afterCommit]);
+    }
 
     /**
      * Execute the job.

@@ -272,7 +272,7 @@ class TraderOrder extends Model implements HasMedia
     {
         if ($this->provider == EnumsTrader::Bursam) {
             Log::channel('bursam')->info('bursa purchasing step => will fire processInitiatedTraderOrder Job by trader order observer', ['traderOrderId' => $this->id]);
-            ProcessBursamInitiatedTraderOrder::dispatch($this->id);
+            ProcessBursamInitiatedTraderOrder::dispatch($this->id)->afterCommit();
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
         }

@@ -34,6 +34,8 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        $this->afterCommit = true;
+        Log::channel('bursam')->info('ProcessBursamStbCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId , 'afterCommit' => $this->afterCommit]);
     }
 
     /**

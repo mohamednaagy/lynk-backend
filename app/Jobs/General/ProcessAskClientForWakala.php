@@ -31,6 +31,8 @@ class ProcessAskClientForWakala implements ShouldQueue
     public function __construct($traderOrder)
     {
         $this->traderOrder = $traderOrder;
+        $this->afterCommit = true;
+        Log::channel('bursam')->info('ProcessAskClientForWakala: traderOrderId: '.$this->traderOrder.' - Job constructor', ['traderOrderId' => $this->traderOrder , 'afterCommit' => $this->afterCommit]);
     }
 
     /**
