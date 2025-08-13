@@ -11,10 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('local_market_order_has_inventories', function (Blueprint $table) {
-            $table->dropForeign(['supplier_id']);
-            $table->dropForeign('fk_lm_inventory');
-        });
+        try {
+
+            Schema::table('local_market_order_has_inventories', function (Blueprint $table) {
+                $table->dropForeign(['supplier_id']);
+                $table->dropForeign('fk_lm_inventory');
+            });
+        } catch (Throwable $e) {
+
+        }
     }
 
     /**
