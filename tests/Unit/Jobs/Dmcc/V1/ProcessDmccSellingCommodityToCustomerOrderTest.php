@@ -31,7 +31,7 @@ class ProcessDmccSellingCommodityToCustomerOrderTest extends TestCase
 
     protected static FinancingOrder $order;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         [self::$company] = $this->createLenderCompany();

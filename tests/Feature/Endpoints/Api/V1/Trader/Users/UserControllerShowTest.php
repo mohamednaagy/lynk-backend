@@ -29,7 +29,7 @@ class UserControllerShowTest extends TestCase
 
     private static User $otherUserTraderAdmin;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

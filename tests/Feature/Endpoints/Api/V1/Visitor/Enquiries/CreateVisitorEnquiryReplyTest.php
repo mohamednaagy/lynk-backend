@@ -27,7 +27,7 @@ class CreateVisitorEnquiryReplyTest extends TestCase
         'body' => 'This is enquiry reply body test',
     ];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -44,7 +44,7 @@ class FinancingOrderControllerIndexTest extends TestCase
 
     private static Builder|Model $firstOrderInOtherCompany;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

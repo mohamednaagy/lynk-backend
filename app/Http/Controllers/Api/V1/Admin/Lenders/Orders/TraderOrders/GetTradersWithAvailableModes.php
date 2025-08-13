@@ -13,7 +13,7 @@ class GetTradersWithAvailableModes extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:' .
+            'permission:'.
             perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage])
         );
     }
@@ -23,11 +23,12 @@ class GetTradersWithAvailableModes extends Controller
         $availableModes = collect(config('trader.providers', []))
             ->map(function ($traderData, $traderName) {
                 $activeVersion = $traderData['latest'];
+
                 return [
                     'trader' => $traderName,
                     'modes' => [
                         $activeVersion => $traderData['modes'][$activeVersion],
-                    ]
+                    ],
                 ];
             })
             ->values()

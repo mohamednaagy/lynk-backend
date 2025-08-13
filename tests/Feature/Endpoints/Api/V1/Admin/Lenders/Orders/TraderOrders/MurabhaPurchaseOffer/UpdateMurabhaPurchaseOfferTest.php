@@ -40,7 +40,7 @@ class UpdateMurabhaPurchaseOfferTest extends TestCase
 
     private static array $requestData;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

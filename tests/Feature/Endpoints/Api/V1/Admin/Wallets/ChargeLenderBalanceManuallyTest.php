@@ -45,7 +45,7 @@ class ChargeLenderBalanceManuallyTest extends TestCase
 
     private static User $lenderSupervisor;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

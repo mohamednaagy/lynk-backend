@@ -238,18 +238,16 @@ class TraderOrderTransformer extends TransformerAbstract
     {
 
         $commodityType = $traderOrder->commodityType;
-        
+
         if ($commodityType) {
             return $this->primitive([
                 'id' => $commodityType->id,
                 'name' => $commodityType->name,
             ]);
-        }elseif($traderOrder->hasAnyCommodityType()){
+        } elseif ($traderOrder->hasAnyCommodityType()) {
             return $this->primitive($traderOrder->commodity_type_id);
         }
 
         return $this->primitive(null);
     }
-    
-    
 }

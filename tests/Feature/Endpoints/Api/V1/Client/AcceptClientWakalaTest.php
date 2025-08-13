@@ -37,7 +37,7 @@ class AcceptClientWakalaTest extends TestCase
 
     private static OtpifyCode $otpifyCode;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -31,7 +31,7 @@ class UpdateMyProfileTest extends TestCase
 
     private static User $userLenderApi;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

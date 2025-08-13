@@ -219,7 +219,6 @@ class OrderController extends Controller
                     $includes[] = 'commodity_type';
                 }
 
-
                 return fractal($financingOrder, new FinancingOrderTransformer)
                     ->parseIncludes($includes)->respond();
             }

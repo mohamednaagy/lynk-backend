@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            //use unsigned to ensure that we don't accept negative numbers
+            // use unsigned to ensure that we don't accept negative numbers
             $table->tinyInteger('charged_trader_orders_count')->unsigned()->default(0);
         });
     }

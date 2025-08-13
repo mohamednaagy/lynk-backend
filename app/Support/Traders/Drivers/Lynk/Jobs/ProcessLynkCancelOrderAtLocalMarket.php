@@ -48,7 +48,7 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
                     return;
                 }
 
-                //if condition to notify function to cancel detail from model (TODO:nagy)
+                // if condition to notify function to cancel detail from model (TODO:nagy)
                 if ($traderOrder->cancelDetail->shouldNotifyProvider()) {
                     LynkClient::of($traderOrder)->cancelOrder();
                 }

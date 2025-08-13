@@ -54,7 +54,7 @@ class CommodityTypeController extends Controller
             ->setProvider($request->validated('provider'))
             ->handle()
             ->paginate();
-            
+
         return fractal($commidityTypes, new CommodityTypeTransformer)
             ->parseIncludes([
                 'id',

@@ -59,24 +59,20 @@ class CommodityTypeTransformer extends TransformerAbstract
         ]);
     }
 
-    
     public function includeTotalValue(CommodityType $commodityType): Primitive
     {
         return $this->primitive($commodityType->statistics?->total_value);
     }
 
-    
     public function includeAvailableValue(CommodityType $commodityType): Primitive
     {
         return $this->primitive($commodityType->statistics?->available_value);
     }
 
-    
     public function includeReservedValue(CommodityType $commodityType): Primitive
     {
         return $this->primitive($commodityType->statistics?->reserved_value);
     }
-
 
     public function includeCreatedAt(CommodityType $commodityType): Primitive
     {

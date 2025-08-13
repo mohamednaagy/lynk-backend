@@ -18,7 +18,7 @@ class PdfGeneratorTest extends TestCase
 
     protected static string $pdfGenerator;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
     }
@@ -69,7 +69,7 @@ class PdfGeneratorTest extends TestCase
     public function test_fails_generate_pdf_will_throw_exception()
     {
         $this->expectException(GeneratingPdfException::class);
-        //make sure the server is running
+        // make sure the server is running
         $browserlessGenerator = new BrowserlessGenerator([
             'base_url' => Config::get('app.url'),
             'storage_disk' => 'test_disk',

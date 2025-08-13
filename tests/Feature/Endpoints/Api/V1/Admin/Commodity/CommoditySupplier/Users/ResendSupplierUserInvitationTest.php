@@ -33,7 +33,7 @@ class ResendSupplierUserInvitationTest extends TestCase
 
     private static Supplier $supplier;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

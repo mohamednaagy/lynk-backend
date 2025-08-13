@@ -43,7 +43,7 @@ class GetCommodityCertificateForClientTest extends TestCase
 
     private static string $fileName;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

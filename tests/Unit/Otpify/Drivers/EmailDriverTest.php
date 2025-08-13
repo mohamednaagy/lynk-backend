@@ -22,7 +22,7 @@ class EmailDriverTest extends TestCase
     use InteractsWithUser;
     use RefreshDatabase;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
