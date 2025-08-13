@@ -38,7 +38,7 @@ class PendingSellOrderStatus extends BaseStatus
             $this->logQueueJob('failed to sell order');
             Log::channel('local_market')->error('failed to sell order', [
                 'order_id' => $this->localMarketOrder->id,
-                'order_reference' => $this->localMarketOrder->order_reference,
+                'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $e->getMessage(),
             ]);
             throw $e;
