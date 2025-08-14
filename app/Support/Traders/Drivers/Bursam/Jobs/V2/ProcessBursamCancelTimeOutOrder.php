@@ -41,6 +41,7 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
                 ->find($this->financingOrder->id);
 
             if (is_null($lockedFinancingOrder)) {
+                Log::channel('bursam')->warning('ProcessBursamCancelTimeOutOrder: financingOrderId: '.$this->financingOrder->id.' - Job skipped - financing order not found', ['financingOrderId' => $this->financingOrder->id]);
                 return;
             }
 

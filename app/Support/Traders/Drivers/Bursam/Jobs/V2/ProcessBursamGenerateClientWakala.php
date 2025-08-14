@@ -35,6 +35,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamGenerateClientWakala: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
 
     }
 
@@ -48,7 +49,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
         $traderOrder = null;
         try {
             // Get attempt count from job properties
-            Log::channel('bursam')->info('Job wakala started', [
+            Log::channel('bursam')->info('bursa purchasing step => Job wakala started', [
                 'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
@@ -58,26 +59,22 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                Log::channel('bursam')->info('Job wakala skipped - order not found', [
-                    'trader_order_id' => $this->traderOrderId,
-                    'timestamp' => saudi_now(),
-                ]);
-
+                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamGenerateClientWakala job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
                 return;
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
-                Log::channel('bursam')->info('Job wakala skipped - order not found or incorrect action state', [
-                    'trader_order_id' => $this->traderOrderId,
-                    'timestamp' => saudi_now(),
-                    'last_action' => $traderOrder->last_history_action,
+                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamGenerateClientWakala: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
                     'expected_action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                 ]);
-
                 return;
             }
 
-            Log::channel('bursam')->info('Processing client wakala generation', [
+            Log::channel('bursam')->info('bursa purchasing step => Processing client wakala generation', [
                 'action' => 'start',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
@@ -85,7 +82,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
             ]);
             app(GenerateClientWakala::class)->handle($traderOrder);
 
-            Log::channel('bursam')->info('Successfully generated client wakala', [
+            Log::channel('bursam')->info('bursa purchasing step => Successfully generated client wakala', [
                 'action' => 'complete',
                 'financing_order_id' => $traderOrder?->order?->id,
                 'trader_order_id' => $this->traderOrderId,
