@@ -40,7 +40,6 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
             if(is_null($traderOrder)){
@@ -53,7 +52,7 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
                 return;
             }
 
-            
+
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
                 Log::channel('bursam')->warning('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
                     'traderOrderId' => $this->traderOrderId ,

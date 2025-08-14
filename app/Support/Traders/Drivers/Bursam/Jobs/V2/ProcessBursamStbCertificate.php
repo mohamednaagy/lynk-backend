@@ -47,7 +47,6 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
             if(is_null($traderOrder)){

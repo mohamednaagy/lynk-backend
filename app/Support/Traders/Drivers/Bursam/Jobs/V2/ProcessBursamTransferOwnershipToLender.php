@@ -55,7 +55,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
         try {
 
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
