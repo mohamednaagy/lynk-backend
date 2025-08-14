@@ -46,12 +46,16 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
     public function handle(): void
     {
         $traderOrder = TraderOrder::query()
-            ->where('status', TraderOrderStatus::Initiated)
             ->find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
-            $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
-            Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
+            Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.'in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId]);
+            return;
+        }
+
+
+        if($traderOrder->status->isNot(TraderOrderStatus::Initiated)){
+            Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status initiated in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
             return;
         }
 
