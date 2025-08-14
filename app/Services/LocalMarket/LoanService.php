@@ -2,21 +2,29 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\LocalMarket\OwnershipTypes;
-use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
-use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
+    private $orderService;
+
+    private $unitService;
+
+    private $inventoryService;
+
+    public function __construct()
+    {
+        $this->orderService = app(OrderService::class);
+        $this->unitService = app(UnitService::class);
+        $this->inventoryService = app(InventoryService::class);
+    }
+
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
-        $inventoryService = app(InventoryService::class);
-        $unitsService = app(UnitService::class);
+        $startTime = microtime(true);
 
-        $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
+        $eligibleInventories = $this->inventoryService->findEligibleInventoryForLoan(
             $localMarketOrder
         );
 
@@ -24,30 +32,12 @@ class LoanService
             return false;
         }
 
-        return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-    }
+        Log::channel('local_market')->info('getCommoditiesForLoan Duration', [
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'order_id' => $localMarketOrder->id,
+        ]);
 
-    public function buyCommodities(LocalMarketOrder $localMarketOrder)
-    {
-        $orderService = new OrderService;
-        $unitService = new UnitService;
-
-        DB::beginTransaction();
-        Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
-        try {
-            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
-            $orderService->insertOrderUnits($localMarketOrder);
-            $orderService->insertOrderInventories($localMarketOrder);
-            DB::commit();
-            Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
-
-            return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-
-            return false;
-        }
+        return $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)

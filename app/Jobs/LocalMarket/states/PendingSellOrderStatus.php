@@ -7,7 +7,7 @@ use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
 
 class PendingSellOrderStatus extends BaseStatus
@@ -28,23 +28,30 @@ class PendingSellOrderStatus extends BaseStatus
      */
     public function handle(): void
     {
-        DB::beginTransaction();
         try {
             $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no, UnitOwnershipAction::SellCommodity);
             $this->inventoryService->completeOrderUnits($this->localMarketOrder);
-            DB::commit();
             $this->localMarketOrder->changeStatusTo(OrderStatus::CommoditiesSell);
             $this->logQueueJob('pending successfully');
         } catch (\Throwable $e) {
-            DB::rollBack();
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
             $this->logQueueJob('failed to sell order');
             Log::channel('local_market')->error('failed to sell order', [
                 'order_id' => $this->localMarketOrder->id,
-                'order_reference' => $this->localMarketOrder->order_reference,
+                'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $e->getMessage(),
             ]);
             throw $e;
         }
+    }
+
+    public function middleware(): array
+    {
+        return [new WithoutOverlapping($this->uniqueId())];
+    }
+
+    public function uniqueId(): string
+    {
+        return __CLASS__.'_'.$this->localMarketOrder->id;
     }
 }
