@@ -2,15 +2,14 @@
 
 namespace App\Jobs\LocalMarket\states;
 
-use App\Actions\Contracts\LocalMarket\BuyCommodities;
-use App\Enums\LocalMarket\OrderHistoryStatus;
+use App\Actions\Contracts\LocalMarket\PendingEligibleCommodities;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
-class EligibleCommoditiesFoundStatus extends BaseStatus
+class InitiateOrderStatus extends BaseStatus
 {
     protected function setUp(): void
     {
-        $this->onQueue('buy_commodities_local_market_orders');
+        $this->onQueue('eligible_commodities_local_market');
         $this->logQueueJob();
     }
 
@@ -19,9 +18,8 @@ class EligibleCommoditiesFoundStatus extends BaseStatus
      */
     public function handle(): void
     {
-        app(BuyCommodities::class)->handle($this->localMarketOrder);
-        $this->logQueueJob('success buy commodity step');
-        $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::EligibleCommoditiesAvailable);
+        app(PendingEligibleCommodities::class)->handle($this->localMarketOrder);
+        $this->logQueueJob('success initiate local market order step');
     }
 
     public function middleware(): array

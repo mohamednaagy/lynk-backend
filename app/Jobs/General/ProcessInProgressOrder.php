@@ -32,6 +32,7 @@ class ProcessInProgressOrder implements ShouldQueue
     public function __construct(int $financingOrderId)
     {
         $this->financingOrderId = $financingOrderId;
+        $this->onQueue('create_trader_orders');
     }
 
     /**

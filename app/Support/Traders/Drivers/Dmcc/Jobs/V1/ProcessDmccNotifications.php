@@ -44,7 +44,7 @@ class ProcessDmccNotifications implements ShouldQueue
                     ProcessDmccPtpDocumentRetrievedOrder::dispatch($notification);
                 }
             } catch (\Throwable $th) {
-                //throw $th;
+                // throw $th;
             }
         });
 

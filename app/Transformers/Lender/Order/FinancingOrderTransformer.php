@@ -10,7 +10,7 @@ class FinancingOrderTransformer extends BaseFinancingOrderTransformer
     public function includeCommodityType(FinancingOrder $financingOrder)
     {
         $commodityType = $financingOrder->commodityType;
-        if (!$commodityType) {
+        if (! $commodityType) {
             return $this->primitive(null);
         }
 
@@ -20,4 +20,3 @@ class FinancingOrderTransformer extends BaseFinancingOrderTransformer
         ]);
     }
 }
-

@@ -23,12 +23,18 @@ class UnitService
      */
     public function getEligibleUnits(LocalMarketOrder $localMarketOrder, $eligibleInventories)
     {
+        $startTime = microtime(true);
         $inventories = [];
         foreach ($eligibleInventories as $eligibleInventory) {
             $inventory = LocalMarketInventory::find($eligibleInventory['id']);
             $this->holdEligibleUnits($localMarketOrder, $inventory, $eligibleInventory['numberOfUnits']);
             $inventories[$inventory->id] = $this->buildResponseArray($inventory, $eligibleInventory['numberOfUnits']);
         }
+
+        Log::channel('local_market')->info('getEligibleUnits Duration', [
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'order_id' => $localMarketOrder->id,
+        ]);
 
         return $inventories;
     }
@@ -70,15 +76,12 @@ class UnitService
 
     private function holdEligibleUnits(LocalMarketOrder $localMarketOrder, LocalMarketInventory $inventory, int $numberOfNeededUnits)
     {
-        Log::channel('local_market')->info('time of hold eligible units start at '.now(), [
-            'order_id' => $localMarketOrder->id,
-            'inventory_id' => $inventory->id,
-        ]);
+        $startTime = microtime(true);
 
         // Get eligible unit IDs
         $eligibleUnitIds = $this->getEligibleUnitIds(
             $inventory,
-            $localMarketOrder->company_id,
+            $localMarketOrder,
             $numberOfNeededUnits
         );
 
@@ -108,7 +111,12 @@ class UnitService
             ]);
         }
 
-        Log::channel('local_market')->info('time of hold eligible units end at '.now());
+        Log::channel('local_market')->info('getEligibleUnitIds Duration', [
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'order_id' => $localMarketOrder->id,
+            'inventory_id' => $inventory->id,
+        ]);
+
     }
 
     /**
@@ -116,16 +124,25 @@ class UnitService
      */
     private function getEligibleUnitIds(
         LocalMarketInventory $inventory,
-        int $companyId,
+        LocalMarketOrder $localMarketOrder,
         int $limit
     ): Collection {
-        return collect(
-            $this->buildEligibleUnitsQuery($inventory->id, $companyId)
+        $startTime = microtime(true);
+        $data = collect(
+            $this->buildEligibleUnitsQuery($inventory->id, $localMarketOrder->company_id)
                 ->select('id')
                 ->limit($limit)
                 ->lockForUpdate()
                 ->pluck('id')
         );
+
+        Log::channel('local_market')->info('getEligibleUnitIds Duration', [
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'inventory_id' => $inventory->id,
+            'order_id' => $localMarketOrder->id,
+        ]);
+
+        return $data;
     }
 
     /**

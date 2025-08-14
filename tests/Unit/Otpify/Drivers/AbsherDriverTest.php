@@ -26,7 +26,7 @@ class AbsherDriverTest extends TestCase
 
     protected static FinancingOrder $financingOrder;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

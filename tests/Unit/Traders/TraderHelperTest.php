@@ -34,7 +34,7 @@ class TraderHelperTest extends TestCase
 
     private static object $traderHelperTrait;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         [self::$company] = $this->createCompany('2000', ['company_cr' => '1234567891']);

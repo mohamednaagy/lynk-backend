@@ -40,7 +40,7 @@ class VerifyOtpClientWakalaTest extends TestCase
 
     private static TraderOrder|Model $otherTraderOrder;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

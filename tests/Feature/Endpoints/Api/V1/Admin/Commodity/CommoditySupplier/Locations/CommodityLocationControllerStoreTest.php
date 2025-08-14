@@ -20,7 +20,7 @@ class CommodityLocationControllerStoreTest extends TestCase
 
     private static string $endpoint;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

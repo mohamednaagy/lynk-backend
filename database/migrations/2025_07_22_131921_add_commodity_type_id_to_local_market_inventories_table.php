@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        
+
         Schema::table('local_market_inventories', function (Blueprint $table) {
             $table->unsignedBigInteger('commodity_type_id')->nullable()->after('commodity_item_id');
             $table->index('commodity_type_id');
@@ -24,17 +24,17 @@ return new class extends Migration
         });
 
         LocalMarketInventory::withTrashed()
-        ->with(['item' => fn($q) => $q->withTrashed()])
-        ->chunk(100, function ($inventories) {
-            foreach ($inventories as $inventory) {
-                $commodityTypeId = $inventory->item?->commodity_type_id;
-                if ($commodityTypeId) {
-                    DB::table('local_market_inventories')
-                        ->where('id', $inventory->id)
-                        ->update(['commodity_type_id' => $commodityTypeId]);
+            ->with(['item' => fn ($q) => $q->withTrashed()])
+            ->chunk(100, function ($inventories) {
+                foreach ($inventories as $inventory) {
+                    $commodityTypeId = $inventory->item?->commodity_type_id;
+                    if ($commodityTypeId) {
+                        DB::table('local_market_inventories')
+                            ->where('id', $inventory->id)
+                            ->update(['commodity_type_id' => $commodityTypeId]);
+                    }
                 }
-            }
-        });
+            });
     }
 
     /**

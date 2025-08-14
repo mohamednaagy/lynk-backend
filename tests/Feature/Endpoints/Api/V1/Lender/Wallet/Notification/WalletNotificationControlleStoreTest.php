@@ -28,7 +28,7 @@ class WalletNotificationControlleStoreTest extends TestCase
 
     private static $url = 'api/v1/lender/wallet-notifications';
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

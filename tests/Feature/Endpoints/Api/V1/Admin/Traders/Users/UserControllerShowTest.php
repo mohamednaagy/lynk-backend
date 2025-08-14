@@ -26,7 +26,7 @@ class UserControllerShowTest extends TestCase
 
     private static string $endPoint;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -50,7 +50,7 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
                     ->where('version', 'v2')
                     ->where('mode', TraderOrderMode::Automatic)
                     ->whereBetween('created_at', [$marketOpeningStartTime, $marketOpeningEndTime])
-                     ->whereHas('cancelDetail', function ($q) {
+                    ->whereHas('cancelDetail', function ($q) {
                         $q->where('cancel_reason', TraderOrderCancelReason::MurabhaTimeout);
                     });
             })

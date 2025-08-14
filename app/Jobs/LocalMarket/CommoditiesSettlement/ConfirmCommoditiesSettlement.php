@@ -2,7 +2,6 @@
 
 namespace App\Jobs\LocalMarket\CommoditiesSettlement;
 
-use App\Actions\Contracts\Orders\LocalMarketWebhook;
 use App\Jobs\LocalMarket\CommoditiesSettlement\Enums\CommoditySettlementStatus;
 use App\Jobs\LocalMarket\CommoditiesSettlement\Exceptions\ConfirmCommoditiesSettlementException;
 use App\Jobs\LocalMarket\LynkWebhooks\CommoditiesSettledWebhook;

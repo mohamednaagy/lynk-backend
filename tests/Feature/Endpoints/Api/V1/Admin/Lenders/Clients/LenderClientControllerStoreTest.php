@@ -28,7 +28,6 @@ class LenderClientControllerStoreTest extends TestCase
 
     private static User $superAdminUser;
 
-
     private static User $userManager;
 
     private static LengthAwarePaginator $users;
@@ -41,7 +40,7 @@ class LenderClientControllerStoreTest extends TestCase
 
     private const INVALID_COMPANY_ID = 900;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         [self::$mainCompany] = $this->createLenderCompany();

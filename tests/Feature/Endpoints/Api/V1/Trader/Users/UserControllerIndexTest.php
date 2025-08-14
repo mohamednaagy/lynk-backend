@@ -33,7 +33,7 @@ class UserControllerIndexTest extends TestCase
 
     private static LengthAwarePaginator $traderUsersCollection;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

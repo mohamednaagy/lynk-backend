@@ -42,7 +42,7 @@ class ProjectSettingsUpdateTest extends TestCase
 
     private static array $projectSettingsData = [];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

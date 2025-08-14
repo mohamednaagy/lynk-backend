@@ -85,7 +85,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'is_deliverable' => $this->traderOrder->isDeliverable(),
-            'client_wakala_message' =>  Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->clientWakalaMessage($this->traderOrder),
+            'client_wakala_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->clientWakalaMessage($this->traderOrder),
             'signed_wakala_document' => [
                 'url' => $signedWakalaDocumentMediaFile?->file_url,
                 'date' => $signedWakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $signedWakalaDocumentMediaFile->created_at) : null,
@@ -115,7 +115,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
 
-        if($this->traderOrder->isVersion('v2')) {
+        if ($this->traderOrder->isVersion('v2')) {
             unset($data['is_deliverable']);
         }
 
@@ -174,7 +174,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             TraderEnum::Lynk => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
         };
 
-        ///*****///
+        // /*****///
 
         $data = [
             'step' => MurabhaStep::MurabahaSaleCompleted,

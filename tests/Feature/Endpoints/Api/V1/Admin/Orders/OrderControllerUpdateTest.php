@@ -42,7 +42,7 @@ class OrderControllerUpdateTest extends TestCase
 
     private static array $updatedOrderDetails;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -29,7 +29,7 @@ class ProcessBursamInitiateTraderOrderTest extends TestCase
 
     protected static User $userLender;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
