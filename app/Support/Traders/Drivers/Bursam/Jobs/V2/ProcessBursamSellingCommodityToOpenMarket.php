@@ -45,12 +45,15 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
             if (! $traderOrder) {
-                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
-                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId ]);
+                return;
+            }
+
+            if($traderOrder->status->value !== TraderOrderStatus::InProgress){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                 return;
             }
 

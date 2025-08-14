@@ -51,8 +51,12 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
                 ->find($this->traderOrderId);
 
             if(is_null($traderOrder)){
-                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
-                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamStbCertificate job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamStbCertificate job', ['traderOrderId' => $this->traderOrderId ]);
+                return;
+            }
+
+            if($traderOrder->status->value !== TraderOrderStatus::InProgress){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamStbCertificate job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                 return;
             }
 

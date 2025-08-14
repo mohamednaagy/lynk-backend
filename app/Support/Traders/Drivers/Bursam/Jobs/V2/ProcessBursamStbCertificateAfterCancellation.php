@@ -61,8 +61,13 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
-                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamStbCertificateAfterCancellation job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamStbCertificateAfterCancellation job', ['traderOrderId' => $this->traderOrderId ]);
+
+                return;
+            }
+
+            if($traderOrder->status->value !== TraderOrderStatus::PendingCancellation){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in pending cancellation in ProcessBursamStbCertificateAfterCancellation job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                 return;
             }
 
