@@ -33,6 +33,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('ProcessBursamSellingCommodityToOpenMarketForCancellation: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -50,6 +51,8 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
+                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarketForCancellation job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
                 return;
             }
 

@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -32,6 +33,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('ProcessBursamSellingCommodityToOpenMarket: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -47,12 +49,20 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
                 ->find($this->traderOrderId);
 
             if (! $traderOrder) {
+                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
                 return;
             }
 
             $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
             if (! $trader->isOrderInSellableState($traderOrder)) {
+                Log::channel('bursam')->warning('ProcessBursamSellingCommodityToOpenMarket: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::ClientWakalaAccepted,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
 

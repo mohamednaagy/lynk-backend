@@ -31,6 +31,8 @@ class ProcessAskClientForWakala implements ShouldQueue
     public function __construct($traderOrder)
     {
         $this->traderOrder = $traderOrder;
+        $this->afterCommit = true;
+        Log::channel('bursam')->info('ProcessAskClientForWakala: traderOrderId: '.$this->traderOrder.' - Job constructor', ['traderOrderId' => $this->traderOrder , 'afterCommit' => $this->afterCommit]);
     }
 
     /**
@@ -52,6 +54,12 @@ class ProcessAskClientForWakala implements ShouldQueue
         $lastHistoryOfPreviousStep = end($previousStep->histories);
 
         if (! $traderOrder->doesLastActionMatchWith($lastHistoryOfPreviousStep)) {
+            Log::channel('bursam')->warning('ProcessAskClientForWakala: traderOrderId: '.$traderOrder->id.' - Job skipped - incorrect action state', [
+                'trader_order_id' => $traderOrder->id,
+                'expected_action' => $lastHistoryOfPreviousStep,
+                'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                'timestamp' => saudi_now(),
+            ]);
             return;
         }
 

@@ -35,6 +35,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamInitiatedTraderOrder: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -49,6 +50,8 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
             ->find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
+            $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+            Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
             return;
         }
 
@@ -60,7 +63,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessBursamInitiatedTraderOrder failed method detail', [
+        Log::channel('bursam')->error('bursa purchasing step => ProcessBursamInitiatedTraderOrder failed method detail', [
             'code' => $exception->getCode(),
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
@@ -70,7 +73,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            Log::channel('bursam')->error('trader order not found in ProcessBursamInitiatedTraderOrder failed method', ['traderOrderId' => $this->traderOrderId]);
+            Log::channel('bursam')->error('bursa purchasing step => trader order not found in ProcessBursamInitiatedTraderOrder failed method', ['traderOrderId' => $this->traderOrderId]);
 
             return;
         }

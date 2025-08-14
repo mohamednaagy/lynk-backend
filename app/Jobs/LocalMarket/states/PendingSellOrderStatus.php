@@ -35,16 +35,14 @@ class PendingSellOrderStatus extends BaseStatus
         try {
             $this->unitService->changeOrderUnitsOwnershipTo($this->localMarketOrder, OwnershipTypes::TraderOrder, $this->localMarketOrder->external_order_no, UnitOwnershipAction::SellCommodity);
             $this->inventoryService->completeOrderUnits($this->localMarketOrder);
-            DB::commit();
             $this->localMarketOrder->changeStatusTo(OrderStatus::CommoditiesSell);
             $this->logQueueJob('pending successfully');
         } catch (\Throwable $e) {
-            DB::rollBack();
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
             $this->logQueueJob('failed to sell order');
             Log::channel('local_market')->error('failed to sell order', [
                 'order_id' => $this->localMarketOrder->id,
-                'order_reference' => $this->localMarketOrder->order_reference,
+                'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $e->getMessage(),
             ]);
             throw $e;

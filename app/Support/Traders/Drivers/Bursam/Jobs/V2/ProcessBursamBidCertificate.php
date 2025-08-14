@@ -37,6 +37,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -51,10 +52,20 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
                 ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)
-            ) {
+                if (is_null($traderOrder)) {
+                    $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+                    Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamBidCertificate job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
+                    return;
+                }
+
+                
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
 

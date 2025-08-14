@@ -26,7 +26,9 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId) {}
+    public function __construct(protected int $traderOrderId) {
+        Log::channel('bursam')->info('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+    }
 
     /**
      * Execute the job.
@@ -40,10 +42,19 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
                 ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)
-            ) {
+            if(is_null($traderOrder)){
+                $fetchTraderOrder = TraderOrder::query()->find($this->traderOrderId);
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToCustomer job', ['traderOrderId' => $this->traderOrderId , 'fetchTraderOrder' => $fetchTraderOrder]);
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+                Log::channel('bursam')->warning('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::ContractSigned,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
 
