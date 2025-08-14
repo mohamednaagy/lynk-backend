@@ -54,7 +54,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
                 return;
             }
 
-            if($traderOrder->status->value !== TraderOrderStatus::PendingCancellation){
+            if($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)){
                 Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in pending cancellation in ProcessBursamSellingCommodityToOpenMarketForCancellation job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                 return;
             }

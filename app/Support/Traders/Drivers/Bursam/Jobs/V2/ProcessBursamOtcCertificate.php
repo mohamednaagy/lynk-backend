@@ -49,7 +49,7 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
                     return;
                 }
     
-                if($traderOrder->status->value !== TraderOrderStatus::InProgress){
+                if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
                     Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOtcCertificate job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                     return;
                 }

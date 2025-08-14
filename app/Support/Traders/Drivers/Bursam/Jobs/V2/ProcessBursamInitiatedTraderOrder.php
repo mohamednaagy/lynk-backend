@@ -54,7 +54,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         }
 
 
-        if($traderOrder->status->value !== TraderOrderStatus::Initiated){
+        if($traderOrder->status->isNot(TraderOrderStatus::Initiated)){
             Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status initiated in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
             return;
         }
