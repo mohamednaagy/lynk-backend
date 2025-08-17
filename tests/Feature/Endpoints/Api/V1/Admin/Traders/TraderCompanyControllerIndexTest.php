@@ -24,7 +24,7 @@ class TraderCompanyControllerIndexTest extends TestCase
 
     private static string $endpoint = 'api/v1/admin/traders';
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

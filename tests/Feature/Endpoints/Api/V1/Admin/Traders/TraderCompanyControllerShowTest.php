@@ -35,7 +35,7 @@ class TraderCompanyControllerShowTest extends TestCase
 
     private static TraderOrder $traderOrder;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

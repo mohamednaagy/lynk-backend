@@ -26,7 +26,7 @@ class ResendInvitationToUserTest extends TestCase
 
     private static string $redirectUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

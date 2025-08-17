@@ -14,7 +14,7 @@ class TraderManagerTest extends TestCase
 {
     protected TraderManager $traderManager;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->traderManager = new TraderManager($this->app);

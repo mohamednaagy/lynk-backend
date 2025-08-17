@@ -31,7 +31,7 @@ class CreateVisitorEnquiryReply extends Controller
 
         $enquiryReply = $replyToEnquiry->handle($data);
 
-        //change the enquiry status to be UnderReview
+        // change the enquiry status to be UnderReview
         $enquiry->update(['status' => EnquiryStatus::UnderReview]);
 
         return fractal($enquiryReply, new EnquiryReplyTransformer)

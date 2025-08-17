@@ -32,6 +32,7 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('ProcessBursamOrderResultNYY: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -42,13 +43,26 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     public function handle(): void
     {
         $traderOrder = TraderOrder::query()
-            ->where('status', TraderOrderStatus::InProgress)
             ->find($this->traderOrderId);
 
-        if (
-            is_null($traderOrder)
-            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
-        ) {
+            if(is_null($traderOrder)){
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.'in ProcessBursamOrderResultNYY job', ['traderOrderId' => $this->traderOrderId ]);
+                return;
+            }
+
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultNYY job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+                return;
+            }
+
+
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
+            Log::channel('bursam')->warning('ProcessBursamOrderResultNYY: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                'traderOrderId' => $this->traderOrderId ,
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+                'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+            ]);
             return;
         }
 

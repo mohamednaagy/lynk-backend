@@ -33,6 +33,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('ProcessBursamSellingCommodityToOpenMarketForCancellation: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -46,10 +47,15 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
 
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::PendingCancellation)
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamSellingCommodityToOpenMarketForCancellation job', ['traderOrderId' => $this->traderOrderId ]);
+                return;
+            }
+
+            if($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in pending cancellation in ProcessBursamSellingCommodityToOpenMarketForCancellation job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                 return;
             }
 

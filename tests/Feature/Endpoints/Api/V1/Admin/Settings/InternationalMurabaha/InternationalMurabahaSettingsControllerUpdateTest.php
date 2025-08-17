@@ -21,7 +21,7 @@ class InternationalMurabahaSettingsControllerUpdateTest extends TestCase
 
     private string $endpoint = 'api/v1/admin/settings/international-murabaha';
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

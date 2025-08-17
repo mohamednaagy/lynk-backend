@@ -138,7 +138,7 @@ class SupplierLocation extends Controller
      */
     public function destroy(ModelsSupplierLocation $location, DeleteSupplierLocation $deleteSupplierLocation)
     {
-        //check if the commodity item is deleteable
+        // check if the commodity item is deleteable
         if (! $location->is_deletable) {
             return $this->errorResponse(
                 __('error.location_cannot_be_deleted'),

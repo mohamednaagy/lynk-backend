@@ -8,7 +8,7 @@ return [
     |---------------------------------------------
     */
     'domains' => [
-        //'*.example.com',
+        // '*.example.com',
         env('APP_URL').'.api/v1/reset-password',
     ],
 
@@ -18,6 +18,6 @@ return [
     |---------------------------------------------
     */
     'excludes' => [
-        //'/api/posts',
+        // '/api/posts',
     ],
 ];

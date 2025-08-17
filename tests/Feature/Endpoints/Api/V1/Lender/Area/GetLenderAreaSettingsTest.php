@@ -26,7 +26,7 @@ class GetLenderAreaSettingsTest extends TestCase
 
     private static $settings;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

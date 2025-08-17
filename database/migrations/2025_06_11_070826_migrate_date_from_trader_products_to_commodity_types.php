@@ -101,6 +101,6 @@ return new class extends Migration
      */
     public function down()
     {
-        //Note that we should treat this as a one-way migration.
+        // Note that we should treat this as a one-way migration.
     }
 };

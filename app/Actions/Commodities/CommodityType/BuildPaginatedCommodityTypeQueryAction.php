@@ -20,19 +20,18 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 
     public function handle(): Builder
     {
-        return CommodityType::
-        with('statistics')
-        ->when($this->status, function ($query) {
-            $query->where('status', $this->status);
-        })->when($this->name, function ($query) {
-            $query->where('name', 'like', "%{$this->name}%");
-        })->when($this->provider, function ($query) {
-            $query->where('provider', $this->provider);
-        })->when($this->active, function ($query) {
-            $query->active($this->active);
-        })->when($this->companyId, function ($query) {
-            $query->getCommoditiesBasedOnCompany(($this->companyId));
-        });
+        return CommodityType::with('statistics')
+            ->when($this->status, function ($query) {
+                $query->where('status', $this->status);
+            })->when($this->name, function ($query) {
+                $query->where('name', 'like', "%{$this->name}%");
+            })->when($this->provider, function ($query) {
+                $query->where('provider', $this->provider);
+            })->when($this->active, function ($query) {
+                $query->active($this->active);
+            })->when($this->companyId, function ($query) {
+                $query->getCommoditiesBasedOnCompany(($this->companyId));
+            });
     }
 
     public function setStatus($status = null)

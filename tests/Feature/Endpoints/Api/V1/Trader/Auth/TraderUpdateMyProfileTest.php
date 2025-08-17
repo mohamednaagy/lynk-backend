@@ -18,7 +18,7 @@ class TraderUpdateMyProfileTest extends TestCase
 
     private static Company $company;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

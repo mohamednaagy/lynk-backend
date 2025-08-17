@@ -43,7 +43,7 @@ class WebhookControllerDestroyTest extends TestCase
 
     private static Webhook $anotherWebhook;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         [self::$company] = $this->createCompany(

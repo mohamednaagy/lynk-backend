@@ -24,7 +24,7 @@ class IsEmailVerifiedUnitTest extends TestCase
 
     private static User $userLenderAdmin;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         [self::$company] = $this->createCompany();

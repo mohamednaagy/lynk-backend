@@ -26,7 +26,10 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId) {}
+    public function __construct(protected int $traderOrderId) {
+        $this->afterCommit = true;
+        Log::channel('bursam')->info('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+    }
 
     /**
      * Execute the job.
@@ -37,13 +40,26 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)
-            ) {
+            if(is_null($traderOrder)){
+                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamTransferOwnershipToCustomer job', ['traderOrderId' => $this->traderOrderId]);
+                return;
+            }
+
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToCustomer job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+                return;
+            }
+
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
+                Log::channel('bursam')->warning('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::ContractSigned,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
 

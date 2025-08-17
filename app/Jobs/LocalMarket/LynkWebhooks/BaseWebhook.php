@@ -15,7 +15,7 @@ abstract class BaseWebhook implements ShouldQueue
 
     public function __construct(protected int $localMarketOrderId)
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_webhooks');
     }
 
     public function backoff(): array

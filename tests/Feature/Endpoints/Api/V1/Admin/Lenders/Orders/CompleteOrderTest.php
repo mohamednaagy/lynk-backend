@@ -37,7 +37,7 @@ class CompleteOrderTest extends TestCase
 
     private static string $apiUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

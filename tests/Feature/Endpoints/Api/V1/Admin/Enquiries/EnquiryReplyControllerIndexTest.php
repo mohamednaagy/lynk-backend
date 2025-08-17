@@ -37,7 +37,7 @@ class EnquiryReplyControllerIndexTest extends TestCase
 
     private static string $enquiryReplyUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

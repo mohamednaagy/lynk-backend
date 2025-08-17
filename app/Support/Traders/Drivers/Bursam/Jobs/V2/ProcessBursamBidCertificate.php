@@ -37,6 +37,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -48,13 +49,25 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)
-            ) {
+            if (is_null($traderOrder)) {
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.'  in ProcessBursamBidCertificate job', ['traderOrderId' => $this->traderOrderId ]);
+                return;
+            }
+            
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamBidCertificate job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+                return;
+            }
+                
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
 

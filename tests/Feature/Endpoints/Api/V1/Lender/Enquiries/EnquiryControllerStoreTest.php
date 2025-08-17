@@ -29,7 +29,7 @@ class EnquiryControllerStoreTest extends TestCase
 
     private static User $userLenderAdminBelongsToPendingCompany;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

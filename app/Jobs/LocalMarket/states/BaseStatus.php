@@ -37,7 +37,7 @@ abstract class BaseStatus implements ShouldQueue
 
     protected function setUp(): void
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_states');
         $this->logQueueJob();
     }
 

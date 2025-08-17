@@ -41,7 +41,7 @@ class CommodityItemControllerShowTest extends TestCase
     /**
      * @throws BindingResolutionException
      */
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         self::$supplier = $this->createSupplier();

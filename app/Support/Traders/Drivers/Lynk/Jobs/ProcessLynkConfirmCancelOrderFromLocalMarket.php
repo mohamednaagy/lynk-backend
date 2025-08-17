@@ -28,7 +28,7 @@ class ProcessLynkConfirmCancelOrderFromLocalMarket implements ShouldBeUnique, Sh
 
     public function __construct(protected string $traderOrderReference)
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_process');
     }
 
     /**

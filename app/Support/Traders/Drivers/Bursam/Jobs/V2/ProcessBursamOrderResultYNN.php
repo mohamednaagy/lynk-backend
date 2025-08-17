@@ -39,6 +39,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -50,18 +51,29 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     {
         try {
             $traderOrder = TraderOrder::query()
-                ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->find($this->traderOrderId);
 
-            if (is_null($traderOrder)) {
-                Log::channel('bursam')->info('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress) || $traderOrder->status->isNot(TraderOrderStatus::Initiated)){
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status ( in progress or initaited ) in ProcessBursamOrderResultYNN job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+            }
 
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::GetTtiId,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
-                Log::channel('bursam')->info('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
-
+                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
+                    'traderOrderId' => $this->traderOrderId ,
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'expected_action' => FinancingOrderHistory::GetTtiId,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
                 return;
             }
             Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);

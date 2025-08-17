@@ -59,7 +59,7 @@ class RejectOrderTest extends TestCase
 
     private static string $apiUrlOrder;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

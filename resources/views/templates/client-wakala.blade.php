@@ -596,24 +596,24 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             --tw-text-opacity: 1;
             color: rgb(22, 78, 99);
         }
-        
+
         /* mPDF-specific adjustments */
         .logo-container {
             text-align: left;
             margin-bottom: 15px;
             padding-right: 20px;
         }
-        
+
         .logo-container img {
             height: 100px;
             width: 100px;
         }
-        
+
         .content-wrapper {
             margin: 0;
             padding: 0;
         }
-        
+
         .footer-text {
             font-size: 16px;
             text-align: center;
