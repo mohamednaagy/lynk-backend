@@ -14,11 +14,26 @@ return new class extends Migration
     public function up()
     {
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
-            $table->dropForeign('inventory_units_commodity_item_id_foreign');
-            $table->dropForeign('inventory_units_local_market_inventory_id_foreign');
-            $table->dropForeign('local_market_inventory_units_last_completed_order_id_foreign');
-            $table->dropForeign('local_market_inventory_units_local_market_inventory_id_foreign');
+            $foreignKeys = [
+                'inventory_units_commodity_item_id_foreign',
+                'inventory_units_local_market_inventory_id_foreign',
+                'local_market_inventory_units_last_completed_order_id_foreign',
+                'local_market_inventory_units_local_market_inventory_id_foreign',
+            ];
+
+            foreach ($foreignKeys as $fk) {
+                $exists = DB::table('information_schema.KEY_COLUMN_USAGE')
+                ->where('TABLE_SCHEMA', DB::getDatabaseName())
+                ->where('TABLE_NAME', 'local_market_inventory_units')
+                ->where('CONSTRAINT_NAME', $fk)
+                ->exists();
+
+                if ($exists) {
+                    $table->dropForeign($fk);
+                }
+            }
         });
+
     }
 
     /**

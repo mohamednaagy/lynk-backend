@@ -12,8 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('local_market_order_has_inventories', function (Blueprint $table) {
-            $table->dropForeign(['supplier_id']);
-            $table->dropForeign('fk_lm_inventory');
+            $foreignKeys = [
+                'supplier_id',
+                'fk_lm_inventory',
+                'local_market_order_has_inventories_supplier_id_foreign',
+                'local_market_order_has_inventories_inventory_id_foreign'
+            ];
+
+            foreach ($foreignKeys as $fk) {
+                $exists = DB::table('information_schema.KEY_COLUMN_USAGE')
+                ->where('TABLE_SCHEMA', DB::getDatabaseName())
+                ->where('TABLE_NAME', 'local_market_order_has_inventories')
+                ->where('CONSTRAINT_NAME', $fk)
+                ->exists();
+
+                if ($exists) {
+                    $table->dropForeign($fk);
+                }
+            }
+
         });
     }
 
