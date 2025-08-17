@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\ApplyOrderFeesJob;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
@@ -125,17 +126,11 @@ class TraderHistoryObserver
      */
     protected function applyOrderFees(TraderHistory $traderHistory): void
     {
-        Log::info('TraderHistoryObserver::applyOrderFees', [
-            'trader_history_id' => $traderHistory->id,
-            'trader_order_id' => $traderHistory->trader_order_id,
-            'action' => $traderHistory->action,
-            'action_class' => $this->feesService->getAction($traderHistory->traderOrder->provider, $traderHistory->action),
-        ]);
         $provider = $traderHistory->traderOrder->provider;
         $status = $traderHistory->action;
         $action = $this->feesService->getAction($provider, $status);
         if ($action) {
-            $action->handle($traderHistory->traderOrder);
+            ApplyOrderFeesJob::dispatch($traderHistory->traderOrder, $action);
         }
     }
 }
