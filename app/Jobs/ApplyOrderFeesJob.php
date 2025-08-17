@@ -23,7 +23,9 @@ class ApplyOrderFeesJob implements ShouldQueue
     public function __construct(
         protected TraderOrder $traderOrder,
         protected FeeActionInterface $feeAction
-    ) {}
+    ) {
+        $this->onQueue('apply-order-fees');
+    }
 
     /**
      * Execute the job.
@@ -60,7 +62,7 @@ class ApplyOrderFeesJob implements ShouldQueue
 
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.$this->traderOrder->order->company_id;
+        return __CLASS__.'_'.$this->traderOrder->financing_order_id;
     }
 
     public function middleware()
