@@ -283,28 +283,28 @@ class BursamV1Driver implements TraderInterface
                 $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
 
-                $this->storeOrderDocumentAsPdf(
-                    'transfer-ownership-to-lender',
-                    [
-                        'order_id' => $traderOrder->order->id,
-                        'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                        'reference_number' => $traderOrder->id,
-                        'trader_order_reference' => $traderOrder->reference,
-                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                        'order_number' => $traderOrder->financing_order_id,
-                        'amount' => $amount,
-                        'previous_owner' => $products->map(
-                            fn ($item) => $item->getPreviousOwnerAsArray()
-                        )
-                            ->flatten()
-                            ->implode('،'),
-                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
-                        'date' => $currentTimeInRiyadhTz->toDateString(),
-                        'time' => $currentTimeInRiyadhTz->toTimeString(),
-                    ],
-                    $traderOrder,
-                    TraderOrderMediaCollection::TransferOwnershipToLender
-                );
+                // $this->storeOrderDocumentAsPdf(
+                //     'transfer-ownership-to-lender',
+                //     [
+                //         'order_id' => $traderOrder->order->id,
+                //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
+                //         'reference_number' => $traderOrder->id,
+                //         'trader_order_reference' => $traderOrder->reference,
+                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                //         'order_number' => $traderOrder->financing_order_id,
+                //         'amount' => $amount,
+                //         'previous_owner' => $products->map(
+                //             fn ($item) => $item->getPreviousOwnerAsArray()
+                //         )
+                //             ->flatten()
+                //             ->implode('،'),
+                //         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+                //         'date' => $currentTimeInRiyadhTz->toDateString(),
+                //         'time' => $currentTimeInRiyadhTz->toTimeString(),
+                //     ],
+                //     $traderOrder,
+                //     TraderOrderMediaCollection::TransferOwnershipToLender
+                // );
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
@@ -351,22 +351,22 @@ class BursamV1Driver implements TraderInterface
 
                 $customerName = $traderOrder->order->customer_name;
 
-                $this->storeOrderDocumentAsPdf(
-                    'selling-commodity-to-customer',
-                    [
-                        'reference_number' => $traderOrder->id,
-                        'trader_order_reference' => $traderOrder->reference,
-                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                        'order_number' => $traderOrder->financing_order_id,
-                        'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                        'amount' => $amount,
-                        'customer_name' => $customerName,
-                        'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
-                        'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
-                    ],
-                    $traderOrder,
-                    TraderOrderMediaCollection::SellingCommodityToCustomer,
-                );
+                // $this->storeOrderDocumentAsPdf(
+                //     'selling-commodity-to-customer',
+                //     [
+                //         'reference_number' => $traderOrder->id,
+                //         'trader_order_reference' => $traderOrder->reference,
+                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                //         'order_number' => $traderOrder->financing_order_id,
+                //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
+                //         'amount' => $amount,
+                //         'customer_name' => $customerName,
+                //         'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
+                //         'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
+                //     ],
+                //     $traderOrder,
+                //     TraderOrderMediaCollection::SellingCommodityToCustomer,
+                // );
 
                 $this->createTraderOrderHistory(
                     $traderOrder,

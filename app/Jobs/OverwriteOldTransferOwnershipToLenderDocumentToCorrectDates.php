@@ -60,23 +60,23 @@ class OverwriteOldTransferOwnershipToLenderDocumentToCorrectDates implements Sho
                     $productName = $products->pluck('product')->implode($separator);
 
                     $trader = Trader::driver($traderOrder->provider);
-                    $trader->storeOrderDocumentAsPdf(
-                        'transfer-ownership-to-lender',
-                        [
-                            'order_id' => $traderOrder->order->id,
-                            'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
-                            'reference_number' => $traderOrder->id,
-                            'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
-                            'order_number' => $traderOrder->financing_order_id,
-                            'amount' => $amount,
-                            'previous_owner' => $previousOwner,
-                            'product_name' => $productName,
-                            'date' => $date->tz('Asia/Riyadh')->toDateString(),
-                            'time' => $date->tz('Asia/Riyadh')->toTimeString(),
-                        ],
-                        $traderOrder,
-                        TraderOrderMediaCollection::TransferOwnershipToLender
-                    );
+                    // $trader->storeOrderDocumentAsPdf(
+                    //     'transfer-ownership-to-lender',
+                    //     [
+                    //         'order_id' => $traderOrder->order->id,
+                    //         'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
+                    //         'reference_number' => $traderOrder->id,
+                    //         'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
+                    //         'order_number' => $traderOrder->financing_order_id,
+                    //         'amount' => $amount,
+                    //         'previous_owner' => $previousOwner,
+                    //         'product_name' => $productName,
+                    //         'date' => $date->tz('Asia/Riyadh')->toDateString(),
+                    //         'time' => $date->tz('Asia/Riyadh')->toTimeString(),
+                    //     ],
+                    //     $traderOrder,
+                    //     TraderOrderMediaCollection::TransferOwnershipToLender
+                    // );
                 });
             });
     }

@@ -86,19 +86,19 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         $currentTimeInUtcTz = CarbonImmutable::now();
         $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
         $financeOrder = $traderOrder->order;
-        $trader->storeOrderDocumentAsPdf(
-            'local-commodity-market.selling-pledge-certificate',
-            [
-                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                'trader_order_reference' => $traderOrder->reference,
-                'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
-                'customer_name' => $financeOrder->customer_name,
-                'current_date' => $currentTimeInRiyadhTz->toDateString(),
-                'current_time' => $currentTimeInRiyadhTz->toTimeString(),
-            ],
-            $traderOrder,
-            TraderOrderMediaCollection::LynkSalePledgeCertificate,
-        );
+        // $trader->storeOrderDocumentAsPdf(
+        //     'local-commodity-market.selling-pledge-certificate',
+        //     [
+        //         'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
+        //         'trader_order_reference' => $traderOrder->reference,
+        //         'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
+        //         'customer_name' => $financeOrder->customer_name,
+        //         'current_date' => $currentTimeInRiyadhTz->toDateString(),
+        //         'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+        //     ],
+        //     $traderOrder,
+        //     TraderOrderMediaCollection::LynkSalePledgeCertificate,
+        // );
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::MurabahaSaleCompleted

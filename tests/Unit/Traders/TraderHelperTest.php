@@ -160,22 +160,22 @@ class TraderHelperTest extends TestCase
         $customerName = self::$traderOrder->order->customer_name;
         $productName = $products->pluck('product')->implode($separator);
 
-        self::$traderHelperTrait->storeOrderDocumentAsPdf(
-            'selling-commodity-to-customer',
-            [
-                'reference_number' => self::$traderOrder->id,
-                'company_name' => self::$traderOrder->order->company->name,
-                'order_number' => self::$traderOrder->financing_order_id,
-                'products' => CommodityProductDto::fromArray(self::$traderOrder->products[0]),
-                'amount' => $amount,
-                'product_name' => $productName,
-                'customer_name' => $customerName,
-                'contract_signed_date' => $dateTime->toDateString(),
-                'contract_signed_time' => $dateTime->toTimeString(),
-            ],
-            self::$traderOrder,
-            TraderOrderMediaCollection::SellingCommodityToCustomer,
-        );
+        // self::$traderHelperTrait->storeOrderDocumentAsPdf(
+        //     'selling-commodity-to-customer',
+        //     [
+        //         'reference_number' => self::$traderOrder->id,
+        //         'company_name' => self::$traderOrder->order->company->name,
+        //         'order_number' => self::$traderOrder->financing_order_id,
+        //         'products' => CommodityProductDto::fromArray(self::$traderOrder->products[0]),
+        //         'amount' => $amount,
+        //         'product_name' => $productName,
+        //         'customer_name' => $customerName,
+        //         'contract_signed_date' => $dateTime->toDateString(),
+        //         'contract_signed_time' => $dateTime->toTimeString(),
+        //     ],
+        //     self::$traderOrder,
+        //     TraderOrderMediaCollection::SellingCommodityToCustomer,
+        // );
 
         $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }

@@ -78,28 +78,28 @@ class OverwriteOldLenderCertificateForBursaV2Orders implements ShouldQueue
                 $timeInstanceInAsiaRiyadhTz = $timeInstanceInUtcTz->timezone('Asia/Riyadh');
                 $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
 
-                $this->storeOrderDocumentAsPdf(
-                    'transfer-ownership-to-lender',
-                    [
-                        'order_id' => $traderOrder->order->id,
-                        'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                        'reference_number' => $traderOrder->id,
-                        'trader_order_reference' => $traderOrder->reference,
-                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                        'order_number' => $traderOrder->financing_order_id,
-                        'amount' => $amount,
-                        'previous_owner' => $products->map(
-                            fn ($item) => $item->getPreviousOwnerAsArray()
-                        )
-                            ->flatten()
-                            ->implode('،'),
-                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
-                        'date' => $timeInstanceInAsiaRiyadhTz->toDateString(),
-                        'time' => $timeInstanceInAsiaRiyadhTz->toTimeString(),
-                    ],
-                    $traderOrder,
-                    TraderOrderMediaCollection::TransferOwnershipToLender
-                );
+                // $this->storeOrderDocumentAsPdf(
+                //     'transfer-ownership-to-lender',
+                //     [
+                //         'order_id' => $traderOrder->order->id,
+                //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
+                //         'reference_number' => $traderOrder->id,
+                //         'trader_order_reference' => $traderOrder->reference,
+                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                //         'order_number' => $traderOrder->financing_order_id,
+                //         'amount' => $amount,
+                //         'previous_owner' => $products->map(
+                //             fn ($item) => $item->getPreviousOwnerAsArray()
+                //         )
+                //             ->flatten()
+                //             ->implode('،'),
+                //         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+                //         'date' => $timeInstanceInAsiaRiyadhTz->toDateString(),
+                //         'time' => $timeInstanceInAsiaRiyadhTz->toTimeString(),
+                //     ],
+                //     $traderOrder,
+                //     TraderOrderMediaCollection::TransferOwnershipToLender
+                // );
 
                 $media = $traderOrder->getMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
 

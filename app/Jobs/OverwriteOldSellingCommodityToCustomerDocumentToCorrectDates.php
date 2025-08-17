@@ -61,22 +61,22 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                     $productName = $products->pluck('product')->implode($separator);
 
                     $trader = Trader::driver($traderOrder->provider);
-                    $trader->storeOrderDocumentAsPdf(
-                        'selling-commodity-to-customer',
-                        [
-                            'reference_number' => $traderOrder->id,
-                            'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                            'order_number' => $traderOrder->financing_order_id,
-                            'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
-                            'amount' => $amount,
-                            'product_name' => $productName,
-                            'customer_name' => $customerName,
-                            'contract_signed_date' => $date->tz('Asia/Riyadh')->toDateString(),
-                            'contract_signed_time' => $date->tz('Asia/Riyadh')->toTimeString(),
-                        ],
-                        $traderOrder,
-                        TraderOrderMediaCollection::SellingCommodityToCustomer,
-                    );
+                    // $trader->storeOrderDocumentAsPdf(
+                    //     'selling-commodity-to-customer',
+                    //     [
+                    //         'reference_number' => $traderOrder->id,
+                    //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
+                    //         'order_number' => $traderOrder->financing_order_id,
+                    //         'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
+                    //         'amount' => $amount,
+                    //         'product_name' => $productName,
+                    //         'customer_name' => $customerName,
+                    //         'contract_signed_date' => $date->tz('Asia/Riyadh')->toDateString(),
+                    //         'contract_signed_time' => $date->tz('Asia/Riyadh')->toTimeString(),
+                    //     ],
+                    //     $traderOrder,
+                    //     TraderOrderMediaCollection::SellingCommodityToCustomer,
+                    // );
                 });
             });
     }
