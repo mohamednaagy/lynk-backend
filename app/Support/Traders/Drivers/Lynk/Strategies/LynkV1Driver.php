@@ -28,7 +28,6 @@ use App\Models\TraderOrder;
 use App\Models\User;
 use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
-use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\Deliverable;
 use App\Support\Traders\Contracts\SellConfirmationCertifiable;
@@ -150,23 +149,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function createSellConfirmationDocument(TraderOrder $traderOrder): void
     {
         try {
-            $trader = Trader::driver($traderOrder->provider);
-            $financeOrder = $traderOrder->order;
-
-            // $trader->storeOrderDocumentAsPdf(
-            //     'local-commodity-market.sell-confirmation-certificate',
-            //     [
-            //         'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-            //         'trader_order_reference' => $traderOrder->reference,
-            //         'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
-            //         'customer_name' => $financeOrder->customer_name,
-            //         'current_date' => saudi_now('Y-m-d'),
-            //         'current_time' => saudi_now('H:i:s'),
-            //     ],
-            //     $traderOrder,
-            //     TraderOrderMediaCollection::SellConfirmationDocument,
-            // );
-
             $this->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachSellConfirmationDocument,
