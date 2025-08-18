@@ -62,7 +62,7 @@ class ApplyOrderFeesJob implements ShouldQueue
 
     public function uniqueId(): string
     {
-        return __CLASS__.'_'.$this->traderOrder->financing_order_id;
+        return __CLASS__.'_'.$this->traderOrder->order->company_id;
     }
 
     public function middleware()
