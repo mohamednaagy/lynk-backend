@@ -6,9 +6,26 @@ use App\Support\DocumentEngine\BasePdfGenerator;
 
 class BursamStbCertificatePdf extends BasePdfGenerator
 {
-    protected function prepareData(array $context): array
+    public function getStorageCallback(): callable
     {
-        return $context;
+        return function ($path) {
+            return storage_path($path);
+        };
+    }
+
+    public function isGeneratedBefore(): bool
+    {
+        return false;
+    }
+
+    public function getGeneratedBeforePath(): string
+    {
+        return '';
+    }
+
+    protected function prepareData(): array
+    {
+        return [];
     }
 
     protected function getTemplatePath(): string

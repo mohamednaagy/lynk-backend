@@ -9,6 +9,13 @@ class ClientWakalaPdf extends BasePdfGenerator
 {
     use HasTraderOrder;
 
+    public function getStorageCallback(): callable
+    {
+        return function ($path) {
+            return storage_path($path);
+        };
+    }
+
     public function isGeneratedBefore(): bool
     {
         return false;
