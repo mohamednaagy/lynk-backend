@@ -383,31 +383,8 @@ class DmccV1Driver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
-            $separator = ' و ';
-            $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
-            $previousOwner = $products->pluck('previous_owner')->implode($separator);
-            $productName = $products->pluck('product')->implode($separator);
             $date = CarbonImmutable::now();
             $data['created_at'] = $date->clone();
-
-            // $this->storeOrderDocumentAsPdf(
-            //     'transfer-ownership-to-lender',
-            //     [
-            //         'order_id' => $traderOrder->order->id,
-            //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-            //         'reference_number' => $traderOrder->id,
-            //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-            //         'order_number' => $traderOrder->financing_order_id,
-            //         'amount' => $amount,
-            //         'previous_owner' => $previousOwner,
-            //         'product_name' => $productName,
-            //         'date' => $date->tz('Asia/Riyadh')->toDateString(),
-            //         'time' => $date->tz('Asia/Riyadh')->toTimeString(),
-            //     ],
-            //     $traderOrder,
-            //     TraderOrderMediaCollection::TransferOwnershipToLender
-            // );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {

@@ -2,6 +2,8 @@
 
 namespace App\Support\DocumentEngine;
 
+use App\Support\PdfGenerator\PdfGenerator;
+
 abstract class BasePdfGenerator
 {
     protected $context = [];
@@ -29,6 +31,8 @@ abstract class BasePdfGenerator
 
     public function beforeGenerate(): void {}
 
+    abstract protected function getStorageCallback(): callable;
+
     abstract protected function isGeneratedBefore(): bool;
 
     abstract protected function getGeneratedBeforePath(): string;
@@ -45,5 +49,11 @@ abstract class BasePdfGenerator
     }
 
     // Shared PDF export logic (MPDF, DomPDF, Browserless, etc.)
-    protected function exportPdf(string $html): void {}
+    protected function exportPdf(string $html): mixed
+    {
+        return PdfGenerator::outputFromHtml(
+            $html,
+            $this->getStorageCallback()
+        );
+    }
 }

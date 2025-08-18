@@ -278,34 +278,7 @@ class BursamV1Driver implements TraderInterface
             $timeLimitService->setContractSignTimeLimit($traderOrder);
 
             $this->withLocale('ar', function () use ($traderOrder) {
-                $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
                 $currentTimeInUtcTz = CarbonImmutable::now();
-                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $products = collect($traderOrder->products)->map(fn ($product) => CommodityProductDto::fromArray($product));
-
-                // $this->storeOrderDocumentAsPdf(
-                //     'transfer-ownership-to-lender',
-                //     [
-                //         'order_id' => $traderOrder->order->id,
-                //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                //         'reference_number' => $traderOrder->id,
-                //         'trader_order_reference' => $traderOrder->reference,
-                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                //         'order_number' => $traderOrder->financing_order_id,
-                //         'amount' => $amount,
-                //         'previous_owner' => $products->map(
-                //             fn ($item) => $item->getPreviousOwnerAsArray()
-                //         )
-                //             ->flatten()
-                //             ->implode('،'),
-                //         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
-                //         'date' => $currentTimeInRiyadhTz->toDateString(),
-                //         'time' => $currentTimeInRiyadhTz->toTimeString(),
-                //     ],
-                //     $traderOrder,
-                //     TraderOrderMediaCollection::TransferOwnershipToLender
-                // );
-
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,

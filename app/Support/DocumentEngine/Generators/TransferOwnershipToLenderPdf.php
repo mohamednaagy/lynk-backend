@@ -2,6 +2,7 @@
 
 namespace App\Support\DocumentEngine\Generators;
 
+use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Trader;
 use App\Support\DocumentEngine\BasePdfGenerator;
 use App\Support\DocumentEngine\Traits\HasProducts;
@@ -11,14 +12,16 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
 {
     use HasProducts, HasTraderOrder;
 
+    protected $collectionName = TraderOrderMediaCollection::TransferOwnershipToLender;
+
     public function isGeneratedBefore(): bool
     {
-        return false;
+        return $this->getTraderOrder()->hasMedia($this->collectionName);
     }
 
     public function getGeneratedBeforePath(): string
     {
-        return '';
+        return $this->getTraderOrder()->getMedia($this->collectionName)->first()->getPath();
     }
 
     protected function prepareData()
@@ -68,5 +71,12 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
         }
 
         throw new \Exception('Trader order provider not found');
+    }
+
+    protected function getStorageCallback(): callable
+    {
+        return function ($fileResource) {
+            $this->attachDocumentToOrder($fileResource, $this->collectionName);
+        };
     }
 }
