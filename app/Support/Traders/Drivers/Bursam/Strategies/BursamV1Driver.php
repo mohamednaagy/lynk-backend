@@ -416,42 +416,11 @@ class BursamV1Driver implements TraderInterface
                 'otc_data' => $response->json(),
             ]);
 
-            $currentTimeInUtcTz = CarbonImmutable::now();
-            $productName = $response->json('PNAME');
-            $otcOwnerShipTemplate = view('bursam-templates.otc-certificate-template', [
-                'e_cert_no' => $response->json('ECERTNO'),
-                'seller' => $response->json('SELLER'),
-                'buyer' => $response->json('BUYER'),
-                'murabaha_value' => $response->json('MURABAHAVALUE'),
-                'total_value' => number_unformat($response->json('TOTALVALUE')),
-                'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
-                'currency' => $response->json('CURRENCY'),
-                //            'price' => $response->json('PRICE'),
-                //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-                'reporting_time_date' => $response->json('REPORTINGTIMEDATE').'  Malaysia Time (MYT)',
-                'value_date' => $response->json('VALUEDATE').'  Malaysia Time (MYT)',
-                'p_name' => in_array($productName, BursamProductCode::getValues())
-                    ? BursamProductCode::fromValue($productName)->description
-                    : $productName,
-                'p_volume' => $response->json('PVOLUME'),
-                'line' => $response->json('LINE'),
-            ])->render();
-
-            PdfGenerator::outputFromHtml(
-                $otcOwnerShipTemplate,
-                function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
-                    return $traderOrder
-                        ->addMediaFromStream($fileResource)
-                        ->usingFileName("otc-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
-                        ->toMediaCollection(TraderOrderMediaCollection::BursamSellingCommodityToCustomer);
-                }
-            );
-
             $this->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::GetOwnershipToCustomerCertificate,
                 [
-                    'created_at' => $currentTimeInUtcTz,
+                    'created_at' => CarbonImmutable::now(),
                 ]
             );
         } else {
@@ -465,7 +434,6 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
-
     }
 
     public function getStbCertificateDetails(TraderOrder $traderOrder)
