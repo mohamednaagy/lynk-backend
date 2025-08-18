@@ -24,7 +24,6 @@ use App\Models\User;
 use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\DataTransferObjects\CommodityProductDto;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\Clients\BursamClient;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
@@ -445,41 +444,11 @@ class BursamV1Driver implements TraderInterface
                 'original_stb' => $response->json(),
             ]);
 
-            $currentTimeInUtcTz = CarbonImmutable::now();
-            $productName = $response->json('PNAME');
-            $stbOwnerShipTemplate = view('bursam-templates.stb-certificate-template', [
-                'e_cert_no' => $response->json('ECERTNO'),
-                'seller' => $response->json('SELLER'),
-                'buyer' => $response->json('BUYER'),
-                'total_value' => number_unformat($response->json('TOTALVALUE')),
-                'total_value_myr_equivalent' => number_unformat($response->json('PRICE_MYR_EQUIVALENT')) * number_unformat($response->json('PVOLUME')),
-                'currency' => $response->json('CURRENCY'),
-                //            'price' => $response->json('PRICE'),
-                //            'price_myr_equivalent' => $response->json('PRICE_MYR_EQUIVALENT'),
-                'selling_time_date' => $response->json('SELLINGTIMEDATE').'  Malaysia Time (MYT)',
-                'value_date' => $response->json('VALUEDATE').'  Malaysia Date (MYT)',
-                'p_name' => in_array($productName, BursamProductCode::getValues())
-                    ? BursamProductCode::fromValue($productName)->description
-                    : $productName,
-                'p_volume' => $response->json('PVOLUME'),
-                'line' => $response->json('LINE'),
-            ])->render();
-
-            PdfGenerator::outputFromHtml(
-                $stbOwnerShipTemplate,
-                function ($fileResource) use ($traderOrder, $currentTimeInUtcTz) {
-                    return $traderOrder
-                        ->addMediaFromStream($fileResource)
-                        ->usingFileName("stb-cert-{$traderOrder->reference}-{$currentTimeInUtcTz->toDateTimeString()}.pdf")
-                        ->toMediaCollection(TraderOrderMediaCollection::BursamTtiHoldingCertificate);
-                }
-            );
-
             $this->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::GetSellingToMarketCertificate,
                 [
-                    'created_at' => $currentTimeInUtcTz,
+                    'created_at' => CarbonImmutable::now(),
                 ]
             );
         } else {
@@ -494,7 +463,6 @@ class BursamV1Driver implements TraderInterface
                 ]
             );
         }
-
     }
 
     /**
