@@ -4,7 +4,6 @@ namespace App\Support\Traders\Drivers\Dmcc\Strategies;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
@@ -313,28 +312,6 @@ class DmccV1Driver implements TraderInterface
                 ->toImmutable();
 
             $data['created_at'] = $dateTime->clone();
-            $separator = ' و ';
-            $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
-            $customerName = $traderOrder->order->customer_name;
-            $productName = $products->pluck('product')->implode($separator);
-
-            // $this->storeOrderDocumentAsPdf(
-            //     'selling-commodity-to-customer',
-            //     [
-            //         'reference_number' => $traderOrder->id,
-            //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-            //         'order_number' => $traderOrder->financing_order_id,
-            //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-            //         'amount' => $amount,
-            //         'product_name' => $productName,
-            //         'customer_name' => $customerName,
-            //         'contract_signed_date' => $dateTime->tz('Asia/Riyadh')->toDateString(),
-            //         'contract_signed_time' => $dateTime->tz('Asia/Riyadh')->toTimeString(),
-            //     ],
-            //     $traderOrder,
-            //     TraderOrderMediaCollection::SellingCommodityToCustomer,
-            // );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument, $data);
         } catch (Exception $exception) {

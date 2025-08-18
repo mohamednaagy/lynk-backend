@@ -5,12 +5,13 @@ namespace App\Support\DocumentEngine\Generators;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Trader;
 use App\Support\DocumentEngine\BasePdfGenerator;
+use App\Support\DocumentEngine\Traits\HasLynkCommodityProducts;
 use App\Support\DocumentEngine\Traits\HasProducts;
 use App\Support\DocumentEngine\Traits\HasTraderOrder;
 
 class TransferOwnershipToLenderPdf extends BasePdfGenerator
 {
-    use HasProducts, HasTraderOrder;
+    use HasLynkCommodityProducts, HasProducts, HasTraderOrder;
 
     protected $collectionName = TraderOrderMediaCollection::TransferOwnershipToLender;
 
@@ -49,7 +50,7 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
         ];
 
         if ($traderOrder->provider->isTrader(Trader::Lynk)) {
-            $data['products'] = $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products);
+            $data['products'] = $this->transformProductsToLynkCommodityProductsDTO($traderOrder->products);
             $data['trade_order'] = $traderOrder;
             $data['financing_order'] = $traderOrder->order;
         } else {

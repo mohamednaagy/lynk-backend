@@ -194,33 +194,12 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     ->where('action', FinancingOrderHistory::ContractSigned)
                     ->first()
                     ?->created_at;
-                $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
-                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
 
-                $customerName = $traderOrder->order->customer_name;
-
-                // $this->storeOrderDocumentAsPdf(
-                //     'local-commodity-market.selling-commodity-to-customer',
-                //     [
-                //         'reference_number' => $traderOrder->id,
-                //         'trader_order_reference' => $traderOrder->reference,
-                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                //         'order_number' => $traderOrder->financing_order_id,
-                //         'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                //         'amount' => $amount,
-                //         'customer_name' => $customerName,
-                //         'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
-                //         'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
-                //     ],
-                //     $traderOrder,
-                //     TraderOrderMediaCollection::SellingCommodityToCustomer,
-                // );
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
                     [
-                        'created_at' => $currentTimeInUtcTz,
+                        'created_at' => CarbonImmutable::parse($dateTime),
                     ]
                 );
             });

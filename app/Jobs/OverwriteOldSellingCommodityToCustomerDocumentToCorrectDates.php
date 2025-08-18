@@ -5,8 +5,6 @@ namespace App\Jobs;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
-use App\Support\DataTransferObjects\CommodityProductDto;
-use App\Support\Traders\Facades\Trader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -53,30 +51,6 @@ class OverwriteOldSellingCommodityToCustomerDocumentToCorrectDates implements Sh
                     if ($traderOrder->hasMedia(TraderOrderMediaCollection::SellingCommodityToCustomer)) {
                         $traderOrder->clearMediaCollection(TraderOrderMediaCollection::SellingCommodityToCustomer);
                     }
-
-                    $separator = ' و ';
-                    $products = collect($traderOrder->products);
-                    $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
-                    $customerName = $traderOrder->order->customer_name;
-                    $productName = $products->pluck('product')->implode($separator);
-
-                    $trader = Trader::driver($traderOrder->provider);
-                    // $trader->storeOrderDocumentAsPdf(
-                    //     'selling-commodity-to-customer',
-                    //     [
-                    //         'reference_number' => $traderOrder->id,
-                    //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                    //         'order_number' => $traderOrder->financing_order_id,
-                    //         'products' => CommodityProductDto::fromArray($traderOrder->products[0]),
-                    //         'amount' => $amount,
-                    //         'product_name' => $productName,
-                    //         'customer_name' => $customerName,
-                    //         'contract_signed_date' => $date->tz('Asia/Riyadh')->toDateString(),
-                    //         'contract_signed_time' => $date->tz('Asia/Riyadh')->toTimeString(),
-                    //     ],
-                    //     $traderOrder,
-                    //     TraderOrderMediaCollection::SellingCommodityToCustomer,
-                    // );
                 });
             });
     }

@@ -9,7 +9,6 @@ use App\Enums\Role;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\Traders\TradingStrategies\Dmcc\DmccStrategyV1;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
@@ -146,38 +145,6 @@ class TraderHelperTest extends TestCase
         self::$traderHelperTrait->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         $this->assertEquals($count + 1, $traderOrder->traderHistories()->count());
-    }
-
-    public function test_trader_helper_store_order_document_as_pdf_successfully()
-    {
-        $separator = ' و ';
-        $dateTime = now();
-
-        $products = collect(self::$traderOrder->products);
-
-        $amount = self::$traderOrder->order->selling_price->formatByDecimal();
-
-        $customerName = self::$traderOrder->order->customer_name;
-        $productName = $products->pluck('product')->implode($separator);
-
-        // self::$traderHelperTrait->storeOrderDocumentAsPdf(
-        //     'selling-commodity-to-customer',
-        //     [
-        //         'reference_number' => self::$traderOrder->id,
-        //         'company_name' => self::$traderOrder->order->company->name,
-        //         'order_number' => self::$traderOrder->financing_order_id,
-        //         'products' => CommodityProductDto::fromArray(self::$traderOrder->products[0]),
-        //         'amount' => $amount,
-        //         'product_name' => $productName,
-        //         'customer_name' => $customerName,
-        //         'contract_signed_date' => $dateTime->toDateString(),
-        //         'contract_signed_time' => $dateTime->toTimeString(),
-        //     ],
-        //     self::$traderOrder,
-        //     TraderOrderMediaCollection::SellingCommodityToCustomer,
-        // );
-
-        $this->assertNotNull(self::$financingOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
     }
 
     public function test_trader_helper_attach_document_to_order_successfully()

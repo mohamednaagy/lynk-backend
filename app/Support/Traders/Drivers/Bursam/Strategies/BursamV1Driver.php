@@ -8,7 +8,6 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\BursamProductCode;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\OrderCancellationStatus;
 use App\Enums\TraderOrderCancellationStatus;
 use App\Enums\TraderOrderCancelReason;
@@ -305,34 +304,12 @@ class BursamV1Driver implements TraderInterface
                     ->where('action', FinancingOrderHistory::ContractSigned)
                     ->first()
                     ?->created_at;
-                $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
-                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
-
-                $customerName = $traderOrder->order->customer_name;
-
-                // $this->storeOrderDocumentAsPdf(
-                //     'selling-commodity-to-customer',
-                //     [
-                //         'reference_number' => $traderOrder->id,
-                //         'trader_order_reference' => $traderOrder->reference,
-                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                //         'order_number' => $traderOrder->financing_order_id,
-                //         'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                //         'amount' => $amount,
-                //         'customer_name' => $customerName,
-                //         'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
-                //         'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
-                //     ],
-                //     $traderOrder,
-                //     TraderOrderMediaCollection::SellingCommodityToCustomer,
-                // );
 
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
                     [
-                        'created_at' => $currentTimeInUtcTz,
+                        'created_at' => CarbonImmutable::parse($dateTime),
                     ]
                 );
             });
