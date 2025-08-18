@@ -128,36 +128,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     {
         try {
             $this->withLocale('ar', function () use ($traderOrder) {
-                $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
-                $currentTimeInUtcTz = CarbonImmutable::now();
-                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
                 $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
-                // $this->storeOrderDocumentAsPdf(
-                //     'local-commodity-market.transfer-ownership-to-lender',
-                //     [
-                //         'order_id' => $traderOrder->order->id,
-                //         'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
-                //         'reference_number' => $traderOrder->id,
-                //         'trader_order_reference' => $traderOrder->reference,
-                //         'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                //         'order_number' => $traderOrder->financing_order_id,
-                //         'amount' => $amount,
-                //         'previous_owner' => $products->map(
-                //             fn ($item) => $item->getPreviousOwnerAsArray()
-                //         )
-                //             ->flatten()
-                //             ->implode('،'),
-                //         'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
-                //         'date' => $currentTimeInRiyadhTz->toDateString(),
-                //         'time' => $currentTimeInRiyadhTz->toTimeString(),
-                //         'trade_order' => $traderOrder,
-                //         'financing_order' => $traderOrder->order,
-                //     ],
-                //     $traderOrder,
-                //     TraderOrderMediaCollection::TransferOwnershipToLender
-                // );
-
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
