@@ -3,12 +3,25 @@
 namespace App\Support\DocumentEngine\Generators;
 
 use App\Support\DocumentEngine\BasePdfGenerator;
+use App\Support\DocumentEngine\Traits\HasTraderOrder;
 
 class ClientWakalaPdf extends BasePdfGenerator
 {
-    protected function prepareData(array $context): array
+    use HasTraderOrder;
+
+    public function isGeneratedBefore(): bool
     {
-        return $context;
+        return false;
+    }
+
+    public function getGeneratedBeforePath(): string
+    {
+        return '';
+    }
+
+    protected function prepareData()
+    {
+        return $this->context;
     }
 
     protected function getTemplatePath(): string
