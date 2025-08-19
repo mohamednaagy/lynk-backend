@@ -2,6 +2,7 @@
 
 namespace App\Jobs\LocalMarket;
 
+use App\Models\CommodityItem;
 use App\Services\LocalMarket\InventoryService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,6 +16,14 @@ class DeleteCommodityItem implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    private CommodityItem $commodityItem;
+
+    
+    public function __construct(CommodityItem $commodityItem)
+    {
+        $this->commodityItem = $commodityItem;
+    }
+    
     /**
      * Execute the job.
      */
