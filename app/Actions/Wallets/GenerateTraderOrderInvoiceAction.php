@@ -5,7 +5,6 @@ namespace App\Actions\Wallets;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\GenerateTraderOrderInvoice;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
@@ -58,6 +57,6 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
             $creationFeeTransaction
         );
 
-        $this->generateZatcaInvoice->handle($invoiceSpecs, TraderOrderMediaCollection::ZatcaInvoice);
+        $this->generateZatcaInvoice->handle($invoiceSpecs);
     }
 }

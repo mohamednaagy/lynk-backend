@@ -69,8 +69,7 @@ class GenerateZatcaInvoiceIfMissing implements ShouldQueue
             }
 
             app(GenerateZatcaInvoice::class)->handle(
-                $traderOrder,
-                creationFeeTransaction: $this->transaction
+                $traderOrder
             );
         } catch (\Throwable $th) {
             throw new \Exception(sprintf('Transaction #%s cannot create zatca', $this->transaction->id), 0, $th);

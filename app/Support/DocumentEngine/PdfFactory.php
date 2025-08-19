@@ -6,11 +6,8 @@ use App\Support\DocumentEngine\Generators\BursamBidCertificatePdf;
 use App\Support\DocumentEngine\Generators\BursamOtcCertificatePdf;
 use App\Support\DocumentEngine\Generators\BursamStbCertificatePdf;
 use App\Support\DocumentEngine\Generators\ClientWakalaPdf;
-use App\Support\DocumentEngine\Generators\LenderWakalaPdf;
-use App\Support\DocumentEngine\Generators\LynkSalePledgeCertificatePdf;
 use App\Support\DocumentEngine\Generators\SellConfirmationDocumentPdf;
 use App\Support\DocumentEngine\Generators\SellingCommodityToCustomerPdf;
-use App\Support\DocumentEngine\Generators\TraderOrderZatcaInvoicePdf;
 use App\Support\DocumentEngine\Generators\TransferOwnershipToLenderPdf;
 use App\Support\DocumentEngine\Generators\VoucherReceiptPdf;
 use App\Support\DocumentEngine\Generators\ZatcaInvoicePdf;
@@ -20,14 +17,11 @@ class PdfFactory
 {
     protected static array $map = [
         'client_wakala' => ClientWakalaPdf::class,
-        'lender_wakala' => LenderWakalaPdf::class,
         'transfer_ownership_to_lender' => TransferOwnershipToLenderPdf::class,
         'selling_commodity_to_customer' => SellingCommodityToCustomerPdf::class,
-        'lynk_sale_pledge_certificate' => LynkSalePledgeCertificatePdf::class,
         'sell_confirmation_document' => SellConfirmationDocumentPdf::class,
         'voucher_receipt' => VoucherReceiptPdf::class,
         'zatca_invoice' => ZatcaInvoicePdf::class,
-        'trader_order_zatca_invoice' => TraderOrderZatcaInvoicePdf::class,
         'bursam_bid_certificate' => BursamBidCertificatePdf::class,
         'bursam_stb_certificate' => BursamStbCertificatePdf::class,
         'bursam_otc_certificate' => BursamOtcCertificatePdf::class,

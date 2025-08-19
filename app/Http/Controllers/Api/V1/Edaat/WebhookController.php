@@ -7,7 +7,6 @@ use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\EdaatInvoiceStatus;
-use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
@@ -81,7 +80,7 @@ class WebhookController extends Controller
                         $vatPercentage
                     );
 
-                    app(GenerateZatcaInvoice::class)->handle($invoiceSpecs, TransactionMediaCollection::ZatcaInvoice);
+                    app(GenerateZatcaInvoice::class)->handle($invoiceSpecs);
                 }
             }
         });
