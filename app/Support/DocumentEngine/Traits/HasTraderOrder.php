@@ -2,7 +2,6 @@
 
 namespace App\Support\DocumentEngine\Traits;
 
-use App\Models\TraderOrder;
 use App\Support\Traders\TraderManager;
 
 trait HasTraderOrder
@@ -11,7 +10,7 @@ trait HasTraderOrder
 
     public function isTraderOrderInContext(): bool
     {
-        return isset($this->context['trader_order']) && $this->context['trader_order'] !== null;
+        return isset($this->context['traderOrder']) && $this->context['traderOrder'] !== null;
     }
 
     public function getTraderOrder()
@@ -21,7 +20,7 @@ trait HasTraderOrder
         }
 
         if ($this->traderOrder === null) {
-            $this->traderOrder = TraderOrder::where('order_id', $this->getTraderOrderFromContext())->first();
+            $this->traderOrder = $this->getTraderOrderFromContext();
         }
 
         return $this->traderOrder;
@@ -29,7 +28,7 @@ trait HasTraderOrder
 
     private function getTraderOrderFromContext()
     {
-        return $this->context['trader_order'];
+        return $this->context['traderOrder'];
     }
 
     public function attachDocumentToOrder($document, $collectionName, $type = null, $originalFileName = null): void

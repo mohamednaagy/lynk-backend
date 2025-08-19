@@ -27,9 +27,9 @@ abstract class BasePdfGenerator
 
     abstract protected function getTemplatePath(): string;
 
-    public function afterGenerate(): void {}
+    protected function afterGenerate(): void {}
 
-    public function beforeGenerate(): void {}
+    protected function beforeGenerate(): void {}
 
     abstract protected function getStorageCallback(): callable;
 

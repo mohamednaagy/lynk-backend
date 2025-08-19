@@ -57,6 +57,6 @@ class VoucherReceiptPdf extends BasePdfGenerator
 
     protected function getTemplatePath(): string
     {
-        return 'pdf.voucher_receipt';
+        return 'templates.voucher-invoice';
     }
 }

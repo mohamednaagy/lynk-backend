@@ -86,7 +86,7 @@ class ZatcaInvoicePdf extends BasePdfGenerator
         ])->getKey();
     }
 
-    public function beforeGenerate(): void
+    protected function beforeGenerate(): void
     {
         $this->generateInvoiceNumber($this->getInvoiceSpecs());
     }
