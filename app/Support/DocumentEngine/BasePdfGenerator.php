@@ -37,6 +37,22 @@ abstract class BasePdfGenerator
 
     abstract protected function getGeneratedBeforePath(): string;
 
+    /**
+     * Public accessor to check if PDF was generated before
+     */
+    public function checkIfGeneratedBefore(): bool
+    {
+        return $this->isGeneratedBefore();
+    }
+
+    /**
+     * Public accessor to get the path of previously generated PDF
+     */
+    public function getExistingPdfPath(): string
+    {
+        return $this->getGeneratedBeforePath();
+    }
+
     public function setContext(array $context): void
     {
         $this->context = $context;

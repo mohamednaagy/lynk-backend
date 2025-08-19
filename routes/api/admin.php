@@ -63,6 +63,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ResendInvitationToUser as ResendLenderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
+use App\Http\Controllers\Api\V1\Admin\PdfController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
 use App\Http\Controllers\Api\V1\Admin\Settings\InternationalMurabahaSettingsController;
@@ -226,6 +227,13 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             ->except(['delete']);
 
         Route::get('constants', [ConstantController::class, 'index']);
+
+        // PDF Generation Routes
+        Route::prefix('pdf')->group(function () {
+            Route::post('generate', [PdfController::class, 'generate']);
+            Route::get('document-types', [PdfController::class, 'getDocumentTypes']);
+            Route::get('check-exists', [PdfController::class, 'checkPdfExists']);
+        });
     });
 
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('sign-up');

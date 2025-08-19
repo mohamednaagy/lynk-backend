@@ -28,7 +28,7 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
     protected function prepareData()
     {
         $traderOrder = $this->getTraderOrder();
-        $products = $traderOrder->products;
+        $products = collect($traderOrder->products); // Convert to Collection
         $amount = $traderOrder->amount;
         $currentTimeInRiyadhTz = now('Asia/Riyadh');
 
@@ -40,16 +40,17 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
             'order_number' => $traderOrder->financing_order_id,
             'amount' => $amount,
             'previous_owner' => $products->map(
-                fn ($item) => $item->getPreviousOwnerAsArray()
+                fn ($item) => $item['previous_owner'] ?? []
             )
                 ->flatten()
+                ->filter()
                 ->implode('،'),
-            'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
+            'product_name' => $products->pluck('product')->filter()->implode('،'),
             'date' => $currentTimeInRiyadhTz->toDateString(),
             'time' => $currentTimeInRiyadhTz->toTimeString(),
         ];
 
-        if ($traderOrder->provider->isTrader(Trader::Lynk)) {
+        if ($traderOrder->provider === Trader::Lynk) {
             $data['products'] = $this->transformProductsToLynkCommodityProductsDTO($traderOrder->products);
             $data['trade_order'] = $traderOrder;
             $data['financing_order'] = $traderOrder->order;
@@ -63,11 +64,11 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
     protected function getTemplatePath(): string
     {
         $traderOrder = $this->getTraderOrder();
-        if ($traderOrder->provider->isTrader(Trader::Lynk)) {
+        if ($traderOrder->provider === Trader::Lynk) {
             return 'local-commodity-market.transfer-ownership-to-lender';
         }
 
-        if ($traderOrder->provider->isTrader(Trader::Bursam)) {
+        if ($traderOrder->provider === Trader::Bursam) {
             return 'transfer-ownership-to-lender';
         }
 

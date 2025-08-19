@@ -60,11 +60,11 @@ class SellingCommodityToCustomerPdf extends BasePdfGenerator
     protected function getTemplatePath(): string
     {
         $traderOrder = $this->getTraderOrder();
-        if ($traderOrder->provider->isTrader(Trader::Lynk)) {
+        if ($traderOrder->provider === Trader::Lynk) {
             return 'local-commodity-market.selling-commodity-to-customer';
         }
 
-        if ($traderOrder->provider->isTrader(Trader::Bursam)) {
+        if ($traderOrder->provider === Trader::Bursam) {
             return 'selling-commodity-to-customer';
         }
 

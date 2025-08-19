@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Lender\Orders\UpdateOrderPaymentProof;
+use App\Http\Controllers\Api\V1\Lender\PdfController;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
@@ -114,6 +115,13 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
 
                     Route::get('/settings', [SettingsController::class, 'index']);
                     Route::put('/settings', [SettingsController::class, 'update']);
+
+                    // PDF Generation Routes
+                    Route::prefix('pdf')->group(function () {
+                        Route::post('generate', [PdfController::class, 'generate']);
+                        Route::get('document-types', [PdfController::class, 'getDocumentTypes']);
+                        Route::get('check-exists', [PdfController::class, 'checkPdfExists']);
+                    });
                 });
 
                 Route::get('/commodity-types/dropdown-list', CommodityTypesLiteList::class);

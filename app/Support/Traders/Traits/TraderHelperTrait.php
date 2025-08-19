@@ -9,7 +9,6 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -75,23 +74,6 @@ trait TraderHelperTrait
             ],
             $data
         );
-    }
-
-    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
-    {
-        Log::info('Storing order document as pdf', [
-            'view' => $view,
-            'trader_order_id' => $traderOrder->id,
-        ]);
-        $html = view($view, $data)->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                $mediaCollection
-            );
-        });
     }
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void
