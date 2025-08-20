@@ -11,6 +11,7 @@ use App\Models\Transaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PdfController extends Controller
 {
@@ -30,11 +31,7 @@ class PdfController extends Controller
             $result = $this->pdfService->generateOrRetrievePdf($documentType, $context);
 
             if ($result['success']) {
-                return response()->json([
-                    'success' => true,
-                    'message' => $result['message'],
-                    'data' => $result['data'],
-                ], 200);
+                return Storage::disk($result['data']['disk'])->download($result['data']['path']);
             }
 
             return response()->json([
@@ -55,64 +52,6 @@ class PdfController extends Controller
                 'message' => 'Internal server error',
                 'error' => config('app.debug') ? $e->getMessage() : 'Something went wrong',
             ], 500);
-        }
-    }
-
-    /**
-     * Get available document types
-     */
-    public function getDocumentTypes(): JsonResponse
-    {
-        $documentTypes = collect(DocumentType::getValues())->map(function ($type) {
-            $enum = DocumentType::fromValue($type);
-
-            return [
-                'value' => $type,
-                'label' => __('enums.document_type.'.$type),
-                'requires_trader_order' => $enum->requiresTraderOrder(),
-                'requires_transaction' => $enum->requiresTransaction(),
-            ];
-        });
-
-        return response()->json([
-            'success' => true,
-            'data' => $documentTypes,
-        ]);
-    }
-
-    /**
-     * Check if PDF exists for given document type and context
-     */
-    public function checkPdfExists(Request $request): JsonResponse
-    {
-        $request->validate([
-            'document_type' => 'required|string|in:'.implode(',', DocumentType::getValues()),
-            'context' => 'required|array',
-            'context.trader_order_id' => 'nullable|integer|exists:trader_orders,id',
-            'context.transaction_id' => 'nullable|integer|exists:transactions,id',
-        ]);
-
-        try {
-            $documentType = DocumentType::fromValue($request->document_type);
-            $context = $this->buildContext($request);
-
-            $exists = $this->pdfService->pdfExists($documentType, $context);
-            $path = $exists ? $this->pdfService->getPdfPath($documentType, $context) : null;
-
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'exists' => $exists,
-                    'path' => $path,
-                ],
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error checking PDF existence',
-                'error' => $e->getMessage(),
-            ], 400);
         }
     }
 

@@ -16,35 +16,18 @@ class PdfService implements PdfServiceInterface
     public function generateOrRetrievePdf(DocumentType $documentType, array $context): array
     {
         try {
-            // Validate context based on document type
             $this->validateContext($documentType, $context);
 
-            // Check if PDF already exists
-            if ($this->pdfExists($documentType, $context)) {
-                $path = $this->getPdfPath($documentType, $context);
-
-                return [
-                    'success' => true,
-                    'message' => 'PDF retrieved successfully',
-                    'data' => [
-                        'path' => $path,
-                        'is_newly_generated' => false,
-                    ],
-                ];
-            }
-
-            // Generate new PDF
             $pdf = PdfFactory::make($documentType->value);
             $pdf->setContext($context);
             $pdf->generate();
-
-            $path = $this->getPdfPath($documentType, $context);
 
             return [
                 'success' => true,
                 'message' => 'PDF generated successfully',
                 'data' => [
-                    'path' => $path,
+                    'path' => $pdf->getExistingPdfPath(),
+                    'disk' => $pdf->getDisk(),
                     'is_newly_generated' => true,
                 ],
             ];
@@ -75,40 +58,6 @@ class PdfService implements PdfServiceInterface
                 'message' => 'Error generating PDF',
                 'error' => $e->getMessage(),
             ];
-        }
-    }
-
-    /**
-     * Check if PDF already exists
-     */
-    public function pdfExists(DocumentType $documentType, array $context): bool
-    {
-        try {
-            $pdf = PdfFactory::make($documentType->value);
-            $pdf->setContext($context);
-
-            return $pdf->checkIfGeneratedBefore();
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Get PDF file path if exists
-     */
-    public function getPdfPath(DocumentType $documentType, array $context): ?string
-    {
-        try {
-            $pdf = PdfFactory::make($documentType->value);
-            $pdf->setContext($context);
-
-            if ($pdf->checkIfGeneratedBefore()) {
-                return $pdf->getExistingPdfPath();
-            }
-
-            return null;
-        } catch (\Exception $e) {
-            return null;
         }
     }
 

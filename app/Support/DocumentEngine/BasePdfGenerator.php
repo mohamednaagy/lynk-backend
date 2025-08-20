@@ -3,6 +3,7 @@
 namespace App\Support\DocumentEngine;
 
 use App\Support\PdfGenerator\PdfGenerator;
+use Illuminate\Support\Facades\Log;
 
 abstract class BasePdfGenerator
 {
@@ -67,9 +68,19 @@ abstract class BasePdfGenerator
     // Shared PDF export logic (MPDF, DomPDF, Browserless, etc.)
     protected function exportPdf(string $html): mixed
     {
+
+        Log::info('Exporting PDF', [
+            'context' => $this->context,
+        ]);
+
         return PdfGenerator::outputFromHtml(
             $html,
             $this->getStorageCallback()
         );
+    }
+
+    public function getDisk(): string
+    {
+        return 'local';
     }
 }

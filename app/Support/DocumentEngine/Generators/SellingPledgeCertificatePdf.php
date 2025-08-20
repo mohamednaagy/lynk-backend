@@ -19,7 +19,6 @@ class SellingPledgeCertificatePdf extends BasePdfGenerator
     {
         return function ($fileResource) {
             $this->attachDocumentToOrder(
-                $this->getTraderOrder(),
                 $fileResource,
                 $this->collectionName
             );
@@ -42,14 +41,34 @@ class SellingPledgeCertificatePdf extends BasePdfGenerator
         $financeOrder = $traderOrder->order;
         $currentTimeInRiyadhTz = CarbonImmutable::now()->timezone('Asia/Riyadh');
 
-        return [
-            'products' => $this->transformProductsToLynkCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
+        $data = [
             'trader_order_reference' => $traderOrder->reference,
             'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
             'customer_name' => $financeOrder->customer_name,
             'current_date' => $currentTimeInRiyadhTz->toDateString(),
             'current_time' => $currentTimeInRiyadhTz->toTimeString(),
         ];
+
+        // Handle products based on provider
+        if ($traderOrder->provider === 'lynk') {
+            $data['products'] = $this->transformProductsToLynkCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys());
+        } else {
+            // For Bursam, use the raw products data or a simpler transformation
+            $data['products'] = collect($traderOrder->products)->map(function ($product) {
+                return [
+                    'product' => $product['product'] ?? '',
+                    'quantity' => $product['quantity'] ?? '',
+                    'uom' => $product['uom'] ?? '',
+                    'amount' => $product['amount'] ?? '',
+                    'currency' => $product['currency'] ?? '',
+                    'warehouse' => $product['warehouse'] ?? '',
+                    'previous_owner' => $product['previous_owner'] ?? [],
+                    'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'] ?? '',
+                ];
+            });
+        }
+
+        return $data;
     }
 
     protected function getTemplatePath(): string

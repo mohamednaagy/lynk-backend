@@ -228,13 +228,11 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::get('constants', [ConstantController::class, 'index']);
 
-        // PDF Generation Routes
-        Route::prefix('pdf')->group(function () {
-            Route::post('generate', [PdfController::class, 'generate']);
-            Route::get('document-types', [PdfController::class, 'getDocumentTypes']);
-            Route::get('check-exists', [PdfController::class, 'checkPdfExists']);
-        });
     });
 
+    // PDF Generation Routes
+    Route::prefix('pdf')->group(function () {
+        Route::get('generate', [PdfController::class, 'generate'])->name('generate');
+    });
     Route::post('/{admin}/sign-up', CompleteAdminRegister::class)->name('sign-up');
 });

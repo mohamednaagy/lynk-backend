@@ -115,13 +115,6 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
 
                     Route::get('/settings', [SettingsController::class, 'index']);
                     Route::put('/settings', [SettingsController::class, 'update']);
-
-                    // PDF Generation Routes
-                    Route::prefix('pdf')->group(function () {
-                        Route::post('generate', [PdfController::class, 'generate']);
-                        Route::get('document-types', [PdfController::class, 'getDocumentTypes']);
-                        Route::get('check-exists', [PdfController::class, 'checkPdfExists']);
-                    });
                 });
 
                 Route::get('/commodity-types/dropdown-list', CommodityTypesLiteList::class);
@@ -130,6 +123,9 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
         }
     );
-
+    // PDF Generation Routes
+    Route::prefix('pdf')->group(function () {
+        Route::get('generate', [PdfController::class, 'generate'])->name('generate');
+    });
     Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
 });
