@@ -156,6 +156,9 @@ return [
         'commodity' => [
             'regex' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
         ],
+        'location' => [
+            'regex' => '_ صيغه معرف السوق غير صحيحه يجب ان تكون حروف او ارقام او ',
+        ],
         'order_cost_amount_tiers_range' => 'Order value start must be greater than order value end of previous tier with only 0.01',
     ],
     /*

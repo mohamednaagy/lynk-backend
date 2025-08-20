@@ -4,7 +4,7 @@ namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
 
-class CompanyUniqueNameRule implements Rule
+class LocationUniqueIdentifierRule implements Rule
 {
     /**
      * Create a new rule instance.
@@ -32,6 +32,6 @@ class CompanyUniqueNameRule implements Rule
      */
     public function message(): string
     {
-        return __('validation.company_unique_name');
+        return __('validation.custom.commodity.regex');
     }
 }

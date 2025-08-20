@@ -24,7 +24,7 @@ class CommodityTypeUniqueNameRole implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        return preg_match('/^[a-zA-Z][a-zA-Z0-9_\s-]*$/', $value);
+        return preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*(?:\s[a-zA-Z0-9_-]+)*$/', $value);
     }
 
     /**
