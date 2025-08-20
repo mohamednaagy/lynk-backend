@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\DocumentType;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as TraderEnum;
@@ -112,6 +113,9 @@ class TraderHistoryTransformer extends TransformerAbstract
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
             $historiesActions, MurabhaStep::ContractSigned
         );
+        $isTransferOwnershipToLenderDocumentExists = $this->traderOrder->traderHistories()
+            ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+            ->exists();
 
         $data = [
             'step' => MurabhaStep::ContractSigned,
@@ -126,7 +130,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                         'trader_order_id' => $this->traderOrder->id,
                     ],
                 ]),
-                'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
+                'date' => $isTransferOwnershipToLenderDocumentExists ? saudi_now('Y-m-d h:i:s A') : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
