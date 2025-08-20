@@ -24,16 +24,6 @@ class ClientWakalaPdf extends BasePdfGenerator
         };
     }
 
-    public function isGeneratedBefore(): bool
-    {
-        return $this->getTraderOrder()->hasMedia($this->collectionName);
-    }
-
-    public function getGeneratedBeforePath(): string
-    {
-        return $this->getTraderOrder()->getMedia($this->collectionName)->first()->getPath();
-    }
-
     protected function prepareData()
     {
         $getWakalaTemplate = app(GetWakalaTemplate::class);

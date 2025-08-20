@@ -36,6 +36,11 @@ class VoucherReceiptPdf extends BasePdfGenerator
         return $this->getTransaction()->getMedia($this->collectionName)->first()->getPath();
     }
 
+    public function getDisk(): string
+    {
+        return $this->getTransaction()->getMedia($this->collectionName)->first()->disk;
+    }
+
     protected function prepareData(): array
     {
         $transaction = $this->getTransaction();

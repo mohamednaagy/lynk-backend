@@ -15,16 +15,6 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
 
     protected $collectionName = TraderOrderMediaCollection::TransferOwnershipToLender;
 
-    public function isGeneratedBefore(): bool
-    {
-        return $this->getTraderOrder()->hasMedia($this->collectionName);
-    }
-
-    public function getGeneratedBeforePath(): string
-    {
-        return $this->getTraderOrder()->getMedia($this->collectionName)->first()->getPath();
-    }
-
     protected function prepareData()
     {
         $traderOrder = $this->getTraderOrder();
