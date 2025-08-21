@@ -6,6 +6,7 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommodityPurcha
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
 use App\Enums\DocumentType;
 use App\Enums\MurabhaStep;
+use App\Enums\Trader;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Enums\WebhookType;
@@ -29,7 +30,7 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
             ->getNextStepOf($lastCompletedStep);
 
         $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
-
+        $isBursaOrder = $traderOrder->provider === Trader::Bursam;
         $company = $financingOrder->company()->withTrashed()->first();
         WebhookEvent::fire($company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -43,12 +44,12 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'current_trading_step' => $this->getUiStepName($nextStep?->step),
                 'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep),
                 'products' => $this->resolveProducts($traderOrder),
-                'cert_document_url' => route('api.v1.admins.generate', [
+                'cert_document_url' => $isBursaOrder ? route('api.v1.admins.generate', [
                     'document_type' => DocumentType::BURSAM_BID_CERTIFICATE,
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
-                ]),
+                ]) : null,
                 'ownership_document_url' => route('api.v1.admins.generate', [
                     'document_type' => DocumentType::TRANSFER_OWNERSHIP_TO_LENDER,
                     'context' => [
