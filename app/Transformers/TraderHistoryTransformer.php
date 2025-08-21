@@ -113,9 +113,9 @@ class TraderHistoryTransformer extends TransformerAbstract
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
             $historiesActions, MurabhaStep::ContractSigned
         );
-        $isTransferOwnershipToLenderDocumentExists = $this->traderOrder->traderHistories()
+        $transferOwnershipToLenderDocumentHistory = $this->traderOrder->traderHistories()
             ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
-            ->exists();
+            ->first();
 
         $data = [
             'step' => MurabhaStep::ContractSigned,
@@ -130,7 +130,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                         'trader_order_id' => $this->traderOrder->id,
                     ],
                 ]),
-                'date' => $isTransferOwnershipToLenderDocumentExists ? saudi_now('Y-m-d h:i:s A') : null,
+                'date' => $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
