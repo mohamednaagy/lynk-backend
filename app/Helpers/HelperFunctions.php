@@ -6,6 +6,7 @@ use App\Models\Media;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
@@ -312,4 +313,26 @@ if (! function_exists('toUtc')) {
 
         return $carbon->copy()->setTimezone('UTC');
     }
+}
+
+function formatMediaUrl(?string $url): ?string
+{
+    if (is_null($url)) {
+        return null;
+    }
+
+    if (app()->environment('local')) {
+        return $url;
+    }
+
+    $parsedPath = parse_url($url, PHP_URL_PATH);
+
+    // Ensure it contains /api/
+    if (! Str::contains($parsedPath, '/api/')) {
+        return null; // or throw, or just return the original
+    }
+
+    $relativePath = Str::of($parsedPath)->after('/api');
+
+    return rtrim(config('app.url'), '/').'/api'.$relativePath;
 }
