@@ -11,11 +11,9 @@ use App\Enums\TraderOrderStatus;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
-use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\Contracts\TraderStrategyInterface;
 use App\Support\Traders\Traits\TraderHelperTrait;
-use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -81,24 +79,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         }
 
         $traderOrder->ensureCanAccessStep(MurabhaStep::CommoditySoldToCustomer);
-
-        $trader = Trader::driver($traderOrder->provider);
-        $currentTimeInUtcTz = CarbonImmutable::now();
-        $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-        $financeOrder = $traderOrder->order;
-        $trader->storeOrderDocumentAsPdf(
-            'local-commodity-market.selling-pledge-certificate',
-            [
-                'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                'trader_order_reference' => $traderOrder->reference,
-                'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
-                'customer_name' => $financeOrder->customer_name,
-                'current_date' => $currentTimeInRiyadhTz->toDateString(),
-                'current_time' => $currentTimeInRiyadhTz->toTimeString(),
-            ],
-            $traderOrder,
-            TraderOrderMediaCollection::LynkSalePledgeCertificate,
-        );
 
         $canUpdateOrderStatus = $traderOrder->canChangeParentOrderStatusIfStepWillBeUpdated(
             MurabhaStep::MurabahaSaleCompleted

@@ -28,7 +28,6 @@ use App\Models\TraderOrder;
 use App\Models\User;
 use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
-use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\Deliverable;
 use App\Support\Traders\Contracts\SellConfirmationCertifiable;
@@ -128,36 +127,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     {
         try {
             $this->withLocale('ar', function () use ($traderOrder) {
-                $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
-                $currentTimeInUtcTz = CarbonImmutable::now();
-                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $products = collect($traderOrder->products)->map(fn ($product) => LynkCommodityProductDto::fromArray($product));
                 $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
-                $this->storeOrderDocumentAsPdf(
-                    'local-commodity-market.transfer-ownership-to-lender',
-                    [
-                        'order_id' => $traderOrder->order->id,
-                        'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products),
-                        'reference_number' => $traderOrder->id,
-                        'trader_order_reference' => $traderOrder->reference,
-                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                        'order_number' => $traderOrder->financing_order_id,
-                        'amount' => $amount,
-                        'previous_owner' => $products->map(
-                            fn ($item) => $item->getPreviousOwnerAsArray()
-                        )
-                            ->flatten()
-                            ->implode('،'),
-                        'product_name' => $products->implode(fn ($item) => $item->getProduct(), '،'),
-                        'date' => $currentTimeInRiyadhTz->toDateString(),
-                        'time' => $currentTimeInRiyadhTz->toTimeString(),
-                        'trade_order' => $traderOrder,
-                        'financing_order' => $traderOrder->order,
-                    ],
-                    $traderOrder,
-                    TraderOrderMediaCollection::TransferOwnershipToLender
-                );
-
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
@@ -179,23 +149,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function createSellConfirmationDocument(TraderOrder $traderOrder): void
     {
         try {
-            $trader = Trader::driver($traderOrder->provider);
-            $financeOrder = $traderOrder->order;
-
-            $trader->storeOrderDocumentAsPdf(
-                'local-commodity-market.sell-confirmation-certificate',
-                [
-                    'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                    'trader_order_reference' => $traderOrder->reference,
-                    'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
-                    'customer_name' => $financeOrder->customer_name,
-                    'current_date' => saudi_now('Y-m-d'),
-                    'current_time' => saudi_now('H:i:s'),
-                ],
-                $traderOrder,
-                TraderOrderMediaCollection::SellConfirmationDocument,
-            );
-
             $this->createTraderOrderHistory(
                 $traderOrder,
                 FinancingOrderHistory::AttachSellConfirmationDocument,
@@ -241,33 +194,12 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     ->where('action', FinancingOrderHistory::ContractSigned)
                     ->first()
                     ?->created_at;
-                $currentTimeInUtcTz = CarbonImmutable::parse($dateTime);
-                $currentTimeInRiyadhTz = $currentTimeInUtcTz->timezone('Asia/Riyadh');
-                $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
 
-                $customerName = $traderOrder->order->customer_name;
-
-                $this->storeOrderDocumentAsPdf(
-                    'local-commodity-market.selling-commodity-to-customer',
-                    [
-                        'reference_number' => $traderOrder->id,
-                        'trader_order_reference' => $traderOrder->reference,
-                        'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                        'order_number' => $traderOrder->financing_order_id,
-                        'products' => $this->transformProductsToLocalCommodityProductsDTO($traderOrder->products, LynkCommodityProductDto::groupedByKeys()),
-                        'amount' => $amount,
-                        'customer_name' => $customerName,
-                        'contract_signed_date' => $currentTimeInRiyadhTz->toDateString(),
-                        'contract_signed_time' => $currentTimeInRiyadhTz->toTimeString(),
-                    ],
-                    $traderOrder,
-                    TraderOrderMediaCollection::SellingCommodityToCustomer,
-                );
                 $this->createTraderOrderHistory(
                     $traderOrder,
                     FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
                     [
-                        'created_at' => $currentTimeInUtcTz,
+                        'created_at' => CarbonImmutable::parse($dateTime),
                     ]
                 );
             });
