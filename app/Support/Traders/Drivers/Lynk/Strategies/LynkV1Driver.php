@@ -317,7 +317,16 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         $cancelledByType = TraderOrderCancelType::System,
         ?User $cancelledBy = null
     ): int {
+        Log::channel('local_market')->info('Starting trader order cancellation', [
+            'trader_order_id' => $traderOrder->id,
+            'mode' => $traderOrder->mode,
+        ]);
+
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
+
+        Log::channel('local_market')->info('UpdateTraderOrderStatusToPendingCancel completed', [
+            'trader_order_id' => $traderOrder->id,
+        ]);
 
         match ($traderOrder->mode) {
             TraderOrderMode::Manual => $this->handleManualOrderCancellation($traderOrder, $cancelReason, $cancelledByType, $cancelledBy),
@@ -353,7 +362,15 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         $cancelledByType,
         ?User $cancelledBy
     ): void {
+        Log::channel('local_market')->info('About to dispatch ProcessLynkCancelOrderAtLocalMarket', [
+            'trader_order_id' => $traderOrder->id,
+        ]);
+
         ProcessLynkCancelOrderAtLocalMarket::dispatch($traderOrder->id, $cancelReason);
+
+        Log::channel('local_market')->info('ProcessLynkCancelOrderAtLocalMarket Job dispatched', [
+            'trader_order_id' => $traderOrder->id,
+        ]);
     }
 
     public function confirmCancelledFromProvider($traderOrder): void
