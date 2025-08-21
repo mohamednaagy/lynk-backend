@@ -37,8 +37,8 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
                 ->filter()
                 ->implode('،'),
             'product_name' => $products->pluck('product')->filter()->implode('،'),
-            'date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz)->toDateString(),
-            'time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz)->toTimeString(),
+            'date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz),
+            'time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz),
         ];
 
         if ($traderOrder->provider === Trader::Lynk) {

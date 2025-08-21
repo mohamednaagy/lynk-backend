@@ -42,8 +42,8 @@ class SellingCommodityToCustomerPdf extends BasePdfGenerator
             'order_number' => $traderOrder->financing_order_id,
             'amount' => $amount,
             'customer_name' => $customerName,
-            'contract_signed_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz)->toDateString(),
-            'contract_signed_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz)->toTimeString(),
+            'contract_signed_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz),
+            'contract_signed_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz),
         ];
 
         // Handle products based on provider
