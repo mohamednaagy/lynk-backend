@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\OrderController;
 use App\Http\Controllers\Api\V1\Lender\Orders\RejectOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\TraderOrders\UpdateCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Lender\Orders\UpdateOrderPaymentProof;
+use App\Http\Controllers\Api\V1\Lender\PdfController;
 use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
@@ -122,6 +123,9 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
         }
     );
-
+    // PDF Generation Routes
+    Route::prefix('pdf')->group(function () {
+        Route::get('generate', [PdfController::class, 'generate'])->name('generate');
+    });
     Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
 });

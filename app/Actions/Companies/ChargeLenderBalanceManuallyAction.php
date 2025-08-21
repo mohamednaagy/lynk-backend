@@ -76,7 +76,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
             $vatPercentage
         );
 
-        $this->generateZatcaInvoice->handle($invoiceSpecs, TransactionMediaCollection::ZatcaInvoice);
+        $this->generateZatcaInvoice->handle($invoiceSpecs);
 
         return $transaction;
     }

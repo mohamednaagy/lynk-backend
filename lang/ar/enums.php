@@ -147,4 +147,16 @@ return [
         CompanyLenderClientType::Business => 'شركات',
         CompanyLenderClientType::Individual => 'فردي',
     ],
+    'document_type' => [
+        'client_wakala' => 'وكالة العميل',
+        'transfer_ownership_to_lender' => 'نقل الملكية إلى المقرض',
+        'selling_commodity_to_customer' => 'بيع السلعة للعميل',
+        'sell_confirmation_document' => 'مستند تأكيد البيع',
+        'bursam_bid_certificate' => 'شهادة عرض بورصة',
+        'bursam_stb_certificate' => 'شهادة بورصة STB',
+        'bursam_otc_certificate' => 'شهادة بورصة OTC',
+        'selling_pledge_certificate' => 'شهادة بيع الرهن',
+        'voucher_receipt' => 'إيصال القسيمة',
+        'zatca_invoice' => 'فاتورة ضريبة القيمة المضافة',
+    ],
 ];
