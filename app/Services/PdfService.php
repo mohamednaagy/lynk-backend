@@ -28,7 +28,6 @@ class PdfService implements PdfServiceInterface
                 'data' => [
                     'path' => $pdf->getExistingPdfPath(),
                     'disk' => $pdf->getDisk(),
-                    'is_newly_generated' => true,
                 ],
             ];
 

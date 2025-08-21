@@ -263,6 +263,10 @@ return [
         'client_wakala' => 'الوكالة',
         'payment_proof' => 'مستند إثبات التحويل للعميل',
         'invalid_case_proceed' => 'قيمة الحالة المدخلة غير صالحة لطلب التجارة هذا',
+        'document_type' => 'نوع المستند',
+        'context' => 'السياق',
+        'trader_order_id' => 'معرف طلب التاجر',
+        'transaction_id' => 'معرف المعاملة',
     ],
 
     'max_string_chars' => 'يجب أن لا يتجاوز طول نّص حقل  :max حرف.',
@@ -288,4 +292,20 @@ return [
     'media_type_invalid' => 'نوع الوسائط المحدد غير صالح.',
     'media_or_delete_required' => 'يجب إما تقديم ملفات وسائط أو اختيار حذف الوسائط الموجودة.',
     'greater_than_zero' => 'يجب أن تكون القيمة أكبر من صفر',
+
+    // رسائل التحقق من إنشاء PDF
+    'pdf' => [
+        'document_type_required' => 'نوع المستند مطلوب. يرجى تقديم نوع مستند صحيح.',
+        'document_type_string' => 'نوع المستند يجب أن يكون نصًا.',
+        'document_type_invalid' => 'نوع المستند المقدم غير صحيح. يرجى التحقق من أنواع المستندات المتاحة.',
+        'context_required' => 'كائن السياق مطلوب.',
+        'context_array' => 'السياق يجب أن يكون كائنًا.',
+        'trader_order_id_integer' => 'معرف طلب التاجر يجب أن يكون رقمًا صحيحًا.',
+        'trader_order_not_found' => 'طلب التاجر غير موجود.',
+        'transaction_id_integer' => 'معرف المعاملة يجب أن يكون رقمًا صحيحًا.',
+        'transaction_not_found' => 'المعاملة غير موجودة.',
+        'trader_order_required' => 'نوع المستند ":document_type" يتطلب معرف طلب تاجر',
+        'transaction_required' => 'نوع المستند ":document_type" يتطلب معرف معاملة',
+        'context_required_field' => 'يجب تقديم حقل سياق واحد على الأقل (معرف طلب التاجر أو معرف المعاملة)',
+    ],
 ];

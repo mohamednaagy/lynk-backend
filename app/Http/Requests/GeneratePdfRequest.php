@@ -50,15 +50,15 @@ class GeneratePdfRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'document_type.required' => 'Document type is required. Please provide a valid document type.',
-            'document_type.string' => 'Document type must be a string.',
-            'document_type.in' => 'Invalid document type provided. Please check the available document types.',
-            'context.required' => 'Context object is required.',
-            'context.array' => 'Context must be an object.',
-            'context.trader_order_id.integer' => 'Trader order ID must be a valid integer.',
-            'context.trader_order_id.exists' => 'Trader order not found.',
-            'context.transaction_id.integer' => 'Transaction ID must be a valid integer.',
-            'context.transaction_id.exists' => 'Transaction not found.',
+            'document_type.required' => __('validation.pdf.document_type_required'),
+            'document_type.string' => __('validation.pdf.document_type_string'),
+            'document_type.in' => __('validation.pdf.document_type_invalid'),
+            'context.required' => __('validation.pdf.context_required'),
+            'context.array' => __('validation.pdf.context_array'),
+            'context.trader_order_id.integer' => __('validation.pdf.trader_order_id_integer'),
+            'context.trader_order_id.exists' => __('validation.pdf.trader_order_not_found'),
+            'context.transaction_id.integer' => __('validation.pdf.transaction_id_integer'),
+            'context.transaction_id.exists' => __('validation.pdf.transaction_not_found'),
         ];
     }
 
@@ -68,10 +68,10 @@ class GeneratePdfRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'document_type' => 'document type',
-            'context' => 'context',
-            'context.trader_order_id' => 'trader order ID',
-            'context.transaction_id' => 'transaction ID',
+            'document_type' => __('validation.attributes.document_type'),
+            'context' => __('validation.attributes.context'),
+            'context.trader_order_id' => __('validation.attributes.trader_order_id'),
+            'context.transaction_id' => __('validation.attributes.transaction_id'),
         ];
     }
 
@@ -100,14 +100,14 @@ class GeneratePdfRequest extends FormRequest
         if ($documentType->requiresTraderOrder() && ! $this->context['trader_order_id'] ?? null) {
             $validator->errors()->add(
                 'context.trader_order_id',
-                "Document type '{$documentType->value}' requires a trader order ID"
+                __('validation.pdf.trader_order_required', ['document_type' => $documentType->value])
             );
         }
 
         if ($documentType->requiresTransaction() && ! $this->context['transaction_id'] ?? null) {
             $validator->errors()->add(
                 'context.transaction_id',
-                "Document type '{$documentType->value}' requires a transaction ID"
+                __('validation.pdf.transaction_required', ['document_type' => $documentType->value])
             );
         }
 
@@ -115,7 +115,7 @@ class GeneratePdfRequest extends FormRequest
         if (! ($this->context['trader_order_id'] ?? null) && ! ($this->context['transaction_id'] ?? null)) {
             $validator->errors()->add(
                 'context',
-                'At least one context field (trader_order_id or transaction_id) must be provided'
+                __('validation.pdf.context_required_field')
             );
         }
     }

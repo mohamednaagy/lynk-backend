@@ -177,6 +177,10 @@ return [
         'company_cr' => 'company CR',
         'national_id' => 'national ID',
         'invalid_case_proceed' => 'The case value entered is invalid for this trade request',
+        'document_type' => 'document type',
+        'context' => 'context',
+        'trader_order_id' => 'trader order ID',
+        'transaction_id' => 'transaction ID',
 
     ],
     'max_digits' => 'It must contain 10 numbers',
@@ -203,4 +207,20 @@ return [
     'media_type_invalid' => 'The selected media type is invalid.',
     'media_or_delete_required' => 'You must either provide media files or choose to delete existing media.',
     'greater_than_zero' => 'Must be greater than zero',
+
+    // PDF Generation Validation Messages
+    'pdf' => [
+        'document_type_required' => 'Document type is required. Please provide a valid document type.',
+        'document_type_string' => 'Document type must be a string.',
+        'document_type_invalid' => 'Invalid document type provided. Please check the available document types.',
+        'context_required' => 'Context object is required.',
+        'context_array' => 'Context must be an object.',
+        'trader_order_id_integer' => 'Trader order ID must be a valid integer.',
+        'trader_order_not_found' => 'Trader order not found.',
+        'transaction_id_integer' => 'Transaction ID must be a valid integer.',
+        'transaction_not_found' => 'Transaction not found.',
+        'trader_order_required' => "Document type ':document_type' requires a trader order ID",
+        'transaction_required' => "Document type ':document_type' requires a transaction ID",
+        'context_required_field' => 'At least one context field (trader_order_id or transaction_id) must be provided',
+    ],
 ];
