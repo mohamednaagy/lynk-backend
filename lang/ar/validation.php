@@ -292,8 +292,8 @@ return [
     'media_type_invalid' => 'نوع الوسائط المحدد غير صالح.',
     'media_or_delete_required' => 'يجب إما تقديم ملفات وسائط أو اختيار حذف الوسائط الموجودة.',
     'greater_than_zero' => 'يجب أن تكون القيمة أكبر من صفر',
-
-    // رسائل التحقق من إنشاء PDF
+    'only_english_alpha_numbers_underscore_hyphen_allowed' => 'الأحرف الإنجليزية والأرقام والشرطة السفلية فقط مسموح بها',
+    'no_hyphen_at_start' => 'لا يمكن استخدام الشرطة في بداية هذا الحقل',
     'pdf' => [
         'document_type_required' => 'نوع المستند مطلوب. يرجى تقديم نوع مستند صحيح.',
         'document_type_string' => 'نوع المستند يجب أن يكون نصًا.',

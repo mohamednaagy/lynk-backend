@@ -6,6 +6,8 @@ use Illuminate\Contracts\Validation\Rule;
 
 class LocationUniqueIdentifierRule implements Rule
 {
+    protected string $errorMessage = '';
+
     /**
      * Create a new rule instance.
      *
@@ -24,7 +26,19 @@ class LocationUniqueIdentifierRule implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        return preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*(?:\s[a-zA-Z0-9_-]+)*$/', $value);
+
+        if (!preg_match('/^(?!-).*$/', $value)) {
+            $this->errorMessage = __('validation.no_hyphen_at_start');
+            return false;
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_-]+(?:\s[a-zA-Z0-9_-]+)*$/', $value)) {
+            $this->errorMessage = __('validation.only_english_alpha_numbers_underscore_hyphen_allowed');
+            return false;
+        }
+
+        return true;
+        
     }
 
     /**
@@ -32,6 +46,6 @@ class LocationUniqueIdentifierRule implements Rule
      */
     public function message(): string
     {
-        return __('validation.custom.commodity.regex');
+        return $this->errorMessage ?: __('validation.custom.commodity.regex');
     }
 }
