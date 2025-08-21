@@ -2,11 +2,13 @@
 
 namespace App\Support\Traders\Traits;
 
+use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Models\CommodityType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\TraderManager;
@@ -145,6 +147,15 @@ trait TraderHelperTrait
         ]);
 
         return $selectedCode;
+    }
+
+    protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
+    {
+        return app(TraderOrderProceedCaseService::class)
+            ->checkIfTraderHasCase(
+                $traderOrder->id,
+                FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+            );
     }
 
     /**
