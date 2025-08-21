@@ -35,8 +35,8 @@ class SellingPledgeCertificatePdf extends BasePdfGenerator
             'trader_order_reference' => $traderOrder->reference,
             'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
             'customer_name' => $financeOrder->customer_name,
-            'current_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz)->toDateString(),
-            'current_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz)->toTimeString(),
+            'current_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz),
+            'current_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz),
         ];
 
         // Handle products based on provider
