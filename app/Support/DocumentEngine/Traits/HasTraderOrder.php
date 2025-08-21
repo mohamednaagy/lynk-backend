@@ -45,22 +45,22 @@ trait HasTraderOrder
         $media->usingFileName($fileName)->toMediaCollection($collectionName);
     }
 
-    public function isGeneratedBefore(): bool
+    protected function isGeneratedBefore(): bool
     {
-        return $this->getMedia()->exists();
+        return $this->getMedia() !== null && $this->getMedia()->exists();
     }
 
-    public function getGeneratedBeforePath(): string
+    protected function getGeneratedBeforePath(): string
     {
-        return $this->getMedia()->getPath();
+        return $this->getMedia() !== null ? $this->getMedia()->getPath() : '';
     }
 
     public function getDisk(): string
     {
-        return $this->getMedia()->disk ?? 'local';
+        return $this->getMedia() !== null ? $this->getMedia()->disk : 'local';
     }
 
-    private function getMedia(): Media
+    private function getMedia(): ?Media
     {
         if ($this->media === null) {
             $this->media = $this->getTraderOrder()->getMedia($this->collectionName)->first();
