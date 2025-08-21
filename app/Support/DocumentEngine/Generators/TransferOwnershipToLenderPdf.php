@@ -2,6 +2,7 @@
 
 namespace App\Support\DocumentEngine\Generators;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Trader;
 use App\Support\DocumentEngine\BasePdfGenerator;
@@ -20,7 +21,7 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
         $traderOrder = $this->getTraderOrder();
         $products = collect($traderOrder->products); // Convert to Collection
         $amount = $traderOrder->amount;
-        $currentTimeInRiyadhTz = now('Asia/Riyadh');
+        $currentTimeInRiyadhTz = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)->first()->created_at;
 
         $data = [
             'order_id' => $traderOrder->order->id,
@@ -36,8 +37,8 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
                 ->filter()
                 ->implode('،'),
             'product_name' => $products->pluck('product')->filter()->implode('،'),
-            'date' => $currentTimeInRiyadhTz->toDateString(),
-            'time' => $currentTimeInRiyadhTz->toTimeString(),
+            'date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz)->toDateString(),
+            'time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz)->toTimeString(),
         ];
 
         if ($traderOrder->provider === Trader::Lynk) {

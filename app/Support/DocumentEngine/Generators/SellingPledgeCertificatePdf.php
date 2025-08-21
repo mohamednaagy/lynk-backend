@@ -2,12 +2,12 @@
 
 namespace App\Support\DocumentEngine\Generators;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\DocumentEngine\BasePdfGenerator;
 use App\Support\DocumentEngine\Traits\HasLynkCommodityProducts;
 use App\Support\DocumentEngine\Traits\HasTraderOrder;
-use Carbon\CarbonImmutable;
 
 class SellingPledgeCertificatePdf extends BasePdfGenerator
 {
@@ -29,14 +29,14 @@ class SellingPledgeCertificatePdf extends BasePdfGenerator
     {
         $traderOrder = $this->getTraderOrder();
         $financeOrder = $traderOrder->order;
-        $currentTimeInRiyadhTz = CarbonImmutable::now()->timezone('Asia/Riyadh');
+        $currentTimeInRiyadhTz = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::MurabahaSaleCompleted)->first()->created_at;
 
         $data = [
             'trader_order_reference' => $traderOrder->reference,
             'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
             'customer_name' => $financeOrder->customer_name,
-            'current_date' => $currentTimeInRiyadhTz->toDateString(),
-            'current_time' => $currentTimeInRiyadhTz->toTimeString(),
+            'current_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz)->toDateString(),
+            'current_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz)->toTimeString(),
         ];
 
         // Handle products based on provider
