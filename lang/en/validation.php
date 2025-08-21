@@ -203,4 +203,7 @@ return [
     'media_type_invalid' => 'The selected media type is invalid.',
     'media_or_delete_required' => 'You must either provide media files or choose to delete existing media.',
     'greater_than_zero' => 'Must be greater than zero',
+    'only_english_alpha_numbers_underscore_hyphen_allowed' => "Only english alpha/numbers/underscore/hyphen allowed",
+    'no_hyphen_at_start' => "hyphen cannot be used at the beginning"
+
 ];
