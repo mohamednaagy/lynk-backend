@@ -36,7 +36,9 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
             ])
         );
         $this->createLocalMarketOrderHistory($order, OrderHistoryStatus::initiate);
-        Log::channel('local_market')->info("saved new local market order id => {$order->id} and trader order reference is {$order->external_order_no}");
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle( "saved new local market order at CreateLocalMarketOrderAction", $order) , [
+            'localMarketOrderId' => $order->id,
+        ]);
         app(PendingEligibleCommodities::class)->handle($order);
 
         return $order;

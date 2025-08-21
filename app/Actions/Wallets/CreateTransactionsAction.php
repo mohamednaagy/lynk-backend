@@ -19,7 +19,7 @@ class CreateTransactionsAction implements CreateTransactions
         ?string $referenceNumber = null
     ): Transaction {
         try {
-            Log::info('CreateTransactionsAction::handle START', [
+            Log::info('start CreateTransactionsAction with wallet_id => ' . $wallet->getKey() .  ' and reference_number => ' . $referenceNumber , [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_reason' => $transactionReason,
                 'amount' => $amount->jsonSerialize(),
@@ -39,7 +39,7 @@ class CreateTransactionsAction implements CreateTransactions
 
             $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
-            Log::info('CreateTransactionsAction::handle SUCCESS', [
+            Log::info('CreateTransactionsAction::handle SUCCESS with wallet_id => ' . $wallet->getKey() .  ' and reference_number => ' . $referenceNumber , [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $result->id,
                 'execution_time_ms' => $executionTime,
@@ -48,11 +48,10 @@ class CreateTransactionsAction implements CreateTransactions
             return $result;
 
         } catch (\Exception $e) {
-            Log::error('CreateTransactionsAction::handle FAILED', [
+            Log::error('CreateTransactionsAction::handle FAILED with wallet_id => ' . $wallet->getKey() .  ' and reference_number => ' . $referenceNumber , [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_reason' => $transactionReason,
-                'error' => $e->getMessage(),
-                'error_class' => get_class($e),
+                'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
             throw $e;

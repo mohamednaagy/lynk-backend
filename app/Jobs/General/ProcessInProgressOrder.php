@@ -50,7 +50,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 if ($financingOrder->traderOrders()->whereIn('status', [
                     TraderOrderStatus::InProgress,
                 ])->count() > 0) {
-                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has in progress trader order');
+                    Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has in progress trader order');
 
                     return;
                 }
@@ -58,16 +58,15 @@ class ProcessInProgressOrder implements ShouldQueue
                     $financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
                     || $financingOrder->company->lender->lenderDetail->require_initiate_trade_request
                 ) {
-                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has in progress trader order');
-
+                    Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has in progress trader order');
                     return;
                 }
 
                 try {
                     app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
                 } catch (BalanceIsNotEnoughException $e) {
-                    Log::channel('lynk')->info('Financing order '.$financingOrder->id.' has balance is not enough');
-                    Log::alert($financingOrder->id);
+                    Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has balance is not enough');
+                    Log::channel(LOG_CHANNEL_LYNK)->alert($financingOrder->id);
 
                     return;
                 }
@@ -79,10 +78,10 @@ class ProcessInProgressOrder implements ShouldQueue
                 ]);
             });
         } catch (\Exception $e) {
-            Log::channel('lynk')->error(
+            Log::channel(LOG_CHANNEL_LYNK)->error(
                 'An error occurred while processing the financing order.',
                 [
-                    'financing_order_id' => $this->financingOrderId,
+                    'financingOrderId' => $this->financingOrderId,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);

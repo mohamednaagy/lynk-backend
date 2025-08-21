@@ -47,12 +47,20 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
                 ->find($this->traderOrderId);
 
             if (! $traderOrder) {
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - not found trader_order_id => ' . $this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
+                ]);
                 return;
             }
 
             $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
 
             if (! $trader->isOrderInSellableState($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamSellingCommodityToOpenMarket Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'is_order_in_sellable_state' => $trader->isOrderInSellableState($traderOrder),
+                ]);
                 return;
             }
 
@@ -72,6 +80,6 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessBursamSellingCommodityToOpenMarket', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

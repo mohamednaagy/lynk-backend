@@ -36,10 +36,10 @@ class ProcessBursamRunHoldTrader implements ShouldBeUnique, ShouldQueue
     {
         try {
             $holdTrader = TraderOrder::find($this->traderOrderId);
-            Log::channel('bursam')->info('move Hold Trader Order ProcessBursamRunHoldTrader', ['financingOrderId' => $holdTrader->order->id,  'traderOrderId' => $holdTrader->id]);
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('move Hold Trader Order ProcessBursamRunHoldTrader', $holdTrader), ['financingOrderId' => $holdTrader->order->id,  'traderOrderId' => $holdTrader->id]);
             Trader::driver($holdTrader->provider, $holdTrader->version)->moveHoldTraderOrder($holdTrader);
         } catch (Exception $e) {
-            Log::channel('bursam')->error('Failed to ProcessBursamRunHoldTrader', ['financingOrderId' => $holdTrader->order->id,  'traderOrderId' => $holdTrader->id, 'error' => $e->getMessage()]);
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('Failed to ProcessBursamRunHoldTrader', $holdTrader), ['financingOrderId' => $holdTrader->order->id,  'traderOrderId' => $holdTrader->id, 'error' => $e->getMessage() , 'trace' => $e->getTraceAsString()]);
         }
 
     }

@@ -30,7 +30,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
         $className = class_basename(static::class);
         $queueName = 'local_market_commodities_settlement';
         self::logInfo("add $className job to queue $queueName", [
-            'local_market_order_id' => $this->localMarketOrderId
+            'localMarketOrderId' => $this->localMarketOrderId
         ]);
 
         $this->onQueue($queueName);
@@ -38,14 +38,14 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
 
     protected function logInfo(string $message, array $data = []): void
     {
-        $message = 'CommoditiesSettlement - '.$message;
-        Log::channel('local_market')->info($message, $data);
+        $message = 'CommoditiesSettlement local_market_order_id : '.$this->localMarketOrderId.' - '.$message;
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info($message, $data);
     }
 
     protected function logError(string $message, array $data = []): void
     {
-        $message = 'CommoditiesSettlement - '.$message;
-        Log::channel('local_market')->error($message, $data);
+        $message = 'CommoditiesSettlement local_market_order_id : '.$this->localMarketOrderId.' - '.$message;
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error($message, $data);
     }
 
     public function middleware(): array
@@ -65,10 +65,10 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
     {
         $className = class_basename(static::class);
 
-        Log::channel('local_market')->error("{$className} failed", [
-            'error_message' => $e->getMessage(),
-            'trace'         => $e->getTraceAsString(),
-            'order_id'      => $this->localMarketOrderId,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("{$className} failed local_market_order_id: {$this->localMarketOrderId}", [
+            'localMarketOrderId' => $this->localMarketOrderId,
+            'message' => $e->getMessage(),
+            'trace'   => $e->getTraceAsString()
         ]);
     }
 }

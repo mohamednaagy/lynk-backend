@@ -91,13 +91,13 @@ class InventoryService
     private function findOptimalCombination($loanAmount, $inventories)
     {
         if ($inventories->isEmpty()) {
-            Log::channel('local_market')->info('The inventories list are empty');
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The inventories list are empty');
 
             return false;
         }
 
         if (fmod($loanAmount, 1) !== 0.0) {
-            Log::channel('local_market')->info('The loan amount must be integer');
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The loan amount must be integer');
 
             return false;
         }
@@ -110,15 +110,15 @@ class InventoryService
     public static function deleteInventory($inventory)
     {
         try {
-            Log::info("Start Deleting Inventory ID: {$inventory->id}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Start Deleting Inventory ID: {$inventory->id}");
 
             DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $inventory->available_quantity]);
-            Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Successfully soft deleted units for inventory ID: {$inventory->id}");
             $inventory->delete();
 
-            Log::info("Success for deleting inventory ID: {$inventory->id}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Success for deleting inventory ID: {$inventory->id}");
         } catch (\Exception $e) {
-            Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
             throw $e;
         }
     }
@@ -206,9 +206,10 @@ class InventoryService
                 }
             });
         } catch (\Exception $e) {
-            Log::error('Failed to deliver order units.', [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Failed to deliver order units.', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
-                'error' => $e->getMessage(),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

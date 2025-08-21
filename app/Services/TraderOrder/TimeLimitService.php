@@ -92,9 +92,9 @@ class TimeLimitService
 
         if ($timeLimit) {
             $timeLimit->cancel(); // Call the model's cancel method
-            Log::info("Cancelled scheduled expiration job for Trader Order ID: {$traderOrder->id}");
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle("Cancelled scheduled expiration job for Trader Order ID: ", $traderOrder));
         } else {
-            Log::warning("No pending time limit found to cancel for Trader Order ID: {$traderOrder->id}");
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->warning(formatLogTitle("No pending time limit found to cancel for Trader Order ID: ", $traderOrder));
         }
     }
 

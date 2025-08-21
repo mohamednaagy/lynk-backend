@@ -48,8 +48,8 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
         $traderOrder = null;
         try {
             // Get attempt count from job properties
-            Log::channel('bursam')->info('Job wakala started', [
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_BURSAM)->info('start ProcessBursamGenerateClientWakala Job - trader_order_id => ' . $this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
 
@@ -58,8 +58,8 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                Log::channel('bursam')->info('Job wakala skipped - order not found', [
-                    'trader_order_id' => $this->traderOrderId,
+                log::channel(LOG_CHANNEL_BURSAM)->info('error at ProcessBursamGenerateClientWakala Job - not found trader_order_id => ' . $this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
                     'timestamp' => saudi_now(),
                 ]);
 
@@ -67,41 +67,38 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
-                Log::channel('bursam')->info('Job wakala skipped - order not found or incorrect action state', [
-                    'trader_order_id' => $this->traderOrderId,
-                    'timestamp' => saudi_now(),
-                    'last_action' => $traderOrder->last_history_action,
+                log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('error at ProcessBursamGenerateClientWakala Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
                     'expected_action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
                 ]);
 
                 return;
             }
 
-            Log::channel('bursam')->info('Processing client wakala generation', [
-                'action' => 'start',
-                'financing_order_id' => $traderOrder?->order?->id,
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('start ProcessBursamGenerateClientWakala Job', $traderOrder), [
+                'financingOrderId' => $traderOrder?->order?->id,
+                'traderOrderId' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
             app(GenerateClientWakala::class)->handle($traderOrder);
 
-            Log::channel('bursam')->info('Successfully generated client wakala', [
-                'action' => 'complete',
-                'financing_order_id' => $traderOrder?->order?->id,
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('finish ProcessBursamGenerateClientWakala Job', $traderOrder), [
+                'financingOrderId' => $traderOrder?->order?->id,
+                'traderOrderId' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
         } catch (Throwable $e) {
-            Log::channel('bursam')->error('Retry Wakala exception on attempt', [
-                'actual_exception' => $e->getMessage(),
+            log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamGenerateClientWakala Job - retry wakala exception on attempt trader_order_id => ' . $this->traderOrderId, [
+                'financingOrderId' => $traderOrder?->order?->id ?? null,
+                'traderOrderId' => $this->traderOrderId,
+                'message' => $e->getMessage(),
                 'error_code' => $e->getCode(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'exception_class' => get_class($e),
-                'trace' => $e->getTraceAsString(),
-                'trader_order_id' => $this->traderOrderId,
-                'financing_order_id' => $traderOrder?->order?->id ?? null,
-                'timestamp' => saudi_now(),
+                'trace' => $e->getTraceAsString()
             ]);
             throw $e;
         }
@@ -122,27 +119,27 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
 
         try {
             $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-            Log::channel('bursam')->error('Failed to generate client wakala - cancelling order', [
-                'error_message' => $exception->getMessage(),
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamGenerateClientWakala Job - failed to generate client wakala - cancelling order', $traderOrder), [
+                'financingOrderId' => $traderOrder?->order?->id,
+                'traderOrderId' => $this->traderOrderId,
+                'message' => $exception->getMessage(),
                 'error_code' => $exception->getCode(),
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'trace' => $exception->getTraceAsString(),
-                'financing_order_id' => $traderOrder->order->id,
-                'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
             app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         } catch (\Exception $e) {
-            Log::channel('bursam')->error('Failed to handle job failure', [
-                'error_message' => $e->getMessage(),
+            log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamGenerateClientWakala Job - failed to handle job failure trader_order_id => ' . $this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+                'message' => $e->getMessage(),
                 'error_code' => $e->getCode(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
                 'original_error' => $exception->getMessage(),
-                'trader_order_id' => $this->traderOrderId,
                 'timestamp' => saudi_now(),
             ]);
         }

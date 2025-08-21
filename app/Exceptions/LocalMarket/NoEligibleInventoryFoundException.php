@@ -15,6 +15,6 @@ class NoEligibleInventoryFoundException extends Exception
      */
     public function render(Request $request)
     {
-        Log::info('can not find good inventories ');
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('can not find good inventories ');
     }
 }

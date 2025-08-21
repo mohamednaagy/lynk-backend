@@ -114,7 +114,10 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        Log::channel('local_market')->info("Create New Order at Local Market For Trader Order id => {$traderOrder->id} and financing order => {$traderOrder->order->id}");
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle("Create New Order at Local Market ", $traderOrder) , [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
+        ]);
         $commodityData = (new GetSuitableCommodityTypesService($traderOrder))->resolve();
         LynkClient::of($traderOrder)->createOrder($commodityData['commodity_types_id']);
         $traderOrder->update([
@@ -201,7 +204,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                 FinancingOrderHistory::AttachSellConfirmationDocument,
             );
         } catch (\Throwable $e) {
-            Log::channel('local_market')->error('Failed to create sell-confirmation-certificate', [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create sell-confirmation-certificate', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
                 'message' => $e->getMessage(),
             ]);
 
@@ -233,8 +238,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {
-            Log::info('Creating selling commodity to customer document', [
-                'trader_order_id' => $traderOrder->id,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Creating selling commodity to customer document', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
             ]);
             $this->withLocale('ar', function () use ($traderOrder) {
                 $dateTime = $traderOrder->traderHistories()

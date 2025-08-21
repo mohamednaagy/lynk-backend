@@ -46,7 +46,12 @@ class GenerateClientWakalaAction implements GenerateClientWakala
                 }
             );
         } catch (Exception $e) {
-            Log::channel('bursam')->error('error at GenerateClientWakalaAction ', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $traderOrder->id, 'message' => $e->getMessage()]);
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('error at GenerateClientWakalaAction', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw $e;
         }
     }

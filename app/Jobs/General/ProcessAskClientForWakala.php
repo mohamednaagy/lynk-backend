@@ -40,11 +40,10 @@ class ProcessAskClientForWakala implements ShouldQueue
     {
         $traderOrder = TraderOrder::query()->find($this->traderOrder);
         if (is_null($traderOrder)) {
-            Log::channel('bursam')->error('ProcessAskClientForWakala not found traderOrderId: '.$this->traderOrder);
-
+            Log::error('error at ProcessAskClientForWakala not found trader_rder_id => '.$this->traderOrder);
             return;
         }
-        Log::channel('bursam')->info('Start ProcessAskClientForWakala Job traderOrderId: '.$traderOrder->id);
+        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Start ProcessAskClientForWakala Job '  , $traderOrder));
 
         $dict = new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type);
         $currentStep = $dict->getStepByHistory(FinancingOrderHistory::WaitingClientWakala);
@@ -58,12 +57,14 @@ class ProcessAskClientForWakala implements ShouldQueue
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::WaitingClientWakala);
 
         if ($proceedCaseService->checkIfTraderHasCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted)) {
-            Log::channel('bursam')->info('ProcessAskClientForWakala: traderOrderId: '.$traderOrder->id.' - The Trader has ContractAndClientWakalaCompleted Case');
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Trader has ContractAndClientWakalaCompleted Case' , $traderOrder));
             Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
         } else {
-            Log::channel('bursam')->info('ProcessAskClientForWakala  : traderOrderId: '.$traderOrder->id.' - Not Proceed Client Wakala Step Because The Trader doesnt has  ContractAndClientWakalaCompleted Case', [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Not Proceed Client Wakala Step Because The Trader doesnt has  ContractAndClientWakalaCompleted Case' , $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrder' => $traderOrder->id,
                 'last_case' => $proceedCaseService->getLatestCase($traderOrder->id),
+                'expected_case' => FinancingOrderProceedCase::ContractAndClientWakalaCompleted,
                 'cases' => json_encode($proceedCaseService->getTraderCases($traderOrder->id)->pluck('case')->toArray()),
             ]);
         }

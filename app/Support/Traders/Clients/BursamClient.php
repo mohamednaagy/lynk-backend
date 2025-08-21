@@ -46,8 +46,9 @@ class BursamClient
         }
 
         // Constructor logging
-        Log::channel('bursam')->info('Initializing BursamClient', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Initializing BursamClient',$traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'fake' => $this->fake,
         ]);
     }
@@ -66,7 +67,7 @@ class BursamClient
     {
         $financingOrder = $this->traderOrder->order;
 
-        Log::channel('bursam')->info('bursa purchasing step => buy product', [
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => buy product', $this->traderOrder), [
             'financingOrderId' => $financingOrder->id,
             'traderOrderId' => $this->traderOrder->id,
             'time' => now()]);
@@ -106,13 +107,15 @@ class BursamClient
                 ]
             ));
 
-        Log::channel('bursam')->info('Malaysia Bursa buyProduct request: ...'.json_encode([
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Malaysia Bursa buyProduct request', $this->traderOrder), [
+            'financingOrderId' => $financingOrder->id,
+            'traderOrderId' => $this->traderOrder->id,
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
             'statusCode' => $response->getStatusCode(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         return $response;
     }
@@ -206,13 +209,13 @@ class BursamClient
     private function logError(string $message, $response): void
     {
         $logData = array_merge([
+            'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
-            'financingOrderId' => $this->traderOrder->order->id,
             'response' => $response ? $response : null,
             'time' => now(),
         ]);
 
-        Log::channel('bursam')->error($message, $logData);
+        log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle($message, $this->traderOrder), $logData);
     }
 
     public function sellProduct()
@@ -256,21 +259,23 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa sellProduct request: ...'.json_encode([
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Malaysia Bursa sellProduct request', $this->traderOrder), [
+            'financingOrderId' => $financingOrder->id,
+            'traderOrderId' => $this->traderOrder->id,
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
             'statusCode' => $response->getStatusCode(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         return $response;
     }
 
     public function fetchBuyResult()
     {
-        Log::channel('bursam')->info('bursa purchasing step => fetchBuyResult', [
-            'financingOrderId' => $this->traderOrder->order->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => fetchBuyResult', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
             'time' => now()]);
 
@@ -284,8 +289,8 @@ class BursamClient
 
     private function fetchOrderResult($uuid)
     {
-        Log::channel('bursam')->info('bursa purchasing step => fetchOrderResult', [
-            'financingOrderId' => $this->traderOrder->order->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => fetchOrderResult', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
             'time' => now()]);
         $url = 'api/process/svc/bsas/orderResult.json';
@@ -312,21 +317,23 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa fetchOrderResult request: ...'.json_encode([
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Malaysia Bursa fetchOrderResult request', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
             'response' => $response->json(),
             'statusCode' => $response->getStatusCode(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         return $response;
     }
 
     public function getBidXml()
     {
-        Log::channel('bursam')->info('bursa purchasing step => getBidXml', [
-            'financingOrderId' => $this->traderOrder->order->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => getBidXml', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
             'time' => now()]);
         $url = 'api/process/svc/bsas/bidXML.json';
@@ -344,12 +351,14 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa getBidXml request: ...'.json_encode([
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Malaysia Bursa getBidXml request', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
             'statusCode' => $response->getStatusCode(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         return $response;
     }
@@ -371,12 +380,14 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa getOtcXml request: ...'.json_encode([
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Malaysia Bursa getOtcXml request', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
             'statusCode' => $response->getStatusCode(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         return $response;
     }
@@ -399,12 +410,14 @@ class BursamClient
                 )
         );
 
-        Log::channel('bursam')->info('Malaysia Bursa getStbXml request: ...'.json_encode([
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Malaysia Bursa getStbXml request', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
             'url' => $url,
             'request' => $request,
             'response' => $response->json(),
             'statusCode' => $response->getStatusCode(),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         return $response;
     }
@@ -443,8 +456,11 @@ class BursamClient
             ];
         });
         $instance->throw(function ($response, $e) use (&$lastRequest) {
-            Log::channel('bursam')->error('Error in request with BURSAM', [
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('Error in request with BURSAM', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'status_code' => $response->status(),
                 'url' => $lastRequest['url'] ?? '',
                 'method' => $lastRequest['method'] ?? '',
@@ -484,16 +500,19 @@ class BursamClient
                     'remaining_retries' => $remainingRetries,
                     'max_retries_before_exception' => $maxRetriesBeforeException,
                 ]);
-                Log::channel('bursam')->error('bursa Reached the maximum number of allowed retries', [
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa Reached the maximum number of allowed retries', $this->traderOrder), [
+                    'financingOrderId' => $this->traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrder->id,
                     'remainingRetries' => $remainingRetries,
                     'maxRetriesBeforeException' => $maxRetriesBeforeException,
                 ]);
                 throw $exception;
             }
-            Log::channel('bursam')->info('bursa send request rate limit', [
-                'time' => now(),
-                'order' => $this->traderOrder->order->id,
-                'trader_order_id' => $this->traderOrder->id]);
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa send request rate limit', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'time' => now()
+            ]);
             $executed = RateLimiter::attempt(
                 'bursam_api',
                 $maxAttempts,
@@ -502,9 +521,9 @@ class BursamClient
             );
 
             if ($executed instanceof Response && empty($executed->json())) {
-                Log::channel('bursam')->error('bursa API returned null response', [
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa API returned null response', $this->traderOrder), [
+                    'financingOrderId' => $this->traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrder->id,
-                    'financingOrderId' => $this->traderOrder->order->id,
                     'remainingRetries' => $remainingRetries,
                     'response' => $executed,
                 ]);
@@ -512,12 +531,12 @@ class BursamClient
             }
 
             if ($executed === false) {
-                Log::channel('bursam')->warning('bursa Rate limit exceeded, delaying retry without incrementing retries', [
+                log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa Rate limit exceeded, delaying retry without incrementing retries', $this->traderOrder), [
+                    'financingOrderId' => $this->traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrder->id,
                     'remainingRetries' => $remainingRetries,
                     'callback' => $callback,
                     'executed' => $executed,
-                    'order' => $this->traderOrder->order->id,
-                    'trader_order_id' => $this->traderOrder->id,
                 ]);
 
                 sleep($decaySeconds + 1);
@@ -527,17 +546,21 @@ class BursamClient
 
             return $executed;
         } catch (RateLimitExceededException $e) {
-            Log::channel('bursam')->error('bursa RateLimitExceededException FUll ', [
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa RateLimitExceededException FUll ', $this->traderOrder), [   
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'decaySeconds' => $decaySeconds,
                 'remainingRetries' => $remainingRetries,
                 'maxRetriesBeforeException' => $maxRetriesBeforeException,
             ]);
         } catch (Exception $e) {
-            Log::channel('bursam')->error('bursa Bursam exception occurred', [
+            log::channel(LOG_CHANNEL_BURSAM)->error('bursa Bursam exception occurred', [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
-                'financingOrderId' => $this->traderOrder->order->id,
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
                 'trace_string' => $e->getTraceAsString(),
@@ -691,7 +714,14 @@ class BursamClient
                 },
             ]);
         } catch (Exception $e) {
-            Log::channel('bursam')->error($e->getMessage(), ['line' => $e->getLine(), 'file' => $e->getFile()]);
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at BursamClient - registerFakeBursamResponses', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
         }
     }
 

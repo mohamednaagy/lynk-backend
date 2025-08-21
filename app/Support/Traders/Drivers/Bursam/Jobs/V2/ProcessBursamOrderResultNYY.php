@@ -45,10 +45,20 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
             ->where('status', TraderOrderStatus::InProgress)
             ->find($this->traderOrderId);
 
-        if (
-            is_null($traderOrder)
-            || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)
-        ) {
+        if (is_null($traderOrder)) {
+            log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - not found trader_order_id:' . $this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+            ]);
+            return;
+        }
+
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOrderResultNYY Job - incorrect action state', $traderOrder), [
+                'financingOrderId' => $traderOrder?->order?->id,
+                'traderOrderId' => $this->traderOrderId,
+                'latest_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
+                'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+            ]);
             return;
         }
 
@@ -67,6 +77,6 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessBursamOrderResultNYY', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace_string' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace' => $exception->getTraceAsString()]);
     }
 }

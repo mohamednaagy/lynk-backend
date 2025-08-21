@@ -88,22 +88,18 @@ class OrderService
 
     private function countHeldUnits(LocalMarketOrder $localMarketOrder): int
     {
-        return DB::table('local_market_inventory_units')
-            ->where('hold_for', $localMarketOrder->id)
-            ->count();
+        return DB::table('local_market_inventory_units')->where('hold_for', $localMarketOrder->id)->count();
     }
 
     private function countInsertedUnits(LocalMarketOrder $localMarketOrder): int
     {
-        return DB::table('local_market_order_has_units')
-            ->where('local_market_order_id', $localMarketOrder->id)
-            ->count();
+        return DB::table('local_market_order_has_units')->where('local_market_order_id', $localMarketOrder->id)->count();
     }
 
     private function logUnitInsertionDetails(LocalMarketOrder $localMarketOrder, int $insertedCount, int $totalUnits): void
     {
-        Log::info('insertOrderUnits', [
-            'order_id' => $localMarketOrder->id,
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('insertOrderUnits', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
             'insertedCount' => $insertedCount,
             'totalUnits' => $totalUnits,
         ]);
@@ -111,9 +107,9 @@ class OrderService
 
     private function logOrderUnitsError(LocalMarketOrder $localMarketOrder, Exception $e): void
     {
-        Log::channel('local_market')->error('Error in insertOrderUnits', [
-            'order_id' => $localMarketOrder->id,
-            'error' => $e->getMessage(),
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error in insertOrderUnits', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'message' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
         ]);
     }
@@ -157,9 +153,9 @@ class OrderService
                 );
             }
         } catch (\Exception $e) {
-            Log::channel('local_market')->error('Error in insertOrderInventories', [
-                'order_id' => $localMarketOrder->id,
-                'error' => $e->getMessage(),
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error in insertOrderInventories', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 

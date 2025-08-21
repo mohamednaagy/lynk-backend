@@ -33,7 +33,7 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('Starting InitiateTraderOrdersIfTimedOut Job');
+        log::channel(LOG_CHANNEL_BURSAM)->info('start InitiateTraderOrdersIfTimedOut Job');
 
         $timezone = Config::get('services.bursam.timezone');
         $marketOpeningStartTimeString = Config::get('services.bursam.market_opening_start_time');
@@ -63,6 +63,6 @@ class InitiateTraderOrdersIfTimedOut implements ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('InitiateTraderOrdersIfTimedOut', ['message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at InitiateTraderOrdersIfTimedOut Job - failed to initiate trader orders', ['message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

@@ -39,10 +39,11 @@ class PendingSellOrderStatus extends BaseStatus
             DB::rollBack();
             $this->localMarketOrder->changeStatusTo(OrderStatus::FailedSell);
             $this->logQueueJob('failed to sell order');
-            Log::channel('local_market')->error('failed to sell order', [
-                'order_id' => $this->localMarketOrder->id,
-                'order_reference' => $this->localMarketOrder->order_reference,
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('failed to sell order', $this->localMarketOrder), [
+                'localMarketOrderId' => $this->localMarketOrder->id,
+                'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }

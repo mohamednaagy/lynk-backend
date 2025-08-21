@@ -51,7 +51,8 @@ class ProcessProceedContractSigned implements ShouldQueue
         }
         $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned), false);
 
-        Log::channel('bursam')->info(' finish ProcessProceedContractSigned', [
+        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle(' finish ProcessProceedContractSigned' , $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrderId,
         ]);
     }

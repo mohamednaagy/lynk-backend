@@ -45,16 +45,29 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
                     ->find($this->traderOrderId);
 
                 if (is_null($traderOrder)) {
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelOrderAtLocalMarket not found trader_order_id =>' . $this->traderOrderId, [
+                        'traderOrderId' => $this->traderOrderId,
+                    ]);
                     return;
                 }
 
                 //if condition to notify function to cancel detail from model (TODO:nagy)
                 if ($traderOrder->cancelDetail->shouldNotifyProvider()) {
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('ProcessLynkCancelOrderAtLocalMarket: cancelling order to local market ', $traderOrder), [
+                        'financingOrderId' => $traderOrder->financing_order_id, 
+                        'traderOrderId' => $traderOrder->id,
+                        'shouldNotifyProvider' => $traderOrder->cancelDetail->shouldNotifyProvider(),
+                        'message' => 'cancelling order to local market',
+                    ]);
                     LynkClient::of($traderOrder)->cancelOrder();
                 }
             });
         } catch (\Exception $e) {
-            Log::channel('local_market')->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order ', ['trader_order_id' => $this->traderOrderId, 'error' => $e->getMessage()]);
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order trader_order_id => '. $this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
         }
 

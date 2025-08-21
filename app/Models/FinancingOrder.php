@@ -93,10 +93,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                 try {
                     $traderOrder = $this->activeTraderOrder->first();
                     if (is_null($traderOrder)) {
-                        Log::channel('bursam')->error(
-                            "No active trader order found for financing  order {$this->id}",
+                        Log::error(
+                            "No active trader order found for financing_order_id => {$this->id}",
                             [
-                                'order_id' => $this->id,
+                                'financingOrderId' => $this->id,
                                 'reference_number' => $this->reference_number,
                             ]
                         );
@@ -111,12 +111,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
                     $currentStepNode = $stepDictionary->getStepByHistory($traderOrder->last_history_action);
                     if (is_null($currentStepNode)) {
-                        Log::error(
-                            "No step node found for order {$this->id} with history action {$traderOrder->last_history_action}",
+                        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(
+                            formatLogTitle("No step node found for order {$this->id} with history action {$traderOrder->last_history_action}", $traderOrder),
                             [
-                                'order_id' => $this->id,
+                                'financingOrderId' => $this->id,
+                                'traderOrderId' => $traderOrder->id,
                                 'reference_number' => $this->reference_number,
-                                'trader_order_id' => $traderOrder->id,
                                 'last_history_action' => $traderOrder->last_history_action,
                             ]
                         );
@@ -126,10 +126,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
                     return MurabhaStep::fromValue($currentStepNode->step);
                 } catch (\Exception $e) {
-                    Log::error(
-                        "Error retrieving current step for order {$this->id}: ".$e->getMessage(),
+                    $traderOrder = $this->activeTraderOrder->first();
+                    $logMessage = "Error retrieving current step for order {$this->id}: " . $e->getMessage();
+                    if ($traderOrder) {
+                        $logMessage .= " trader_order_id => " . $traderOrder->id;
+                    }
+                    Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(
+                        formatLogTitle($logMessage, $traderOrder),
                         [
-                            'order_id' => $this->id,
+                            'financingOrderId' => $this->id,
+                            'traderOrderId' => $traderOrder->id,
                             'reference_number' => $this->reference_number,
                         ]
                     );

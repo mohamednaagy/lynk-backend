@@ -28,7 +28,12 @@ trait StopsTraderOrderOnJobFailure
         }
 
         if (method_exists($exception, 'getMessage')) {
-            Log::channel($channel)->error($exception->getMessage(), ['traderOrderId' => $this->traderOrderId, 'trace' => $exception->getTraceAsString()]);
+            Log::channel($channel)->error(formatLogTitle($exception->getMessage(), $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString()
+            ]);
         }
     }
 }

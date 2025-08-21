@@ -247,13 +247,24 @@ class BursamV2Driver extends BursamV1Driver
     // use it in public api to proceed order after purchasing commodity step by one step
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('processProceedContractAndClientWakala', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
+        ]);
+        
         if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value != FinancingOrderProceedCase::ContractSigned) {
-            Log::channel('bursam')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ContractSigned Job');
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('we will fire ProcessProceedContractSigned Job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
+            ]);
             ProcessProceedContractSigned::dispatch($traderOrder->id);
         }
 
         if ($this->shouldProcessClientWakala($traderOrder)) {
-            Log::channel('bursam')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ProcessProceedClientWakala Job');
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('we will fire ProcessProceedClientWakala Job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
+            ]);
             ProcessProceedClientWakala::dispatch($traderOrder->id);
         }
     }

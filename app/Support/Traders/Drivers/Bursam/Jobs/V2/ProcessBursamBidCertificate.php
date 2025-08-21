@@ -51,14 +51,23 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
                 ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
-            if (
-                is_null($traderOrder)
-                || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)
-            ) {
+            if (is_null($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamBidCertificate Job - not found ', ['traderOrderId' => $this->traderOrderId]);
                 return;
             }
 
-            Log::channel('bursam')->info('bursa Purchasing Step => Starting ProcessBursamBidCertificate Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)
+            ) {
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamBidCertificate Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
+                    'expected_action' => FinancingOrderHistory::GetTtiHoldingCertificateDocument,
+                ]);
+                return;
+            }
+
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa Purchasing Step => Starting ProcessBursamBidCertificate Job', $traderOrder), ['financingOrderId' => $traderOrder->financing_order_id, 'traderOrderId' => $this->traderOrderId]);
 
             Trader::driver('bursam', $traderOrder->version)
                 ->getBidCertificateDetails($traderOrder);
@@ -78,7 +87,12 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     public function failed($exception)
     {
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-        Log::channel('bursam')->error('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrderId,
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         (new RunHoldTraderWhenMarketOpenCommand)->handle();

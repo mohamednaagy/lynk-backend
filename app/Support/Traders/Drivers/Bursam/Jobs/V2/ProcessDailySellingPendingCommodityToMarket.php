@@ -31,7 +31,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
      */
     public function handle(): void
     {
-        Log::channel('bursam')->info('Starting ProcessDailySellingPendingCommodityToMarket Job');
+        log::channel(LOG_CHANNEL_BURSAM)->info('Starting ProcessDailySellingPendingCommodityToMarket Job');
 
         FinancingOrder::query()
             ->whereHas('activeTraderOrder', function (Builder $query) {
@@ -41,14 +41,14 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             })
             ->select('id')
             ->lazyById()
-            ->each(function (FinancingOrder $financingOrder) {
-                Log::channel('bursam')->info("fire auto cancel job for finance order {$financingOrder->id}");
+            ->each(function (FinancingOrder $financingOrder) { 
+                log::channel(LOG_CHANNEL_BURSAM)->info('fire auto cancel job for financing_order_id => ' . $financingOrder->id);
                 ProcessBursamCancelTimeOutOrder::dispatch($financingOrder);
             });
     }
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage() , 'trace' => $exception->getTraceAsString()]);
     }
 }

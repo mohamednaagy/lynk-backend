@@ -33,18 +33,26 @@ class LoanService
         $unitService = new UnitService;
 
         DB::beginTransaction();
-        Log::info('buy commodities', ['order_id' => $localMarketOrder->id]);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('buy commodities', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+        ]);
         try {
             $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
             $orderService->insertOrderUnits($localMarketOrder);
             $orderService->insertOrderInventories($localMarketOrder);
             DB::commit();
-            Log::info('buy commodities success', ['order_id' => $localMarketOrder->id]);
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('buy commodities success', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+            ]);
 
             return true;
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Error in buy commodities', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error in buy commodities', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return false;
         }
@@ -63,6 +71,8 @@ class LoanService
          * 5- log the action
          * 6- send notification to the company
          */
-        Log::info('We wll sell your commodities ISA soon', ['order_id' => $localMarketOrder->id]);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('We wll sell your commodities ISA soon', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+        ]);
     }
 }
