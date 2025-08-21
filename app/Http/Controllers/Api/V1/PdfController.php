@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PdfController extends Controller
 {
@@ -22,14 +23,13 @@ class PdfController extends Controller
     /**
      * Generate or retrieve PDF document
      */
-    public function generate(GeneratePdfRequest $request): JsonResponse
+    public function generate(GeneratePdfRequest $request): StreamedResponse|JsonResponse
     {
         try {
             $documentType = DocumentType::fromValue($request->document_type);
             $context = $this->buildContext($request);
 
             $result = $this->pdfService->generateOrRetrievePdf($documentType, $context);
-
             if ($result['success']) {
                 return Storage::disk($result['data']['disk'])->download($result['data']['path']);
             }

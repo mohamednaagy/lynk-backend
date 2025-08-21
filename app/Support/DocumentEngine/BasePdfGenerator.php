@@ -3,7 +3,6 @@
 namespace App\Support\DocumentEngine;
 
 use App\Support\PdfGenerator\PdfGenerator;
-use Illuminate\Support\Facades\Log;
 
 abstract class BasePdfGenerator
 {
@@ -12,15 +11,13 @@ abstract class BasePdfGenerator
     // Template method (final so subclasses don't override the flow)
     final public function generate()
     {
-        if ($this->isGeneratedBefore()) {
-            return $this->getGeneratedBeforePath();
+        if (! $this->isGeneratedBefore()) {
+            $this->beforeGenerate();
+            $data = $this->prepareData();
+            $html = $this->renderTemplate($data);
+            $this->exportPdf($html);
+            $this->afterGenerate();
         }
-
-        $this->beforeGenerate();
-        $data = $this->prepareData();
-        $html = $this->renderTemplate($data);
-        $this->exportPdf($html);
-        $this->afterGenerate();
     }
 
     // Steps that subclasses implement
@@ -65,15 +62,9 @@ abstract class BasePdfGenerator
         return view($this->getTemplatePath(), $data)->render();
     }
 
-    // Shared PDF export logic (MPDF, DomPDF, Browserless, etc.)
-    protected function exportPdf(string $html): mixed
+    protected function exportPdf(string $html): void
     {
-
-        Log::info('Exporting PDF', [
-            'context' => $this->context,
-        ]);
-
-        return PdfGenerator::outputFromHtml(
+        PdfGenerator::outputFromHtml(
             $html,
             $this->getStorageCallback()
         );

@@ -25,6 +25,7 @@ trait HasTraderOrder
         if ($this->traderOrder === null) {
             $this->traderOrder = $this->getTraderOrderFromContext();
         }
+        $this->traderOrder->refresh();
 
         return $this->traderOrder;
     }
@@ -62,10 +63,6 @@ trait HasTraderOrder
 
     private function getMedia(): ?Media
     {
-        if ($this->media === null) {
-            $this->media = $this->getTraderOrder()->getMedia($this->collectionName)->first();
-        }
-
-        return $this->media;
+        return $this->getTraderOrder()->getMedia($this->collectionName)->first();
     }
 }
