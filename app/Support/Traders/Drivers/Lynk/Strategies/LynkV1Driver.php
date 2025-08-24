@@ -298,7 +298,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             'trader_order_id' => $traderOrder->id,
         ]);
 
-        ProcessLynkCancelOrderAtLocalMarket::dispatch($traderOrder->id, $cancelReason);
+        ProcessLynkCancelOrderAtLocalMarket::dispatch($traderOrder->id, $cancelReason)->afterCommit();
 
         Log::channel('local_market')->info('ProcessLynkCancelOrderAtLocalMarket Job dispatched', [
             'trader_order_id' => $traderOrder->id,
