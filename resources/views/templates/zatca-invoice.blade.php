@@ -7,7 +7,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.4; padding: 20px; direction: ltr; margin: 0;">
     <div style="max-width: 800px; margin: 0 auto; background: white;">
-        
+
         <!-- Row 1: Logo + Header -->
         <table style="width: 100%; margin-bottom: 30px; border-bottom: 1px solid #ddd; padding-bottom: 15px;">
             <tr>

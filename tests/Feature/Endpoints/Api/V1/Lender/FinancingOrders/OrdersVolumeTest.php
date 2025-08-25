@@ -52,7 +52,7 @@ class OrdersVolumeTest extends TestCase
 
     private static $ordersCountForSecondCompany;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         self::$firstDateForFirstCompany = date('2021-10-01');

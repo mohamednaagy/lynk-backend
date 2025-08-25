@@ -15,6 +15,7 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     use Queueable;
 
     private TraderOrder $traderOrder;
+
     private FinancingOrder $financingOrder;
 
     /**

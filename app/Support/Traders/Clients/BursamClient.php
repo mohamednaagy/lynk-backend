@@ -482,7 +482,7 @@ class BursamClient
         return $instance;
     }
 
-    //TODO : remove RateLimitExceededException and the catch and add log  insteadof fire exception
+    // TODO : remove RateLimitExceededException and the catch and add log  insteadof fire exception
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
         try {

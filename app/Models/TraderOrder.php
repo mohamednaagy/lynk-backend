@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -166,7 +167,7 @@ class TraderOrder extends Model implements HasMedia
         }
 
         if (! $this->last_history_action) {
-            throw new \Exception('Last history action is not set');
+            throw new \Exception('Last history action is not set for trader order: '.$this->id);
         }
 
         return in_array($this->last_history_action, $actions);
@@ -270,7 +271,8 @@ class TraderOrder extends Model implements HasMedia
     public function processInitiatedTraderOrder()
     {
         if ($this->provider == EnumsTrader::Bursam) {
-            ProcessBursamInitiatedTraderOrder::dispatch($this->id);
+            Log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => will fire processInitiatedTraderOrder Job by trader order observer', $this), ['traderOrderId' => $this->id]);
+            ProcessBursamInitiatedTraderOrder::dispatch($this->id)->afterCommit();
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
         }

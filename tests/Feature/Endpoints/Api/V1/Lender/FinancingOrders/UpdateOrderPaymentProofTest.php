@@ -31,7 +31,7 @@ class UpdateOrderPaymentProofTest extends TestCase
 
     private static string $apiUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -64,7 +64,7 @@ class UpdateOrderPaymentProofTest extends TestCase
             ]);
     }
 
-    public function test_update_order_payment_proof_only_roles_in_Lender_area_users_can_access(): void
+    public function test_update_order_payment_proof_only_roles_in_lender_area_users_can_access(): void
     {
         $this->assertStatusCodeForAllRolesExceptForArea(403, [Area::Lender], function ($user, $role) {
             return $this->actingAs($user)

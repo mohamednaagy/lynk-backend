@@ -16,14 +16,14 @@ class DeleteCommodityItem implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Create a new job instance.
-     */
-    public function __construct(protected CommodityItem $commodityItem)
-    {
-        $this->onQueue('local_market');
-    }
+    private CommodityItem $commodityItem;
 
+    
+    public function __construct(CommodityItem $commodityItem)
+    {
+        $this->commodityItem = $commodityItem;
+    }
+    
     /**
      * Execute the job.
      */

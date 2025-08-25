@@ -72,7 +72,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
             ]);
 
             try {
-                $wallet = $company->getWallet(WalletType::CompanyWallet);
+                $wallet = $company->getWallet(WalletType::CompanyWallet, false);
 
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Wallet retrieval completed', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,

@@ -2,6 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -32,6 +33,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamSellingCommodityToOpenMarket: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -43,13 +45,17 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
             if (! $traderOrder) {
                 log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - not found trader_order_id => ' . $this->traderOrderId, [
                     'traderOrderId' => $this->traderOrderId,
                 ]);
+                return;
+            }
+
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+                Log::channel(LOG_CHANNEL_BURSAM)->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
                 return;
             }
 

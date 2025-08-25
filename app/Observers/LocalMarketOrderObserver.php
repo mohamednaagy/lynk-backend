@@ -9,6 +9,7 @@ use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
 use App\Jobs\LocalMarket\states\FailedCancelOrderStatus;
 use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\FailedSoldOrderStatus;
+use App\Jobs\LocalMarket\states\InitiateOrderStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingCancelOrderStatus;
 use App\Jobs\LocalMarket\states\PendingSellOrderStatus;
@@ -124,6 +125,9 @@ class LocalMarketOrderObserver
                 break;
             case OrderStatus::TransferOwnershipToCustomer:
                 TransferCommodityToCustomerStatus::dispatch($localMarketOrder->id);
+                break;
+            case OrderStatus::initiate:
+                InitiateOrderStatus::dispatch($localMarketOrder->id);
                 break;
         }
     }

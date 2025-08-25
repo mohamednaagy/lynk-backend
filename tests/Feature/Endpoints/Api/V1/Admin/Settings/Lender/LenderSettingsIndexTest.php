@@ -35,7 +35,7 @@ class LenderSettingsIndexTest extends TestCase
 
     private static $lenderSettings;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

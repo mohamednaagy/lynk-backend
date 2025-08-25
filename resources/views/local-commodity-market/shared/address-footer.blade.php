@@ -1,4 +1,4 @@
-<div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px;"> 
+<div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px;">
     <table style="width: 100%; font-size: 11px; border: none; border-collapse: collapse;">
         <tr>
             <td style="text-align: left; color: rgb(22, 78, 99); border: none; white-space: nowrap; padding-right: 15px;">www.lynk.sa</td>

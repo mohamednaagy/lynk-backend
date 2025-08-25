@@ -39,7 +39,7 @@ class GetMurabhaCompleteDocumentTest extends TestCase
 
     private static string $getMurabhaCompleteDocumentUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

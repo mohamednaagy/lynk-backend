@@ -30,7 +30,7 @@ class ForgotPasswordTest extends TestCase
 
     private static string $resetPasswordUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

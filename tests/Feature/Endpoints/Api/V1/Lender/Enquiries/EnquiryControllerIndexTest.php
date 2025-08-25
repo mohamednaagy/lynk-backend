@@ -39,7 +39,7 @@ class EnquiryControllerIndexTest extends TestCase
 
     private static Enquiry $anotherEnquiry;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

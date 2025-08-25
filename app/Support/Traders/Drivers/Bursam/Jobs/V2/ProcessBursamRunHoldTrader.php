@@ -25,6 +25,7 @@ class ProcessBursamRunHoldTrader implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamRunHoldTrader: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**

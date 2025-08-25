@@ -2,21 +2,29 @@
 
 namespace App\Services\LocalMarket;
 
-use App\Enums\LocalMarket\OwnershipTypes;
-use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
-use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
+    private $orderService;
+
+    private $unitService;
+
+    private $inventoryService;
+
+    public function __construct()
+    {
+        $this->orderService = app(OrderService::class);
+        $this->unitService = app(UnitService::class);
+        $this->inventoryService = app(InventoryService::class);
+    }
+
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
-        $inventoryService = app(InventoryService::class);
-        $unitsService = app(UnitService::class);
+        $startTime = microtime(true);
 
-        $eligibleInventories = $inventoryService->findEligibleInventoryForLoan(
+        $eligibleInventories = $this->inventoryService->findEligibleInventoryForLoan(
             $localMarketOrder
         );
 
@@ -24,38 +32,12 @@ class LoanService
             return false;
         }
 
-        return $unitsService->getEligibleUnits($localMarketOrder, $eligibleInventories);
-    }
-
-    public function buyCommodities(LocalMarketOrder $localMarketOrder)
-    {
-        $orderService = new OrderService;
-        $unitService = new UnitService;
-
-        DB::beginTransaction();
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('buy commodities', $localMarketOrder), [
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getCommoditiesForLoan Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
         ]);
-        try {
-            $unitService->changeOrderUnitsOwnershipTo($localMarketOrder, OwnershipTypes::Company, $localMarketOrder->company_id, UnitOwnershipAction::PurchaseCommodity);
-            $orderService->insertOrderUnits($localMarketOrder);
-            $orderService->insertOrderInventories($localMarketOrder);
-            DB::commit();
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('buy commodities success', $localMarketOrder), [
-                'localMarketOrderId' => $localMarketOrder->id,
-            ]);
 
-            return true;
-        } catch (Exception $e) {
-            DB::rollBack();
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error in buy commodities', $localMarketOrder), [
-                'localMarketOrderId' => $localMarketOrder->id,
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return false;
-        }
+        return $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)

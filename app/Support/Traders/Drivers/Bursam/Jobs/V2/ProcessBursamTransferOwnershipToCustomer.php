@@ -26,7 +26,10 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId) {}
+    public function __construct(protected int $traderOrderId) {
+        $this->afterCommit = true;
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+    }
 
     /**
      * Execute the job.
@@ -37,7 +40,6 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
     {
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::InProgress)
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
@@ -47,11 +49,20 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
                 return;
             }
 
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToCustomer job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId ,
+                    'status' => $traderOrder->status->value]);
+                return;
+            }
+
+
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
                 log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamTransferOwnershipToCustomer Job - incorrect action state', $traderOrder), [
                     'financingOrderId' => $traderOrder?->order?->id,
                     'traderOrderId' => $this->traderOrderId,
-                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
                     'expected_action' => FinancingOrderHistory::ContractSigned,
                 ]);
                 return;

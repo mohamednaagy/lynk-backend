@@ -140,7 +140,7 @@ class LocalMarketInventoryController extends Controller
      */
     public function destroy(CommodityItem $item, LocalMarketInventory $inventory, DeleteCommodityInventory $deleteCommodityInventory)
     {
-        //check if the inventory is deleteable
+        // check if the inventory is deleteable
         if (! $inventory->is_deletable) {
             return $this->errorResponse(
                 __('error.inventory_cannot_be_deleted'),

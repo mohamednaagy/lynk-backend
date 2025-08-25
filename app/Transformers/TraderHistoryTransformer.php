@@ -2,6 +2,8 @@
 
 namespace App\Transformers;
 
+use App\Enums\DocumentType;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as TraderEnum;
@@ -53,23 +55,35 @@ class TraderHistoryTransformer extends TransformerAbstract
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, MurabhaStep::PurchasingCommodity);
 
-        $certDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::TtiHoldingCertificate);
-        $ownershipDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
-
-        return $this->primitive([
+        $data = [
             'step' => MurabhaStep::PurchasingCommodity,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history) ? saudi_now('Y-m-d h:i:s A', optional($history)->created_at) : null,
-            'cert_document' => [
-                'url' => $certDocumentMediaFile?->file_url,
-                'date' => $certDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $certDocumentMediaFile->created_at) : null,
-            ],
             'ownership_document' => [
-                'url' => $ownershipDocumentMediaFile?->file_url,
-                'date' => $ownershipDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $ownershipDocumentMediaFile->created_at) : null,
+                'url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::TRANSFER_OWNERSHIP_TO_LENDER,
+                    'context' => [
+                        'trader_order_id' => $this->traderOrder->id,
+                    ],
+                ]),
+                'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
-        ]);
+        ];
+
+        if ($this->traderOrder->provider === TraderEnum::Bursam) {
+            $data['cert_document'] = [
+                'url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::BURSAM_BID_CERTIFICATE,
+                    'context' => [
+                        'trader_order_id' => $this->traderOrder->id,
+                    ],
+                ]),
+                'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
+            ];
+        }
+
+        return $this->primitive($data);
     }
 
     public function includeClientWakala($historiesActions): Primitive
@@ -85,7 +99,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'is_deliverable' => $this->traderOrder->isDeliverable(),
-            'client_wakala_message' =>  Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->clientWakalaMessage($this->traderOrder),
+            'client_wakala_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->clientWakalaMessage($this->traderOrder),
             'signed_wakala_document' => [
                 'url' => $signedWakalaDocumentMediaFile?->file_url,
                 'date' => $signedWakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $signedWakalaDocumentMediaFile->created_at) : null,
@@ -99,8 +113,9 @@ class TraderHistoryTransformer extends TransformerAbstract
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
             $historiesActions, MurabhaStep::ContractSigned
         );
-
-        $wakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::ClientWakala);
+        $transferOwnershipToLenderDocumentHistory = $this->traderOrder->traderHistories()
+            ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+            ->first();
 
         $data = [
             'step' => MurabhaStep::ContractSigned,
@@ -109,13 +124,18 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_deliverable' => $this->traderOrder->isDeliverable(),
             'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => [
-                'url' => $wakalaDocumentMediaFile?->file_url,
-                'date' => $wakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $wakalaDocumentMediaFile->created_at) : null,
+                'url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::CLIENT_WAKALA,
+                    'context' => [
+                        'trader_order_id' => $this->traderOrder->id,
+                    ],
+                ]),
+                'date' => $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
 
-        if($this->traderOrder->isVersion('v2')) {
+        if ($this->traderOrder->isVersion('v2')) {
             unset($data['is_deliverable']);
         }
 
@@ -128,15 +148,18 @@ class TraderHistoryTransformer extends TransformerAbstract
             $historiesActions, MurabhaStep::CommoditySoldToCustomer
         );
 
-        $documentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
-
         return $this->primitive([
             'step' => MurabhaStep::CommoditySoldToCustomer,
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'borrower_document' => [
-                'url' => $documentMediaFile?->file_url,
-                'date' => $documentMediaFile ? saudi_now('Y-m-d h:i:s A', $documentMediaFile->created_at) : null,
+                'url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::SELLING_COMMODITY_TO_CUSTOMER,
+                    'context' => [
+                        'trader_order_id' => $this->traderOrder->id,
+                    ],
+                ]),
+                'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ]);
@@ -148,15 +171,18 @@ class TraderHistoryTransformer extends TransformerAbstract
             $historiesActions, MurabhaStep::MurabhaOfferIssued
         );
 
-        $mpoDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::MurabahaPurchaseOrder);
-
         return $this->primitive([
             'step' => MurabhaStep::SellingCommodityToOpenMarket,
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'mpo_document' => [
-                'url' => $mpoDocumentMediaFile?->file_url,
-                'date' => $mpoDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $mpoDocumentMediaFile->created_at) : null,
+                'url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'context' => [
+                        'trader_order_id' => $this->traderOrder->id,
+                    ],
+                ]),
+                'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ]);
@@ -168,21 +194,18 @@ class TraderHistoryTransformer extends TransformerAbstract
             $historiesActions, MurabhaStep::MurabahaSaleCompleted
         );
 
-        $warrantyDocumentMediaFile = match ($this->traderOrder->provider) {
-            TraderEnum::Dmcc, TraderEnum::FakeDmcc => $this->getMedia(TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo),
-            TraderEnum::Bursam => $this->getMedia(TraderOrderMediaCollection::BursamTtiHoldingCertificate),
-            TraderEnum::Lynk => $this->getMedia(TraderOrderMediaCollection::LynkSalePledgeCertificate),
-        };
-
-        ///*****///
-
         $data = [
             'step' => MurabhaStep::MurabahaSaleCompleted,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'warranty_document' => [
-                'url' => $warrantyDocumentMediaFile?->file_url,
-                'date' => $warrantyDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $warrantyDocumentMediaFile->created_at) : null,
+                'url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'context' => [
+                        'trader_order_id' => $this->traderOrder->id,
+                    ],
+                ]),
+                'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];

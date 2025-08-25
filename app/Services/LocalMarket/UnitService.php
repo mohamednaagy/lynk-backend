@@ -23,12 +23,18 @@ class UnitService
      */
     public function getEligibleUnits(LocalMarketOrder $localMarketOrder, $eligibleInventories)
     {
+        $startTime = microtime(true);
         $inventories = [];
         foreach ($eligibleInventories as $eligibleInventory) {
             $inventory = LocalMarketInventory::find($eligibleInventory['id']);
             $this->holdEligibleUnits($localMarketOrder, $inventory, $eligibleInventory['numberOfUnits']);
             $inventories[$inventory->id] = $this->buildResponseArray($inventory, $eligibleInventory['numberOfUnits']);
         }
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getEligibleUnits Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+        ]);
 
         return $inventories;
     }
@@ -75,10 +81,12 @@ class UnitService
             'inventory_id' => $inventory->id,
         ]);
 
+        $startTime = microtime(true);
+
         // Get eligible unit IDs
         $eligibleUnitIds = $this->getEligibleUnitIds(
             $inventory,
-            $localMarketOrder->company_id,
+            $localMarketOrder,
             $numberOfNeededUnits
         );
 
@@ -119,16 +127,25 @@ class UnitService
      */
     private function getEligibleUnitIds(
         LocalMarketInventory $inventory,
-        int $companyId,
+        LocalMarketOrder $localMarketOrder,
         int $limit
     ): Collection {
-        return collect(
-            $this->buildEligibleUnitsQuery($inventory->id, $companyId)
+        $startTime = microtime(true);
+        $data = collect(
+            $this->buildEligibleUnitsQuery($inventory->id, $localMarketOrder->company_id)
                 ->select('id')
                 ->limit($limit)
                 ->lockForUpdate()
                 ->pluck('id')
         );
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getEligibleUnitIds Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'inventoryId' => $inventory->id,
+        ]);
+
+        return $data;
     }
 
     /**
@@ -195,7 +212,8 @@ class UnitService
             'inventory_id' => $inventory->id,
         ]);
 
-        $count = $this->buildEligibleUnitsQuery($inventory->id, $company->id)->count();
+        $count = $this->buildEligibleUnitsCountQuery($inventory->id, $company->id)->count();
+
 
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => '.$inventory->id . ' at ' .now());
 
@@ -227,6 +245,35 @@ class UnitService
 
         return $query;
     }
+
+
+    private function buildEligibleUnitsCountQuery(int $inventoryId, int $companyId): \Illuminate\Database\Query\Builder
+{
+    $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
+
+    $baseQuery = DB::table('local_market_inventory_units')
+        ->selectRaw('1')
+        ->where('local_market_inventory_id', $inventoryId)
+        ->where('status', InventoryUnitsStatus::Free)
+        ->where('hold_for', 0)
+        ->whereNull('deleted_at')
+        ->fromRaw('local_market_inventory_units FORCE INDEX (inventory_units_eligibility_index)');
+
+    if ($numberOfRotation > 0) {
+        for ($i = 0; $i < $numberOfRotation; $i++) {
+            $baseQuery->where(function ($q) use ($companyId, $i) {
+                $q->where("previous_company_id_owner_$i", '!=', $companyId)
+                  ->orWhereNull("previous_company_id_owner_$i");
+            });
+        }
+    }
+
+    $wrapped = DB::table(DB::raw("({$baseQuery->limit(config('trader.providers.lynk.max_count_eligible_units_per_inventory'))->toSql()}) as t"))
+        ->mergeBindings($baseQuery);
+
+    return $wrapped;
+}
+
 
     /**
      * Change ownership of order units directly with better performance

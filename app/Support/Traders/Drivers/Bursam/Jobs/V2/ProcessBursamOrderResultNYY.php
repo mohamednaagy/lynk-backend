@@ -32,6 +32,7 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamOrderResultNYY: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -42,7 +43,6 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     public function handle(): void
     {
         $traderOrder = TraderOrder::query()
-            ->where('status', TraderOrderStatus::InProgress)
             ->find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
@@ -52,11 +52,22 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
             return;
         }
 
+        
+        if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+            Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultNYY job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
+                'status' => $traderOrder->status->value
+            ]);
+            return;
+        }
+
+
         if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
             log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOrderResultNYY Job - incorrect action state', $traderOrder), [
                 'financingOrderId' => $traderOrder?->order?->id,
                 'traderOrderId' => $this->traderOrderId,
-                'latest_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
+                'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
                 'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
             ]);
             return;

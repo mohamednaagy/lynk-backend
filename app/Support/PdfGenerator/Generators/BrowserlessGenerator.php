@@ -104,7 +104,7 @@ class BrowserlessGenerator implements GeneratorInterface
                     $this->cleanupTmpFile($tmpFileResource);
                     $end = microtime(true);
                     $duration = $end - $start;
-                    Log::channel('lynk')->info('PDF Generation Duration - request_id => ' . $this->requestId, [
+                    Log::channel(LOG_CHANNEL_LYNK)->info('PDF Generation Duration - request_id => ' . $this->requestId, [
                         'duration' => $duration,
                         'request_id' => $this->requestId,
                         'generator' => 'browserless',
@@ -147,7 +147,7 @@ class BrowserlessGenerator implements GeneratorInterface
     {
         $storedFile = $storageCallback($tmpFileResource);
 
-        Log::channel('lynk')->info('PDF Generation Success - request_id => ' . $this->requestId, [
+        Log::channel(LOG_CHANNEL_LYNK)->info('PDF Generation Success - request_id => ' . $this->requestId, [
             'attempt' => $attempt,
             'request_id' => $this->requestId,
         ]);
@@ -157,7 +157,7 @@ class BrowserlessGenerator implements GeneratorInterface
 
     protected function handleFailedResponse($response, int $attempt): void
     {
-        Log::channel('lynk')->error('PDF Generation Failed - request_id => ' . $this->requestId, [
+        Log::channel(LOG_CHANNEL_LYNK)->error('PDF Generation Failed - request_id => ' . $this->requestId, [
             'attempt' => $attempt,
             'status' => $response->status(),
             'body' => $response->body(),
@@ -180,7 +180,7 @@ class BrowserlessGenerator implements GeneratorInterface
 
     protected function logAttempt(int $attempt): void
     {
-        Log::channel('lynk')->info('PDF Generation Attempt - request_id => ' . $this->requestId, [
+        Log::channel(LOG_CHANNEL_LYNK)->info('PDF Generation Attempt - request_id => ' . $this->requestId, [
             'attempt' => $attempt,
             'max_retries' => $this->maxRetries,
             'url' => $this->baseUrl,
@@ -190,7 +190,7 @@ class BrowserlessGenerator implements GeneratorInterface
 
     protected function logRetryableError(Throwable $e, int $attempt): void
     {
-        Log::channel('lynk')->error('PDF Generation Retryable Error - request_id => ' . $this->requestId, [
+        Log::channel(LOG_CHANNEL_LYNK)->error('PDF Generation Retryable Error - request_id => ' . $this->requestId, [
             'attempt' => $attempt,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
@@ -200,7 +200,7 @@ class BrowserlessGenerator implements GeneratorInterface
 
     protected function logFinalError(Throwable $th, int $attempt): void
     {
-        Log::channel('lynk')->error('PDF Generation Final Error - request_id => ' . $this->requestId, [
+        Log::channel(LOG_CHANNEL_LYNK)->error('PDF Generation Final Error - request_id => ' . $this->requestId, [
             'error_message' => $th->getMessage(),
             'stack_trace' => $th->getTraceAsString(),
             'attempts' => $attempt,

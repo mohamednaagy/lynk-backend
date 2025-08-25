@@ -29,7 +29,7 @@ class TransactionServiceTest extends TestCase
 
     private static array $walletInformation;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

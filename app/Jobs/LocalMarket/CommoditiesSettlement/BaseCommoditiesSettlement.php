@@ -29,7 +29,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
 
         $className = class_basename(static::class);
         $queueName = 'local_market_commodities_settlement';
-        self::logInfo("add $className job to queue $queueName", [
+        self::logInfo("add $className job to queue $queueName localMarketOrderId $this->localMarketOrderId", [
             'localMarketOrderId' => $this->localMarketOrderId
         ]);
 

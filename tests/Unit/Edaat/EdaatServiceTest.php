@@ -18,7 +18,7 @@ class EdaatServiceTest extends TestCase
 
     protected static int $amount;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         self::$edaatService = new EdaatService;

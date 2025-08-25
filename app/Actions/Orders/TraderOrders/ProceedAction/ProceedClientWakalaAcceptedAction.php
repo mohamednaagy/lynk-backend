@@ -8,7 +8,6 @@ use App\Enums\FinancingOrderProceedCase;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
-use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;

@@ -39,6 +39,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -52,20 +53,26 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
         try {
             $traderOrder = TraderOrder::query()
-                ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
                 log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
-
                 return;
             }
 
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){ 
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultYNN job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'status' => $traderOrder->status->value
+                ]);
+                return;
+            }
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
                 log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
-                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action ,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action ,
                     'expected_action' => FinancingOrderHistory::GetTtiId,
                 ]);
                 return;

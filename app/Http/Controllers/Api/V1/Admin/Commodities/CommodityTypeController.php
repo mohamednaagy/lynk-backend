@@ -61,6 +61,7 @@ class CommodityTypeController extends Controller
                 'name',
                 'unique_name',
                 'description',
+                'provider',
                 'status',
                 'total_value',
                 'available_value',

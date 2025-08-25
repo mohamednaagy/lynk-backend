@@ -30,7 +30,7 @@ class ProcessDmccMpoSaleCompleteNotificationTest extends TestCase
 
     protected static mixed $notification;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

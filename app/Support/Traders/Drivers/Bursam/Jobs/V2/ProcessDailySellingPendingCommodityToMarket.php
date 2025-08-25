@@ -24,6 +24,7 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
     public function __construct()
     {
         $this->onQueue('bursam');
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessDailySellingPendingCommodityToMarket: Job constructor');
     }
 
     /**

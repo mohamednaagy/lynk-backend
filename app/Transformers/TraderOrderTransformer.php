@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\BursamProductCode;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
@@ -229,22 +230,27 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeShowProceedBtn(TraderOrder $traderOrder): Primitive
     {
-        $signedWakalaDocumentMediaFile = $traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::ClientWakala) ?? null;
-
-        return $this->primitive(empty($signedWakalaDocumentMediaFile) ? false : true);
+        return $this->primitive(
+            $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+                ->exists()
+        );
     }
 
     public function includeCommodityType(TraderOrder $traderOrder): Primitive
     {
+
         $commodityType = $traderOrder->commodityType;
+
         if ($commodityType) {
             return $this->primitive([
                 'id' => $commodityType->id,
                 'name' => $commodityType->name,
             ]);
+        } elseif ($traderOrder->hasAnyCommodityType()) {
+            return $this->primitive($traderOrder->commodity_type_id);
         }
 
         return $this->primitive(null);
-
     }
 }

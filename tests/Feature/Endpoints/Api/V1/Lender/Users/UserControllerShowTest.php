@@ -38,7 +38,7 @@ class UserControllerShowTest extends TestCase
 
     private static User $otherUserLenderAdmin;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

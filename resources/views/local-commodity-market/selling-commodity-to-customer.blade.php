@@ -807,15 +807,49 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                         </tr>
                         @foreach ($products ?? [] as $product)
                             <tr>
-                                <td class="w-1/2 border border-black">{{ $product->getProduct() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getType() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getQuantity() }}
-                                    {{ $product->getUom() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getAmount() }}
-                                    {{ $product->getCurrency() }}</td>
+                                <td class="w-1/2 border border-black">
+                                    @if (is_object($product) && method_exists($product, 'getProduct'))
+                                        {{ $product->getProduct() }}
+                                    @else
+                                        {{ $product['product'] ?? '' }}
+                                    @endif
+                                </td>
+                                <td class="w-1/2 border border-black">
+                                    @if (is_object($product) && method_exists($product, 'getType'))
+                                        {{ $product->getType() }}
+                                    @else
+                                        {{ $product['type'] ?? '' }}
+                                    @endif
+                                </td>
+                                <td class="w-1/2 border border-black">
+                                    @if (is_object($product) && method_exists($product, 'getQuantity'))
+                                        {{ $product->getQuantity() }} {{ $product->getUom() }}
+                                    @else
+                                        {{ $product['quantity'] ?? '' }} {{ $product['uom'] ?? '' }}
+                                    @endif
+                                </td>
+                                <td class="w-1/2 border border-black">
+                                    @if (is_object($product) && method_exists($product, 'getAmount'))
+                                        {{ $product->getAmount() }} {{ $product->getCurrency() }}
+                                    @else
+                                        {{ $product['amount'] ?? '' }} {{ $product['currency'] ?? '' }}
+                                    @endif
+                                </td>
                                 <td class="w-1/2 border border-black">{{ $company_name }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getOriginalSupplier() }}</td>
-                                <td class="w-1/2 border border-black">{{ $product->getLocation() }}</td>
+                                <td class="w-1/2 border border-black">
+                                    @if (is_object($product) && method_exists($product, 'getOriginalSupplier'))
+                                        {{ $product->getOriginalSupplier() }}
+                                    @else
+                                        {{ $product['original_supplier'] ?? '' }}
+                                    @endif
+                                </td>
+                                <td class="w-1/2 border border-black">
+                                    @if (is_object($product) && method_exists($product, 'getLocation'))
+                                        {{ $product->getLocation() }}
+                                    @else
+                                        {{ $product['location'] ?? '' }}
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

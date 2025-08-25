@@ -23,7 +23,7 @@ return new class extends Migration
             ->withCount('traderHistories')
             ->get(['id', 'data', 'status']);
         foreach ($cancelTraders as $cancelTrader) {
-            //create log for each trader
+            // create log for each trader
             $data = json_decode($cancelTrader->data, true);
             Log::channel('daily')->info('**** add new record at trader cancel detail table for trader order id '.$cancelTrader->id.' ******');
             if ($cancelTrader->traderHistories()->count() == 0) {

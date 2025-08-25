@@ -4,7 +4,6 @@ namespace App\Support\Traders\Drivers\Fake\Strategies;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\FinancingOrderHistory;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
@@ -235,29 +234,7 @@ class FakeV1Driver implements TraderInterface
                 ->created_at
                 ->toImmutable();
 
-            $separator = ' و ';
-            $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
-            $customerName = $traderOrder->order->customer_name;
-            $productName = $products->pluck('product')->implode($separator);
             $data['created_at'] = $dateTime->clone();
-
-            $this->storeOrderDocumentAsPdf(
-                'selling-commodity-to-customer',
-                [
-                    'reference_number' => $traderOrder->id,
-                    'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
-                    'order_number' => $traderOrder->financing_order_id,
-                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                    'amount' => $amount,
-                    'product_name' => $productName,
-                    'customer_name' => $customerName,
-                    'contract_signed_date' => $dateTime->tz('Asia/Riyadh')->toDateString(),
-                    'contract_signed_time' => $dateTime->tz('Asia/Riyadh')->toTimeString(),
-                ],
-                $traderOrder,
-                TraderOrderMediaCollection::SellingCommodityToCustomer,
-            );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateSellingCommodityToCustomerDocument, $data);
         } catch (Exception $exception) {
@@ -304,32 +281,8 @@ class FakeV1Driver implements TraderInterface
     public function createTransferOwnershipToLenderDocument($traderOrder): void
     {
         try {
-            $separator = ' و ';
-            $products = collect($traderOrder->products);
-            $amount = $traderOrder->order->amount->convertAndFormatByDecimal(sperator: ',');
-
-            $previousOwner = $products->pluck('previous_owner')->implode($separator);
-            $productName = $products->pluck('product')->implode($separator);
             $date = CarbonImmutable::now();
             $data['created_at'] = $date;
-
-            $this->storeOrderDocumentAsPdf(
-                'transfer-ownership-to-lender',
-                [
-                    'order_id' => $traderOrder->order->id,
-                    'products' => $this->transformProductsToCommodityProductsDTO($traderOrder->products),
-                    'reference_number' => $traderOrder->id,
-                    'company_name' => $traderOrder->order->company()->withTrashed()->first()?->name,
-                    'order_number' => $traderOrder->financing_order_id,
-                    'amount' => $amount,
-                    'previous_owner' => $previousOwner,
-                    'product_name' => $productName,
-                    'date' => $date->tz('Asia/Riyadh')->toDateString(),
-                    'time' => $date->tz('Asia/Riyadh')->toTimeString(),
-                ],
-                $traderOrder,
-                TraderOrderMediaCollection::TransferOwnershipToLender
-            );
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::CreateTransferOwnershipToLenderDocument, $data);
         } catch (Exception $exception) {

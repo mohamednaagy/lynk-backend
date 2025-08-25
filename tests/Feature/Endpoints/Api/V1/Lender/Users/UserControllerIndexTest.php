@@ -41,7 +41,7 @@ class UserControllerIndexTest extends TestCase
 
     private static LengthAwarePaginator $lenderUsersCollection;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

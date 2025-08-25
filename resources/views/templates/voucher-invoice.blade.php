@@ -705,14 +705,14 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
         .mt-4 {
             margin-top: 1rem;
         }
-        
+
         /* mPDF-specific adjustments */
         .logo-container {
             text-align: left;
             margin-bottom: 15px;
             padding-right: 20px;
         }
-        
+
         .logo-container img {
             height: 100px;
             width: 100px;

@@ -11,11 +11,11 @@
 |
 */
 
-//use Illuminate\Support\Facades\Route;
+// use Illuminate\Support\Facades\Route;
 //
-//Route::get('test', function () {
+// Route::get('test', function () {
 //    return 'hello';
-//});
+// });
 
 /*
 |--------------------------------------------------------------------------

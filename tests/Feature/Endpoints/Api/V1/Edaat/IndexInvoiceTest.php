@@ -28,7 +28,7 @@ class IndexInvoiceTest extends TestCase
 
     private static Builder|Model $edaatInvoice;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

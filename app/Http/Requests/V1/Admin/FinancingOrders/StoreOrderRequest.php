@@ -68,7 +68,7 @@ class StoreOrderRequest extends FormRequest
         // If field is provided (not null/empty) but setting is OFF, fail
         if (! $allowCommoditySelection) {
             $fail($attribute, 'Order not created. Commodity type selection is not allowed for this company.');
-            
+
             return;
         }
 
@@ -77,7 +77,7 @@ class StoreOrderRequest extends FormRequest
             ->where('commodity_types.id', $value)
             ->where('commodity_types.status', CommodityTypeStatus::Active)
             ->exists();
-        
+
         if (! $commodityTypeExists) {
             $fail($attribute, 'Order not created. Invalid commodity type '.$value.' for this company.');
         }

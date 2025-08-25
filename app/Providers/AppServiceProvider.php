@@ -50,6 +50,12 @@ class AppServiceProvider extends ServiceProvider
                 default => new OptimizedLoanCoverageStrategy, // Default to optimized
             };
         });
+
+        // Register PDF service
+        $this->app->bind(
+            \App\Contracts\Services\PdfServiceInterface::class,
+            \App\Services\PdfService::class
+        );
     }
 
     /**

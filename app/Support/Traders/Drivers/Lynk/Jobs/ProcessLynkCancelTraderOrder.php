@@ -27,7 +27,7 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_process');
     }
 
     /**

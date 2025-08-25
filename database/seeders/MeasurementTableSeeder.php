@@ -22,6 +22,8 @@ class MeasurementTableSeeder extends Seeder
             'm3' => 'Cubic Meters',
             'ml' => 'Milliliters',
             'pc' => 'Pieces',
+            'm' => 'Meters',
+            'roll' => 'Rolls',
         ];
 
         foreach ($data as $key => $value) {

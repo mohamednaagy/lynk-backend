@@ -39,9 +39,10 @@ class InventoryService
         $preferredInventories = $this->findEligibleInventoriesForLoan(
             $loanAmount,
             $companyId,
-            $preferredItemTypes
+            $preferredItemTypes,
+            $localMarketOrder
         );
-        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories);
+        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories, $localMarketOrder);
 
         // Return combination if found or if we must use preferred types
         if (! empty($preferredItemTypes) || ! empty($combination)) {
@@ -49,47 +50,60 @@ class InventoryService
         } else {
             // Fallback to all inventory types if allowed
 
-            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId);
+            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId, [], $localMarketOrder);
 
-            return $this->findOptimalCombination($loanAmount, $allInventories);
+            return $this->findOptimalCombination($loanAmount, $allInventories, $localMarketOrder);
         }
     }
 
-    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes = [])
+    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes, $localMarketOrder)
     {
-        return LocalMarketInventory::query()
+        $startTime = microtime(true);
+        $data = LocalMarketInventory::query()
             ->select([
                 'local_market_inventories.*',
                 'local_market_eligible_quantities.eligible_quantity as available_quantity',
-                'commodity_items.max_price as max_price', // Select max_price for ordering
+                'commodity_items.max_price as max_price',
                 'commodity_items.commodity_type_id',
+                'commodity_types.status as commodity_type_status',
+                'company_supplier_details.status as supplier_status',
             ])
             ->join('local_market_eligible_quantities', function ($join) use ($companyId) {
                 $join->on('local_market_inventories.id', '=', 'local_market_eligible_quantities.inventory_id')
-                    ->where('local_market_eligible_quantities.company_id', '=', $companyId);
+                    ->where('local_market_eligible_quantities.company_id', '=', $companyId)
+                    ->where('local_market_eligible_quantities.eligible_quantity', '>', 0);
             })
             ->join('commodity_items', 'local_market_inventories.commodity_item_id', '=', 'commodity_items.id')
+            ->join('commodity_types', 'commodity_items.commodity_type_id', '=', 'commodity_types.id')
+            ->join('companies as suppliers', 'local_market_inventories.company_id', '=', 'suppliers.id')
+            ->leftJoin('company_supplier_details', 'suppliers.id', '=', 'company_supplier_details.company_id')
             ->where('local_market_inventories.status', InventoryStatus::Active)
             ->where('commodity_items.max_price', '<=', $loanAmount)
-            ->where('local_market_eligible_quantities.eligible_quantity', '>', 0)
-            ->whereHas('type', function ($query) use ($preferredItemTypes) {
-                $query->where('status', CommodityTypeStatus::Active);
-                if (! empty($preferredItemTypes)) {
-                    $query->whereIn('commodity_types.id', $preferredItemTypes);
-                }
-            })
-            ->whereHas('supplier.detail', function ($query) {
-                $query->where('status', CommoitySupplierStatus::Active);
+            ->where('commodity_types.status', CommodityTypeStatus::Active)
+            ->where('company_supplier_details.status', CommoitySupplierStatus::Active)
+            ->when(! empty($preferredItemTypes), function ($query) use ($preferredItemTypes) {
+                $query->whereIn('commodity_types.id', $preferredItemTypes);
             })
             ->lockForUpdate()
             ->orderBy('commodity_items.max_price', 'DESC')
             ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
+            ->orderBy('local_market_inventories.available_quantity', 'desc')
             ->get();
 
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findEligibleInventoriesForLoan Duration', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+                'loanAmount' => $loanAmount,
+                'companyId' => $companyId,
+                'preferredItemTypes' => $preferredItemTypes
+        ]);
+
+        return $data;
     }
 
-    private function findOptimalCombination($loanAmount, $inventories)
+    private function findOptimalCombination($loanAmount, $inventories, $localMarketOrder)
     {
+        $startTime = microtime(true);
         if ($inventories->isEmpty()) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The inventories list are empty');
 
@@ -103,6 +117,11 @@ class InventoryService
         }
 
         $result = $this->loanCoverageStrategy->calculateCombination($loanAmount, $inventories->all());
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findOptimalCombination Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+        ]);
 
         return empty($result) ? false : $result;
     }

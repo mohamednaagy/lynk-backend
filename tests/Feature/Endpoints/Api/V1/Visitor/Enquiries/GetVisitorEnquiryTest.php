@@ -22,7 +22,7 @@ class GetVisitorEnquiryTest extends TestCase
 
     private static string $signedVisitorEnquiryUrl;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

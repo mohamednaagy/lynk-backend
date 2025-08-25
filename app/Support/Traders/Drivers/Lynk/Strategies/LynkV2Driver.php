@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
@@ -129,11 +128,5 @@ class LynkV2Driver extends LynkV1Driver
             ]);
             ProcessProceedClientWakala::dispatch($traderOrder->id);
         }
-    }
-
-    public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
-    {
-        parent::createTransferOwnershipToLenderDocument($traderOrder);
-        app(GenerateClientWakala::class)->handle($traderOrder);
     }
 }

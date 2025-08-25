@@ -10,9 +10,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Settings\Classes\InternationalMurabahaSetting;
-use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -83,24 +81,6 @@ trait TraderHelperTrait
         );
     }
 
-    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
-    {
-        Log::info(formatLogTitle('Storing order document as pdf', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id, 
-            'traderOrderId' => $traderOrder->id,
-            'view' => $view,
-        ]);
-        $html = view($view, $data)->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                $mediaCollection
-            );
-        });
-    }
-
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void
     {
         $traderManager = new TraderManager(app());
@@ -110,77 +90,6 @@ trait TraderHelperTrait
             : $traderOrder->addMediaFromStream($document);
 
         $media->usingFileName($fileName)->toMediaCollection($collectionName);
-    }
-
-    public function transformProductsToCommodityProductsDTO($products): Collection
-    {
-        return collect($products)->map(function ($product) {
-            return CommodityProductDto::fromArray([
-                'product' => $product['product'],
-                'quantity' => $product['quantity'],
-                'uom' => $product['uom'],
-                'amount' => $product['amount'],
-                'warehouse' => $product['warehouse'],
-                'previous_owner' => $product['previous_owner'],
-                'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'],
-            ]);
-        });
-    }
-
-    public function transformProductsToLocalCommodityProductsDTO($products, string|array|null $groupByKeys = null): Collection
-    {
-
-        return collect($products)
-            ->when($groupByKeys, function (Collection $productCollection) use ($groupByKeys) {
-                $keys = (array) $groupByKeys;
-
-                return $productCollection
-                    ->groupBy(fn ($item) => $this->generateGroupKey($item, $keys))
-                    ->map(fn (Collection $group) => $this->mapGroupToDto($group));
-            }, function (Collection $productCollection) {
-                return $productCollection->map(fn (array $product) => $this->mapProductToDto($product));
-            });
-
-    }
-
-    /**
-     * Retrieve preferred product codes for a company associated with a trader order.
-     *
-     * @param  TraderOrder  $traderOrder  The trader order to extract company from
-     * @return array List of preferred product codes
-     */
-    public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
-    {
-        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Retrieving company preferred product codes', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id, 
-            'traderOrderId' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-        ]);
-
-        $companyPreferredProductIds = $traderOrder->order->company
-            ->commodityTypes()
-            ->where('provider', $traderOrder->provider)
-            ->pluck('unique_name')
-            ->toArray();
-
-        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Company preferred product codes resolved', $traderOrder) , [
-            'financingOrderId' => $traderOrder->financing_order_id, 
-            'traderOrderId' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-            'product_codes' => $companyPreferredProductIds,
-            'count' => count($companyPreferredProductIds),
-        ]);
-
-        return $companyPreferredProductIds;
-    }
-
-    protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
-    {
-        return app(TraderOrderProceedCaseService::class)
-            ->checkIfTraderHasCase(
-                $traderOrder->id,
-                FinancingOrderProceedCase::ContractAndClientWakalaCompleted
-            );
     }
 
     private function generateGroupKey(array $item, array $keys): string
@@ -243,6 +152,15 @@ trait TraderHelperTrait
         ]);
 
         return $selectedCode;
+    }
+
+    protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
+    {
+        return app(TraderOrderProceedCaseService::class)
+            ->checkIfTraderHasCase(
+                $traderOrder->id,
+                FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+            );
     }
 
     /**
