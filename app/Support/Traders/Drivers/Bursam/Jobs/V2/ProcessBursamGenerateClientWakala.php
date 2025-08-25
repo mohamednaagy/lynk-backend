@@ -77,7 +77,7 @@ class ProcessBursamGenerateClientWakala implements ShouldQueue
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
                     'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
-                    'expected_action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                    'expected_action' => FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
                 ]);
 
                 return;
