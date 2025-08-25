@@ -325,7 +325,9 @@ function formatMediaUrl(?string $url): ?string
         return $url;
     }
 
-    $parsedPath = parse_url($url, PHP_URL_PATH);
+    $parsedUrl = parse_url($url);
+    $parsedPath = $parsedUrl['path'];
+    $queryString = $parsedUrl['query'] ?? '';
 
     // Ensure it contains /api/
     if (! Str::contains($parsedPath, '/api/')) {
@@ -333,6 +335,7 @@ function formatMediaUrl(?string $url): ?string
     }
 
     $relativePath = Str::of($parsedPath)->after('/api');
+    $baseUrl = rtrim(config('app.url'), '/').'/api'.$relativePath;
 
-    return rtrim(config('app.url'), '/').'/api'.$relativePath;
+    return $queryString ? $baseUrl.'?'.$queryString : $baseUrl;
 }
