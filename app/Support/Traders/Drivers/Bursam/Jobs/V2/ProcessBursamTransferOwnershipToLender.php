@@ -33,7 +33,8 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(protected int $traderOrderId) {
+    public function __construct(protected int $traderOrderId)
+    {
         $this->afterCommit = true;
         Log::channel('bursam')->info('bursa purchasing step => ProcessBursamTransferOwnershipToLender: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
@@ -59,21 +60,24 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
             if (is_null($traderOrder)) {
                 Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamTransferOwnershipToLender job', ['traderOrderId' => $this->traderOrderId]);
+
                 return;
             }
 
-            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
-                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToLender job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToLender job', ['traderOrderId' => $this->traderOrderId, 'status' => $traderOrder->status->value]);
+
                 return;
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::AttachTtiHoldingCertificateDocument)) {
                 Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamTransferOwnershipToLender: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
+                    'traderOrderId' => $this->traderOrderId,
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'expected_action' => FinancingOrderHistory::AttachTtiHoldingCertificateDocument,
                     'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                 ]);
+
                 return;
             }
 
@@ -83,9 +87,6 @@ class ProcessBursamTransferOwnershipToLender implements ShouldQueue
 
             // Run market open check
             (new RunHoldTraderWhenMarketOpenCommand)->handle();
-
-            // Dispatch next step job
-            ProcessBursamGenerateClientWakala::dispatch($this->traderOrderId);
 
             Log::channel('bursam')->info('bursa purchasing step => Successfully processed transfer ownership to lender', [
                 'action' => 'complete',
