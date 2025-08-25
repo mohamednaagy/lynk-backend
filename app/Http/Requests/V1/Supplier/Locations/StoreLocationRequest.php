@@ -3,6 +3,7 @@
 namespace App\Http\Requests\V1\Supplier\Locations;
 
 use App\Models\SupplierLocation;
+use App\Rules\LocationUniqueIdentifierRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,7 +32,7 @@ class StoreLocationRequest extends FormRequest
                 'string',
                 'min:3',
                 'max:16',
-                'regex:/^\S+$/', // Ensures no spaces
+                new LocationUniqueIdentifierRule,
                 Rule::unique(SupplierLocation::class, 'unique_identifier')->where('company_id', tenant()->id)->withoutTrashed(),
             ],
             'name' => ['required', 'string',  'max:32'],

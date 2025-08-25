@@ -14,6 +14,7 @@ use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\TraderOrder;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
@@ -31,6 +32,11 @@ class MakeOrderProceedAction implements MakeOrderProceed
      */
     public function handle(TraderOrder $traderOrder, string $case, bool $forceToProceed = false)
     {
+        Log::info('MakeOrderProceedAction', [
+            'trader_order_id' => $traderOrder->id,
+            'case' => $case,
+        ]);
+
         $signedClientWakala = $this->signedClientWakala;
 
         return match ($case) {

@@ -143,4 +143,17 @@ return [
         CompanyLenderClientType::Business => 'Business',
         CompanyLenderClientType::Individual => 'Individual',
     ],
+
+    'document_type' => [
+        'client_wakala' => 'Client Wakala',
+        'transfer_ownership_to_lender' => 'Transfer Ownership to Lender',
+        'selling_commodity_to_customer' => 'Selling Commodity to Customer',
+        'sell_confirmation_document' => 'Sell Confirmation Document',
+        'bursam_bid_certificate' => 'Bursam Bid Certificate',
+        'bursam_stb_certificate' => 'Bursam STB Certificate',
+        'bursam_otc_certificate' => 'Bursam OTC Certificate',
+        'selling_pledge_certificate' => 'Selling Pledge Certificate',
+        'voucher_receipt' => 'Voucher Receipt',
+        'zatca_invoice' => 'ZATCA Invoice',
+    ],
 ];

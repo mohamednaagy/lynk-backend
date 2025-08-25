@@ -826,13 +826,55 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     </tr>
                     @foreach ($products ?? [] as $product)
                         <tr>
-                            <td>{{ $product->getProduct() }}</td>
-                            <td>{{ $product->getType() }}</td>
-                            <td>{{ $product->getQuantity() }} {{$product->getUom()}}</td>
-                            <td>{{ $product->getAmount() }} {{$product->getCurrency()}}</td>
-                            <td>{{ $product->getPreviousOwner() }}</td>
-                            <td>{{ $product->getOriginalSupplier() }}</td>
-                            <td>{{ $product->getLocation() }}</td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getProduct'))
+                                    {{ $product->getProduct() }}
+                                @else
+                                    {{ $product['product'] ?? '' }}
+                                @endif
+                            </td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getType'))
+                                    {{ $product->getType() }}
+                                @else
+                                    {{ $product['type'] ?? '' }}
+                                @endif
+                            </td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getQuantity'))
+                                    {{ $product->getQuantity() }} {{$product->getUom()}}
+                                @else
+                                    {{ $product['quantity'] ?? '' }} {{$product['uom'] ?? ''}}
+                                @endif
+                            </td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getAmount'))
+                                    {{ $product->getAmount() }} {{$product->getCurrency()}}
+                                @else
+                                    {{ $product['amount'] ?? '' }} {{$product['currency'] ?? ''}}
+                                @endif
+                            </td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getPreviousOwner'))
+                                    {{ $product->getPreviousOwner() }}
+                                @else
+                                    {{ $product['previous_owner'] ?? '' }}
+                                @endif
+                            </td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getOriginalSupplier'))
+                                    {{ $product->getOriginalSupplier() }}
+                                @else
+                                    {{ $product['original_supplier'] ?? '' }}
+                                @endif
+                            </td>
+                            <td>
+                                @if (is_object($product) && method_exists($product, 'getLocation'))
+                                    {{ $product->getLocation() }}
+                                @else
+                                    {{ $product['location'] ?? '' }}
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>

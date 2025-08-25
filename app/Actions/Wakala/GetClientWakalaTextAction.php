@@ -4,6 +4,7 @@ namespace App\Actions\Wakala;
 
 use App\Actions\Contracts\Wakala\GetClientWakalaText;
 use App\Enums\BursamProductCode;
+use App\Enums\FinancingOrderHistory;
 use App\Models\TraderOrder;
 use Illuminate\Support\Traits\Localizable;
 
@@ -13,10 +14,12 @@ class GetClientWakalaTextAction implements GetClientWakalaText
 
     public function handle(TraderOrder $traderOrder, string $clientTemplate)
     {
+        $transferOwnershipToLenderDocumentHistory = $traderOrder->traderHistories()
+            ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
+            ->first();
         $financingOrder = $traderOrder->order;
-        $now = now('Asia/Riyadh');
-        $date = $now->toDateString();
-        $time = $now->toTimeString();
+        $date = $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null;
+        $time = $transferOwnershipToLenderDocumentHistory ? saudi_now('h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null;
         $amount = $financingOrder->selling_price->convertAndFormatByDecimal(sperator: ',');
         $commodityNumber = $traderOrder->reference;
         $commodity = collect($traderOrder->products)->pluck('product')->implode(' و ') ?? '';
