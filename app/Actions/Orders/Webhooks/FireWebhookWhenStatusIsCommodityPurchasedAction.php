@@ -44,18 +44,18 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
                 'current_trading_step' => $this->getUiStepName($nextStep?->step),
                 'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep),
                 'products' => $this->resolveProducts($traderOrder),
-                'cert_document_url' => $isBursaOrder ? route('api.v1.admins.generate', [
+                'cert_document_url' => $isBursaOrder ? formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::BURSAM_BID_CERTIFICATE,
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
-                ]) : null,
-                'ownership_document_url' => route('api.v1.admins.generate', [
+                ])) : null,
+                'ownership_document_url' => formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::TRANSFER_OWNERSHIP_TO_LENDER,
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
-                ]),
+                ])),
                 'expiry_date' => $effective_at ? saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at)) : null,
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
