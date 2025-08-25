@@ -90,7 +90,7 @@ class InventoryService
             ->orderBy('local_market_inventories.available_quantity', 'desc')
             ->get();
 
-            Log::channel('local_market')->info('findEligibleInventoriesForLoan Duration', [
+        Log::channel('local_market')->info('findEligibleInventoriesForLoan Duration', [
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             'loan_amount' => $loanAmount,
             'company_id' => $companyId,
