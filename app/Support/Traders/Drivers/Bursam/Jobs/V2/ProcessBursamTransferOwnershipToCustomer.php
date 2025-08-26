@@ -28,7 +28,7 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
      */
     public function __construct(protected int $traderOrderId) {
         $this->afterCommit = true;
-        Log::channel('bursam')->info('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -42,23 +42,28 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
             $traderOrder = TraderOrder::query()
                 ->find($this->traderOrderId);
 
-            if(is_null($traderOrder)){
-                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamTransferOwnershipToCustomer job', ['traderOrderId' => $this->traderOrderId]);
+            if (is_null($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamTransferOwnershipToCustomer Job - not found trader_order_id => ' . $this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
+                ]);
                 return;
             }
 
             if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
-                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToCustomer job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamTransferOwnershipToCustomer job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId ,
+                    'status' => $traderOrder->status->value]);
                 return;
             }
 
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
-                Log::channel('bursam')->warning('ProcessBursamTransferOwnershipToCustomer: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
-                    'financingOrderId' => $traderOrder->financing_order_id,
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamTransferOwnershipToCustomer Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
                     'expected_action' => FinancingOrderHistory::ContractSigned,
-                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                 ]);
                 return;
             }
@@ -80,6 +85,10 @@ class ProcessBursamTransferOwnershipToCustomer implements ShouldBeUnique, Should
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamTransferOwnershipToCustomer', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamTransferOwnershipToCustomer Job - trader_order_id => ' . $this->traderOrderId, [
+            'traderOrderId ' => $this->traderOrderId, 
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
     }
 }

@@ -49,8 +49,12 @@ class ExpireOrderJob implements ShouldQueue
                 default => throw new \Exception("Unknown trader order time limit type: {$this->traderOrderTimeLimit->type->value}"),
             };
         } catch (\Exception $exception) {
-            Log::error("ExpireOrderJob failed: {$exception->getMessage()}", [
+            Log::channel(getSuitableLoggingFromTraderProvider($this->traderOrder))->error(formatLogTitle("ExpireOrderJob failed: {$exception->getMessage()}", $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
                 'time_limit' => $this->traderOrderTimeLimit,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
                 'exception' => $exception,
             ]);
             $this->traderOrderTimeLimit->fail();
@@ -88,12 +92,19 @@ class ExpireOrderJob implements ShouldQueue
             Trader::driver($this->traderOrder->provider, $this->traderOrder->version)
                 ->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
             $this->traderOrderTimeLimit->expire();
-            Log::info("Expire order {$this->traderOrder->id} successfully");
-
+            Log::channel(getSuitableLoggingFromTraderProvider($this->traderOrder))->info(formatLogTitle("Expire order successfully", $this->traderOrder),[
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'reference' => $this->traderOrder->reference,
+                'time_limit' => $this->traderOrderTimeLimit,
+            ]);
             return;
         }
         $this->traderOrderTimeLimit->cancel();
-        Log::info("Order {$this->traderOrder->id} is not expirable", [
+        Log::channel(getSuitableLoggingFromTraderProvider($this->traderOrder))->info(formatLogTitle("Order is not expirable", $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
+            'reference' => $this->traderOrder->reference,
             'time_limit' => $this->traderOrderTimeLimit,
         ]);
     }
@@ -116,7 +127,12 @@ class ExpireOrderJob implements ShouldQueue
             $this->traderOrderTimeLimit->expire();
 
             // Log the successful expiration of the order
-            Log::info("Expire order {$this->traderOrder->id} successfully");
+            Log::channel(getSuitableLoggingFromTraderProvider($this->traderOrder))->info(formatLogTitle("Expire order successfully", $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'reference' => $this->traderOrder->reference,
+                'time_limit' => $this->traderOrderTimeLimit,
+            ]);
 
             return;
         }
@@ -125,7 +141,10 @@ class ExpireOrderJob implements ShouldQueue
         $this->traderOrderTimeLimit->cancel();
 
         // Log the unsuccessful expiration of the order
-        Log::info("Order {$this->traderOrder->id} is not expirable", [
+        Log::channel(getSuitableLoggingFromTraderProvider($this->traderOrder))->info(formatLogTitle("Order is not expirable", $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
+            'reference' => $this->traderOrder->reference,
             'time_limit' => $this->traderOrderTimeLimit,
         ]);
     }

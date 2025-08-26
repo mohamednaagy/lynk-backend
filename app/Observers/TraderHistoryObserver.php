@@ -21,13 +21,15 @@ class TraderHistoryObserver
     public function created(TraderHistory $traderHistory)
     {
         try {
-            Log::info('TraderHistoryObserver::created START', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderHistory->trader_order_id,
+            $traderOrder = $traderHistory->traderOrder()->first();
+
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created START', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
             ]);
 
-            $traderOrder = $traderHistory->traderOrder()->first();
             $traderOrder->last_history_action = $traderHistory->action;
             $traderOrder->last_history_action_updated_at = $traderHistory->created_at;
             $traderOrder->save();
@@ -35,52 +37,58 @@ class TraderHistoryObserver
             Trader::driver($traderOrder->provider, $traderOrder->version)
                 ->dispatchJobForTransitioningFlow($traderOrder);
 
-            Log::info('TraderHistoryObserver::created - Job dispatched, getting step nodes', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Job dispatched, getting step nodes', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
             ]);
 
             $currentStepNode = app(StepHistoriesDictionary::class)->getStepByHistory($traderHistory->action);
 
-            Log::info('TraderHistoryObserver::created - Current step node retrieved', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Current step node retrieved', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
                 'current_step_node' => $currentStepNode ? get_class($currentStepNode) : null,
             ]);
 
             $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
 
-            Log::info('TraderHistoryObserver::created - Admins notified, getting completed step node', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Admins notified, getting completed step node', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
             ]);
 
             $currentCompletedStepNode = app(StepHistoriesDictionary::class)->getCompletedStepByHistory($traderHistory->action);
 
-            Log::info('TraderHistoryObserver::created - Completed step node retrieved', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Completed step node retrieved', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
                 'completed_step_node' => $currentCompletedStepNode ? get_class($currentCompletedStepNode) : null,
             ]);
 
             $this->fireWebhookWhenStatusIsMurabhaOfferIssued($traderOrder, $currentCompletedStepNode);
 
-            Log::info('TraderHistoryObserver::created - Webhook fired, processing provider actions', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Webhook fired, processing provider actions', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
                 'provider' => $traderOrder->provider,
             ]);
 
             $providerActions = $this->getActionsOfProvider($traderOrder->provider, $currentCompletedStepNode);
 
-            Log::info('TraderHistoryObserver::created - Provider actions retrieved', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Provider actions retrieved', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
                 'provider_actions_count' => count($providerActions),
                 'provider_actions' => $providerActions,
@@ -90,26 +98,29 @@ class TraderHistoryObserver
                 app($actionClass)->handle($traderOrder->order, $traderHistory->traderOrder);
             }
 
-            Log::info('TraderHistoryObserver::created - All provider actions completed, applying order fees', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - All provider actions completed, applying order fees', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
             ]);
 
             $this->applyOrderFees($traderHistory);
 
-            Log::info('TraderHistoryObserver::created - Order fees applied, updating cached last history action', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderOrder->id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Order fees applied, updating cached last history action', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('TraderHistoryObserver::created failed', [
-                'trader_history_id' => $traderHistory->id,
-                'trader_order_id' => $traderHistory->trader_order_id,
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('TraderHistoryObserver::created failed', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
-                'error' => $e->getMessage(),
+                'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'exception_class' => get_class($e),
                 'file' => $e->getFile(),
@@ -125,9 +136,10 @@ class TraderHistoryObserver
      */
     protected function applyOrderFees(TraderHistory $traderHistory): void
     {
-        Log::info('TraderHistoryObserver::applyOrderFees', [
-            'trader_history_id' => $traderHistory->id,
-            'trader_order_id' => $traderHistory->trader_order_id,
+        Log::channel(getSuitableLoggingFromTraderProvider($traderHistory->traderOrder))->info(formatLogTitle('TraderHistoryObserver::applyOrderFees', $traderHistory->traderOrder), [
+            'financingOrderId' => $traderHistory->traderOrder->financing_order_id,
+            'traderOrderId' => $traderHistory->traderOrder->id,
+            'traderHistoryId' => $traderHistory->id,
             'action' => $traderHistory->action,
             'action_class' => $this->feesService->getAction($traderHistory->traderOrder->provider, $traderHistory->action),
         ]);

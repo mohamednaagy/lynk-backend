@@ -22,7 +22,9 @@ class CompleteOrderAction implements CompleteOrder
             ->findOrFail($orderId);
 
         if (! $financingOrder->canBeCompleted()) {
-            Log::error('financing order id '.$financingOrder->id.' cant be completed');
+            Log::error('financing_order_id '.$financingOrder->id.' cant be completed at CompleteOrderAction', [
+                'financingOrderId' => $financingOrder->id,
+            ]);
             throw new OrderStatusDoesNotFollowSequenceException;
         }
 

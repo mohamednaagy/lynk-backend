@@ -35,7 +35,7 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
     {
         $this->onQueue('bursam');
         $this->afterCommit = true;
-        Log::channel('bursam')->info('ProcessBursamStbCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamStbCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -49,20 +49,27 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
             $traderOrder = TraderOrder::query()
                 ->find($this->traderOrderId);
 
-            if(is_null($traderOrder)){
-                Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamStbCertificate job', ['traderOrderId' => $this->traderOrderId ]);
+            if (is_null($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamStbCertificate Job - not found trader_order_id => ' . $this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
+                ]);
                 return;
             }
 
+
             if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
-                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamStbCertificate job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamStbCertificate job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'traderOrderId' => $this->traderOrderId ,
+                    'status' => $traderOrder->status->value
+                ]);
                 return;
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetOwnershipToCustomerCertificate)) {
-                Log::channel('bursam')->warning('ProcessBursamStbCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('ProcessBursamStbCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId ,
                     'expected_action' => FinancingOrderHistory::GetOwnershipToCustomerCertificate,
                     'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                 ]);
@@ -91,6 +98,6 @@ class ProcessBursamStbCertificate implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamStbCertificate', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamStbCertificate Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

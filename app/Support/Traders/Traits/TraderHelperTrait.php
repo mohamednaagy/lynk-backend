@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
+
 trait TraderHelperTrait
 {
     public function createStepHistories(array $data, TraderOrder $traderOrder, $step): void
@@ -65,8 +66,10 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
-        Log::info('Creating trader order history', [
-            'trader_order_id' => $traderOrder->id,
+
+        Log::info(formatLogTitle('Creating trader order history', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'action' => $action,
             'data' => $data,
         ]);
@@ -129,8 +132,9 @@ trait TraderHelperTrait
      */
     public function getUnusedProductCode(TraderOrder $traderOrder): ?string
     {
-        Log::channel('bursam')->info('Getting unused product code', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Getting unused product code', $traderOrder) , [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'provider' => $traderOrder->provider,
             'company_id' => $traderOrder->order->company_id,
         ]);
@@ -139,8 +143,9 @@ trait TraderHelperTrait
 
         $selectedCode = ! empty($productCodes) ? reset($productCodes) : null;
 
-        Log::channel('bursam')->info('Product code selection result', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Product code selection result', $traderOrder) , [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'selected_product_code' => $selectedCode,
             'available_codes_count' => count($productCodes),
             'all_available_codes' => $productCodes,
@@ -166,8 +171,9 @@ trait TraderHelperTrait
      */
     private function getProductCodes(TraderOrder $traderOrder): array
     {
-        Log::channel('bursam')->info('Starting product code selection', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Starting product code selection', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'provider' => $traderOrder->provider,
             'company_id' => $traderOrder->order->company_id,
         ]);
@@ -177,8 +183,9 @@ trait TraderHelperTrait
 
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
 
-        Log::channel('bursam')->info('Global preferred commodity type retrieved', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Global preferred commodity type retrieved', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'global_preferred_commodity_type_id' => $globalPreferredCommodityType,
         ]);
 
@@ -195,16 +202,18 @@ trait TraderHelperTrait
 
         $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
 
-        Log::channel('bursam')->info('Company preferred product codes retrieved', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Company preferred product codes retrieved', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'company_preferred_product_codes' => $companyPreferredProductCodes,
             'count' => count($companyPreferredProductCodes),
         ]);
 
         $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
 
-        Log::channel('bursam')->info('Unavailable product codes from cache', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Unavailable product codes from cache', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'unavailable_product_codes' => $unavailableProductCodes,
             'count' => count($unavailableProductCodes),
         ]);
@@ -212,16 +221,18 @@ trait TraderHelperTrait
         if (! empty($companyPreferredProductCodes)) {
             $availablePreferredProductCodes = array_diff($companyPreferredProductCodes, $unavailableProductCodes);
 
-            Log::channel('bursam')->info('Available preferred product codes after filtering unavailable', [
-                'trader_order_id' => $traderOrder->id,
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Available preferred product codes after filtering unavailable', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
                 'available_preferred_product_codes' => $availablePreferredProductCodes,
                 'count' => count($availablePreferredProductCodes),
                 'filtered_out' => array_intersect($companyPreferredProductCodes, $unavailableProductCodes),
             ]);
 
             if (empty($availablePreferredProductCodes)) {
-                Log::warning('All preferred product codes are unavailable', [
-                    'trader_order_id' => $traderOrder->id,
+                Log::warning(formatLogTitle('All preferred product codes are unavailable', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'traderOrderId' => $traderOrder->id,
                     'preferred_codes' => $companyPreferredProductCodes,
                     'unavailable_codes' => $unavailableProductCodes,
                 ]);
@@ -231,8 +242,9 @@ trait TraderHelperTrait
 
             $query = $query->whereIn('unique_name', $availablePreferredProductCodes);
         } else {
-            Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
-                'trader_order_id' => $traderOrder->id,
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('No company preferred product codes found, using global filtering', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id, 
+                'traderOrderId' => $traderOrder->id,
             ]);
 
             // No preferred product codes; exclude unavailable ones globally
@@ -245,8 +257,9 @@ trait TraderHelperTrait
             ->pluck('unique_name')
             ->toArray();
 
-        Log::channel('bursam')->info('Final product codes selection completed', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Final product codes selection completed', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id, 
+            'traderOrderId' => $traderOrder->id,
             'final_product_codes' => $finalProductCodes,
             'count' => count($finalProductCodes),
             'selected_first' => ! empty($finalProductCodes) ? $finalProductCodes[0] : null,

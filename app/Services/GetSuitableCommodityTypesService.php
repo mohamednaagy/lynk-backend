@@ -26,7 +26,7 @@ final class GetSuitableCommodityTypesService
     public function __construct(
         private readonly TraderOrder $traderOrder
     ) {
-        $this->logChannel = $this->traderOrder->provider === Trader::Bursam ? 'bursam' : 'local_market';
+        $this->logChannel = $this->traderOrder->provider === Trader::Bursam ? LOG_CHANNEL_BURSAM : LOG_CHANNEL_LOCAL_MARKET;
     }
 
     /**
@@ -41,8 +41,8 @@ final class GetSuitableCommodityTypesService
 
         $commodityTypes = $this->resolveCommodityTypesWithFallbacks();
         if ($commodityTypes->isEmpty()) {
-            Log::channel($this->logChannel)->error('No suitable commodity type found', [
-                'financingOrderId' => $this->traderOrder->order->id,
+            Log::channel($this->logChannel)->error(formatLogTitle('No suitable commodity type found', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
                 'provider' => $this->traderOrder->provider,
             ]);
@@ -66,8 +66,8 @@ final class GetSuitableCommodityTypesService
 
         if ($this->traderOrder->hasAnyCommodityType()) {
             $commodities = $this->resolveFromGlobalSettings();
-            Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder (ANY)', [
-                'financingOrderId' => $this->traderOrder->order->id,
+            Log::channel($this->logChannel)->info(formatLogTitle('CommodityType resolved directly from TraderOrder (ANY)', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
                 'commodity_type_id' => $commodities->pluck('unique_name')->toArray(),
             ]);
@@ -77,8 +77,8 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromTraderOrder()) {
             if ($commodities->isNotEmpty()) {
-                Log::channel($this->logChannel)->info('CommodityType resolved directly from TraderOrder', [
-                    'financingOrderId' => $this->traderOrder->order->id,
+                Log::channel($this->logChannel)->info(formatLogTitle('CommodityType resolved directly from TraderOrder', $this->traderOrder), [
+                    'financingOrderId' => $this->traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
                 ]);
@@ -90,8 +90,8 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromFinancingOrder()) {
             if ($commodities->isNotEmpty()) {
-                Log::channel($this->logChannel)->info('CommodityType resolved directly from FinancingOrder', [
-                    'financingOrderId' => $this->traderOrder->order->id,
+                Log::channel($this->logChannel)->info(formatLogTitle('CommodityType resolved directly from FinancingOrder', $this->traderOrder), [
+                    'financingOrderId' => $this->traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
                 ]);
@@ -103,8 +103,8 @@ final class GetSuitableCommodityTypesService
 
         if ($commodities = $this->resolveFromCompany()) {
             if ($commodities->isNotEmpty()) {
-                Log::channel($this->logChannel)->info('CommodityType resolved directly from Company', [
-                    'financingOrderId' => $this->traderOrder->order->id,
+                Log::channel($this->logChannel)->info(formatLogTitle('CommodityType resolved directly from Company', $this->traderOrder), [
+                    'financingOrderId' => $this->traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrder->id,
                     'commodity_type_id' => $commodities->pluck('id')->toArray(),
                 ]);
@@ -113,8 +113,8 @@ final class GetSuitableCommodityTypesService
             }
         }
 
-        Log::channel($this->logChannel)->warning('Falling back to GlobalSettings', [
-            'financingOrderId' => $this->traderOrder->order->id,
+        Log::channel($this->logChannel)->warning(formatLogTitle('Falling back to GlobalSettings', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
             'reason' => 'TraderOrder, FinancingOrder, and Company all returned null',
         ]);
@@ -200,8 +200,8 @@ final class GetSuitableCommodityTypesService
         }
 
         $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
-        Log::channel($this->logChannel)->info('Unavailable product codes from cache', [
-            'financingOrderId' => $this->traderOrder->order->id,
+        Log::channel($this->logChannel)->info(formatLogTitle('Unavailable product codes from cache', $this->traderOrder), [
+            'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
             'unavailable_product_codes' => $unavailableProductCodes,
             'count' => count($unavailableProductCodes),
@@ -214,15 +214,15 @@ final class GetSuitableCommodityTypesService
         $commodities = $query->get();
 
         if ($commodities->isNotEmpty()) {
-            Log::channel($this->logChannel)->info('CommodityType resolved from GlobalSettings', [
-                'financingOrderId' => $this->traderOrder->order->id,
+            Log::channel($this->logChannel)->info(formatLogTitle('CommodityType resolved from GlobalSettings', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
                 'commodity_types_id' => $commodities->pluck('id')->toArray(),
             ]);
 
             return $commodities;
         }
-        Log::channel($this->logChannel)->warning('No active Bursa commodity found in GlobalSettings');
+        Log::channel($this->logChannel)->warning(formatLogTitle('No active Bursa commodity found in GlobalSettings', $this->traderOrder));
 
         return null;
     }
@@ -242,15 +242,15 @@ final class GetSuitableCommodityTypesService
             ->get();
 
         if ($commodities->isNotEmpty()) {
-            Log::channel($this->logChannel)->info('Resolved from GlobalSettings (Lynk random selection)', [
-                'financingOrderId' => $this->traderOrder->order->id,
+            Log::channel($this->logChannel)->info(formatLogTitle('Resolved from GlobalSettings (Lynk random selection)', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
                 'commodity_types_id' => $commodities->pluck('id')->toArray(),
             ]);
 
             return $commodities;
         }
-        Log::channel($this->logChannel)->warning('No active Lynk commodity found in GlobalSettings');
+        Log::channel($this->logChannel)->warning(formatLogTitle('No active Lynk commodity found in GlobalSettings', $this->traderOrder));
 
         return null;
     }

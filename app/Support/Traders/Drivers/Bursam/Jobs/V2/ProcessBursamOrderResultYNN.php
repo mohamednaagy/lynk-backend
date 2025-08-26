@@ -39,7 +39,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
-        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+        Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -49,36 +49,36 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
+        log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
+
         try {
             $traderOrder = TraderOrder::query()
                 ->find($this->traderOrderId);
 
-            if($traderOrder->status->isNot(TraderOrderStatus::InProgress) || $traderOrder->status->isNot(TraderOrderStatus::Initiated)){
-                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status ( in progress or initaited ) in ProcessBursamOrderResultYNN job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
-            }
-
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
-                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'expected_action' => FinancingOrderHistory::GetTtiId,
-                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
-                ]);
+            if (is_null($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
                 return;
             }
 
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
-                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
+            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){ 
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultYNN job', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
-                    'expected_action' => FinancingOrderHistory::GetTtiId,
-                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'traderOrderId' => $this->traderOrderId,
+                    'status' => $traderOrder->status->value
                 ]);
                 return;
             }
-            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
+                log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action ,
+                    'expected_action' => FinancingOrderHistory::GetTtiId,
+                ]);
+                return;
+            }
             Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
-            Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', $traderOrder), ['financingOrderId' => $traderOrder->financing_order_id, 'traderOrderId' => $this->traderOrderId]);
 
         } catch (Exception $e) {
             if ($this->shouldSkipRetry($e)) {
@@ -97,7 +97,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
 
         DB::transaction(function () use ($exception) {
             $traderOrder = TraderOrder::query()

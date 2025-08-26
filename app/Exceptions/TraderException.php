@@ -34,7 +34,7 @@ class TraderException extends Exception
             $message,
         ]);
 
-        Log::channel('bursam')->error('Trader Request Issue : ...', [
+        Log::channel(LOG_CHANNEL_BURSAM)->error('Trader Request Issue with trader_order_id => '.Arr::get($context, 'trader_order_id', '---'), [
             'TRADER_ERROR',
             $context['provider'] ?? null,
             'Trader Order ID '.Arr::get($context, 'trader_order_id', '---'),
