@@ -32,7 +32,6 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->afterCommit = true;
         $this->onQueue('local_market_process');
 
         Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job created', [
@@ -47,13 +46,13 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      */
     public function handle()
     {
-        Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job started , traderOrderId => ' . $this->traderOrderId, [
+        Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job started , traderOrderId => '.$this->traderOrderId, [
             'trader_order_id' => $this->traderOrderId,
         ]);
 
         try {
             DB::transaction(function () {
-                Log::channel(self::LOG_CHANNEL)->info('Starting database transaction for order cancellation , traderOrderId => ' . $this->traderOrderId, [
+                Log::channel(self::LOG_CHANNEL)->info('Starting database transaction for order cancellation , traderOrderId => '.$this->traderOrderId, [
                     'trader_order_id' => $this->traderOrderId,
                 ]);
 
@@ -62,13 +61,13 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
                     ->find($this->traderOrderId);
 
                 if (is_null($traderOrder)) {
-                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelOrderAtLocalMarket not found trader_order_id =>' . $this->traderOrderId, [
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelOrderAtLocalMarket not found trader_order_id =>'.$this->traderOrderId, [
                         'traderOrderId' => $this->traderOrderId,
                     ]);
+
                     return;
                 }
 
-               
                 Log::channel(self::LOG_CHANNEL)->info(formatLogTitle('TraderOrder retrieved', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
@@ -111,12 +110,12 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
                 ]);
             });
 
-            Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job completed successfully traderOrderId => ' . $this->traderOrderId, [
+            Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job completed successfully traderOrderId => '.$this->traderOrderId, [
                 'trader_order_id' => $this->traderOrderId,
             ]);
 
         } catch (\Exception $e) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order trader_order_id => '. $this->traderOrderId, [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('error at ProcessLynkCancelOrderAtLocalMarket , cant add connect to local market to cancel order trader_order_id => '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
