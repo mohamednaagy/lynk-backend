@@ -13,6 +13,7 @@ use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
@@ -30,6 +31,23 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
     {
         $order = $traderOrder->order;
 
+        if(! $order){
+            Log::channel('bursam')->info('ProceedClientWakalaAccepted: traderOrderId: '.$traderOrder->id.' - Order is null', [
+                'traderOrderId' => $traderOrder->id,
+                'order' => $order?->id,
+            ]);
+            return [];
+        }
+
+        Log::channel('bursam')->info('ProceedClientWakalaAccepted: traderOrderId: '.$traderOrder->id.' - data', [
+            'traderOrderId' => $traderOrder->id,
+            'order' => $order?->id,
+            'forceToProceed' => $forceToProceed,
+            'is_verification_required' => $order->is_verification_required,
+            'isClientWakalaStepCompleted' => $this->isClientWakalaStepCompleted($traderOrder),
+            'isPreviousStepOfClientWakalaNotCompleted' => $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder),
+        ]);
+        
         if (
             $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
             || ($forceToProceed === false && $order->is_verification_required)
