@@ -6,8 +6,8 @@ use Illuminate\Contracts\Validation\Rule;
 
 class CommodityTypeUniqueNameRole implements Rule
 {
-    
     protected string $errorMessage = '';
+
     /**
      * Create a new rule instance.
      *
@@ -26,19 +26,21 @@ class CommodityTypeUniqueNameRole implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        
-        if (!preg_match('/^(?!-).*$/', $value)) {
+
+        if (! preg_match('/^(?!-).*$/', $value)) {
             $this->errorMessage = __('validation.no_hyphen_at_start');
+
             return false;
         }
 
-        if (!preg_match('/^[a-zA-Z0-9_-]+(?:\s[a-zA-Z0-9_-]+)*$/', $value)) {
+        if (! preg_match('/^[a-zA-Z0-9_-]+(?:\s[a-zA-Z0-9_-]+)*$/', $value)) {
             $this->errorMessage = __('validation.only_english_alpha_numbers_underscore_hyphen_allowed');
+
             return false;
         }
 
         return true;
-        
+
     }
 
     /**

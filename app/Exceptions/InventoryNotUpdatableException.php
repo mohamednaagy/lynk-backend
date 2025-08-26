@@ -7,7 +7,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class InventoryNotUpdatable extends Exception
+class InventoryNotUpdatableException extends Exception
 {
     /**
      * Render the exception into an HTTP response.

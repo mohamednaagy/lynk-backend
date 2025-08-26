@@ -16,6 +16,7 @@ class LocalMarketEligibleQuantity extends Model
         'inventory_id',
         'company_id',
         'eligible_quantity',
+        'touched_by',
     ];
 
     /**

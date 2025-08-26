@@ -5,10 +5,10 @@ namespace App\Observers;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Jobs\LocalMarket\states\CancelledOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
-use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
 use App\Jobs\LocalMarket\states\FailedCancelOrderStatus;
 use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\FailedSoldOrderStatus;
+use App\Jobs\LocalMarket\states\HoldEligibleUnitInventoriesJob;
 use App\Jobs\LocalMarket\states\InitiateOrderStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingCancelOrderStatus;
@@ -94,7 +94,7 @@ class LocalMarketOrderObserver
         // TODO:sell_commodity_21_10 => add new job for cancelled success
         switch ($localMarketOrder->status) {
             case OrderStatus::EligibleCommoditiesAvailable:
-                EligibleCommoditiesFoundStatus::dispatch($localMarketOrder->id);
+                HoldEligibleUnitInventoriesJob::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::NoEligibleCommoditiesAvailable:
                 NoEligibleCommoditiesAvailableStatus::dispatch($localMarketOrder->id);

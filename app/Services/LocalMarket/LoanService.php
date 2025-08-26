@@ -2,20 +2,19 @@
 
 namespace App\Services\LocalMarket;
 
+use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketOrder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
-    private $orderService;
+    private UnitService $unitService;
 
-    private $unitService;
-
-    private $inventoryService;
+    private InventoryService $inventoryService;
 
     public function __construct()
     {
-        $this->orderService = app(OrderService::class);
         $this->unitService = app(UnitService::class);
         $this->inventoryService = app(InventoryService::class);
     }
@@ -37,7 +36,52 @@ class LoanService
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
         ]);
 
+        $this->updateEligibleQuantities($eligibleInventories, $localMarketOrder->id);
+
         return $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
+    }
+
+    /**
+     * Update eligible quantities for multiple inventories using optimized SQL
+     *
+     * @param  array  $inventoryUpdates  Array of inventory updates with id and numberOfUnits
+     * @param  int  $touchedBy  The ID of the local_market_order that touched these inventories
+     */
+    private function updateEligibleQuantities(array $inventoryUpdates, int $touchedBy): void
+    {
+        $caseStatements = [];
+        $inventoryIds = [];
+
+        foreach ($inventoryUpdates as $update) {
+            $inventoryId = $update['id'];
+            $numberOfUnits = $update['numberOfUnits'];
+
+            $caseStatements[] = "WHEN inventory_id = {$inventoryId} THEN {$numberOfUnits}";
+            $inventoryIds[] = $inventoryId;
+        }
+
+        $caseClause = implode(' ', $caseStatements);
+        $inventoryIdsList = implode(',', $inventoryIds);
+
+        // make all inventories inactive
+        LocalMarketInventory::query()->whereIn('id', $inventoryIds)
+            ->update([
+                'is_editable' => 0,
+            ]);
+
+        $sql = "
+            UPDATE local_market_eligible_quantities
+            SET
+                eligible_quantity = eligible_quantity - CASE
+                    {$caseClause}
+                    ELSE 0
+                END,
+                touched_by = {$touchedBy},
+                updated_at = NOW()
+            WHERE inventory_id IN ({$inventoryIdsList})
+        ";
+
+        DB::update($sql);
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)
