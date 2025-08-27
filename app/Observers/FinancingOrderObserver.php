@@ -8,6 +8,8 @@ use App\Services\AdminOrderAssignmentService;
 
 class FinancingOrderObserver
 {
+    public $afterCommit = true;
+
     /**
      * Handle the TraderOrder "created" event.
      */

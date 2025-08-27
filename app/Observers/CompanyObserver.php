@@ -8,6 +8,8 @@ use App\Models\Company;
 
 class CompanyObserver
 {
+    public $afterCommit = true;
+
     /**
      * Handle the Company "created" event.
      */
