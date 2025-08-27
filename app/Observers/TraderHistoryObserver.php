@@ -7,13 +7,12 @@ use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
-class TraderHistoryObserver
+class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
 {
     use ObserverHelper;
-
-    protected $afterCommit = true;
 
     public function __construct(private FeesService $feesService) {}
 
