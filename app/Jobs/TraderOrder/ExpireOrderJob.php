@@ -29,7 +29,7 @@ class ExpireOrderJob implements ShouldQueue
     /**
      * Centralized log channel name
      */
-    private string $logChannel;
+    private string $logChannel = LOG_CHANNEL_LOCAL_MARKET;  
 
     public function __construct(int $traderOrderTimeLimitId)
     {
@@ -37,8 +37,6 @@ class ExpireOrderJob implements ShouldQueue
         $this->jobUniqueId = 'expire_trader_order_'.$this->traderOrderTimeLimit->trader_order_id;
         $this->onQueue('expire_trader_order');
         $this->traderOrder = $this->traderOrderTimeLimit->traderOrder;
-        $this->logChannel = $this->logChannel;
-
         // Log job construction (instantiation)
         Log::channel($this->logChannel)->info('ExpireOrderJob instantiated', [
             'time_limit_id' => $this->traderOrderTimeLimit->id,
