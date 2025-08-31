@@ -7,12 +7,11 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
 use App\Models\Wallet;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
-class TransactionObserver
+class TransactionObserver implements ShouldHandleEventsAfterCommit
 {
-    public $afterCommit = true;
-
     public function created(Transaction $transaction): void
     {
         // if the transaction is negative, then it's a withdrawal
