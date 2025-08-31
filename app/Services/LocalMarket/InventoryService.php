@@ -27,7 +27,7 @@ class InventoryService
      * - Excludes inventories that have already been used.
      * - Orders the inventory by a combination of available quantity and maximum price to prioritize the most suitable items.
      *
-     * @return LocalMarketInventory|false The best matching inventory item, or false if no eligible inventory is found.
+     * @return array|false The best matching inventory item, or false if no eligible inventory is found.
      */
     public function findEligibleInventoryForLoan(LocalMarketOrder $localMarketOrder)
     {
@@ -90,12 +90,12 @@ class InventoryService
             ->orderBy('local_market_inventories.available_quantity', 'desc')
             ->get();
 
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findEligibleInventoriesForLoan Duration', $localMarketOrder), [
-                'localMarketOrderId' => $localMarketOrder->id,
-                'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
-                'loanAmount' => $loanAmount,
-                'companyId' => $companyId,
-                'preferredItemTypes' => $preferredItemTypes
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findEligibleInventoriesForLoan Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'loanAmount' => $loanAmount,
+            'companyId' => $companyId,
+            'preferredItemTypes' => $preferredItemTypes,
         ]);
 
         return $data;
