@@ -32,7 +32,7 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->afterCommit = true;
+        $this->afterCommit = true; // Required: this job isn’t processed by TraderHistoryObserver.
         $this->onQueue('local_market_process');
 
         Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job created', [

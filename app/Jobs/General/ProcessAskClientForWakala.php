@@ -32,7 +32,6 @@ class ProcessAskClientForWakala implements ShouldQueue
     {
         $this->traderOrder = $traderOrder;
         Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessAskClientForWakala: traderOrderId: '.$this->traderOrder.' - Job constructor', ['traderOrderId' => $this->traderOrder]);
-
     }
 
     /**
