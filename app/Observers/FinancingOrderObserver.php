@@ -5,11 +5,10 @@ namespace App\Observers;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class FinancingOrderObserver
+class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
 {
-    public $afterCommit = true;
-
     /**
      * Handle the TraderOrder "created" event.
      */

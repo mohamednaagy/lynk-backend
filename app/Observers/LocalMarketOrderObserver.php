@@ -17,13 +17,12 @@ use App\Jobs\LocalMarket\states\SoldOrderSuccessStatus;
 use App\Jobs\LocalMarket\states\TransferCommodityToCustomerStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Str;
 
-class LocalMarketOrderObserver
+class LocalMarketOrderObserver implements ShouldHandleEventsAfterCommit
 {
     use LocalMarketHelperTrait;
-
-    public $afterCommit = true;
 
     public function creating(LocalMarketOrder $localMarketOrder)
     {
