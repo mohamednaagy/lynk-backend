@@ -11,16 +11,18 @@ use Illuminate\Support\Facades\Log;
 
 class TransactionObserver
 {
+    public $afterCommit = true;
+
     public function created(Transaction $transaction): void
     {
         // if the transaction is negative, then it's a withdrawal
         if ($transaction->amount->isNegative()) {
             CheckWalletNotificaitonJob::dispatch($transaction->wallet);
-            Log::info('increment transaction FOR REFUND financing_order_id => ' . $transaction->financing_order_id . ' transaction_id => ' . $transaction->id . ' wallet_id => ' . $transaction->wallet_id);
+            Log::info('increment transaction FOR REFUND financing_order_id => '.$transaction->financing_order_id.' transaction_id => '.$transaction->id.' wallet_id => '.$transaction->wallet_id);
             FinancingOrder::where('id', $transaction->financing_order_id)->increment('charged_trader_orders_count');
         } elseif ($transaction->amount->isPositive()) {
             $this->clearNotifiedForWalletNotification($transaction->wallet);
-            Log::info('decrement transaction FOR REFUND financing_order_id => ' . $transaction->financing_order_id . ' transaction_id => ' . $transaction->id . ' wallet_id => ' . $transaction->wallet_id);
+            Log::info('decrement transaction FOR REFUND financing_order_id => '.$transaction->financing_order_id.' transaction_id => '.$transaction->id.' wallet_id => '.$transaction->wallet_id);
             FinancingOrder::where('id', $transaction->financing_order_id)->decrement('charged_trader_orders_count');
         }
     }

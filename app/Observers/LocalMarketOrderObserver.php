@@ -23,6 +23,8 @@ class LocalMarketOrderObserver
 {
     use LocalMarketHelperTrait;
 
+    public $afterCommit = true;
+
     public function creating(LocalMarketOrder $localMarketOrder)
     {
         $localMarketOrder->order_no = Str::uuid();
