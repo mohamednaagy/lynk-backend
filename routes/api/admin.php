@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
-use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
@@ -161,9 +160,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
 
-        Route::prefix('commodity-types')->group(function () {
-            Route::get('/dropdown-list', CommodityTypesLiteList::class);
-        });
         Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);

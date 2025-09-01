@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\Lender\Orders\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Lender\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\CreateTraderOrder;
 use App\Http\Controllers\Api\V1\Lender\Orders\ExportOrders;
+use App\Http\Controllers\Api\V1\Lender\Orders\FinancingProductsLiteList;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersStats;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrderStatus;
 use App\Http\Controllers\Api\V1\Lender\Orders\GetOrdersVolume;
@@ -118,6 +119,8 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                 });
 
                 Route::get('/commodity-types/dropdown-list', CommodityTypesLiteList::class);
+                Route::get('/financial-products/dropdown-list', [FinancingProductsLiteList::class , 'index']);
+
             });
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
             Route::apiResource('enquiries.replies', EnquiryReplyController::class)->only('index', 'store')->only(['index', 'store']);
