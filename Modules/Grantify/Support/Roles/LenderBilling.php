@@ -35,5 +35,8 @@ class LenderBilling
         Subject::CommodityMarketCommodityTypes => [
             Action::Index,
         ],
+        Subject::FinancialProducts => [
+            Action::Index,
+        ],
     ];
 }
