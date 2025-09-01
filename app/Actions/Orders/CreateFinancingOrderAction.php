@@ -52,6 +52,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
                 'approved_at',
                 'is_verification_required',
                 'commodity_type_id',
+                'financing_product_id',
             ])
         );
     }
