@@ -73,6 +73,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'created_at',
         'charged_trader_orders_count',
         'commodity_type_id',
+        'financing_product_id',
     ];
 
     protected $casts = [
