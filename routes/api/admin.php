@@ -76,6 +76,7 @@ use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 
 /*
 |--------------------------------------------------------------------------
@@ -159,7 +160,9 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
 
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
-
+        Route::prefix('commodity-types')->group(function () {
+            Route::get('/dropdown-list', CommodityTypesLiteList::class);
+        });
         Route::apiResource('commodity-types', CommodityTypeController::class);
 
         Route::get('orders/export', ExportOrders::class);
