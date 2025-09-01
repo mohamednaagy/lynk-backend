@@ -12,6 +12,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingProductEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
@@ -147,6 +148,13 @@ return [
         CompanyLenderClientType::Business => 'شركات',
         CompanyLenderClientType::Individual => 'فردي',
     ],
+
+    FinancingProductEnum::class => [
+        FinancingProductEnum::NormalLending => 'تمويل',
+        FinancingProductEnum::SpecialPurposeVehicle => 'مرابحة الاستثمار لغرض خاص',
+        FinancingProductEnum::TimeDeposit => 'وديعة لأجل',
+    ],
+
     'document_type' => [
         'client_wakala' => 'وكالة العميل',
         'transfer_ownership_to_lender' => 'نقل الملكية إلى المقرض',
