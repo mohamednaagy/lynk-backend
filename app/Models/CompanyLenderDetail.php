@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
+use App\Enums\FinancingProductEnum;
 use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 
 class CompanyLenderDetail extends Model
 {
@@ -19,7 +21,7 @@ class CompanyLenderDetail extends Model
         'auto_complete_murabaha_order' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'allow_preferred_commodity_in_order' => 'boolean',
-        'default_contract_sign_time_limit' => 'integer',
+        'default_contract_sign_time_limit' => 'integer'
     ];
 
     protected $fillable = [
@@ -41,10 +43,36 @@ class CompanyLenderDetail extends Model
         'allow_preferred_commodity_in_order',
         'token_expire_in',
         'token_version',
+        'allowed_financing_products',
     ];
 
     public function lender()
     {
         return $this->belongsTo(Lender::class, 'company_id');
+    }
+
+    public function setAllowedFinancingProductsAttribute($value)
+    {
+        $values = is_array($value) ? $value : explode(',', (string) $value);
+        foreach ($values as $v) {
+            $v = (int) $v;
+            if (! FinancingProductEnum::hasValue($v)) {
+                throw new InvalidArgumentException("Invalid financing product: {$v}");
+            }
+        }
+        $this->attributes['allowed_financing_products'] = implode(',', $values);
+    }
+
+    public function getAllowedFinancingProductsAttribute($value)
+    {
+        if (is_array($value)) {
+            return array_map('intval', $value);
+        }
+        return array_map('intval', explode(',', $value));
+    }
+
+    public function getDefaultFinancingProductIdAttribute()
+    {
+        return $this->allowed_financing_products[0] ?? FinancingProductEnum::NormalLending;
     }
 }
