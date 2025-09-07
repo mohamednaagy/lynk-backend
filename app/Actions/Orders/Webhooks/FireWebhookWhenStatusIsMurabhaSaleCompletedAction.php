@@ -19,19 +19,13 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
 
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        $warrantyMediaCollection = match ($traderOrder->provider) {
-            Trader::Dmcc, Trader::FakeDmcc => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-            Trader::Bursam => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
-            Trader::Lynk => TraderOrderMediaCollection::LynkSalePledgeCertificate
-        };
-
+        $isBursam = $traderOrder->provider === TraderEnum::Bursam;
         $sellConfirmationMediaCollection = match ($traderOrder->provider) {
             Trader::Dmcc, Trader::FakeDmcc => null,
             Trader::Bursam => null,
             Trader::Lynk => TraderOrderMediaCollection::SellConfirmationDocument,
         };
 
-        $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
         $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SignedClientWakala);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
@@ -49,7 +43,7 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
                 'completed_murabaha_step' => $lastCompletedStep,
                 'signed_wakala_document_url' => get_file_url($wakalaDocumentMediaFile),
                 'warranty_document_url' => route('api.v1.admins.generate', [
-                    'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'document_type' => $isBursam ? DocumentType::BURSAM_OTC_CERTIFICATE : DocumentType::SELLING_PLEDGE_CERTIFICATE,
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
