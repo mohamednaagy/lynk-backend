@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -39,7 +41,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, VirtualColumn;
+    use HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
 
     protected $guarded = [];
 
@@ -480,5 +482,10 @@ class TraderOrder extends Model implements HasMedia
     public function hasSpecificCommodityType(): bool
     {
         return $this->commodity_type_id > 0;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll();
     }
 }

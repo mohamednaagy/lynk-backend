@@ -12,7 +12,6 @@ use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\TraderManager;
-use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -74,7 +73,14 @@ trait TraderHelperTrait
             'data' => $data,
         ]);
         if ($traderOrder->traderHistories()->where('action', $action)->exists()) {
-            throw new Exception('order history action '.$action.'already exists for trader order id: '.$traderOrder->id);
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))
+                ->info(formatLogTitle('Trader order history action already exists', $traderOrder), [
+                    'traderOrderId' => $traderOrder->id,
+                    'action' => $action,
+                    'data' => $data,
+                ]);
+
+            return;
         }
         $traderOrder->traderHistories()->create(
             [
