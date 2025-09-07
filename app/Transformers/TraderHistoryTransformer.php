@@ -177,7 +177,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'mpo_document' => [
                 'url' => formatMediaUrl(route('api.v1.admins.generate', [
-                    'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($this->traderOrder->provider),
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
@@ -200,7 +200,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'warranty_document' => [
                 'url' => formatMediaUrl(route('api.v1.admins.generate', [
-                    'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($this->traderOrder->provider),
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
