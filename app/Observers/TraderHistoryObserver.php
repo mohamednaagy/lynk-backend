@@ -16,7 +16,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
 
     public function __construct(private FeesService $feesService) {}
 
-
     public function creating(TraderHistory $traderHistory)
     {
         $traderHistory->traderOrder()->update([
@@ -24,6 +23,7 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
             'last_history_action_updated_at' => $traderHistory->created_at,
         ]);
     }
+
     /**
      * @throws \Exception
      */
@@ -117,6 +117,7 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
                 'traderOrderId' => $traderOrder->id,
                 'traderHistoryId' => $traderHistory->id,
                 'action' => $traderHistory->action,
+                'last_history_action' => $traderOrder->last_history_action,
             ]);
 
         } catch (\Exception $e) {
