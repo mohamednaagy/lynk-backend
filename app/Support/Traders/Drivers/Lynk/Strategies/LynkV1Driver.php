@@ -113,8 +113,8 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle("Create New Order at Local Market ", $traderOrder) , [
-            'financingOrderId' => $traderOrder->financing_order_id, 
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Create New Order at Local Market ', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,
         ]);
         $commodityData = (new GetSuitableCommodityTypesService($traderOrder))->resolve();
@@ -158,7 +158,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             );
         } catch (\Throwable $e) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create sell-confirmation-certificate', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'message' => $e->getMessage(),
             ]);
@@ -192,7 +192,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     {
         try {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Creating selling commodity to customer document', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
             ]);
             $this->withLocale('ar', function () use ($traderOrder) {

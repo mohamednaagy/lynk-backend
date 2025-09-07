@@ -4,11 +4,10 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
-const LOG_CHANNEL_BURSAM         = 'bursam';
-const LOG_CHANNEL_LOCAL_MARKET    = 'local_market';
-const LOG_CHANNEL_LYNK            = 'lynk';
+const LOG_CHANNEL_BURSAM = 'bursam';
+const LOG_CHANNEL_LOCAL_MARKET = 'local_market';
+const LOG_CHANNEL_LYNK = 'lynk';
 const LOG_CHANNEL_AUTO_COMPLETE_SELL = 'bursam_autosell';
-
 
 return [
 

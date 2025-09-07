@@ -38,8 +38,8 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
      */
     public function handle(): void
     {
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('will start ProcessLynkSellingCommodityToOpenMarket trader_order_id => ' . $this->traderOrderId, [
-            'traderOrderId' =>$this->traderOrderId
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('will start ProcessLynkSellingCommodityToOpenMarket trader_order_id => '.$this->traderOrderId, [
+            'traderOrderId' => $this->traderOrderId,
         ]);
 
         DB::transaction(function () {
@@ -47,7 +47,7 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
 
             if (! $traderOrder) {
                 log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkSellingCommodityToOpenMarket', $traderOrder), [
-                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
                     'message' => 'Trader order not found with reference: '.$this->traderOrderId,
                 ]);
@@ -56,7 +56,7 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
 
             if (! $traderOrder->status->is(TraderOrderStatus::InProgress)) {
                 log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkSellingCommodityToOpenMarket', $traderOrder), [
-                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
                     'message' => 'Trader order is not in progress with reference: '.$this->traderOrderId,
                 ]);
@@ -67,7 +67,7 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
             $isOrderInSellableState = $trader->isOrderInSellableState($traderOrder);
             if (! $isOrderInSellableState) {
                 log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkSellingCommodityToOpenMarket', $traderOrder), [
-                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
                     'is_order_in_sellable_state' => $isOrderInSellableState,
                     'message' => 'Trader order is not in sellable state with reference: '.$this->traderOrderId,
@@ -93,10 +93,10 @@ class ProcessLynkSellingCommodityToOpenMarket implements ShouldBeUnique, ShouldQ
     {
         $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed at ProcessLynkSellingCommodityToOpenMarket Job', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id, 
-            'traderOrderId ' => $traderOrder->id, 
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId ' => $traderOrder->id,
             'message' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString()
+            'trace' => $exception->getTraceAsString(),
         ]);
     }
 }

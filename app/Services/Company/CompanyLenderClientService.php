@@ -16,7 +16,7 @@ class CompanyLenderClientService
             $end = $period->effective_end->endOfDay();
 
             if ($creationDate->between($start, $end)) {
-                log::channel(LOG_CHANNEL_BURSAM)->info('Auto complete sell period found for client_id => ' . $client->id . ' and period id => ' . $period->id, [
+                log::channel(LOG_CHANNEL_BURSAM)->info('Auto complete sell period found for client_id => '.$client->id.' and period id => '.$period->id, [
                     'client' => $client->id,
                     'period' => $period->id,
                 ]);

@@ -29,10 +29,10 @@ trait StopsTraderOrderOnJobFailure
 
         if (method_exists($exception, 'getMessage')) {
             Log::channel($channel)->error(formatLogTitle($exception->getMessage(), $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'message' => $exception->getMessage(),
-                'trace' => $exception->getTraceAsString()
+                'trace' => $exception->getTraceAsString(),
             ]);
         }
     }

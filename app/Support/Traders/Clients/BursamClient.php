@@ -46,7 +46,7 @@ class BursamClient
         }
 
         // Constructor logging
-        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Initializing BursamClient',$traderOrder), [
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Initializing BursamClient', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,
             'fake' => $this->fake,
@@ -511,7 +511,7 @@ class BursamClient
             log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa send request rate limit', $this->traderOrder), [
                 'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
-                'time' => now()
+                'time' => now(),
             ]);
             $executed = RateLimiter::attempt(
                 'bursam_api',
@@ -546,7 +546,7 @@ class BursamClient
 
             return $executed;
         } catch (RateLimitExceededException $e) {
-            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa RateLimitExceededException FUll ', $this->traderOrder), [   
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa RateLimitExceededException FUll ', $this->traderOrder), [
                 'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
                 'message' => $e->getMessage(),
@@ -720,7 +720,7 @@ class BursamClient
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'line' => $e->getLine(),
-                'file' => $e->getFile()
+                'file' => $e->getFile(),
             ]);
         }
     }

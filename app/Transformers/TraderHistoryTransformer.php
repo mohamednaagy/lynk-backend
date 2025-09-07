@@ -60,12 +60,12 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_complete' => (bool) $history,
             'completed_at' => optional($history) ? saudi_now('Y-m-d h:i:s A', optional($history)->created_at) : null,
             'ownership_document' => [
-                'url' => route('api.v1.admins.generate', [
+                'url' => formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::TRANSFER_OWNERSHIP_TO_LENDER,
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
-                ]),
+                ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
@@ -73,12 +73,12 @@ class TraderHistoryTransformer extends TransformerAbstract
 
         if ($this->traderOrder->provider === TraderEnum::Bursam) {
             $data['cert_document'] = [
-                'url' => route('api.v1.admins.generate', [
+                'url' => formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::BURSAM_BID_CERTIFICATE,
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
-                ]),
+                ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ];
         }
@@ -124,12 +124,12 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_deliverable' => $this->traderOrder->isDeliverable(),
             'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => [
-                'url' => route('api.v1.admins.generate', [
+                'url' => formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::CLIENT_WAKALA,
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
-                ]),
+                ])),
                 'date' => $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
@@ -153,12 +153,12 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_complete' => (bool) $history,
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'borrower_document' => [
-                'url' => route('api.v1.admins.generate', [
+                'url' => formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::SELLING_COMMODITY_TO_CUSTOMER,
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
-                ]),
+                ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),

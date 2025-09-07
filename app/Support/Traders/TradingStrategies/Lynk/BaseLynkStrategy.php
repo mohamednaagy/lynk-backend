@@ -61,7 +61,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
         // Idempotency check: If the step is already complete, don't process again
         if ($traderOrder->checkOrderStepComplete(MurabhaStep::MurabahaSaleCompleted)) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('LynkStrategy updateMurabhaCompleteDocument: Step already completed, skipping', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'current_status' => $traderOrder->status->key,
                 'last_action' => $traderOrder->last_history_action,
@@ -72,7 +72,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
                 $traderOrder->update(['status' => TraderOrderStatus::Completed]);
                 app(TimeLimitService::class)->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
                 log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('LynkStrategy updateMurabhaCompleteDocument: Updated status to completed for already completed step', $traderOrder), [
-                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
                 ]);
             }
@@ -98,7 +98,7 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             ]);
         } else {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('LynkStrategy updateMurabhaCompleteDocument failed to update order status to completed', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'last_action' => $traderOrder->last_history_action,
             ]);

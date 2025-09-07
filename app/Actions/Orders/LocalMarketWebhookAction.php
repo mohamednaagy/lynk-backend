@@ -30,13 +30,13 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
         $traderOrder = TraderOrder::where('reference', $this->data['external_order_no'])->first();
 
         if (! $traderOrder) {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("Trader order not found for the given reference => {$this->data['external_order_no']}"  , [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("Trader order not found for the given reference => {$this->data['external_order_no']}", [
                 'reference' => $this->data['external_order_no'],
             ]);
             throw new LocalMarketWebhookException;
         }
 
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle("Update trader by local market webhook with case => ".$this->data['case'] , $traderOrder), [
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Update trader by local market webhook with case => '.$this->data['case'], $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,
             'reference' => $this->data['external_order_no'],

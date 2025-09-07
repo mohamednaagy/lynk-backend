@@ -9,6 +9,7 @@ use App\Models\TraderOrder;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 use Modules\Grantify\Facades\Grantify;
 use Propaganistas\LaravelPhone\PhoneNumber;
 use Spatie\MediaLibrary\HasMedia;
@@ -317,10 +318,34 @@ if (! function_exists('toUtc')) {
     }
 }
 
+function formatMediaUrl(?string $url): ?string
+{
+    if (is_null($url)) {
+        return null;
+    }
 
-if (!function_exists('formatLogTitle')) {
-    function formatLogTitle(string $baseMessage,TraderOrder $traderOrder ): string
-    {  
+    if (app()->environment('local')) {
+        return $url;
+    }
+
+    $parsedUrl = parse_url($url);
+    $parsedPath = $parsedUrl['path'];
+    $queryString = $parsedUrl['query'] ?? '';
+
+    // Ensure it contains /api/
+    if (! Str::contains($parsedPath, '/api/')) {
+        return null; // or throw, or just return the original
+    }
+
+    $relativePath = Str::of($parsedPath)->after('/api');
+    $baseUrl = rtrim(config('app.url'), '/').'/api'.$relativePath;
+
+    return $queryString ? $baseUrl.'?'.$queryString : $baseUrl;
+}
+
+if (! function_exists('formatLogTitle')) {
+    function formatLogTitle(string $baseMessage, TraderOrder $traderOrder): string
+    {
         $traderOrderId = $traderOrder->id;
         $financingOrderId = $traderOrder->order->id;
         $reference = $traderOrder->reference;
@@ -329,8 +354,8 @@ if (!function_exists('formatLogTitle')) {
     }
 }
 
-if (!function_exists('formatLocalMarketOrderTitle')) {
-    function formatLocalMarketOrderTitle(string $baseMessage,LocalMarketOrder $localMarketOrder): string
+if (! function_exists('formatLocalMarketOrderTitle')) {
+    function formatLocalMarketOrderTitle(string $baseMessage, LocalMarketOrder $localMarketOrder): string
     {
         $localMarketOrderId = $localMarketOrder->id;
         $reference = $localMarketOrder->external_order_no;
@@ -339,7 +364,7 @@ if (!function_exists('formatLocalMarketOrderTitle')) {
     }
 }
 
-if (!function_exists('getSuitableLoggingFromTraderProvider')) {
+if (! function_exists('getSuitableLoggingFromTraderProvider')) {
     function getSuitableLoggingFromTraderProvider(TraderOrder $traderOrder): string
     {
         $provider = $traderOrder->provider;
@@ -349,6 +374,7 @@ if (!function_exists('getSuitableLoggingFromTraderProvider')) {
         if ($provider === Trader::Lynk) {
             return LOG_CHANNEL_LOCAL_MARKET;
         }
+
         return LOG_CHANNEL_LYNK;
     }
 }

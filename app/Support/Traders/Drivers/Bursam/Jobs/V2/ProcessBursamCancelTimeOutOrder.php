@@ -34,14 +34,15 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        log::channel(LOG_CHANNEL_BURSAM)->info('start ProcessBursamCancelTimeOutOrder Job - financing_order_id => ' . $this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id]);
+        log::channel(LOG_CHANNEL_BURSAM)->info('start ProcessBursamCancelTimeOutOrder Job - financing_order_id => '.$this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id]);
 
         DB::transaction(function () {
             $lockedFinancingOrder = FinancingOrder::query()
                 ->find($this->financingOrder->id);
 
             if (is_null($lockedFinancingOrder)) {
-                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamCancelTimeOutOrder Job - not found financing_order_id => ' . $this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id]);
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamCancelTimeOutOrder Job - not found financing_order_id => '.$this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id]);
+
                 return;
             }
 
@@ -54,6 +55,6 @@ class ProcessBursamCancelTimeOutOrder implements ShouldQueue
 
     public function failed($exception)
     {
-        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamCancelTimeOutOrder Job - financing_order_id => ' . $this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamCancelTimeOutOrder Job - financing_order_id => '.$this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

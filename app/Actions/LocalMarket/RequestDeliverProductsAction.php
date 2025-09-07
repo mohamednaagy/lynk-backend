@@ -32,11 +32,11 @@ class RequestDeliverProductsAction implements RequestDeliverProducts
                 UnitOwnershipAction::BorrowerOwnershipTransfer
             );
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingDelivery);
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info( formatLocalMarketOrderTitle("Delivery requested at RequestDeliverProductsAction", $localMarketOrder) , [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('Delivery requested at RequestDeliverProductsAction', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
             ]);
         } catch (\Exception $e) {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle("Failed to request delivery at RequestDeliverProductsAction", $localMarketOrder), [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Failed to request delivery at RequestDeliverProductsAction', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

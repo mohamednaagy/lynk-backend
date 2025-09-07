@@ -60,6 +60,7 @@ class ProcessInProgressOrder implements ShouldQueue
                     || $financingOrder->company->lender->lenderDetail->require_initiate_trade_request
                 ) {
                     Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has in progress trader order');
+
                     return;
                 }
 

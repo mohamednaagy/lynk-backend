@@ -46,7 +46,7 @@ class ProcessProceedClientWakala implements ShouldQueue
         $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
 
         if ($this->isClientWakalaStepCompleted($traderOrder)) {
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Skipped ProceedClientWakalaAccepted: already completed' , $traderOrder), [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Skipped ProceedClientWakalaAccepted: already completed', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
             ]);
@@ -55,7 +55,7 @@ class ProcessProceedClientWakala implements ShouldQueue
         }
 
         if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala)) {
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted WaitingClientWakala not complete' , $traderOrder), [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted WaitingClientWakala not complete', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
                 'last_action' => $traderOrder->trader_order_history->latest()->first()->action,
@@ -65,7 +65,7 @@ class ProcessProceedClientWakala implements ShouldQueue
             return;
         }
         $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted), false);
-        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted completed successfully' , $traderOrder), [
+        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted completed successfully', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrderId,
         ]);

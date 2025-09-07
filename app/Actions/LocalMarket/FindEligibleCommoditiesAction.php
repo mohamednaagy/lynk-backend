@@ -35,7 +35,7 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 
             DB::commit();
 
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder) , [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
             ]);
         } catch (Exception $e) {

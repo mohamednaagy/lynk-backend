@@ -42,14 +42,14 @@ class ProcessDailySellingPendingCommodityToMarket implements ShouldQueue
             })
             ->select('id')
             ->lazyById()
-            ->each(function (FinancingOrder $financingOrder) { 
-                log::channel(LOG_CHANNEL_BURSAM)->info('fire auto cancel job for financing_order_id => ' . $financingOrder->id);
+            ->each(function (FinancingOrder $financingOrder) {
+                log::channel(LOG_CHANNEL_BURSAM)->info('fire auto cancel job for financing_order_id => '.$financingOrder->id);
                 ProcessBursamCancelTimeOutOrder::dispatch($financingOrder);
             });
     }
 
     public function failed($exception)
     {
-        log::channel(LOG_CHANNEL_BURSAM)->error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage() , 'trace' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('ProcessDailySellingPendingCommodityToMarket', ['message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

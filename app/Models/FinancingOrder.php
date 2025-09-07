@@ -127,9 +127,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                     return MurabhaStep::fromValue($currentStepNode->step);
                 } catch (\Exception $e) {
                     $traderOrder = $this->activeTraderOrder->first();
-                    $logMessage = "Error retrieving current step for order {$this->id}: " . $e->getMessage();
+                    $logMessage = "Error retrieving current step for order {$this->id}: ".$e->getMessage();
                     if ($traderOrder) {
-                        $logMessage .= " trader_order_id => " . $traderOrder->id;
+                        $logMessage .= ' trader_order_id => '.$traderOrder->id;
                     }
                     Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(
                         formatLogTitle($logMessage, $traderOrder),

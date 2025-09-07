@@ -268,14 +268,13 @@ class UnitService
      */
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory): int
     {
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => '.$inventory->id . ' at ' . now(), [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => '.$inventory->id.' at '.now(), [
             'inventory_id' => $inventory->id,
         ]);
 
         $count = $this->buildEligibleUnitsCountQuery($inventory->id, $company->id)->count();
 
-
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => '.$inventory->id . ' at ' .now());
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => '.$inventory->id.' at '.now());
 
         return $count;
     }
@@ -426,11 +425,11 @@ DELIMITER ;
                         formatLocalMarketOrderTitle('Swapping unit ID '.$unit->id.
                             ' to owner '.$newCurrentOwner.
                             ' of type '.$newCurrentOwnerType, $localMarketOrder), [
-                            'localMarketOrderId' => $localMarketOrder->id,
-                            'unit_id' => $unit->id,
-                            'new_current_owner' => $newCurrentOwner,
-                            'new_current_owner_type' => $newCurrentOwnerType,
-                        ]
+                                'localMarketOrderId' => $localMarketOrder->id,
+                                'unit_id' => $unit->id,
+                                'new_current_owner' => $newCurrentOwner,
+                                'new_current_owner_type' => $newCurrentOwnerType,
+                            ]
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer

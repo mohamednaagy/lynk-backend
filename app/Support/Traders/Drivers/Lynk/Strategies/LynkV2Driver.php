@@ -109,21 +109,21 @@ class LynkV2Driver extends LynkV1Driver
 
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('processProceedContractAndClientWakala', $traderOrder) , [
-            'financingOrderId' => $traderOrder->financing_order_id, 
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('processProceedContractAndClientWakala', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,
         ]);
         if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value != FinancingOrderProceedCase::ContractSigned) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('We Will Fire ContractSigned Job', $traderOrder) , [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('We Will Fire ContractSigned Job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
             ]);
             ProcessProceedContractSigned::dispatch($traderOrder->id);
         }
 
         if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value == FinancingOrderProceedCase::ContractSigned) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('We Will Fire ProcessProceedClientWakala Job', $traderOrder) , [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('We Will Fire ProcessProceedClientWakala Job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
             ]);
             ProcessProceedClientWakala::dispatch($traderOrder->id);
