@@ -180,7 +180,7 @@ class BursamV2Driver extends BursamV1Driver
         };
 
         if ($dispatchableJob) {
-            $dispatchableJob::dispatch($traderOrder->id);   
+            $dispatchableJob::dispatch($traderOrder->id);
         }
     }
 
@@ -248,13 +248,13 @@ class BursamV2Driver extends BursamV1Driver
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
         log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('processProceedContractAndClientWakala', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id, 
+            'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,
         ]);
-        
+
         if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value != FinancingOrderProceedCase::ContractSigned) {
             log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('we will fire ProcessProceedContractSigned Job', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
             ]);
             ProcessProceedContractSigned::dispatch($traderOrder->id);
@@ -262,7 +262,7 @@ class BursamV2Driver extends BursamV1Driver
 
         if ($this->shouldProcessClientWakala($traderOrder)) {
             log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('we will fire ProcessProceedClientWakala Job', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
             ]);
             ProcessProceedClientWakala::dispatch($traderOrder->id);

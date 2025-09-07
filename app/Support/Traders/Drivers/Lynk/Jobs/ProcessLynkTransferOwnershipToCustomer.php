@@ -53,7 +53,7 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
 
         if (! $traderOrder->status->is(TraderOrderStatus::InProgress)) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('error at ProcessLynkTransferOwnershipToCustomer Job - trader order is not in progress status', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
                 'current_status' => $traderOrder->status,
                 'message' => 'Trader order is not in progress with reference: '.$this->traderOrderId,
@@ -65,7 +65,7 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
 
         if (! $isLastActionContractSigned) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkTransferOwnershipToCustomer', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
                 'last_action' => $isLastActionContractSigned,
                 'message' => 'Trader order does not have contract signed action with reference: '.$this->traderOrderId.' and last action: '.$isLastActionContractSigned,
@@ -90,9 +90,9 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
     {
         $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkTransferOwnershipToCustomer', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id, 
-            'traderOrderId ' => $traderOrder->id, 
-            'message' => $exception->getMessage()
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId ' => $traderOrder->id,
+            'message' => $exception->getMessage(),
         ]);
     }
 }

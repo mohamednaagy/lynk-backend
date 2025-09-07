@@ -30,7 +30,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
         $className = class_basename(static::class);
         $queueName = 'local_market_commodities_settlement';
         self::logInfo("add $className job to queue $queueName localMarketOrderId $this->localMarketOrderId", [
-            'localMarketOrderId' => $this->localMarketOrderId
+            'localMarketOrderId' => $this->localMarketOrderId,
         ]);
 
         $this->onQueue($queueName);
@@ -68,7 +68,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("{$className} failed local_market_order_id: {$this->localMarketOrderId}", [
             'localMarketOrderId' => $this->localMarketOrderId,
             'message' => $e->getMessage(),
-            'trace'   => $e->getTraceAsString()
+            'trace' => $e->getTraceAsString(),
         ]);
     }
 }

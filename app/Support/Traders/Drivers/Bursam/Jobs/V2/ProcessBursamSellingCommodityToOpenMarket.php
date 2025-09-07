@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Bursam\Jobs\V2;
 
-use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
@@ -48,14 +47,16 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
                 ->find($this->traderOrderId);
 
             if (! $traderOrder) {
-                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - not found trader_order_id => ' . $this->traderOrderId, [
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - not found trader_order_id => '.$this->traderOrderId, [
                     'traderOrderId' => $this->traderOrderId,
                 ]);
+
                 return;
             }
 
-            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
-                Log::channel(LOG_CHANNEL_BURSAM)->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamSellingCommodityToOpenMarket job', ['traderOrderId' => $this->traderOrderId, 'status' => $traderOrder->status->value]);
+
                 return;
             }
 
@@ -67,6 +68,7 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
                     'traderOrderId' => $this->traderOrderId,
                     'is_order_in_sellable_state' => $trader->isOrderInSellableState($traderOrder),
                 ]);
+
                 return;
             }
 
@@ -86,6 +88,6 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
 
     public function failed($exception)
     {
-        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

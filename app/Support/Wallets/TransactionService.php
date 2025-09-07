@@ -24,7 +24,7 @@ class TransactionService implements TransactionServiceInterface
         array $meta = []
     ) {
         try {
-            Log::info('TransactionService::withdraw START wallet_id => ' . $wallet->getKey() . ' reference_number => ' . $referenceNumber, [
+            Log::info('TransactionService::withdraw START wallet_id => '.$wallet->getKey().' reference_number => '.$referenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'wallet_currency' => $wallet->currency,
                 'amount' => $amount->jsonSerialize(),
@@ -36,7 +36,7 @@ class TransactionService implements TransactionServiceInterface
             // Generate reference number if not provided
             $finalReferenceNumber = $referenceNumber ?? $this->referenceNumberGeneratorInterface->generate();
 
-            Log::info('TransactionService::withdraw - Reference number generated wallet_id => ' . $wallet->getKey() . ' reference_number => ' . $finalReferenceNumber, [
+            Log::info('TransactionService::withdraw - Reference number generated wallet_id => '.$wallet->getKey().' reference_number => '.$finalReferenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'reference_number' => $finalReferenceNumber,
                 'was_generated' => $referenceNumber === null,
@@ -51,7 +51,7 @@ class TransactionService implements TransactionServiceInterface
                 'meta' => $meta,
             ];
 
-            Log::info('TransactionService::withdraw - About to create transaction wallet_id => ' . $wallet->getKey() . ' reference_number => ' . $finalReferenceNumber, [
+            Log::info('TransactionService::withdraw - About to create transaction wallet_id => '.$wallet->getKey().' reference_number => '.$finalReferenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_data' => [
                     'wallet_id' => $transactionData['wallet_id'],
@@ -68,7 +68,7 @@ class TransactionService implements TransactionServiceInterface
 
             $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
-            Log::info('TransactionService::withdraw SUCCESS wallet_id => ' . $wallet->getKey() . ' reference_number => ' . $finalReferenceNumber, [
+            Log::info('TransactionService::withdraw SUCCESS wallet_id => '.$wallet->getKey().' reference_number => '.$finalReferenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $transaction->id,
                 'transaction_amount' => $transaction->amount->jsonSerialize(),
@@ -78,7 +78,7 @@ class TransactionService implements TransactionServiceInterface
             return $transaction;
 
         } catch (\Exception $e) {
-            Log::error('TransactionService::withdraw FAILED wallet_id => ' . $wallet->getKey() . ' reference_number => ' . $finalReferenceNumber, [
+            Log::error('TransactionService::withdraw FAILED wallet_id => '.$wallet->getKey().' reference_number => '.$finalReferenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'error' => $e->getMessage(),
                 'error_class' => get_class($e),

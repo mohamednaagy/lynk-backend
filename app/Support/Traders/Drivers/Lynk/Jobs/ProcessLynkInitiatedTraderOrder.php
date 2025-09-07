@@ -47,7 +47,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkInitiatedTraderOrder not found trader_order_id:' . $this->traderOrderId, [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkInitiatedTraderOrder not found trader_order_id:'.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
             throw new \Exception('Trader order not found to initiate with reference: '.$this->traderOrderId);
@@ -55,7 +55,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 
         if (! $traderOrder->status->is(TraderOrderStatus::Initiated)) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkInitiatedTraderOrder trader order is not initiated status', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'current_status' => $traderOrder->status,
                 'expected_status' => TraderOrderStatus::Initiated,
@@ -73,7 +73,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkInitiatedTraderOrder not found trader_order_id:' . $this->traderOrderId, [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkInitiatedTraderOrder not found trader_order_id:'.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
             throw new \Exception('Trader order not found to failed to initiate with reference: '.$this->traderOrderId);
@@ -81,9 +81,9 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
 
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle( method_exists('getMessage', $exception)? $exception->getMesage(): 'Cannot proceed to buy product', $traderOrder), 
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle(method_exists('getMessage', $exception) ? $exception->getMesage() : 'Cannot proceed to buy product', $traderOrder),
             [
-                'financingOrderId' => $traderOrder->financing_order_id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
                 'exception' => $exception,
             ]

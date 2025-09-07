@@ -32,12 +32,12 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => 'cancelled',
                 'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep?->step),
-                'warranty_document_url' => route('api.v1.admins.generate', [
+                'warranty_document_url' => formatMediaUrl(route('api.v1.admins.generate', [
                     'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
-                ]),
+                ])),
             ],
             'updated_at' => $this->getFormattedDateTime($traderOrder),
         ]);

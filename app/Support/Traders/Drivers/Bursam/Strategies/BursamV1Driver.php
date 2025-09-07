@@ -138,7 +138,7 @@ class BursamV1Driver implements TraderInterface
         // we always use the first commodity type from the list
         $productCode = $commoditiesData['commodity_types_id'][0];
         log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Using the first commodity type from the list as the product code for the trader order', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id, 
+            'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,
             'product_code' => $productCode,
         ]);
@@ -243,9 +243,9 @@ class BursamV1Driver implements TraderInterface
             ]);
 
             $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::AttachTtiHoldingCertificateDocument);
-            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Bid certificate generated successfully', $traderOrder) , [
-                'financingOrderId' => $traderOrder->financing_order_id, 
-                'traderOrderId' => $traderOrder->id
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Bid certificate generated successfully', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
             ]);
         } else {
             throw new TraderException(
@@ -279,14 +279,14 @@ class BursamV1Driver implements TraderInterface
 
             });
             log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => transferOwnershipToLenderDocument certificate generated successfully', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
-                'traderOrderId' => $traderOrder->id
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
             ]);
 
         } catch (\Throwable $exception) {
             log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('exception of transfer ownership to lender', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id, 
-                'traderOrderId' => $traderOrder->id, 
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
                 'message' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),
             ]);
@@ -294,7 +294,7 @@ class BursamV1Driver implements TraderInterface
             throw new TraderException(
                 'Failed to create lender ownership certificate',
                 [
-                    'financingOrderId' => $traderOrder->financing_order_id, 
+                    'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
                     'provider' => $traderOrder->provider,
                     'version' => $traderOrder->version,

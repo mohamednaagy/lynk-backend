@@ -29,7 +29,7 @@ class ExpireOrderJob implements ShouldQueue
     /**
      * Centralized log channel name
      */
-    private string $logChannel = LOG_CHANNEL_LOCAL_MARKET;  
+    private string $logChannel = LOG_CHANNEL_LOCAL_MARKET;
 
     public function __construct(int $traderOrderTimeLimitId)
     {

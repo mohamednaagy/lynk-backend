@@ -54,32 +54,34 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
      */
     public function handle(): void
     {
-        log::channel(LOG_CHANNEL_BURSAM)->info('start processing cancel trader_order_id => ' . $this->traderOrderId . ' at ProcessBursamStbCertificateAfterCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->info('start processing cancel trader_order_id => '.$this->traderOrderId.' at ProcessBursamStbCertificateAfterCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
 
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamStbCertificateAfterCancellation Job - not found trader order id:' . $this->traderOrderId, [
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamStbCertificateAfterCancellation Job - not found trader order id:'.$this->traderOrderId, [
                     'traderOrderId' => $this->traderOrderId,
                 ]);
+
                 return;
             }
 
-            if($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)){
+            if ($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)) {
                 Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in pending cancellation in ProcessBursamStbCertificateAfterCancellation job', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $this->traderOrderId ,
-                    'status' => $traderOrder->status->value
+                    'traderOrderId' => $this->traderOrderId,
+                    'status' => $traderOrder->status->value,
                 ]);
+
                 return;
             }
 
             Log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('start processing cancel trader order at ProcessBursamStbCertificateAfterCancellation', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
-                'cancel_at' => now()->toDateTimeString()
+                'cancel_at' => now()->toDateTimeString(),
             ]);
             if (
                 ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::GetSellingToMarketCertificate)
@@ -104,9 +106,10 @@ class ProcessBursamStbCertificateAfterCancellation implements ShouldBeUnique, Sh
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            log::channel(LOG_CHANNEL_BURSAM)->error('error at failed function at ProcessBursamStbCertificateAfterCancellation Job - not found trader_order_id =>' . $this->traderOrderId, [
+            log::channel(LOG_CHANNEL_BURSAM)->error('error at failed function at ProcessBursamStbCertificateAfterCancellation Job - not found trader_order_id =>'.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
+
             return;
         }
 

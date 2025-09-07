@@ -31,11 +31,12 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
     {
         $order = $traderOrder->order;
 
-        if(! $order){
+        if (! $order) {
             Log::channel('bursam')->info('ProceedClientWakalaAccepted: traderOrderId: '.$traderOrder->id.' - Order is null', [
                 'traderOrderId' => $traderOrder->id,
                 'order' => $order?->id,
             ]);
+
             return [];
         }
 
@@ -47,7 +48,7 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
             'isClientWakalaStepCompleted' => $this->isClientWakalaStepCompleted($traderOrder),
             'isPreviousStepOfClientWakalaNotCompleted' => $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder),
         ]);
-        
+
         if (
             $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
             || ($forceToProceed === false && $order->is_verification_required)

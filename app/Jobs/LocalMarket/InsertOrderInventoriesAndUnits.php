@@ -56,7 +56,7 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
                     'status' => OrderStatus::FailedPurchase,
                 ]);
             }
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('InsertOrderInventoriesAndUnits failed for localMarketOrderId => ' . $this->localMarketOrderId, [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('InsertOrderInventoriesAndUnits failed for localMarketOrderId => '.$this->localMarketOrderId, [
                 'localMarketOrderId' => $this->localMarketOrderId,
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

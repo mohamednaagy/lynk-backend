@@ -43,7 +43,7 @@ class LynkClient
 
             $data = $this->prepareOrderData($financingOrder);
             $data['preferred_commodity_type'] = $this->getCommodityTypeIds($commodityTypesUniqueNames);
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle("Data prepared for trader_order_id ", $this->traderOrder), [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Data prepared for trader_order_id ', $this->traderOrder), [
                 'financingOrderId' => $financingOrder->id,
                 'traderOrderId' => $this->traderOrder->id,
                 'data' => $data,
@@ -51,7 +51,7 @@ class LynkClient
 
             return app(CreateLocalMarketOrder::class)->handle($data);
         } catch (\Exception $e) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle("Error creating LocalMarketOrder  ", $this->traderOrder), [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Error creating LocalMarketOrder  ', $this->traderOrder), [
                 'financingOrderId' => $financingOrder->id,
                 'traderOrderId' => $this->traderOrder->id,
                 'message' => $e->getMessage(),

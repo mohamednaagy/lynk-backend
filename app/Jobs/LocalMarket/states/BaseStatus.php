@@ -33,7 +33,7 @@ abstract class BaseStatus implements ShouldQueue
 
             $this->setUp();
         } catch (\Exception $e) {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle("failed {$this->className} local market order id {$this->localMarketOrderID}" , $this->localMarketOrder), [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle("failed {$this->className} local market order id {$this->localMarketOrderID}", $this->localMarketOrder), [
                 'localMarketOrderId' => $this->localMarketOrderID,
                 'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $e->getMessage(),

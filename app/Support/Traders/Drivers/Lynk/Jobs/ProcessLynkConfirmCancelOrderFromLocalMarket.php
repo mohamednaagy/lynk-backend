@@ -46,18 +46,19 @@ class ProcessLynkConfirmCancelOrderFromLocalMarket implements ShouldBeUnique, Sh
                     ->first();
 
                 if (is_null($this->traderOrder)) {
-                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkConfirmCancelOrderFromLocalMarket not found trader_order_reference:' . $this->traderOrderReference, [
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkConfirmCancelOrderFromLocalMarket not found trader_order_reference:'.$this->traderOrderReference, [
                         'traderOrderReference' => $this->traderOrderReference,
                     ]);
+
                     return;
                 }
                 Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->confirmCancelledFromProvider($this->traderOrder);
             });
         } catch (\Exception $e) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('error ProcessLynkConfirmCancelOrderFromLocalMarket', $this->traderOrder), [
-                'financingOrderId' => $this->traderOrder->financing_order_id, 
+                'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
 
         }

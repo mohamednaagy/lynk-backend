@@ -50,7 +50,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
             if (! $company) {
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Company not found', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id
+                    'traderOrderId' => $traderOrder->id,
                 ]);
 
                 return null;
@@ -132,7 +132,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 return null;
             }
 
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Found wallet', $traderOrder) , [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Found wallet', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'wallet_id' => $wallet->id,
@@ -242,7 +242,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
             ]);
             throw $e;
         } catch (\Exception $e) {
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('error at DeductOrderCompletedFeeAction: Unexpected exception', $traderOrder) , [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('error at DeductOrderCompletedFeeAction: Unexpected exception', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'message' => $e->getMessage(),

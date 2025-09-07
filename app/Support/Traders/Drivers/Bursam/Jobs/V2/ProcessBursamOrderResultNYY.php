@@ -46,30 +46,31 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
             ->find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
-            log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - not found trader_order_id:' . $this->traderOrderId, [
+            log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - not found trader_order_id:'.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
+
             return;
         }
 
-        
-        if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
             Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultNYY job', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
-                'status' => $traderOrder->status->value
+                'status' => $traderOrder->status->value,
             ]);
+
             return;
         }
-
 
         if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
             log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOrderResultNYY Job - incorrect action state', $traderOrder), [
                 'financingOrderId' => $traderOrder?->order?->id,
                 'traderOrderId' => $this->traderOrderId,
-                'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action  ,
+                'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                 'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
             ]);
+
             return;
         }
 
@@ -88,6 +89,6 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace' => $exception->getTraceAsString()]);
     }
 }
