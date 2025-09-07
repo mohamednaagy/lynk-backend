@@ -83,7 +83,7 @@ final class DocumentType extends Enum implements LocalizedEnum
         return in_array($this->value, self::getTransactionRequiredTypes());
     }
 
-    public static function getSellingPledgeCertificateType(Trader $provider): string
+    public static function getSellingPledgeCertificateType($provider): string
     {
         switch ($provider) {
             case Trader::Bursam:
