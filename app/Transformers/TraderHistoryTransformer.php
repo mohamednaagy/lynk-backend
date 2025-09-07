@@ -170,7 +170,6 @@ class TraderHistoryTransformer extends TransformerAbstract
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
             $historiesActions, MurabhaStep::MurabhaOfferIssued
         );
-        $isBursam = $this->traderOrder->provider === TraderEnum::Bursam;
 
         return $this->primitive([
             'step' => MurabhaStep::SellingCommodityToOpenMarket,
@@ -178,7 +177,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'completed_at' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             'mpo_document' => [
                 'url' => formatMediaUrl(route('api.v1.admins.generate', [
-                    'document_type' => $isBursam ? DocumentType::BURSAM_OTC_CERTIFICATE : DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($this->traderOrder->provider),
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],
@@ -195,14 +194,13 @@ class TraderHistoryTransformer extends TransformerAbstract
             $historiesActions, MurabhaStep::MurabahaSaleCompleted
         );
 
-        $isBursam = $this->traderOrder->provider === TraderEnum::Bursam;
         $data = [
             'step' => MurabhaStep::MurabahaSaleCompleted,
             'is_complete' => (bool) $history,
             'completed_at' => optional($history)->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'warranty_document' => [
                 'url' => formatMediaUrl(route('api.v1.admins.generate', [
-                    'document_type' => $isBursam ? DocumentType::BURSAM_OTC_CERTIFICATE : DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($this->traderOrder->provider),
                     'context' => [
                         'trader_order_id' => $this->traderOrder->id,
                     ],

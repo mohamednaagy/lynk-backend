@@ -6,7 +6,6 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
 use App\Enums\DocumentType;
 use App\Enums\MurabhaStep;
-use App\Enums\Trader;
 use App\Enums\WebhookType;
 use App\Models\TraderOrder;
 use App\Support\Webhooks\Facades\WebhookEvent;
@@ -20,7 +19,6 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
         $financingOrder = $traderOrder->order;
 
         $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
-        $isBursam = $traderOrder->provider === Trader::Bursam;
         $company = $financingOrder->company()->withTrashed()->first();
         WebhookEvent::fire($company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -34,7 +32,7 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
                 'current_trading_step' => 'cancelled',
                 'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep?->step),
                 'warranty_document_url' => formatMediaUrl(route('api.v1.admins.generate', [
-                    'document_type' => $isBursam ? DocumentType::BURSAM_OTC_CERTIFICATE : DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($traderOrder->provider),
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
