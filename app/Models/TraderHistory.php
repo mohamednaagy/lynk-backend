@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Stancl\VirtualColumn\VirtualColumn;
 
 /**
@@ -12,7 +14,7 @@ use Stancl\VirtualColumn\VirtualColumn;
  */
 class TraderHistory extends Model
 {
-    use HasFactory, VirtualColumn;
+    use HasFactory, LogsActivity, VirtualColumn;
 
     protected $fillable = [
         'trader_order_id',
@@ -34,5 +36,11 @@ class TraderHistory extends Model
     public function traderOrder(): BelongsTo
     {
         return $this->belongsTo(TraderOrder::class, 'trader_order_id', 'id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll();
     }
 }
