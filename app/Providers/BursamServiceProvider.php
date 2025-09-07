@@ -59,7 +59,7 @@ class BursamServiceProvider extends ServiceProvider
 
                     $token = $response->json('access_token');
 
-                    Log::channel('bursam')->info('Malaysia Bursa Get token request: ...'.json_encode([
+                    Log::channel(LOG_CHANNEL_BURSAM)->info('Malaysia Bursa Get token request: ...'.json_encode([
                         'url' => $baseUrl.'api/process/svc/auth/token',
                         'request' => $data,
                         'response' => $response->json(),

@@ -4,6 +4,11 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
+const LOG_CHANNEL_BURSAM = 'bursam';
+const LOG_CHANNEL_LOCAL_MARKET = 'local_market';
+const LOG_CHANNEL_LYNK = 'lynk';
+const LOG_CHANNEL_AUTO_COMPLETE_SELL = 'bursam_autosell';
+
 return [
 
     /*
@@ -132,25 +137,25 @@ return [
             'level' => env('NIGHTWATCH_LOG_LEVEL', 'debug'),
         ],
 
-        'bursam' => [
+        LOG_CHANNEL_BURSAM => [
             'driver' => 'daily',
             'path' => storage_path('logs/bursam/bursam.log'),
             'level' => 'debug',
             'days' => 30,
         ],
-        'bursam_autosell' => [
+        LOG_CHANNEL_AUTO_COMPLETE_SELL => [
             'driver' => 'daily',
             'path' => storage_path('logs/bursam/bursam_autosell.log'),
             'level' => 'debug',
             'days' => 30,
         ],
-        'local_market' => [
+        LOG_CHANNEL_LOCAL_MARKET => [
             'driver' => 'daily',
             'path' => storage_path('logs/local-market/local-market.log'),
             'level' => 'debug',
             'days' => 30,
         ],
-        'lynk' => [
+        LOG_CHANNEL_LYNK => [
             'driver' => 'daily',
             'path' => storage_path('logs/lynk/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),

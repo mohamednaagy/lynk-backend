@@ -18,12 +18,11 @@ class DeleteCommodityItem implements ShouldQueue
 
     private CommodityItem $commodityItem;
 
-    
     public function __construct(CommodityItem $commodityItem)
     {
         $this->commodityItem = $commodityItem;
     }
-    
+
     /**
      * Execute the job.
      */

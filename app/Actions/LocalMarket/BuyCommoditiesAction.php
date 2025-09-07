@@ -37,16 +37,19 @@ class BuyCommoditiesAction implements BuyCommodities
                 'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),
             ]);
 
-            Log::channel('local_market')->info('unit service for order '.$localMarketOrder->id, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]);
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('unit service for order '.$localMarketOrder->id, $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder),
+            ]);
 
-            Log::channel('local_market')->info('BuyCommoditiesAction Duration', [
-                'order_id' => $localMarketOrder->id,
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('BuyCommoditiesAction Duration', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
                 'status' => $localMarketOrder->status,
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
-            Log::channel('local_market')->error('Error in BuyCommoditiesAction', [
-                'order_id' => $localMarketOrder->id,
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error at BuyCommoditiesAction', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

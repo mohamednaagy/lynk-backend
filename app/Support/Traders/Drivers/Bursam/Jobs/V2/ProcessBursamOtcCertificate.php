@@ -29,7 +29,7 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
-        Log::channel('bursam')->info('ProcessBursamOtcCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamOtcCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -44,29 +44,65 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
             $traderOrder = TraderOrder::query()
                 ->find($this->traderOrderId);
 
-                if(is_null($traderOrder)){
-                    Log::channel('bursam')->warning('trader order not found traderOrderId: '.$this->traderOrderId.' in ProcessBursamOtcCertificate job', ['traderOrderId' => $this->traderOrderId ]);
-                    return;
-                }
-    
-                if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
-                    Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOtcCertificate job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
-                    return;
-                }
-    
-
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket)) {
-                Log::channel('bursam')->warning('ProcessBursamOtcCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'expected_action' => FinancingOrderHistory::CommoditySoldToMarket,
-                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+            if (is_null($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOtcCertificate Job - not found trader_order_id =>'.$this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
                 ]);
+
                 return;
             }
 
-            if($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)){
-                Log::channel('bursam')->warning('ProcessBursamOtcCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - on hold', ['traderOrderId' => $this->traderOrderId , 'financingOrderId' => $traderOrder->financing_order_id]);
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOtcCertificate job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'status' => $traderOrder->status->value,
+                ]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('ProcessBursamOtcCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'expected_action' => FinancingOrderHistory::CommoditySoldToMarket,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
+
+                return;
+            }
+
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('ProcessBursamOtcCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - on hold', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'expected_action' => FinancingOrderHistory::OnHold,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                ]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CommoditySoldToMarket)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOtcCertificate Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'expected_action' => FinancingOrderHistory::CommoditySoldToMarket,
+                ]);
+
+                return;
+            }
+
+            if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::OnHold)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOtcCertificate Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'expected_action' => FinancingOrderHistory::OnHold,
+                ]);
+
                 return;
             }
 
@@ -86,6 +122,6 @@ class ProcessBursamOtcCertificate implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::error('ProcessBursamOtcCertificate', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOtcCertificate Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

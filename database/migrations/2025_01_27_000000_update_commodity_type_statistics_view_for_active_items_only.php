@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement('DROP VIEW IF EXISTS commodity_type_statistics_view');
-        
+
         DB::statement('
             CREATE VIEW commodity_type_statistics_view AS
             SELECT 
@@ -71,7 +71,7 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement('DROP VIEW IF EXISTS commodity_type_statistics_view');
-        
+
         // Recreate the original view
         DB::statement('
             CREATE VIEW commodity_type_statistics_view AS

@@ -23,7 +23,7 @@ class ProcessProceedClientWakala implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, StopsTraderOrderOnJobFailure, TraderHelperTrait;
 
-    protected string $channel = 'bursam';
+    protected string $channel = LOG_CHANNEL_BURSAM;
 
     /**
      * Create a new job instance.
@@ -46,7 +46,8 @@ class ProcessProceedClientWakala implements ShouldQueue
         $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
 
         if ($this->isClientWakalaStepCompleted($traderOrder)) {
-            Log::channel('bursam')->info('Skipped ProceedClientWakalaAccepted: already completed', [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Skipped ProceedClientWakalaAccepted: already completed', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
             ]);
 
@@ -54,14 +55,18 @@ class ProcessProceedClientWakala implements ShouldQueue
         }
 
         if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala)) {
-            Log::channel('bursam')->info('ProceedClientWakalaAccepted WaitingClientWakala not complete', [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted WaitingClientWakala not complete', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
+                'last_action' => $traderOrder->trader_order_history->latest()->first()->action,
+                'expected_action' => FinancingOrderHistory::WaitingClientWakala,
             ]);
 
             return;
         }
         $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted), false);
-        Log::channel('bursam')->info('ProceedClientWakalaAccepted completed successfully', [
+        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted completed successfully', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrderId,
         ]);
     }
