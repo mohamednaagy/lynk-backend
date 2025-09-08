@@ -39,13 +39,13 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
     protected function logInfo(string $message, array $data = []): void
     {
         $message = 'CommoditiesSettlement local_market_order_id : '.$this->localMarketOrderId.' - '.$message;
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info($message, $data);
+        Log::channel(LOG_CHANNEL_COMMODITIES_SETTLEMENT)->info($message, $data);
     }
 
     protected function logError(string $message, array $data = []): void
     {
         $message = 'CommoditiesSettlement local_market_order_id : '.$this->localMarketOrderId.' - '.$message;
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error($message, $data);
+        Log::channel(LOG_CHANNEL_COMMODITIES_SETTLEMENT)->error($message, $data);
     }
 
     public function middleware(): array

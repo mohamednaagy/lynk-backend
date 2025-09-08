@@ -41,8 +41,10 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
      */
     public function handle()
     {
-        $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('ProcessLynkTransferOwnershipToCustomer started job traderOrderId: '.$this->traderOrderId);
+        $traderOrder = TraderOrder::find($this->traderOrderId);
 
+        
         if (is_null($traderOrder)) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkTransferOwnershipToCustomer not found trader_order_id: '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
@@ -89,10 +91,12 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
     public function failed($exception)
     {
         $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkTransferOwnershipToCustomer', $traderOrder), [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('error at ProcessLynkTransferOwnershipToCustomer , we will fire failed function in job', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId ' => $traderOrder->id,
             'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+
         ]);
     }
 }

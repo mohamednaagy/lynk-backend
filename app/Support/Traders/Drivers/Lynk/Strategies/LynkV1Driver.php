@@ -210,6 +210,12 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                 );
             });
         } catch (Exception $exception) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create customer ownership document', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
             throw new TraderException(
                 'Failed to create customer ownership document',
                 [
