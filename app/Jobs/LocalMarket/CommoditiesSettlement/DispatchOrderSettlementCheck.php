@@ -33,7 +33,7 @@ class DispatchOrderSettlementCheck implements ShouldQueue
     ) {
         $this->onQueue(self::QUEUE_NAME);
 
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(
+        Log::channel(LOG_CHANNEL_COMMODITIES_SETTLEMENT)->info(
             'CommoditiesSettlement - Added job to queue local_market_order_id: '.$this->mainLocalMarketOrderId,
             [
                 'localMarketOrderId' => $this->mainLocalMarketOrderId,

@@ -8,6 +8,7 @@ const LOG_CHANNEL_BURSAM = 'bursam';
 const LOG_CHANNEL_LOCAL_MARKET = 'local_market';
 const LOG_CHANNEL_LYNK = 'lynk';
 const LOG_CHANNEL_AUTO_COMPLETE_SELL = 'bursam_autosell';
+const LOG_CHANNEL_COMMODITIES_SETTLEMENT = 'commodities_settlement';
 
 return [
 
@@ -159,6 +160,12 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/lynk/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+        ],
+        LOG_CHANNEL_COMMODITIES_SETTLEMENT => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/local-market/commodities-settlement.log'),
+            'level' => 'debug',
             'days' => 30,
         ],
         'live_market' => [
