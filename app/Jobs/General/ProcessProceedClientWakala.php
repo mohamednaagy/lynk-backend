@@ -58,7 +58,7 @@ class ProcessProceedClientWakala implements ShouldQueue
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted WaitingClientWakala not complete', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
-                'last_action' => $traderOrder->trader_order_history->latest()->first()->action,
+                'actual_last_action' => $traderOrder->last_history_action,
                 'expected_action' => FinancingOrderHistory::WaitingClientWakala,
             ]);
 
