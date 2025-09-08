@@ -87,7 +87,7 @@ final class DocumentType extends Enum implements LocalizedEnum
     {
         switch ($provider) {
             case Trader::Bursam:
-                return self::BURSAM_OTC_CERTIFICATE;
+                return self::BURSAM_STB_CERTIFICATE;
             default:
                 return self::SELLING_PLEDGE_CERTIFICATE;
         }
