@@ -9,6 +9,7 @@ const LOG_CHANNEL_LOCAL_MARKET = 'local_market';
 const LOG_CHANNEL_LYNK = 'lynk';
 const LOG_CHANNEL_AUTO_COMPLETE_SELL = 'bursam_autosell';
 const LOG_CHANNEL_COMMODITIES_SETTLEMENT = 'commodities_settlement';
+const LOG_CHANNEL_WEBHOOKS = 'webhooks';
 
 return [
 
@@ -173,6 +174,12 @@ return [
             'path' => storage_path('logs/live-market/live-market.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
+        ],
+        LOG_CHANNEL_WEBHOOKS => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/webhooks/webhooks.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
         ],
     ],
 
