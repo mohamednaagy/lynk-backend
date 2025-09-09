@@ -36,7 +36,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
-        
+
         Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
@@ -52,7 +52,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
         try {
             $traderOrder = TraderOrder::find($this->traderOrderId);
-            if (! $traderOrder) {
+
+            if (is_null($traderOrder)) {
                 log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
 
                 return;
@@ -149,7 +150,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     private function determineCancelReason(): int
     {
-        if (! $this->failureCode) {
+        if (! $this->failureCode || $this->failureCode == '') {
             return TraderOrderCancelReason::BursamBuyOrderRetriesExceeded;
         }
 
