@@ -15,7 +15,7 @@ class TransferOwnerShipAction implements TransferOwnerShip
     {
         $localMarketOrder = $this->getLocalMarketOrderByReference($reference);
         if ($localMarketOrder) {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('TransferOwnerShipAction   - change status to TransferOwnershipToCustomer ' , $localMarketOrder));
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('TransferOwnerShipAction   - change status to TransferOwnershipToCustomer ', $localMarketOrder));
 
             $localMarketOrder->changeStatusTo(OrderStatus::TransferOwnershipToCustomer);
         } else {

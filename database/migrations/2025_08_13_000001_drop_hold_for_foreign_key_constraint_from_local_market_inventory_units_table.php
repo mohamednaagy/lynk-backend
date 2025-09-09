@@ -23,10 +23,10 @@ return new class extends Migration
 
             foreach ($foreignKeys as $fk) {
                 $exists = DB::table('information_schema.KEY_COLUMN_USAGE')
-                ->where('TABLE_SCHEMA', DB::getDatabaseName())
-                ->where('TABLE_NAME', 'local_market_inventory_units')
-                ->where('CONSTRAINT_NAME', $fk)
-                ->exists();
+                    ->where('TABLE_SCHEMA', DB::getDatabaseName())
+                    ->where('TABLE_NAME', 'local_market_inventory_units')
+                    ->where('CONSTRAINT_NAME', $fk)
+                    ->exists();
 
                 if ($exists) {
                     $table->dropForeign($fk);

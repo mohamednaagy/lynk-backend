@@ -23,7 +23,7 @@ class TransferCommodityToCustomerStatus extends BaseStatus
      */
     public function handle(): void
     {
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we will start  changeOrderUnitsOwnershipTo at TransferCommodityToCustomerStatus job ',$this->localMarketOrder));
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we will start  changeOrderUnitsOwnershipTo at TransferCommodityToCustomerStatus job ', $this->localMarketOrder));
 
         $this->unitService->changeOrderUnitsOwnershipTo(
             $this->localMarketOrder,
@@ -32,11 +32,11 @@ class TransferCommodityToCustomerStatus extends BaseStatus
             UnitOwnershipAction::BorrowerOwnershipTransfer
         );
 
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we completed  changeOrderUnitsOwnershipTo at TransferCommodityToCustomerStatus job ',$this->localMarketOrder));
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we completed  changeOrderUnitsOwnershipTo at TransferCommodityToCustomerStatus job ', $this->localMarketOrder));
 
         $this->localMarketWebhook->with(['case' => OrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
-    
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we send webhook to lynk from TransferCommodityToCustomerStatus job with case :'.OrderStatus::TransferOwnershipToCustomer,$this->localMarketOrder));
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we send webhook to lynk from TransferCommodityToCustomerStatus job with case :'.OrderStatus::TransferOwnershipToCustomer, $this->localMarketOrder));
 
         $this->logQueueJob('Transfer Ownership to customer successfully');
     }

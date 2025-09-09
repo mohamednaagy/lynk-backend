@@ -44,7 +44,6 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('ProcessLynkTransferOwnershipToCustomer started job traderOrderId: '.$this->traderOrderId);
         $traderOrder = TraderOrder::find($this->traderOrderId);
 
-        
         if (is_null($traderOrder)) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkTransferOwnershipToCustomer not found trader_order_id: '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
