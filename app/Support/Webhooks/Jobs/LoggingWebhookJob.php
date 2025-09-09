@@ -12,7 +12,6 @@ class LoggingWebhookJob extends CallWebhookJob
 {
     public function handle()
     {
-        Log::error('Test log');
         $startTime = microtime(true);
 
         Log::channel(LOG_CHANNEL_WEBHOOKS)->info('HTTP webhook request initiated', [
