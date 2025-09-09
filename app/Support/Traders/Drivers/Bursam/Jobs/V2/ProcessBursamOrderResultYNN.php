@@ -36,10 +36,8 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
-        Log::channel(LOG_CHANNEL_BURSAM)->info(
-            'bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: ' . $this->traderOrderId . ' - Job constructor',
-            ['traderOrderId' => $this->traderOrderId]
-        );
+        
+        Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
