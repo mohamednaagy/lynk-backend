@@ -177,7 +177,7 @@ return [
         ],
         LOG_CHANNEL_WEBHOOKS => [
             'driver' => 'daily',
-            'path' => storage_path('logs/webhooks/webhooks.log'),
+            'path' => storage_path('logs/lynk/webhooks.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
         ],
