@@ -33,6 +33,7 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamSellingCommodityToOpenMarketForCancellation: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -42,21 +43,41 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
      */
     public function handle(): void
     {
-        Log::channel('bursam')->info('start processing cancel trader order ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->info('start processing cancel trader order ProcessBursamSellingCommodityToOpenMarketForCancellation trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
 
         DB::transaction(function () {
             $traderOrder = TraderOrder::query()
-                ->where('status', TraderOrderStatus::PendingCancellation)
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarketForCancellation Job - not found trader_order_id => '.$this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
+                ]);
+
+                return;
+            }
+
+            if ($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in pending cancellation in ProcessBursamSellingCommodityToOpenMarketForCancellation job', ['traderOrderId' => $this->traderOrderId, 'status' => $traderOrder->status->value]);
+
                 return;
             }
 
             if ($traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity)) {
                 Trader::driver('bursam', $traderOrder->version)
                     ->sellCommodityToBursam($traderOrder);
-                Log::channel('bursam')->info('start processing cancel trader order finish sellCommodityToBursam', ['traderOrderId' => $this->traderOrderId, 'cancel_at' => now()->toDateTimeString()]);
+                log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('start ProcessBursamSellingCommodityToOpenMarketForCancellation job - finish sellCommodityToBursam', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'cancel_at' => now()->toDateTimeString(),
+                ]);
+            } else {
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamSellingCommodityToOpenMarketForCancellation Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'complete_purchasing_step' => $traderOrder->checkOrderStepComplete(MurabhaStep::PurchasingCommodity),
+                ]);
             }
         });
     }
@@ -73,6 +94,6 @@ class ProcessBursamSellingCommodityToOpenMarketForCancellation implements Should
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessBursamSellingCommodityToOpenMarketForCancellation', ['traderOrderId ' => $this->traderOrderId, 'trace' => $exception->getTraceAsString(), 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarketForCancellation Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

@@ -31,14 +31,13 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     public $backoff = 30;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
+    private ?string $failureCode = null;
+
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
+
+        Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamOrderResultYNN: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -48,73 +47,118 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
+        log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
+
         try {
-            $traderOrder = TraderOrder::query()
-                ->whereIn('status', [TraderOrderStatus::InProgress, TraderOrderStatus::Initiated])
-                ->find($this->traderOrderId);
+            $traderOrder = TraderOrder::find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                Log::channel('bursam')->info('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+                log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
+
+                return;
+            }
+
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultYNN job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'status' => $traderOrder->status->value,
+                ]);
 
                 return;
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
-                Log::channel('bursam')->info('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', ['traderOrderId' => $this->traderOrderId]);
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'expected_action' => FinancingOrderHistory::GetTtiId,
+                ]);
 
                 return;
             }
-            Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
-            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
-            Log::channel('bursam')->info('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
 
+            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', $traderOrder), ['financingOrderId' => $traderOrder->financing_order_id, 'traderOrderId' => $this->traderOrderId]);
         } catch (Exception $e) {
-            if ($this->shouldSkipRetry($e)) {
+            $this->extractFailureCode($e);
+
+            if ($this->shouldSkipRetry()) {
                 $this->fail($e);
 
                 return;
             }
+
             throw $e;
         }
     }
 
-    private function shouldSkipRetry(Exception $e): bool
-    {
-        return $this->isUnavailableCommoditiesCode($e->getContext('failure_code'));
-    }
-
     public function failed($exception)
     {
-        Log::channel('bursam')->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job', ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
 
-        DB::transaction(function () use ($exception) {
-            $traderOrder = TraderOrder::query()
-                ->find($this->traderOrderId);
-
-            if ($traderOrder === null) {
+        DB::transaction(function () {
+            $traderOrder = TraderOrder::find($this->traderOrderId);
+            if (! $traderOrder) {
                 return;
             }
+
             (new RunHoldTraderWhenMarketOpenCommand)->handle();
+
             $traderOrder->order->update([
-                'status' => $this->isUnavailableCommoditiesCode($exception->getContext('failure_code')) ? FinancingOrderStatus::PendingTraderOrder : FinancingOrderStatus::TradingFailure,
+                'status' => $this->determineOrderStatus(),
             ]);
-            $cancel_reason = $this->isUnavailableCommoditiesCode($exception->getContext('failure_code')) ? TraderOrderCancelReason::NoEligibleCommoditiesAvailable : TraderOrderCancelReason::FailureToPurchase;
-            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancel_reason);
+
+            $cancelReason = $this->determineCancelReason();
+
+            app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason);
             app(UpdateTraderOrderStatusToCancel::class)->handle(
                 $traderOrder,
-                $cancel_reason,
-                method_exists($exception, 'getContext') ?
-                    $exception->getContext('failure_reason')
-                    : ''
+                $cancelReason,
+                $this->failureCode
             );
         });
     }
 
-    private function isUnavailableCommoditiesCode(string $code): bool
+    private function shouldSkipRetry(): bool
     {
-        return in_array($code, array_merge(
-            BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES, BursamErrorCode::UNAVAILABLE_INVENTORY_ERROR_CODES
-        ));
+        return $this->isUnavailableCommoditiesCode();
+    }
+
+    private function isUnavailableCommoditiesCode(): bool
+    {
+        return $this->failureCode
+            && in_array($this->failureCode, [
+                ...BursamErrorCode::UNAVAILABLE_PRODUCT_ERROR_CODES,
+                ...BursamErrorCode::UNAVAILABLE_INVENTORY_ERROR_CODES,
+            ]);
+    }
+
+    private function extractFailureCode(Exception $e): void
+    {
+        $this->failureCode = method_exists($e, 'getContext')
+            ? $e->getContext('failure_code') ?? null
+            : null;
+    }
+
+    private function determineOrderStatus(): int
+    {
+        return $this->isUnavailableCommoditiesCode()
+            ? FinancingOrderStatus::PendingTraderOrder
+            : FinancingOrderStatus::TradingFailure;
+    }
+
+    private function determineCancelReason(): int
+    {
+        if (! $this->failureCode || $this->failureCode == '') {
+            return TraderOrderCancelReason::BursamBuyOrderRetriesExceeded;
+        }
+
+        return $this->isUnavailableCommoditiesCode()
+            ? TraderOrderCancelReason::NoEligibleCommoditiesAvailable
+            : TraderOrderCancelReason::FailureToPurchase;
     }
 
     public function middleware(): array

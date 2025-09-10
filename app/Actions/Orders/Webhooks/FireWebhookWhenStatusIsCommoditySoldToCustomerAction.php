@@ -4,6 +4,7 @@ namespace App\Actions\Orders\Webhooks;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCommoditySoldToCustomer;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
+use App\Enums\DocumentType;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\WebhookType;
@@ -37,7 +38,12 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
                     'trading_reference' => $traderOrder->reference,
                     'current_trading_step' => $this->getUiStepName($nextStep?->step),
                     'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep),
-                    'borrower_document_url' => get_file_url($documentMediaFile),
+                    'borrower_document_url' => formatMediaUrl(route('api.v1.admins.generate', [
+                        'document_type' => DocumentType::SELLING_COMMODITY_TO_CUSTOMER,
+                        'context' => [
+                            'trader_order_id' => $traderOrder->id,
+                        ],
+                    ])),
                 ],
                 'updated_at' => $this->getFormattedDateTime($lastHistory),
             ]

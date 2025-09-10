@@ -59,24 +59,20 @@ class CommodityTypeTransformer extends TransformerAbstract
         ]);
     }
 
-    
     public function includeTotalValue(CommodityType $commodityType): Primitive
     {
-        return $this->primitive($commodityType->statistics?->total_value);
+        return $this->primitive($commodityType->statistics?->total_value->convertAndFormatByDecimal(sperator: ','));
     }
 
-    
     public function includeAvailableValue(CommodityType $commodityType): Primitive
     {
-        return $this->primitive($commodityType->statistics?->available_value);
+        return $this->primitive($commodityType->statistics?->available_value->convertAndFormatByDecimal(sperator: ','));
     }
 
-    
     public function includeReservedValue(CommodityType $commodityType): Primitive
     {
-        return $this->primitive($commodityType->statistics?->reserved_value);
+        return $this->primitive($commodityType->statistics?->reserved_value->convertAndFormatByDecimal(sperator: ','));
     }
-
 
     public function includeCreatedAt(CommodityType $commodityType): Primitive
     {

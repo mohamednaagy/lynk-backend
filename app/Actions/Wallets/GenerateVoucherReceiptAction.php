@@ -3,57 +3,19 @@
 namespace App\Actions\Wallets;
 
 use App\Actions\Contracts\Wallets\GenerateVoucherReceipt;
-use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Models\Transaction;
-use App\Support\PdfGenerator\PdfGenerator;
+use App\Support\DocumentEngine\PdfFactory;
 use Cknow\Money\Money;
 
 class GenerateVoucherReceiptAction implements GenerateVoucherReceipt
 {
-    protected string $timezone = 'Asia/Riyadh';
-
-    protected string $template = 'templates.voucher-invoice';
-
-    protected string $collectionName = TransactionMediaCollection::VoucherReceipt;
-
     public function handle(Transaction $transaction, Money $amount)
     {
-        $company = $transaction->wallet->holder;
-
-        $content = __('invoices/voucher-receipt.content', [
-            'amount' => $amount->convertAndFormatByDecimal(sperator: ','),
-            'company_name' => $company->name,
-        ], 'ar');
-
-        $html = view($this->getTemplate(), [
-            'day' => $transaction->created_at->tz($this->timezone)->locale('ar')->dayName,
-            'date' => $transaction->created_at->tz($this->timezone)->toDateString(),
-            'time' => $transaction->created_at->tz($this->timezone)->toTimeString(),
-            'content' => $content,
-        ])->render();
-
-        $this->generatePdfFile($html, $transaction);
-    }
-
-    protected function generatePdfFile($html, $transaction)
-    {
-        return PdfGenerator::outputFromHtml(
-            $html,
-            function ($fileResource) use ($transaction) {
-                return $transaction->addMediaFromStream($fileResource)
-                    ->usingFileName("voucher-receipt-{$transaction->reference_number}".'.pdf')
-                    ->toMediaCollection($this->getCollectionName());
-            }
-        );
-    }
-
-    public function getTemplate()
-    {
-        return $this->template;
-    }
-
-    public function getCollectionName()
-    {
-        return $this->collectionName;
+        $pdf = PdfFactory::make('voucher_receipt');
+        $pdf->setContext([
+            'transaction' => $transaction,
+            'amount' => $amount,
+        ]);
+        $pdf->generate();
     }
 }

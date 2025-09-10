@@ -4,6 +4,7 @@ namespace App\Actions\Orders\Webhooks;
 
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaSaleCompleted;
 use App\Actions\Orders\Webhooks\Traits\OrderWebhooksHelper;
+use App\Enums\DocumentType;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
@@ -18,19 +19,12 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
 
     public function handle(FinancingOrder $financingOrder, TraderOrder $traderOrder): void
     {
-        $warrantyMediaCollection = match ($traderOrder->provider) {
-            Trader::Dmcc, Trader::FakeDmcc => TraderOrderMediaCollection::WarrantAmendmentExceptWarrantNo,
-            Trader::Bursam => TraderOrderMediaCollection::BursamTtiHoldingCertificate,
-            Trader::Lynk => TraderOrderMediaCollection::LynkSalePledgeCertificate
-        };
-
         $sellConfirmationMediaCollection = match ($traderOrder->provider) {
             Trader::Dmcc, Trader::FakeDmcc => null,
             Trader::Bursam => null,
             Trader::Lynk => TraderOrderMediaCollection::SellConfirmationDocument,
         };
 
-        $documentMediaFile = get_media_of_model($traderOrder, $warrantyMediaCollection);
         $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SignedClientWakala);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
@@ -47,7 +41,12 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
                 'current_trading_step' => 'completed',
                 'completed_murabaha_step' => $lastCompletedStep,
                 'signed_wakala_document_url' => get_file_url($wakalaDocumentMediaFile),
-                'warranty_document_url' => get_file_url($documentMediaFile),
+                'warranty_document_url' => route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($traderOrder->provider),
+                    'context' => [
+                        'trader_order_id' => $traderOrder->id,
+                    ],
+                ]),
             ],
             'updated_at' => $this->getFormattedDateTime($lastHistory),
         ]);

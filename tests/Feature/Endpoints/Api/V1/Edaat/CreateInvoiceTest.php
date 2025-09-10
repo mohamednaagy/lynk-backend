@@ -21,7 +21,7 @@ class CreateInvoiceTest extends TestCase
 
     private static Wallet $wallet;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

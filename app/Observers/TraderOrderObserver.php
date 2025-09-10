@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Actions\Contracts\Orders\CompleteOrder;
-use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;

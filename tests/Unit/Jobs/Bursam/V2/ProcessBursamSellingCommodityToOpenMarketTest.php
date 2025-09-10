@@ -25,7 +25,7 @@ class ProcessBursamSellingCommodityToOpenMarketTest extends TestCase
 
     protected static Model|TraderOrder $traderOrder;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

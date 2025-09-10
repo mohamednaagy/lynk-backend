@@ -42,7 +42,11 @@ class ConfirmDeliverProductsAction implements ConfirmDeliverProducts
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::channel('local_market')->error('Error in ConfirmDeliverProductsAction', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error at ConfirmDeliverProductsAction', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::FailedDelivery);
         }
     }

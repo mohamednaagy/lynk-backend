@@ -31,7 +31,7 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_process');
     }
 
     /**
@@ -41,19 +41,21 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
      */
     public function handle()
     {
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('ProcessLynkTransferOwnershipToCustomer started job traderOrderId: '.$this->traderOrderId);
         $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
-            Log::error('ProcessLynkTransferOwnershipToCustomer', [
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkTransferOwnershipToCustomer not found trader_order_id: '.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
                 'message' => 'Trader order not found to transfer ownership with reference: '.$this->traderOrderId,
             ]);
             throw new \Exception('Trader order not found to transfer ownership with reference: '.$this->traderOrderId);
         }
 
         if (! $traderOrder->status->is(TraderOrderStatus::InProgress)) {
-            Log::error('ProcessLynkTransferOwnershipToCustomer', [
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('error at ProcessLynkTransferOwnershipToCustomer Job - trader order is not in progress status', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
                 'current_status' => $traderOrder->status,
                 'message' => 'Trader order is not in progress with reference: '.$this->traderOrderId,
             ]);
@@ -63,8 +65,9 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
         $isLastActionContractSigned = $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned);
 
         if (! $isLastActionContractSigned) {
-            Log::error('ProcessLynkTransferOwnershipToCustomer', [
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkTransferOwnershipToCustomer', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
                 'last_action' => $isLastActionContractSigned,
                 'message' => 'Trader order does not have contract signed action with reference: '.$this->traderOrderId.' and last action: '.$isLastActionContractSigned,
             ]);
@@ -86,6 +89,13 @@ class ProcessLynkTransferOwnershipToCustomer implements ShouldBeUnique, ShouldQu
 
     public function failed($exception)
     {
-        Log::error('ProcessLynkTransferOwnershipToCustomer', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('error at ProcessLynkTransferOwnershipToCustomer , we will fire failed function in job', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId ' => $traderOrder->id,
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+
+        ]);
     }
 }

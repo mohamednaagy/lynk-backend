@@ -126,6 +126,7 @@ return [
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with Trader.',
         TraderOrderCancelReason::ExpiredContractSignTime => 'Trade request cancelled by system due to Contract Sign Time Limit of :value hours has expired.',
         TraderOrderCancelReason::ExpiredConfirmationTimeLimit => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit has expired.',
+        TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'Purchase Retries Exceeded',
     ],
     UnitOwnershipAction::class => [
         UnitOwnershipAction::SellCommodity => 'Sell Commodity',
@@ -142,5 +143,18 @@ return [
     CompanyLenderClientType::class => [
         CompanyLenderClientType::Business => 'Business',
         CompanyLenderClientType::Individual => 'Individual',
+    ],
+
+    'document_type' => [
+        'client_wakala' => 'Client Wakala',
+        'transfer_ownership_to_lender' => 'Transfer Ownership to Lender',
+        'selling_commodity_to_customer' => 'Selling Commodity to Customer',
+        'sell_confirmation_document' => 'Sell Confirmation Document',
+        'bursam_bid_certificate' => 'Bursam Bid Certificate',
+        'bursam_stb_certificate' => 'Bursam STB Certificate',
+        'bursam_otc_certificate' => 'Bursam OTC Certificate',
+        'selling_pledge_certificate' => 'Selling Pledge Certificate',
+        'voucher_receipt' => 'Voucher Receipt',
+        'zatca_invoice' => 'ZATCA Invoice',
     ],
 ];

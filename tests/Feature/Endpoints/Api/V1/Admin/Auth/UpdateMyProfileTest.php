@@ -19,7 +19,7 @@ class UpdateMyProfileTest extends TestCase
 
     private static mixed $getSettingsClassInstance;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
         self::$getSettingsClassInstance = app(GetSettingsClassInstance::class);

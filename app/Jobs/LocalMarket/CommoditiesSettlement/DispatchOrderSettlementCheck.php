@@ -18,28 +18,28 @@ class DispatchOrderSettlementCheck implements ShouldQueue
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable;
 
     private const CHUNK_SIZE = 10;
+
     private const QUEUE_NAME = 'local_market_commodities_settlement';
 
     /**
      * Create a new job instance.
      *
-     * @param int|null $mainLocalMarketOrderId The ID of the current purchased local market order.
-     * @param int|null $inventoryId The ID of the inventory to filter.
+     * @param  int|null  $mainLocalMarketOrderId  The ID of the current purchased local market order.
+     * @param  int|null  $inventoryId  The ID of the inventory to filter.
      */
     public function __construct(
         private ?int $mainLocalMarketOrderId = null,
         private ?int $inventoryId = null
-    )
-    {
+    ) {
         $this->onQueue(self::QUEUE_NAME);
 
-        Log::channel('local_market')->info(
-            'CommoditiesSettlement - Added job to queue',
+        Log::channel(LOG_CHANNEL_COMMODITIES_SETTLEMENT)->info(
+            'CommoditiesSettlement - Added job to queue local_market_order_id: '.$this->mainLocalMarketOrderId,
             [
+                'localMarketOrderId' => $this->mainLocalMarketOrderId,
+                'inventoryId' => $this->inventoryId,
                 'job' => class_basename(static::class),
                 'queue' => self::QUEUE_NAME,
-                'main_local_market_order_id' => $this->mainLocalMarketOrderId,
-                'inventory_id' => $this->inventoryId,
             ]
         );
     }
@@ -80,8 +80,6 @@ class DispatchOrderSettlementCheck implements ShouldQueue
 
     /**
      * Define middleware for the job.
-     *
-     * @return array
      */
     public function middleware(): array
     {
@@ -92,8 +90,6 @@ class DispatchOrderSettlementCheck implements ShouldQueue
 
     /**
      * Unique ID for the job instance to prevent overlaps
-     *
-     * @return string
      */
     public function uniqueId(): string
     {
@@ -104,7 +100,7 @@ class DispatchOrderSettlementCheck implements ShouldQueue
         }
 
         if ($this->mainLocalMarketOrderId) {
-            $parts[] = 'order_' . $this->mainLocalMarketOrderId;
+            $parts[] = 'order_'.$this->mainLocalMarketOrderId;
         }
 
         return implode('_', $parts);

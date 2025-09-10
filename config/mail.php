@@ -60,6 +60,11 @@ return [
             'verify_peer' => false,
         ],
 
+        'sendgrid' => [
+            'transport' => 'sendgrid',
+            'key' => env('SENDGRID_API_KEY'),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

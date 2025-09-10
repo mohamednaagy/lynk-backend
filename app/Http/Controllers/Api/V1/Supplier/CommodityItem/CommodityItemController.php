@@ -157,7 +157,7 @@ class CommodityItemController extends Controller
      */
     public function destroy(CommodityItem $commodityItem, DeleteCommodityItem $deleteCommodityItem)
     {
-        //check if the commodity item is deleteable
+        // check if the commodity item is deleteable
         if (! $commodityItem->is_deletable) {
             return $this->errorResponse(
                 __('error.commodity_item_cannot_be_deleted'),

@@ -27,7 +27,7 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('local_market');
+        $this->onQueue('local_market_process');
     }
 
     /**
@@ -46,12 +46,19 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
 
                 if (
                     (is_null($traderOrder))) {
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found trader_order_id:'.$this->traderOrderId, [
+                        'traderOrderId' => $this->traderOrderId,
+                    ]);
+
                     return;
                 }
                 app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $traderOrder->cancelDetail->cancel_reason->value);
             });
         } catch (\Exception $e) {
-            Log::channel('local_market')->error('error at ProcessLynkCancelTraderOrder ,cant add cancel details ', ['trader_order_id' => $this->traderOrderId, 'error' => $e->getMessage()]);
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('error at ProcessLynkCancelTraderOrder ,cant add cancel details trader_order_id => '.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+                'error' => $e->getMessage(),
+            ]);
         }
 
     }
@@ -70,7 +77,12 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
             'status' => TraderOrderStatus::FailureToCancel,
         ]);
 
-        Log::error('ProcessLynkCancelTraderOrder', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at ProcessLynkCancelTraderOrder ', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId ' => $this->traderOrderId,
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
     }
 
     public function middleware(): array

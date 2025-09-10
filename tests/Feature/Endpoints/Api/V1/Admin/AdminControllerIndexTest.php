@@ -23,7 +23,7 @@ class AdminControllerIndexTest extends TestCase
 
     private static User $managerAdminUser;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

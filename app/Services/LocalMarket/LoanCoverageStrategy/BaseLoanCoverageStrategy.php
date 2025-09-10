@@ -19,7 +19,7 @@ abstract class BaseLoanCoverageStrategy implements LoanCoverageStrategy
 
     protected function logInfo(string $message, array $data = []): void
     {
-        Log::channel('local_market')->info($message, $data);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info($message, $data);
     }
 
     protected function getElapsedTime($startTime): float

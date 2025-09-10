@@ -25,7 +25,9 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
     {
         $traderOrder = $this->financingOrder->activeTraderOrder()->first();
         if (! $traderOrder) {
-            Log::info("No active trader order found for FinancingOrder: {$this->financingOrder->id} ,Company: {$this->financingOrder->company_id}", [
+            Log::info("No active trader order found for financing_order_id: {$this->financingOrder->id} ,company_id: {$this->financingOrder->company_id}", [
+                'financingOrderId' => $this->financingOrder->id,
+                'companyId' => $this->financingOrder->company_id,
                 'user_id' => auth()->user()?->id,
             ]);
 
@@ -45,6 +47,19 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
         }
 
         if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, $value)) {
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle("traderOrderId already proceed this $value before ", $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'companyId' => $this->financingOrder->company_id,
+                'user_id' => auth()->user()?->id,
+                'value' => $value,
+            ]);
+            $this->errorMessage = __('error.order_status_doesnt_follow_sequence');
+
+            return false;
+        }
+
+        if (app(TraderOrderProceedCaseService::class)->checkIfTraderHasCase($traderOrder->id, $value)) {
             Log::info("traderOrderId already proceed this $value before");
             $this->errorMessage = __('error.order_status_doesnt_follow_sequence');
 
@@ -52,7 +67,6 @@ class CheckAllowedFinancingOrderProceedCaseRule implements Rule
         }
 
         return true;
-
     }
 
     /**

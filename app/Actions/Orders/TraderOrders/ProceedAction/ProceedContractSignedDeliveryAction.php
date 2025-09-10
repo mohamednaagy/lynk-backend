@@ -3,7 +3,6 @@
 namespace App\Actions\Orders\TraderOrders\ProceedAction;
 
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSignedDelivery;
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
@@ -51,9 +50,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         $traderOrder->allowProgressToNextStep();
 
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
-        if ($traderOrder->isNeedToGenerateWakalaDocument()) {
-            app()->make(GenerateClientWakala::class)->handle($traderOrder);
-        }
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
 
         $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);

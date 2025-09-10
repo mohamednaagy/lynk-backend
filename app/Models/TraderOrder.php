@@ -22,6 +22,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -38,7 +41,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, VirtualColumn;
+    use HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
 
     protected $guarded = [];
 
@@ -270,7 +273,8 @@ class TraderOrder extends Model implements HasMedia
     public function processInitiatedTraderOrder()
     {
         if ($this->provider == EnumsTrader::Bursam) {
-            ProcessBursamInitiatedTraderOrder::dispatch($this->id);
+            Log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => will fire processInitiatedTraderOrder Job by trader order observer', $this), ['traderOrderId' => $this->id]);
+            ProcessBursamInitiatedTraderOrder::dispatch($this->id)->afterCommit();
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
         }
@@ -478,5 +482,10 @@ class TraderOrder extends Model implements HasMedia
     public function hasSpecificCommodityType(): bool
     {
         return $this->commodity_type_id > 0;
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()->logAll();
     }
 }

@@ -5,10 +5,11 @@ namespace App\Observers;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Jobs\LocalMarket\states\CancelledOrderStatus;
 use App\Jobs\LocalMarket\states\CommoditiesPurchaseCompletedStatus;
-use App\Jobs\LocalMarket\states\EligibleCommoditiesFoundStatus;
 use App\Jobs\LocalMarket\states\FailedCancelOrderStatus;
 use App\Jobs\LocalMarket\states\FailedPurchaseStatus;
 use App\Jobs\LocalMarket\states\FailedSoldOrderStatus;
+use App\Jobs\LocalMarket\states\HoldEligibleUnitInventoriesJob;
+use App\Jobs\LocalMarket\states\InitiateOrderStatus;
 use App\Jobs\LocalMarket\states\NoEligibleCommoditiesAvailableStatus;
 use App\Jobs\LocalMarket\states\PendingCancelOrderStatus;
 use App\Jobs\LocalMarket\states\PendingSellOrderStatus;
@@ -16,9 +17,11 @@ use App\Jobs\LocalMarket\states\SoldOrderSuccessStatus;
 use App\Jobs\LocalMarket\states\TransferCommodityToCustomerStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class LocalMarketOrderObserver
+class LocalMarketOrderObserver implements ShouldHandleEventsAfterCommit
 {
     use LocalMarketHelperTrait;
 
@@ -40,7 +43,25 @@ class LocalMarketOrderObserver
     public function updating(LocalMarketOrder $localMarketOrder)
     {
         if ($localMarketOrder->wasChanged(['status'])) {
-            return $this->canMoveToNextStep($localMarketOrder->getOriginal('status'), $localMarketOrder->status, $localMarketOrder);
+            $originalStatus = $localMarketOrder->getOriginal('status');
+            $newStatus = $localMarketOrder->status;
+
+            // Skip validation if status hasn't actually changed (same status update)
+            if ($originalStatus == $newStatus) {
+                Log::channel(LOG_CHANNEL_LOCAL_MARKET)->warning('LocalMarketOrderObserver::updating - Same status update detected, skipping validation', [
+                    'localMarketOrderId' => $localMarketOrder->id,
+                    'status' => $originalStatus,
+                    'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), // Last 5 stack frames
+                ]);
+            } else {
+                Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('LocalMarketOrderObserver::updating - Validating status transition', [
+                    'localMarketOrderId' => $localMarketOrder->id,
+                    'fromStatus' => $originalStatus,
+                    'toStatus' => $newStatus,
+                ]);
+
+                return $this->canMoveToNextStep($originalStatus, $newStatus, $localMarketOrder);
+            }
         }
     }
 
@@ -93,7 +114,7 @@ class LocalMarketOrderObserver
         // TODO:sell_commodity_21_10 => add new job for cancelled success
         switch ($localMarketOrder->status) {
             case OrderStatus::EligibleCommoditiesAvailable:
-                EligibleCommoditiesFoundStatus::dispatch($localMarketOrder->id);
+                HoldEligibleUnitInventoriesJob::dispatch($localMarketOrder->id);
                 break;
             case OrderStatus::NoEligibleCommoditiesAvailable:
                 NoEligibleCommoditiesAvailableStatus::dispatch($localMarketOrder->id);
@@ -124,6 +145,9 @@ class LocalMarketOrderObserver
                 break;
             case OrderStatus::TransferOwnershipToCustomer:
                 TransferCommodityToCustomerStatus::dispatch($localMarketOrder->id);
+                break;
+            case OrderStatus::initiate:
+                InitiateOrderStatus::dispatch($localMarketOrder->id);
                 break;
         }
     }

@@ -32,7 +32,7 @@ class EnquiryControllerShowTest extends TestCase
 
     private static mixed $paginatedEnquiries;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -2,15 +2,14 @@
 
     use Illuminate\Database\Migrations\Migration;
 
-
-    return new class extends Migration
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        /**
-         * Run the migrations.
-         */
-        public function up(): void
-        {
-                DB::statement("
+        DB::statement('
                     CREATE VIEW commodity_type_statistics_view AS
                     SELECT 
                         lmi.commodity_type_id,
@@ -29,14 +28,14 @@
                     WHERE lmi.deleted_at IS NULL
 
                     GROUP BY lmi.commodity_type_id
-                ");
-        }
+                ');
+    }
 
-        /**
-         * Reverse the migrations.
-         */
-        public function down(): void
-        {
-            DB::statement("DROP VIEW IF EXISTS commodity_type_statistics_view");
-        }
-    };
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        DB::statement('DROP VIEW IF EXISTS commodity_type_statistics_view');
+    }
+};

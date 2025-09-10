@@ -10,9 +10,7 @@ use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Settings\Classes\InternationalMurabahaSetting;
-use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
-use App\Support\PdfGenerator\PdfGenerator;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -67,34 +65,29 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
-        Log::info('Creating trader order history', [
-            'trader_order_id' => $traderOrder->id,
+
+        Log::info(formatLogTitle('Creating trader order history', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'action' => $action,
             'data' => $data,
         ]);
-        $traderOrder->traderHistories()->updateOrCreate(
+        if ($traderOrder->traderHistories()->where('action', $action)->exists()) {
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))
+                ->info(formatLogTitle('Trader order history action already exists', $traderOrder), [
+                    'traderOrderId' => $traderOrder->id,
+                    'action' => $action,
+                    'data' => $data,
+                ]);
+
+            return;
+        }
+        $traderOrder->traderHistories()->create(
             [
                 'action' => $action,
-            ],
-            $data
+                'data' => $data,
+            ]
         );
-    }
-
-    public function storeOrderDocumentAsPdf(string $view, array $data, TraderOrder $traderOrder, $mediaCollection): void
-    {
-        Log::info('Storing order document as pdf', [
-            'view' => $view,
-            'trader_order_id' => $traderOrder->id,
-        ]);
-        $html = view($view, $data)->render();
-
-        PdfGenerator::outputFromHtml($html, function ($fileResource) use ($mediaCollection, $traderOrder) {
-            $this->attachDocumentToOrder(
-                $traderOrder,
-                $fileResource,
-                $mediaCollection
-            );
-        });
     }
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void
@@ -106,75 +99,6 @@ trait TraderHelperTrait
             : $traderOrder->addMediaFromStream($document);
 
         $media->usingFileName($fileName)->toMediaCollection($collectionName);
-    }
-
-    public function transformProductsToCommodityProductsDTO($products): Collection
-    {
-        return collect($products)->map(function ($product) {
-            return CommodityProductDto::fromArray([
-                'product' => $product['product'],
-                'quantity' => $product['quantity'],
-                'uom' => $product['uom'],
-                'amount' => $product['amount'],
-                'warehouse' => $product['warehouse'],
-                'previous_owner' => $product['previous_owner'],
-                'date_time_of_purchasing_commodity' => $product['date_time_of_purchasing_commodity'],
-            ]);
-        });
-    }
-
-    public function transformProductsToLocalCommodityProductsDTO($products, string|array|null $groupByKeys = null): Collection
-    {
-
-        return collect($products)
-            ->when($groupByKeys, function (Collection $productCollection) use ($groupByKeys) {
-                $keys = (array) $groupByKeys;
-
-                return $productCollection
-                    ->groupBy(fn ($item) => $this->generateGroupKey($item, $keys))
-                    ->map(fn (Collection $group) => $this->mapGroupToDto($group));
-            }, function (Collection $productCollection) {
-                return $productCollection->map(fn (array $product) => $this->mapProductToDto($product));
-            });
-
-    }
-
-    /**
-     * Retrieve preferred product codes for a company associated with a trader order.
-     *
-     * @param  TraderOrder  $traderOrder  The trader order to extract company from
-     * @return array List of preferred product codes
-     */
-    public function getCompanyPreferredProductCodes(TraderOrder $traderOrder): array
-    {
-        Log::channel('bursam')->info('Retrieving company preferred product codes', [
-            'trader_order_id' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-        ]);
-
-        $companyPreferredProductIds = $traderOrder->order->company
-            ->commodityTypes()
-            ->where('provider', $traderOrder->provider)
-            ->pluck('unique_name')
-            ->toArray();
-
-        Log::channel('bursam')->info('Company preferred product codes resolved', [
-            'trader_order_id' => $traderOrder->id,
-            'company_id' => $traderOrder->order->company_id,
-            'product_codes' => $companyPreferredProductIds,
-            'count' => count($companyPreferredProductIds),
-        ]);
-
-        return $companyPreferredProductIds;
-    }
-
-    protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
-    {
-        return app(TraderOrderProceedCaseService::class)
-            ->checkIfTraderHasCase(
-                $traderOrder->id,
-                FinancingOrderProceedCase::ContractAndClientWakalaCompleted
-            );
     }
 
     private function generateGroupKey(array $item, array $keys): string
@@ -217,8 +141,9 @@ trait TraderHelperTrait
      */
     public function getUnusedProductCode(TraderOrder $traderOrder): ?string
     {
-        Log::channel('bursam')->info('Getting unused product code', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Getting unused product code', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'provider' => $traderOrder->provider,
             'company_id' => $traderOrder->order->company_id,
         ]);
@@ -227,14 +152,24 @@ trait TraderHelperTrait
 
         $selectedCode = ! empty($productCodes) ? reset($productCodes) : null;
 
-        Log::channel('bursam')->info('Product code selection result', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Product code selection result', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'selected_product_code' => $selectedCode,
             'available_codes_count' => count($productCodes),
             'all_available_codes' => $productCodes,
         ]);
 
         return $selectedCode;
+    }
+
+    protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
+    {
+        return app(TraderOrderProceedCaseService::class)
+            ->checkIfTraderHasCase(
+                $traderOrder->id,
+                FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+            );
     }
 
     /**
@@ -245,8 +180,9 @@ trait TraderHelperTrait
      */
     private function getProductCodes(TraderOrder $traderOrder): array
     {
-        Log::channel('bursam')->info('Starting product code selection', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Starting product code selection', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'provider' => $traderOrder->provider,
             'company_id' => $traderOrder->order->company_id,
         ]);
@@ -256,8 +192,9 @@ trait TraderHelperTrait
 
         $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
 
-        Log::channel('bursam')->info('Global preferred commodity type retrieved', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Global preferred commodity type retrieved', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'global_preferred_commodity_type_id' => $globalPreferredCommodityType,
         ]);
 
@@ -274,16 +211,18 @@ trait TraderHelperTrait
 
         $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
 
-        Log::channel('bursam')->info('Company preferred product codes retrieved', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Company preferred product codes retrieved', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'company_preferred_product_codes' => $companyPreferredProductCodes,
             'count' => count($companyPreferredProductCodes),
         ]);
 
         $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
 
-        Log::channel('bursam')->info('Unavailable product codes from cache', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Unavailable product codes from cache', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'unavailable_product_codes' => $unavailableProductCodes,
             'count' => count($unavailableProductCodes),
         ]);
@@ -291,16 +230,18 @@ trait TraderHelperTrait
         if (! empty($companyPreferredProductCodes)) {
             $availablePreferredProductCodes = array_diff($companyPreferredProductCodes, $unavailableProductCodes);
 
-            Log::channel('bursam')->info('Available preferred product codes after filtering unavailable', [
-                'trader_order_id' => $traderOrder->id,
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Available preferred product codes after filtering unavailable', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
                 'available_preferred_product_codes' => $availablePreferredProductCodes,
                 'count' => count($availablePreferredProductCodes),
                 'filtered_out' => array_intersect($companyPreferredProductCodes, $unavailableProductCodes),
             ]);
 
             if (empty($availablePreferredProductCodes)) {
-                Log::warning('All preferred product codes are unavailable', [
-                    'trader_order_id' => $traderOrder->id,
+                Log::warning(formatLogTitle('All preferred product codes are unavailable', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
                     'preferred_codes' => $companyPreferredProductCodes,
                     'unavailable_codes' => $unavailableProductCodes,
                 ]);
@@ -310,8 +251,9 @@ trait TraderHelperTrait
 
             $query = $query->whereIn('unique_name', $availablePreferredProductCodes);
         } else {
-            Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
-                'trader_order_id' => $traderOrder->id,
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('No company preferred product codes found, using global filtering', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
             ]);
 
             // No preferred product codes; exclude unavailable ones globally
@@ -324,8 +266,9 @@ trait TraderHelperTrait
             ->pluck('unique_name')
             ->toArray();
 
-        Log::channel('bursam')->info('Final product codes selection completed', [
-            'trader_order_id' => $traderOrder->id,
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('Final product codes selection completed', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'final_product_codes' => $finalProductCodes,
             'count' => count($finalProductCodes),
             'selected_first' => ! empty($finalProductCodes) ? $finalProductCodes[0] : null,

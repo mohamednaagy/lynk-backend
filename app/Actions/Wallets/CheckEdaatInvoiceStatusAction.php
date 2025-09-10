@@ -9,7 +9,6 @@ use App\Actions\Contracts\Wallets\CheckEdaatInvoiceStatus;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\EdaatInvoiceStatus;
-use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
 use App\Models\EdaatInvoice;
@@ -73,7 +72,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                     $vatPercentage
                 );
 
-                app(GenerateZatcaInvoice::class)->handle($invoiceSpecs, TransactionMediaCollection::ZatcaInvoice);
+                app(GenerateZatcaInvoice::class)->handle($invoiceSpecs);
             }
         }
     }

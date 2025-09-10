@@ -3,7 +3,6 @@
 namespace App\Actions\LocalMarket;
 
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
-use App\Actions\Contracts\LocalMarket\PendingEligibleCommodities;
 use App\Enums\LocalMarket\OrderHistoryStatus;
 use App\Models\LocalMarketOrder;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
@@ -36,8 +35,9 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
             ])
         );
         $this->createLocalMarketOrderHistory($order, OrderHistoryStatus::initiate);
-        Log::channel('local_market')->info("saved new local market order id => {$order->id} and trader order reference is {$order->external_order_no}");
-        app(PendingEligibleCommodities::class)->handle($order);
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle("saved new local market local_market_order_id => {$order->id} and trader order reference is {$order->external_order_no}", $order), [
+            'localMarketOrderId' => $order->id,
+        ]);
 
         return $order;
     }

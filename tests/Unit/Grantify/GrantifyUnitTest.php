@@ -29,7 +29,7 @@ class GrantifyUnitTest extends TestCase
         $this->assertTrue($this->user->hasRole(Role::Admin));
     }
 
-    public function test_assign_Wrong_role_to_user()
+    public function test_assign_wrong_role_to_user()
     {
         $assignRoleToUser = new AssignRoleToUserAction;
         $assignRoleToUser->handle($this->user, Role::Admin);

@@ -34,7 +34,7 @@ class UserControllerUpdateTest extends TestCase
 
     private static array $traderDetails;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 

@@ -2,7 +2,6 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Strategies;
 
-use App\Actions\Contracts\Wakala\GenerateClientWakala;
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
@@ -110,20 +109,24 @@ class LynkV2Driver extends LynkV1Driver
 
     public function processProceedContractAndClientWakala(TraderOrder $traderOrder)
     {
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('processProceedContractAndClientWakala', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
+        ]);
         if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value != FinancingOrderProceedCase::ContractSigned) {
-            Log::channel('lynk')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ContractSigned Job');
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('We Will Fire ContractSigned Job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
             ProcessProceedContractSigned::dispatch($traderOrder->id);
         }
 
         if (app(TraderOrderProceedCaseService::class)->getLatestCase($traderOrder->id)->value == FinancingOrderProceedCase::ContractSigned) {
-            Log::channel('lynk')->info('traderOrderId: '.$traderOrder->id.' - Will Fire ProcessProceedClientWakala Job');
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('We Will Fire ProcessProceedClientWakala Job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
             ProcessProceedClientWakala::dispatch($traderOrder->id);
         }
-    }
-
-    public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
-    {
-        parent::createTransferOwnershipToLenderDocument($traderOrder);
-        app(GenerateClientWakala::class)->handle($traderOrder);
     }
 }

@@ -26,10 +26,12 @@ class LocalMarketInventory extends Model
         'available_quantity',
         'status',
         'commodity_type_id',
+        'is_editable',
     ];
 
     protected $casts = [
         'status' => InventoryStatus::class,
+        'is_editable' => 'boolean',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -94,12 +96,6 @@ class LocalMarketInventory extends Model
         return count($this->units);
     }
 
-    public function getIsEditableAttribute()
-    {
-        // save for later if business changes and want to update inventory with a specified criteriea
-        return true;
-    }
-
     public function canUpdateUnits($total_new_units)
     {
         return $total_new_units >= $this->reserved_items;
@@ -127,11 +123,15 @@ class LocalMarketInventory extends Model
      */
     public function refreshStockQuantities($forceRebuildEligibility = false)
     {
+        if (! $this->canBeEditable()) {
+            return;
+        }
+
         $currentAvailableQuantity = $this->available_quantity;
         $currentReservedItems = $this->reserved_items;
         $updated = $this->updateQuantities();
         $this->refresh();
-        Log::channel('local_market')->info('Refreshing stock quantities for inventory: ', [
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Refreshing stock quantities for inventory: ', [
             'inventory_id' => $this->id,
             'current_available_quantity' => $currentAvailableQuantity,
             'current_reserved_items' => $currentReservedItems,
@@ -150,22 +150,22 @@ class LocalMarketInventory extends Model
     public function updateQuantities()
     {
         return DB::update("
-        UPDATE local_market_inventories 
-        SET 
+        UPDATE local_market_inventories
+        SET
             available_quantity = (
-                SELECT COUNT(*) 
-                FROM local_market_inventory_units 
+                SELECT COUNT(*)
+                FROM local_market_inventory_units
                 USE INDEX (idx_units_status_optimized, idx_units_count_covering)
-                WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id 
-                AND local_market_inventory_units.status = ? 
+                WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id
+                AND local_market_inventory_units.status = ?
                 AND local_market_inventory_units.deleted_at IS NULL
             ),
             reserved_items = (
-                SELECT COUNT(*) 
-                FROM local_market_inventory_units 
+                SELECT COUNT(*)
+                FROM local_market_inventory_units
                 USE INDEX (idx_units_status_optimized, idx_units_count_covering)
-                WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id 
-                AND local_market_inventory_units.status = ? 
+                WHERE local_market_inventory_units.local_market_inventory_id = local_market_inventories.id
+                AND local_market_inventory_units.status = ?
                 AND local_market_inventory_units.deleted_at IS NULL
             ),
             updated_at = NOW()
@@ -173,6 +173,18 @@ class LocalMarketInventory extends Model
     ", [
             InventoryUnitsStatus::Free,
             InventoryUnitsStatus::Reserved,
+        ]);
+    }
+
+    public function canBeEditable(): bool
+    {
+        return $this->is_editable;
+    }
+
+    public function markAsEditable(): void
+    {
+        $this->update([
+            'is_editable' => 1,
         ]);
     }
 }

@@ -777,7 +777,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black right-text">الوقت: {{ $time ?? '' }}</p>
             <p class="title-main text-black">شهادة حيازة</p>
             <p class="text-right text-black section-spacing">نؤكد نحن لينك أن السلع المشار لها
-                @if ($products->first()?->getWarehouse())
+                @if ((is_object($products->first()) && method_exists($products->first(), 'getWarehouse') && $products->first()->getWarehouse()) || (is_array($products->first()) && !empty($products->first()['warehouse'])))
                     في الموقع أدناه
                 @endif
                 ؛ في حيازتنا بالنيابة
@@ -797,27 +797,51 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                         @endif
                         <tr>
                             <td style="text-align: right; width: 50%;">نوع السلعة</td>
-                            <td style="width: 50%;">{{ $product->getProduct() }}</td>
+                            <td style="width: 50%;">
+                                @if (is_object($product) && method_exists($product, 'getProduct'))
+                                    {{ $product->getProduct() }}
+                                @else
+                                    {{ $product['product'] ?? '' }}
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td style="text-align: right; width: 50%;">الكمية</td>
-                            <td style="width: 50%;">{{ $product->getQuantity() }} {{ $product->getUom() }}</td>
+                            <td style="width: 50%;">
+                                @if (is_object($product) && method_exists($product, 'getQuantity'))
+                                    {{ $product->getQuantity() }} {{ $product->getUom() }}
+                                @else
+                                    {{ $product['quantity'] ?? '' }} {{ $product['uom'] ?? '' }}
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td style="text-align: right; width: 50%;">قيمة السلعة</td>
-                            <td style="width: 50%;">{{ number_format((float) $product->getAmount(), 2) }} ريال سعودي</td>
+                            <td style="width: 50%;">
+                                @if (is_object($product) && method_exists($product, 'getAmount'))
+                                    {{ number_format((float) $product->getAmount(), 2) }} ريال سعودي
+                                @else
+                                    {{ number_format((float) ($product['amount'] ?? 0), 2) }} ريال سعودي
+                                @endif
+                            </td>
                         </tr>
-                        @if ($product->getWarehouse())
+                        @if ((is_object($product) && method_exists($product, 'getWarehouse') && $product->getWarehouse()) || (is_array($product) && !empty($product['warehouse'])))
                             <tr>
                                 <td style="text-align: right; width: 50%;">موقع السلعة</td>
-                                <td style="width: 50%;">{{ $product->getWarehouse() }}</td>
+                                <td style="width: 50%;">
+                                    @if (is_object($product) && method_exists($product, 'getWarehouse'))
+                                        {{ $product->getWarehouse() }}
+                                    @else
+                                        {{ $product['warehouse'] ?? '' }}
+                                    @endif
+                                </td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
             @endforeach
             <p class="footer-text text-black">سيتم حفظ السلعة
-                @if ($products->first()?->getWarehouse())
+                @if ((is_object($products->first()) && method_exists($products->first(), 'getWarehouse') && $products->first()->getWarehouse()) || (is_array($products->first()) && !empty($products->first()['warehouse'])))
                     بالموقع المشار له أعلاه
                 @endif
                 ، بالنيابة عن {{ $company_name }}

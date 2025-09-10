@@ -27,7 +27,7 @@ class InventoryService
      * - Excludes inventories that have already been used.
      * - Orders the inventory by a combination of available quantity and maximum price to prioritize the most suitable items.
      *
-     * @return LocalMarketInventory|false The best matching inventory item, or false if no eligible inventory is found.
+     * @return array|false The best matching inventory item, or false if no eligible inventory is found.
      */
     public function findEligibleInventoryForLoan(LocalMarketOrder $localMarketOrder)
     {
@@ -39,9 +39,10 @@ class InventoryService
         $preferredInventories = $this->findEligibleInventoriesForLoan(
             $loanAmount,
             $companyId,
-            $preferredItemTypes
+            $preferredItemTypes,
+            $localMarketOrder
         );
-        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories);
+        $combination = $this->findOptimalCombination($loanAmount, $preferredInventories, $localMarketOrder);
 
         // Return combination if found or if we must use preferred types
         if (! empty($preferredItemTypes) || ! empty($combination)) {
@@ -49,15 +50,16 @@ class InventoryService
         } else {
             // Fallback to all inventory types if allowed
 
-            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId);
+            $allInventories = $this->findEligibleInventoriesForLoan($loanAmount, $companyId, [], $localMarketOrder);
 
-            return $this->findOptimalCombination($loanAmount, $allInventories);
+            return $this->findOptimalCombination($loanAmount, $allInventories, $localMarketOrder);
         }
     }
 
-    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes = [])
+    private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes, $localMarketOrder)
     {
-        return LocalMarketInventory::query()
+        $startTime = microtime(true);
+        $data = LocalMarketInventory::query()
             ->select([
                 'local_market_inventories.*',
                 'local_market_eligible_quantities.eligible_quantity as available_quantity',
@@ -85,24 +87,41 @@ class InventoryService
             ->lockForUpdate()
             ->orderBy('commodity_items.max_price', 'DESC')
             ->orderBy('local_market_eligible_quantities.eligible_quantity', 'desc')
+            ->orderBy('local_market_inventories.available_quantity', 'desc')
             ->get();
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findEligibleInventoriesForLoan Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+            'loanAmount' => $loanAmount,
+            'companyId' => $companyId,
+            'preferredItemTypes' => $preferredItemTypes,
+        ]);
+
+        return $data;
     }
 
-    private function findOptimalCombination($loanAmount, $inventories)
+    private function findOptimalCombination($loanAmount, $inventories, $localMarketOrder)
     {
+        $startTime = microtime(true);
         if ($inventories->isEmpty()) {
-            Log::channel('local_market')->info('The inventories list are empty');
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The inventories list are empty');
 
             return false;
         }
 
         if (fmod($loanAmount, 1) !== 0.0) {
-            Log::channel('local_market')->info('The loan amount must be integer');
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The loan amount must be integer');
 
             return false;
         }
 
         $result = $this->loanCoverageStrategy->calculateCombination($loanAmount, $inventories->all());
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findOptimalCombination Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
+        ]);
 
         return empty($result) ? false : $result;
     }
@@ -110,15 +129,15 @@ class InventoryService
     public static function deleteInventory($inventory)
     {
         try {
-            Log::info("Start Deleting Inventory ID: {$inventory->id}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Start Deleting Inventory ID: {$inventory->id}");
 
             DB::select('CALL DeleteLocalMarketInventoryUnits(?, ? , ?)', [$inventory->id, InventoryUnitsStatus::Free, $inventory->available_quantity]);
-            Log::info("Successfully soft deleted units for inventory ID: {$inventory->id}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Successfully soft deleted units for inventory ID: {$inventory->id}");
             $inventory->delete();
 
-            Log::info("Success for deleting inventory ID: {$inventory->id}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Success for deleting inventory ID: {$inventory->id}");
         } catch (\Exception $e) {
-            Log::error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("Updated Inventory ID: {$inventory->id} status to Problem due to error: {$e->getMessage()}");
             throw $e;
         }
     }
@@ -206,9 +225,10 @@ class InventoryService
                 }
             });
         } catch (\Exception $e) {
-            Log::error('Failed to deliver order units.', [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Failed to deliver order units.', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
-                'error' => $e->getMessage(),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }

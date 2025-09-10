@@ -42,7 +42,7 @@ class EnquiryReplyControllerStoreTest extends TestCase
         'redirect_url' => 'http://localhost:8000/api/v1/visitor/enquiries/:enquiry',
     ];
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
