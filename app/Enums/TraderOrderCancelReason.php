@@ -26,5 +26,4 @@ final class TraderOrderCancelReason extends Enum implements LocalizedEnum
     const ExpiredConfirmationTimeLimit = 9;
 
     const BursamBuyOrderRetriesExceeded = 10;
-
 }

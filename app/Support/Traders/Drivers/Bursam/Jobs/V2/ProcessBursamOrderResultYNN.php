@@ -47,24 +47,24 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
-
+        log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Starting ProcessBursamOrderResultYNN Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
 
         try {
             $traderOrder = TraderOrder::find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
+                log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => Trader Order Is Null at ProcessBursamOrderResultYNN trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
 
                 return;
             }
 
             if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
-                Log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: ' . $this->traderOrderId . ' with status in progress in ProcessBursamOrderResultYNN job', $traderOrder), [
+                Log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultYNN job', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $this->traderOrderId,
                     'status' => $traderOrder->status->value,
                 ]);
+
                 return;
             }
 
@@ -75,6 +75,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
                     'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
                     'expected_action' => FinancingOrderHistory::GetTtiId,
                 ]);
+
                 return;
             }
 
@@ -86,6 +87,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
             if ($this->shouldSkipRetry()) {
                 $this->fail($e);
+
                 return;
             }
 
@@ -95,9 +97,9 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job - trader_order_id => ' . $this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('bursa purchasing step => failed ProcessBursamOrderResultYNN Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
 
-        DB::transaction(function () use ($exception) {
+        DB::transaction(function () {
             $traderOrder = TraderOrder::find($this->traderOrderId);
             if (! $traderOrder) {
                 return;
@@ -159,7 +161,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             : TraderOrderCancelReason::FailureToPurchase;
     }
 
-
     public function middleware(): array
     {
         return [new WithoutOverlapping($this->uniqueId())];
@@ -167,6 +168,6 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
 
     public function uniqueId(): string
     {
-        return __CLASS__ . '_' . $this->traderOrderId;
+        return __CLASS__.'_'.$this->traderOrderId;
     }
 }
