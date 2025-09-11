@@ -82,6 +82,11 @@ class LoanService
         ";
 
         DB::update($sql);
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Eligible quantities updated successfully', [
+            'inventory_ids' => $inventoryIds,
+            'touched_by' => $touchedBy,
+        ]);
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)

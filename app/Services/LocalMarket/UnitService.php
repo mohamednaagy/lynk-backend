@@ -9,6 +9,7 @@ use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Exceptions\LocalMarket\ErrorPurchasingAtLocalMarket;
 use App\Jobs\LocalMarket\states\ClearEligibleFlagAndRefreshInventory;
 use App\Models\Company;
+use App\Models\LocalMarketEligibleQuantity;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -72,7 +73,6 @@ class UnitService
             'numberOfSuitableUnits' => $numberOfUnits,
             'totalCost' => $numberOfUnits * $inventory->price(),
         ];
-
     }
 
     public function holdEligibleUnits(LocalMarketOrder $localMarketOrder): void
@@ -80,7 +80,7 @@ class UnitService
         $eligibleInventories = $localMarketOrder->data['inventories'];
         $inventoryIds = array_keys($eligibleInventories);
 
-        Log::channel('local_market')->info('Time of hold eligible units start at '.now(), [
+        Log::channel('local_market')->info('Time of hold eligible units start at ' . now(), [
             'order_id' => $localMarketOrder->id,
             'inventory_ids' => $inventoryIds,
         ]);
@@ -89,7 +89,20 @@ class UnitService
             $this->executeHoldProcedures($localMarketOrder, $eligibleInventories);
 
             foreach ($inventoryIds as $inventoryId) {
-                ClearEligibleFlagAndRefreshInventory::dispatch($localMarketOrder->id, $inventoryId);
+
+                $checkIFThisLastOrderAndMustBeRefreshStock = LocalMarketEligibleQuantity::where('inventory_id', $inventoryId)->where('touched_by', $localMarketOrder->id)->first();
+                Log::channel('local_market')->info('we will not refresh stock for inventory_id => ' . $inventoryId, [
+                    'order_id' => $localMarketOrder->id,
+                    'checkThatMustBeCleared' => $checkIFThisLastOrderAndMustBeRefreshStock?->touched_by,
+                    'inventory_id' => $inventoryId,
+                ]);
+                if ($checkIFThisLastOrderAndMustBeRefreshStock) {
+                    Log::channel('local_market')->info('Dispatching refresh stock job for inventory_id => ' . $inventoryId, [
+                        'order_id' => $localMarketOrder->id,
+                        'inventory_id' => $inventoryId,
+                    ]);
+                    ClearEligibleFlagAndRefreshInventory::dispatch($localMarketOrder->id, $inventoryId);
+                }
             }
         } catch (Exception $e) {
             Log::channel('local_market')->error('Failed to hold eligible units', [
@@ -268,13 +281,13 @@ class UnitService
      */
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory): int
     {
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => '.$inventory->id.' at '.now(), [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => ' . $inventory->id . ' at ' . now(), [
             'inventory_id' => $inventory->id,
         ]);
 
         $count = $this->buildEligibleUnitsCountQuery($inventory->id, $company->id)->count();
 
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => '.$inventory->id.' at '.now());
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => ' . $inventory->id . ' at ' . now());
 
         return $count;
     }
@@ -422,14 +435,15 @@ DELIMITER ;
                     $newCurrentOwnerType = $lastValidOwner['current_owner_type'];
 
                     log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(
-                        formatLocalMarketOrderTitle('Swapping unit ID '.$unit->id.
-                            ' to owner '.$newCurrentOwner.
-                            ' of type '.$newCurrentOwnerType, $localMarketOrder), [
-                                'localMarketOrderId' => $localMarketOrder->id,
-                                'unit_id' => $unit->id,
-                                'new_current_owner' => $newCurrentOwner,
-                                'new_current_owner_type' => $newCurrentOwnerType,
-                            ]
+                        formatLocalMarketOrderTitle('Swapping unit ID ' . $unit->id .
+                            ' to owner ' . $newCurrentOwner .
+                            ' of type ' . $newCurrentOwnerType, $localMarketOrder),
+                        [
+                            'localMarketOrderId' => $localMarketOrder->id,
+                            'unit_id' => $unit->id,
+                            'new_current_owner' => $newCurrentOwner,
+                            'new_current_owner_type' => $newCurrentOwnerType,
+                        ]
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer
