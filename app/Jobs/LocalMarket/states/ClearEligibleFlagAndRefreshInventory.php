@@ -25,8 +25,8 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
     ) {
         parent::__construct($this->localMarketOrderId);
 
-        $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
-        $this->delay = Carbon::now()->addMinutes($delay);
+        // $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
+        // $this->delay = Carbon::now()->addMinutes($delay);
     }
 
     protected function setUp(): void
