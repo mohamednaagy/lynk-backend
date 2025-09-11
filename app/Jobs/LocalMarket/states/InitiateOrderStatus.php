@@ -12,7 +12,7 @@ class InitiateOrderStatus extends BaseStatus
 {
     protected function setUp(): void
     {
-        $this->onQueue('local_market_initiation');
+        $this->onQueue('local_market_order_initiation');
         $this->logQueueJob();
     }
 
