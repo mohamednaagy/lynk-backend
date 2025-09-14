@@ -27,10 +27,11 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
 
         // $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
         // $this->delay = Carbon::now()->addMinutes($delay);
-        // $this->delay = Carbon::now()->addSecond(10);
-        Log::channel(self::LOG_CHANNEL)->info('fire job  ClearEligibleFlagAndRefreshInventory Delay set', [
+        $this->delay = Carbon::now()->addSecond(30);
+        Log::channel(self::LOG_CHANNEL)->info('fire job  ClearEligibleFlagAndRefreshInventory Delay set with delay', [
             'localMarketOrderId' => $this->localMarketOrderId,
-            'inventoryId' => $this->inventoryId
+            'inventoryId' => $this->inventoryId,
+            'delay' => $this->delay,
         ]);
     }
 
@@ -45,14 +46,14 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
 
         $isLatestOrderTouched = LocalMarketEligibleQuantity::where('inventory_id' , $this->inventoryId)->where('touched_by' , $this->localMarketOrderID )->exists();
         if($isLatestOrderTouched){
-            Log::channel(self::LOG_CHANNEL)->info('refresh inventory stock', [
+            Log::channel(self::LOG_CHANNEL)->info('refresh inventory stock with delay', [
                 'order_id' => $this->localMarketOrderId,
                 'inventory_id' => $this->inventoryId,
             ]);
             $clearedRows = $this->clearEligibleQuantityFlags();
 
             if ($clearedRows > 0) {
-                Log::channel(self::LOG_CHANNEL)->info('Eligible quantity flags cleared', [
+                Log::channel(self::LOG_CHANNEL)->info('Eligible quantity flags cleared with delay', [
                     'order_id' => $this->localMarketOrderId,
                     'inventory_id' => $this->inventoryId,
                     'rows_cleared' => $clearedRows,
@@ -63,13 +64,13 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
                 return;
             }
 
-            Log::channel(self::LOG_CHANNEL)->info('no clear rows', [
+            Log::channel(self::LOG_CHANNEL)->info('no clear rows with delay', [
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
                 'current_touched_by' => $this->getCurrentTouchedByValue(),
             ]);
         }else{
-            Log::channel(self::LOG_CHANNEL)->info('no touched by found in eligible quantity for latest order', [
+            Log::channel(self::LOG_CHANNEL)->info('no touched by found in eligible quantity for latest order with delay', [
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
                 'current_touched_by' => $this->getCurrentTouchedByValue(),
