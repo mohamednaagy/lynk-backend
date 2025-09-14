@@ -107,12 +107,7 @@ class LocalMarketInventory extends Model
      */
     public function getIsDeletableAttribute(): bool
     {
-        return $this->reserved_items == 0 && $this->passesDeletionCheck();
-    }
-
-    public function passesDeletionCheck(): bool
-    {
-        return $this->is_editable;
+        return $this->reserved_items == 0 && $this->is_editable;
     }
 
     public function price()
