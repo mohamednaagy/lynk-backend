@@ -27,6 +27,11 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
 
         // $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
         // $this->delay = Carbon::now()->addMinutes($delay);
+        // $this->delay = Carbon::now()->addSecond(10);
+        Log::channel(self::LOG_CHANNEL)->info('fire job  ClearEligibleFlagAndRefreshInventory Delay set', [
+            'localMarketOrderId' => $this->localMarketOrderId,
+            'inventoryId' => $this->inventoryId
+        ]);
     }
 
     protected function setUp(): void
@@ -37,25 +42,41 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
 
     public function handle(): void
     {
-        $clearedRows = $this->clearEligibleQuantityFlags();
 
-        if ($clearedRows > 0) {
-            Log::channel(self::LOG_CHANNEL)->info('Eligible quantity flags cleared', [
+        $isLatestOrderTouched = LocalMarketEligibleQuantity::where('inventory_id' , $this->inventoryId)->where('touched_by' , $this->localMarketOrderID )->exists();
+        if($isLatestOrderTouched){
+            Log::channel(self::LOG_CHANNEL)->info('refresh inventory stock', [
                 'order_id' => $this->localMarketOrderId,
                 'inventory_id' => $this->inventoryId,
-                'rows_cleared' => $clearedRows,
             ]);
+            $clearedRows = $this->clearEligibleQuantityFlags();
 
-            $this->updateInventoryEditabilityAndRefreshStock($this->localMarketOrderId, $this->inventoryId);
+            if ($clearedRows > 0) {
+                Log::channel(self::LOG_CHANNEL)->info('Eligible quantity flags cleared', [
+                    'order_id' => $this->localMarketOrderId,
+                    'inventory_id' => $this->inventoryId,
+                    'rows_cleared' => $clearedRows,
+                ]);
 
-            return;
+                $this->updateInventoryEditabilityAndRefreshStock($this->localMarketOrderId, $this->inventoryId);
+
+                return;
+            }
+
+            Log::channel(self::LOG_CHANNEL)->info('no clear rows', [
+                'inventory_id' => $this->inventoryId,
+                'order_id' => $this->localMarketOrderId,
+                'current_touched_by' => $this->getCurrentTouchedByValue(),
+            ]);
+        }else{
+            Log::channel(self::LOG_CHANNEL)->info('no touched by found in eligible quantity for latest order', [
+                'inventory_id' => $this->inventoryId,
+                'order_id' => $this->localMarketOrderId,
+                'current_touched_by' => $this->getCurrentTouchedByValue(),
+            ]);
+            return ;
         }
-
-        Log::channel(self::LOG_CHANNEL)->info('Flag cannot be cleared', [
-            'inventory_id' => $this->inventoryId,
-            'order_id' => $this->localMarketOrderId,
-            'current_touched_by' => $this->getCurrentTouchedByValue(),
-        ]);
+      
     }
 
     public function failed(Throwable $exception): void
