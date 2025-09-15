@@ -26,7 +26,7 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
         parent::__construct($this->localMarketOrderId);
 
         $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
-        $this->delay = Carbon::now()->addSecond($delay); //must used it to make delay between orders to check the latest order  == touched by
+        $this->delay = Carbon::now()->addSeconds($delay); //must used it to make delay between orders to check the latest order  == touched by
        
         Log::channel(self::LOG_CHANNEL)->info('fire job ClearEligibleFlagAndRefreshInventory with Delay', [
             'localMarketOrderId' => $this->localMarketOrderId,
