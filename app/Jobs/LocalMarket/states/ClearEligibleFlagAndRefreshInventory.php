@@ -25,10 +25,10 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
     ) {
         parent::__construct($this->localMarketOrderId);
 
-        // $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
-        // $this->delay = Carbon::now()->addMinutes($delay);
-        $this->delay = Carbon::now()->addSecond(10); //must used it to make delay between orders to check the latest order  == touched by
-        Log::channel(self::LOG_CHANNEL)->info('fire job  ClearEligibleFlagAndRefreshInventory Delay set with delay', [
+        $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
+        $this->delay = Carbon::now()->addSecond($delay); //must used it to make delay between orders to check the latest order  == touched by
+       
+        Log::channel(self::LOG_CHANNEL)->info('fire job ClearEligibleFlagAndRefreshInventory with Delay', [
             'localMarketOrderId' => $this->localMarketOrderId,
             'inventoryId' => $this->inventoryId,
             'delay' => $this->delay,
@@ -47,14 +47,13 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
 
         $isLatestOrderTouched = LocalMarketEligibleQuantity::where('inventory_id' , $this->inventoryId)->where('touched_by' , $this->localMarketOrderID )->exists();
         if($isLatestOrderTouched){
-            Log::channel(self::LOG_CHANNEL)->info('refresh inventory stock with delay', [
+            Log::channel(self::LOG_CHANNEL)->info('we will start to refresh inventory stock', [
                 'order_id' => $this->localMarketOrderId,
                 'inventory_id' => $this->inventoryId,
             ]);
             $clearedRows = $this->clearEligibleQuantityFlags();
-
             if ($clearedRows > 0) {
-                Log::channel(self::LOG_CHANNEL)->info('Eligible quantity flags cleared with delay', [
+                Log::channel(self::LOG_CHANNEL)->info('we finished to clear eligible quantity flags', [
                     'order_id' => $this->localMarketOrderId,
                     'inventory_id' => $this->inventoryId,
                     'rows_cleared' => $clearedRows,
@@ -65,13 +64,13 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
                 return;
             }
 
-            Log::channel(self::LOG_CHANNEL)->info('no clear rows with delay', [
+            Log::channel(self::LOG_CHANNEL)->info('no clear rows', [
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
                 'current_touched_by' => $this->getCurrentTouchedByValue(),
             ]);
         }else{
-            Log::channel(self::LOG_CHANNEL)->info('no touched by found in eligible quantity for latest order with delay', [
+            Log::channel(self::LOG_CHANNEL)->info('the latest order is not touched by this inventory', [
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
                 'current_touched_by' => $this->getCurrentTouchedByValue(),
