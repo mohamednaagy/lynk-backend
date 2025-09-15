@@ -89,20 +89,7 @@ class UnitService
             $this->executeHoldProcedures($localMarketOrder, $eligibleInventories);
 
             foreach ($inventoryIds as $inventoryId) {
-
-                $checkIFThisLastOrderAndMustBeRefreshStock = LocalMarketEligibleQuantity::where('inventory_id', $inventoryId)->where('touched_by', $localMarketOrder->id)->first();
-                Log::channel('local_market')->info('we will not refresh stock for inventory_id => ' . $inventoryId, [
-                    'order_id' => $localMarketOrder->id,
-                    'checkThatMustBeCleared' => $checkIFThisLastOrderAndMustBeRefreshStock?->touched_by,
-                    'inventory_id' => $inventoryId,
-                ]);
-                if ($checkIFThisLastOrderAndMustBeRefreshStock) {
-                    Log::channel('local_market')->info('Dispatching refresh stock job for inventory_id => ' . $inventoryId, [
-                        'order_id' => $localMarketOrder->id,
-                        'inventory_id' => $inventoryId,
-                    ]);
-                    ClearEligibleFlagAndRefreshInventory::dispatch($localMarketOrder->id, $inventoryId);
-                }
+                ClearEligibleFlagAndRefreshInventory::dispatch($localMarketOrder->id, $inventoryId);
             }
         } catch (Exception $e) {
             Log::channel('local_market')->error('Failed to hold eligible units', [
