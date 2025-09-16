@@ -11,7 +11,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\FinancingProductEnum;
+use App\Enums\FinancialProductEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
@@ -146,10 +146,10 @@ return [
         CompanyLenderClientType::Individual => 'Individual',
     ],
 
-    FinancingProductEnum::class => [
-        FinancingProductEnum::NormalLending => 'Normal Lending ',
-        FinancingProductEnum::SpecialPurposeVehicle => 'Special Purpose Vehicle (SPV)',
-        FinancingProductEnum::TimeDeposit => 'Time Deposit',
+    FinancialProductEnum::class => [
+        FinancialProductEnum::NormalLending => 'Normal Lending ',
+        FinancialProductEnum::SpecialPurposeVehicle => 'Special Purpose Vehicle (SPV)',
+        FinancialProductEnum::TimeDeposit => 'Time Deposit',
     ],
 
     'document_type' => [

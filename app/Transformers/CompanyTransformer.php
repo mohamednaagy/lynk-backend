@@ -2,7 +2,7 @@
 
 namespace App\Transformers;
 
-use App\Enums\FinancingProductEnum;
+use App\Enums\FinancialProductEnum;
 use App\Models\Company;
 use Cknow\Money\Money;
 use League\Fractal\Resource\Collection;
@@ -39,7 +39,7 @@ class CompanyTransformer extends TransformerAbstract
         'allow_preferred_commodity_in_order',
         'token_expire_in',
         'lender_order_allowed_commodity_types',
-        'allowed_financing_products',
+        'allowed_financial_products',
 
     ];
 
@@ -228,12 +228,12 @@ class CompanyTransformer extends TransformerAbstract
         );
     }
 
-    public function includeAllowedFinancingProducts(Company $company): Primitive
+    public function includeAllowedFinancialProducts(Company $company): Primitive
     {
-        return $this->primitive(collect($company->lender->lenderDetail->allowed_financing_products)->map(function ($value) {
+        return $this->primitive(collect($company->lender->lenderDetail->allowed_financial_products)->map(function ($value) {
             return [
                 'id' => $value,                                 
-                'name'   => FinancingProductEnum::getDescription($value),  
+                'name'   => FinancialProductEnum::getDescription($value),  
             ];
         })->values());
     }

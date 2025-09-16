@@ -3,7 +3,7 @@
 namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
-use App\Enums\FinancingProductEnum;
+use App\Enums\FinancialProductEnum;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -40,21 +40,9 @@ class UpdateOrderRequest extends FormRequest
             'phone_number' => ['required', 'phone:phone_country_code,mobile', 'string'],
             'amount' => ['required', 'numeric', 'gt:0'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
-            'financing_product_id' => ['nullable', 'integer',new EnumValue(FinancingProductEnum::class, false) ],
         ];
     }
 
-    protected function prepareForValidation()
-    {
-        if (is_null($this->input('financing_product_id')) && $this->filled('company_id')) {
-            $company = Company::find($this->input('company_id'));
-            if ($company && $company->lender?->lenderDetail?->default_financing_product_id) {
-                $this->merge([
-                    'financing_product_id' => $company->lender->lenderDetail->default_financing_product_id,
-                ]);
-            }
-        }
-    }
 
     private function handleUniqueReferenceNumber(): ?Unique
     {

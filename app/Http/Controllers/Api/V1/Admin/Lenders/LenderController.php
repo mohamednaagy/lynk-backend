@@ -139,7 +139,7 @@ class LenderController extends Controller
                 'default_contract_sign_time_limit',
                 'allow_preferred_commodity_in_order',
                 'lender_order_allowed_commodity_types',
-                'allowed_financing_products',
+                'allowed_financial_products',
             ])
             ->respond();
     }
