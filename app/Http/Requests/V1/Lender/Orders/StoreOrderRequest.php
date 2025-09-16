@@ -42,7 +42,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function rules(): array
     {        
-        return $this->productValidator ? $this->productValidator->getRules() : [];
+        return  $this->productValidator->getRules();
     }
 
 
@@ -52,7 +52,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function messages(): array
     {
-        return $this->productValidator ? $this->productValidator->getMessages() : [];
+        return $this->productValidator->getMessages();
 
     }
 
@@ -61,7 +61,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return $this->productValidator ? $this->productValidator->getAttributes() : [];
+        return  $this->productValidator->getAttributes();
     }
 
     protected function prepareForValidation()
