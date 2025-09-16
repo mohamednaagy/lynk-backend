@@ -6,8 +6,7 @@ namespace App\Http\Requests\V1\Admin\FinancingOrders;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Http\Requests\V1\Admin\FinancingOrders\Validators\AbstractFinancialProductValidator;
 use App\Http\Requests\V1\Admin\FinancingOrders\Validators\FinancialProductValidatorFactory;
-use App\Models\Company;
-use App\Models\CompanyLenderDetail;
+use App\Models\Lender;
 use Illuminate\Foundation\Http\FormRequest;
 use Request;
 
@@ -17,11 +16,9 @@ class StoreOrderRequest extends FormRequest
 
     private AbstractFinancialProductValidator $productValidator;
 
-    private Company $company;
+    private Lender $lender;
 
-    private CompanyLenderDetail $lenderDetail;
-
-    private int $financialProductId ;
+    private int $type ;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -62,30 +59,29 @@ class StoreOrderRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $this->loadCompanyAndLenderDetail();
-        $this->setFinancialProductId();
+        $this->getLender();
+        $this->settype();
         $this->merge([
-            'financial_product_id' => $this->financialProductId,
+            'type' => $this->type,
         ]);
         $this->initProductValidator();
     }
 
     
-    protected function loadCompanyAndLenderDetail(): void
+    protected function getLender(): void
     {
-        $this->company = Company::find($this->input('company_id'));
-        $this->lenderDetail = $this->company->lender->lenderDetail;
+        $this->lender = Lender::find($this->input('company_id'));
     }
 
-    private function setFinancialProductId(): void
+    private function settype(): void
     {
-        $this->financialProductId = $this->input('financial_product_id') ?? $this->lenderDetail->default_financial_product_id;
+        $this->type = $this->input('type' , $this->lender->default_type); 
     }
 
 
     protected function initProductValidator(): AbstractFinancialProductValidator
     {          
-        $this->productValidator = FinancialProductValidatorFactory::create($this->financialProductId , $this->company->id);
+        $this->productValidator = FinancialProductValidatorFactory::create($this->type , $this->lender->id);
         return $this->productValidator;
     }
 

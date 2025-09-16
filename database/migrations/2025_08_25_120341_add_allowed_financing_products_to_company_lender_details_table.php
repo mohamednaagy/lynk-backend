@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\FinancialProductEnum;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Models\CompanyLenderDetail;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,17 +14,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
-            $table->json('allowed_financial_products')->after('token_version');
+            $table->json('allowed_financial_order_types')->after('token_version');
         });
 
         CompanyLenderDetail::query()->update([
-            'allowed_financial_products' => json_encode([
-                FinancialProductEnum::NormalLending
+            'allowed_financial_order_types' => json_encode([
+                FinancingOrderTypeEnum::NormalLending
             ])
         ]);
 
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->tinyInteger('financial_product_id')->default(FinancialProductEnum::NormalLending)->after('company_id');
+            $table->tinyInteger('type')->default(FinancingOrderTypeEnum::NormalLending)->after('company_id');
         });
     }
 
@@ -34,11 +34,11 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
-            $table->dropColumn('allowed_financial_products');
+            $table->dropColumn('allowed_financial_order_types');
         });
 
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropColumn('financial_product_id');
+            $table->dropColumn('type');
         });
     }
 };

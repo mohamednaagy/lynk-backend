@@ -149,7 +149,7 @@ class OrderController extends Controller
                 'payment_proof_url',
                 'company',
                 'commodity_type',
-                'financial_product',
+                'type',
             ])
             ->respond();
     }

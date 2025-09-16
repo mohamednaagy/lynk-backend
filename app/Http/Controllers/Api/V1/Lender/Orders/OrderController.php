@@ -81,7 +81,7 @@ class OrderController extends Controller
         'trader_orders.show_proceed_btn',
         'history',
         'commodity_type',
-        'financial_product'
+        'type'
     ];
 
     public function __construct()

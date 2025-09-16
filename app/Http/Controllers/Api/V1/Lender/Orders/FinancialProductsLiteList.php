@@ -25,10 +25,10 @@ final class FinancialProductsLiteList extends Controller
      */
     public function index(GetFinancialProduct $getFinancialProducts): JsonResponse
     {
-        $company = auth()->user()->company;
+        $lender = auth()->user()->lender;
         $financialProducts = $getFinancialProducts
-            ->handle($company);
+            ->handle($lender);
 
-            return $this->successResponse(['allowed_financial_products' => $financialProducts->toArray()]);
+            return $this->successResponse(['allowed_financial_order_types' => $financialProducts->toArray()]);
         }
 }

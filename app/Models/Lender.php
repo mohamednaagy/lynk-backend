@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\FinancingOrderTypeEnum;
+
 class Lender extends Company
 {
     public function getMorphClass()
@@ -30,4 +32,21 @@ class Lender extends Company
     {
         return $this->lenderDetail->allow_preferred_commodity_in_order;
     }
+
+    public function allowedFinancialOrderTypes()
+    {
+        return $this->lenderDetail->allowed_financial_order_types;
+    }
+
+    public function isForceUniqueReferenceNumber()
+    {
+        return $this->lenderDetail->force_unique_reference_number;
+    }
+
+    public function getDefaulttypeAttribute()
+    {
+        return $this->allowedFinancialOrderTypes()[0] ?? FinancingOrderTypeEnum::NormalLending;
+    }
+
+    
 }

@@ -3,37 +3,34 @@
 namespace App\Rules;
 
 use App\Enums\CommodityTypeStatus;
-use App\Models\Company;
-use App\Models\CompanyLenderDetail;
+use App\Models\Lender;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
+use function PHPUnit\Framework\isEmpty;
+
 class ValidCommodityTypeAtOrderRule implements ValidationRule
 {
-    private Company $company;
-    private CompanyLenderDetail $lenderDetail;
+    private Lender $lender;
     public function __construct(
-        private int $companyId
+        private int $lenderId
     ) {
-        $this->company = Company::find($this->companyId);
-        $this->lenderDetail = $this->company->lender->lenderDetail;
+        $this->lender = Lender::find($this->lenderId);
     }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (is_null($value) || $value === '') {
+        if (empty($value) ) {
             return;
         }
 
        
-        $allowCommoditySelection = $company->lender?->lenderDetail?->allow_preferred_commodity_in_order ?? false;
-
-        if (! $allowCommoditySelection) {
+        if (! $this->lender->isPreferredCommoditySelectionAllowed()) {
             $fail('Order not created. Commodity type selection is not allowed for this company.');
             return;
         }
 
-        $exists = $this->company->lenderOrderAllowedCommodityTypes()
+        $exists = $this->lender->lenderOrderAllowedCommodityTypes()
             ->where('commodity_types.id', $value)
             ->where('commodity_types.status', CommodityTypeStatus::Active)
             ->exists();

@@ -2,17 +2,17 @@
 
 namespace App\Http\Requests\V1\Lender\Orders\Validators;
 
-use App\Enums\FinancialProductEnum;
+use App\Enums\FinancingOrderTypeEnum;
 
 class FinancialProductValidatorFactory
 {
-    public static function create(int $financialproductid, int $companyid): AbstractFinancialProductValidator
+    public static function create(int $type, int $lenderId): AbstractFinancialProductValidator
     {
-        return match ($financialproductid) {
-            FinancialProductEnum::NormalLending => new NormalLendingValidator($companyid),
-            FinancialProductEnum::SpecialPurposeVehicle => new SpecialPurposeVehicleValidator($companyid),
-            FinancialProductEnum::TimeDeposit => new TimeDepositValidator($companyid),
-            default => new NormalLendingValidator($companyid), 
+        return match ($type) {
+            FinancingOrderTypeEnum::NormalLending => new NormalLendingValidator($lenderId),
+            FinancingOrderTypeEnum::SpecialPurposeVehicle => new SpecialPurposeVehicleValidator($lenderId),
+            FinancingOrderTypeEnum::TimeDeposit => new TimeDepositValidator($lenderId),
+            default => new NormalLendingValidator($lenderId), 
         };
     }
 }

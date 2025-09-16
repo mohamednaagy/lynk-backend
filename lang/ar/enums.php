@@ -12,7 +12,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
-use App\Enums\FinancialProductEnum;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
@@ -150,10 +150,10 @@ return [
         CompanyLenderClientType::Individual => 'فردي',
     ],
 
-    FinancialProductEnum::class => [
-        FinancialProductEnum::NormalLending => 'تمويل',
-        FinancialProductEnum::SpecialPurposeVehicle => 'مرابحة الاستثمار لغرض خاص',
-        FinancialProductEnum::TimeDeposit => 'وديعة لأجل',
+    FinancingOrderTypeEnum::class => [
+        FinancingOrderTypeEnum::NormalLending => 'تمويل',
+        FinancingOrderTypeEnum::SpecialPurposeVehicle => 'مرابحة الاستثمار لغرض خاص',
+        FinancingOrderTypeEnum::TimeDeposit => 'وديعة لأجل',
     ],
 
     'document_type' => [
