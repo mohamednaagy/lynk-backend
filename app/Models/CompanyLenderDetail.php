@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
-use App\Enums\FinancingProductEnum;
+use App\Enums\FinancialProductEnum;
 use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
@@ -21,7 +21,8 @@ class CompanyLenderDetail extends Model
         'auto_complete_murabaha_order' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'allow_preferred_commodity_in_order' => 'boolean',
-        'default_contract_sign_time_limit' => 'integer'
+        'default_contract_sign_time_limit' => 'integer' ,
+        'allowed_financial_products' => 'array' 
     ];
 
     protected $fillable = [
@@ -43,7 +44,7 @@ class CompanyLenderDetail extends Model
         'allow_preferred_commodity_in_order',
         'token_expire_in',
         'token_version',
-        'allowed_financing_products',
+        'allowed_financial_products',
     ];
 
     public function lender()
@@ -51,28 +52,28 @@ class CompanyLenderDetail extends Model
         return $this->belongsTo(Lender::class, 'company_id');
     }
 
-    public function setAllowedFinancingProductsAttribute($value)
-    {
-        $values = is_array($value) ? $value : explode(',', (string) $value);
-        foreach ($values as $v) {
-            $v = (int) $v;
-            if (! FinancingProductEnum::hasValue($v)) {
-                throw new InvalidArgumentException("Invalid financing product: {$v}");
-            }
-        }
-        $this->attributes['allowed_financing_products'] = implode(',', $values);
-    }
+    // public function setAllowedFinancialProductsAttribute($value)
+    // {
+    //     $values = is_array($value) ? $value : explode(',', (string) $value);
+    //     foreach ($values as $v) {
+    //         $v = (int) $v;
+    //         if (! FinancialProductEnum::hasValue($v)) {
+    //             throw new InvalidArgumentException("Invalid financing product: {$v}");
+    //         }
+    //     }
+    //     $this->attributes['allowed_financial_products'] = implode(',', $values);
+    // }
 
-    public function getAllowedFinancingProductsAttribute($value)
-    {
-        if (is_array($value)) {
-            return array_map('intval', $value);
-        }
-        return array_map('intval', explode(',', $value));
-    }
+    // public function getAllowedFinancialProductsAttribute($value)
+    // {
+    //     if (is_array($value)) {
+    //         return array_map('intval', $value);
+    //     }
+    //     return array_map('intval', explode(',', $value));
+    // }
 
-    public function getDefaultFinancingProductIdAttribute()
+    public function getDefaultfinancialProductIdAttribute()
     {
-        return $this->allowed_financing_products[0] ?? FinancingProductEnum::NormalLending;
+        return $this->allowed_financial_products[0] ?? FinancialProductEnum::NormalLending;
     }
 }

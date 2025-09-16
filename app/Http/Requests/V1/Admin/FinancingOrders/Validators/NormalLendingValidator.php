@@ -2,36 +2,35 @@
 
 namespace App\Http\Requests\V1\Admin\FinancingOrders\Validators;
 
-use App\Enums\FinancingProductEnum;
+use App\Enums\FinancialProductEnum;
 use App\Models\Company;
+use App\Rules\ValidCommodityTypeAtOrderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Validation\Rule;
 
-class NormalLendingValidator implements FinancingProductValidatorInterface
+class NormalLendingValidator extends AbstractFinancialProductValidator
 {
-        public function getRules(array $baseRules): array
-        {
-            return array_merge($baseRules, [
-                'company_id' => ['required', Rule::exists(Company::class, 'id')],
-                'financing_product_id' => ['nullable', 'integer', new EnumValue(FinancingProductEnum::class, false)],
-                'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
-                'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-                'phone_number' => ['required_if:is_verification_required,true', 'string', 'phone:phone_country_code,mobile'],
-                'amount' => ['required', 'numeric', 'gte:1'],
-                'selling_price' => ['required', 'numeric', 'gte:amount'],
-                'is_verification_required' => ['required', 'boolean'],
-                'customer_name' => ['required', 'string', 'max:255'],
-            ]);
-        }
+    public function __construct(private int $companyId)
+    {
+        parent::__construct($companyId);
+    }
 
-        public function getMessages(): array
-        {
-            return [];
-        }
-    
-        public function getAttributes(): array
-        {
-            return [];
-        }
+    public function getRules(): array
+    {
+        return [
+            'reference_number' => ['nullable', 'string', 'max:100', $this->handleUniqueReferenceNumber()],
+            'commodity_type_id' => ['nullable', 'numeric', new ValidCommodityTypeAtOrderRule($this->companyId)],
+            'company_id' => ['required', Rule::exists(Company::class, 'id')],
+            'financial_product_id' => ['nullable', 'integer', new EnumValue(FinancialProductEnum::class, false)],
+            'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
+            'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
+            'phone_number' => ['required_if:is_verification_required,true', 'string', 'phone:phone_country_code,mobile'],
+            'amount' => ['required', 'numeric', 'gte:1'],
+            'selling_price' => ['required', 'numeric', 'gte:amount'],
+            'is_verification_required' => ['required', 'boolean'],
+            'customer_name' => ['required', 'string', 'max:255'],
+        ];
+    }
+
 }
     

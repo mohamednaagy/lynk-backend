@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
 use App\Actions\Contracts\Companies\GetFinancialProduct;
@@ -13,7 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-final class FinancingProductsLiteList extends Controller
+final class FinancialProductsLiteList extends Controller
 {
     public function __construct()
     {
@@ -31,6 +29,6 @@ final class FinancingProductsLiteList extends Controller
         $financialProducts = $getFinancialProducts
             ->handle($company);
 
-            return $this->successResponse(['allowed_financing_products' => $financialProducts->toArray()]);
+            return $this->successResponse(['allowed_financial_products' => $financialProducts->toArray()]);
         }
 }

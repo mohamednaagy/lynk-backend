@@ -2,16 +2,22 @@
 
 namespace App\Http\Requests\V1\Lender\Orders\Validators;
 
-use App\Enums\FinancingProductEnum;
-use App\Models\Company;
+use App\Enums\FinancialProductEnum;
+use App\Rules\ValidCommodityTypeAtOrderRule;
 use BenSampo\Enum\Rules\EnumValue;
-use Illuminate\Validation\Rule;
 
-class NormalLendingValidator implements FinancingProductValidatorInterface
+class NormalLendingValidator extends AbstractFinancialProductValidator
 {
-    public function getRules(array $baseRules): array
+    public function __construct(private int $companyId)
     {
-        return array_merge($baseRules, [
+        parent::__construct($companyId);
+    }
+
+    public function getRules(): array
+    {
+        return [
+            'reference_number' => ['nullable', 'string', 'max:100', $this->handleUniqueReferenceNumber()],
+            'commodity_type_id' => ['nullable', 'numeric' , new ValidCommodityTypeAtOrderRule($this->companyId)],
             'customer_name' => ['required', 'string', 'max:255'],
             'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
@@ -19,18 +25,9 @@ class NormalLendingValidator implements FinancingProductValidatorInterface
             'amount' => ['required', 'numeric', 'gte:1'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
             'is_verification_required' => ['required', 'boolean'],
-            'financing_product_id' => ['nullable', 'integer',new EnumValue(FinancingProductEnum::class, false)],
-        ]);
+            'financial_product_id' => ['nullable', 'integer',new EnumValue(FinancialProductEnum::class, false)],
+        ];
     }
 
-        public function getMessages(): array
-        {
-            return [];
-        }
-    
-        public function getAttributes(): array
-        {
-            return [];
-        }
 }
     
