@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
-use App\Enums\FinancialProductEnum;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Models\Company;
 use App\Models\FinancingOrder;

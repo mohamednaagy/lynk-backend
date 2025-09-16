@@ -3,19 +3,19 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\GetFinancialProduct;
-use App\Enums\FinancialProductEnum;
-use App\Models\Company;
+use App\Enums\FinancingOrderTypeEnum;
+use App\Models\Lender;
 
 class GetFinancialProductAction implements GetFinancialProduct
 {
-    public function handle(Company $lender)
+    public function handle(Lender $lender)
     {
-        $allowed = $lender->lender->lenderDetail->allowed_financial_products;
+        $allowedFinancialOrderTypes = $lender->allowedFinancialOrderTypes();
 
-        return collect($allowed)->map(function ($value) {
+        return collect($allowedFinancialOrderTypes)->map(function ($value) {
             return [
                 'id' => $value,                                 
-                'name'   => FinancialProductEnum::getDescription($value),  
+                'name'   => FinancingOrderTypeEnum::getDescription($value),  
             ];
         })->values();
     }

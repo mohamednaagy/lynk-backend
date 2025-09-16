@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Companies;
 
-use App\Models\Company;
+use App\Models\Lender;
 
 interface GetFinancialProduct
 {
-    public function handle(Company $lender);
+    public function handle(Lender $lender);
 }
