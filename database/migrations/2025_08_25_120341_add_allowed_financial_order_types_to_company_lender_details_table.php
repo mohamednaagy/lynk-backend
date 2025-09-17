@@ -14,11 +14,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
-            $table->json('allowed_financial_order_types')->after('token_version');
+            $table->json('allowed_financing_order_types')->after('token_version');
         });
 
         CompanyLenderDetail::query()->update([
-            'allowed_financial_order_types' => json_encode([
+            'allowed_financing_order_types' => json_encode([
                 FinancingOrderTypeEnum::NormalLending
             ])
         ]);
@@ -34,7 +34,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
-            $table->dropColumn('allowed_financial_order_types');
+            $table->dropColumn('allowed_financing_order_types');
         });
 
         Schema::table('financing_orders', function (Blueprint $table) {

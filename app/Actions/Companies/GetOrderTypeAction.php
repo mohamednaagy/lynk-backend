@@ -10,9 +10,9 @@ class GetOrderTypeAction implements GetOrderType
 {
     public function handle(Lender $lender)
     {
-        $allowedFinancialOrderTypes = $lender->allowedFinancialOrderTypes();
+        $allowedFinancingOrderTypes = $lender->allowedFinancingOrderTypes();
 
-        return collect($allowedFinancialOrderTypes)->map(function ($value) {
+        return collect($allowedFinancingOrderTypes)->map(function ($value) {
             return [
                 'id' => $value,                                 
                 'name'   => FinancingOrderTypeEnum::getDescription($value),  

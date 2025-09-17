@@ -33,9 +33,9 @@ class Lender extends Company
         return $this->lenderDetail->allow_preferred_commodity_in_order;
     }
 
-    public function allowedFinancialOrderTypes()
+    public function allowedFinancingOrderTypes()
     {
-        return $this->lenderDetail->allowed_financial_order_types;
+        return $this->lenderDetail->allowed_financing_order_types;
     }
 
     public function isForceUniqueReferenceNumber()
@@ -45,7 +45,7 @@ class Lender extends Company
 
     public function getDefaulttypeAttribute()
     {
-        return $this->allowedFinancialOrderTypes()[0] ?? FinancingOrderTypeEnum::NormalLending;
+        return $this->allowedFinancingOrderTypes()[0] ?? FinancingOrderTypeEnum::NormalLending;
     }
 
     

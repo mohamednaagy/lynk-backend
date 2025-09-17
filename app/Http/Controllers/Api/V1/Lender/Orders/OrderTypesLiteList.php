@@ -29,6 +29,6 @@ final class OrderTypesLiteList extends Controller
         $OrderTypes = $getOrderTypes
             ->handle($lender);
 
-            return $this->successResponse(['allowed_financial_order_types' => $OrderTypes->toArray()]);
+            return $this->successResponse(['allowed_financing_order_types' => $OrderTypes->toArray()]);
         }
 }

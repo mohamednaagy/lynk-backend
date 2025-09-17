@@ -39,7 +39,7 @@ class CompanyTransformer extends TransformerAbstract
         'allow_preferred_commodity_in_order',
         'token_expire_in',
         'lender_order_allowed_commodity_types',
-        'allowed_financial_order_types',
+        'allowed_financing_order_types',
 
     ];
 
@@ -228,9 +228,9 @@ class CompanyTransformer extends TransformerAbstract
         );
     }
     
-    public function includeAllowedFinancialOrderTypes(Company $company): Primitive
+    public function includeAllowedFinancingOrderTypes(Company $company): Primitive
     {
-        return $this->primitive(collect($company->lender->lenderDetail->allowed_financial_order_types)->map(function ($value) {
+        return $this->primitive(collect($company->lender->lenderDetail->allowed_financing_order_types)->map(function ($value) {
             return [
                 'id' => $value,                                 
                 'name'   => FinancingOrderTypeEnum::getDescription($value),  
