@@ -16,7 +16,7 @@ final class OrderTypesLiteList extends Controller
     public function __construct()
     {
         $this->middleware(
-            'permission:'.perm(Area::Lender, [Subject::OrderTypes, Action::Manage, Action::Index])
+            'permission:'.perm(Area::Lender, [Subject::FinancingOrderTypes, Action::Manage, Action::Index])
         );
     }
 
