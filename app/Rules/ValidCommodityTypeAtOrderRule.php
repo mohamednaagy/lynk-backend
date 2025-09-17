@@ -7,8 +7,6 @@ use App\Models\Lender;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-use function PHPUnit\Framework\isEmpty;
-
 class ValidCommodityTypeAtOrderRule implements ValidationRule
 {
     private Lender $lender;
