@@ -14,7 +14,7 @@ class StoreOrderRequest extends FormRequest
 {
     use RequestHasMobileVerification;
 
-    private AbstractOrderTypeValidator $productValidator;
+    private AbstractOrderTypeValidator $orderValidator;
 
     private Lender $lender;
 
@@ -37,7 +37,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        return  $this->productValidator->getRules() ;
+        return  $this->orderValidator->getRules() ;
     }
 
     /**
@@ -45,7 +45,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function messages(): array
     {
-        return  $this->productValidator->getMessages();
+        return  $this->orderValidator->getMessages();
     }
 
     /**
@@ -53,7 +53,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function attributes(): array
     {
-        return $this->productValidator->getAttributes() ;
+        return $this->orderValidator->getAttributes() ;
     }
 
 
@@ -64,7 +64,7 @@ class StoreOrderRequest extends FormRequest
         $this->merge([
             'type' => $this->type,
         ]);
-        $this->initProductValidator();
+        $this->initorderValidator();
     }
 
     
@@ -79,10 +79,10 @@ class StoreOrderRequest extends FormRequest
     }
 
 
-    protected function initProductValidator(): AbstractOrderTypeValidator
+    protected function initorderValidator(): AbstractOrderTypeValidator
     {          
-        $this->productValidator = OrderTypeValidatorFactory::create($this->type , $this->lender->id);
-        return $this->productValidator;
+        $this->orderValidator = OrderTypeValidatorFactory::create($this->type , $this->lender->id);
+        return $this->orderValidator;
     }
 
 
