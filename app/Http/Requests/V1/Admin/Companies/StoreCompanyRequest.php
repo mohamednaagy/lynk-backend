@@ -186,13 +186,13 @@ class StoreCompanyRequest extends FormRequest
                 'required', new CheckActiveCommodityTypeRule,
             ],
 
-            'allowed_financial_order_types' => [
+            'allowed_financing_order_types' => [
                 'required',
                 'array',
                 'min:1',
             ],
 
-            'allowed_financial_order_types.*' => [
+            'allowed_financing_order_types.*' => [
                 'required',
                 'integer',
                 new EnumValue(FinancingOrderTypeEnum::class, false),

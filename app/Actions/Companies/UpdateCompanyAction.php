@@ -62,7 +62,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'public_status_comment',
                 'auto_complete_murabaha_order',
                 'webhook_secret_key',
-                'allowed_financial_order_types',
+                'allowed_financing_order_types',
             ])
         );
 

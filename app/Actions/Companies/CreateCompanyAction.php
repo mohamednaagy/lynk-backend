@@ -55,7 +55,7 @@ class CreateCompanyAction implements CreateCompany
                     'auto_complete_murabaha_order',
                     'webhook_secret_key',
                     'allow_preferred_commodity_in_order',
-                    'allowed_financial_order_types',
+                    'allowed_financing_order_types',
                 ]
             )
         );
