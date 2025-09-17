@@ -8,7 +8,7 @@ use App\Rules\ValidCommodityTypeAtOrderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Validation\Rule;
 
-class SpecialPurposeVehicleValidator extends AbstractFinancialProductValidator
+class SpecialPurposeVehicleValidator extends AbstractOrderTypeValidator
 {
 
     public function __construct(private int $lenderId)

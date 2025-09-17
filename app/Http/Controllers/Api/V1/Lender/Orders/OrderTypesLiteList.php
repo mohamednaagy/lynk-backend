@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
-use App\Actions\Contracts\Companies\GetFinancialProduct;
+use App\Actions\Contracts\Companies\GetOrderType;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\CommodityTypeStatus;
@@ -11,24 +11,24 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-final class FinancialProductsLiteList extends Controller
+final class OrderTypesLiteList extends Controller
 {
     public function __construct()
     {
         $this->middleware(
-            'permission:'.perm(Area::Lender, [Subject::FinancialProducts, Action::Manage, Action::Index])
+            'permission:'.perm(Area::Lender, [Subject::OrderTypes, Action::Manage, Action::Index])
         );
     }
 
     /**
      * Handle the incoming request.
      */
-    public function index(GetFinancialProduct $getFinancialProducts): JsonResponse
+    public function index(GetOrderType $getOrderTypes): JsonResponse
     {
         $lender = auth()->user()->lender;
-        $financialProducts = $getFinancialProducts
+        $OrderTypes = $getOrderTypes
             ->handle($lender);
 
-            return $this->successResponse(['allowed_financial_order_types' => $financialProducts->toArray()]);
+            return $this->successResponse(['allowed_financial_order_types' => $OrderTypes->toArray()]);
         }
 }

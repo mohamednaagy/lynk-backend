@@ -82,6 +82,6 @@ final class Subject extends Enum
 
     const LenderClientAutoSellPeriodDocuments = 'LenderClientAutoSellPeriodDocuments';
 
-    const FinancialProducts = 'FinancialProducts';
+    const OrderTypes = 'OrderTypes';
 
 }

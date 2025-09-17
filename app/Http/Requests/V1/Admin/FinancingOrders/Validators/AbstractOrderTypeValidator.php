@@ -6,7 +6,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Models\Lender;
 use Illuminate\Validation\Rules\Unique;
 
-abstract class AbstractFinancialProductValidator
+abstract class AbstractOrderTypeValidator
 {
     private Lender $lender;
 

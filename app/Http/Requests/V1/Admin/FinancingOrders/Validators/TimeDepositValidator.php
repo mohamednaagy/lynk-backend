@@ -8,7 +8,7 @@ use App\Rules\ValidCommodityTypeAtOrderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Validation\Rule;
 
-class TimeDepositValidator extends AbstractFinancialProductValidator
+class TimeDepositValidator extends AbstractOrderTypeValidator
 {
     public function __construct(private int $lenderId)
     {
