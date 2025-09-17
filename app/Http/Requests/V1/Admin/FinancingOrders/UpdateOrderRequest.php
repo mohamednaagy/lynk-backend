@@ -40,7 +40,6 @@ class UpdateOrderRequest extends FormRequest
         ];
     }
 
-
     private function handleUniqueReferenceNumber(): ?Unique
     {
         /** @var FinancingOrder $financingOrder */
