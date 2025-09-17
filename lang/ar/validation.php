@@ -307,5 +307,7 @@ return [
         'trader_order_required' => 'نوع المستند ":document_type" يتطلب معرف طلب تاجر',
         'transaction_required' => 'نوع المستند ":document_type" يتطلب معرف معاملة',
         'context_required_field' => 'يجب تقديم حقل سياق واحد على الأقل (معرف طلب التاجر أو معرف المعاملة)',
+        'order_not_created_commodity_type_selection_not_allowed' => 'لا يمكن إنشاء الطلب. لا يسمح باختيار نوع السلعة لهذه الشركة.',
+        'the_selected_commodity_type_is_not_allowed_for_this_company' => 'النوع المختار للسلعة غير مسموح به لهذه الشركة.'
     ],
 ];

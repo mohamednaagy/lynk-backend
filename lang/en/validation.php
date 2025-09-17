@@ -223,4 +223,6 @@ return [
         'transaction_required' => "Document type ':document_type' requires a transaction ID",
         'context_required_field' => 'At least one context field (trader_order_id or transaction_id) must be provided',
     ],
+    'order_not_created_commodity_type_selection_not_allowed' => 'Order not created. Commodity type selection is not allowed for this company.',
+    'the_selected_commodity_type_is_not_allowed_for_this_company' => 'The selected commodity type is not allowed for this company.',
 ];

@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Api\V1\Lender\Orders;
 
-use App\Actions\Contracts\Companies\GetOrderType;
+use App\Actions\Contracts\Companies\GetFinancingOrderType;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\CommodityTypeStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-final class OrderTypesLiteList extends Controller
+final class FinancingOrderTypesLiteList extends Controller
 {
     public function __construct()
     {
@@ -23,10 +22,10 @@ final class OrderTypesLiteList extends Controller
     /**
      * Handle the incoming request.
      */
-    public function index(GetOrderType $getOrderTypes): JsonResponse
+    public function index(GetFinancingOrderType $getFinancingOrderTypes): JsonResponse
     {
         $lender = auth()->user()->lender;
-        $OrderTypes = $getOrderTypes
+        $OrderTypes = $getFinancingOrderTypes
             ->handle($lender);
 
             return $this->successResponse(['allowed_financing_order_types' => $OrderTypes->toArray()]);

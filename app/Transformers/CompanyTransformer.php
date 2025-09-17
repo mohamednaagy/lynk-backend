@@ -230,7 +230,7 @@ class CompanyTransformer extends TransformerAbstract
     
     public function includeAllowedFinancingOrderTypes(Company $company): Primitive
     {
-        return $this->primitive(collect($company->lender->lenderDetail->allowed_financing_order_types)->map(function ($value) {
+        return $this->primitive(collect($company->lender->allowedFinancingOrderTypes())->map(function ($value) {
             return [
                 'id' => $value,                                 
                 'name'   => FinancingOrderTypeEnum::getDescription($value),  

@@ -2,11 +2,11 @@
 
 namespace App\Actions\Companies;
 
-use App\Actions\Contracts\Companies\GetOrderType;
+use App\Actions\Contracts\Companies\GetFinancingOrderType;
 use App\Enums\FinancingOrderTypeEnum;
 use App\Models\Lender;
 
-class GetOrderTypeAction implements GetOrderType
+class GetFinancingOrderTypeAction implements GetFinancingOrderType
 {
     public function handle(Lender $lender)
     {
