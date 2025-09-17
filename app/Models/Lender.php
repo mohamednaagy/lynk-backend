@@ -43,7 +43,7 @@ class Lender extends Company
         return $this->lenderDetail->force_unique_reference_number;
     }
 
-    public function getDefaultTypeAttribute()
+    public function getDefaultFinancingOrderTypeAttribute()
     {
         return $this->allowedFinancingOrderTypes()[0] ?? FinancingOrderTypeEnum::NormalLending;
     }
