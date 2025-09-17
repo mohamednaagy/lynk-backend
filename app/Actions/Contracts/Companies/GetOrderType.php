@@ -4,7 +4,7 @@ namespace App\Actions\Contracts\Companies;
 
 use App\Models\Lender;
 
-interface GetFinancialProduct
+interface GetOrderType
 {
     public function handle(Lender $lender);
 }

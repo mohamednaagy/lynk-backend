@@ -4,8 +4,8 @@ namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
 
 use App\Http\Requests\Traits\RequestHasMobileVerification;
-use App\Http\Requests\V1\Admin\FinancingOrders\Validators\AbstractFinancialProductValidator;
-use App\Http\Requests\V1\Admin\FinancingOrders\Validators\FinancialProductValidatorFactory;
+use App\Http\Requests\V1\Admin\FinancingOrders\Validators\AbstractOrderTypeValidator;
+use App\Http\Requests\V1\Admin\FinancingOrders\Validators\OrderTypeValidatorFactory;
 use App\Models\Lender;
 use Illuminate\Foundation\Http\FormRequest;
 use Request;
@@ -14,7 +14,7 @@ class StoreOrderRequest extends FormRequest
 {
     use RequestHasMobileVerification;
 
-    private AbstractFinancialProductValidator $productValidator;
+    private AbstractOrderTypeValidator $productValidator;
 
     private Lender $lender;
 
@@ -79,9 +79,9 @@ class StoreOrderRequest extends FormRequest
     }
 
 
-    protected function initProductValidator(): AbstractFinancialProductValidator
+    protected function initProductValidator(): AbstractOrderTypeValidator
     {          
-        $this->productValidator = FinancialProductValidatorFactory::create($this->type , $this->lender->id);
+        $this->productValidator = OrderTypeValidatorFactory::create($this->type , $this->lender->id);
         return $this->productValidator;
     }
 

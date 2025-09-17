@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Actions\Companies\GetFinancialProductAction;
-use App\Actions\Contracts\Companies\GetFinancialProduct;
+use App\Actions\Companies\GetOrderTypeAction;
+use App\Actions\Contracts\Companies\GetOrderType;
 use App\Listeners\LogActivity;
 use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageStrategy;
@@ -60,8 +60,8 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->app->bind(
-            GetFinancialProduct::class,
-            GetFinancialProductAction::class
+            GetOrderType::class,
+            GetOrderTypeAction::class
         );
     }
 

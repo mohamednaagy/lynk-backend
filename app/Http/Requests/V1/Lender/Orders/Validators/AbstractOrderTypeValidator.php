@@ -3,12 +3,10 @@
 namespace App\Http\Requests\V1\Lender\Orders\Validators;
 
 use App\Enums\FinancingOrderStatus;
-use App\Models\Company;
-use App\Models\CompanyLenderDetail;
 use App\Models\Lender;
 use Illuminate\Validation\Rules\Unique;
 
-abstract class AbstractFinancialProductValidator
+abstract class AbstractOrderTypeValidator
 {
     private Lender $lender;
 
