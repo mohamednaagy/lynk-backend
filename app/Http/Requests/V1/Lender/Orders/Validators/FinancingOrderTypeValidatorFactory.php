@@ -12,7 +12,7 @@ class FinancingOrderTypeValidatorFactory
             FinancingOrderTypeEnum::NormalLending => new NormalLendingValidator(),
             FinancingOrderTypeEnum::SpecialPurposeVehicle => new SpecialPurposeVehicleValidator(),
             FinancingOrderTypeEnum::TimeDeposit => new TimeDepositValidator(),
-            default => new NormalLendingValidator()
+            default => new NormalLendingValidator(),
         };
     }
 }

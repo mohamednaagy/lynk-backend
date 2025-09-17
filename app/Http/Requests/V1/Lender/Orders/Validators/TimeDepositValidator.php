@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Lender\Orders\Validators;
 
 use App\Enums\FinancingOrderTypeEnum;
-use App\Rules\ValidCommodityTypeAtFinancingOrderRule;
 use BenSampo\Enum\Rules\EnumValue;
 
 class TimeDepositValidator extends AbstractFinancingOrderTypeValidator
