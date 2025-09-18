@@ -42,27 +42,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
         $strategy = $this->financingOrderTypeFactory->make($data['type']);
 
         return $strategy->create($company, $data);
-
         
-        // return $company->orders()->create(
-        //     Arr::only($data, [
-        //         'customer_name',
-        //         'reference_number',
-        //         'national_id',
-        //         'contract_number',
-        //         'phone_number',
-        //         'amount',
-        //         'selling_price',
-        //         'currency',
-        //         'status',
-        //         'creator_id',
-        //         'creator_type',
-        //         'approved_at',
-        //         'is_verification_required',
-        //         'commodity_type_id',
-        //         'type',
-        //     ])
-        // );
     }
 
     private function findCommodityTypeIdByUniqueName(?string $uniqueName, Company $company): ?int
