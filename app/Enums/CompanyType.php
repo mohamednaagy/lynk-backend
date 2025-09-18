@@ -12,4 +12,8 @@ final class CompanyType extends Enum implements LocalizedEnum
     const Trader = 2;
 
     const Supplier = 3;
+
+    const SpecialPurposeVehicle = 4;
+
+    const TimeDeposit = 5;
 }

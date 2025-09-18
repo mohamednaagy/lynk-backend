@@ -74,6 +74,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'charged_trader_orders_count',
         'commodity_type_id',
         'type',
+        'borrower_identifier',
+        'lender_type',
+        'lender_identifier',
+        'borrower_type',
     ];
 
     protected $casts = [
@@ -505,4 +509,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             return Trader::Lynk;
         }
     }
+
+    // protected function customerId(): Attribute
+    // {
+    //     return Attribute::make(
+    //         set: fn ($value) => ['borrower_identifier' => $value],
+    //         get: fn () => $this->borrower_identifier
+    //     );
+    // }
 }
