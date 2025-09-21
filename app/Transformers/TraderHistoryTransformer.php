@@ -211,11 +211,18 @@ class TraderHistoryTransformer extends TransformerAbstract
         ];
 
         if ($this->traderOrder->provider === TraderEnum::Lynk) {
-            $sellConfirmationDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SellConfirmationDocument);
-            $data['sell_confirmation_document'] = [
-                'url' => $sellConfirmationDocumentMediaFile?->file_url,
-                'date' => $sellConfirmationDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $sellConfirmationDocumentMediaFile->created_at) : null,
-            ];
+            $attachedSellConfirmationDocument = $this->traderOrder->traderHistories()->where('action', FinancingOrderHistory::AttachSellConfirmationDocument)->first();
+            if ($attachedSellConfirmationDocument) {
+                $data['sell_confirmation_document'] = [
+                    'url' => formatMediaUrl(route('api.v1.admins.generate', [
+                        'document_type' => DocumentType::SELL_CONFIRMATION_DOCUMENT,
+                        'context' => [
+                            'trader_order_id' => $this->traderOrder->id,
+                        ],
+                    ])),
+                    'date' => $attachedSellConfirmationDocument ? saudi_now('Y-m-d h:i:s A', $attachedSellConfirmationDocument->created_at) : null,
+                ];
+            }
         }
 
         return $this->primitive($data);
