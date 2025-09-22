@@ -41,7 +41,6 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
             'traderOrderId' => $traderOrder->id,
             'reference' => $this->data['external_order_no'],
             'case' => $this->data['case'],
-            'data' => $this->data,
         ]);
 
         switch ($this->data['case']) {

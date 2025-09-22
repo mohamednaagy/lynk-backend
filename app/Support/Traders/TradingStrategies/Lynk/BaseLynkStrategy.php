@@ -26,9 +26,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
-        Log::channel(LOG_CHANNEL_LYNK)->info(formatLogTitle('LynkStrategy updatePurchasingCommodity: Updating trader order', $traderOrder), [
-            'data' => $data,
-        ]);
         app(UpdateTraderOrder::class)->handle($traderOrder, $data);
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
