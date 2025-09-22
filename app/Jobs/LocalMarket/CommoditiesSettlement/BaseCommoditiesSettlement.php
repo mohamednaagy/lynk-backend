@@ -26,14 +26,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
     {
         // Disable tenancy inside the job
         app(Tenancy::class)->end();
-
-        $className = class_basename(static::class);
-        $queueName = 'local_market_commodities_settlement';
-        self::logInfo("add $className job to queue $queueName localMarketOrderId $this->localMarketOrderId", [
-            'localMarketOrderId' => $this->localMarketOrderId,
-        ]);
-
-        $this->onQueue($queueName);
+        $this->onQueue('local_market_commodities_settlement');
     }
 
     protected function logInfo(string $message, array $data = []): void

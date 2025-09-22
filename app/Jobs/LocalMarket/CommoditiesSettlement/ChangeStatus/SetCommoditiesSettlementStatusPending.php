@@ -10,10 +10,6 @@ class SetCommoditiesSettlementStatusPending extends BaseCommoditiesSettlement
 {
     public function handle(): void
     {
-        $this->logInfo('Changing commodities_settlement_status to PendingSettlement', [
-            'order_id' => $this->localMarketOrderId,
-        ]);
-
         try {
             LocalMarketOrder::changeCommoditiesSettlementStatus(
                 $this->localMarketOrderId,
