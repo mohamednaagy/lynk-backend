@@ -4,10 +4,8 @@ namespace App\Models;
 
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
-use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Model;
-use InvalidArgumentException;
 
 class CompanyLenderDetail extends Model
 {
@@ -21,8 +19,8 @@ class CompanyLenderDetail extends Model
         'auto_complete_murabaha_order' => 'boolean',
         'webhook_secret_key' => 'encrypted',
         'allow_preferred_commodity_in_order' => 'boolean',
-        'default_contract_sign_time_limit' => 'integer' ,
-        'allowed_financing_order_types' => 'array' 
+        'default_contract_sign_time_limit' => 'integer',
+        'allowed_financing_order_types' => 'array',
     ];
 
     protected $fillable = [
@@ -51,6 +49,4 @@ class CompanyLenderDetail extends Model
     {
         return $this->belongsTo(Lender::class, 'company_id');
     }
-
-   
 }

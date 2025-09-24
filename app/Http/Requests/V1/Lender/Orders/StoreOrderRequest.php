@@ -6,7 +6,6 @@ use App\Enums\FinancingOrderStatus;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Http\Requests\V1\Lender\Orders\Validators\AbstractFinancingOrderTypeValidator;
 use App\Http\Requests\V1\Lender\Orders\Validators\FinancingOrderTypeValidatorFactory;
-use App\Models\Company;
 use App\Models\Lender;
 use App\Rules\ValidCommodityTypeAtFinancingOrderRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -25,7 +24,6 @@ class StoreOrderRequest extends FormRequest
     private Lender $lender;
 
     private int $type;
-
 
     /**
      * Always authorize this request.
@@ -95,7 +93,6 @@ class StoreOrderRequest extends FormRequest
         ];
     }
 
-
     /**
      * Unique reference number rule if lender requires it.
      */
@@ -123,7 +120,7 @@ class StoreOrderRequest extends FormRequest
      */
     private function setFinancingOrderType(): void
     {
-        $this->type = $this->input('type',$this->lender->default_financing_order_type);
+        $this->type = $this->input('type', $this->lender->default_financing_order_type);
     }
 
     /**

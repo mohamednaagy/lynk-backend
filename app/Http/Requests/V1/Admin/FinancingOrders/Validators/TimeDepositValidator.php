@@ -7,7 +7,6 @@ use BenSampo\Enum\Rules\EnumValue;
 
 class TimeDepositValidator extends AbstractFinancingOrderTypeValidator
 {
-
     public function getRules(): array
     {
         return [
@@ -22,4 +21,3 @@ class TimeDepositValidator extends AbstractFinancingOrderTypeValidator
         ];
     }
 }
-    

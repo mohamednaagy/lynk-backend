@@ -19,8 +19,8 @@ return new class extends Migration
 
         CompanyLenderDetail::query()->update([
             'allowed_financing_order_types' => json_encode([
-                FinancingOrderTypeEnum::NormalLending
-            ])
+                FinancingOrderTypeEnum::NormalLending,
+            ]),
         ]);
 
         Schema::table('financing_orders', function (Blueprint $table) {

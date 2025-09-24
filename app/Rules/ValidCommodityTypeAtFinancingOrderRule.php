@@ -12,19 +12,18 @@ class ValidCommodityTypeAtFinancingOrderRule implements Rule
 
     protected string $errorMessage = '';
 
-
     public function __construct(
         private int $lenderId
     ) {
         $this->lender = Lender::find($this->lenderId);
     }
 
-
     public function passes($attribute, $value): bool
     {
-       
+
         if (! $this->lender->isPreferredCommoditySelectionAllowed()) {
             $this->errorMessage = __('validation.order_not_created_commodity_type_selection_not_allowed');
+
             return false;
         }
 
@@ -35,6 +34,7 @@ class ValidCommodityTypeAtFinancingOrderRule implements Rule
 
         if (! $exists) {
             $this->errorMessage = __('validation.the_selected_commodity_type_is_not_allowed_for_this_company');
+
             return false;
         }
 
@@ -42,9 +42,8 @@ class ValidCommodityTypeAtFinancingOrderRule implements Rule
 
     }
 
-
     public function message(): string
     {
-        return $this->errorMessage ;
+        return $this->errorMessage;
     }
 }

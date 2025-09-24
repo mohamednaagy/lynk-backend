@@ -7,8 +7,6 @@ use BenSampo\Enum\Rules\EnumValue;
 
 class NormalLendingValidator extends AbstractFinancingOrderTypeValidator
 {
-
-
     public function getRules(): array
     {
         return [
@@ -22,6 +20,4 @@ class NormalLendingValidator extends AbstractFinancingOrderTypeValidator
             'customer_name' => ['required', 'string', 'max:255'],
         ];
     }
-
 }
-    

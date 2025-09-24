@@ -137,7 +137,7 @@ class StoreOrderRequest extends FormRequest
      */
     private function setFinancingOrderType(): void
     {
-        $this->type = $this->input('type',$this->lender->default_financing_order_type);
+        $this->type = $this->input('type', $this->lender->default_financing_order_type);
     }
 
     /**
@@ -147,6 +147,4 @@ class StoreOrderRequest extends FormRequest
     {
         $this->financingOrderValidator = FinancingOrderTypeValidatorFactory::create($this->type);
     }
-
-
 }

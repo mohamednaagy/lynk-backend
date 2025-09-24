@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\ApplyOrderFeesJob;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
@@ -153,7 +154,7 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
         $status = $traderHistory->action;
         $action = $this->feesService->getAction($provider, $status);
         if ($action) {
-            $action->handle($traderHistory->traderOrder);
+            ApplyOrderFeesJob::dispatch($traderHistory->traderOrder, $action);
         }
     }
 }

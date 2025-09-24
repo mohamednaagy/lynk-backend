@@ -7,10 +7,9 @@ use BenSampo\Enum\Rules\EnumValue;
 
 class SpecialPurposeVehicleValidator extends AbstractFinancingOrderTypeValidator
 {
-
     public function getRules(): array
     {
-        return  [
+        return [
             'type' => ['nullable', 'integer', new EnumValue(FinancingOrderTypeEnum::class, false)],
             'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
@@ -22,4 +21,3 @@ class SpecialPurposeVehicleValidator extends AbstractFinancingOrderTypeValidator
         ];
     }
 }
-

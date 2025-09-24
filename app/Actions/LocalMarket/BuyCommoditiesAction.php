@@ -32,7 +32,7 @@ class BuyCommoditiesAction implements BuyCommodities
             $startTime = microtime(true);
             InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
             $data = UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder);
-            
+
             $localMarketOrder->update([
                 'status' => OrderStatus::CommoditiesPurchased,
                 'data' => array_merge($localMarketOrder->data, ['data' => $data]),

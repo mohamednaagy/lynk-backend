@@ -9,7 +9,6 @@ use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Exceptions\LocalMarket\ErrorPurchasingAtLocalMarket;
 use App\Jobs\LocalMarket\states\ClearEligibleFlagAndRefreshInventory;
 use App\Models\Company;
-use App\Models\LocalMarketEligibleQuantity;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -80,7 +79,7 @@ class UnitService
         $eligibleInventories = $localMarketOrder->data['inventories'];
         $inventoryIds = array_keys($eligibleInventories);
 
-        Log::channel('local_market')->info('Time of hold eligible units start at ' . now(), [
+        Log::channel('local_market')->info('Time of hold eligible units start at '.now(), [
             'order_id' => $localMarketOrder->id,
             'inventory_ids' => $inventoryIds,
         ]);
@@ -268,13 +267,13 @@ class UnitService
      */
     public function countEligibleUnits(Company $company, LocalMarketInventory $inventory): int
     {
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => ' . $inventory->id . ' at ' . now(), [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => '.$inventory->id.' at '.now(), [
             'inventory_id' => $inventory->id,
         ]);
 
         $count = $this->buildEligibleUnitsCountQuery($inventory->id, $company->id)->count();
 
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => ' . $inventory->id . ' at ' . now());
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => '.$inventory->id.' at '.now());
 
         return $count;
     }
@@ -422,9 +421,9 @@ DELIMITER ;
                     $newCurrentOwnerType = $lastValidOwner['current_owner_type'];
 
                     log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(
-                        formatLocalMarketOrderTitle('Swapping unit ID ' . $unit->id .
-                            ' to owner ' . $newCurrentOwner .
-                            ' of type ' . $newCurrentOwnerType, $localMarketOrder),
+                        formatLocalMarketOrderTitle('Swapping unit ID '.$unit->id.
+                            ' to owner '.$newCurrentOwner.
+                            ' of type '.$newCurrentOwnerType, $localMarketOrder),
                         [
                             'localMarketOrderId' => $localMarketOrder->id,
                             'unit_id' => $unit->id,

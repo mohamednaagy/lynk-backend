@@ -26,8 +26,8 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
         parent::__construct($this->localMarketOrderId);
 
         $delay = (int) config('trader.providers.lynk.refresh_inventory_stock_delay');
-        $this->delay = Carbon::now()->addSeconds($delay); //must used it to make delay between orders to check the latest order  == touched by
-       
+        $this->delay = Carbon::now()->addSeconds($delay); // must used it to make delay between orders to check the latest order  == touched by
+
         Log::channel(self::LOG_CHANNEL)->info('fire job ClearEligibleFlagAndRefreshInventory with Delay', [
             'localMarketOrderId' => $this->localMarketOrderId,
             'inventoryId' => $this->inventoryId,
@@ -41,12 +41,11 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
         $this->onQueue('refresh_eligibilities');
     }
 
-
     public function handle(): void
     {
 
-        $isLatestOrderTouched = LocalMarketEligibleQuantity::where('inventory_id' , $this->inventoryId)->where('touched_by' , $this->localMarketOrderID )->exists();
-        if($isLatestOrderTouched){
+        $isLatestOrderTouched = LocalMarketEligibleQuantity::where('inventory_id', $this->inventoryId)->where('touched_by', $this->localMarketOrderID)->exists();
+        if ($isLatestOrderTouched) {
             Log::channel(self::LOG_CHANNEL)->info('we will start to refresh inventory stock', [
                 'order_id' => $this->localMarketOrderId,
                 'inventory_id' => $this->inventoryId,
@@ -69,15 +68,16 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
                 'order_id' => $this->localMarketOrderId,
                 'current_touched_by' => $this->getCurrentTouchedByValue(),
             ]);
-        }else{
+        } else {
             Log::channel(self::LOG_CHANNEL)->info('the latest order is not touched by this inventory', [
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
                 'current_touched_by' => $this->getCurrentTouchedByValue(),
             ]);
-            return ;
+
+            return;
         }
-      
+
     }
 
     public function failed(Throwable $exception): void
