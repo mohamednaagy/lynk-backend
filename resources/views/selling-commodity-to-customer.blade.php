@@ -811,7 +811,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p style="color: rgb(75, 85, 99);">الوقت: {{ $contract_signed_time }}</p>
             <p class="text-center" style="color: rgb(75, 85, 99);">رقم المرجع: {{ $reference_number }}</p>
             <p class="title-main text-black">شهادة ملكية</p>
-            <p class="text-center text-black section-spacing">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ {{ $customer_name }} وهو/هي المالك/ة الوحيد/ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{ $company_name }} بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{ $amount }} ريال سعودي</p>
+            <p class="text-center text-black section-spacing">نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك لـ {{ $borrower_name }} وهو/هي المالك/ة الوحيد/ة من تاريخ و توقيت هذه الشهادة، وقد تم شراؤها من {{ $lender_name }} بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }} مقابل مبلغ وقدره {{ $amount }} ريال سعودي</p>
             <p class="title-section text-black">بيانات السلع/ـة</p>
             @foreach ($products ?? [] as $product)
                 <table class="data-table">
