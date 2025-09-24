@@ -4,20 +4,22 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Enums\CompanyType;
+use App\Enums\FinancingOrderBorrowerTypeEnum;
+use App\Enums\FinancingOrderLenderTypeEnum;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
-use App\Enums\FinancingOrderBorrowerTypeEnum;
-use App\Enums\FinancingOrderLenderTypeEnum;
+
 class SpecialPurposeVehicleFinancingOrderStrategy implements FinancingOrderTypeStrategy
 {
     public function __construct(
         private CreateCompany $createCompany
     ) {}
+
     public function create(Company $company, array $data): FinancingOrder
     {
         $companyData['name'] = $data['customer_name'];
-        $newSpvCompany = $this->createCompany->handle($companyData , CompanyType::SpecialPurposeVehicle);
+        $newSpvCompany = $this->createCompany->handle($companyData, CompanyType::SpecialPurposeVehicle);
 
         $data['lender_type'] = FinancingOrderLenderTypeEnum::SpecialPurposeVehicle;
         $data['lender_identifier'] = $newSpvCompany->id;

@@ -780,9 +780,9 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black">الوقت: {{ $contract_signed_time ?? '' }}</p>
             <p class="title-main text-black">شهادة ملكية</p>
                 <p class="text-center text-black">
-                    نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك ل{{ $customer_name }}
+                    نؤكد نحن لينك أن السلع المذكورة أدناه هي ملك ل{{ $borrower_name }}
 
-                    و هو\هي المالك\ة الوحيد\ة من تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{ $company_name }}
+                    و هو\هي المالك\ة الوحيد\ة من تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{ $lender_name }}
 
                     بناء على العقد المبرم بين الطرفين بتاريخ {{ $contract_signed_date }}
 
@@ -835,7 +835,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                         {{ $product['amount'] ?? '' }} {{ $product['currency'] ?? '' }}
                                     @endif
                                 </td>
-                                <td class="w-1/2 border border-black">{{ $company_name }}</td>
+                                <td class="w-1/2 border border-black">{{ $lender_name }}</td>
                                 <td class="w-1/2 border border-black">
                                     @if (is_object($product) && method_exists($product, 'getOriginalSupplier'))
                                         {{ $product->getOriginalSupplier() }}

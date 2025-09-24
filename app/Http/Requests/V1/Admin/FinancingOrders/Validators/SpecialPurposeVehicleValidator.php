@@ -2,16 +2,11 @@
 
 namespace App\Http\Requests\V1\Admin\FinancingOrders\Validators;
 
-use App\Enums\FinancingOrderTypeEnum;
-use BenSampo\Enum\Rules\EnumValue;
-
 class SpecialPurposeVehicleValidator extends AbstractFinancingOrderTypeValidator
 {
-
     public function getRules(): array
     {
-        return  [
-            'type' => ['nullable', 'integer', new EnumValue(FinancingOrderTypeEnum::class, false)],
+        return [
             'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
             'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
             'phone_number' => ['required_if:is_verification_required,true', 'string', 'phone:phone_country_code,mobile'],
@@ -22,4 +17,3 @@ class SpecialPurposeVehicleValidator extends AbstractFinancingOrderTypeValidator
         ];
     }
 }
-

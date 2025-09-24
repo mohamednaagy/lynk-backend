@@ -4,11 +4,12 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Companies\CreateCompany;
 use App\Enums\CompanyType;
+use App\Enums\FinancingOrderBorrowerTypeEnum;
+use App\Enums\FinancingOrderLenderTypeEnum;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use Illuminate\Support\Arr;
-use App\Enums\FinancingOrderBorrowerTypeEnum;
-use App\Enums\FinancingOrderLenderTypeEnum;
+
 class TimeDepositFinancingOrderStrategy implements FinancingOrderTypeStrategy
 {
     public function __construct(
@@ -17,11 +18,11 @@ class TimeDepositFinancingOrderStrategy implements FinancingOrderTypeStrategy
 
     public function create(Company $company, array $data): FinancingOrder
     {
-       $companyData['name'] = $data['customer_name'];
-        $newSpvCompany = $this->createCompany->handle($companyData , CompanyType::TimeDeposit);
+        $companyData['name'] = $data['customer_name'];
+        $newTimeDespoistCompany = $this->createCompany->handle($companyData, CompanyType::TimeDeposit);
 
         $data['lender_type'] = FinancingOrderLenderTypeEnum::TimeDeposit;
-        $data['lender_identifier'] = $newSpvCompany->id;
+        $data['lender_identifier'] = $newTimeDespoistCompany->id;
         $data['borrower_type'] = FinancingOrderBorrowerTypeEnum::Lender;
         $data['borrower_identifier'] = $company->id;
 
