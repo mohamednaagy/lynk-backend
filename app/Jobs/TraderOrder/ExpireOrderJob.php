@@ -26,18 +26,39 @@ class ExpireOrderJob implements ShouldQueue
 
     private TraderOrder $traderOrder;
 
+    /**
+     * Centralized log channel name
+     */
+    private string $logChannel = LOG_CHANNEL_LOCAL_MARKET;
+
     public function __construct(int $traderOrderTimeLimitId)
     {
         $this->traderOrderTimeLimit = TraderOrderTimeLimit::findOrFail($traderOrderTimeLimitId);
         $this->jobUniqueId = 'expire_trader_order_'.$this->traderOrderTimeLimit->trader_order_id;
         $this->onQueue('expire_trader_order');
         $this->traderOrder = $this->traderOrderTimeLimit->traderOrder;
+        // Log job construction (instantiation)
+        Log::channel($this->logChannel)->info('ExpireOrderJob instantiated', [
+            'time_limit_id' => $this->traderOrderTimeLimit->id,
+            'order_id' => $this->traderOrder->id ?? null,
+            'type' => $this->traderOrderTimeLimit->type->value,
+            'status' => $this->traderOrderTimeLimit->status->value,
+            'action' => $this->traderOrderTimeLimit->action->value,
+            'effective_at' => $this->traderOrderTimeLimit->effective_at,
+        ]);
     }
 
     public function handle()
     {
+        Log::channel($this->logChannel)->info('ExpireOrderJob started', [
+            'time_limit_id' => $this->traderOrderTimeLimit->id,
+        ]);
+
         if (! $this->shouldExpire()) {
             $this->traderOrderTimeLimit->cancel();
+            Log::channel($this->logChannel)->info('Time limit cancelled (not eligible to expire)', [
+                'time_limit_id' => $this->traderOrderTimeLimit->id,
+            ]);
 
             return;
         }
@@ -49,27 +70,28 @@ class ExpireOrderJob implements ShouldQueue
                 default => throw new \Exception("Unknown trader order time limit type: {$this->traderOrderTimeLimit->type->value}"),
             };
         } catch (\Exception $exception) {
-            Log::error("ExpireOrderJob failed: {$exception->getMessage()}", [
-                'time_limit' => $this->traderOrderTimeLimit,
+            Log::channel($this->logChannel)->error(formatLogTitle("ExpireOrderJob failed: {$exception->getMessage()}", $this->traderOrder), [
+                'time_limit_id' => $this->traderOrderTimeLimit->id,
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
                 'exception' => $exception,
             ]);
             $this->traderOrderTimeLimit->fail();
         }
     }
 
-    public function getJobUniqueId(): string
-    {
-        return $this->jobUniqueId;
-    }
-
-    /**
-     * Determine if the TraderOrderTimeLimit should be expired.
-     *
-     * It will be expired if the TraderOrderTimeLimit is pending, the effective_at datetime is in the past,
-     * and the related TraderOrder exists.
-     */
     private function shouldExpire(): bool
     {
+        Log::channel($this->logChannel)->info('should order Expire', [
+            'time_limit_id' => $this->traderOrderTimeLimit->id,
+            'traderOrderTimeLimit status' => $this->traderOrderTimeLimit->status->value,
+            'traderOrderTimeLimit action' => $this->traderOrderTimeLimit->action->value,
+            'traderOrderTimeLimit effective_at' => $this->traderOrderTimeLimit->effective_at,
+            'now' => now(),
+        ]);
+
         return $this->traderOrderTimeLimit
             && $this->traderOrderTimeLimit->status->value === TraderOrderTimeLimitStatus::Pending
             && $this->traderOrderTimeLimit->action->value === TraderOrderTimeLimitAction::AutoCancelOrder
@@ -77,56 +99,59 @@ class ExpireOrderJob implements ShouldQueue
             && $this->traderOrder;
     }
 
-    /**
-     * Expire the order when it is delivery expirable, otherwise cancel the time limit.
-     *
-     * @return void
-     */
     private function expireOrderDelivery()
     {
         if ($this->traderOrder->isDeliveryExpirable()) {
             Trader::driver($this->traderOrder->provider, $this->traderOrder->version)
                 ->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredConfirmationTimeLimit);
+
             $this->traderOrderTimeLimit->expire();
-            Log::info("Expire order {$this->traderOrder->id} successfully");
+
+            Log::channel($this->logChannel)->info(formatLogTitle('Expire order successfully', $this->traderOrder), [
+                'time_limit_id' => $this->traderOrderTimeLimit->id,
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'reference' => $this->traderOrder->reference,
+            ]);
 
             return;
         }
+
         $this->traderOrderTimeLimit->cancel();
-        Log::info("Order {$this->traderOrder->id} is not expirable", [
-            'time_limit' => $this->traderOrderTimeLimit,
+
+        Log::channel($this->logChannel)->info(formatLogTitle('Order is not expirable', $this->traderOrder), [
+            'time_limit_id' => $this->traderOrderTimeLimit->id,
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
+            'reference' => $this->traderOrder->reference,
         ]);
     }
 
-    /**
-     * Expires the order when it is contract sign expirable, otherwise cancels the time limit.
-     *
-     * @param void
-     * @return void
-     */
     private function expireOrderContractSigned()
     {
         $trader = Trader::driver($this->traderOrder->provider, $this->traderOrder->version);
-        // Check if the order is contract sign limit expirable
-        if ($trader->isContractSignLimitEligibleForExpiry($this->traderOrder)) {
-            // Cancel the trader order with the expired contract sign time reason
-            $trader->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
 
-            // Expire the trader order time limit
+        if ($trader->isContractSignLimitEligibleForExpiry($this->traderOrder)) {
+            $trader->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
             $this->traderOrderTimeLimit->expire();
 
-            // Log the successful expiration of the order
-            Log::info("Expire order {$this->traderOrder->id} successfully");
+            Log::channel($this->logChannel)->info(formatLogTitle('Expire order successfully', $this->traderOrder), [
+                'time_limit_id' => $this->traderOrderTimeLimit->id,
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'reference' => $this->traderOrder->reference,
+            ]);
 
             return;
         }
 
-        // Cancel the trader order time limit if the order is not contract sign limit expirable
         $this->traderOrderTimeLimit->cancel();
 
-        // Log the unsuccessful expiration of the order
-        Log::info("Order {$this->traderOrder->id} is not expirable", [
-            'time_limit' => $this->traderOrderTimeLimit,
+        Log::channel($this->logChannel)->info(formatLogTitle('Order is not expirable', $this->traderOrder), [
+            'time_limit_id' => $this->traderOrderTimeLimit->id,
+            'financingOrderId' => $this->traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrder->id,
+            'reference' => $this->traderOrder->reference,
         ]);
     }
 }

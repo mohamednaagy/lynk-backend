@@ -42,7 +42,6 @@ class StoreLocationRequest extends FormRequest
         ];
     }
 
-
     public function messages()
     {
         return [

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Actions\Companies\GetFinancingOrderTypeAction;
+use App\Actions\Contracts\Companies\GetFinancingOrderType;
 use App\Listeners\LogActivity;
 use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageStrategy;
@@ -55,6 +57,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Contracts\Services\PdfServiceInterface::class,
             \App\Services\PdfService::class
+        );
+
+        $this->app->bind(
+            GetFinancingOrderType::class,
+            GetFinancingOrderTypeAction::class
         );
     }
 

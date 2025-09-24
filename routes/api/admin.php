@@ -160,7 +160,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
 
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
-
         Route::prefix('commodity-types')->group(function () {
             Route::get('/dropdown-list', CommodityTypesLiteList::class);
         });

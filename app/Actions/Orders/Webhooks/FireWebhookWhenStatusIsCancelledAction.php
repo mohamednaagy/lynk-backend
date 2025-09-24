@@ -19,7 +19,6 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
         $financingOrder = $traderOrder->order;
 
         $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
-
         $company = $financingOrder->company()->withTrashed()->first();
         WebhookEvent::fire($company, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
@@ -32,12 +31,12 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
                 'trading_reference' => $traderOrder->reference,
                 'current_trading_step' => 'cancelled',
                 'completed_murabaha_step' => $this->getUiStepName($lastCompletedStep?->step),
-                'warranty_document_url' => route('api.v1.admins.generate', [
-                    'document_type' => DocumentType::SELLING_PLEDGE_CERTIFICATE,
+                'warranty_document_url' => formatMediaUrl(route('api.v1.admins.generate', [
+                    'document_type' => DocumentType::getSellingPledgeCertificateType($traderOrder->provider),
                     'context' => [
                         'trader_order_id' => $traderOrder->id,
                     ],
-                ]),
+                ])),
             ],
             'updated_at' => $this->getFormattedDateTime($traderOrder),
         ]);

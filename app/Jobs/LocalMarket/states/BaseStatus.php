@@ -10,10 +10,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 abstract class BaseStatus implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, LocalMarketHelperTrait, Queueable;
+
+    protected const LOG_CHANNEL = 'local_market';
 
     protected LocalMarketWebhook $localMarketWebhook;
 
@@ -30,7 +33,12 @@ abstract class BaseStatus implements ShouldQueue
 
             $this->setUp();
         } catch (\Exception $e) {
-            Log::channel('local_market')->error("failed {$this->className} market order id {$this->localMarketOrderID}", ['message' => $e->getMessage()]);
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle("failed {$this->className} local market order id {$this->localMarketOrderID}", $this->localMarketOrder), [
+                'localMarketOrderId' => $this->localMarketOrderID,
+                'order_reference' => $this->localMarketOrder->external_order_no,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             throw $e;
         }
     }
@@ -45,17 +53,20 @@ abstract class BaseStatus implements ShouldQueue
     {
         $message = $message ?? "add {$this->className} job to queue local_market";
 
-        Log::channel('local_market')->info($message.' for the given order',
-            ['order_id' => $this->localMarketOrder->id]);
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle($message.' for the given order', $this->localMarketOrder),
+            [
+                'localMarketOrderId' => $this->localMarketOrder->id,
+                'order_reference' => $this->localMarketOrder->external_order_no,
+            ]);
     }
 
-    public function failed(\Exception $exception): void
+    public function failed(Throwable $exception): void
     {
-        $errorMessage = "failed {$this->className}, the given order: ".$this->localMarketOrderID;
-        Log::channel('local_market')->error(
+        $errorMessage = formatLocalMarketOrderTitle("failed {$this->className}, the given ", $this->localMarketOrder);
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(
             $errorMessage,
             [
-                'order_id' => $this->localMarketOrderID,
+                'localMarketOrderId' => $this->localMarketOrderID,
                 'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $exception->getMessage(),
                 'trace' => $exception->getTraceAsString(),

@@ -207,8 +207,8 @@ return [
     'media_type_invalid' => 'The selected media type is invalid.',
     'media_or_delete_required' => 'You must either provide media files or choose to delete existing media.',
     'greater_than_zero' => 'Must be greater than zero',
-    'only_english_alpha_numbers_underscore_hyphen_allowed' => "Only english alpha/numbers/underscore/hyphen allowed",
-    'no_hyphen_at_start' => "hyphen cannot be used at the beginning",
+    'only_english_alpha_numbers_underscore_hyphen_allowed' => 'Only english alpha/numbers/underscore/hyphen allowed',
+    'no_hyphen_at_start' => 'hyphen cannot be used at the beginning',
     'pdf' => [
         'document_type_required' => 'Document type is required. Please provide a valid document type.',
         'document_type_string' => 'Document type must be a string.',
@@ -223,4 +223,6 @@ return [
         'transaction_required' => "Document type ':document_type' requires a transaction ID",
         'context_required_field' => 'At least one context field (trader_order_id or transaction_id) must be provided',
     ],
+    'order_not_created_commodity_type_selection_not_allowed' => 'Order not created. Commodity type selection is not allowed for this company.',
+    'the_selected_commodity_type_is_not_allowed_for_this_company' => 'The selected commodity type is not allowed for this company.',
 ];

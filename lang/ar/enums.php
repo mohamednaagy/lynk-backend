@@ -12,6 +12,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
@@ -130,6 +131,7 @@ return [
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه',
         TraderOrderCancelReason::ExpiredContractSignTime => 'تم إلغاء طلب التجارة من قبل النظام بسبب انتهاء وقت توقيع العقد المحدد بـ :value ساعة.',
+        TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'تم إلغاء طلب التجارة من قبل النظام بسبب تجاوز عدد المحاولات المحددة.',
     ],
     UnitOwnershipAction::class => [
         UnitOwnershipAction::SellCommodity => 'بيع السلعة',
@@ -147,6 +149,13 @@ return [
         CompanyLenderClientType::Business => 'شركات',
         CompanyLenderClientType::Individual => 'فردي',
     ],
+
+    FinancingOrderTypeEnum::class => [
+        FinancingOrderTypeEnum::NormalLending => 'تمويل',
+        FinancingOrderTypeEnum::SpecialPurposeVehicle => 'مرابحة الاستثمار لغرض خاص',
+        FinancingOrderTypeEnum::TimeDeposit => 'وديعة لأجل',
+    ],
+
     'document_type' => [
         'client_wakala' => 'وكالة العميل',
         'transfer_ownership_to_lender' => 'نقل الملكية إلى المقرض',

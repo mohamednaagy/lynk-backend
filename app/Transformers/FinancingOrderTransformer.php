@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
@@ -67,6 +68,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'company',
         'commodity_type',
         'commodity_type_id',
+        'type',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -345,5 +347,13 @@ class FinancingOrderTransformer extends TransformerAbstract
         }
 
         return $this->primitive($commodityType->only(['id', 'name']));
+    }
+
+    public function includeType(FinancingOrder $financingOrder)
+    {
+        return $this->primitive([
+            'id' => $financingOrder->type,
+            'name' => FinancingOrderTypeEnum::getDescription($financingOrder->type),
+        ]);
     }
 }

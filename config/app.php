@@ -219,6 +219,7 @@ return [
         Anhskohbo\NoCaptcha\NoCaptchaServiceProvider::class,
 
         App\Providers\TokenServiceProvider::class,
+        App\Providers\SendGridServiceProvider::class,
     ],
 
     /*

@@ -40,10 +40,6 @@ class UpdateCompanyAction implements UpdateCompany
             $lender->commodityTypes()->sync($data['preferred_commodity_types']);
         }
 
-        if (isset($data['lender_order_allowed_commodity_types']) && $this->isAllowedToUpdatePreferredCommodityInOrder($lender, $data['allow_preferred_commodity_in_order'])) {
-            $lender->lenderOrderAllowedCommodityTypes()->sync($data['lender_order_allowed_commodity_types']);
-        }
-
         $lender->lenderDetail()->updateOrCreate(
             ['company_id' => $lender->id],
             Arr::only($data, [
@@ -62,8 +58,13 @@ class UpdateCompanyAction implements UpdateCompany
                 'public_status_comment',
                 'auto_complete_murabaha_order',
                 'webhook_secret_key',
+                'allowed_financing_order_types',
             ])
         );
+
+        if (isset($data['lender_order_allowed_commodity_types']) && $this->isAllowedToUpdatePreferredCommodityInOrder($lender, $data['allow_preferred_commodity_in_order'])) {
+            $lender->lenderOrderAllowedCommodityTypes()->sync($data['lender_order_allowed_commodity_types']);
+        }
 
         return $lender;
     }

@@ -18,5 +18,4 @@ class CommodityTypeStatisticsView extends Model
         'available_value' => MoneyStringCast::class.':currency',
         'reserved_value' => MoneyStringCast::class.':currency',
     ];
-
 }

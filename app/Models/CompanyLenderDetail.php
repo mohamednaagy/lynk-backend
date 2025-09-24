@@ -20,6 +20,7 @@ class CompanyLenderDetail extends Model
         'webhook_secret_key' => 'encrypted',
         'allow_preferred_commodity_in_order' => 'boolean',
         'default_contract_sign_time_limit' => 'integer',
+        'allowed_financing_order_types' => 'array',
     ];
 
     protected $fillable = [
@@ -41,6 +42,7 @@ class CompanyLenderDetail extends Model
         'allow_preferred_commodity_in_order',
         'token_expire_in',
         'token_version',
+        'allowed_financing_order_types',
     ];
 
     public function lender()

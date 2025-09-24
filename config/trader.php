@@ -92,6 +92,7 @@ return [
             ],
             'max_units_per_trader' => (int) env('LYNK_MAX_UNITS_PER_TRADER', 10000),
             'max_count_eligible_units_per_inventory' => (int) env('LYNK_MAX_COUNT_ELIGIBLE_UNITS_PER_INVENTORY', 10000),
+            'refresh_inventory_stock_delay' => (int) env('REFRESH_INVENTORY_STOCK_DELAY', 10), // seconds
             'loan_coverage_strategy' => env('LOAN_COVERAGE_STRATEGY', 'optimized'),
             'loan_coverage_timeout' => (int) env('LOAN_COVERAGE_TIMEOUT', 3), // 3sec
             'default_contract_sign_time_limit' => function () {

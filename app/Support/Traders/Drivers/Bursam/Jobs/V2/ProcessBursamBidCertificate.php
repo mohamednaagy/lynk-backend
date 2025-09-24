@@ -37,7 +37,7 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
-        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+        Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -52,26 +52,44 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.'  in ProcessBursamBidCertificate job', ['traderOrderId' => $this->traderOrderId ]);
-                return;
-            }
-            
-            if($traderOrder->status->isNot(TraderOrderStatus::InProgress)){
-                Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamBidCertificate job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
-                return;
-            }
-                
-            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
-                Log::channel('bursam')->warning('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', [
-                    'traderOrderId' => $this->traderOrderId ,
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
-                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
-                ]);
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamBidCertificate Job - not found ', ['traderOrderId' => $this->traderOrderId]);
+
                 return;
             }
 
-            Log::channel('bursam')->info('bursa Purchasing Step => Starting ProcessBursamBidCertificate Job', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId]);
+            if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamBidCertificate job', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'status' => $traderOrder->status->value]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)) {
+                Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => ProcessBursamBidCertificate: traderOrderId: '.$this->traderOrderId.' - Job skipped - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'expected_action' => FinancingOrderHistory::GetTtiHoldingCertificateDocument,
+                ]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiHoldingCertificateDocument)
+            ) {
+                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamBidCertificate Job - incorrect action state', $traderOrder), [
+                    'financingOrderId' => $traderOrder?->order?->id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'latest_action' => $traderOrder->traderHistories()->latest()->first()->action,
+                    'expected_action' => FinancingOrderHistory::GetTtiHoldingCertificateDocument,
+                ]);
+
+                return;
+            }
+
+            log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa Purchasing Step => Starting ProcessBursamBidCertificate Job', $traderOrder), ['financingOrderId' => $traderOrder->financing_order_id, 'traderOrderId' => $this->traderOrderId]);
 
             Trader::driver('bursam', $traderOrder->version)
                 ->getBidCertificateDetails($traderOrder);
@@ -91,7 +109,12 @@ class ProcessBursamBidCertificate implements ShouldBeUnique, ShouldQueue
     public function failed($exception)
     {
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-        Log::channel('bursam')->error('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', ['financingOrderId' => $traderOrder->order->id, 'traderOrderId' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => faild to get ProcessBursamBidCertificate and we will cancel order', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrderId,
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         (new RunHoldTraderWhenMarketOpenCommand)->handle();

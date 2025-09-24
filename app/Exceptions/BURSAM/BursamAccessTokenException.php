@@ -14,7 +14,7 @@ class BursamAccessTokenException extends Exception
         $code = ErrorCode::CAN_NOT_DEAL_WITH_BURSAM_SYSTEM;
         $message = 'Error while getting access token from Bursam';
 
-        Log::error('Error While Trying To Get Token From BURSAM for request details check BURSAM log files.');
+        Log::channel(LOG_CHANNEL_BURSAM)->error('Error While Trying To Get Token From BURSAM for request details check BURSAM log files.');
 
         if ($request->expectsJson()) {
             return response()->errorResponse(

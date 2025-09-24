@@ -41,6 +41,9 @@ class UpdateInventoryStock implements ShouldQueue
     public function handle()
     {
         try {
+            if (! $this->inventory->canBeEditable()) {
+                return;
+            }
 
             Log::info("Starting transaction for inventory ID: {$this->inventory->id}", [
                 'inventory' => $this->inventory,

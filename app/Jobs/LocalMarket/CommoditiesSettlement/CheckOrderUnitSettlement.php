@@ -37,7 +37,6 @@ class CheckOrderUnitSettlement extends BaseCommoditiesSettlement
             ->where('local_market_order_id', $orderId)
             ->whereNull('settlement_status')
             ->chunkById(self::CHUNK_SIZE, function ($units) {
-                self::logInfo('Processing chunk of units');
                 foreach ($units as $unit) {
                     $this->processUnit($unit);
                 }
@@ -59,10 +58,6 @@ class CheckOrderUnitSettlement extends BaseCommoditiesSettlement
     {
         $unit->update([
             'settlement_status' => $status,
-        ]);
-
-        self::logInfo("Updated settlement_status to $status", [
-            'unit_id' => $unit->id,
         ]);
     }
 }

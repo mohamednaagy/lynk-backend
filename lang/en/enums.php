@@ -11,6 +11,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
@@ -126,6 +127,7 @@ return [
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with Trader.',
         TraderOrderCancelReason::ExpiredContractSignTime => 'Trade request cancelled by system due to Contract Sign Time Limit of :value hours has expired.',
         TraderOrderCancelReason::ExpiredConfirmationTimeLimit => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit has expired.',
+        TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'Purchase Retries Exceeded',
     ],
     UnitOwnershipAction::class => [
         UnitOwnershipAction::SellCommodity => 'Sell Commodity',
@@ -142,6 +144,12 @@ return [
     CompanyLenderClientType::class => [
         CompanyLenderClientType::Business => 'Business',
         CompanyLenderClientType::Individual => 'Individual',
+    ],
+
+    FinancingOrderTypeEnum::class => [
+        FinancingOrderTypeEnum::NormalLending => 'Normal Lending ',
+        FinancingOrderTypeEnum::SpecialPurposeVehicle => 'Special Purpose Vehicle (SPV)',
+        FinancingOrderTypeEnum::TimeDeposit => 'Time Deposit',
     ],
 
     'document_type' => [

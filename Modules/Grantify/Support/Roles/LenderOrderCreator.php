@@ -27,5 +27,8 @@ class LenderOrderCreator
         Subject::CommodityMarketCommodityTypes => [
             Action::Index,
         ],
+        Subject::FinancingOrderTypes => [
+            Action::Index,
+        ],
     ];
 }

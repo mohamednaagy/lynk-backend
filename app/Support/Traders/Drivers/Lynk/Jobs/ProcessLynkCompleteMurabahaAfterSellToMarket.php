@@ -42,15 +42,16 @@ class ProcessLynkCompleteMurabahaAfterSellToMarket implements ShouldBeUnique, Sh
                 ->find($this->traderOrderId);
 
             if (is_null($traderOrder)) {
-                Log::warning('ProcessLynkCompleteMurabahaAfterSellToMarket: TraderOrder not found', [
-                    'trader_order_id' => $this->traderOrderId,
+                log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCompleteMurabahaAfterSellToMarket not found trader_order_id:'.$this->traderOrderId, [
+                    'traderOrderId' => $this->traderOrderId,
                 ]);
                 throw new \Exception('TraderOrder not found with reference: '.$this->traderOrderId);
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)) {
-                Log::info('ProcessLynkCompleteMurabahaAfterSellToMarket: Order not in expected state', [
-                    'trader_order_id' => $this->traderOrderId,
+                log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('ProcessLynkCompleteMurabahaAfterSellToMarket: Order not in expected state ', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
                     'last_action' => $traderOrder->last_history_action,
                     'expected_action' => FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
                 ]);
@@ -64,12 +65,14 @@ class ProcessLynkCompleteMurabahaAfterSellToMarket implements ShouldBeUnique, Sh
                     $traderOrder->version
                 ))->updateMurabhaCompleteDocument($traderOrder, []);
 
-                Log::info('ProcessLynkCompleteMurabahaAfterSellToMarket: Successfully completed', [
-                    'trader_order_id' => $this->traderOrderId,
+                log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('ProcessLynkCompleteMurabahaAfterSellToMarket: Successfully completed ', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
                 ]);
             } catch (\Exception $e) {
-                Log::error('ProcessLynkCompleteMurabahaAfterSellToMarket: Failed to complete', [
-                    'trader_order_id' => $this->traderOrderId,
+                log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkCompleteMurabahaAfterSellToMarket: Failed to complete ', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
                 ]);
@@ -95,6 +98,12 @@ class ProcessLynkCompleteMurabahaAfterSellToMarket implements ShouldBeUnique, Sh
 
     public function failed($exception)
     {
-        Log::error('process sell commodity', ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage()]);
+        $traderOrder = TraderOrder::findOrFail($this->traderOrderId);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at ProcessLynkCompleteMurabahaAfterSellToMarket process sell commodity ', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
+            'message' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(),
+        ]);
     }
 }

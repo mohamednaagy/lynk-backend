@@ -15,9 +15,11 @@ class TransferOwnerShipAction implements TransferOwnerShip
     {
         $localMarketOrder = $this->getLocalMarketOrderByReference($reference);
         if ($localMarketOrder) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('TransferOwnerShipAction   - change status to TransferOwnershipToCustomer ', $localMarketOrder));
+
             $localMarketOrder->changeStatusTo(OrderStatus::TransferOwnershipToCustomer);
         } else {
-            Log::channel('local_market')->error('LocalMarketOrder not found', [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('TransferOwnerShipAction not found local market order with reference => '.$reference, [
                 'reference' => $reference,
             ]);
             throw new \Exception('LocalMarketOrder not found with reference: '.$reference);

@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Admin\Companies;
 use App\Enums\CompanyMarketType;
 use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyType;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\OrderFeeType;
 use App\Enums\TraderOrderMode;
 use App\Models\Company;
@@ -183,6 +184,18 @@ class StoreCompanyRequest extends FormRequest
 
             'lender_order_allowed_commodity_types.*' => [
                 'required', new CheckActiveCommodityTypeRule,
+            ],
+
+            'allowed_financing_order_types' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'allowed_financing_order_types.*' => [
+                'required',
+                'integer',
+                new EnumValue(FinancingOrderTypeEnum::class, false),
             ],
         ];
     }

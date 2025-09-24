@@ -22,16 +22,14 @@ class ProcessAutoCompleteSell implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    private const LOG_CHANNEL = 'bursam_autosell';
-
     public function __construct(
         private readonly int $traderOrderId
     ) {
         // Disable tenancy inside the job
         app(Tenancy::class)->end();
 
-        Log::channel(self::LOG_CHANNEL)->info('ProcessAutoCompleteSell job queued', [
-            'trader_order_id' => $this->traderOrderId,
+        Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info('ProcessAutoCompleteSell job queued trader order id => '.$this->traderOrderId, [
+            'traderOrderId' => $this->traderOrderId,
         ]);
     }
 
@@ -95,8 +93,9 @@ class ProcessAutoCompleteSell implements ShouldQueue
             ->find($this->traderOrderId);
 
         if (! $traderOrder || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
-            Log::channel(self::LOG_CHANNEL)->info('Invalid trader order state', [
-                'trader_order_id' => $this->traderOrderId,
+            Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info(formatLogTitle('Invalid trader order state', $traderOrder), [
+                'financingOrderId' => $traderOrder?->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
                 'exists' => ! is_null($traderOrder),
                 'last_action' => $traderOrder?->last_history_action,
             ]);
@@ -118,8 +117,9 @@ class ProcessAutoCompleteSell implements ShouldQueue
             ->first();
 
         if (! $client || ! $client->auto_complete_sell) {
-            Log::channel(self::LOG_CHANNEL)->info('Invalid client state', [
-                'trader_order_id' => $this->traderOrderId,
+            Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info(formatLogTitle('Invalid client state', $traderOrder), [
+                'financingOrderId' => $financingOrder->id,
+                'traderOrderId' => $this->traderOrderId,
                 'client_exists' => ! is_null($client),
                 'auto_complete_sell' => $client?->auto_complete_sell,
                 'national_id' => $financingOrder->national_id,
@@ -137,8 +137,9 @@ class ProcessAutoCompleteSell implements ShouldQueue
         $period = CompanyLenderClientService::getAutoCompleteSellPeriod($client, $traderOrder->created_at);
 
         if (! $period) {
-            Log::channel(self::LOG_CHANNEL)->info('No valid period found', [
-                'trader_order_id' => $this->traderOrderId,
+            Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info(formatLogTitle('No valid period found', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
                 'created_at' => $traderOrder->created_at,
             ]);
 
@@ -150,7 +151,7 @@ class ProcessAutoCompleteSell implements ShouldQueue
 
     private function handleFailure(\Throwable $e): void
     {
-        Log::channel(self::LOG_CHANNEL)->error('ProcessAutoCompleteSell job failed', [
+        Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->error('ProcessAutoCompleteSell job failed trader_order_id => '.$this->traderOrderId, [
             'trader_order_id' => $this->traderOrderId,
             'message' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),

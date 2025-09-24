@@ -193,4 +193,9 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     {
         $this->update(['password' => $password, 'email_verified_at' => now()]);
     }
+
+    public function lender(): BelongsTo
+    {
+        return $this->belongsTo(Lender::class, 'company_id');
+    }
 }
