@@ -19,7 +19,6 @@ class LocalMarketOrder extends Model
         'source',
         'amount',
         'national_id',
-        'customer_name',
         'status',
         'data',
         'comment',
@@ -32,6 +31,8 @@ class LocalMarketOrder extends Model
         'order_no',
         'preferred_commodity_type',
         'commodities_settlement_status',
+        'lender_identifier',
+        'borrower_identifier',
     ];
 
     protected $attributes = [

@@ -68,7 +68,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'company',
         'commodity_type',
         'commodity_type_id',
-        'type',
+        'type'
     ];
 
     public function transform(FinancingOrder $financingOrder)

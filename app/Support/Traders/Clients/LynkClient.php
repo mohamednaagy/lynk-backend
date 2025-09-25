@@ -101,11 +101,13 @@ class LynkClient
      */
     private function prepareOrderData($financingOrder): array
     {
+
         return [
             'currency' => $financingOrder->currency,
             'national_id' => $financingOrder->national_id,
             'amount' => $financingOrder->amount->convertAndFormatByDecimal(),
-            'customer_name' => $financingOrder->customer_name,
+            'lender_identifier' => $financingOrder->getLenderInfo()['id'],
+            'borrower_identifier' => $financingOrder->getBorrowerInfo()['name'],
             'external_order_no' => $this->traderOrder->reference,
             'source' => $this->traderOrder->provider,
             'company_id' => $financingOrder->company_id,

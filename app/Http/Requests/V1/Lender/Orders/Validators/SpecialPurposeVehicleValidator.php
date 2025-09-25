@@ -2,9 +2,6 @@
 
 namespace App\Http\Requests\V1\Lender\Orders\Validators;
 
-use App\Enums\FinancingOrderTypeEnum;
-use BenSampo\Enum\Rules\EnumValue;
-
 class SpecialPurposeVehicleValidator extends AbstractFinancingOrderTypeValidator
 {
     public function getRules(): array
@@ -17,7 +14,6 @@ class SpecialPurposeVehicleValidator extends AbstractFinancingOrderTypeValidator
             'amount' => ['required', 'numeric', 'gte:1'],
             'selling_price' => ['required', 'numeric', 'gte:amount'],
             'is_verification_required' => ['required', 'boolean'],
-            'type' => ['nullable', 'integer', new EnumValue(FinancingOrderTypeEnum::class, false)],
         ];
     }
 }

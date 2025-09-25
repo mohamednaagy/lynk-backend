@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\Area;
+use App\Enums\FinancingOrderBorrowerTypeEnum;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
@@ -74,6 +76,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'charged_trader_orders_count',
         'commodity_type_id',
         'type',
+        'borrower_identifier',
+        'lender_type',
+        'lender_identifier',
+        'borrower_type',
     ];
 
     protected $casts = [
@@ -85,6 +91,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'phone_number' => E164PhoneNumberCast::class,
         'amount' => MoneyStringCast::class.':currency',
         'selling_price' => MoneyStringCast::class.':currency',
+        'type' => FinancingOrderTypeEnum::class,
     ];
 
     protected function currentStep(): Attribute
@@ -510,5 +517,44 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
             return Trader::Lynk;
         }
+    }
+
+    protected function customerName(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => ['borrower_identifier' => $value],
+            get: fn () => $this->getBorrowerName()
+        );
+    }
+
+    public function getLenderInfo(): array
+    {
+        return [
+            'id' => $this->lender_identifier,
+            'type' => $this->lender_type,
+            'name' => $this->getLenderName(),
+        ];
+    }
+
+    public function getBorrowerInfo()
+    {
+        return [
+            'type' => $this->borrower_type,
+            'name' => $this->getBorrowerName(),
+        ];
+    }
+
+    public function getLenderName()
+    {
+        return Lender::withTrashed()->find($this->lender_identifier)->name;
+    }
+
+    public function getBorrowerName()
+    {
+        if ($this->borrower_type == FinancingOrderBorrowerTypeEnum::Lender) {
+            return $this->company->name;
+        }
+
+        return $this->borrower_identifier;
     }
 }

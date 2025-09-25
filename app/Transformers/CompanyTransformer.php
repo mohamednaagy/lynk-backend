@@ -227,13 +227,13 @@ class CompanyTransformer extends TransformerAbstract
             ])->all()
         );
     }
-
+    
     public function includeAllowedFinancingOrderTypes(Company $company): Primitive
     {
         return $this->primitive(collect($company->lender->allowedFinancingOrderTypes())->map(function ($value) {
             return [
-                'id' => $value,
-                'name' => FinancingOrderTypeEnum::getDescription($value),
+                'id' => $value,                                 
+                'name'   => FinancingOrderTypeEnum::getDescription($value),  
             ];
         })->values());
     }

@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
-use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
@@ -77,6 +76,7 @@ use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 
 /*
 |--------------------------------------------------------------------------

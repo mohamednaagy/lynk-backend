@@ -28,7 +28,7 @@ class TransferCommodityToCustomerStatus extends BaseStatus
         $this->unitService->changeOrderUnitsOwnershipTo(
             $this->localMarketOrder,
             OwnershipTypes::Customer,
-            $this->localMarketOrder->customer_name,
+            $this->localMarketOrder->borrower_identifier,
             UnitOwnershipAction::BorrowerOwnershipTransfer
         );
 

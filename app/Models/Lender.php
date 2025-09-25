@@ -47,4 +47,6 @@ class Lender extends Company
     {
         return $this->allowedFinancingOrderTypes()[0] ?? FinancingOrderTypeEnum::NormalLending;
     }
+
+    
 }

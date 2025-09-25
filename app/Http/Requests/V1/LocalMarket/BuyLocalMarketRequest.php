@@ -29,7 +29,7 @@ class BuyLocalMarketRequest extends FormRequest
             'source' => ['required', 'string'],
             'amount' => ['required', 'numeric'],
             'national_id' => ['required', 'numeric'],
-            'customer_name' => ['required', 'string'],
+            'borrower_identifier' => ['required', 'string'],
             'comment' => ['nullable', 'string'],
             'company_id' => ['required', 'numeric'],
             'reference' => ['required', 'string'],

@@ -47,7 +47,7 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
             $this->unitService->changeOrderUnitsOwnershipTo(
                 $order,
                 OwnershipTypes::Company,
-                $order->company_id,
+                $order->lender_identifier,
                 UnitOwnershipAction::PurchaseCommodity
             );
         } catch (\Throwable $e) {

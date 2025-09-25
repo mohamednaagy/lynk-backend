@@ -22,7 +22,6 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
         $order = LocalMarketOrder::create(
             Arr::only($data, [
                 'company_id',
-                'customer_name',
                 'external_order_no',
                 'national_id',
                 'amount',
@@ -32,6 +31,8 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
                 'preferred_commodity_type',
                 'buying_uuid',
                 'selling_uuid',
+                'lender_identifier',
+                'borrower_identifier',
             ])
         );
         $this->createLocalMarketOrderHistory($order, OrderHistoryStatus::initiate);

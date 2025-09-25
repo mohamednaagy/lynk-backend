@@ -119,7 +119,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                 });
 
                 Route::get('/commodity-types/dropdown-list', CommodityTypesLiteList::class);
-                Route::get('/financing-order-types/dropdown-list', [FinancingOrderTypesLiteList::class, 'index']);
+                Route::get('/financing-order-types/dropdown-list', [FinancingOrderTypesLiteList::class , 'index']);
 
             });
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);

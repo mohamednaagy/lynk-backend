@@ -793,13 +793,13 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 استناداً إلى أحكام المادة (3/سادساً) من الاتفاقية الاطارية فيما بين المورد ولينك بعقد رقم
                 {{ $financing_order->contract_number }}
                 نفيدكم بأن السلعة التي جرى نقل ملكيتها من المورد إلى
-                {{ $financing_order->company->name }}
+                {{ $lender_name }}
                 بموجب أمر الشراء رقم
                 {{ $financing_order->id }}
                 وتاريخ
                 {{ $date }}
                 هي في ملك
-                {{ $financing_order->company->name }}
+                {{ $lender_name }}
                 ابتداءً من تاريخ {{ $date }} الساعة
                 {{ $time }}
                 مقابل مبلغ وقدره
@@ -879,12 +879,12 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     @endforeach
                     </tbody>
                 </table>
-            <p class="footer-text text-black text-right">سيتم حفظ السلعة، بالنيابة عن {{ $company_name }} إلى أن يتم إشعارنا بالتصرف.</p>
-            <p class="footer-text text-black text-right">{{ $company_name }} سيكون مسؤولا عن رسوم التخزين والحفظ خلال مدة تملك السلعة.</p>
+            <p class="footer-text text-black text-right">سيتم حفظ السلعة، بالنيابة عن {{ $lender_name }} إلى أن يتم إشعارنا بالتصرف.</p>
+            <p class="footer-text text-black text-right">{{ $lender_name }} سيكون مسؤولا عن رسوم التخزين والحفظ خلال مدة تملك السلعة.</p>
             <p class="footer-text text-black text-right">
                 استناداً إلى أحكام المادة (2/سادساً) من الاتفاقية الإطارية فيما بين المورد ولينك؛ تضمن لينك بأن
                 السلعة التي جرى نقل ملكيتها من المورد إلى
-                {{ $financing_order->company->name }}
+                {{ $lender_name }}
                 بموجب أمر الشراء رقم
                 {{ $financing_order->id }}
                 خالية من أي امتياز أو عبء، وأن المواد المستخدمة فيها مطابقة للمواصفات والمقاييس السعودية.
