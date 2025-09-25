@@ -68,7 +68,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'company',
         'commodity_type',
         'commodity_type_id',
-        'type'
+        'type',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -120,7 +120,9 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCustomerName(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->customer_name);
+        $customerName = $financingOrder->type->is(FinancingOrderTypeEnum::NormalLending) ? $financingOrder->getBorrowerInfo()['name'] : $financingOrder->getLenderInfo()['name'];
+
+        return $this->primitive($customerName);
     }
 
     public function includeNationalId(FinancingOrder $financingOrder)
