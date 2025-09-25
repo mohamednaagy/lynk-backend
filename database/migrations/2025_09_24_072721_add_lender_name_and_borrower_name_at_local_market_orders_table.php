@@ -17,7 +17,7 @@ return new class extends Migration
             $table->renameColumn('customer_name', 'borrower_identifier');
         });
         LocalMarketOrder::with('lender')->get()->each(function ($order) {
-            $order->lender_identifier = $order->lender->id;
+            $order->lender_identifier = $order->lender?->id;
             $order->save();
 
         });
