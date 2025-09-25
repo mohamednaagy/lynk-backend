@@ -309,6 +309,7 @@ return [
         'context_required_field' => 'يجب تقديم حقل سياق واحد على الأقل (معرف طلب التاجر أو معرف المعاملة)',
         'order_not_created_commodity_type_selection_not_allowed' => 'لا يمكن إنشاء الطلب. لا يسمح باختيار نوع السلعة لهذه الشركة.',
         'the_selected_commodity_type_is_not_allowed_for_this_company' => 'النوع المختار للسلعة غير مسموح به لهذه الشركة.',
-        'the_selected_financing_order_type_is_not_allowed_for_this_company' => 'النوع المختار للطلب غير مسموح به لهذه الشركة.',
+        'the_selected_financing_order_type_is_not_allowed_for_this_company' => 'لا يمكن إنشاء الطلب. النوع :type غير مسموح به لهذه الشركة.',
+        'need_to_select_financing_order_type' => 'يجب اختيار نوع الطلب لإنشاء الطلب.',
     ],
 ];

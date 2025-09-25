@@ -5,7 +5,7 @@ namespace App\Rules;
 use App\Models\Lender;
 use Illuminate\Contracts\Validation\Rule;
 
-class CheckFinancingOrderTypeExistAtCompanyRule implements Rule
+class CheckNeedToSelectFinancingOrderTypeRule implements Rule
 {
     private $lenderId;
 
@@ -24,10 +24,12 @@ class CheckFinancingOrderTypeExistAtCompanyRule implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        $this->value = $value;
         $allowedFinancingOrderTypes = Lender::find($this->lenderId)->allowedFinancingOrderTypes();
+        if (count($allowedFinancingOrderTypes) === 1) {
+            return true;
+        }
 
-        return in_array($value, $allowedFinancingOrderTypes);
+        return false;
     }
 
     /**
@@ -35,6 +37,6 @@ class CheckFinancingOrderTypeExistAtCompanyRule implements Rule
      */
     public function message(): string
     {
-        return __('validation.the_selected_financing_order_type_is_not_allowed_for_this_company', ['type' => $this->value]);
+        return __('validation.need_to_select_financing_order_type');
     }
 }
