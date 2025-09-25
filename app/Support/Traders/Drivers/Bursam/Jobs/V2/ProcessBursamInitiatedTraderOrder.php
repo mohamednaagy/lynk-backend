@@ -35,7 +35,7 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
     public function __construct(protected int $traderOrderId)
     {
         $this->onQueue('bursam');
-        Log::channel('bursam')->info('bursa purchasing step => ProcessBursamInitiatedTraderOrder: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
+        Log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => ProcessBursamInitiatedTraderOrder: traderOrderId: '.$this->traderOrderId.' - Job constructor', ['traderOrderId' => $this->traderOrderId]);
     }
 
     /**
@@ -45,39 +45,50 @@ class ProcessBursamInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
+        log::channel(LOG_CHANNEL_BURSAM)->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
+
         $traderOrder = TraderOrder::query()
             ->find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
-            Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.'in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId]);
+            log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamInitiatedTraderOrder Job - not found trader_order_id:'.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+            ]);
+
             return;
         }
 
+        if ($traderOrder->status->isNot(TraderOrderStatus::Initiated)) {
+            Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status initiated in ProcessBursamInitiatedTraderOrder job', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
+                'status' => $traderOrder->status->value,
+            ]);
 
-        if($traderOrder->status->isNot(TraderOrderStatus::Initiated)){
-            Log::channel('bursam')->warning('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status initiated in ProcessBursamInitiatedTraderOrder job', ['traderOrderId' => $this->traderOrderId , 'status' => $traderOrder->status->value]);
             return;
         }
 
-        Log::channel('bursam')->info('bursa purchasing step => Starting ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
         Trader::driver('bursam', $traderOrder->version)->processInitiatedTraderOrder($traderOrder);
-        Log::channel('bursam')->info('bursa purchasing step => finishing ProcessBursamInitiatedTraderOrder Job', ['traderOrderId' => $this->traderOrderId]);
+        log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => finishing ProcessBursamInitiatedTraderOrder Job', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $this->traderOrderId,
+        ]);
 
     }
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('bursa purchasing step => ProcessBursamInitiatedTraderOrder failed method detail', [
+        log::channel(LOG_CHANNEL_BURSAM)->error('error in failed function at ProcessBursamInitiatedTraderOrder - trader_order_id => '.$this->traderOrderId, [
+            'traderOrderId' => $this->traderOrderId,
             'code' => $exception->getCode(),
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
-            'traderOrderId' => $this->traderOrderId,
         ]);
 
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            Log::channel('bursam')->error('bursa purchasing step => trader order not found in ProcessBursamInitiatedTraderOrder failed method', ['traderOrderId' => $this->traderOrderId]);
+            log::channel(LOG_CHANNEL_BURSAM)->error('error in failed function at ProcessBursamInitiatedTraderOrder  not found trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId]);
 
             return;
         }

@@ -34,7 +34,7 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function __construct(protected int $traderOrderId)
     {
-        $this->onQueue('initiate_local_market_orders');
+        $this->onQueue('trader_order_initiation');
     }
 
     /**
@@ -47,18 +47,18 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (is_null($traderOrder)) {
-            Log::error('ProcessLynkInitiatedTraderOrder', [
-                'trader_order_id' => $this->traderOrderId,
-                'message' => 'Trader order not found to initiate with reference: '.$this->traderOrderId,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkInitiatedTraderOrder not found trader_order_id:'.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
             ]);
             throw new \Exception('Trader order not found to initiate with reference: '.$this->traderOrderId);
         }
 
         if (! $traderOrder->status->is(TraderOrderStatus::Initiated)) {
-            Log::error('ProcessLynkInitiatedTraderOrder', [
-                'trader_order_id' => $this->traderOrderId,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('ProcessLynkInitiatedTraderOrder trader order is not initiated status', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
                 'current_status' => $traderOrder->status,
-                'message' => 'Trader order is not initiated with reference: '.$this->traderOrderId,
+                'expected_status' => TraderOrderStatus::Initiated,
             ]);
             throw new \Exception('Trader order is not initiated with reference: '.$this->traderOrderId);
         }
@@ -73,20 +73,17 @@ class ProcessLynkInitiatedTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            Log::error('ProcessLynkInitiatedTraderOrder', [
-                'trader_order_id' => $this->traderOrderId,
-                'message' => 'Trader order not found to failed to initiate with reference: '.$this->traderOrderId,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkInitiatedTraderOrder not found trader_order_id:'.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
             ]);
             throw new \Exception('Trader order not found to failed to initiate with reference: '.$this->traderOrderId);
         }
 
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, TraderOrderCancelReason::FailureToPurchase);
-        Log::error(
-            method_exists('getMessage', $exception)
-                ? $exception->getMesage()
-                : 'Cannot proceed to buy product',
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle(method_exists('getMessage', $exception) ? $exception->getMesage() : 'Cannot proceed to buy product', $traderOrder),
             [
+                'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
                 'exception' => $exception,
             ]

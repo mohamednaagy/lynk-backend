@@ -58,7 +58,7 @@ class TransactionUtil implements TransactionUtilInterface
         array $meta
     ): Transaction {
         try {
-            Log::info('TransactionUtil::process START', [
+            Log::info('TransactionUtil::process START wallet_id => '.$wallet->getKey().' reference_number => '.$refrenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'reason' => $reason,
                 'reason_name' => TransactionReason::getKey($reason),
@@ -68,7 +68,7 @@ class TransactionUtil implements TransactionUtilInterface
 
             $handler = $this->resolveHandler($reason);
 
-            Log::info('TransactionUtil::process - Handler resolved', [
+            Log::info('TransactionUtil::process - Handler resolved wallet_id => '.$wallet->getKey().' reference_number => '.$refrenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'handler_class' => get_class($handler),
                 'reason' => $reason,
@@ -80,7 +80,7 @@ class TransactionUtil implements TransactionUtilInterface
 
             $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
-            Log::info('TransactionUtil::process SUCCESS', [
+            Log::info('TransactionUtil::process SUCCESS wallet_id => '.$wallet->getKey().' reference_number => '.$refrenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $result->id,
                 'execution_time_ms' => $executionTime,
@@ -89,7 +89,7 @@ class TransactionUtil implements TransactionUtilInterface
             return $result;
 
         } catch (\Exception $e) {
-            Log::error('TransactionUtil::process FAILED', [
+            Log::error('TransactionUtil::process FAILED wallet_id => '.$wallet->getKey().' reference_number => '.$refrenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'reason' => $reason,
                 'error' => $e->getMessage(),

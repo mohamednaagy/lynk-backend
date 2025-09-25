@@ -113,7 +113,10 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
      */
     public function processInitiatedTraderOrder(TraderOrder $traderOrder): TraderOrder
     {
-        Log::channel('local_market')->info("Create New Order at Local Market For Trader Order id => {$traderOrder->id} and financing order => {$traderOrder->order->id}");
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Create New Order at Local Market ', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
+        ]);
         $commodityData = (new GetSuitableCommodityTypesService($traderOrder))->resolve();
         LynkClient::of($traderOrder)->createOrder($commodityData['commodity_types_id']);
         $traderOrder->update([
@@ -154,7 +157,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                 FinancingOrderHistory::AttachSellConfirmationDocument,
             );
         } catch (\Throwable $e) {
-            Log::channel('local_market')->error('Failed to create sell-confirmation-certificate', [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create sell-confirmation-certificate', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
                 'message' => $e->getMessage(),
             ]);
 
@@ -186,8 +191,9 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {
-            Log::info('Creating selling commodity to customer document', [
-                'trader_order_id' => $traderOrder->id,
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Creating selling commodity to customer document', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
             ]);
             $this->withLocale('ar', function () use ($traderOrder) {
                 $dateTime = $traderOrder->traderHistories()
@@ -204,6 +210,12 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                 );
             });
         } catch (Exception $exception) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create customer ownership document', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]);
             throw new TraderException(
                 'Failed to create customer ownership document',
                 [
@@ -249,15 +261,17 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         $cancelledByType = TraderOrderCancelType::System,
         ?User $cancelledBy = null
     ): int {
-        Log::channel('local_market')->info('Starting trader order cancellation', [
-            'trader_order_id' => $traderOrder->id,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('Starting trader order cancellation', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'mode' => $traderOrder->mode,
         ]);
 
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason, cancelledByType: $cancelledByType, cancelledBy: $cancelledBy);
 
-        Log::channel('local_market')->info('UpdateTraderOrderStatusToPendingCancel completed', [
-            'trader_order_id' => $traderOrder->id,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('UpdateTraderOrderStatusToPendingCancel completed', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
         ]);
 
         match ($traderOrder->mode) {
@@ -294,14 +308,16 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         $cancelledByType,
         ?User $cancelledBy
     ): void {
-        Log::channel('local_market')->info('About to dispatch ProcessLynkCancelOrderAtLocalMarket', [
-            'trader_order_id' => $traderOrder->id,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('About to dispatch ProcessLynkCancelOrderAtLocalMarket', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
         ]);
 
         ProcessLynkCancelOrderAtLocalMarket::dispatch($traderOrder->id, $cancelReason);
 
-        Log::channel('local_market')->info('ProcessLynkCancelOrderAtLocalMarket Job dispatched', [
-            'trader_order_id' => $traderOrder->id,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLogTitle('ProcessLynkCancelOrderAtLocalMarket Job dispatched', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
         ]);
     }
 

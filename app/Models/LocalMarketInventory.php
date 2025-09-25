@@ -107,7 +107,7 @@ class LocalMarketInventory extends Model
      */
     public function getIsDeletableAttribute(): bool
     {
-        return $this->reserved_items == 0;
+        return $this->reserved_items == 0 && $this->is_editable;
     }
 
     public function price()
@@ -131,7 +131,7 @@ class LocalMarketInventory extends Model
         $currentReservedItems = $this->reserved_items;
         $updated = $this->updateQuantities();
         $this->refresh();
-        Log::channel('local_market')->info('Refreshing stock quantities for inventory: ', [
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Refreshing stock quantities for inventory: ', [
             'inventory_id' => $this->id,
             'current_available_quantity' => $currentAvailableQuantity,
             'current_reserved_items' => $currentReservedItems,

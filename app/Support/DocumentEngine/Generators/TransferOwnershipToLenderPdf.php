@@ -19,17 +19,17 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
     protected function prepareData()
     {
         $traderOrder = $this->getTraderOrder();
+        $financingOrder = $traderOrder->order;
         $products = collect($traderOrder->products); // Convert to Collection
-        $amount = $traderOrder->amount;
         $currentTimeInRiyadhTz = $traderOrder->traderHistories()->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)->first()->created_at;
 
         $data = [
-            'order_id' => $traderOrder->order->id,
+            'order_id' => $financingOrder->id,
             'reference_number' => $traderOrder->id,
             'trader_order_reference' => $traderOrder->reference,
             'lender_name' => $traderOrder->order->getLenderInfo()['name'],
             'order_number' => $traderOrder->financing_order_id,
-            'amount' => $amount,
+            'amount' => $financingOrder->amount->convertAndFormatByDecimal(sperator: ','),
             'previous_owner' => $products->map(
                 fn ($item) => $item['previous_owner'] ?? []
             )
@@ -44,7 +44,7 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
         if ($traderOrder->provider === Trader::Lynk) {
             $data['products'] = $this->transformProductsToLynkCommodityProductsDTO($traderOrder->products);
             $data['trade_order'] = $traderOrder;
-            $data['financing_order'] = $traderOrder->order;
+            $data['financing_order'] = $financingOrder;
         } else {
             $data['products'] = $this->transformProductsToCommodityProductsDTO($traderOrder->products);
         }

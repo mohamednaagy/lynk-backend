@@ -10,10 +10,6 @@ class SetCommoditiesSettlementStatusCanceled extends BaseCommoditiesSettlement
 {
     public function handle(): void
     {
-        $this->logInfo('Changing commodities_settlement_status to SettlementCanceled', [
-            'order_id' => $this->localMarketOrderId,
-        ]);
-
         try {
             LocalMarketOrder::changeCommoditiesSettlementStatus(
                 $this->localMarketOrderId,
@@ -26,6 +22,5 @@ class SetCommoditiesSettlementStatusCanceled extends BaseCommoditiesSettlement
                 'exception' => $e,
             ]);
         }
-
     }
 }

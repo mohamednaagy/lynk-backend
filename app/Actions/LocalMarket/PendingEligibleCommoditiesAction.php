@@ -23,8 +23,8 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
         app(FindEligibleCommodities::class)->handle($localMarketOrder);
 
         $duration = microtime(true) - $startTime;
-        Log::channel('local_market')->info('PendingEligibleCommoditiesAction Duration', [
-            'order_id' => $localMarketOrder->id,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('after find eligible commodities at PendingEligibleCommoditiesAction', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
             'duration' => convertMicrotimeToDuration($duration),
         ]);
     }

@@ -158,7 +158,7 @@ class StaticGenerator implements GeneratorInterface
 
             $end = microtime(true);
             $duration = $end - $start;
-            Log::channel('lynk')->info('PDF Generation Duration', [
+            Log::channel(LOG_CHANNEL_LYNK)->info('PDF Generation Duration - request_id => '.$this->requestId, [
                 'duration' => $duration,
                 'request_id' => $this->requestId,
                 'generator' => 'static',
@@ -166,7 +166,7 @@ class StaticGenerator implements GeneratorInterface
 
             return $result;
         } catch (Throwable $e) {
-            Log::channel('lynk')->error('mPDF Generation Error', [
+            Log::channel(LOG_CHANNEL_LYNK)->error('mPDF Generation Error - request_id => '.$this->requestId, [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'request_id' => $this->requestId,
@@ -230,7 +230,7 @@ class StaticGenerator implements GeneratorInterface
     {
         $storedFile = $storageCallback($tmpFileResource);
 
-        Log::channel('lynk')->info('PDF Generation Success', [
+        Log::channel(LOG_CHANNEL_LYNK)->info('PDF Generation Success - request_id => '.$this->requestId, [
             'attempt' => $attempt,
             'request_id' => $this->requestId,
             'generator' => 'StaticGenerator',
@@ -241,7 +241,7 @@ class StaticGenerator implements GeneratorInterface
 
     protected function handleFailedGeneration(int $attempt): void
     {
-        Log::channel('lynk')->error('PDF Generation Failed', [
+        Log::channel(LOG_CHANNEL_LYNK)->error('PDF Generation Failed - request_id => '.$this->requestId, [
             'attempt' => $attempt,
             'error' => 'Failed to generate PDF content',
             'request_id' => $this->requestId,
@@ -264,7 +264,7 @@ class StaticGenerator implements GeneratorInterface
 
     protected function logAttempt(int $attempt): void
     {
-        Log::channel('lynk')->info('PDF Generation Attempt', [
+        Log::channel(LOG_CHANNEL_LYNK)->info('PDF Generation Attempt - request_id => '.$this->requestId, [
             'attempt' => $attempt,
             'max_retries' => $this->maxRetries,
             'generator' => 'StaticGenerator',
@@ -274,7 +274,7 @@ class StaticGenerator implements GeneratorInterface
 
     protected function logRetryableError(Throwable $e, int $attempt): void
     {
-        Log::channel('lynk')->error('PDF Generation Retryable Error', [
+        Log::channel(LOG_CHANNEL_LYNK)->error('PDF Generation Retryable Error - request_id => '.$this->requestId, [
             'attempt' => $attempt,
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString(),
@@ -285,7 +285,7 @@ class StaticGenerator implements GeneratorInterface
 
     protected function logFinalError(Throwable $th, int $attempt): void
     {
-        Log::channel('lynk')->error('PDF Generation Final Error', [
+        Log::channel(LOG_CHANNEL_LYNK)->error('PDF Generation Final Error - request_id => '.$this->requestId, [
             'error_message' => $th->getMessage(),
             'stack_trace' => $th->getTraceAsString(),
             'attempts' => $attempt,

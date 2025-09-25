@@ -11,7 +11,7 @@ class RateLimitExceededException extends Exception
 
     public function __construct($key, ?\Throwable $previous = null)
     {
-        Log::channel('bursam')->error('Rate limit exceeded for key:', $this->context);
+        Log::channel(LOG_CHANNEL_BURSAM)->error('Rate limit exceeded for key:', $this->context);
         parent::__construct('Rate limit exceeded for key: '.$key, 0, $previous);
     }
 

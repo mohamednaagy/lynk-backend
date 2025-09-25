@@ -31,9 +31,9 @@ class LoanService
             return false;
         }
 
-        Log::channel('local_market')->info('getCommoditiesForLoan Duration', [
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getCommoditiesForLoan Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
             'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
-            'order_id' => $localMarketOrder->id,
         ]);
 
         $this->updateEligibleQuantities($eligibleInventories, $localMarketOrder->id);
@@ -82,6 +82,11 @@ class LoanService
         ";
 
         DB::update($sql);
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Eligible quantities updated successfully', [
+            'inventory_ids' => $inventoryIds,
+            'touched_by' => $touchedBy,
+        ]);
     }
 
     public function sellCommodities(LocalMarketOrder $localMarketOrder)
@@ -97,6 +102,8 @@ class LoanService
          * 5- log the action
          * 6- send notification to the company
          */
-        Log::info('We wll sell your commodities ISA soon', ['order_id' => $localMarketOrder->id]);
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('We wll sell your commodities ISA soon', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+        ]);
     }
 }

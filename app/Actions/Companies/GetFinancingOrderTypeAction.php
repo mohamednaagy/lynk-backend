@@ -14,8 +14,8 @@ class GetFinancingOrderTypeAction implements GetFinancingOrderType
 
         return collect($allowedFinancingOrderTypes)->map(function ($value) {
             return [
-                'id' => $value,                                 
-                'name'   => FinancingOrderTypeEnum::getDescription($value),  
+                'id' => $value,
+                'name' => FinancingOrderTypeEnum::getDescription($value),
             ];
         })->values();
     }

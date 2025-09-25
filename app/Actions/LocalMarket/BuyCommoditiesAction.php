@@ -31,22 +31,26 @@ class BuyCommoditiesAction implements BuyCommodities
         try {
             $startTime = microtime(true);
             InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
+            $data = UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder);
 
             $localMarketOrder->update([
                 'status' => OrderStatus::CommoditiesPurchased,
-                'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),
+                'data' => array_merge($localMarketOrder->data, ['data' => $data]),
             ]);
 
-            Log::channel('local_market')->info('unit service for order '.$localMarketOrder->id, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]);
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('unit service for order '.$localMarketOrder->id, $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'data' => $data,
+            ]);
 
-            Log::channel('local_market')->info('BuyCommoditiesAction Duration', [
-                'order_id' => $localMarketOrder->id,
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('BuyCommoditiesAction Duration', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
                 'status' => $localMarketOrder->status,
                 'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
-            Log::channel('local_market')->error('Error in BuyCommoditiesAction', [
-                'order_id' => $localMarketOrder->id,
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error at BuyCommoditiesAction', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

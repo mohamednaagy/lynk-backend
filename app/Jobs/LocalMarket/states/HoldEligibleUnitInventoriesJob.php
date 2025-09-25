@@ -28,12 +28,10 @@ class HoldEligibleUnitInventoriesJob extends BaseStatus implements ShouldBeUniqu
         DB::beginTransaction();
 
         try {
-            $unitsService = app(UnitService::class);
-            $unitsService->holdEligibleUnits($this->localMarketOrder);
+            app(UnitService::class)->holdEligibleUnits($this->localMarketOrder);
+            DB::commit();
 
             EligibleCommoditiesFoundStatus::dispatch($this->localMarketOrder->id);
-
-            DB::commit();
         } catch (Throwable $e) {
             DB::rollBack();
             throw $e;

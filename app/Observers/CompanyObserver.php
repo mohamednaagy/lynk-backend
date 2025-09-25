@@ -6,8 +6,9 @@ use App\Enums\CompanyType;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteCompany;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildLender;
 use App\Models\Company;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class CompanyObserver
+class CompanyObserver implements ShouldHandleEventsAfterCommit
 {
     /**
      * Handle the Company "created" event.

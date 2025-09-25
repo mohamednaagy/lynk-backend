@@ -9,12 +9,9 @@ use App\Http\Requests\V1\Lender\Orders\Validators\AbstractFinancingOrderTypeVali
 use App\Http\Requests\V1\Lender\Orders\Validators\FinancingOrderTypeValidatorFactory;
 use App\Models\Lender;
 use App\Rules\CheckFinancingOrderTypeExistAtCompanyRule;
-use App\Rules\CheckNeedToSelectFinancingOrderTypeRule;
 use App\Rules\ValidCommodityTypeAtFinancingOrderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
 class StoreOrderRequest extends FormRequest
@@ -98,7 +95,6 @@ class StoreOrderRequest extends FormRequest
                 'numeric',
                 new EnumValue(FinancingOrderTypeEnum::class, false),
                 new CheckFinancingOrderTypeExistAtCompanyRule($this->lender->id),
-                new CheckNeedToSelectFinancingOrderTypeRule($this->lender->id),
             ],
         ];
     }

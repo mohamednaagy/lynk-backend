@@ -5,16 +5,13 @@ namespace App\Support\Traders\Traits;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
-use App\Models\CommodityType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Settings\Classes\InternationalMurabahaSetting;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
@@ -65,16 +62,28 @@ trait TraderHelperTrait
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void
     {
-        Log::info('Creating trader order history', [
-            'trader_order_id' => $traderOrder->id,
+
+        Log::info(formatLogTitle('Creating trader order history', $traderOrder), [
+            'financingOrderId' => $traderOrder->financing_order_id,
+            'traderOrderId' => $traderOrder->id,
             'action' => $action,
             'data' => $data,
         ]);
-        $traderOrder->traderHistories()->updateOrCreate(
+        if ($traderOrder->traderHistories()->where('action', $action)->exists()) {
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))
+                ->info(formatLogTitle('Trader order history action already exists', $traderOrder), [
+                    'traderOrderId' => $traderOrder->id,
+                    'action' => $action,
+                    'data' => $data,
+                ]);
+
+            return;
+        }
+        $traderOrder->traderHistories()->create(
             [
                 'action' => $action,
-            ],
-            $data
+                'data' => $data,
+            ]
         );
     }
 
@@ -116,39 +125,6 @@ trait TraderHelperTrait
         return LynkCommodityProductDto::fromArray($product);
     }
 
-    /**
-     * Get an unused product code for a given trader order.
-     *
-     * First checks for company override international commodity type (forced choice).
-     * If override is set and available, returns only that product code.
-     * If override is set but unavailable, returns null to force cancellation.
-     * Otherwise, falls back to preferred product codes or global defaults.
-     *
-     * @param  TraderOrder  $traderOrder  The trader order to find a product code for
-     * @return string|null The first available product code or null if no codes are available
-     */
-    public function getUnusedProductCode(TraderOrder $traderOrder): ?string
-    {
-        Log::channel('bursam')->info('Getting unused product code', [
-            'trader_order_id' => $traderOrder->id,
-            'provider' => $traderOrder->provider,
-            'company_id' => $traderOrder->order->company_id,
-        ]);
-
-        $productCodes = $this->getProductCodes($traderOrder);
-
-        $selectedCode = ! empty($productCodes) ? reset($productCodes) : null;
-
-        Log::channel('bursam')->info('Product code selection result', [
-            'trader_order_id' => $traderOrder->id,
-            'selected_product_code' => $selectedCode,
-            'available_codes_count' => count($productCodes),
-            'all_available_codes' => $productCodes,
-        ]);
-
-        return $selectedCode;
-    }
-
     protected function isContractAndWakalaCompleted(TraderOrder $traderOrder): bool
     {
         return app(TraderOrderProceedCaseService::class)
@@ -156,108 +132,5 @@ trait TraderHelperTrait
                 $traderOrder->id,
                 FinancingOrderProceedCase::ContractAndClientWakalaCompleted
             );
-    }
-
-    /**
-     * Retrieve product codes based on various filtering criteria.
-     *
-     * @param  TraderOrder  $traderOrder  The trader order to base product code selection on
-     * @return array List of filtered and sorted product codes
-     */
-    private function getProductCodes(TraderOrder $traderOrder): array
-    {
-        Log::channel('bursam')->info('Starting product code selection', [
-            'trader_order_id' => $traderOrder->id,
-            'provider' => $traderOrder->provider,
-            'company_id' => $traderOrder->order->company_id,
-        ]);
-
-        // Fallback to existing logic if no override is set
-        $query = CommodityType::query();
-
-        $globalPreferredCommodityType = app(InternationalMurabahaSetting::class)->bursam_default_preferred_commodity_type;
-
-        Log::channel('bursam')->info('Global preferred commodity type retrieved', [
-            'trader_order_id' => $traderOrder->id,
-            'global_preferred_commodity_type_id' => $globalPreferredCommodityType,
-        ]);
-
-        if ($globalPreferredCommodityType) {
-            $query = $query->orderByRaw(
-                'CASE WHEN id = ? THEN 0 ELSE 1 END',
-                [$globalPreferredCommodityType]
-            );
-        }
-
-        if ($traderOrder->provider) {
-            $query = $query->where('provider', $traderOrder->provider);
-        }
-
-        $companyPreferredProductCodes = $this->getCompanyPreferredProductCodes($traderOrder);
-
-        Log::channel('bursam')->info('Company preferred product codes retrieved', [
-            'trader_order_id' => $traderOrder->id,
-            'company_preferred_product_codes' => $companyPreferredProductCodes,
-            'count' => count($companyPreferredProductCodes),
-        ]);
-
-        $unavailableProductCodes = (array) Cache::get('bursam_unavailable_product_codes', []);
-
-        Log::channel('bursam')->info('Unavailable product codes from cache', [
-            'trader_order_id' => $traderOrder->id,
-            'unavailable_product_codes' => $unavailableProductCodes,
-            'count' => count($unavailableProductCodes),
-        ]);
-
-        if (! empty($companyPreferredProductCodes)) {
-            $availablePreferredProductCodes = array_diff($companyPreferredProductCodes, $unavailableProductCodes);
-
-            Log::channel('bursam')->info('Available preferred product codes after filtering unavailable', [
-                'trader_order_id' => $traderOrder->id,
-                'available_preferred_product_codes' => $availablePreferredProductCodes,
-                'count' => count($availablePreferredProductCodes),
-                'filtered_out' => array_intersect($companyPreferredProductCodes, $unavailableProductCodes),
-            ]);
-
-            if (empty($availablePreferredProductCodes)) {
-                Log::warning('All preferred product codes are unavailable', [
-                    'trader_order_id' => $traderOrder->id,
-                    'preferred_codes' => $companyPreferredProductCodes,
-                    'unavailable_codes' => $unavailableProductCodes,
-                ]);
-
-                return []; // All preferred codes are unavailable
-            }
-
-            $query = $query->whereIn('unique_name', $availablePreferredProductCodes);
-        } else {
-            Log::channel('bursam')->info('No company preferred product codes found, using global filtering', [
-                'trader_order_id' => $traderOrder->id,
-            ]);
-
-            // No preferred product codes; exclude unavailable ones globally
-            if (! empty($unavailableProductCodes)) {
-                $query = $query->whereNotIn('unique_name', $unavailableProductCodes);
-            }
-        }
-
-        $finalProductCodes = $query
-            ->pluck('unique_name')
-            ->toArray();
-
-        Log::channel('bursam')->info('Final product codes selection completed', [
-            'trader_order_id' => $traderOrder->id,
-            'final_product_codes' => $finalProductCodes,
-            'count' => count($finalProductCodes),
-            'selected_first' => ! empty($finalProductCodes) ? $finalProductCodes[0] : null,
-            'selection_criteria' => [
-                'had_company_preferences' => ! empty($companyPreferredProductCodes),
-                'had_global_preference' => ! empty($globalPreferredCommodityType),
-                'had_unavailable_codes' => ! empty($unavailableProductCodes),
-                'provider' => $traderOrder->provider,
-            ],
-        ]);
-
-        return $finalProductCodes;
     }
 }

@@ -20,7 +20,7 @@ return new class extends Migration
     public function up(): void
     {
         $corruptionDate = '2025-05-12';
-        Log::channel('local_market')->info('Starting migration to fix corrupted orders and inventory units');
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Starting migration to fix corrupted orders and inventory units');
 
         $orderIds = LocalMarketOrder::query()
             ->select('local_market_orders.*')
@@ -39,7 +39,7 @@ return new class extends Migration
             ->whereDoesntHave('orderInventories')
             ->pluck('local_market_orders.id');
 
-        Log::channel('local_market')->info('Retrieved affected orders', [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Retrieved affected orders', [
             'orders_count' => count($orderIds),
             'order_ids' => $orderIds,
         ]);
@@ -55,7 +55,7 @@ return new class extends Migration
                 DB::beginTransaction();
 
                 try {
-                    Log::channel('local_market')->info('Processing order', ['order_id' => $order->id]);
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Processing order', ['order_id' => $order->id]);
 
                     // Get expected inventories from DTO
                     $expectedInventories = OrderCommoditiesDto::getInventoriesFromOrder($order);
@@ -131,13 +131,13 @@ return new class extends Migration
                         );
                     }
 
-                    Log::channel('local_market')->info('Order processed successfully', ['order_id' => $order->id]);
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Order processed successfully', ['order_id' => $order->id]);
                     DB::commit();
 
                 } catch (\Throwable $e) {
                     DB::rollBack();
 
-                    Log::channel('local_market')->error('Error processing order', [
+                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('Error processing order', [
                         'order_id' => $order->id,
                         'code' => $e->getCode(),
                         'error' => $e->getMessage(),
@@ -147,7 +147,7 @@ return new class extends Migration
             }
         });
 
-        Log::channel('local_market')->info('Migration completed: Corrupted orders and inventory units handled.');
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('Migration completed: Corrupted orders and inventory units handled.');
     }
 
     public function down(): void

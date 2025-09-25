@@ -36,13 +36,13 @@ class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(InitiateTraderOrder $initiateTraderOrder)
     {
-        Log::channel('bursam')->info('Starting ProcessBursamInitiateTraderOrder Job');
+        log::channel(LOG_CHANNEL_BURSAM)->info('Starting ProcessBursamInitiateTraderOrder Job - financing_order_id => '.$this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id]);
 
         return DB::multipleTransaction(function () use ($initiateTraderOrder) {
             try {
                 $initiateTraderOrder->handle($this->financingOrder->creator, $this->financingOrder->id);
             } catch (OrderAlreadyHasActiveTraderOrderException $exception) {
-                //
+                log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamInitiateTraderOrder Job - order already has active trader order', ['financingOrderId' => $this->financingOrder->id, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
             }
 
             return Command::SUCCESS;
@@ -56,6 +56,6 @@ class ProcessBursamInitiateTraderOrder implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        Log::channel('bursam')->error('ProcessBursamInitiateTraderOrder', ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamInitiateTraderOrder Job - financing_order_id => '.$this->financingOrder->id, ['financingOrderId' => $this->financingOrder->id,  'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

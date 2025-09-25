@@ -131,6 +131,7 @@ return [
         TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه',
         TraderOrderCancelReason::ExpiredContractSignTime => 'تم إلغاء طلب التجارة من قبل النظام بسبب انتهاء وقت توقيع العقد المحدد بـ :value ساعة.',
+        TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'تم إلغاء طلب التجارة من قبل النظام بسبب تجاوز عدد المحاولات المحددة.',
     ],
     UnitOwnershipAction::class => [
         UnitOwnershipAction::SellCommodity => 'بيع السلعة',

@@ -21,3 +21,13 @@ sail-mysql/
 _ide_helper.php
 
 composer.lock
+
+# Ignore worker log files
+/storage/logs/workers/*.log*
+/storage/logs/workers/*.log
+
+# Ignore logs backup folder
+/storage/logs_backup/
+
+# Ignore tenant folders
+/storage/tenant*/
