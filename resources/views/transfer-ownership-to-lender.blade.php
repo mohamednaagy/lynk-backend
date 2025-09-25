@@ -781,7 +781,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                     في الموقع أدناه
                 @endif
                 ؛ في حيازتنا بالنيابة
-                عن {{ $company_name }} من
+                عن {{ $lender_name }} من
                 تاريخ وتوقيت هذه الشهادة، وقد تم شراؤها من {{ $previous_owner }} بناء على طلب الشركة مقابل مبلغ
                 وقدره {{ $amount }} ريال سعودي
             </p>
@@ -844,10 +844,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 @if ((is_object($products->first()) && method_exists($products->first(), 'getWarehouse') && $products->first()->getWarehouse()) || (is_array($products->first()) && !empty($products->first()['warehouse'])))
                     بالموقع المشار له أعلاه
                 @endif
-                ، بالنيابة عن {{ $company_name }}
+                ، بالنيابة عن {{ $lender_name }}
                 إلى أن يتم إشعارنا بالتصرف.
             </p>
-            <p class="footer-text text-black">{{ $company_name }} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ بـ{{ $product_name }} لأكثر من يوم عمل</p>
+            <p class="footer-text text-black">{{ $lender_name }} سيكون مسؤولًا عن رسوم التخزين والحفظ إذا تم الاحتفاظ بـ{{ $product_name }} لأكثر من يوم عمل</p>
             <p class="footer-text text-black">توقيع المخول بالتوقيع نيابة عن ( لينك)</p>
         </div>
         

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\CompanyType;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteCompany;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\RebuildLender;
 use App\Models\Company;
@@ -13,7 +14,9 @@ class CompanyObserver
      */
     public function created(Company $company): void
     {
-        RebuildLender::dispatch($company->id);
+        if ($company->type->is(CompanyType::Lender)) {
+            RebuildLender::dispatch($company->id);
+        }
     }
 
     /**
@@ -26,6 +29,8 @@ class CompanyObserver
      */
     public function deleted(Company $company): void
     {
-        DeleteCompany::dispatch($company->id);
+        if ($company->type->is(CompanyType::Lender)) {
+            DeleteCompany::dispatch($company->id);
+        }
     }
 }

@@ -3,12 +3,15 @@
 namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
 use App\Http\Requests\V1\Admin\FinancingOrders\Validators\AbstractFinancingOrderTypeValidator;
 use App\Http\Requests\V1\Admin\FinancingOrders\Validators\FinancingOrderTypeValidatorFactory;
 use App\Models\Company;
 use App\Models\Lender;
+use App\Rules\CheckFinancingOrderTypeExistAtCompanyRule;
 use App\Rules\ValidCommodityTypeAtFinancingOrderRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -25,7 +28,7 @@ class StoreOrderRequest extends FormRequest
 
     private Lender $lender;
 
-    private int $type;
+    private $type;
 
     /**
      * Always authorize this request.
@@ -93,6 +96,13 @@ class StoreOrderRequest extends FormRequest
                 'max:100',
                 $this->handleUniqueReferenceNumber(),
             ],
+
+            'type' => [
+                'required',
+                'numeric',
+                new EnumValue(FinancingOrderTypeEnum::class, false),
+                new CheckFinancingOrderTypeExistAtCompanyRule($this->lender->id),
+            ],
         ];
     }
 
@@ -137,7 +147,7 @@ class StoreOrderRequest extends FormRequest
      */
     private function setFinancingOrderType(): void
     {
-        $this->type = $this->input('type',$this->lender->default_financing_order_type);
+        $this->type = (int) $this->input('type', $this->lender->default_financing_order_type);
     }
 
     /**
@@ -147,6 +157,4 @@ class StoreOrderRequest extends FormRequest
     {
         $this->financingOrderValidator = FinancingOrderTypeValidatorFactory::create($this->type);
     }
-
-
 }

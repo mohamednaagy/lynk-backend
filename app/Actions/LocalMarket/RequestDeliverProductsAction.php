@@ -28,7 +28,7 @@ class RequestDeliverProductsAction implements RequestDeliverProducts
             $this->unitService->changeOrderUnitsOwnershipTo(
                 $localMarketOrder,
                 OwnershipTypes::Customer,
-                $localMarketOrder->customer_name,
+                $localMarketOrder->borrower_identifier,
                 UnitOwnershipAction::BorrowerOwnershipTransfer
             );
             $localMarketOrder->changeStatusTo(LocalMarketOrderStatus::PendingDelivery);

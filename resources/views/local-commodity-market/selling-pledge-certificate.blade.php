@@ -791,7 +791,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black text-right">الوقت: {{ $current_time ?? '' }}</p>
             <p class="title-main text-black">شهادة تعهد بالبيع</p>
             <p class="text-right text-black section-spacing">
-                نتعهد نحن لينك من تاريخ وتوقيت هذه الشهادة ببيع السلع المشار لها بناء على طلب {{ $customer_name }}
+                نتعهد نحن لينك من تاريخ وتوقيت هذه الشهادة ببيع السلع المشار لها بناء على طلب {{ $borrower_name }}
                 مقابل مبلغ وقدره {{ $amount }} ريال سعودي
             </p>
             <p class="title-section text-black">بيانات السلع/ـة</p>
@@ -842,7 +842,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                     {{ $product['amount'] ?? '' }} {{ $product['currency'] ?? '' }}
                                 @endif
                             </td>
-                            <td>{{ $customer_name }}</td>
+                            <td>{{ $borrower_name }}</td>
                             <td>
                                 @if (is_object($product) && method_exists($product, 'getOriginalSupplier'))
                                     {{ $product->getOriginalSupplier() }}
@@ -862,7 +862,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                 </tbody>
                 </table>
 
-            <p class="footer-text text-black text-right">سيتم حفظ السلعة، بالنيابة عن {{ $customer_name }} إلى أن يتم إشعارنا بالتصرف.</p>
+            <p class="footer-text text-black text-right">سيتم حفظ السلعة، بالنيابة عن {{ $borrower_name }} إلى أن يتم إشعارنا بالتصرف.</p>
 
             <div class="logo-container">
                 <img src="{{ 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('radised-logo.png'))) }}" alt="Stamp" style="height: 50px; max-width: 120px;">

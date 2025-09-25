@@ -81,7 +81,7 @@ class OrderController extends Controller
         'trader_orders.show_proceed_btn',
         'history',
         'commodity_type',
-        'type'
+        'type',
     ];
 
     public function __construct()
@@ -214,6 +214,7 @@ class OrderController extends Controller
                     'phone_country_code',
                     'phone_number',
                     'phone_number_formatted',
+                    'type',
                 ];
 
                 if ($financingOrder->commodity_type_id) {
