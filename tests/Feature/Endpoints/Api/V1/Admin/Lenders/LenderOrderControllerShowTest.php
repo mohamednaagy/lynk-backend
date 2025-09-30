@@ -59,7 +59,6 @@ class LenderOrderControllerShowTest extends TestCase
             'company_id' => self::$lender->id,
             'approved_at' => Carbon::now(),
             'creator_id' => self::$userLender->id,
-            'creator_type' => User::class,
             'customer_name' => 'youssof',
             'national_id' => '2553451234',
             'phone_number' => '+966500112233',

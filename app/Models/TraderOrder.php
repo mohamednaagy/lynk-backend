@@ -15,6 +15,7 @@ use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Traits\HasCreator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -41,7 +42,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
+    use HasCreator, HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
 
     protected $guarded = [];
 

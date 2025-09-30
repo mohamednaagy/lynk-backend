@@ -45,14 +45,12 @@ class GetOrdersStatsTest extends TestCase
         FinancingOrder::factory(5)->create([
             'company_id' => self::$company->id,
             'status' => FinancingOrderStatus::Approved,
-            'creator_type' => self::$userLenderOrderCreator->getMorphClass(),
             'creator_id' => self::$userLenderOrderCreator->getKey(),
         ]);
 
         FinancingOrder::factory(2)->create([
             'company_id' => self::$company->id,
             'status' => FinancingOrderStatus::Cancelled,
-            'creator_type' => self::$userLenderOrderCreator->getMorphClass(),
             'creator_id' => self::$userLenderOrderCreator->getKey(),
         ]);
     }

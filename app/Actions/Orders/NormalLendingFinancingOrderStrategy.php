@@ -29,7 +29,6 @@ class NormalLendingFinancingOrderStrategy implements FinancingOrderTypeStrategy
                 'currency',
                 'status',
                 'creator_id',
-                'creator_type',
                 'approved_at',
                 'is_verification_required',
                 'commodity_type_id',

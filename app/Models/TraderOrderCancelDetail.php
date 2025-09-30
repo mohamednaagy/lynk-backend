@@ -3,15 +3,16 @@
 namespace App\Models;
 
 use App\Enums\TraderOrderCancelReason;
+use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TraderOrderCancelDetail extends Model
 {
-    use HasFactory;
+    use HasCreator, HasFactory;
 
     protected $fillable = [
-        'cancelled_by',
+        'creator_id',
         'cancel_reason',
         'cancel_step',
         'trader_order_id',
