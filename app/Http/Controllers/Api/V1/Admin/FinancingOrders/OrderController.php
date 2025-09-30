@@ -193,7 +193,6 @@ class OrderController extends Controller
                         [
                             'status' => $status,
                             'creator_id' => $user->id,
-                            'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::PendingApproval ? null : now(),
                         ]
                     )

@@ -38,7 +38,6 @@ class SpecialPurposeVehicleFinancingOrderStrategy implements FinancingOrderTypeS
                 'currency',
                 'status',
                 'creator_id',
-                'creator_type',
                 'approved_at',
                 'is_verification_required',
                 'commodity_type_id',

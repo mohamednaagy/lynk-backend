@@ -13,7 +13,6 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
-use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -158,7 +157,6 @@ trait InteractsWithCompany
             'company_id' => $companyId,
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
-            'creator_type' => (new User)->getMorphClass(),
             'customer_name' => 'youssof okiel',
             'national_id' => '2553451234',
             'phone_number' => '+966500112233',

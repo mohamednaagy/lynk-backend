@@ -17,6 +17,7 @@ use App\Enums\TransactionReason;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
+use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +46,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use BelongsToTenant;
+    use HasCreator;
     use HasFactory;
     use HasScopes;
     use InteractsWithMedia;
@@ -66,7 +68,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approved_at',
         'approver_id',
         'creator_id',
-        'creator_type',
         'customer_name',
         'customer_details',
         'status_reason',
@@ -197,11 +198,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function company()
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function creator()
-    {
-        return $this->morphTo('creator');
     }
 
     public function approver()
