@@ -24,7 +24,13 @@ class ApplyOrderFeesJob implements ShouldQueue
         protected TraderOrder $traderOrder,
         protected FeeActionInterface $feeAction
     ) {
-        $this->onQueue('apply_order_fees');
+        $queue = 'apply_order_fees';
+        Log::info("add ApplyOrderFeesJob job to queue {$queue}", [
+            'trader_order_id' => $this->traderOrder->id,
+            'fee_action_class' => get_class($this->feeAction),
+        ]);
+
+        $this->onQueue($queue);
     }
 
     /**
