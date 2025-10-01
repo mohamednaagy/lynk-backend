@@ -15,7 +15,6 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-
         $timezone = Config::get('services.bursam.timezone');
 
         $schedule->command(RunHoldTraderWhenMarketOpenCommand::class)
@@ -34,7 +33,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
 
-        $schedule->command('telescope:prune --hours=72')->daily();
+        $hours = config('telescope.prune_hours');
+        $schedule->command("telescope:prune --hours={$hours}")->daily();
     }
 
     /**
