@@ -19,6 +19,7 @@ class EligibleCommoditiesFoundStatus extends BaseStatus
      */
     public function handle(): void
     {
+        $this->logQueueJob('Start processing EligibleCommoditiesFoundStatus job');
         app(BuyCommodities::class)->handle($this->localMarketOrder);
         $this->logQueueJob('success buy commodity step');
         $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::EligibleCommoditiesAvailable);
