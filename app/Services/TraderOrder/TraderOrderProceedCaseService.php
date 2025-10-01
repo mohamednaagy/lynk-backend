@@ -31,7 +31,7 @@ class TraderOrderProceedCaseService
         return TraderOrderProceedCase::create([
             'trader_order_id' => $traderOrderId,
             'case' => $case,
-            'creator_id' => auth()->id(),
+            'creator_id' => auth()?->id(),
         ]);
     }
 
@@ -62,5 +62,10 @@ class TraderOrderProceedCaseService
         return TraderOrderProceedCase::where('trader_order_id', $traderOrderId)
             ->where('case', $case)
             ->first();
+    }
+
+    public function getCreatorNameForCase(int $traderOrderId, int $case): string
+    {
+        return $this->getTraderCasesByCase($traderOrderId, $case)?->getCreator()['name'] ?? '';
     }
 }

@@ -55,25 +55,21 @@ class LynkV2Driver extends LynkV1Driver
         $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
 
         // Prefer the more specific case; only query the fallback if needed
-        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $contractAndClientWakalaCompletedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted
         );
 
-        if ($contractAndClientWakalaCompletedCase) {
-            $creatorName = $contractAndClientWakalaCompletedCase->getCreator()?->name ?? '';
-
-            return __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell', ['USER' => $creatorName]);
+        if ($contractAndClientWakalaCompletedCaseCreator) {
+            return __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell', ['USER' => $contractAndClientWakalaCompletedCaseCreator]);
         }
 
-        $contractSignedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $contractSignedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractSigned
         );
 
-        $creatorName = $contractSignedCase->getCreator()['name'] ?? '';
-
-        return str_replace('{USER}', $creatorName, __('order.trader.lynk.steps.contract_signed.v2.proceed'));
+        return str_replace('{USER}', $contractSignedCaseCreator, __('order.trader.lynk.steps.contract_signed.v2.proceed'));
 
     }
 
@@ -85,48 +81,40 @@ class LynkV2Driver extends LynkV1Driver
 
         $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
 
-        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $contractAndClientWakalaCompletedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted
         );
 
-        if ($contractAndClientWakalaCompletedCase) {
-            $creatorName = $contractAndClientWakalaCompletedCase->getCreator()?->name ?? '';
-
-            return str_replace('{USER}', $creatorName, __('order.trader.lynk.steps.client_wakala.v2.wakalaAndSell'));
+        if ($contractAndClientWakalaCompletedCaseCreator) {
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.wakalaAndSell'));
         }
 
-        $ignoreAndSellCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $ignoreAndSellCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::IgnoreAndSell
         );
 
-        if ($ignoreAndSellCase) {
-            $creatorName = $ignoreAndSellCase->getCreator()['name'] ?? '';
-
-            return str_replace('{USER}', $creatorName, __('order.trader.lynk.steps.client_wakala.v2.sell'));
+        if ($ignoreAndSellCaseCreator) {
+            return str_replace('{USER}', $ignoreAndSellCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.sell'));
         }
 
-        $clientWakalaAcceptedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $clientWakalaAcceptedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ClientWakalaAccepted
         );
 
-        if ($clientWakalaAcceptedCase) {
-            $creatorName = $clientWakalaAcceptedCase->getCreator()['name'] ?? '';
-
-            return str_replace('{USER}', $creatorName, __('order.trader.lynk.steps.client_wakala.v2.sell'));
+        if ($clientWakalaAcceptedCaseCreator) {
+            return str_replace('{USER}', $clientWakalaAcceptedCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.sell'));
         }
 
-        $confirmDeliverCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $confirmDeliverCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ConfirmDeliver
         );
 
-        if ($confirmDeliverCase) {
-            $creatorName = $confirmDeliverCase->getCreator()['name'] ?? '';
-
-            return str_replace('{USER}', $creatorName, __('order.trader.lynk.steps.client_wakala.v2.deliver'));
+        if ($confirmDeliverCaseCreator) {
+            return str_replace('{USER}', $confirmDeliverCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.deliver'));
         }
 
         return null;

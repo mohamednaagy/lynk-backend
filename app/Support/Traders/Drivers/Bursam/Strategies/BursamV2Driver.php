@@ -284,25 +284,21 @@ class BursamV2Driver extends BursamV1Driver
         $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
 
         // Prefer the more specific case; only query the fallback if needed
-        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted
         );
 
         if ($contractAndClientWakalaCompletedCase) {
-            $creatorName = $contractAndClientWakalaCompletedCase->getCreator()?->name ?? '';
-
-            return __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell', ['USER' => $creatorName]);
+            return __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell', ['USER' => $contractAndClientWakalaCompletedCase]);
         }
 
-        $contractSignedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $contractSignedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractSigned
         );
 
-        $creatorName = $contractSignedCase->getCreator()['name'] ?? '';
-
-        return str_replace('{USER}', $creatorName, __('order.trader.bursa.steps.contract_signed.v2.proceed'));
+        return str_replace('{USER}', $contractSignedCase, __('order.trader.bursa.steps.contract_signed.v2.proceed'));
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder): ?string
@@ -314,25 +310,21 @@ class BursamV2Driver extends BursamV1Driver
         $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
 
         // Prefer the more specific case; only query the fallback if needed
-        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted
         );
 
         if ($contractAndClientWakalaCompletedCase) {
-            $creatorName = $contractAndClientWakalaCompletedCase->getCreator()?->name ?? '';
-
-            return str_replace('{USER}', $creatorName, __('order.trader.bursa.steps.client_wakala.v2.wakalaAndSell'));
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCase, __('order.trader.bursa.steps.client_wakala.v2.wakalaAndSell'));
         }
 
-        $clientWakalaAcceptedCase = $traderOrderProceedCaseService->getTraderCasesByCase(
+        $clientWakalaAcceptedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ClientWakalaAccepted
         );
 
-        $creatorName = $clientWakalaAcceptedCase->getCreator()['name'] ?? '';
-
-        return str_replace('{USER}', $creatorName, __('order.trader.bursa.steps.client_wakala.v2.sell'));
+        return str_replace('{USER}', $clientWakalaAcceptedCase, __('order.trader.bursa.steps.client_wakala.v2.sell'));
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}
