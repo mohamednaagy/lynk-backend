@@ -11,13 +11,13 @@ return [
             'steps' => [
                 'contract_signed' => [
                     'v2' => [
-                        'proceed' => 'Contract Signed confirmed by user.',
-                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by user.',
+                        'proceed' => 'Contract Signed confirmed by {USER}.',
+                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by {USER}.',
                     ],
                 ],
                 'client_wakala' => [
                     'v2' => [
-                        'sell' => 'Client Wakala - Sell Customer confirmed by user.',
+                        'sell' => 'Client Wakala - Sell Customer confirmed by {USER}.',
                         'wakalaAndSell' => '',
                     ],
                 ],
@@ -32,18 +32,18 @@ return [
             'steps' => [
                 'contract_signed' => [
                     'v1' => [
-                        'sell' => 'Contract Signed - Sell for Customer confirmed by user.',
-                        'deliver' => 'Contract Signed - Delivery for Customer requested by user.',
+                        'sell' => 'Contract Signed - Sell for Customer confirmed by {USER}.',
+                        'deliver' => 'Contract Signed - Delivery for Customer requested by {USER}.',
                     ],
                     'v2' => [
-                        'proceed' => 'Contract Signed confirmed by user.',
-                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by user.',
+                        'proceed' => 'Contract Signed confirmed by {USER}.',
+                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by {USER}.',
                     ],
                 ],
                 'client_wakala' => [
                     'v2' => [
-                        'sell' => 'Client Wakala - Sell Customer confirmed by user.',
-                        'deliver' => 'Client Wakala - Deliver for Customer confirmed by user. Please contact a LYNK Administrator to confirm delivery process and logistics',
+                        'sell' => 'Client Wakala - Sell Customer confirmed by {USER}.',
+                        'deliver' => 'Client Wakala - Deliver for Customer confirmed by {USER}. Please contact a LYNK Administrator to confirm delivery process and logistics',
                         'wakalaAndSell' => '',
                     ],
                 ],
