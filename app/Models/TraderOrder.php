@@ -67,6 +67,7 @@ class TraderOrder extends Model implements HasMedia
             'commodity_type_id',
             'last_history_action',
             'last_history_action_updated_at',
+            'creator_id',
         ];
     }
 

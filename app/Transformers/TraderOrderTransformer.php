@@ -53,6 +53,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'contract_signed_type',
         'show_proceed_btn',
         'commodity_type',
+        'creator',
     ];
 
     public function transform(TraderOrder $traderOrder)
@@ -252,5 +253,10 @@ class TraderOrderTransformer extends TransformerAbstract
         }
 
         return $this->primitive(null);
+    }
+
+    public function includeCreator(TraderOrder $traderOrder): Primitive
+    {
+        return $this->primitive($traderOrder->getCreator());
     }
 }

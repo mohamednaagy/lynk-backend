@@ -92,6 +92,7 @@ class BursamV1Driver implements TraderInterface
             'status' => $status,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'creator_id' => auth()->user()->id,
             'commodity_type_id' => $preferredCommodityTypeId,
 
         ];

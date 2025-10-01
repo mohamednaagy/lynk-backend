@@ -40,6 +40,8 @@ class InProgressOrder
             throw new \Exception('Active trader order exists');
         }
 
+        $data['creator_id'] = auth()->user()->id;
+
         $traderOrder = TraderOrder::withoutEvents(function () use ($reference, $status, $data, $driver) {
             return $this->financingOrder
                 ->traderOrders()

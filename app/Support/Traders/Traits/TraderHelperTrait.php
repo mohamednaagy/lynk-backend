@@ -49,6 +49,7 @@ trait TraderHelperTrait
             'status' => TraderOrderStatus::InProgress,
             'mode' => TraderOrderMode::Automatic,
             'version' => get_latest_version_of_trader($provider),
+            'creator_id' => auth()->user()->id,
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }
