@@ -33,6 +33,8 @@ class Kernel extends ConsoleKernel
             ->onOneServer();
 
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
+
+        $schedule->command('telescope:prune --hours=72')->daily();
     }
 
     /**
