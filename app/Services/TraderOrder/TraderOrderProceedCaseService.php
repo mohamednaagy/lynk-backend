@@ -31,6 +31,7 @@ class TraderOrderProceedCaseService
         return TraderOrderProceedCase::create([
             'trader_order_id' => $traderOrderId,
             'case' => $case,
+            'creator_id' => auth()->id(),
         ]);
     }
 
