@@ -17,7 +17,7 @@ return new class extends Migration
         });
         // creator creator_id to trader_orders table
         Schema::table('trader_orders', function (Blueprint $table) {
-            $table->unsignedBigInteger('creator_id');
+            $table->unsignedBigInteger('creator_id')->nullable();
         });
         // rename cancelled_by to creator_id in trader_order_cancel_details table
         Schema::table('trader_order_cancel_details', function (Blueprint $table) {
@@ -25,7 +25,7 @@ return new class extends Migration
         });
         // creator creator_id to trader processed cases  table
         Schema::table('trader_order_proceed_cases', function (Blueprint $table) {
-            $table->unsignedBigInteger('creator_id');
+            $table->unsignedBigInteger('creator_id')->nullable();
         });
     }
 
@@ -48,7 +48,7 @@ return new class extends Migration
         });
         // Drop creator_id from financing_orders table
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->dropColumn('creator_id');
+            $table->string('creator_type')->nullable();
         });
     }
 };
