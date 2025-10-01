@@ -83,7 +83,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'creator_id' => auth()->user()->id,
+            'creator_id' => auth()?->user()?->id,
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }

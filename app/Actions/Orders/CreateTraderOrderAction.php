@@ -48,6 +48,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
         }
 
         $commodityTypeId = isset($data['commodity_type_id']) ? $data['commodity_type_id'] : null;
+        $data['creator_id'] = auth()?->user()?->id;
         $traderOrder = match ($data['mode']) {
             TraderOrderMode::Manual => $this->createTraderOrder($financingOrder, $data),
             TraderOrderMode::Automatic => Trader::driver($data['trader'], $data['version'])

@@ -13,17 +13,18 @@ trait HasCreator
         'name' => 'Lynk System',
     ];
 
-    public function creator()
+    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class, $this->key);
     }
 
-    public function getCreator()
+    public function getCreator(): array
     {
-        if ($this->creator) {
+        $creator = $this->creator;
+        if ($creator) {
             return [
-                'id' => $this->creator->id,
-                'name' => $this->creator->fullName,
+                'id' => $creator->id,
+                'name' => $creator->fullName,
             ];
         }
 
