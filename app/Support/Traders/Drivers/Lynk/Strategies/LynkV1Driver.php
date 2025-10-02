@@ -431,10 +431,10 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             TraderOrderCancelReason::TraderOrderIsCancelled => __('order.user_cancel_request'),
             TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
             TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.lynk.expired_contract_time', [
-                'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
+                'time' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
             TraderOrderCancelReason::ExpiredConfirmationTimeLimit => __('order.trader.lynk.expired_confirmation_time_limit', [
-                'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
+                'time' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
             default => null,
         };

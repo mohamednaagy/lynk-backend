@@ -7,7 +7,7 @@ return [
     'no_eligible_commodities_available' => 'No commodities found with Trader',
     'trader' => [
         'bursa' => [
-            'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until :TIME KSA time.',
+            'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until :time KSA time.',
             'steps' => [
                 'contract_signed' => [
                     'v2' => [
@@ -27,8 +27,8 @@ return [
             'cancelled_status' => 'User has chosen to cancel this trade request.',
             'no_commodity_available' => 'No commodities found with Trader.',
             'internal_technical_error' => 'Internal Technical Error',
-            'expired_contract_time' => 'Contract Sign Time Limit of :TIME hours has expired.',
-            'expired_confirmation_time_limit' => 'Trade request cancelled by LYNK System due to Customer Delivery Confirmation Time Limit of :TIME hours has expired.',
+            'expired_contract_time' => 'Contract Sign Time Limit of :time hours has expired.',
+            'expired_confirmation_time_limit' => 'Trade request cancelled by LYNK System due to Customer Delivery Confirmation Time Limit of :time hours has expired.',
             'steps' => [
                 'contract_signed' => [
                     'v1' => [
