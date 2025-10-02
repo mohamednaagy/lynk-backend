@@ -2,12 +2,9 @@
 
 namespace App\Support\FinancingOrders;
 
-use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderTimeLimitStatus;
-use App\Enums\TraderOrderTimeLimitType;
 use App\Listeners\RefundOrderCost;
 use App\Models\TraderOrder;
 use Carbon\Carbon;
@@ -53,30 +50,11 @@ trait TraderOrderHelper
     public function formatCancelReasonMessage(TraderOrder $traderOrder)
     {
         $cancelDetail = $traderOrder->cancelDetail;
-        $reason = $cancelDetail?->cancel_reason;
 
-        if (! $reason) {
+        if (! $cancelDetail || ! $cancelDetail->cancel_reason) {
             return null;
         }
 
-        // Expired contract sign time: replace placeholder with latest expired time limit value
-        if ($reason->is(TraderOrderCancelReason::ExpiredContractSignTime)) {
-            $timeLimit = $traderOrder->getRecentTimeLimit(
-                TraderOrderTimeLimitType::ContractSignTimeLimit,
-                TraderOrderTimeLimitStatus::Expired
-            );
-
-            return str_replace(':value', $timeLimit->default_value, $reason->description);
-        }
-
-        // Order cancelled by user: include creator name safely
-        if ($reason->is(TraderOrderCancelReason::TraderOrderIsCancelled)) {
-            $creator = $cancelDetail->getCreator();
-
-            return str_replace(':user', $creator['name'], $reason->description);
-        }
-
-        // Default: return the reason description
-        return $reason->description;
+        return $cancelDetail->cancelMessage();
     }
 }
