@@ -55,6 +55,10 @@ trait TraderOrderHelper
         $cancelDetail = $traderOrder->cancelDetail;
         $reason = $cancelDetail?->cancel_reason;
 
+        if (! $reason) {
+            return null;
+        }
+
         // Expired contract sign time: replace placeholder with latest expired time limit value
         if ($reason->is(TraderOrderCancelReason::ExpiredContractSignTime)) {
             $timeLimit = $traderOrder->getRecentTimeLimit(
