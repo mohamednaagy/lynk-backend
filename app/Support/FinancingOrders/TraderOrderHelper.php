@@ -52,9 +52,27 @@ trait TraderOrderHelper
 
     public function formatCancelReasonMessage(TraderOrder $traderOrder)
     {
-        return match ($traderOrder->cancelDetail?->cancel_reason->value) {
-            TraderOrderCancelReason::ExpiredContractSignTime => str_replace(':value', $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value, $traderOrder->cancelDetail?->cancel_reason->description),
-            default => $traderOrder->cancelDetail?->cancel_reason->description
-        };
+        $cancelDetail = $traderOrder->cancelDetail;
+        $reason = $cancelDetail?->cancel_reason;
+
+        // Expired contract sign time: replace placeholder with latest expired time limit value
+        if ($reason->is(TraderOrderCancelReason::ExpiredContractSignTime)) {
+            $timeLimit = $traderOrder->getRecentTimeLimit(
+                TraderOrderTimeLimitType::ContractSignTimeLimit,
+                TraderOrderTimeLimitStatus::Expired
+            );
+
+            return str_replace(':value', $timeLimit->default_value, $reason->description);
+        }
+
+        // Order cancelled by user: include creator name safely
+        if ($reason->is(TraderOrderCancelReason::TraderOrderIsCancelled)) {
+            $creator = $cancelDetail->getCreator();
+
+            return str_replace(':user', $creator['name'], $reason->description);
+        }
+
+        // Default: return the reason description
+        return $reason->description;
     }
 }
