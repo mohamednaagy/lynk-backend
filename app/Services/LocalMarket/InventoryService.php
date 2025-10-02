@@ -103,15 +103,15 @@ class InventoryService
 
     private function findOptimalCombination($loanAmount, $inventories, $localMarketOrder)
     {
-        $startTime = microtime(true);
-        if ($inventories->isEmpty()) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The inventories list are empty');
+        if (fmod($loanAmount, 1) !== 0.0) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The loan amount must be integer');
 
             return false;
         }
 
-        if (fmod($loanAmount, 1) !== 0.0) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The loan amount must be integer');
+        $startTime = microtime(true);
+        if ($inventories->isEmpty()) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The inventories list are empty');
 
             return false;
         }
