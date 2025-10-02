@@ -57,7 +57,7 @@ class BursamV2Driver extends BursamV1Driver
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'mode' => TraderOrderMode::Automatic,
+            'creator_id' => auth()?->user()?->id,
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
 
