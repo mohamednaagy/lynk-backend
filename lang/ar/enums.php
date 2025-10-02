@@ -128,7 +128,7 @@ return [
         TraderOrderCancelReason::MurabhaTimeout => 'تم إلغاء طلب التداول بسبب وقت إغلاق السوق',
         TraderOrderCancelReason::FailureToPurchase => '',
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
-        TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
+        TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار :user إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه',
         TraderOrderCancelReason::ExpiredContractSignTime => 'تم إلغاء طلب التجارة من قبل النظام بسبب انتهاء وقت توقيع العقد المحدد بـ :value ساعة.',
         TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'تم إلغاء طلب التجارة من قبل النظام بسبب تجاوز عدد المحاولات المحددة.',

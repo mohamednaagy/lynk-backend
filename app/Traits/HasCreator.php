@@ -10,7 +10,7 @@ trait HasCreator
 
     private $defaultCreator = [
         'id' => null,
-        'name' => 'Lynk System',
+        'name' => 'LYNK System',
     ];
 
     public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo

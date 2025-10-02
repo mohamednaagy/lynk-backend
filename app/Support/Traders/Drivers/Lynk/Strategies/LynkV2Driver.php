@@ -61,7 +61,7 @@ class LynkV2Driver extends LynkV1Driver
         );
 
         if ($contractAndClientWakalaCompletedCaseCreator) {
-            return __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell', ['USER' => $contractAndClientWakalaCompletedCaseCreator]);
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCaseCreator, __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell'));
         }
 
         $contractSignedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(

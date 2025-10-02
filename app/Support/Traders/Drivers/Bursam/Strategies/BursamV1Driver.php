@@ -549,7 +549,7 @@ class BursamV1Driver implements TraderInterface
     {
         return match ($traderOrder->status->value) {
             TraderOrderStatus::Cancelled => $this->getCancellationReasonMessage($traderOrder->cancelDetail->cancel_reason->value) ,
-            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['TIME' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
+            TraderOrderStatus::Hold => __('order.trader.bursa.hold_status', ['time' => Carbon::parse(Config::get('services.bursam.market_opening_start_time'))->translatedFormat('h:i A')]),
             default => null,
         };
     }

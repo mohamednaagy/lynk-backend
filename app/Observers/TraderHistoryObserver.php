@@ -157,7 +157,7 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
             Log::channel(getSuitableLoggingFromTraderProvider($traderHistory->traderOrder))->info(formatLogTitle('TraderHistoryObserver dispatching applyOrderFees job', $traderHistory->traderOrder), [
                 'trader_order_id' => $traderHistory->traderOrder->id,
             ]);
-            
+
             ApplyOrderFeesJob::dispatch($traderHistory->traderOrder, $action);
         }
     }

@@ -57,7 +57,7 @@ class BursamV2Driver extends BursamV1Driver
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'mode' => TraderOrderMode::Automatic,
+            'creator_id' => auth()?->user()?->id,
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
 
@@ -283,14 +283,13 @@ class BursamV2Driver extends BursamV1Driver
         }
         $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
 
-        // Prefer the more specific case; only query the fallback if needed
         $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
             $traderOrder->id,
             FinancingOrderProceedCase::ContractAndClientWakalaCompleted
         );
 
         if ($contractAndClientWakalaCompletedCase) {
-            return __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell', ['USER' => $contractAndClientWakalaCompletedCase]);
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCase, __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell'));
         }
 
         $contractSignedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
