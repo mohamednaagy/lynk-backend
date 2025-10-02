@@ -330,13 +330,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function scopeByCreator($query, Model $model)
     {
-        $query->whereHasMorph(
-            'creator',
-            $model->getMorphClass(),
-            function ($query) use ($model) {
-                $query->where('creator_id', $model->getKey());
-            }
-        );
+        $query->where('creator_id', $model->getKey());
     }
 
     public function activeTraderOrder(): HasMany
