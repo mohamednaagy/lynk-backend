@@ -9,6 +9,11 @@ use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
+    private array $allowedEntryTypes = [
+        EntryType::REQUEST,
+        EntryType::QUERY,
+    ];
+
     public function register()
     {
         // Always register Telescope
@@ -16,17 +21,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $this->hideSensitiveRequestDetails();
 
         Telescope::filter(function ($entry) {
-            // Always log requests
-            if ($entry->type === EntryType::REQUEST) {
-                return true;
-            }
-
-            // Log queries (so you can see them under each request)
-            if ($entry->type === EntryType::QUERY) {
-                return true;
-            }
-
-            return false; // ignore everything else
+            return in_array($entry->type, $this->allowedEntryTypes, true);
         });
     }
 

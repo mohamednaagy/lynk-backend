@@ -36,7 +36,8 @@ class Kernel extends ConsoleKernel
         $hours = config('telescope.prune_hours');
         $schedule->command("telescope:prune --hours={$hours}")
             ->timezone($timezone)
-            ->hourly();
+            ->dailyAt('00:00')
+            ->onOneServer();
     }
 
     /**
