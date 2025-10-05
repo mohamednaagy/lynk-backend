@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
+use Laravel\Telescope\EntryType;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
@@ -13,6 +14,20 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         // Always register Telescope
         $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
         $this->hideSensitiveRequestDetails();
+
+        Telescope::filter(function ($entry) {
+            // Always log requests
+            if ($entry->type === EntryType::REQUEST) {
+                return true;
+            }
+
+            // Log queries (so you can see them under each request)
+            if ($entry->type === EntryType::QUERY) {
+                return true;
+            }
+
+            return false; // ignore everything else
+        });
     }
 
     protected function hideSensitiveRequestDetails()

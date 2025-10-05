@@ -34,7 +34,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('horizon:snapshot')->everyFiveMinutes();
 
         $hours = config('telescope.prune_hours');
-        $schedule->command("telescope:prune --hours={$hours}")->daily();
+        $schedule->command("telescope:prune --hours={$hours}")
+            ->timezone($timezone)
+            ->hourly();
     }
 
     /**
