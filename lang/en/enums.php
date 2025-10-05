@@ -125,8 +125,8 @@ return [
         TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by :user',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by :user',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with Trader.',
-        TraderOrderCancelReason::ExpiredContractSignTime => 'Trade request cancelled by LYNK System due to Contract Sign Time Limit of :value hours has expired.',
-        TraderOrderCancelReason::ExpiredConfirmationTimeLimit => 'Trade request cancelled by LYNK System due to Customer Delivery Confirmation Time Limit has expired.',
+        TraderOrderCancelReason::ExpiredContractSignTime => 'Trade request cancelled by system due to Contract Sign Time Limit of :value hours has expired.',
+        TraderOrderCancelReason::ExpiredConfirmationTimeLimit => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit has expired.',
         TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'Purchase Retries Exceeded',
     ],
     UnitOwnershipAction::class => [
