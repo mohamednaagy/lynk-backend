@@ -28,7 +28,7 @@ return [
             'no_commodity_available' => 'No commodities found with Trader.',
             'internal_technical_error' => 'Internal Technical Error',
             'expired_contract_time' => 'Contract Sign Time Limit of :time hours has expired.',
-            'expired_confirmation_time_limit' => 'Trade request cancelled by LYNK System due to Customer Delivery Confirmation Time Limit of :time hours has expired.',
+            'expired_confirmation_time_limit' => 'Trade request cancelled by System due to Customer Delivery Confirmation Time Limit of :time hours has expired.',
             'steps' => [
                 'contract_signed' => [
                     'v1' => [
