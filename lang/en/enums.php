@@ -122,7 +122,7 @@ return [
         TraderOrderCancelReason::Manual => '',
         TraderOrderCancelReason::MurabhaTimeout => 'Trade Request cancelled due to Market Close Time',
         TraderOrderCancelReason::FailureToPurchase => '',
-        TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by user',
+        TraderOrderCancelReason::FinancingOrderIsCancelled => 'Order cancelled by :user',
         TraderOrderCancelReason::TraderOrderIsCancelled => 'Trade request cancelled by :user',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'No commodities found with Trader.',
         TraderOrderCancelReason::ExpiredContractSignTime => 'Trade request cancelled by LYNK System due to Contract Sign Time Limit of :value hours has expired.',

@@ -13,7 +13,7 @@ return [
     | Number of hours to keep Telescope entries before pruning.
     |
     */
-        'prune_hours' => env('TELESCOPE_PRUNE_HOURS', 72),
+    'prune_hours' => env('TELESCOPE_PRUNE_HOURS', 72),
 
     /*
     |--------------------------------------------------------------------------
