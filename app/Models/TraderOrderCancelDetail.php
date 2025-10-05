@@ -68,11 +68,6 @@ class TraderOrderCancelDetail extends Model
 
     private function getCreatorNameForDisplay()
     {
-        $user = auth()->user();
-        if (! $user || ! $user->isAdmin()) {
-            return 'user';
-        }
-
         $creator = $this->getCreator();
 
         return $creator['name'] ?? '';
