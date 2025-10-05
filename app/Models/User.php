@@ -198,4 +198,9 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     {
         return $this->belongsTo(Lender::class, 'company_id');
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(Role::Admin) || $this->hasRole(Role::Manager);
+    }
 }

@@ -59,11 +59,22 @@ class TraderOrderCancelDetail extends Model
         // Order cancelled by user: include creator name safely
         if ($reason->is(TraderOrderCancelReason::TraderOrderIsCancelled) ||
             $reason->is(TraderOrderCancelReason::FinancingOrderIsCancelled)) {
-            $creator = $this->getCreator();
 
-            return str_replace(':user', $creator['name'], $reason->description);
+            return str_replace(':user', $this->getCreatorNameForDisplay(), $reason->description);
         }
 
         return $reason->description;
+    }
+
+    private function getCreatorNameForDisplay()
+    {
+        $user = auth()->user();
+        if (! $user || ! $user->isAdmin()) {
+            return 'user';
+        }
+
+        $creator = $this->getCreator();
+
+        return $creator['name'] ?? '';
     }
 }
