@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\Lender\Edaat;
 
 use App\Actions\Contracts\Edaat\CreateEdaatInvoice as CreateEdaatInvoiceInterface;
 use App\Actions\Contracts\Edaat\GetEdaatInvoices as GetEdaatInvoicesInterface;
-use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
@@ -12,7 +11,6 @@ use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use App\Models\Company;
-use App\Models\TieredPricing;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceSortByCreatedAtScope;
 use App\Transformers\EdaatInvoiceTransformer;
 use Cknow\Money\Money;
@@ -84,18 +82,9 @@ class EdaatInvoiceController extends Controller
 
     protected function resolveAmount(Request $request, Company $company)
     {
-        $orderCostForStandardPricing = TieredPricing::getOrderCostIfStandard($company);
-
-        if ($orderCostForStandardPricing) {
-            return app(CalculateOrdersCost::class)->handle(
-                $request->validated('orders_count'),
-                $orderCostForStandardPricing['costWithoutVat']
-            );
-        } else {
-            return Money::parseByDecimal(
-                $request->validated('amount'),
-                $company->getWallet(WalletType::CompanyWallet)->currency
-            );
-        }
+        return Money::parseByDecimal(
+            $request->validated('amount'),
+            $company->getWallet(WalletType::CompanyWallet)->currency
+        );
     }
 }

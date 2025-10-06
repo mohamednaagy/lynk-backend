@@ -22,15 +22,8 @@ class CalculateOrdersRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [];
-
-        $company = tenant();
-        if ($company->isTiered()) {
-            $rules['amount'] = ['required', 'numeric', 'gt:0', new MoneyValueRule];
-        } else {
-            $rules['orders_count'] = ['required', 'integer', 'min:1', 'max:99999999999999'];
-        }
-
-        return $rules;
+        return [
+            'amount' => ['required', 'numeric', 'gt:0', new MoneyValueRule],
+        ];
     }
 }
