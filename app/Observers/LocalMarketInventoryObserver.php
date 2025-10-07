@@ -7,11 +7,10 @@ use App\Jobs\LocalMarket\CommoditiesSettlement\DispatchOrderSettlementCheck;
 use App\Jobs\LocalMarket\InventoryEligibleQuantities\DeleteInventory as DeleteInventoryEligibleQuantities;
 use App\Jobs\LocalMarket\UpdateInventoryStock;
 use App\Models\LocalMarketInventory;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class LocalMarketInventoryObserver
+class LocalMarketInventoryObserver implements ShouldHandleEventsAfterCommit
 {
-    public $afterCommit = true;
-
     /**
      * Handle before creating the inventory
      */
