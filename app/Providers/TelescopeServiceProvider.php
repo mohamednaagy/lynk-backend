@@ -21,7 +21,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         $this->hideSensitiveRequestDetails();
 
         Telescope::filter(function ($entry) {
-            return in_array($entry->type, $this->allowedEntryTypes, true);
+            return $this->app->isLocal() || in_array($entry->type, $this->allowedEntryTypes, true);
         });
     }
 
