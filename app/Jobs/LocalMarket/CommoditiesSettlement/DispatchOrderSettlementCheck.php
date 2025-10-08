@@ -12,6 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Laravel\Nightwatch\Facades\Nightwatch;
 
 class DispatchOrderSettlementCheck implements ShouldQueue
 {
@@ -31,6 +32,7 @@ class DispatchOrderSettlementCheck implements ShouldQueue
         private ?int $mainLocalMarketOrderId = null,
         private ?int $inventoryId = null
     ) {
+        Nightwatch::dontSample();
         $this->onQueue(self::QUEUE_NAME);
 
         Log::channel(LOG_CHANNEL_COMMODITIES_SETTLEMENT)->info(
