@@ -81,6 +81,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'lender_type',
         'lender_identifier',
         'borrower_type',
+        'cost_with_vat',
+        'cost_without_vat',
     ];
 
     protected $casts = [

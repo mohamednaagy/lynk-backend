@@ -40,22 +40,25 @@ class ExportOrders extends Controller
                     : ['reference_number', 'national_id', 'selling_price', 'cost_with_vat', 'cost_without_vat']
             );
 
-        return Excel::download($export, $this->getFileName($request), null, [
-            'X-File-Name' => $this->getFileName($request),
-        ]);
+        return Excel::download(
+            $export,
+            $this->getFileName($request, 'csv'),
+            \Maatwebsite\Excel\Excel::CSV,
+            ['X-File-Name' => $this->getFileName($request, 'csv')]
+        );
     }
 
-    protected function getFileName(Request $request)
+    protected function getFileName(Request $request, $type = 'xlsx')
     {
         $todayDateInYYYYMMDD = now('Asia/Riyadh')->format('Ymd_His');
 
         $company = $this->getFirstCompany($request);
 
         if ($company) {
-            return "{$company->name}_LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
+            return "{$company->name}_LYNKOrderList_{$todayDateInYYYYMMDD}.{$type}";
         }
 
-        return "LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
+        return "LYNKOrderList_{$todayDateInYYYYMMDD}.{$type}";
     }
 
     protected function getFirstCompany(Request $request)
