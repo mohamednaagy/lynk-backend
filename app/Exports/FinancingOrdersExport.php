@@ -70,8 +70,8 @@ class FinancingOrdersExport implements FromGenerator, WithCustomChunkSize, WithH
         $items = $this->filterExcludes([
             'id' => $order->id,
             'reference_number' => $order->reference_number,
-            'created_date' => $order->created_at->format('Y-m-d'),
-            'created_time' => $order->created_at->format('H:i:s'),
+            'created_date' => $order->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d'),
+            'created_time' => $order->created_at->clone()->tz('Asia/Riyadh')->format('H:i:s'),
             'national_id' => $order->national_id,
             'amount' => round($order->amount->formatByDecimal(), 2),
             'selling_price' => round($order->selling_price->formatByDecimal(), 2),

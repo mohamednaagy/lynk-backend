@@ -15,10 +15,10 @@ return new class extends Migration
     {
         DB::beginTransaction();
         try {
-            // Schema::table('financing_orders', function (Blueprint $table) {
-            //     $table->decimal('cost_with_vat', 64, 0)->nullable()->after('amount');
-            //     $table->decimal('cost_without_vat', 64, 0)->nullable()->after('cost_with_vat');
-            // });
+            Schema::table('financing_orders', function (Blueprint $table) {
+                $table->decimal('cost_with_vat', 64, 0)->nullable()->after('amount');
+                $table->decimal('cost_without_vat', 64, 0)->nullable()->after('cost_with_vat');
+            });
 
             $financingOrders = FinancingOrder::orderBy('id', 'desc')->get();
             foreach ($financingOrders as $financingOrder) {
