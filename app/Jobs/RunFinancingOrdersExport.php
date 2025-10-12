@@ -28,7 +28,7 @@ class RunFinancingOrdersExport implements ShouldQueue
         public string $filePath,
         public bool $detailed = false
     ) {
-        $this->onQueue('exports');
+        // $this->onQueue('exports');
     }
 
     public function handle(BuildFinancingOrdersQuery $buildOrdersQuery)

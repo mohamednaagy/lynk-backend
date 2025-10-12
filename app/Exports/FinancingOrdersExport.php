@@ -41,7 +41,7 @@ class FinancingOrdersExport implements FromGenerator, WithCustomChunkSize, WithH
 
     public function chunkSize(): int
     {
-        return 8000;
+        return 5000;
     }
 
     public function setExcludes(array $excludes): static
