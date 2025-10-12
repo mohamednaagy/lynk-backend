@@ -214,6 +214,8 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'meta' => $transactionMeta,
             ]);
 
+            $financingOrder->setCosts($totalAmountWithVat->jsonSerialize()['amount'], $orderCostWithoutVat->jsonSerialize()['amount']);
+
             $transaction = $this->createTransactions->handle(
                 $wallet,
                 TransactionReason::OrderCreationFee,

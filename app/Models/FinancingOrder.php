@@ -81,6 +81,8 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'lender_type',
         'lender_identifier',
         'borrower_type',
+        'cost_with_vat',
+        'cost_without_vat',
     ];
 
     protected $casts = [
@@ -546,5 +548,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         }
 
         return $this->borrower_identifier;
+    }
+
+    public function setCosts(float $costWithVat, float $costWithoutVat): void
+    {
+        $this->cost_with_vat = $costWithVat;
+        $this->cost_without_vat = $costWithoutVat;
+        $this->saveQuietly();
     }
 }
