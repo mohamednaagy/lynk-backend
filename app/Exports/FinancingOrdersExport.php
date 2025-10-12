@@ -15,6 +15,11 @@ class FinancingOrdersExport implements FromGenerator, WithCustomChunkSize, WithH
 {
     use Localizable;
 
+    public function __construct(
+        protected Request $request,
+        protected Builder $ordersQuery
+    ) {}
+
     protected array $headings = [
         'id' => 'ID',
         'reference_number' => 'Reference Number',
@@ -34,14 +39,9 @@ class FinancingOrdersExport implements FromGenerator, WithCustomChunkSize, WithH
 
     protected array $excludes = [];
 
-    public function __construct(
-        protected Request $request,
-        protected Builder $ordersQuery
-    ) {}
-
     public function chunkSize(): int
     {
-        return 10000;
+        return 8000;
     }
 
     public function setExcludes(array $excludes): static
