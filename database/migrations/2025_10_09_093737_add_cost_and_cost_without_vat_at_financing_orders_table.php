@@ -18,7 +18,7 @@ return new class extends Migration
         });
 
         FinancingOrder::orderBy('id')
-            ->chunkById(5000, function ($orders) {
+            ->chunkById(500, function ($orders) {
                 foreach ($orders as $financingOrder) {
                     $transaction = $financingOrder->creationFeeTransactions()->latest()->first();
 

@@ -38,9 +38,7 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 
         $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
-        $financingOrder->cost_with_vat = $totalAmountWithVat->jsonSerialize()['amount'];
-        $financingOrder->cost_without_vat = $orderCostWithoutVat->jsonSerialize()['amount'];
-        $financingOrder->saveQuietly();
+        $financingOrder->setCosts($totalAmountWithVat->jsonSerialize()['amount'], $orderCostWithoutVat->jsonSerialize()['amount']);
 
         return $this->createTransactions->handle(
             $wallet,

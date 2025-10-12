@@ -549,4 +549,11 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
         return $this->borrower_identifier;
     }
+
+    public function setCosts(float $costWithVat, float $costWithoutVat): void
+    {
+        $this->cost_with_vat = $costWithVat;
+        $this->cost_without_vat = $costWithoutVat;
+        $this->saveQuietly();
+    }
 }
