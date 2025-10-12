@@ -38,6 +38,8 @@ class DeductOrderDeliveryConfirmedFeeAction implements DeductOrderDeliveryConfir
 
         $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
+        $financingOrder->setCosts($totalAmountWithVat->jsonSerialize()['amount'], $orderCostWithoutVat->jsonSerialize()['amount']);
+
         return $this->createTransactions->handle(
             $wallet,
             TransactionReason::DeliveryConfirmedFee,
