@@ -39,9 +39,10 @@ class ExportOrders extends Controller
         ]);
     }
 
-    protected function getFileName(Request $request, $type = 'xlsx')
+    protected function getFileName(Request $request, string $type = 'xlsx')
     {
-        $today = now('Asia/Riyadh')->format('Ymd_His');
+
+        $today = saudi_now('Ymd_His');
         $company = $this->getFirstCompany($request);
 
         return $company
