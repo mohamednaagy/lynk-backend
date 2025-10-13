@@ -214,14 +214,13 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'meta' => $transactionMeta,
             ]);
 
-            $financingOrder->setCosts($totalAmountWithVat->jsonSerialize()['amount'], $orderCostWithoutVat->jsonSerialize()['amount']);
-
             $transaction = $this->createTransactions->handle(
                 $wallet,
                 TransactionReason::OrderCreationFee,
                 $totalAmountWithVat,
                 $transactionMeta
             );
+            $financingOrder->updateFinancingOrderCosts(TransactionReason::OrderCreationFee, $totalAmountWithVat->getAmount(), $orderCostWithoutVat->getAmount());
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction::handle SUCCESS', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,

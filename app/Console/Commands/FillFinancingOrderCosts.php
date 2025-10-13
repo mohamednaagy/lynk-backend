@@ -3,55 +3,49 @@
 namespace App\Console\Commands;
 
 use App\Models\FinancingOrder;
+use App\Support\Collections\FinancingOrderCollection;
 use Illuminate\Console\Command;
 
 class FillFinancingOrderCosts extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'fill:financing-order-costs';
+    protected $signature = 'fill:financing-order-costs {--chunk=1000}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Command description';
+    protected $description = 'Calculate and fill financing order costs with VAT and without VAT';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
-        FinancingOrder::orderBy('id')
-            ->chunkById(500, function ($orders) {
-                foreach ($orders as $financingOrder) {
-                    $transaction = $financingOrder->creationFeeTransactions()->latest()->first();
+        $this->info('Starting cost calculation for financing orders...');
+        $startTime = microtime(true);
 
-                    if (! $transaction) {
-                        continue;
-                    }
+        $total = FinancingOrder::count();
+        $this->info("Total orders: {$total}");
 
-                    $meta = $transaction->meta;
-                    $financingOrder->cost_with_vat = abs($transaction->amount->getAmount());
+        $bar = $this->output->createProgressBar($total);
+        $bar->start();
 
-                    try {
-                        if ($meta['is_vat_included']) {
-                            $financingOrder->cost_without_vat = $meta['order_cost']['amount'];
-                        } else {
-                            $financingOrder->cost_without_vat = $meta['order_cost']['amount'] - ($meta['order_cost']['amount'] * 0.15);
-                        }
+        FinancingOrder::query()
+            ->select(['id'])
+            ->orderBy('id')
+            ->chunkById($this->option('chunk'), function ($orders) use ($bar) {
+                (new FinancingOrderCollection($orders))->loadCost();
 
-                        $financingOrder->saveQuietly();
-                    } catch (\Throwable $e) {
-                        logger()->error('Failed to update FinancingOrder ID '.$financingOrder->id, [
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
+                foreach ($orders as $order) {
+                    $order->update([
+                        'cost_with_vat' => $order->cost_with_vat?->getAmount() ?? 0,
+                        'cost_without_vat' => $order->cost_without_vat?->getAmount() ?? 0,
+                    ]);
+
+                    $bar->advance();
                 }
+
+                unset($orders);
+                gc_collect_cycles();
             });
+
+        $bar->finish();
+        $this->newLine(2);
+
+        $duration = round(microtime(true) - $startTime, 2);
+        $this->info("✅ Completed in {$duration} seconds.");
     }
 }

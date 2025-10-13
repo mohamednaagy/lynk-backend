@@ -26,4 +26,18 @@ final class TransactionReason extends Enum
         TransactionReason::OrderCreationFee,
         TransactionReason::VatPercentageFee,
     ];
+
+    public static function shouldIncreaseTransactionAmount($reason): bool
+    {
+        return in_array($reason, [
+            TransactionReason::OrderCreationFee,
+        ]);
+    }
+
+    public static function shouldDecreaseTransactionAmount($reason): bool
+    {
+        return in_array($reason, [
+            TransactionReason::RefundOrderCreationFee,
+        ]);
+    }
 }

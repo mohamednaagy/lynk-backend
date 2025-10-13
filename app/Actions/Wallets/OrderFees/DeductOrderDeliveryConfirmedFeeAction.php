@@ -38,9 +38,7 @@ class DeductOrderDeliveryConfirmedFeeAction implements DeductOrderDeliveryConfir
 
         $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
-        $financingOrder->setCosts($totalAmountWithVat->jsonSerialize()['amount'], $orderCostWithoutVat->jsonSerialize()['amount']);
-
-        return $this->createTransactions->handle(
+        $transaction = $this->createTransactions->handle(
             $wallet,
             TransactionReason::DeliveryConfirmedFee,
             $totalAmountWithVat,
@@ -57,5 +55,8 @@ class DeductOrderDeliveryConfirmedFeeAction implements DeductOrderDeliveryConfir
                 'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
+        $financingOrder->updateFinancingOrderCosts(TransactionReason::DeliveryConfirmedFee, $totalAmountWithVat->getAmount(), $orderCostWithoutVat->getAmount());
+
+        return $transaction;
     }
 }

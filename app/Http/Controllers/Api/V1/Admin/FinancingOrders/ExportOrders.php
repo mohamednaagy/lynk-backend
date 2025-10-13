@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\FinancingOrders;
 
+use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
-use App\Jobs\RunFinancingOrdersExport;
 use App\Models\Company;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel as MaatwebsiteExcel;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExportOrders extends Controller
 {
@@ -20,22 +24,25 @@ class ExportOrders extends Controller
         );
     }
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, BuildFinancingOrdersQuery $buildOrdersQuery)
     {
-        $fileName = $this->getFileName($request, 'csv');
-        $filePath = "exports/{$fileName}";
+        $query = $buildOrdersQuery->setRelations([
+            'activeTraderOrder' => fn ($query) => $query->latest(),
+            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'responsableAdmin' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+        ])
+            ->handle();
 
-        RunFinancingOrdersExport::dispatch(
-            $request->all(),
-            $request->user(),
-            $filePath,
-            $request->boolean('detailed')
-        );
+        $export = (new FinancingOrdersExport($request, $query))
+            ->setExcludes(
+                $request->boolean('detailed')
+                    ? ['reference_number']
+                    : ['reference_number', 'national_id', 'selling_price', 'cost_with_vat', 'cost_without_vat']
+            );
 
-        return response()->json([
-            'status' => 'queued',
-            'message' => 'Your export has been queued and will be available soon.',
-            'file' => $fileName,
+        return Excel::download($export, $this->getFileName($request, 'csv'), MaatwebsiteExcel::CSV, [
+            'X-File-Name' => $this->getFileName($request, 'csv'),
         ]);
     }
 

@@ -11,6 +11,7 @@ use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel as MaatwebsiteExcel;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportOrders extends Controller
@@ -43,16 +44,16 @@ class ExportOrders extends Controller
                     : ['company_name', 'order_owner', 'cost_with_vat', 'cost_without_vat', 'assigned_to']
             );
 
-        return Excel::download($export, $this->getFileName(), null, [
-            'X-File-Name' => $this->getFileName(),
+        return Excel::download($export, $this->getFileName('csv'), MaatwebsiteExcel::CSV, [
+            'X-File-Name' => $this->getFileName('csv'),
         ]);
     }
 
-    protected function getFileName()
+    protected function getFileName(string $type = 'xlsx')
     {
         $companyName = tenant()->name;
-        $todayDateInYYYYMMDD = now('Asia/Riyadh')->format('Ymd_His');
+        $todayDateInYYYYMMDD = saudi_now('Ymd_His');
 
-        return "{$companyName}_LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
+        return "{$companyName}_LYNKOrderList_{$todayDateInYYYYMMDD}.{$type}";
     }
 }

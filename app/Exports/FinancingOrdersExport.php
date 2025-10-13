@@ -58,9 +58,7 @@ class FinancingOrdersExport implements FromGenerator, WithCustomChunkSize, WithH
 
     public function generator(): \Generator
     {
-        $query = $this->ordersQuery->clone();
-
-        foreach ($query->lazyByIdDesc($this->chunkSize()) as $order) {
+        foreach ($this->ordersQuery->lazy($this->chunkSize()) as $order) {
             yield $this->map($order);
         }
     }
