@@ -220,7 +220,6 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 $totalAmountWithVat,
                 $transactionMeta
             );
-            $financingOrder->updateFinancingOrderCosts(TransactionReason::OrderCreationFee, $totalAmountWithVat->getAmount(), $orderCostWithoutVat->getAmount());
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction::handle SUCCESS', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,

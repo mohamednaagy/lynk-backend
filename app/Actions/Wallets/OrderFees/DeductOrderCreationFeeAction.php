@@ -56,8 +56,6 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
             ]
         );
 
-        $financingOrder->updateFinancingOrderCosts(TransactionReason::OrderCreationFee, $totalAmountWithVat->getAmount(), $orderCostWithoutVat->getAmount());
-
         return $transaction;
     }
 }
