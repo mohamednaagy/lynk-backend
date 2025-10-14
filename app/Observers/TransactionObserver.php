@@ -24,17 +24,19 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
             Log::info('increment transaction FOR REFUND financing_order_id => '.$transaction->financing_order_id.' transaction_id => '.$transaction->id.' wallet_id => '.$transaction->wallet_id);
             FinancingOrder::where('id', $transaction->financing_order_id)->increment('charged_trader_orders_count');
 
-            if ($cost_with_vat > 0 && $cost_without_vat > 0) {
+            if ($financingOrder) {
                 $financingOrder->addToFinancingOrderCosts($cost_with_vat, $cost_without_vat);
             }
+
         } elseif ($transaction->amount->isPositive()) {
             $this->clearNotifiedForWalletNotification($transaction->wallet);
             Log::info('decrement transaction FOR REFUND financing_order_id => '.$transaction->financing_order_id.' transaction_id => '.$transaction->id.' wallet_id => '.$transaction->wallet_id);
             FinancingOrder::where('id', $transaction->financing_order_id)->decrement('charged_trader_orders_count');
 
-            if ($cost_with_vat > 0 && $cost_without_vat > 0) {
+            if ($financingOrder) {
                 $financingOrder->subtractFromFinancingOrderCosts($cost_with_vat, $cost_without_vat);
             }
+
         }
     }
 
