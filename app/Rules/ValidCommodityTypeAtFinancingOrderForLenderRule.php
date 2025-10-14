@@ -21,9 +21,7 @@ class ValidCommodityTypeAtFinancingOrderForLenderRule implements Rule
             return false;
         }
 
-        $allowCommoditySelection = $this->lender->lenderDetail?->allow_preferred_commodity_in_order ?? false;
-
-        if (! $allowCommoditySelection) {
+        if (! $this->lender->isPreferredCommoditySelectionAllowed()) {
             $this->errorMessage = __('validation.order_not_created_commodity_type_selection_not_allowed');
 
             return false;
