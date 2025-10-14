@@ -74,21 +74,15 @@ class Transaction extends Model implements HasMedia
 
     public function getCostWithVatAttribute()
     {
-        $costAmount = $this->meta['order_cost']['amount'] ?? null;
-        $vatAmount = $this->meta['vat_amount']['amount'] ?? null;
-        if ($costAmount === null || $vatAmount === null) {
-            return 0;
-        }
+        $costAmount = $this->meta['order_cost']['amount'] ?? 0;
+        $vatAmount = $this->meta['vat_amount']['amount'] ?? 0;
 
         return $costAmount + $vatAmount;
     }
 
     public function getCostWithoutVatAttribute()
     {
-        $cost = $this->meta['order_cost']['amount'] ?? null;
-        if ($cost === null) {
-            return 0;
-        }
+        $cost = $this->meta['order_cost']['amount'] ?? 0;
 
         return $cost;
     }
