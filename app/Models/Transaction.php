@@ -71,4 +71,25 @@ class Transaction extends Model implements HasMedia
     {
         return $query->whereJsonContains('meta->financing_order_id', $financingOrderId);
     }
+
+    public function getCostWithVatAttribute()
+    {
+        $costAmount = $this->meta['order_cost']['amount'] ?? null;
+        $vatAmount = $this->meta['vat_amount']['amount'] ?? null;
+        if ($costAmount === null || $vatAmount === null) {
+            return 0;
+        }
+
+        return $costAmount + $vatAmount;
+    }
+
+    public function getCostWithoutVatAttribute()
+    {
+        $cost = $this->meta['order_cost']['amount'] ?? null;
+        if ($cost === null) {
+            return 0;
+        }
+
+        return $cost;
+    }
 }
