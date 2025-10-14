@@ -55,7 +55,6 @@ class DeductOrderDeliveryConfirmedFeeAction implements DeductOrderDeliveryConfir
                 'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
-        $financingOrder->updateFinancingOrderCosts(TransactionReason::DeliveryConfirmedFee, $totalAmountWithVat->getAmount(), $orderCostWithoutVat->getAmount());
 
         return $transaction;
     }

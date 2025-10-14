@@ -17,7 +17,6 @@ use App\Enums\TransactionReason;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
-use App\Traits\AdjustsFinancingOrderCostsTrait;
 use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,7 +45,6 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
-    use AdjustsFinancingOrderCostsTrait;
     use BelongsToTenant;
     use HasCreator;
     use HasFactory;
@@ -550,5 +548,19 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         }
 
         return $this->borrower_identifier;
+    }
+
+    public function addToFinancingOrderCosts(float $costWithVat, float $costWithoutVat): void
+    {
+        $this->cost_with_vat += $costWithVat;
+        $this->cost_without_vat += $costWithoutVat;
+        $this->save();
+    }
+
+    public function subtractFromFinancingOrderCosts(float $costWithVat, float $costWithoutVat): void
+    {
+        $this->cost_with_vat -= $costWithVat;
+        $this->cost_without_vat -= $costWithoutVat;
+        $this->save();
     }
 }
