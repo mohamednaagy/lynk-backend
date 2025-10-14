@@ -17,7 +17,7 @@ class ValidCommodityTypeAtFinancingOrderForLenderRule implements Rule
     public function passes($attribute, $value): bool
     {
 
-        if (is_null($value) || $value === '') {
+        if (empty($value)) {
             return false;
         }
 
@@ -32,13 +32,13 @@ class ValidCommodityTypeAtFinancingOrderForLenderRule implements Rule
             ->where('commodity_types.status', CommodityTypeStatus::Active)
             ->exists();
 
-        if (! $commodityTypeExists) {
+        if ($commodityTypeExists) {
+            return true;
+        } else {
             $this->errorMessage = __('validation.the_selected_commodity_type_is_not_allowed_for_this_company');
 
             return false;
         }
-
-        return true;
 
     }
 
