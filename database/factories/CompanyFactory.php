@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Enums\CompanyMarketType;
 use App\Enums\CompanyStatus;
 use App\Enums\CompanyType;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,18 +19,10 @@ class CompanyFactory extends Factory
     public function definition()
     {
         return [
+            'type' => CompanyType::Lender,
             'name' => $this->faker->company,
             'unique_name' => $this->faker->unique()->domainName,
-            'company_cr' => $this->faker->unique()->text(20),
             'status' => CompanyStatus::Approved,
-            'public_status_comment' => $this->faker->randomLetter,
-            'internal_status_comment' => $this->faker->randomLetter,
-            'does_order_require_approval' => $this->faker->boolean,
-            'require_initiate_trade_request' => $this->faker->boolean,
-            'notifications_email' => $this->faker->email,
-            'notify_admins_about_new_orders' => $this->faker->boolean,
-            'preferred_market_type' => CompanyMarketType::International,
-            'type' => CompanyType::Lender,
         ];
     }
 }

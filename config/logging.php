@@ -4,12 +4,24 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
-const LOG_CHANNEL_BURSAM = 'bursam';
-const LOG_CHANNEL_LOCAL_MARKET = 'local_market';
-const LOG_CHANNEL_LYNK = 'lynk';
-const LOG_CHANNEL_AUTO_COMPLETE_SELL = 'bursam_autosell';
-const LOG_CHANNEL_COMMODITIES_SETTLEMENT = 'commodities_settlement';
-const LOG_CHANNEL_WEBHOOKS = 'webhooks';
+if (! defined('LOG_CHANNEL_BURSAM')) {
+    define('LOG_CHANNEL_BURSAM', 'bursam');
+}
+if (! defined('LOG_CHANNEL_LOCAL_MARKET')) {
+    define('LOG_CHANNEL_LOCAL_MARKET', 'local_market');
+}
+if (! defined('LOG_CHANNEL_LYNK')) {
+    define('LOG_CHANNEL_LYNK', 'lynk');
+}
+if (! defined('LOG_CHANNEL_AUTO_COMPLETE_SELL')) {
+    define('LOG_CHANNEL_AUTO_COMPLETE_SELL', 'bursam_autosell');
+}
+if (! defined('LOG_CHANNEL_COMMODITIES_SETTLEMENT')) {
+    define('LOG_CHANNEL_COMMODITIES_SETTLEMENT', 'commodities_settlement');
+}
+if (! defined('LOG_CHANNEL_WEBHOOKS')) {
+    define('LOG_CHANNEL_WEBHOOKS', 'webhooks');
+}
 
 return [
 

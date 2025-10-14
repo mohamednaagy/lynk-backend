@@ -39,6 +39,7 @@ class LenderTransactionController extends Controller
                 'description',
                 'amount',
                 'amount_formatted',
+                'balance_formatted',
                 'receipt_url',
             ])
             ->respond();
