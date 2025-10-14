@@ -15,9 +15,8 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
     public function created(Transaction $transaction): void
     {
         $financingOrder = $this->getFinancingOrder($transaction);
-        $costs = $this->extractCostsFromTransaction($transaction);
-        $cost_with_vat = $costs['cost_with_vat'];
-        $cost_without_vat = $costs['cost_without_vat'];
+        $cost_with_vat = $transaction->cost_with_vat;
+        $cost_without_vat = $transaction->cost_without_vat;
 
         if ($transaction->amount->isNegative()) {
             CheckWalletNotificaitonJob::dispatch($transaction->wallet);
@@ -50,17 +49,5 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
     public function getFinancingOrder(Transaction $transaction): FinancingOrder
     {
         return FinancingOrder::where('id', $transaction->financing_order_id)->first();
-    }
-
-    public function extractCostsFromTransaction(Transaction $transaction): array
-    {
-        $cost_with_vat = 0;
-        $cost_without_vat = 0;
-        if (isset($transaction->meta['order_cost']['amount']) && isset($transaction->meta['vat_amount']['amount'])) {
-            $cost_with_vat = $transaction->meta['order_cost']['amount'] + $transaction->meta['vat_amount']['amount'];
-            $cost_without_vat = $transaction->meta['order_cost']['amount'];
-        }
-
-        return ['cost_with_vat' => $cost_with_vat, 'cost_without_vat' => $cost_without_vat];
     }
 }
