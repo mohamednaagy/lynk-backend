@@ -9,7 +9,7 @@ use App\Http\Requests\V1\Lender\Orders\Validators\AbstractFinancingOrderTypeVali
 use App\Http\Requests\V1\Lender\Orders\Validators\FinancingOrderTypeValidatorFactory;
 use App\Models\Lender;
 use App\Rules\CheckFinancingOrderTypeExistAtCompanyRule;
-use App\Rules\ValidCommodityTypeAtFinancingOrderRule;
+use App\Rules\ValidCommodityTypeAtFinancingOrderForLenderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Unique;
@@ -81,8 +81,8 @@ class StoreOrderRequest extends FormRequest
         return [
             'commodity_type_id' => [
                 'nullable',
-                'numeric',
-                new ValidCommodityTypeAtFinancingOrderRule($this->lender->id),
+                'string',
+                new ValidCommodityTypeAtFinancingOrderForLenderRule($this->lender),
             ],
             'reference_number' => [
                 'nullable',
