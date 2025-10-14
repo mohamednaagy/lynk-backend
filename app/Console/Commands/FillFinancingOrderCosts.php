@@ -24,9 +24,7 @@ class FillFinancingOrderCosts extends Command
 
         $total = FinancingOrder::where(function ($query) {
             $query->where('cost_with_vat', 0)
-                ->orWhere('cost_without_vat', 0)
-                ->orWhereNull('cost_with_vat')
-                ->orWhereNull('cost_without_vat');
+                ->orWhere('cost_without_vat', 0);
         })->count();
         $this->info("Total orders: {$total}");
 
@@ -37,9 +35,7 @@ class FillFinancingOrderCosts extends Command
             FinancingOrder::query()
                 ->where(function ($query) {
                     $query->where('cost_with_vat', 0)
-                        ->orWhere('cost_without_vat', 0)
-                        ->orWhereNull('cost_with_vat')
-                        ->orWhereNull('cost_without_vat');
+                        ->orWhere('cost_without_vat', 0);
                 })
                 ->select(['id'])
                 ->orderBy('id')

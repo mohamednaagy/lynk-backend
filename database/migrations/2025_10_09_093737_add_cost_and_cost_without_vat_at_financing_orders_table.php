@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('financing_orders', function (Blueprint $table) {
-            $table->decimal('cost_with_vat', 64, 0)->nullable()->after('amount');
-            $table->decimal('cost_without_vat', 64, 0)->nullable()->after('cost_with_vat');
+            $table->decimal('cost_with_vat', 64, 0)->default(0)->after('amount');
+            $table->decimal('cost_without_vat', 64, 0)->default(0)->after('cost_with_vat');
         });
     }
 
