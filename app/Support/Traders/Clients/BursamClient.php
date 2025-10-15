@@ -424,7 +424,9 @@ class BursamClient
 
     private function http(): PendingRequest
     {
-        $instance = Http::bursam();
+        $timeoutSeconds = config('trader.providers.bursam.http_timeout_seconds', 30);
+        $instance = Http::bursam()->timeout($timeoutSeconds); // Set configurable timeout to prevent long-running requests
+
         $lastRequest = [
             'url' => '',
             'headers' => [],
@@ -455,11 +457,16 @@ class BursamClient
                 'method' => $request->method(),
             ];
         });
-        $instance->throw(function ($response, $e) use (&$lastRequest) {
-            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('Error in request with BURSAM', $this->traderOrder), [
+        $instance->throw(function ($response, $e) use (&$lastRequest, $timeoutSeconds) {
+            $isTimeout = str_contains($e->getMessage(), 'timeout') || str_contains($e->getMessage(), 'timed out');
+            $logTitle = $isTimeout ? "Timeout error in request with BURSAM ({$timeoutSeconds}s limit)" : 'Error in request with BURSAM';
+
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle($logTitle, $this->traderOrder), [
                 'financingOrderId' => $this->traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrder->id,
                 'message' => $e->getMessage(),
+                'is_timeout' => $isTimeout,
+                'timeout_limit_seconds' => $timeoutSeconds,
                 'trace' => $e->getTraceAsString(),
                 'status_code' => $response->status(),
                 'url' => $lastRequest['url'] ?? '',
