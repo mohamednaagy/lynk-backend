@@ -46,8 +46,8 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
         $company->walletNotification?->markAsNotNotified();
     }
 
-    public function getFinancingOrder(Transaction $transaction): FinancingOrder
+    public function getFinancingOrder(Transaction $transaction): ?FinancingOrder
     {
-        return FinancingOrder::where('id', $transaction->financing_order_id)->first();
+        return FinancingOrder::where('id', $transaction?->financing_order_id)->first();
     }
 }
