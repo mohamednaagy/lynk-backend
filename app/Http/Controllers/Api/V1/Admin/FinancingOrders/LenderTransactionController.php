@@ -25,7 +25,9 @@ class LenderTransactionController extends Controller
     public function index(ListTransactionRequest $request, Company $lender, GetTransactions $getTransactions): JsonResponse
     {
         $data = $request->validated();
-        $transactions = $getTransactions->handle($lender, $data);
+        $transactions = $getTransactions->handle($lender, $data)
+            ->attachZatcaInvoicesMedia()
+            ->paginate();
 
         tap($transactions)->loadZatcaInvoicesMedia();
 

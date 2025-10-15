@@ -26,7 +26,9 @@ class GetWalletTransactions extends Controller
         GetTransactions $getTransactions
     ): JsonResponse {
         $data = $request->validated();
-        $paginatedTransactions = $getTransactions->handle(tenant(), $data);
+        $paginatedTransactions = $getTransactions->handle(tenant(), $data)
+            ->attachZatcaInvoicesMedia()
+            ->paginate();
 
         tap($paginatedTransactions)->loadZatcaInvoicesMedia();
 

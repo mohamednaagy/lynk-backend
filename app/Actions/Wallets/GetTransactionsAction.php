@@ -16,14 +16,7 @@ class GetTransactionsAction implements GetTransactions
         $query = $company->transactions(WalletType::CompanyWallet);
         $newQuery = $this->filterQuery($query, $data);
 
-        return $newQuery->with([
-            'media' => fn ($query) => $query->whereIn('collection_name', [
-                TransactionMediaCollection::VoucherReceipt,
-                TransactionMediaCollection::ZatcaInvoice,
-            ]),
-        ])
-            ->latest('id')
-            ->paginate();
+        return $newQuery->latest('id');
     }
 
     public function filterQuery(Builder $builder, array $data): Builder
@@ -63,5 +56,15 @@ class GetTransactionsAction implements GetTransactions
         }
 
         return $builder;
+    }
+
+    public function attachZatcaInvoicesMedia(Builder $builder): Builder
+    {
+        return $builder->with([
+            'media' => fn ($query) => $query->whereIn('collection_name', [
+                TransactionMediaCollection::VoucherReceipt,
+                TransactionMediaCollection::ZatcaInvoice,
+            ]),
+        ]);
     }
 }
