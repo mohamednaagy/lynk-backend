@@ -47,7 +47,7 @@ class WalletReachedThreshold extends Notification implements ShouldQueue
             ->line(trans('emails/wallet-reached-threshold.'.$this->walletNotification->type->value.'.content', [
                 'value' => $this->walletNotification->type->is(WalletNotificationType::ORDER_COUNT)
                     ? $this->walletNotification->value->format(style: NumberFormatter::TYPE_INT32)
-                    : $this->walletNotification->value->convertAndFormatByDecimal(sperator: ','),
+                    : $this->walletNotification->value->convertAndFormatByDecimal(separator: ','),
             ]))
             ->action(trans('emails/wallet-reached-threshold.action'), $url);
     }

@@ -48,7 +48,7 @@ class VoucherReceiptPdf extends BasePdfGenerator
         $company = $transaction->wallet->holder;
 
         $content = __('invoices/voucher-receipt.content', [
-            'amount' => $amount->convertAndFormatByDecimal(sperator: ','),
+            'amount' => $amount->convertAndFormatByDecimal(separator: ','),
             'company_name' => $company->name,
         ], 'ar');
 

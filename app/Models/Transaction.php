@@ -26,6 +26,7 @@ class Transaction extends Model implements HasMedia
     protected $casts = [
         'meta' => 'array',
         'amount' => MoneyStringCast::class.':currency',
+        'balance' => MoneyStringCast::class.':currency',
     ];
 
     public function getConnectionName()

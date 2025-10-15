@@ -29,7 +29,7 @@ class TransferOwnershipToLenderPdf extends BasePdfGenerator
             'trader_order_reference' => $traderOrder->reference,
             'lender_name' => $traderOrder->order->getLenderInfo()['name'],
             'order_number' => $traderOrder->financing_order_id,
-            'amount' => $financingOrder->amount->convertAndFormatByDecimal(sperator: ','),
+            'amount' => $financingOrder->amount->convertAndFormatByDecimal(separator: ','),
             'previous_owner' => $products->map(
                 fn ($item) => $item['previous_owner'] ?? []
             )

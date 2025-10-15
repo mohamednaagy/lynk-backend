@@ -20,10 +20,10 @@ class GetClientWakalaTextAction implements GetClientWakalaText
         $financingOrder = $traderOrder->order;
         $date = $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null;
         $time = $transferOwnershipToLenderDocumentHistory ? saudi_now('h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null;
-        $amount = $financingOrder->selling_price->convertAndFormatByDecimal(sperator: ',');
+        $amount = $financingOrder->selling_price->convertAndFormatByDecimal(separator: ',');
         $commodityNumber = $traderOrder->reference;
         $commodity = collect($traderOrder->products)->pluck('product')->implode(' و ') ?? '';
-        $commodityPrice = $financingOrder->amount->convertAndFormatByDecimal(sperator: ',');
+        $commodityPrice = $financingOrder->amount->convertAndFormatByDecimal(separator: ',');
         $orderNumber = $financingOrder->id;
         $orderDate = $financingOrder->created_at->format('Y-m-d');
         $clientName = $financingOrder->customer_name;

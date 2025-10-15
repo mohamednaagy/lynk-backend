@@ -20,6 +20,7 @@ class TransactionTransformer extends TransformerAbstract
         'description',
         'amount',
         'amount_formatted',
+        'balance_formatted',
         'receipt_url',
     ];
 
@@ -49,12 +50,17 @@ class TransactionTransformer extends TransformerAbstract
 
     public function includeAmountFormatted(Transaction $transaction): Primitive
     {
-        return $this->primitive($transaction->amount->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($transaction->amount->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeAmount(Transaction $transaction): Primitive
     {
         return $this->primitive($transaction->amount->convertAndFormatByDecimal());
+    }
+
+    public function includeBalanceFormatted(Transaction $transaction): Primitive
+    {
+        return $this->primitive($transaction->balance->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeReceiptUrl(Transaction $transaction): Primitive|NullResource
