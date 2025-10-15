@@ -13,6 +13,10 @@ class BlockTelescopeAccess
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (app()->isLocal()) {
+            return $next($request);
+        }
+
         if ($request->is('telescope') || $request->is('telescope/*')) {
             abort(403, 'Access to Telescope is forbidden.');
         }

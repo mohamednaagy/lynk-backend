@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
+use Laravel\Nightwatch\Facades\Nightwatch;
 use Stancl\Tenancy\Tenancy;
 use Throwable;
 
@@ -24,6 +25,7 @@ abstract class BaseCommoditiesSettlement implements ShouldQueue
 
     public function __construct(protected int $localMarketOrderId)
     {
+        Nightwatch::dontSample();
         // Disable tenancy inside the job
         app(Tenancy::class)->end();
         $this->onQueue('local_market_commodities_settlement');

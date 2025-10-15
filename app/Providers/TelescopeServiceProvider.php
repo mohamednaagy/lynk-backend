@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\EntryType;
+use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
@@ -14,13 +15,19 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         EntryType::QUERY,
     ];
 
-    public function register()
+    public function register(): void
     {
         // Always register Telescope
         $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
         $this->hideSensitiveRequestDetails();
 
-        Telescope::filter(function ($entry) {
+        Telescope::filter(function (IncomingEntry $entry) {
+            // Always include reportable exceptions
+            if ($entry->isReportableException()) {
+                return true;
+            }
+
+            // Allow only specific entry types
             return in_array($entry->type, $this->allowedEntryTypes, true);
         });
     }
@@ -41,8 +48,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
     protected function gate()
     {
-        Gate::define('viewTelescope', function ($user) {
-            return false;
-        });
+        Gate::define('viewTelescope', fn ($user) => false);
     }
 }
