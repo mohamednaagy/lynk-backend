@@ -61,17 +61,17 @@ class CommodityTypeTransformer extends TransformerAbstract
 
     public function includeTotalValue(CommodityType $commodityType): Primitive
     {
-        return $this->primitive($commodityType->statistics?->total_value->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($commodityType->statistics?->total_value->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeAvailableValue(CommodityType $commodityType): Primitive
     {
-        return $this->primitive($commodityType->statistics?->available_value->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($commodityType->statistics?->available_value->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeReservedValue(CommodityType $commodityType): Primitive
     {
-        return $this->primitive($commodityType->statistics?->reserved_value->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($commodityType->statistics?->reserved_value->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeCreatedAt(CommodityType $commodityType): Primitive

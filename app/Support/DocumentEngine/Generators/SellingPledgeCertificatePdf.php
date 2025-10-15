@@ -33,7 +33,7 @@ class SellingPledgeCertificatePdf extends BasePdfGenerator
 
         $data = [
             'trader_order_reference' => $traderOrder->reference,
-            'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
+            'amount' => $financeOrder->amount->convertAndFormatByDecimal(separator: ','),
             'borrower_name' => $financeOrder->getBorrowerInfo()['name'],
             'current_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz),
             'current_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz),

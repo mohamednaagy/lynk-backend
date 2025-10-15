@@ -60,10 +60,10 @@
                 <tr>
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: left; font-size: 14px; background-color: white;">{{ $item->getName() }}</td>
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getQuantity() }}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getItemPrice()->convertAndFormatByDecimal(sperator: ',') }}</td>
+                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getItemPrice()->convertAndFormatByDecimal(separator: ',') }}</td>
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getDiscountPercentage() }}%</td>
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getVatPercentage() ? 'V' : 'N' }}</td>
-                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getLineTotalWithoutVat()->convertAndFormatByDecimal(sperator: ',') }}</td>
+                    <td style="border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 14px; background-color: white;">{{ $item->getLineTotalWithoutVat()->convertAndFormatByDecimal(separator: ',') }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -87,7 +87,7 @@
                         <table style="width: 100%; margin-bottom: 8px; font-size: 14px;">
                             <tr>
                                 <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.total_discount') }}</td>
-                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
+                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalDiscount()->convertAndFormatByDecimal(separator: ',')]) }}</td>
                             </tr>
                         </table>
                         @endif
@@ -95,21 +95,21 @@
                         <table style="width: 100%; margin-bottom: 8px; font-size: 14px;">
                             <tr>
                                 <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.total_before_vat') }}</td>
-                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
+                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalWithoutVat()->convertAndFormatByDecimal(separator: ',')]) }}</td>
                             </tr>
                         </table>
 
                         <table style="width: 100%; margin-bottom: 8px; font-size: 14px;">
                             <tr>
                                 <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.vat_total') }}</td>
-                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
+                                <td style="width: 40%; text-align: right; font-weight: 600;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalVat()->convertAndFormatByDecimal(separator: ',')]) }}</td>
                             </tr>
                         </table>
 
                         <table style="width: 100%; margin-bottom: 8px; font-size: 16px; font-weight: bold; color: #000; margin-top: 10px; padding-top: 10px; border-top: 1px solid #000;">
                             <tr>
                                 <td style="width: 60%; text-align: left;">{{ __('zatca/e-invoice.total') }}</td>
-                                <td style="width: 40%; text-align: right;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->convertAndFormatByDecimal(sperator: ',')]) }}</td>
+                                <td style="width: 40%; text-align: right;">{{ __('zatca/e-invoice.amount_with_currency', ['amount' => $order->getTotalAmount()->convertAndFormatByDecimal(separator: ',')]) }}</td>
                             </tr>
                         </table>
                     </div>

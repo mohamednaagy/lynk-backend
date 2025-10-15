@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Actions\Wallets\SetTransactionBalanceAction;
 use App\Jobs\Transaction\CheckWalletNotificaitonJob;
 use App\Models\Company;
 use App\Models\FinancingOrder;
@@ -14,6 +15,8 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
 {
     public function created(Transaction $transaction): void
     {
+        app(SetTransactionBalanceAction::class)->handle($transaction);
+
         $financingOrder = $this->getFinancingOrder($transaction);
         $cost_with_vat = $transaction->cost_with_vat;
         $cost_without_vat = $transaction->cost_without_vat;
@@ -46,8 +49,8 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
         $company->walletNotification?->markAsNotNotified();
     }
 
-    public function getFinancingOrder(Transaction $transaction): FinancingOrder
+    public function getFinancingOrder(Transaction $transaction): ?FinancingOrder
     {
-        return FinancingOrder::where('id', $transaction->financing_order_id)->first();
+        return FinancingOrder::where('id', $transaction?->financing_order_id)->first();
     }
 }

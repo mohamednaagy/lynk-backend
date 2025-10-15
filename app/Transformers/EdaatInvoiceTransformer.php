@@ -53,7 +53,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeAmountFormatted(EdaatInvoice $edaatInvoice): Primitive
     {
-        return $this->primitive($edaatInvoice->amount->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($edaatInvoice->amount->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeCompanyName(): Primitive

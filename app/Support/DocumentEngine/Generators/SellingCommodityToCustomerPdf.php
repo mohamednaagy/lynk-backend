@@ -29,7 +29,7 @@ class SellingCommodityToCustomerPdf extends BasePdfGenerator
     protected function prepareData(): array
     {
         $traderOrder = $this->getTraderOrder();
-        $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
+        $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(separator: ',');
         $lenderName = $traderOrder->order->getLenderInfo()['name'];
         $borrowerName = $traderOrder->order->getBorrowerInfo()['name'];
         $currentTimeInRiyadhTz = $traderOrder->traderHistories()
