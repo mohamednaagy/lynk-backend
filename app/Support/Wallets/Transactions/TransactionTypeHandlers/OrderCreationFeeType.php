@@ -58,7 +58,7 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
             return $result;
 
         } catch (\Exception $e) {
-            Log::error('OrderCreationFeeType::process FAILED trader_order_id => '.$traderOrderId.' wallet_id => '.$walletId.' reference_number => '.$referenceNumber.' transaction_id => '.$result->id, [
+            Log::error('OrderCreationFeeType::process FAILED trader_order_id => '.$traderOrderId.' wallet_id => '.$walletId.' reference_number => '.$referenceNumber.' transaction_id => '.($result?->id), [
                 'wallet_id' => $wallet->getKey(),
                 'reason' => $reason,
                 'error' => $e->getMessage(),

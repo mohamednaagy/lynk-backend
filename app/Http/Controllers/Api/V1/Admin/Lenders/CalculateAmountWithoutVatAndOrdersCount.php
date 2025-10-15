@@ -37,7 +37,7 @@ class CalculateAmountWithoutVatAndOrdersCount extends Controller
 
         return $this->successResponse(data: [
             'amount_without_vat' => $amountWithoutVat->convertAndFormatByDecimal(),
-            'amount_without_vat_formatted' => $amountWithoutVat->convertAndFormatByDecimal(sperator: ','),
+            'amount_without_vat_formatted' => $amountWithoutVat->convertAndFormatByDecimal(separator: ','),
             'order_count' => $orderCount,
         ]);
     }
