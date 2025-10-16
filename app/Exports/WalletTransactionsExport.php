@@ -57,7 +57,7 @@ class WalletTransactionsExport implements FromGenerator, WithCustomChunkSize, Wi
     protected function map($transaction): array
     {
         $items = $this->filterExcludes([
-            'date' => (string) $transaction->created_at->clone()->tz('Asia/Riyadh')->format('Y-m-d H:i:s'),
+            'date' => saudi_now('Y-m-d H:i:s', $transaction->created_at),
             'transaction_description' => $this->withLocale('en', function () use ($transaction) {
                 return ! is_null($transaction->reason)
                     ? app(TransactionUtilInterface::class)->getDescription($transaction)

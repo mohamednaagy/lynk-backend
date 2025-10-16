@@ -45,7 +45,7 @@ class ExportWalletTransactionsTest extends TestCase
 
     public function test_unauthenticated_user_cannot_export_wallet_transactions()
     {
-        $this->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export")
+        $this->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export")
             ->assertUnauthorized()
             ->assertExactJson([
                 'message' => __('Unauthenticated.'),
@@ -59,21 +59,30 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
+        $mockGetTransactions->shouldReceive('setCompany')
+            ->once()
+            ->with($this->lender)
+            ->andReturnSelf();
+
+        $mockGetTransactions->shouldReceive('setFilters')
+            ->once()
+            ->with([])
+            ->andReturnSelf();
+
         $mockGetTransactions->shouldReceive('handle')
             ->once()
-            ->with($this->lender, [])
             ->andReturn($mockQuery);
 
         $this->app->instance(GetTransactions::class, $mockGetTransactions);
 
         $this->actingAs($this->superAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export")
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export")
             ->assertStatus(Response::HTTP_OK);
 
         Excel::assertDownloaded(function ($filename, $export) {
             return $export instanceof WalletTransactionsExport &&
-                   str_contains($filename, 'wallet-transactions-'.$this->lender->name) &&
-                   str_contains($filename, '.xlsx');
+                   str_contains($filename, 'LYNKWalletTransactions') &&
+                   str_contains($filename, '.csv');
         });
     }
 
@@ -84,21 +93,30 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
+        $mockGetTransactions->shouldReceive('setCompany')
+            ->once()
+            ->with($this->lender)
+            ->andReturnSelf();
+
+        $mockGetTransactions->shouldReceive('setFilters')
+            ->once()
+            ->with([])
+            ->andReturnSelf();
+
         $mockGetTransactions->shouldReceive('handle')
             ->once()
-            ->with($this->lender, [])
             ->andReturn($mockQuery);
 
         $this->app->instance(GetTransactions::class, $mockGetTransactions);
 
         $this->actingAs($this->managerAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export")
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export")
             ->assertStatus(Response::HTTP_OK);
 
         Excel::assertDownloaded(function ($filename, $export) {
             return $export instanceof WalletTransactionsExport &&
-                   str_contains($filename, 'wallet-transactions-'.$this->lender->name) &&
-                   str_contains($filename, '.xlsx');
+                   str_contains($filename, 'LYNKWalletTransactions') &&
+                   str_contains($filename, '.csv');
         });
     }
 
@@ -108,7 +126,7 @@ class ExportWalletTransactionsTest extends TestCase
         $this->assignPermissionToUser($this->managerAdminUser, []);
 
         $this->actingAs($this->managerAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export")
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export")
             ->assertStatus(Response::HTTP_FORBIDDEN)
             ->assertJsonPath('message', __('User does not have the right permissions.'));
     }
@@ -128,28 +146,37 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
+        $mockGetTransactions->shouldReceive('setCompany')
+            ->once()
+            ->with($this->lender)
+            ->andReturnSelf();
+
+        $mockGetTransactions->shouldReceive('setFilters')
+            ->once()
+            ->with($queryParams)
+            ->andReturnSelf();
+
         $mockGetTransactions->shouldReceive('handle')
             ->once()
-            ->with($this->lender, $queryParams)
             ->andReturn($mockQuery);
 
         $this->app->instance(GetTransactions::class, $mockGetTransactions);
 
         $this->actingAs($this->superAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export?".http_build_query($queryParams))
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export?".http_build_query($queryParams))
             ->assertStatus(Response::HTTP_OK);
 
         Excel::assertDownloaded(function ($filename, $export) {
             return $export instanceof WalletTransactionsExport &&
-                   str_contains($filename, 'wallet-transactions-'.$this->lender->name) &&
-                   str_contains($filename, '.xlsx');
+                   str_contains($filename, 'LYNKWalletTransactions') &&
+                   str_contains($filename, '.csv');
         });
     }
 
     public function test_export_with_invalid_lender_returns_404()
     {
         $this->actingAs($this->superAdminUser)
-            ->getJson('api/v1/admin/lenders/999999/wallet-transactions/export')
+            ->getJson('api/v1/admin/lenders/999999/transactions/export')
             ->assertNotFound();
     }
 
@@ -160,20 +187,29 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
+        $mockGetTransactions->shouldReceive('setCompany')
+            ->once()
+            ->with($this->lender)
+            ->andReturnSelf();
+
+        $mockGetTransactions->shouldReceive('setFilters')
+            ->once()
+            ->with([])
+            ->andReturnSelf();
+
         $mockGetTransactions->shouldReceive('handle')
             ->once()
-            ->with($this->lender, [])
             ->andReturn($mockQuery);
 
         $this->app->instance(GetTransactions::class, $mockGetTransactions);
 
         $this->actingAs($this->superAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export")
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export")
             ->assertStatus(Response::HTTP_OK);
 
         Excel::assertDownloaded(function ($filename) {
-            // Check that filename contains timestamp pattern (Y-m-d-H-i-s)
-            return preg_match('/\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}/', $filename);
+            // Check that filename contains timestamp pattern (Ymd_His)
+            return preg_match('/\d{8}_\d{6}/', $filename);
         });
     }
 
@@ -184,15 +220,24 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
+        $mockGetTransactions->shouldReceive('setCompany')
+            ->once()
+            ->with($this->lender)
+            ->andReturnSelf();
+
+        $mockGetTransactions->shouldReceive('setFilters')
+            ->once()
+            ->with([])
+            ->andReturnSelf();
+
         $mockGetTransactions->shouldReceive('handle')
             ->once()
-            ->with($this->lender, [])
             ->andReturn($mockQuery);
 
         $this->app->instance(GetTransactions::class, $mockGetTransactions);
 
         $this->actingAs($this->superAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export")
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export")
             ->assertStatus(Response::HTTP_OK);
 
         Excel::assertDownloaded(function ($filename, $export) {
@@ -208,7 +253,7 @@ class ExportWalletTransactionsTest extends TestCase
         ];
 
         $this->actingAs($this->superAdminUser)
-            ->getJson("api/v1/admin/lenders/{$this->lender->id}/wallet-transactions/export?".http_build_query($invalidParams))
+            ->getJson("api/v1/admin/lenders/{$this->lender->id}/transactions/export?".http_build_query($invalidParams))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrors(['date_from', 'amount_gte']);
     }
