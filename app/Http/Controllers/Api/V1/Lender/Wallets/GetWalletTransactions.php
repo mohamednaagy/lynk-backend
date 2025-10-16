@@ -26,13 +26,16 @@ class GetWalletTransactions extends Controller
         GetTransactions $getTransactions
     ): JsonResponse {
         $data = $request->validated();
-        $paginatedTransactions = $getTransactions->handle(tenant(), $data)
+        $transactions = $getTransactions
+            ->setCompany(tenant())
+            ->setFilters($data)
             ->attachZatcaInvoicesMedia()
+            ->handle()
             ->paginate();
 
-        tap($paginatedTransactions)->loadZatcaInvoicesMedia();
+        tap($transactions)->loadZatcaInvoicesMedia();
 
-        return fractal($paginatedTransactions, (new TransactionTransformer))
+        return fractal($transactions, (new TransactionTransformer))
             ->parseIncludes([
                 'id',
                 'date',

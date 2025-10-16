@@ -18,15 +18,19 @@ class LenderTransactionController extends Controller
     {
         $this->middleware(
             'permission:'.
-                perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Manage])
+                perm(Area::SuperAdmin, [Subject::LenderTransactions, Action::Index, Action::Show])
         )->only('index');
     }
 
-    public function index(ListTransactionRequest $request, Company $lender, GetTransactions $getTransactions): JsonResponse
+    public function index(ListTransactionRequest $request, Company $lender): JsonResponse
     {
+        $getTransactions = app(GetTransactions::class);
         $data = $request->validated();
-        $transactions = $getTransactions->handle($lender, $data)
+        $transactions = $getTransactions
+            ->setCompany($lender)
+            ->setFilters($data)
             ->attachZatcaInvoicesMedia()
+            ->handle()
             ->paginate();
 
         tap($transactions)->loadZatcaInvoicesMedia();

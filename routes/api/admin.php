@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommoditySupplierUserController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypeController;
+use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
@@ -34,6 +35,7 @@ use App\Http\Controllers\Api\V1\Admin\FinancingOrders\RejectOrder;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\CalculateAmountWithoutVatAndOrdersCount;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
+use App\Http\Controllers\Api\V1\Admin\Lenders\ExportWalletTransactions;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderMarketTypes;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
@@ -76,7 +78,6 @@ use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
 use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 
 /*
 |--------------------------------------------------------------------------
@@ -135,6 +136,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
+            Route::get('/{lender}/transactions/export', ExportWalletTransactions::class);
             Route::get('/{lender}/calculate-balance/{amount_with_vat}', CalculateAmountWithoutVatAndOrdersCount::class)
                 ->whereNumber('amount');
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);

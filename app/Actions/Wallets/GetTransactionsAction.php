@@ -11,12 +11,37 @@ use Illuminate\Database\Eloquent\Builder;
 
 class GetTransactionsAction implements GetTransactions
 {
-    public function handle(Company $company, array $data): mixed
-    {
-        $query = $company->transactions(WalletType::CompanyWallet);
-        $newQuery = $this->filterQuery($query, $data);
+    private ?Builder $query = null;
 
-        return $newQuery->latest('id');
+    private ?Company $company = null;
+
+    private array $filters = [];
+
+    public function handle(): mixed
+    {
+        $this->initQuery();
+
+        if (! $this->query) {
+            throw new \Exception('Unable to initialize query. Company must be set before calling handle().');
+        }
+
+        $this->query = $this->filterQuery($this->query, $this->filters);
+
+        return $this->query->latest('id');
+    }
+
+    public function setCompany(Company $company): self
+    {
+        $this->company = $company;
+
+        return $this;
+    }
+
+    public function setFilters(array $filters): self
+    {
+        $this->filters = $filters;
+
+        return $this;
     }
 
     public function filterQuery(Builder $builder, array $data): Builder
@@ -58,13 +83,25 @@ class GetTransactionsAction implements GetTransactions
         return $builder;
     }
 
-    public function attachZatcaInvoicesMedia(Builder $builder): Builder
+    public function attachZatcaInvoicesMedia(): self
     {
-        return $builder->with([
-            'media' => fn ($query) => $query->whereIn('collection_name', [
-                TransactionMediaCollection::VoucherReceipt,
-                TransactionMediaCollection::ZatcaInvoice,
-            ]),
-        ]);
+        $this->initQuery();
+        if ($this->query) {
+            $this->query->with([
+                'media' => fn ($query) => $query->whereIn('collection_name', [
+                    TransactionMediaCollection::VoucherReceipt,
+                    TransactionMediaCollection::ZatcaInvoice,
+                ]),
+            ]);
+        }
+
+        return $this;
+    }
+
+    private function initQuery()
+    {
+        if (! $this->query && $this->company) {
+            $this->query = $this->company->transactions(WalletType::CompanyWallet);
+        }
     }
 }
