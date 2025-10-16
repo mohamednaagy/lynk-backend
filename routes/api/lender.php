@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\V1\Lender\Settings\GetLenderAreaSettings;
 use App\Http\Controllers\Api\V1\Lender\Settings\SettingsController;
 use App\Http\Controllers\Api\V1\Lender\Users\UserController;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CalculateOrderCost;
+use App\Http\Controllers\Api\V1\Lender\Wallets\ExportWalletTransactions;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetBalance;
 use App\Http\Controllers\Api\V1\Lender\Wallets\GetWalletTransactions;
 use App\Http\Controllers\Api\V1\Lender\Wallets\WalletNotificationController;
@@ -105,6 +106,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                             Route::get('/balance', GetBalance::class);
                             Route::post('/calculate', CalculateOrderCost::class);
                             Route::get('/transactions', GetWalletTransactions::class);
+                            Route::get('/transactions/export', ExportWalletTransactions::class);
                         }
                     );
 
@@ -119,7 +121,7 @@ Route::prefix('v1/lender')->name('api.v1.lender.')->group(function () {
                 });
 
                 Route::get('/commodity-types/dropdown-list', CommodityTypesLiteList::class);
-                Route::get('/financing-order-types/dropdown-list', [FinancingOrderTypesLiteList::class , 'index']);
+                Route::get('/financing-order-types/dropdown-list', [FinancingOrderTypesLiteList::class, 'index']);
 
             });
             Route::apiResource('enquiries', EnquiryController::class)->only(['index', 'show', 'store']);
