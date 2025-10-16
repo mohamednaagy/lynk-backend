@@ -78,12 +78,4 @@ class WalletTransactionsExport implements FromGenerator, WithCustomChunkSize, Wi
             ARRAY_FILTER_USE_BOTH
         );
     }
-
-    public function getFileName(): string
-    {
-        $companyName = str_replace(' ', '', $this->company->name);
-        $dateTime = now()->tz('Asia/Riyadh')->format('Y-m-d_H-i-s');
-
-        return "{$companyName}_LYNKWalletTransactions_{$dateTime}.xlsx";
-    }
 }
