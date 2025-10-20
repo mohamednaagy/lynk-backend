@@ -424,7 +424,7 @@ class BursamClient
 
     private function http(): PendingRequest
     {
-        $timeoutSeconds = config('trader.providers.bursam.http_timeout_seconds', 30);
+        $timeoutSeconds = config('trader.providers.bursam.http_timeout_seconds');
         $instance = Http::bursam()->timeout($timeoutSeconds); // Set configurable timeout to prevent long-running requests
 
         $lastRequest = [
