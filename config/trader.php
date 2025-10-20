@@ -64,7 +64,7 @@ return [
             'grant_type' => env('BURSAM_GRANT_TYPE', 'client_credentials'),
             'tenor' => env('BURSAM_TENOR', '00090'),
             'purchasing_commodity_job_backoff_time' => (int) env('BURSAM_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 10),
-            'http_timeout_seconds' => (int) env('BURSAM_HTTP_TIMEOUT_SECONDS', 30),
+            'http_timeout_seconds' => (int) env('BURSAM_HTTP_TIMEOUT_SECONDS', 115),
             'modes' => [
                 'v1' => [
                     TraderOrderMode::Manual,
