@@ -28,10 +28,10 @@ class CalculateVatAmountAction implements CalculateVatAmount
 
         if ($this->isVatIncludedInAmount) {
             $vatAmount = $this->amount->subtract(
-                $this->amount->divide(1 + $vatRate)
+                $this->amount->multiply(1 - $vatRate)
             );
         } else {
-            $vatAmount = $this->amount->multiply($vatRate);
+            $vatAmount = $this->amount->divide(1 - $vatRate)->multiply($vatRate);
         }
 
         return [$vatAmount, $vatRate];
