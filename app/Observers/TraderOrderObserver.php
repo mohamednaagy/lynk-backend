@@ -7,8 +7,9 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class TraderOrderObserver
+class TraderOrderObserver implements ShouldHandleEventsAfterCommit
 {
     /**
      * Handle the TraderOrder "creating" event.
