@@ -16,15 +16,7 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
      *
      * @return void
      */
-    public function creating(TraderOrder $traderOrder)
-    {
-        $order = $traderOrder->order;
-        if ($this->shouldSetAsBaseTraderOrder($order)) {
-            $traderOrder->fill([
-                'is_base' => true,
-            ]);
-        }
-    }
+    public function creating(TraderOrder $traderOrder) {}
 
     /**
      * Handle the TraderOrder "created" event.
@@ -33,6 +25,13 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(TraderOrder $traderOrder)
     {
+        $order = $traderOrder->order;
+        if ($this->shouldSetAsBaseTraderOrder($order, $traderOrder)) {
+            $traderOrder->update([
+                'is_base' => true,
+            ]);
+        }
+
         if ($traderOrder->needsProcessingAfterInitiation()) {
             $traderOrder->processInitiatedTraderOrder();
         }
@@ -41,9 +40,14 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
     /**
      * Determine if the given order should have the current trader order set as the base trader order.
      */
-    protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
+    protected function shouldSetAsBaseTraderOrder(FinancingOrder $order, TraderOrder $traderOrder): bool
     {
-        if ($order->traderOrders()->count() === 0) {
+        $existingBaseTraderOrder = $order->traderOrders()
+            ->where('is_base', 0)
+            ->latest('id')
+            ->first();
+
+        if ($order->traderOrders()->count() === 0 || $existingBaseTraderOrder->id == $traderOrder->id) {
             return true;
         }
 
