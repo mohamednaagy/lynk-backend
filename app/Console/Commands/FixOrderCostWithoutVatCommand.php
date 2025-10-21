@@ -3,51 +3,59 @@
 namespace App\Console\Commands;
 
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
+use App\Models\TieredPricing;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class SetOrderCostWithVatCommand extends Command
+class FixOrderCostWithoutVatCommand extends Command
 {
-    protected $signature = 'tiered-pricing:set-order-cost-with-vat {--company=244 : Company ID to process}';
+    protected $signature = 'tiered-pricing:set-order-cost-with-vat';
 
     protected $description = 'Set order_cost_with_vat for fixed fee types in tiered_pricing table.';
 
     public function handle(GetProjectSettings $getProjectSettings): int
     {
-        $vatMultiplier = 1 + $getProjectSettings->handle()->getVatRate();
-        $companyId = (int) $this->option('company');
-
-        $this->info("Starting VAT update for company ID {$companyId}");
-        $this->info("VAT Multiplier: {$vatMultiplier}");
+        $vatRate = $getProjectSettings->handle()->getVatRate();
+        $this->info("VAT Rate: {$vatRate}");
 
         $updatedIds = [];
         $failedIds = [];
 
-        DB::table('tiered_pricing')
-            ->where('company_id', $companyId)
-            ->orderBy('id')
-            ->chunkById(500, function ($records) use ($vatMultiplier, &$updatedIds, &$failedIds) {
+        Log::info('Start FixOrderCostWithoutVatCommand');
+
+        TieredPricing::query()
+            ->whereHas('company')
+            ->chunkById(500, function ($records) use ($vatRate, &$updatedIds, &$failedIds) {
                 foreach ($records as $record) {
                     try {
-                        $newValue = round($record->order_cost_without_vat * $vatMultiplier);
+                        DB::transaction(function () use ($record, $vatRate, &$updatedIds) {
+                            $oldValue = $record->temp_order_cost_without_vat;
+                            $newValue = $record->temp_order_cost_without_vat
+                                ->multiply(1 + $vatRate)
+                                ->multiply(1 - $vatRate);
 
-                        $affected = DB::table('tiered_pricing')
-                            ->where('id', $record->id)
-                            ->update(['order_cost_with_vat' => $newValue]);
+                            // 🪵 Log before & after values to storage/logs/laravel.log
+                            Log::info('Updating tiered_pricing record', [
+                                'record_id' => $record->id,
+                                'company_id' => $record->company_id,
+                                'old_value' => $oldValue->getAmount(),
+                                'new_value' => $newValue->getAmount(),
+                            ]);
 
-                        if ($affected) {
+                            $record->update([
+                                'order_cost_without_vat' => $newValue,
+                            ]);
+
                             $updatedIds[] = $record->id;
-                        } else {
-                            $failedIds[] = $record->id;
-                        }
+                        });
                     } catch (Throwable $e) {
                         $failedIds[] = $record->id;
                         $this->error("❌ Failed to update record ID {$record->id}: {$e->getMessage()}");
                     }
                 }
             });
-
         $totalProcessed = count($updatedIds) + count($failedIds);
 
         $this->info("\n--- Summary ---");
@@ -56,8 +64,8 @@ class SetOrderCostWithVatCommand extends Command
         $this->info("Total processed: {$totalProcessed}");
 
         // 🔍 Verify all records handled
-        $allRecordIds = DB::table('tiered_pricing')
-            ->where('company_id', $companyId)
+        $allRecordIds = TieredPricing::query()
+            ->whereHas('company')
             ->pluck('id')
             ->toArray();
 

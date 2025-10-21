@@ -9,6 +9,7 @@ use App\Support\Money\Casts\MoneyStringCast;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TieredPricing extends Model
 {
@@ -19,6 +20,7 @@ class TieredPricing extends Model
         'order_value_end',
         'fee_type',
         'order_cost_without_vat',
+        'temp_order_cost_without_vat',
         'proration_amount',
     ];
 
@@ -27,8 +29,14 @@ class TieredPricing extends Model
         'order_value_end' => MoneyStringCast::class,
         'fee_type' => OrderFeeType::class,
         'order_cost_without_vat' => MoneyStringCast::class,
+        'temp_order_cost_without_vat' => MoneyStringCast::class,
         'proration_amount' => MoneyStringCast::class,
     ];
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
 
     /**
      * @throws NoMatchOrderCostAndValueException
