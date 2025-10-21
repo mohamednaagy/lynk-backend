@@ -40,7 +40,7 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
     /**
      * Determine if the given order should have the current trader order set as the base trader order.
      */
-    protected function shouldSetAsBaseTraderOrder(FinancingOrder $order, TraderOrder $traderOrder): bool
+    protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
     {
         if ($order->traderOrders()->count() === 1) {
             return true;
