@@ -10,6 +10,10 @@ return new class extends Migration
     {
         Schema::table('tiered_pricing', function (Blueprint $table) {
             $table->renameColumn('order_cost_without_vat', 'temp_order_cost_without_vat');
+        });
+
+        Schema::table('tiered_pricing', function (Blueprint $table) {
+            $table->decimal('temp_order_cost_without_vat', 64, 0)->nullable()->change();
             $table->decimal('order_cost_without_vat', 64, 0)->after('temp_order_cost_without_vat');
         });
     }
