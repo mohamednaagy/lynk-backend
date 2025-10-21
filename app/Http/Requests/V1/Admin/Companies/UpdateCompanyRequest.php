@@ -217,6 +217,7 @@ class UpdateCompanyRequest extends FormRequest
     {
         return [
             'lender_order_allowed_commodity_types.required_if' => 'The :attribute field is required when :other field is On.',
+            'allowed_financing_order_types.required' => 'The field is required.',
         ];
     }
 
