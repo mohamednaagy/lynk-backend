@@ -42,12 +42,7 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
      */
     protected function shouldSetAsBaseTraderOrder(FinancingOrder $order, TraderOrder $traderOrder): bool
     {
-        $existingBaseTraderOrder = $order->traderOrders()
-            ->where('is_base', 0)
-            ->latest('id')
-            ->first();
-
-        if ($order->traderOrders()->count() === 0 || $existingBaseTraderOrder->id == $traderOrder->id) {
+        if ($order->traderOrders()->count() === 1) {
             return true;
         }
 
