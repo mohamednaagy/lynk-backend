@@ -53,6 +53,7 @@ class EdaatInvoiceController extends Controller
                 'company_number',
                 'status',
                 'created_at',
+                'paid_at',
             ])
             ->respond();
     }

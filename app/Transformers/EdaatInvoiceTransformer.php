@@ -20,6 +20,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
         'company_number',
         'status',
         'created_at',
+        'paid_at',
         'company',
     ];
 
@@ -94,5 +95,14 @@ class EdaatInvoiceTransformer extends TransformerAbstract
     public function includeCreatedAt(EdaatInvoice $edaatInvoice): Primitive
     {
         return $this->primitive($edaatInvoice->created_at->format('Y-m-d h:i A'));
+    }
+
+    public function includePaidAt(EdaatInvoice $edaatInvoice): Primitive
+    {
+        if (is_null($edaatInvoice->paid_at)) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive($edaatInvoice->paid_at?->format('Y-m-d h:i A'));
     }
 }

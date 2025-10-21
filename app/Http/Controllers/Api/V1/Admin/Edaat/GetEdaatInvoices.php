@@ -43,6 +43,8 @@ class GetEdaatInvoices extends Controller
                 'company_number',
                 'status',
                 'company',
+                'created_at',
+                'paid_at',
             ])
             ->respond();
     }

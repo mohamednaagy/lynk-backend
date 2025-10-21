@@ -20,11 +20,13 @@ class EdaatInvoice extends Model
         'status',
         'creator_id',
         'company_id',
+        'paid_at',
     ];
 
     protected $casts = [
         'status' => EdaatInvoiceStatus::class,
         'amount' => MoneyStringCast::class.':currency',
+        'paid_at' => 'datetime',
     ];
 
     public function creator(): BelongsTo
@@ -34,6 +36,6 @@ class EdaatInvoice extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class);
+        return $this->belongsTo(Company::class, 'company_id', 'id');
     }
 }
