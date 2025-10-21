@@ -36,6 +36,6 @@ class EdaatInvoice extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(Company::class, 'company_id', 'id');
+        return $this->belongsTo(Company::class, 'company_id', 'id')->withTrashed();
     }
 }
