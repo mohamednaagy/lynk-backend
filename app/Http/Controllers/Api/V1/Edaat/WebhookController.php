@@ -18,7 +18,6 @@ use App\Support\ZatcaEInvoice\Order;
 use App\Support\ZatcaEInvoice\PurchaseLine;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
@@ -30,7 +29,6 @@ class WebhookController extends Controller
         CreateTransactions $createTransactions,
         CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount
     ) {
-        Log::debug('test', [$request->all()]);
         DB::transaction(function () use ($request, $calcAmountWithoutVatAndOrdersCount, $createTransactions, $edaatService) {
             foreach ($request->all() as $invoice) {
                 if ($edaatService->isPaidInvoice($invoice['InvoiceNo'])) {
@@ -40,7 +38,10 @@ class WebhookController extends Controller
                     }
                     $company = $invoice->company;
                     $wallet = $company->getWallet(WalletType::CompanyWallet);
-                    $invoice->update(['status' => EdaatInvoiceStatus::Paid]);
+                    $invoice->update([
+                        'status' => EdaatInvoiceStatus::Paid,
+                        'paid_at' => now(),
+                    ]);
 
                     $amountWithVat = $invoice->amount;
                     [$amountWithoutVat,
