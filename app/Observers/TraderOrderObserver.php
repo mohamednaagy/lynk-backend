@@ -42,16 +42,27 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
      */
     protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
     {
-        if ($order->traderOrders()->count() === 1) {
-            return true;
-        }
+        return $this->isFirstTraderOrder($order)
+            || $this->hasDuplicatedBaseTraderOrder($order);
+    }
 
-        $baseTraderOrder = $order->traderOrders()
+    private function isFirstTraderOrder(FinancingOrder $order): bool
+    {
+        return $order->traderOrders()->count() === 1;
+    }
+
+    private function hasDuplicatedBaseTraderOrder(FinancingOrder $order, int $staleAfterHours = 72): bool
+    {
+        $currentBaseOrder = $order->traderOrders()
             ->where('is_base', true)
             ->latest('id')
             ->first();
 
-        return $baseTraderOrder && now()->diffInHours($baseTraderOrder->created_at) >= 72;
+        if (! $currentBaseOrder) {
+            return true;
+        }
+
+        return now()->diffInHours($currentBaseOrder->created_at) >= $staleAfterHours;
     }
 
     /**
