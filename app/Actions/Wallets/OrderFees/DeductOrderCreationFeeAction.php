@@ -31,14 +31,12 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
 
         $orderCostWithoutVat = TieredPricing::getOrderCostWithoutVat($company, $financingOrder->amount);
 
-        [$vatAmount, $vatRate] = $this->calculateVatAmount
-            ->setAmount($orderCostWithoutVat)
-            ->setIsVatIncludedInAmount(false)
-            ->handle();
+        $vatRate = $this->getProjectSettings->handle()->getVatRate();
+        $vatAmount = TieredPricing::getVatAmount($company, $financingOrder->amount, $orderCostWithoutVat);
 
         $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 
-        $transaction = $this->createTransactions->handle(
+        return $this->createTransactions->handle(
             $wallet,
             TransactionReason::OrderCreationFee,
             $totalAmountWithVat,
@@ -55,7 +53,5 @@ class DeductOrderCreationFeeAction implements DeductOrderCreationFee
                 'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
             ]
         );
-
-        return $transaction;
     }
 }

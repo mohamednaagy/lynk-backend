@@ -20,7 +20,7 @@ class TieredPricing extends Model
         'order_value_end',
         'fee_type',
         'order_cost_without_vat',
-        'temp_order_cost_without_vat',
+        'vat_amount',
         'proration_amount',
     ];
 
@@ -29,7 +29,7 @@ class TieredPricing extends Model
         'order_value_end' => MoneyStringCast::class,
         'fee_type' => OrderFeeType::class,
         'order_cost_without_vat' => MoneyStringCast::class,
-        'temp_order_cost_without_vat' => MoneyStringCast::class,
+        'vat_amount' => MoneyStringCast::class,
         'proration_amount' => MoneyStringCast::class,
     ];
 
@@ -106,7 +106,48 @@ class TieredPricing extends Model
             ->where(function (Builder $query) use ($orderValue) {
                 $query->where('order_value_end', '>=', $orderValue->getAmount())
                     ->orWhereNull('order_value_end');
-            })
-            ->first();
+            })->first();
+    }
+
+    /**
+     * Retrieve the VAT amount for a given company's tiered pricing configuration.
+     *
+     * This method resolves the applicable tiered pricing record for the given
+     * company and order value, then determines the VAT amount based on the
+     * pricing type:
+     *
+     *   If the resolved `tiered_pricing` entry has a type of `proration`,
+     *   the VAT amount is calculated dynamically using the provided
+     *   `orderCostWithoutVat` and the configured VAT rate.
+     *
+     *   For fixed type, the method simply returns the VAT amount
+     *   stored in the database (`vat_amount` column) without recalculation.
+     *
+     * @param  \App\Models\Company  $company  The company whose pricing tiers apply.
+     * @param  \App\ValueObjects\Money  $orderValue  The total order value used to locate the tier.
+     * @param  \App\ValueObjects\Money  $orderCostWithoutVat  The order cost excluding VAT.
+     * @return \App\ValueObjects\Money The VAT amount as a Money value object.
+     *
+     * @throws \App\Exceptions\NoMatchOrderCostAndValueException
+     *                                                           If no tiered pricing record matches the given order value.
+     */
+    public static function getVatAmount(Company $company, Money $orderValue, Money $orderCostWithoutVat): Money
+    {
+        $pricing = self::getPricingTier($company, $orderValue);
+
+        if (! $pricing) {
+            throw new NoMatchOrderCostAndValueException;
+        }
+
+        if ($pricing->fee_type->is(OrderFeeType::Proration)) {
+            [$vatAmount] = app(CalculateVatAmount::class)
+                ->setAmount($orderCostWithoutVat)
+                ->setIsVatIncludedInAmount(false)
+                ->handle();
+
+            return $vatAmount;
+        }
+
+        return $pricing->vat_amount;
     }
 }

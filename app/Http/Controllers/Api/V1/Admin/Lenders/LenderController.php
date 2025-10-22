@@ -203,6 +203,7 @@ class LenderController extends Controller
                 ->handle();
 
             $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount);
+            $tier['vat_amount'] = $vatOfOrderCostAmount;
 
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
 

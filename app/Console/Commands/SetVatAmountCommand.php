@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class FixOrderCostWithoutVatCommand extends Command
+class SetVatAmountCommand extends Command
 {
-    protected $signature = 'tiered-pricing:set-order-cost-with-vat';
+    protected $signature = 'tiered-pricing:set-vat-amount';
 
-    protected $description = 'Set order_cost_with_vat for fixed fee types in tiered_pricing table.';
+    protected $description = 'Set vat_amount based on order_cost_without_vat * 0.15 in tiered_pricing table.';
 
     public function handle(GetProjectSettings $getProjectSettings): int
     {
@@ -23,7 +23,7 @@ class FixOrderCostWithoutVatCommand extends Command
         $updatedIds = [];
         $failedIds = [];
 
-        Log::info('Start FixOrderCostWithoutVatCommand');
+        Log::info('Start SetVatAmountCommand');
 
         TieredPricing::query()
             ->whereHas('company')
@@ -31,21 +31,43 @@ class FixOrderCostWithoutVatCommand extends Command
                 foreach ($records as $record) {
                     try {
                         DB::transaction(function () use ($record, $vatRate, &$updatedIds) {
-                            $oldValue = $record->temp_order_cost_without_vat;
-                            $newValue = $record->temp_order_cost_without_vat
-                                ->multiply(1 + $vatRate)
-                                ->multiply(1 - $vatRate);
+                            $orderCostWithoutVat = $record->order_cost_without_vat;
+
+                            // Calculate total with VAT
+                            $totalWithVat = $orderCostWithoutVat->multiply(1 + $vatRate);
+
+                            // Round the total to get a clean number
+                            $totalAmount = $totalWithVat->getAmount();
+
+                            // Check the last digit and adjust if needed
+                            $lastDigit = $totalAmount % 10;
+
+                            if ($lastDigit == 1) {
+                                // If last digit is 1, subtract 1 from total
+                                $totalAmount -= 1;
+                            } elseif ($lastDigit == 9) {
+                                // If last digit is 9, add 1 to total
+                                $totalAmount += 1;
+                            }
+
+                            $roundedTotal = money($totalAmount, $totalWithVat->getCurrency());
+
+                            // VAT amount is the difference between adjusted total and original amount
+                            $vatAmount = $roundedTotal->subtract($orderCostWithoutVat);
 
                             // 🪵 Log before & after values to storage/logs/laravel.log
-                            Log::info('Updating tiered_pricing record', [
+                            Log::info('Updating tiered_pricing vat_amount', [
                                 'record_id' => $record->id,
                                 'company_id' => $record->company_id,
-                                'old_value' => $oldValue->getAmount(),
-                                'new_value' => $newValue->getAmount(),
+                                'order_cost_without_vat' => $orderCostWithoutVat->getAmount(),
+                                'total_with_vat_before_round' => $totalWithVat->getAmount(),
+                                'total_with_vat_after_round' => $roundedTotal->getAmount(),
+                                'calculated_vat_amount' => $vatAmount->getAmount(),
+                                'verification_sum' => $orderCostWithoutVat->add($vatAmount)->getAmount(),
                             ]);
 
                             $record->update([
-                                'order_cost_without_vat' => $newValue,
+                                'vat_amount' => $vatAmount,
                             ]);
 
                             $updatedIds[] = $record->id;
