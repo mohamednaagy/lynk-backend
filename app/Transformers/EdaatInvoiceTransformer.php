@@ -94,7 +94,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCreatedAt(EdaatInvoice $edaatInvoice): Primitive
     {
-        return $this->primitive($edaatInvoice->created_at->format('Y-m-d h:i A'));
+        return $this->primitive(saudi_now('Y-m-d h:i A', $edaatInvoice->created_at));
     }
 
     public function includePaidAt(EdaatInvoice $edaatInvoice): Primitive
@@ -103,6 +103,6 @@ class EdaatInvoiceTransformer extends TransformerAbstract
             return $this->primitive(null);
         }
 
-        return $this->primitive($edaatInvoice->paid_at?->format('Y-m-d h:i A'));
+        return $this->primitive(saudi_now('Y-m-d h:i A', $edaatInvoice->paid_at));
     }
 }
