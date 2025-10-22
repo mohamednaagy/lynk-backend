@@ -15,7 +15,6 @@ use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +30,7 @@ class LynkV2Driver extends LynkV1Driver
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAutoCompleteSell::dispatch($traderOrder->id),
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessLynkSellingCommodityToOpenMarket::dispatch($traderOrder->id),
+            FinancingOrderHistory::ClientWakalaAccepted => $this->handleAutomaticSellTransition($traderOrder),
             default => null,
         };
     }
@@ -145,7 +144,7 @@ class LynkV2Driver extends LynkV1Driver
     //       The logic will then be implemented there, accepting $action as a second argument.
     public function isOrderInSellableState(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted);
     }
 
     public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool

@@ -490,6 +490,14 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         };
     }
 
+    protected function handleAutomaticSellTransition(TraderOrder $traderOrder): void
+    {
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->updateMurabhaCompleteDocument($traderOrder);
+
+        ProcessLynkSellingCommodityToOpenMarket::dispatch($traderOrder->id);
+    }
+
     protected function handleManualSellTransition(TraderOrder $traderOrder): void
     {
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
