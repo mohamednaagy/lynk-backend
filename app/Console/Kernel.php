@@ -31,8 +31,6 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
-        $schedule->command('horizon:snapshot')->everyFiveMinutes();
-
         $hours = config('telescope.prune_hours');
         $schedule->command("telescope:prune --hours={$hours}")
             ->timezone($timezone)

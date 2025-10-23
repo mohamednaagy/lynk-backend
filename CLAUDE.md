@@ -15,7 +15,6 @@ This is a Laravel 12-based fintech backend application called "Lynk" with a modu
 - **Run code formatting**: `./vendor/bin/pint`
 - **Run tests**: `php artisan test` or `./vendor/bin/phpunit`
 - **Start queue workers**: `php artisan queue:work`
-- **Start Laravel Horizon**: `php artisan horizon`
 
 ### Frontend Assets
 - **Development build**: `npm run dev`
@@ -65,7 +64,7 @@ The application supports multiple database connections:
 - **SMS Services**: Multi-driver SMS system (`SMS_DEFAULT_DRIVER`)
 - **Identity Verification**: Absher integration for national ID verification
 - **Media Management**: Spatie Media Library for file handling
-- **Background Jobs**: Laravel Horizon for queue management
+- **Background Jobs**: Laravel Queue Workers (Redis)
 - **API Authentication**: JWT-based authentication with Laravel Sanctum
 
 ### Helper Functions
