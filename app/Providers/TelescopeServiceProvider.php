@@ -12,7 +12,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
     private array $allowedEntryTypes = [
         EntryType::REQUEST,
-        EntryType::QUERY,
+        EntryType::EXCEPTION,
     ];
 
     public function register(): void
@@ -27,12 +27,24 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                 return true;
             }
 
-            // Allow only specific entry types
+            // Handle queries separately - only log slow ones
+            if ($entry->type === EntryType::QUERY) {
+                // Skip if query is on telescope's own connection
+                if (isset($entry->content['connection']) &&
+                    $entry->content['connection'] === config('telescope.storage.database.connection')) {
+                    return false;
+                }
+
+                // Only log slow queries
+                return $entry->content['slow'] ?? false;
+            }
+
+            // Allow other specific entry types
             return in_array($entry->type, $this->allowedEntryTypes, true);
         });
     }
 
-    protected function hideSensitiveRequestDetails()
+    protected function hideSensitiveRequestDetails(): void
     {
         if ($this->app->environment('local')) {
             return;
@@ -46,7 +58,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         ]);
     }
 
-    protected function gate()
+    protected function gate(): void
     {
         Gate::define('viewTelescope', fn ($user) => false);
     }
