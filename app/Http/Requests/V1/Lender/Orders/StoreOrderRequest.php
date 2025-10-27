@@ -9,10 +9,12 @@ use App\Http\Requests\V1\Lender\Orders\Validators\AbstractFinancingOrderTypeVali
 use App\Http\Requests\V1\Lender\Orders\Validators\FinancingOrderTypeValidatorFactory;
 use App\Models\Lender;
 use App\Rules\CheckFinancingOrderTypeExistAtCompanyRule;
+use App\Rules\RequireTypeIfMultipleAllowedRule;
 use App\Rules\ValidCommodityTypeAtFinancingOrderForLenderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Unique;
+use Illuminate\Validation\ValidationException;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -25,8 +27,6 @@ class StoreOrderRequest extends FormRequest
     private Lender $lender;
 
     private $type;
-
-    private $requireType = false;
 
     /**
      * Always authorize this request.
@@ -69,14 +69,24 @@ class StoreOrderRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->getLender();
+        $this->initialValidateType();
         $this->setFinancingOrderType();
-
-        $this->requireType = count($this->lender->lenderDetail->allowed_financing_order_types ?? []) > 1;
-        if (! $this->requireType || $this->has('type')) {
-            $this->merge(['type' => $this->type]);
-        }
+        $this->merge(['type' => $this->type]);
 
         $this->initFinancingOrderValidator();
+    }
+
+    protected function initialValidateType(): void
+    {
+        $validator = validator($this->all(), [
+            'type' => [
+                new RequireTypeIfMultipleAllowedRule($this->lender),
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
     }
 
     /**
@@ -97,7 +107,7 @@ class StoreOrderRequest extends FormRequest
                 $this->handleUniqueReferenceNumber(),
             ],
             'type' => [
-                $this->requireType ? 'required' : 'nullable',
+                'nullable',
                 'numeric',
                 new EnumValue(FinancingOrderTypeEnum::class, false),
                 new CheckFinancingOrderTypeExistAtCompanyRule($this->lender->id),
