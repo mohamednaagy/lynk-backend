@@ -31,7 +31,7 @@ class SellConfirmationDocumentPdf extends BasePdfGenerator
 
         $data = [
             'trader_order_reference' => $traderOrder->reference,
-            'amount' => $financeOrder->amount->convertAndFormatByDecimal(sperator: ','),
+            'amount' => $financeOrder->amount->convertAndFormatByDecimal(separator: ','),
             'borrower_name' => $financeOrder->getBorrowerInfo()['name'],
             'current_date' => saudi_now('Y-m-d'),
             'current_time' => saudi_now('H:i:s'),
