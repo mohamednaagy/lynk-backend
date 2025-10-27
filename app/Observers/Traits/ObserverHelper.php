@@ -8,36 +8,11 @@ use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaOfferIss
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsMurabhaSaleCompleted;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
-use App\Jobs\FinancingOrders\NotifyAdminsIfTraderOrderHasStopped;
-use App\Models\TraderHistory;
 use App\Models\TraderOrder;
-use App\Settings\Classes\GeneralSettings;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionaryNode;
 
 trait ObserverHelper
 {
-    public function notifyAdminsAboutOrderStopped(TraderHistory $traderHistory, ?StepHistoriesDictionaryNode $currentStepNode): bool
-    {
-        if (is_null($currentStepNode)) {
-            return false;
-        }
-
-        $nextStepNode = app(StepHistoriesDictionary::class)->getNextStepOf($currentStepNode->step);
-
-        if ($nextStepNode) {
-            $delayTime = app(GeneralSettings::class)->trader_order_timeout;
-            if ($this->isPurchasingOrSellingCommodity($nextStepNode->step)) {
-                $delayTime = 1;
-            }
-
-            NotifyAdminsIfTraderOrderHasStopped::dispatch($traderHistory->traderOrder, $traderHistory->action)
-                ->delay(now()->addMinutes($delayTime));
-        }
-
-        return true;
-    }
-
     public function fireWebhookWhenStatusIsMurabhaOfferIssued(TraderOrder $traderOrder, ?StepHistoriesDictionaryNode $currentStepNode): bool
     {
         if (is_null($currentStepNode)) {
