@@ -5,7 +5,6 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
-use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
@@ -220,20 +219,13 @@ class BursamV2Driver extends BursamV1Driver
             return false;
         }
 
-        return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
-            && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
+        return $this->isNotInTransitionStateForSellingOrBuying($traderOrder);
     }
 
     protected function isNotInTransitionStateForSellingOrBuying(TraderOrder $traderOrder)
     {
         return ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
             && ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
-    }
-
-    protected function isNotInContractSignedForLenderArea(TraderOrder $traderOrder, $area)
-    {
-        return $area !== Area::Lender
-            || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned);
     }
 
     /**
