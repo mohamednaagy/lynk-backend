@@ -60,8 +60,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
                 'current_step_node' => $currentStepNode ? get_class($currentStepNode) : null,
             ]);
 
-            $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
-
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Admins notified, getting completed step node', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
