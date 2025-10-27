@@ -26,6 +26,8 @@ class StoreOrderRequest extends FormRequest
 
     private $type;
 
+    private $requireType = false;
+
     /**
      * Always authorize this request.
      */
@@ -68,7 +70,11 @@ class StoreOrderRequest extends FormRequest
     {
         $this->getLender();
         $this->setFinancingOrderType();
-        $this->merge(['type' => $this->type]);
+
+        $this->requireType = count($this->lender->lenderDetail->allowed_financing_order_types ?? []) > 1;
+        if (! $this->requireType || $this->has('type')) {
+            $this->merge(['type' => $this->type]);
+        }
 
         $this->initFinancingOrderValidator();
     }
@@ -91,7 +97,7 @@ class StoreOrderRequest extends FormRequest
                 $this->handleUniqueReferenceNumber(),
             ],
             'type' => [
-                'nullable',
+                $this->requireType ? 'required' : 'nullable',
                 'numeric',
                 new EnumValue(FinancingOrderTypeEnum::class, false),
                 new CheckFinancingOrderTypeExistAtCompanyRule($this->lender->id),
