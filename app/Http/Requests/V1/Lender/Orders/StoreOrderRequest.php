@@ -69,14 +69,14 @@ class StoreOrderRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->getLender();
-        $this->initialValidateType();
+        $this->baseValidation();
         $this->setFinancingOrderType();
         $this->merge(['type' => $this->type]);
 
         $this->initFinancingOrderValidator();
     }
 
-    protected function initialValidateType(): void
+    protected function baseValidation(): void
     {
         $validator = validator($this->all(), [
             'type' => [
