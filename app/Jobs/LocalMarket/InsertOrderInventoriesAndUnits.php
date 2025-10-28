@@ -50,6 +50,19 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
                 $order->lender_identifier,
                 UnitOwnershipAction::PurchaseCommodity
             );
+
+            $data = UnitService::getUnitsByGroupedByPreviousOwner($order);
+
+            $order->update([
+                'status' => OrderStatus::CommoditiesPurchased,
+                'data' => array_merge($order->data, ['data' => $data]),
+            ]);
+
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('unit service for order '.$order->id, $order), [
+                'localMarketOrderId' => $order->id,
+                'data' => $data,
+            ]);
+
         } catch (\Throwable $e) {
             if ($order) {
                 $order->update([
