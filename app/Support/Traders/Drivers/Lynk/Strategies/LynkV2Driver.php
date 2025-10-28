@@ -126,7 +126,12 @@ class LynkV2Driver extends LynkV1Driver
             (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
 
         if ($invalidSequence) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
     }
 

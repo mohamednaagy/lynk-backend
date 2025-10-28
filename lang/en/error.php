@@ -19,7 +19,7 @@ return [
     'invalid_operator_tcn' => 'Invalid operator TCN',
     'no_enough_balance' => 'No enough balance',
     'user_doesnt_belong_to_company' => 'User Doesnt Belong To This Company',
-    'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
+    'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence. Order ID: :financingOrderId, Trader Order ID: :traderOrderId',
     'order_require_client_verification' => 'You cannot proceed because order requires client verification.',
     'order_cannot_be_updated' => 'Order can be updated only if the status is '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
     'webhook_type_not_supported' => 'Unsupported webhook type',

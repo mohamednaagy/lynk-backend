@@ -214,7 +214,12 @@ class TraderOrder extends Model implements HasMedia
     public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $this->financing_order_id,
+                    'traderOrderId' => $this->id,
+                ]
+            );
         }
     }
 
