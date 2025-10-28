@@ -9,10 +9,12 @@ use App\Http\Requests\V1\Lender\Orders\Validators\AbstractFinancingOrderTypeVali
 use App\Http\Requests\V1\Lender\Orders\Validators\FinancingOrderTypeValidatorFactory;
 use App\Models\Lender;
 use App\Rules\CheckFinancingOrderTypeExistAtCompanyRule;
+use App\Rules\RequireTypeIfMultipleAllowedRule;
 use App\Rules\ValidCommodityTypeAtFinancingOrderForLenderRule;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Unique;
+use Illuminate\Validation\ValidationException;
 
 class StoreOrderRequest extends FormRequest
 {
@@ -67,10 +69,24 @@ class StoreOrderRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->getLender();
+        $this->baseValidation();
         $this->setFinancingOrderType();
         $this->merge(['type' => $this->type]);
 
         $this->initFinancingOrderValidator();
+    }
+
+    protected function baseValidation(): void
+    {
+        $validator = validator($this->all(), [
+            'type' => [
+                new RequireTypeIfMultipleAllowedRule($this->lender),
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
+        }
     }
 
     /**
