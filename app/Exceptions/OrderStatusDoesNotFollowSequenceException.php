@@ -9,17 +9,31 @@ use Illuminate\Http\Response;
 
 class OrderStatusDoesNotFollowSequenceException extends Exception
 {
+    protected $message;
+
+    public function __construct(
+        protected $context = [],
+        ?string $message = null,
+    ) {
+        $this->message = $message ?? __('error.order_status_doesnt_follow_sequence', [
+            'financingOrderId' => $this->context['financingOrderId'],
+            'traderOrderId' => $this->context['traderOrderId'],
+        ]);
+        parent::__construct($this->message);
+
+    }
+
     public function render(Request $request)
     {
-        $message = __('error.order_status_doesnt_follow_sequence');
+
         $code = Response::HTTP_BAD_REQUEST;
         if ($request->expectsJson()) {
             return response()->errorResponse(
-                $message,
+                $this->message,
                 $code,
                 ErrorCode::ORDER_STATUS_DOESNT_FOLLOW_SEQUENCE
             );
         }
-        abort($code, $message);
+        abort($code, $this->message);
     }
 }

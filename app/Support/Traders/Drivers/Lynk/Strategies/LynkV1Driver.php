@@ -525,7 +525,12 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
 
         if ($invalidSequence) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
     }
 

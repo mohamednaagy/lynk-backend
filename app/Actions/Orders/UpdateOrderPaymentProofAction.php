@@ -20,7 +20,12 @@ class UpdateOrderPaymentProofAction implements UpdateOrderPaymentProof
             ->findOrFail($financingOrderId);
 
         if ($order->status->isNot(FinancingOrderStatus::Completed)) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $order->id,
+                    'traderOrderId' => null,
+                ]
+            );
         }
 
         return $order->addMedia(Arr::get($data, 'payment_proof'))
