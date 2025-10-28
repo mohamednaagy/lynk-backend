@@ -9,5 +9,5 @@ interface GetEdaatInvoices
     /**
      * Get edaat invoices for tenant (company) or admin
      */
-    public function handle(array $scopes = []): Builder;
+    public function handle(): Builder;
 }
