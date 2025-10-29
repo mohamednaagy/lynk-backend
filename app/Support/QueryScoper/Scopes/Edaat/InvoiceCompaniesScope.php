@@ -13,6 +13,13 @@ class InvoiceCompaniesScope extends QueryScoper
     {
         $companyIds = Request::query('company_id');
 
+        // Handle null or empty values
+        if (empty($companyIds)) {
+            return [
+                'company_id' => [],
+            ];
+        }
+
         // Normalize to integers and unique values
         $companyIds = array_values(array_unique(array_map('intval', $companyIds)));
 

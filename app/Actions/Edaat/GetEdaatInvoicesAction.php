@@ -3,6 +3,7 @@
 namespace App\Actions\Edaat;
 
 use App\Actions\Contracts\Edaat\GetEdaatInvoices;
+use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceAmountGteScope;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceAmountLteScope;
@@ -16,11 +17,14 @@ use Illuminate\Database\Eloquent\Builder;
 
 class GetEdaatInvoicesAction implements GetEdaatInvoices
 {
+    protected ?Company $company = null;
+
     /**
      * Get edaat invoices for tenant (company) or admin
      */
     public function handle(): Builder
     {
+        $query = EdaatInvoice::query();
         $scopes = [
             // Common filters
             'invoice_number' => InvoiceNumberScope::class,
@@ -35,6 +39,20 @@ class GetEdaatInvoicesAction implements GetEdaatInvoices
             'company' => InvoiceCompaniesScope::class,
         ];
 
-        return EdaatInvoice::query()->toScopes($scopes);
+        if ($this->company) {
+            $query = $query->where('company_id', $this->company->id);
+        }
+
+        return $query->toScopes($scopes);
+    }
+
+    /**
+     * Set company for query scoping
+     */
+    public function setCompany(Company $company): self
+    {
+        $this->company = $company;
+
+        return $this;
     }
 }
