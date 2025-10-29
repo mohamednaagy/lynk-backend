@@ -8,6 +8,7 @@ use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\OrderService;
 use App\Services\LocalMarket\UnitService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -51,19 +52,7 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
                 UnitOwnershipAction::PurchaseCommodity
             );
 
-            $data = UnitService::getUnitsByGroupedByPreviousOwner($order);
-
-            $order->update([
-                'status' => OrderStatus::CommoditiesPurchased,
-                'data' => array_merge($order->data, ['data' => $data]),
-            ]);
-
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('unit service for order '.$order->id, $order), [
-                'localMarketOrderId' => $order->id,
-                'data' => $data,
-            ]);
-
-        } catch (\Throwable $e) {
+        } catch (Exception $e) {
             if ($order) {
                 $order->update([
                     'status' => OrderStatus::FailedPurchase,
