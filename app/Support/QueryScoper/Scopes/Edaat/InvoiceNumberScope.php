@@ -42,6 +42,6 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where('invoice_number', $data['invoice_number']);
+        return $builder->where('invoice_number', 'like', '%'.$data['invoice_number'].'%');
     }
 }
