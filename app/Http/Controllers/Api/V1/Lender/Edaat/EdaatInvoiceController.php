@@ -9,9 +9,9 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Edaat\EdaatInvoiceFilterRequest;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use App\Models\Company;
-use App\Support\QueryScoper\Scopes\Edaat\InvoiceSortByCreatedAtScope;
 use App\Transformers\EdaatInvoiceTransformer;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
@@ -36,10 +36,11 @@ class EdaatInvoiceController extends Controller
     }
 
     public function index(
-        Request $request,
+        EdaatInvoiceFilterRequest $request,
         GetEdaatInvoicesInterface $getEdaatInvoices
     ): JsonResponse {
-        $edaatInvoices = $getEdaatInvoices->handle(['sort_by_created_at' => InvoiceSortByCreatedAtScope::class])
+        $edaatInvoices = $getEdaatInvoices->setCompany(tenant())
+            ->handle()
             ->with('creator')
             ->paginate();
 

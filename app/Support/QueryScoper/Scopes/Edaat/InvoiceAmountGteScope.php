@@ -3,45 +3,35 @@
 namespace App\Support\QueryScoper\Scopes\Edaat;
 
 use App\Support\QueryScoper\QueryScoper;
+use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
-class InvoiceNumberScope extends QueryScoper
+class InvoiceAmountGteScope extends QueryScoper
 {
-    /**
-     * Prepare data for violation
-     */
     public function prepareData(): array
     {
         return [
-            'invoice_number' => Request::query('invoice_number'),
+            'amount_gte' => Request::query('amount_gte'),
         ];
     }
 
-    /**
-     * Get the validator
-     *
-     * @param  array  $data
-     */
     public function validator($data): \Illuminate\Contracts\Validation\Validator
     {
         return Validator::make(
             $data,
             [
-                'invoice_number' => ['required', 'string', 'max:255'],
+                'amount_gte' => ['required', 'numeric'],
             ]
         );
     }
 
-    /**
-     * Prepare builder
-     *
-     * @param  Builder  $builder
-     * @param  array  $data
-     */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where('invoice_number', 'like', '%'.$data['invoice_number'].'%');
+        $currency = config('app.currency');
+        $minor = Money::parseByDecimal($data['amount_gte'], $currency)->getAmount();
+
+        return $builder->where('amount', '>=', $minor);
     }
 }

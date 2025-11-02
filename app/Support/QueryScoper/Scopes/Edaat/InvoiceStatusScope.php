@@ -2,20 +2,22 @@
 
 namespace App\Support\QueryScoper\Scopes\Edaat;
 
+use App\Enums\EdaatInvoiceStatus;
 use App\Support\QueryScoper\QueryScoper;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
-class InvoiceNumberScope extends QueryScoper
+class InvoiceStatusScope extends QueryScoper
 {
     /**
-     * Prepare data for violation
+     * Prepare data for validation
      */
     public function prepareData(): array
     {
         return [
-            'invoice_number' => Request::query('invoice_number'),
+            'status' => Request::query('status'),
         ];
     }
 
@@ -29,7 +31,7 @@ class InvoiceNumberScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'invoice_number' => ['required', 'string', 'max:255'],
+                'status' => ['required', new EnumValue(EdaatInvoiceStatus::class, false)],
             ]
         );
     }
@@ -42,6 +44,6 @@ class InvoiceNumberScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where('invoice_number', 'like', '%'.$data['invoice_number'].'%');
+        return $builder->where('status', $data['status']);
     }
 }

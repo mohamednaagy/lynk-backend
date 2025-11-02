@@ -27,7 +27,15 @@ class ProceedContractSignedAction implements ProceedContractSigned
     {
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned));
         $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if (! $canProceed) {
+        if ($canProceed) {
+            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned);
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
+            Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractSigned($traderOrder);
+
+            return [];
+        } else {
             throw new OrderStatusDoesNotFollowSequenceException(
                 [
                     'financingOrderId' => $traderOrder->financing_order_id,
@@ -35,12 +43,6 @@ class ProceedContractSignedAction implements ProceedContractSigned
                 ]
             );
         }
-        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned);
 
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
-
-        Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractSigned($traderOrder);
-
-        return [];
     }
 }

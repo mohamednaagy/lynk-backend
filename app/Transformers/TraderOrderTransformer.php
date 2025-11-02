@@ -14,6 +14,7 @@ use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\FinancingOrders\TraderOrderHelper;
+use App\Transformers\TraderHistoryTransformers\TraderHistoryTransformerFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Collection as IlluminateCollection;
 use League\Fractal\Resource\Collection;
@@ -141,7 +142,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
         $historiesActions = $traderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection([$historiesActions], new TraderHistoryTransformer($traderOrder, $traderMurabhaSteps));
+        return $this->collection([$historiesActions], TraderHistoryTransformerFactory::make($traderOrder, $traderMurabhaSteps));
     }
 
     public function includeProducts(TraderOrder $traderOrder): Collection

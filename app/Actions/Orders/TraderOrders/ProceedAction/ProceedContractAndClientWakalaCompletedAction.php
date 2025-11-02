@@ -39,7 +39,13 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
 
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted));
         $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if (! $canProceed) {
+        if ($canProceed) {
+            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
+
+            Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
+
+            return [];
+        } else {
             throw new OrderStatusDoesNotFollowSequenceException(
                 [
                     'financingOrderId' => $traderOrder->financing_order_id,
@@ -47,10 +53,6 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
                 ]
             );
         }
-        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
 
-        Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
-
-        return [];
     }
 }

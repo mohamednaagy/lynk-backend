@@ -3,45 +3,32 @@
 namespace App\Support\QueryScoper\Scopes\Edaat;
 
 use App\Support\QueryScoper\QueryScoper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 
-class InvoiceNumberScope extends QueryScoper
+class InvoiceDateFromScope extends QueryScoper
 {
-    /**
-     * Prepare data for violation
-     */
     public function prepareData(): array
     {
         return [
-            'invoice_number' => Request::query('invoice_number'),
+            'date_from' => Request::query('date_from'),
         ];
     }
 
-    /**
-     * Get the validator
-     *
-     * @param  array  $data
-     */
     public function validator($data): \Illuminate\Contracts\Validation\Validator
     {
         return Validator::make(
             $data,
             [
-                'invoice_number' => ['required', 'string', 'max:255'],
+                'date_from' => ['required', 'date_format:Y-m-d'],
             ]
         );
     }
 
-    /**
-     * Prepare builder
-     *
-     * @param  Builder  $builder
-     * @param  array  $data
-     */
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where('invoice_number', 'like', '%'.$data['invoice_number'].'%');
+        return $builder->where('created_at', '>=', Carbon::parse($data['date_from'])->startOfDay());
     }
 }

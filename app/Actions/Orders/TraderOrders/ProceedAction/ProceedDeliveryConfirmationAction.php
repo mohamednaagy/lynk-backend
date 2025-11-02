@@ -28,7 +28,26 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
     {
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ConfirmDeliver));
         $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if (! $canProceed) {
+        if ($canProceed) {
+            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ConfirmDeliver);
+
+            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+                ->confirmDeliverCommodityToCustomer($traderOrder);
+
+            dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
+
+            $canUpdateOrderStatus = Trader::driver($traderOrder->provider, $traderOrder->version)->confirmDelivery($traderOrder);
+
+            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryConfirmed);
+
+            if ($canUpdateOrderStatus) {
+                $traderOrder->update([
+                    'status' => TraderOrderStatus::Completed,
+                ]);
+            }
+
+            return [];
+        } else {
             throw new OrderStatusDoesNotFollowSequenceException(
                 [
                     'financingOrderId' => $traderOrder->financing_order_id,
@@ -36,23 +55,6 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
                 ]
             );
         }
-        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ConfirmDeliver);
 
-        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-            ->confirmDeliverCommodityToCustomer($traderOrder);
-
-        dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
-
-        $canUpdateOrderStatus = Trader::driver($traderOrder->provider, $traderOrder->version)->confirmDelivery($traderOrder);
-
-        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryConfirmed);
-
-        if ($canUpdateOrderStatus) {
-            $traderOrder->update([
-                'status' => TraderOrderStatus::Completed,
-            ]);
-        }
-
-        return [];
     }
 }

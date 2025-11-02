@@ -41,7 +41,17 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
 
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted));
         $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if (! $canProceed) {
+        if ($canProceed) {
+            if ($signedClientWakala) {
+                $traderOrder->addMedia($signedClientWakala)
+                    ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
+            }
+            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
+
+            app(AcceptClientWakala::class)->handle($traderOrder);
+
+            return [];
+        } else {
             throw new OrderStatusDoesNotFollowSequenceException(
                 [
                     'financingOrderId' => $traderOrder->financing_order_id,
@@ -50,14 +60,5 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
             );
         }
 
-        if ($signedClientWakala) {
-            $traderOrder->addMedia($signedClientWakala)
-                ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
-        }
-        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
-
-        app(AcceptClientWakala::class)->handle($traderOrder);
-
-        return [];
     }
 }
