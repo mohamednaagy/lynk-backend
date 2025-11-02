@@ -13,7 +13,7 @@ class InvoiceDateFromScope extends QueryScoper
     public function prepareData(): array
     {
         return [
-            'date_from' => Carbon::parse(Request::query('date_from'))->startOfDay(),
+            'date_from' => Request::query('date_from'),
         ];
     }
 
@@ -29,6 +29,6 @@ class InvoiceDateFromScope extends QueryScoper
 
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->where('created_at', '>=', $data['date_from']);
+        return $builder->where('created_at', '>=', Carbon::parse($data['date_from'])->startOfDay());
     }
 }
