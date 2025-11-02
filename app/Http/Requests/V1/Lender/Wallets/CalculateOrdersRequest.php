@@ -23,7 +23,14 @@ class CalculateOrdersRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'amount' => ['required', 'numeric', 'gt:0', new MoneyValueRule],
+            'amount' => ['required', 'numeric', 'gte:50', new MoneyValueRule],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'amount.gte' => __('validation.amount_gte', ['amount' => 50]),
         ];
     }
 }

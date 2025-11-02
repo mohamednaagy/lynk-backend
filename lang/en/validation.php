@@ -227,4 +227,5 @@ return [
     'the_selected_commodity_type_is_not_allowed_for_this_company' => 'The selected commodity type is not allowed for this company.',
     'the_selected_financing_order_type_is_not_allowed_for_this_company' => 'Order not created. Invalid type :type for this company.',
     'need_to_select_financing_order_type' => 'You must select a financing order type to create the order.',
+    'amount_gte' => 'Entered amount should be greater than or equal to :amount SAR',
 ];

@@ -312,4 +312,5 @@ return [
         'the_selected_financing_order_type_is_not_allowed_for_this_company' => 'لا يمكن إنشاء الطلب. النوع :type غير مسموح به لهذه الشركة.',
         'need_to_select_financing_order_type' => 'يجب اختيار نوع الطلب لإنشاء الطلب.',
     ],
+    'amount_gte' => 'يجب أن تكون القيمة أكبر من أو تساوي :amount ريال سعودي',
 ];
