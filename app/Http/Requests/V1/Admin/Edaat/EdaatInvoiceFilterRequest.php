@@ -19,8 +19,8 @@ class EdaatInvoiceFilterRequest extends FormRequest
         return [
             'invoice_number' => ['sometimes', 'string', 'max:255'],
             'status' => ['sometimes', new EnumValue(EdaatInvoiceStatus::class, false)],
-            'date_from' => ['sometimes', 'date_format:Y-m-d', Rule::when($this->filled('date_to'), ['before_or_equal:date_to'])],
-            'date_to' => ['sometimes', 'date_format:Y-m-d', Rule::when($this->filled('date_from'), ['after_or_equal:date_from'])],
+            'date_from' => ['sometimes', Rule::when($this->filled('date_to'), ['before_or_equal:date_to'])],
+            'date_to' => ['sometimes', Rule::when($this->filled('date_from'), ['after_or_equal:date_from'])],
             'amount_gte' => ['sometimes', 'numeric', Rule::when($this->filled('amount_lte'), ['lte:amount_lte'])],
             'amount_lte' => ['sometimes', 'numeric', Rule::when($this->filled('amount_gte'), ['gte:amount_gte'])],
             'oldest' => ['sometimes', 'boolean'],
