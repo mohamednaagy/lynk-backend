@@ -20,45 +20,64 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
 {
     use TraderHelperTrait;
 
+    public function __construct(
+        protected readonly TraderOrderProceedCaseService $proceedCaseService,
+        protected readonly AcceptClientWakala $acceptClientWakala
+    ) {}
+
     /**
+     * Process the client wakala acceptance for a trader order.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order to process
+     * @param  UploadedFile|null  $signedClientWakala  Optional signed client wakala file
+     * @param  bool  $forceToProceed  Whether to force proceeding despite validation
+     *
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
-     * @throws \Exception
      */
     public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): array
     {
-        $order = $traderOrder->order;
-
-        if (! $order) {
-            Log::channel('bursam')->info('ProceedClientWakalaAccepted: traderOrderId: '.$traderOrder->id.' - Order is null', [
+        if (! $traderOrder->order) {
+            Log::channel('bursam')->warning('ProceedClientWakalaAccepted: Order not found for trader order', [
                 'traderOrderId' => $traderOrder->id,
-                'order' => $order?->id,
             ]);
 
             return [];
         }
 
-        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted));
-        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if ($canProceed) {
-            if ($signedClientWakala) {
-                $traderOrder->addMedia($signedClientWakala)
-                    ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
-            }
-            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(
+            FinancingOrderProceedCase::ClientWakalaAccepted
+        );
 
-            app(AcceptClientWakala::class)->handle($traderOrder);
-
-            return [];
-        } else {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
 
+        $this->attachSignedClientWakalaIfProvided($traderOrder, $signedClientWakala);
+        $this->proceedCaseService->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
+        $this->acceptClientWakala->handle($traderOrder);
+
+        return [];
+    }
+
+    /**
+     * Attach the signed client wakala file to the trader order if provided.
+     *
+     *
+     * @throws FileDoesNotExist
+     * @throws FileIsTooBig
+     */
+    protected function attachSignedClientWakalaIfProvided(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala): void
+    {
+        if ($signedClientWakala === null) {
+            return;
+        }
+
+        $traderOrder->addMedia($signedClientWakala)
+            ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
     }
 }

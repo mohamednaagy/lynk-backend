@@ -24,7 +24,7 @@ class TraderOrderProceedCaseFactory
     public static function handle(string $proceedCase): TraderOrderProceedCase
     {
         return match ($proceedCase) {
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted) => new ClientWakalaAcceptedCase,
+            FinancingOrderProceedCase::ClientWakalaAccepted => new ClientWakalaAcceptedCase,
             FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned) => new ContractSignedCase,
             FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery) => new ContractSignedDeliveryCase,
             FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted) => new ContractAndClientWakalaCompletedCase,
