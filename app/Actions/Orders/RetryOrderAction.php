@@ -19,7 +19,12 @@ class RetryOrderAction implements RetryOrder
             ->findOrFail($orderId);
 
         if (! $financingOrder->status->is(FinancingOrderStatus::TradingFailure)) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $financingOrder->id,
+                    'traderOrderId' => null,
+                ]
+            );
         }
 
         $financingOrder->retry();

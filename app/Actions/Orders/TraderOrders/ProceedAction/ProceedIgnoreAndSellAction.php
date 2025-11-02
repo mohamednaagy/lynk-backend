@@ -39,7 +39,12 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
             $this->isPreviousStepOfCustomerDeliveryConfirmationNotCompleted($traderOrder)
             || ($forceToProceed === false && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder))
         ) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::IgnoreAndSell);
 

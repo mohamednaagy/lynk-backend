@@ -11,6 +11,7 @@ use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use App\Transformers\TraderHistoryTransformers\TraderHistoryTransformerFactory;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
@@ -256,7 +257,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
         $historiesActions = $activeTraderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection([$historiesActions], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
+        return $this->collection([$historiesActions], TraderHistoryTransformerFactory::make($activeTraderOrder, $traderMurabhaSteps));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection

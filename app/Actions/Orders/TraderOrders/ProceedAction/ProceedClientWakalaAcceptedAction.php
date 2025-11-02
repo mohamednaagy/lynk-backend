@@ -54,7 +54,12 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
             || ($forceToProceed === false && $order->is_verification_required)
             || ($forceToProceed === false && $this->isClientWakalaStepCompleted($traderOrder))
         ) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
 
         if ($signedClientWakala) {

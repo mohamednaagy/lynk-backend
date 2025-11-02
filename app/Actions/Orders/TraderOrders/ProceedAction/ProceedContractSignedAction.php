@@ -30,7 +30,12 @@ class ProceedContractSignedAction implements ProceedContractSigned
             $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
             || ($forceToProceed === false && $this->isContractSignedStepCompleted($traderOrder))
         ) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned);
 
