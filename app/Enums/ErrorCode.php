@@ -101,4 +101,6 @@ class ErrorCode
     public const TRADE_REQUEST_CREATION_NOT_ALLOWED = 1050;
 
     public const ITEM_NOT_FOUND = 1052;
+
+    public const UNABLE_TO_SETTLE_ORDER = 1053;
 }

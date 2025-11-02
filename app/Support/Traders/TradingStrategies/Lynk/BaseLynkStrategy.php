@@ -122,11 +122,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             'base64',
             $sellCOnfirmationDocumentFile->getClientOriginalName(),
         );
-
-        $this->createTraderOrderHistory(
-            $traderOrder,
-            FinancingOrderHistory::AttachSellConfirmationDocument,
-        );
     }
 
     /**

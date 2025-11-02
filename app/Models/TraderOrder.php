@@ -9,6 +9,7 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderSettlementStatus;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
@@ -130,6 +132,16 @@ class TraderOrder extends Model implements HasMedia
     public function traderHistories(): HasMany
     {
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
+    }
+
+    public function settlements(): HasMany
+    {
+        return $this->hasMany(TraderOrderSettlement::class, 'trader_order_id', 'id');
+    }
+
+    public function latestSettlement(): HasOne
+    {
+        return $this->hasOne(TraderOrderSettlement::class, 'trader_order_id', 'id')->latestOfMany();
     }
 
     public function isCancellable(?string $area): bool
@@ -307,6 +319,26 @@ class TraderOrder extends Model implements HasMedia
             FinancingOrderHistory::GetTtiId,
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ]) && ($this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold));
+    }
+
+    public function canBeSettled(): bool
+    {
+        return $this->status->value === TraderOrderStatus::Completed
+            && $this->provider === EnumsTrader::Lynk;
+    }
+
+    public function isCommoditiesSettled(): bool
+    {
+        $latestSettlement = $this->latestSettlement;
+
+        return $latestSettlement && $latestSettlement->is_commodities_settled;
+    }
+
+    public function hasPendingSettlementCheck(): bool
+    {
+        $latestSettlement = $this->latestSettlement;
+
+        return $latestSettlement && $latestSettlement->status->is(TraderOrderSettlementStatus::Pending);
     }
 
     public function isTraderManualAndPurchaseStepNotComplete(): bool

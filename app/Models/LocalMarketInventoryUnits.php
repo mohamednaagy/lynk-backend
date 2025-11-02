@@ -23,6 +23,7 @@ class LocalMarketInventoryUnits extends Model
         'current_owner',
         'current_owner_type',
         'last_completed_order_id',
+        'last_purchasing_order_id',
         'previous_owner_type',
         'previous_owner',
     ];

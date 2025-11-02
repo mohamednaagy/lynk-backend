@@ -49,6 +49,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelTraderOrder;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CheckSettlement;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
@@ -190,6 +191,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
                 Route::post('/attach-sell-confirmation-document', UpdateSellConfirmationDocument::class);
                 Route::put('/cancel', CancelTraderOrder::class);
+                Route::get('/check-settlement', CheckSettlement::class);
             });
 
         });

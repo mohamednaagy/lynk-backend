@@ -2,8 +2,6 @@
 
 namespace App\Jobs\LocalMarket\states;
 
-use App\Jobs\LocalMarket\CommoditiesSettlement\ChangeStatus\SetCommoditiesSettlementStatusPending;
-
 class SoldOrderSuccessStatus extends BaseStatus
 {
     /**
@@ -12,6 +10,5 @@ class SoldOrderSuccessStatus extends BaseStatus
     public function handle(): void
     {
         $this->logQueueJob('Order Sold successfully');
-        SetCommoditiesSettlementStatusPending::dispatch($this->localMarketOrderID);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Clients;
 
 use App\Actions\Contracts\LocalMarket\CancelOrder;
+use App\Actions\Contracts\LocalMarket\CheckOrderSettlement;
 use App\Actions\Contracts\LocalMarket\ConfirmDeliverProducts;
 use App\Actions\Contracts\LocalMarket\CreateLocalMarketOrder;
 use App\Actions\Contracts\LocalMarket\RequestDeliverProducts;
@@ -72,6 +73,11 @@ class LynkClient
     public function sellProduct()
     {
         return app(SellCommodities::class)->handle($this->traderOrder->reference);
+    }
+
+    public function checkOrderSettlement(): bool
+    {
+        return app(CheckOrderSettlement::class)->handle($this->traderOrder->reference);
     }
 
     public function transferOwnershipToCustomer()

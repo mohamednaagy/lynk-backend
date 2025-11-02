@@ -57,4 +57,9 @@ return [
     'invalid_media_collection_type' => 'نوع مجموعة الوسائط المحدد غير صالح.',
     'order_has_no_active_trade_request' => 'تم إلغاء هذا الطلب أو لا يحتوي على طلب تداول نشط.',
     'item_not_found' => 'هذا العنصر غير موجود',
+    'unable_to_settle_order' => 'لا يمكن تسوية هذا الطلب. التسوية متاحة فقط للطلبات المكتملة في السوق المحلي.',
+    'settlement_check_in_progress' => 'جارٍ التحقق من حالة التسوية.',
+    'unable_to_generate_sell_confirmation_certificate' => 'شهادة تأكيد البيع غير متوفرة لطلب التداول هذا. يرجى المحاولة لاحقًا. آخر فحص: :created_at بواسطة :creator_name',
+    'pending_settlement_check' => 'عملية فحص التسوية قيد التنفيذ بالفعل.',
+
 ];

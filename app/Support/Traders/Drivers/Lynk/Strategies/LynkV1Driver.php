@@ -30,7 +30,6 @@ use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\Deliverable;
-use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
@@ -48,7 +47,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
 // TODO_LOCAL_MARKET need to review
-class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderInterface
+class LynkV1Driver implements Deliverable, TraderInterface
 {
     use Localizable;
     use TraderHelperTrait {
@@ -146,32 +145,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     'version' => $traderOrder->version,
                 ],
                 $exception
-            );
-        }
-    }
-
-    public function createSellConfirmationDocument(TraderOrder $traderOrder): void
-    {
-        try {
-            $this->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachSellConfirmationDocument,
-            );
-        } catch (\Throwable $e) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create sell-confirmation-certificate', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id,
-                'traderOrderId' => $traderOrder->id,
-                'message' => $e->getMessage(),
-            ]);
-
-            throw new TraderException(
-                'Failed to create sell-confirmation-certificate',
-                [
-                    'trader_order_id' => $traderOrder->id,
-                    'provider' => $traderOrder->provider,
-                    'version' => $traderOrder->version,
-                ],
-                $e
             );
         }
     }

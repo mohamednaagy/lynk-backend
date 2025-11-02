@@ -6,6 +6,8 @@ use App\Actions\Contracts\Companies\CreateDefaultPricingTier;
 use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\EdaatInvoiceStatus;
+use App\Enums\FinancingOrderBorrowerTypeEnum;
+use App\Enums\FinancingOrderLenderTypeEnum;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\OrderFeeType;
 use App\Enums\TransactionReason;
@@ -164,6 +166,10 @@ trait InteractsWithCompany
             'selling_price' => 220,
             'status' => FinancingOrderStatus::InProgress,
             'is_verification_required' => true,
+            'lender_type' => FinancingOrderLenderTypeEnum::NormalLending,
+            'lender_identifier' => $companyId,
+            'borrower_type' => FinancingOrderBorrowerTypeEnum::Customer,
+            'borrower_identifier' => 'youssof okiel',
         ], $data));
     }
 

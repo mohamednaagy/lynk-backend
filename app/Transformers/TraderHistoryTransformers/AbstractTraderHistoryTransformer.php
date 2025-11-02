@@ -6,10 +6,12 @@ use App\Enums\DocumentType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
+use App\Enums\Role;
 use App\Enums\Trader as TraderEnum;
 use App\Models\TraderOrder;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
+use App\Transformers\TraderOrderSettlementTransformer;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use League\Fractal\Resource\Primitive;
@@ -210,19 +212,9 @@ abstract class AbstractTraderHistoryTransformer extends TransformerAbstract
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ];
 
+        // Add Lynk-specific settlement data
         if ($this->traderOrder->provider === TraderEnum::Lynk) {
-            $attachedSellConfirmationDocument = $this->traderOrder->traderHistories()->where('action', FinancingOrderHistory::AttachSellConfirmationDocument)->first();
-            if ($attachedSellConfirmationDocument) {
-                $data['sell_confirmation_document'] = [
-                    'url' => formatMediaUrl(route('api.v1.admins.generate', [
-                        'document_type' => DocumentType::SELL_CONFIRMATION_DOCUMENT,
-                        'context' => [
-                            'trader_order_id' => $this->traderOrder->id,
-                        ],
-                    ])),
-                    'date' => $attachedSellConfirmationDocument ? saudi_now('Y-m-d h:i:s A', $attachedSellConfirmationDocument->created_at) : null,
-                ];
-            }
+            $data = array_merge($data, $this->getLynkSettlementData());
         }
 
         return $this->primitive($data);
@@ -315,5 +307,58 @@ abstract class AbstractTraderHistoryTransformer extends TransformerAbstract
             'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
         ]);
+    }
+
+    /**
+     * Get Lynk-specific settlement data for MurabahaSaleCompleted step.
+     *
+     * @return array Settlement details and sell confirmation document if applicable
+     */
+    private function getLynkSettlementData(): array
+    {
+        $data = [];
+        $latestSettlement = $this->traderOrder->latestSettlement;
+
+        if (! $latestSettlement) {
+            return $data;
+        }
+
+        // Include settlement details for admin users
+        if (auth()?->user()?->hasRole(Role::Admin)) {
+            $data['settlement_details'] = $this->getSettlementDetails($latestSettlement);
+        }
+
+        // Include sell confirmation document if commodities are settled
+        if ($latestSettlement->is_commodities_settled) {
+            $data['sell_confirmation_document'] = $this->getSellConfirmationDocument($latestSettlement);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get formatted settlement details using TraderOrderSettlementTransformer.
+     */
+    private function getSettlementDetails($settlement): array
+    {
+        return fractal($settlement, new TraderOrderSettlementTransformer)
+            ->parseIncludes(['is_commodities_settled', 'created_at', 'message', 'creator'])
+            ->toArray()['data'];
+    }
+
+    /**
+     * Get sell confirmation document data.
+     */
+    private function getSellConfirmationDocument($settlement): array
+    {
+        return [
+            'url' => formatMediaUrl(route('api.v1.admins.generate', [
+                'document_type' => DocumentType::SELL_CONFIRMATION_DOCUMENT,
+                'context' => [
+                    'trader_order_id' => $this->traderOrder->id,
+                ],
+            ])),
+            'date' => $settlement->created_at,
+        ];
     }
 }

@@ -58,5 +58,9 @@ return [
     'invalid_media_collection_type' => 'The specified media collection type is invalid.',
     'order_has_no_active_trade_request' => 'This order has been cancelled or does not have an active trade request.',
     'item_not_found' => 'This item was not found.',
+    'unable_to_settle_order' => 'This order cannot be settled. Settlement is only available for completed local market orders.',
+    'settlement_check_in_progress' => 'Checking settlement status in progress.',
+    'unable_to_generate_sell_confirmation_certificate' => 'Sell Confirmation Certificate is not available for this Trade Request. Please try again later. Last Check: :created_at by :creator_name',
+    'pending_settlement_check' => 'A settlement check operation is already in progress.',
 
 ];

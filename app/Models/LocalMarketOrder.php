@@ -29,8 +29,8 @@ class LocalMarketOrder extends Model
         'currency',
         'hold_for',
         'order_no',
+        'is_commodities_settled',
         'preferred_commodity_type',
-        'commodities_settlement_status',
         'lender_identifier',
         'borrower_identifier',
     ];
@@ -40,6 +40,7 @@ class LocalMarketOrder extends Model
     ];
 
     protected $casts = [
+        'is_commodities_settled' => 'boolean',
         'preferred_commodity_type' => 'array',
         'data' => 'array',
     ];
@@ -86,15 +87,18 @@ class LocalMarketOrder extends Model
         return $this->belongsTo(Lender::class, 'company_id');
     }
 
-    public static function changeCommoditiesSettlementStatus(int $localMarketOrderId, string $status): void
+    public function markAsSettled(): void
     {
-        LocalMarketOrder::whereId($localMarketOrderId)->update([
-            'commodities_settlement_status' => $status,
-        ]);
+        $this->update(['is_commodities_settled' => true]);
 
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('commodities_settlement_status Changed local_market_order_id => '.$localMarketOrderId, [
-            'localMarketOrderId' => $localMarketOrderId,
-            'status' => $status,
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('Local market order marked as settled', $this), [
+            'local_market_order_id' => $this->id,
+            'external_order_no' => $this->external_order_no,
         ]);
+    }
+
+    public function isCommoditiesSettled(): bool
+    {
+        return $this->is_commodities_settled;
     }
 }

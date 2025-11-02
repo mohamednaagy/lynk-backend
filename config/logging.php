@@ -16,9 +16,6 @@ if (! defined('LOG_CHANNEL_LYNK')) {
 if (! defined('LOG_CHANNEL_AUTO_COMPLETE_SELL')) {
     define('LOG_CHANNEL_AUTO_COMPLETE_SELL', 'bursam_autosell');
 }
-if (! defined('LOG_CHANNEL_COMMODITIES_SETTLEMENT')) {
-    define('LOG_CHANNEL_COMMODITIES_SETTLEMENT', 'commodities_settlement');
-}
 if (! defined('LOG_CHANNEL_WEBHOOKS')) {
     define('LOG_CHANNEL_WEBHOOKS', 'webhooks');
 }
@@ -173,12 +170,6 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/lynk/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 30,
-        ],
-        LOG_CHANNEL_COMMODITIES_SETTLEMENT => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/local-market/commodities-settlement.log'),
-            'level' => 'debug',
             'days' => 30,
         ],
         'live_market' => [
