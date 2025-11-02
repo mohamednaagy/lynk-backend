@@ -6,13 +6,12 @@ use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedContractSigne
 use App\Enums\ContractSignedType;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -30,10 +29,9 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
      */
     public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
     {
-        if (
-            $this->isPreviousStepOfContractSignedNotCompleted($traderOrder)
-            || ($forceToProceed === false && $this->isContractSignedStepCompleted($traderOrder))
-        ) {
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery));
+        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
+        if (! $canProceed) {
             throw new OrderStatusDoesNotFollowSequenceException(
                 [
                     'financingOrderId' => $traderOrder->financing_order_id,
@@ -41,7 +39,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
                 ]
             );
         }
-
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSignedDelivery);
 
         $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
@@ -60,18 +57,5 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
 
         return [];
-    }
-
-    protected function isPreviousStepOfContractSignedNotCompleted(TraderOrder $traderOrder): bool
-    {
-        return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-                ->getPreviousStepOf(MurabhaStep::ContractSigned)->step
-        );
-    }
-
-    protected function isContractSignedStepCompleted(TraderOrder $traderOrder): bool
-    {
-        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 }

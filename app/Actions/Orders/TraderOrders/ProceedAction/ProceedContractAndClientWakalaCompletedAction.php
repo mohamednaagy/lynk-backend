@@ -8,9 +8,9 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumTrader;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 
@@ -37,7 +37,9 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
             throw new OrderRequiresClientVerification;
         }
 
-        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($traderOrder->last_history_action)) {
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted));
+        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
+        if (! $canProceed) {
             throw new OrderStatusDoesNotFollowSequenceException(
                 [
                     'financingOrderId' => $traderOrder->financing_order_id,
@@ -50,18 +52,5 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
         Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
 
         return [];
-
-    }
-
-    protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
-    {
-        $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-        $stepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
-
-        return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-                ->getPreviousStepOf($murabhaSteps[$stepIndex])->step
-        );
-
     }
 }
