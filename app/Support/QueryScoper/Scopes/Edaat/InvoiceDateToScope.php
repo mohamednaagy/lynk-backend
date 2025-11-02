@@ -3,6 +3,7 @@
 namespace App\Support\QueryScoper\Scopes\Edaat;
 
 use App\Support\QueryScoper\QueryScoper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +13,7 @@ class InvoiceDateToScope extends QueryScoper
     public function prepareData(): array
     {
         return [
-            'date_to' => Request::query('date_to'),
+            'date_to' => Carbon::parse(Request::query('date_to'))->endOfDay(),
         ];
     }
 
@@ -28,6 +29,6 @@ class InvoiceDateToScope extends QueryScoper
 
     public function prepareBuilder($builder, $data): Builder
     {
-        return $builder->whereDate('created_at', '<=', $data['date_to']);
+        return $builder->where('created_at', '<=', $data['date_to']);
     }
 }
