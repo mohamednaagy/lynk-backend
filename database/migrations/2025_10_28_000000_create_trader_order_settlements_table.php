@@ -24,8 +24,7 @@ return new class extends Migration
                 ->default(TraderOrderSettlementStatus::Pending)
                 ->comment('Settlement check status: 0=pending, 1=in_progress, 2=completed, 3=failed');
             $table->foreignIdFor(User::class, 'creator_id')
-                ->constrained('users')
-                ->nullOnDelete();
+                ->constrained('users');
             $table->timestamps();
         });
     }

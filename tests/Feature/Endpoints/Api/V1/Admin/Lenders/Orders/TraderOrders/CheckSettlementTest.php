@@ -3,7 +3,9 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Lenders\Orders\TraderOrders;
 
 use App\Enums\Area;
+use App\Enums\TraderOrderSettlementStatus;
 use App\Enums\TraderOrderStatus;
+use App\Jobs\TraderOrder\CheckTraderOrderSettlementJob;
 use App\Models\Company;
 use App\Models\TraderOrder;
 use App\Models\TraderOrderSettlement;
@@ -11,6 +13,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Tests\Traits\AssertsAccessByRoleAndArea;
 
@@ -104,5 +107,102 @@ class CheckSettlementTest extends TestCase
                 ],
             ])
             ->assertJsonPath('data.is_commodities_settled', true);
+    }
+
+    public function test_cannot_check_settlement_when_trader_order_is_not_completed(): void
+    {
+        $traderOrder = self::$financingOrder->traderOrders()->create([
+            'provider' => 'lynk',
+            'reference' => 'REF-IN-PROGRESS',
+            'status' => TraderOrderStatus::InProgress,
+        ]);
+
+        $url = self::BaseUrl.
+            '/orders/'.self::$financingOrder->getOriginal('id').
+            '/trader-orders/'.$traderOrder->getOriginal('id').
+            '/check-settlement';
+
+        $this->actingAs(self::$superAdminUser)
+            ->getJson($url)
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonStructure([
+                'message',
+                'code',
+            ]);
+    }
+
+    public function test_cannot_check_settlement_when_trader_order_is_not_lynk(): void
+    {
+        $traderOrder = self::$financingOrder->traderOrders()->create([
+            'provider' => 'bursam',
+            'reference' => 'REF-BURSAM',
+            'status' => TraderOrderStatus::Completed,
+        ]);
+
+        $url = self::BaseUrl.
+            '/orders/'.self::$financingOrder->getOriginal('id').
+            '/trader-orders/'.$traderOrder->getOriginal('id').
+            '/check-settlement';
+
+        $this->actingAs(self::$superAdminUser)
+            ->getJson($url)
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonStructure([
+                'message',
+                'code',
+            ]);
+    }
+
+    public function test_creates_new_settlement_check_when_not_already_settled(): void
+    {
+        // Fake queue to prevent job from actually running
+        Queue::fake();
+
+        // Create a new trader order without pre-existing settlement
+        $traderOrder = self::$financingOrder->traderOrders()->create([
+            'provider' => 'lynk',
+            'reference' => 'REF-NEW',
+            'status' => TraderOrderStatus::Completed,
+        ]);
+
+        $url = self::BaseUrl.
+            '/orders/'.self::$financingOrder->getOriginal('id').
+            '/trader-orders/'.$traderOrder->getOriginal('id').
+            '/check-settlement';
+
+        // Assert no settlement exists before
+        $this->assertDatabaseMissing('trader_order_settlements', [
+            'trader_order_id' => $traderOrder->id,
+        ]);
+
+        $this->actingAs(self::$superAdminUser)
+            ->getJson($url)
+            ->assertStatus(Response::HTTP_OK)
+            ->assertJsonStructure([
+                'data' => [
+                    'is_commodities_settled',
+                    'message',
+                    'creator',
+                ],
+            ])->assertJsonPath('data.message', __('error.settlement_check_in_progress'));
+
+        // Assert settlement was created
+        $this->assertDatabaseHas('trader_order_settlements', [
+            'trader_order_id' => $traderOrder->id,
+            'creator_id' => self::$superAdminUser->id,
+            'status' => TraderOrderSettlementStatus::Pending,
+            'is_commodities_settled' => null,
+        ]);
+
+        // Assert job was dispatched but not executed
+        Queue::assertPushed(CheckTraderOrderSettlementJob::class);
+
+        // Try to send another check settlement request
+        $this->actingAs(self::$superAdminUser)
+            ->getJson($url)
+            ->assertStatus(Response::HTTP_BAD_REQUEST)
+            ->assertJsonStructure([
+                'message',
+            ])->assertJsonPath('message', __('error.pending_settlement_check'));
     }
 }
