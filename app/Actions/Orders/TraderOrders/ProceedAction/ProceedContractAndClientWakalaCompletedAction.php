@@ -29,7 +29,7 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws OrderRequiresClientVerification
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
         $order = $traderOrder->order;
 
@@ -37,22 +37,17 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
             throw new OrderRequiresClientVerification;
         }
 
-        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted));
-        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if ($canProceed) {
-            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
 
-            Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
-
-            return [];
-        } else {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
 
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
+
+        Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
     }
 }

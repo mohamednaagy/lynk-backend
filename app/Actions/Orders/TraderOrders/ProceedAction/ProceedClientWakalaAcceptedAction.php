@@ -5,7 +5,6 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedClientWakalaAccepted;
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\TraderOrder;
@@ -36,14 +35,12 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
      */
-    public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): void
     {
         if (! $traderOrder->order) {
             Log::channel('bursam')->warning('ProceedClientWakalaAccepted: Order not found for trader order', [
                 'traderOrderId' => $traderOrder->id,
             ]);
-
-            return [];
         }
 
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(
@@ -57,27 +54,7 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
             ]);
         }
 
-        $this->attachSignedClientWakalaIfProvided($traderOrder, $signedClientWakala);
         $this->proceedCaseService->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
-        $this->acceptClientWakala->handle($traderOrder);
-
-        return [];
-    }
-
-    /**
-     * Attach the signed client wakala file to the trader order if provided.
-     *
-     *
-     * @throws FileDoesNotExist
-     * @throws FileIsTooBig
-     */
-    protected function attachSignedClientWakalaIfProvided(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala): void
-    {
-        if ($signedClientWakala === null) {
-            return;
-        }
-
-        $traderOrder->addMedia($signedClientWakala)
-            ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
+        $this->acceptClientWakala->handle($traderOrder, $signedClientWakala);
     }
 }

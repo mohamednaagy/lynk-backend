@@ -32,32 +32,27 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
-        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::IgnoreAndSell));
-        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if ($canProceed) {
-            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::IgnoreAndSell);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::IgnoreAndSell);
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
-
-            match ($traderOrder->mode) {
-                TraderOrderMode::Manual => (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-                    ->updateMurabhaCompleteDocument($traderOrder),
-                TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)->sellCommodityToLocalMarket($traderOrder),
-            };
-
-            $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
-
-            return [];
-        } else {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
 
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::IgnoreAndSell);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
+
+        match ($traderOrder->mode) {
+            TraderOrderMode::Manual => (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+                ->updateMurabhaCompleteDocument($traderOrder),
+            TraderOrderMode::Automatic => Trader::driver($traderOrder->provider, $traderOrder->version)->sellCommodityToLocalMarket($traderOrder),
+        };
+
+        $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
     }
 }

@@ -4,7 +4,9 @@ namespace App\Http\Requests\V1\Admin\Companies\Lenders\Orders;
 
 use App\Rules\CheckAllowedFinancingOrderProceedCaseRule;
 use App\Rules\CheckProceedOrderSequenceRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class MakeOrderProceedRequest extends FormRequest
 {
@@ -32,5 +34,14 @@ class MakeOrderProceedRequest extends FormRequest
             ],
             'client_wakala' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg'],
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = $validator->errors()->all();
+        throw new HttpResponseException(response()->json([
+            'message' => $errors[0] ?? 'Validation error.',
+            'code' => 1011,
+        ], 400));
     }
 }

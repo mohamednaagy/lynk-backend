@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Enums\FinancingOrderProceedCase;
 use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\FinancingOrder;
 use Illuminate\Contracts\Validation\Rule;
@@ -28,7 +29,7 @@ class CheckProceedOrderSequenceRule implements Rule
 
             return false;
         }
-
+        $value = FinancingOrderProceedCase::getKeyByDescription($value);
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle($value);
         $canProceed = $proceedCaseHandler->canProceed($traderOrder, false);
 

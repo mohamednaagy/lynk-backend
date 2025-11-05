@@ -23,26 +23,22 @@ class ProceedContractSignedAction implements ProceedContractSigned
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
-        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned));
-        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if ($canProceed) {
-            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::ContractSigned);
 
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
-
-            Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractSigned($traderOrder);
-
-            return [];
-        } else {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
+
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSigned);
+
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
+        Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractSigned($traderOrder);
 
     }
 }

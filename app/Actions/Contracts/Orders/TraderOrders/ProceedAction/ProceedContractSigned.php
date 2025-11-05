@@ -6,5 +6,5 @@ use App\Models\TraderOrder;
 
 interface ProceedContractSigned
 {
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array;
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void;
 }

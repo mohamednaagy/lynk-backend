@@ -7,5 +7,5 @@ use Illuminate\Http\UploadedFile;
 
 interface ProceedClientWakalaAccepted
 {
-    public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): array;
+    public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): void;
 }

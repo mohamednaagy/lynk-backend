@@ -13,8 +13,8 @@ class DeliveryConfirmationCase implements TraderOrderProceedCase
     public function canProceed(TraderOrder $traderOrder, bool $forceToProceed = false): bool
     {
 
-        if ($traderOrder->isPreviousStepNotCompleted(MurabhaStep::CustomerDeliveryConfirmation)
-        || (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder))) {
+        if ($traderOrder->isPreviousStepNotCompleted(MurabhaStep::ClientWakala) ||
+        (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder))) {
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeliveryConfirmationCase: traderOrderId: '.$traderOrder->id.' - can not proceed', $traderOrder), [
                 'traderOrderId' => $traderOrder->id,
                 'financingOrderId' => $traderOrder->order?->id,

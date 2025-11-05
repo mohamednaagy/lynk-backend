@@ -21,15 +21,15 @@ class TraderOrderProceedCaseFactory
      *
      * @throws InvalidArgumentException
      */
-    public static function handle(string $proceedCase): TraderOrderProceedCase
+    public static function handle(int $proceedCase): TraderOrderProceedCase
     {
         return match ($proceedCase) {
             FinancingOrderProceedCase::ClientWakalaAccepted => new ClientWakalaAcceptedCase,
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned) => new ContractSignedCase,
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery) => new ContractSignedDeliveryCase,
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted) => new ContractAndClientWakalaCompletedCase,
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::IgnoreAndSell) => new IgnoreAndSellCase,
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ConfirmDeliver) => new DeliveryConfirmationCase,
+            FinancingOrderProceedCase::ContractSigned => new ContractSignedCase,
+            FinancingOrderProceedCase::ContractSignedDelivery => new ContractSignedDeliveryCase,
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted => new ContractAndClientWakalaCompletedCase,
+            FinancingOrderProceedCase::IgnoreAndSell => new IgnoreAndSellCase,
+            FinancingOrderProceedCase::ConfirmDeliver => new DeliveryConfirmationCase,
             default => throw new InvalidArgumentException("Unknown proceed case: {$proceedCase}"),
         };
     }

@@ -27,37 +27,32 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
-        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery));
-        $canProceed = $proceedCaseHandler->canProceed($traderOrder, $forceToProceed);
-        if ($canProceed) {
-            app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSignedDelivery);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::ContractSignedDelivery);
 
-            $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
-
-            (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
-                ->requestDeliverCommodityToCustomer($traderOrder);
-
-            $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
-
-            $traderOrder->allowProgressToNextStep();
-
-            $trader->createSellingCommodityToCustomerDocument($traderOrder);
-            $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
-
-            $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
-
-            return [];
-        } else {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
 
+        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractSignedDelivery);
+
+        $traderOrder->update(['contract_signed_type' => ContractSignedType::Delivery]);
+
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->requestDeliverCommodityToCustomer($traderOrder);
+
+        $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
+
+        $traderOrder->allowProgressToNextStep();
+
+        $trader->createSellingCommodityToCustomerDocument($traderOrder);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
+
+        $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
     }
 }
