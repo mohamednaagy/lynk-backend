@@ -16,21 +16,21 @@ jobs:
         id: pull-and-build-backend-preprod-server-1
         run: |
           ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_1 }}@${{ secrets.BACKEND_PREPRD_1_IP }} \
-           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo supervisorctl stop all && sudo supervisorctl start all"
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan structure:clear && sudo php artisan structure:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
 
       # Pull and build code on Backend Preprod Server 2
       - name: pulling and build code on backend preprod server 2
         id: pull-and-build-backend-preprod-server-2
         run: |
           ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_2 }}@${{ secrets.BACKEND_PREPRD_2_IP }} \
-           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo supervisorctl stop all && sudo supervisorctl start all"
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan structure:clear && sudo supervisorctl stop all && sudo supervisorctl start all"
 
       # Pull and build code on Backend Preprod Server 3
       - name: pulling and build code on backend preprod server 3
         id: pull-and-build-backend-preprod-server-3
         run: |
           ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_3 }}@${{ secrets.BACKEND_PREPRD_3_IP }} \
-           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo supervisorctl stop all && sudo supervisorctl start all"
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan structure:clear && sudo supervisorctl stop all && sudo supervisorctl start all"
 
       # Set PR URL if the event is 'pull_request' or 'pull_request_target'
       - name: set pr url
