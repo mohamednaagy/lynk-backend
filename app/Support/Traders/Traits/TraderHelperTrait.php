@@ -12,6 +12,7 @@ use App\Support\DataTransferObjects\LynkCommodityProductDto;
 use App\Support\Traders\TraderManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
@@ -80,12 +81,29 @@ trait TraderHelperTrait
 
             return;
         }
-        $traderOrder->traderHistories()->create(
-            [
-                'action' => $action,
-                'data' => $data,
-            ]
-        );
+        DB::beginTransaction();
+        try {
+            $traderOrder->update([
+                'last_history_action' => $action,
+                'last_history_action_updated_at' => now(),
+            ]);
+            $traderOrder->traderHistories()->create(
+                [
+                    'action' => $action,
+                    'data' => $data,
+                ]
+            );
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))
+                ->error(formatLogTitle('Error creating trader order history', $traderOrder), [
+                    'traderOrderId' => $traderOrder->id,
+                    'action' => $action,
+                    'data' => $data,
+                    'error' => $e->getMessage(),
+                ]);
+        }
     }
 
     public function attachDocumentToOrder($traderOrder, $document, $collectionName, $type = null, $originalFileName = null): void

@@ -17,14 +17,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
 
     public function __construct(private FeesService $feesService) {}
 
-    public function creating(TraderHistory $traderHistory)
-    {
-        $traderHistory->traderOrder()->update([
-            'last_history_action' => $traderHistory->action,
-            'last_history_action_updated_at' => $traderHistory->created_at,
-        ]);
-    }
-
     /**
      * @throws \Exception
      */
