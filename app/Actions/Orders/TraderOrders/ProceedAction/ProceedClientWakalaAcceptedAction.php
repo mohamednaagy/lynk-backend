@@ -5,12 +5,10 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 use App\Actions\Contracts\Clients\AcceptClientWakala;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedClientWakalaAccepted;
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\MediaCollections\TraderOrderMediaCollection;
-use App\Enums\MurabhaStep;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -21,68 +19,42 @@ class ProceedClientWakalaAcceptedAction implements ProceedClientWakalaAccepted
 {
     use TraderHelperTrait;
 
+    public function __construct(
+        protected readonly TraderOrderProceedCaseService $proceedCaseService,
+        protected readonly AcceptClientWakala $acceptClientWakala
+    ) {}
+
     /**
+     * Process the client wakala acceptance for a trader order.
+     *
+     * @param  TraderOrder  $traderOrder  The trader order to process
+     * @param  UploadedFile|null  $signedClientWakala  Optional signed client wakala file
+     * @param  bool  $forceToProceed  Whether to force proceeding despite validation
+     *
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws FileDoesNotExist
      * @throws FileIsTooBig
-     * @throws \Exception
      */
-    public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, ?UploadedFile $signedClientWakala = null, bool $forceToProceed = false): void
     {
-        $order = $traderOrder->order;
-
-        if (! $order) {
-            Log::channel('bursam')->info('ProceedClientWakalaAccepted: traderOrderId: '.$traderOrder->id.' - Order is null', [
+        if (! $traderOrder->order) {
+            Log::channel('bursam')->warning('ProceedClientWakalaAccepted: Order not found for trader order', [
                 'traderOrderId' => $traderOrder->id,
-                'order' => $order?->id,
             ]);
-
-            return [];
         }
 
-        Log::channel('bursam')->info('ProceedClientWakalaAccepted: traderOrderId: '.$traderOrder->id.' - data', [
-            'traderOrderId' => $traderOrder->id,
-            'order' => $order?->id,
-            'forceToProceed' => $forceToProceed,
-            'is_verification_required' => $order->is_verification_required,
-            'isClientWakalaStepCompleted' => $this->isClientWakalaStepCompleted($traderOrder),
-            'isPreviousStepOfClientWakalaNotCompleted' => $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder),
-        ]);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(
+            FinancingOrderProceedCase::ClientWakalaAccepted
+        );
 
-        if (
-            $this->isPreviousStepOfClientWakalaNotCompleted($traderOrder)
-            || ($forceToProceed === false && $order->is_verification_required)
-            || ($forceToProceed === false && $this->isClientWakalaStepCompleted($traderOrder))
-        ) {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
 
-        if ($signedClientWakala) {
-            $traderOrder->addMedia($signedClientWakala)
-                ->toMediaCollection(TraderOrderMediaCollection::SignedClientWakala);
-        }
-        app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
-
-        app(AcceptClientWakala::class)->handle($traderOrder);
-
-        return [];
-    }
-
-    protected function isPreviousStepOfClientWakalaNotCompleted(TraderOrder $traderOrder): bool
-    {
-        $previousStep = (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-            ->getPreviousStepOf(MurabhaStep::ClientWakala)->step;
-
-        return ! $traderOrder->checkOrderStepComplete($previousStep);
-    }
-
-    protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool
-    {
-        return $traderOrder->checkOrderStepComplete(MurabhaStep::ClientWakala);
+        $this->proceedCaseService->createCase($traderOrder->id, FinancingOrderProceedCase::ClientWakalaAccepted);
+        $this->acceptClientWakala->handle($traderOrder, $signedClientWakala);
     }
 }

@@ -8,9 +8,9 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumTrader;
 use App\Exceptions\OrderRequiresClientVerification;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 
@@ -29,7 +29,7 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws OrderRequiresClientVerification
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
         $order = $traderOrder->order;
 
@@ -37,31 +37,17 @@ class ProceedContractAndClientWakalaCompletedAction implements ProceedContractAn
             throw new OrderRequiresClientVerification;
         }
 
-        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($traderOrder->last_history_action)) {
-            throw new OrderStatusDoesNotFollowSequenceException(
-                [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $traderOrder->id,
-                ]
-            );
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
+
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
+
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ContractAndClientWakalaCompleted);
 
         Trader::driver($traderOrder->provider, $traderOrder->version)->processProceedContractAndClientWakala($traderOrder);
-
-        return [];
-
-    }
-
-    protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
-    {
-        $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-        $stepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
-
-        return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-                ->getPreviousStepOf($murabhaSteps[$stepIndex])->step
-        );
-
     }
 }

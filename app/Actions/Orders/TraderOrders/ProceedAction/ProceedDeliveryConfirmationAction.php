@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
@@ -23,9 +24,16 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
-        Trader::driver($traderOrder->provider, $traderOrder->version)->validateDeliverySequence($traderOrder, $forceToProceed);
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::ConfirmDeliver);
+
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
+        }
 
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::ConfirmDeliver);
 
@@ -44,6 +52,5 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
             ]);
         }
 
-        return [];
     }
 }
