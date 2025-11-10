@@ -13,11 +13,14 @@ use App\Exceptions\OrderIsCancelledException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class CreateTraderOrderAction implements CreateTraderOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @return mixed
      */
@@ -73,9 +76,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'status' => Trader::driver($data['trader'], $data['version'])->getDefaultInitialTradeOrderStatus(),
         ]);
 
-        $traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetTtiId,
-        ]);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }
