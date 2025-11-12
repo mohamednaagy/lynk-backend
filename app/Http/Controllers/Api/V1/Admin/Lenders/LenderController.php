@@ -64,6 +64,9 @@ class LenderController extends Controller
                 'name',
                 'status',
                 'orders_count',
+                'trading_mode',
+                'preferred_market_type',
+                'unique_name',
                 'created_at',
                 'order_cost',
             ])
