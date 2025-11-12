@@ -20,6 +20,8 @@ class ProductTransformer extends TransformerAbstract
         'currency',
         'type',
         'location',
+        'original_supplier',
+        'previous_owner',
     ];
 
     public function transform(CommodityProductDto $productDto): array
@@ -70,5 +72,23 @@ class ProductTransformer extends TransformerAbstract
 
         return $this->primitive(null);
 
+    }
+
+    public function includeOriginalSupplier(CommodityProductDto $productDto): Primitive
+    {
+        if ($productDto instanceof LynkCommodityProductDto) {
+            return $this->primitive($productDto->getOriginalSupplier());
+        }
+
+        return $this->primitive(null);
+    }
+
+    public function includePreviousOwner(CommodityProductDto $productDto): Primitive
+    {
+        if ($productDto instanceof LynkCommodityProductDto) {
+            return $this->primitive($productDto->getPreviousOwner());
+        }
+
+        return $this->primitive(null);
     }
 }
