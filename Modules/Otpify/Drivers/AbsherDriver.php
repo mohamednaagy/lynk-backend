@@ -99,7 +99,6 @@ class AbsherDriver implements OtpifyDriverInterface
             $response->json('code') === 600 &&
             $userDetails = $response->json('userDetails')
         ) {
-            $otpifyCode->otpifiable->update(['customer_details' => $userDetails]);
 
             $this->setOtpExpiredAt($otpifyCode);
 
