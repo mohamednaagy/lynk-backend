@@ -99,8 +99,8 @@ class FinancingOrderTransformer extends TransformerAbstract
         return $this->primitive([
             'description' => $financingOrder->status->description,
             'value' => $financingOrder->status->value,
-            'creator' => $latest->getCreator(),
-            'created_at' => saudi_now($latest->created_at),
+            'creator' => $latest?->getCreator(),
+            'created_at' => $latest?->created_at ? saudi_now($latest->created_at) : null,
         ]);
     }
 

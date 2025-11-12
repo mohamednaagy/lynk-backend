@@ -9,31 +9,29 @@ use App\Enums\TraderOrderCancelType;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class CancelOrderAction implements CancelOrder
 {
+    use TraderHelperTrait;
+
     public function handle(
         FinancingOrder $financingOrder,
         User $user,
         array $data = [],
         int $cancelReason = TraderOrderCancelReason::Manual
     ): void {
-        $activeTraderOrders = $financingOrder->activeTraderOrder()->lockForUpdate()->get();
-        $status_reason = $data['status_reason'] ?? null;
-
+        $activeTraderOrders = $financingOrder->activeTraderOrder()->get();
+        $statusReason = $data['status_reason'] ?? null;
         if ($activeTraderOrders->count() === 0) {
-            $financingOrder->update([
-                'status' => FinancingOrderStatus::Cancelled,
-                'status_reason' => $status_reason,
-            ]);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
+            $financingOrder->update(['status_reason' => $statusReason]);
 
             return;
         }
 
-        $financingOrder->update([
-            'status' => FinancingOrderStatus::PendingCancellation,
-            'status_reason' => $data['status_reason'] ?? null,
-        ]);
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::PendingCancellation);
+        $financingOrder->update(['status_reason' => $statusReason]);
 
         $cancelByType = is_null($user) ? TraderOrderCancelType::System : TraderOrderCancelType::User;
         $activeTraderOrders->each(function ($traderOrder) use ($user, $cancelByType) {
