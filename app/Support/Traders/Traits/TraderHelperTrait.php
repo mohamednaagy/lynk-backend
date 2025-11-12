@@ -57,9 +57,17 @@ trait TraderHelperTrait
 
     public function updateOrderStatus($order, $status): void
     {
-        $order->update([
-            'status' => $status,
-        ]);
+        DB::transaction(function () use ($order, $status) {
+            $order->update([
+                'status' => $status,
+            ]);
+
+            // Record financing order status history atomically
+            $order->statusHistories()->create([
+                'status' => $status,
+                'creator_id' => auth()?->id(),
+            ]);
+        });
     }
 
     public function createTraderOrderHistory(TraderOrder $traderOrder, int $action, array $data = []): void

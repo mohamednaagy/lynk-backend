@@ -41,6 +41,7 @@ use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -82,7 +83,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'creator_id' => auth()?->user()?->id,
+            'creator_id' => Auth::id(),
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }
@@ -269,7 +270,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
             app(CancelOrder::class)->handle($traderOrder->order, $cancelledBy);
         }
         if ($traderOrder->order->status->is(FinancingOrderStatus::InProgress) && $traderOrder->order->activeTraderOrder()->count() == 0) {
-            $traderOrder->order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+            $this->updateOrderStatus($traderOrder->order, FinancingOrderStatus::PendingTraderOrder);
         }
 
         app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
@@ -310,15 +311,15 @@ class LynkV1Driver implements Deliverable, TraderInterface
         $order = $traderOrder->order;
         $lender = $order->company->lender;
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-            $order->update(['status' => FinancingOrderStatus::Cancelled]);
+            $this->updateOrderStatus($order, FinancingOrderStatus::Cancelled);
         } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
             if (
                 $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Local())
                 && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)
             ) {
-                $order->update(['status' => FinancingOrderStatus::TradingFailure]);
+                $this->updateOrderStatus($order, FinancingOrderStatus::TradingFailure);
             } else {
-                $order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+                $this->updateOrderStatus($order, FinancingOrderStatus::PendingTraderOrder);
             }
         }
     }
@@ -351,7 +352,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
     {
         if ($this->canRetryOrder($traderOrder)) {
             if ($traderOrder->order->status->is(FinancingOrderStatus::PendingTraderOrder)) {
-                $traderOrder->order->update(['status' => FinancingOrderStatus::InProgress]);
+                $this->updateOrderStatus($traderOrder->order, FinancingOrderStatus::InProgress);
             }
 
             Trader::driver(\App\Enums\Trader::Bursam, 'v2')->createTraderOrder($traderOrder->order);

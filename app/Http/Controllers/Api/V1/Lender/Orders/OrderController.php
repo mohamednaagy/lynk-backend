@@ -116,6 +116,7 @@ class OrderController extends Controller
         $financingOrders = $buildOrdersQuery->setCompany(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->latest(),
+                'latestStatusHistory.creator',
             ])
             ->handle()
             ->paginate();
@@ -144,7 +145,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load('creator', 'approver');
+        $order->load('creator', 'approver', 'latestStatusHistory.creator');
 
         $userRole = $request->user()->getRoleNames()->first();
         $fields = array_diff($this->sharedFields, $this->getFieldsForRole($userRole, OrderController::class, 'show'));

@@ -222,6 +222,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
     }
 
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(FinancingOrderStatusHistory::class, 'order_id', 'id');
+    }
+
+    public function latestStatusHistory(): HasOne
+    {
+        return $this->hasOne(FinancingOrderStatusHistory::class, 'order_id', 'id')->latestOfMany();
+    }
+
     public function creationFeeTransactions()
     {
         return $this->hasMany(Transaction::class, 'meta->financing_order_id')
