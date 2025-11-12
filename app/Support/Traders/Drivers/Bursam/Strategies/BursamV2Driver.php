@@ -156,15 +156,11 @@ class BursamV2Driver extends BursamV1Driver
     public function updateFinancingOrderStatus(FinancingOrder $financingOrder): void
     {
         if ($financingOrder->status->is(FinancingOrderStatus::PendingCancellation)) {
-            $financingOrder->update([
-                'status' => FinancingOrderStatus::Cancelled,
-            ]);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
         }
 
         if ($financingOrder->status->is(FinancingOrderStatus::InProgress) && $financingOrder->activeTraderOrder()->count() === 0) {
-            $financingOrder->update([
-                'status' => FinancingOrderStatus::PendingTraderOrder,
-            ]);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::PendingTraderOrder);
         }
     }
 
