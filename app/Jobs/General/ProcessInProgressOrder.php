@@ -8,6 +8,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,6 +22,7 @@ use Throwable;
 class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use TraderHelperTrait;
 
     private int $financingOrderId;
 
@@ -75,9 +77,7 @@ class ProcessInProgressOrder implements ShouldQueue
 
                 $trader->createTraderOrder($financingOrder);
 
-                $financingOrder->update([
-                    'status' => FinancingOrderStatus::InProgress,
-                ]);
+                $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
             });
         } catch (\Exception $e) {
             Log::channel(LOG_CHANNEL_LYNK)->error(
