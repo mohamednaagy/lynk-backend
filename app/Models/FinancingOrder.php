@@ -17,6 +17,7 @@ use App\Enums\TransactionReason;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -51,6 +52,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     use HasScopes;
     use InteractsWithMedia;
     use LogsActivity;
+    use TraderHelperTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -500,7 +502,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function retry()
     {
-        $this->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+        $this->updateOrderStatus($this, FinancingOrderStatus::PendingTraderOrder);
     }
 
     public function commodityType(): BelongsTo
