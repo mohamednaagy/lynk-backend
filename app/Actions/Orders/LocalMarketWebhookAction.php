@@ -49,8 +49,6 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
                     ->updatePurchasingCommodity($traderOrder, $this->data);
 
-                $traderOrder->allowProgressToNextStep(false); // TODO: Added to explicitly control order transitions (needs refactoring later)
-
                 break;
 
             case CaseStatus::FailedPurchase:

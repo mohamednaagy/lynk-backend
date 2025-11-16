@@ -60,7 +60,6 @@ class TraderOrder extends Model implements HasMedia
             'status',
             'is_base',
             'reference',
-            'can_continue_progress',
             'updated_at',
             'created_at',
             'contract_signed_type',
@@ -76,7 +75,6 @@ class TraderOrder extends Model implements HasMedia
     protected $casts = [
         'status' => TraderOrderStatus::class,
         'contract_signed_type' => ContractSignedType::class,
-        'can_continue_progress' => 'boolean',
         'created_at' => 'datetime',
     ];
 
@@ -449,11 +447,6 @@ class TraderOrder extends Model implements HasMedia
             ->holdStatus()
             ->mode(TraderOrderMode::Automatic)
             ->orderBy('id', 'asc');
-    }
-
-    public function allowProgressToNextStep(bool $value = true): void
-    {
-        $this->update(['can_continue_progress' => $value]);
     }
 
     public function scopeCompletedSellStep($query)
