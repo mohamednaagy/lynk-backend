@@ -1,0 +1,103 @@
+version: "3.9"
+
+services:
+  # Group 1: Local Market Core Processing
+  # Server A will handle primary local market operations
+
+  worker-local-market:
+    image: app-php-fpm:latest
+    container_name: worker-local-market
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=local_market,local_market_states,local_market_process
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # For local dev: uncomment the volumes section below
+    # For prod/pre-prod: keep volumes commented out (immutable images)
+    # volumes:
+    #   - ../../:/var/www/html
+
+  worker-order-initiation:
+    image: app-php-fpm:latest
+    container_name: worker-order-initiation
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=local_market_order_initiation
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # volumes:
+    #   - ../../:/var/www/html
+
+  worker-buy-commodities:
+    image: app-php-fpm:latest
+    container_name: worker-buy-commodities
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=buy_commodities_local_market_orders
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # volumes:
+    #   - ../../:/var/www/html
+
+  worker-complete-commodities:
+    image: app-php-fpm:latest
+    container_name: worker-complete-commodities
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=complete_commodities_purchased_local_market
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # volumes:
+    #   - ../../:/var/www/html
+
+networks:
+  laravel:
+    driver: bridge

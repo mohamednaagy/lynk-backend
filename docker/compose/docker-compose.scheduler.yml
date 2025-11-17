@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  scheduler:
+    image: app-php-fpm:latest
+    container_name: laravel-scheduler
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan schedule:work
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge

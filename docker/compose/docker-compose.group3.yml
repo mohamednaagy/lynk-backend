@@ -1,0 +1,103 @@
+version: "3.9"
+
+services:
+  # Group 3: Supporting Operations & External Integrations
+  # Server C will handle logging, refresh operations, fees, and external integrations (Bursam)
+
+  worker-inventory-logging:
+    image: app-php-fpm:latest
+    container_name: worker-inventory-logging
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=local_market_order_inventories_units_logging
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # For local dev: uncomment the volumes section below
+    # For prod/pre-prod: keep volumes commented out (immutable images)
+    # volumes:
+    #   - ../../:/var/www/html
+
+  worker-refresh-eligibilities:
+    image: app-php-fpm:latest
+    container_name: worker-refresh-eligibilities
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=refresh_eligibilities
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # volumes:
+    #   - ../../:/var/www/html
+
+  worker-order-fees:
+    image: app-php-fpm:latest
+    container_name: worker-order-fees
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=5 --queue=apply_order_fees
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # volumes:
+    #   - ../../:/var/www/html
+
+  worker-external-integrations:
+    image: app-php-fpm:latest
+    container_name: worker-external-integrations
+    working_dir: /var/www/html
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    command: php artisan queue:work redis --verbose --tries=3 --backoff=120 --queue=bursam,unit-inventory,expire_trader_order
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      replicas: 2
+    networks:
+      - laravel
+    # volumes:
+    #   - ../../:/var/www/html
+
+networks:
+  laravel:
+    driver: bridge
