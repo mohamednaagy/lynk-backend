@@ -100,7 +100,7 @@ class FinancingOrderTransformer extends TransformerAbstract
             'description' => $financingOrder->status->description,
             'value' => $financingOrder->status->value,
             'creator' => $latest?->getCreator(),
-            'created_at' => $latest?->created_at ? saudi_now($latest->created_at) : null,
+            'created_at' => $latest?->created_at ? saudi_now('Y-m-d h:i:s A', $latest->created_at) : null,
         ]);
     }
 
