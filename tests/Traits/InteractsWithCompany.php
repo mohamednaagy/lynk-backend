@@ -131,11 +131,6 @@ trait InteractsWithCompany
         return $orderCostTiers;
     }
 
-    public function createTraderCompany($walletInitialAmount = 2000, $data = [])
-    {
-        return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Trader], $data));
-    }
-
     public function createSupplierCompany($walletInitialAmount = 2000, $data = [])
     {
         return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Supplier], $data));

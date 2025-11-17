@@ -4,10 +4,8 @@ namespace Tests\Unit\Generators;
 
 use App\Support\PdfGenerator\Exceptions\GeneratingPdfException;
 use App\Support\PdfGenerator\Exceptions\MissingStorageCallbackException;
-use App\Support\PdfGenerator\Generators\BrowserlessGenerator;
 use App\Support\PdfGenerator\PdfGenerator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 use function Psl\Type\mixed;
@@ -69,14 +67,5 @@ class PdfGeneratorTest extends TestCase
     public function test_fails_generate_pdf_will_throw_exception()
     {
         $this->expectException(GeneratingPdfException::class);
-        // make sure the server is running
-        $browserlessGenerator = new BrowserlessGenerator([
-            'base_url' => Config::get('app.url'),
-            'storage_disk' => 'test_disk',
-        ]);
-
-        $browserlessGenerator->outputFromHtml('<h1>Hi</h1>', function () {
-            // dummy closure for test
-        });
     }
 }

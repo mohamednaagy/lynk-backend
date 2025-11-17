@@ -2,8 +2,8 @@
 
 namespace App\Jobs\LocalMarket\states;
 
+use App\Enums\LocalMarket\CaseStatus;
 use App\Enums\LocalMarket\OrderHistoryStatus;
-use App\Enums\LocalMarket\OrderStatus;
 
 class CommoditiesPurchaseCompletedStatus extends BaseStatus
 {
@@ -20,7 +20,7 @@ class CommoditiesPurchaseCompletedStatus extends BaseStatus
     {
         $data = $this->getDataOfLocalMarketOrder($this->localMarketOrder);
         $this->createLocalMarketOrderHistory($this->localMarketOrder, OrderHistoryStatus::CommoditiesPurchased);
-        $data['case'] = OrderStatus::CommoditiesPurchased;
+        $data['case'] = CaseStatus::CommoditiesPurchased;
         $data['external_order_no'] = $this->localMarketOrder->external_order_no;
         $this->localMarketWebhook->with($data)->handle();
         $this->logQueueJob('Congratulations Commodities purchased');

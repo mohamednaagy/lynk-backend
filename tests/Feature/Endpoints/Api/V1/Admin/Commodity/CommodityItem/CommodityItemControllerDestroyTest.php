@@ -1,6 +1,6 @@
 <?php
 
-namespace Endpoints\Api\V1\Admin\CommodityItem;
+namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommodityItem;
 
 use App\Enums\Action;
 use App\Enums\Area;
@@ -14,7 +14,6 @@ use App\Models\LocalMarketInventory;
 use App\Models\SupplierLocation;
 use App\Models\User;
 use App\Observers\LocalMarketInventoryObserver;
-use App\Services\LocalMarket\LiveMarketService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Bus;
@@ -96,7 +95,7 @@ class CommodityItemControllerDestroyTest extends TestCase
 
         self::$inventory = LocalMarketInventory::create(self::$inventoryData);
 
-        $observer = new LocalMarketInventoryObserver(new LiveMarketService);
+        $observer = new LocalMarketInventoryObserver;
         $observer->created(self::$inventory);
 
         $job = new UpdateInventoryStock(self::$inventory, 300, true);

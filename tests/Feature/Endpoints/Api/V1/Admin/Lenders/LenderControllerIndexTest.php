@@ -84,7 +84,7 @@ class LenderControllerIndexTest extends TestCase
 
     public function test_lender_controller_index_lender_companies_only_successfully(): void
     {
-        $this->createTraderCompany('2000');
+        $this->createCompany('2000');
 
         $lendersCount = Company::query()
             ->type(CompanyType::Lender)

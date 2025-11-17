@@ -2,7 +2,6 @@
 
 namespace App\Support\PdfGenerator;
 
-use App\Support\PdfGenerator\Generators\BrowserlessGenerator;
 use App\Support\PdfGenerator\Generators\FakeGenerator;
 use App\Support\PdfGenerator\Generators\StaticGenerator;
 
@@ -77,11 +76,6 @@ class PdfGeneratorManager
         }
 
         return $this->{$driverMethod}($config);
-    }
-
-    protected function createBrowserlessGenerator($config)
-    {
-        return new BrowserlessGenerator($config);
     }
 
     protected function createFakeGenerator($config)

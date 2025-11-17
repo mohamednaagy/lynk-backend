@@ -20,6 +20,8 @@ class LynkProduct implements ProductInterface
                 'currency' => $productDto->getCurrency(),
                 'type' => $productDto->getType(),
                 'location' => $productDto->getLocation(),
+                'original_supplier' => $productDto->getOriginalSupplier(),
+                'previous_owner' => $productDto->getPreviousOwner(),
             ];
         })->toArray();
     }

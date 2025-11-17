@@ -72,6 +72,8 @@ class OrderController extends Controller
         'trader_orders.products.currency',
         'trader_orders.products.type',
         'trader_orders.products.location',
+        'trader_orders.products.original_supplier',
+        'trader_orders.products.previous_owner',
         'trader_orders.status',
         'trader_orders.expiry_date',
         'trader_orders.cancel_details',

@@ -62,36 +62,6 @@ class FakeAbsherDriver implements OtpifyDriverInterface
         }
 
         if ($code === '2023') {
-            $otpifyCode->otpifiable->update([
-                'customer_details' => [
-                    'issueLocationAr' => '',
-                    'englishName' => 'Mahmod Mohammed Fahed Ali',
-                    'arabicFatherName' => 'محمد',
-                    'englishFatherName' => 'Mohammed',
-                    'gender' => 'Male',
-                    'dobHijri' => '1430/11/09',
-                    'cardIssueDateHijri' => '1439/02/27',
-                    'englishFirstName' => 'Mahmod',
-                    'issueLocationEn' => '',
-                    'cardIssueDateGregorian' => '2017/11/16',
-                    'englishGrandFatherName' => 'Fahed',
-                    'userid' => '2309470215',
-                    'arabicGrandFatherName' => 'فهد',
-                    'idVersionNo' => '4',
-                    'arabicNationality' => 'الفلبين',
-                    'arabicName' => 'محمود محمد فهد علي',
-                    'arabicFirstName' => 'محمود',
-                    'nationalityCode' => '315',
-                    'nationality' => 'Philippines',
-                    'dob' => '2009/10/28',
-                    'englishFamilyName' => 'Ali',
-                    'idExpiryDateHijri' => '1448/09/11',
-                    'arabicFamilyName' => 'علي',
-                    'idExpiryDateGregorian' => '2027/02/18',
-                ],
-            ]);
-
-            $this->setOtpExpiredAt($otpifyCode);
 
             return true;
             // return $this->createAuthorizationToken($request->all());
