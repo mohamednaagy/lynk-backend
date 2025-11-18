@@ -75,9 +75,15 @@ class ProcessInProgressOrder implements ShouldQueue
                     return;
                 }
 
-                $trader->createTraderOrder($financingOrder);
+                $createdTraderOrder = $trader->createTraderOrder($financingOrder);
 
                 $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
+
+                DB::afterCommit(function () use ($createdTraderOrder) {
+                    if ($createdTraderOrder && $createdTraderOrder->needsProcessingAfterInitiation()) {
+                        $createdTraderOrder->processInitiatedTraderOrder();
+                    }
+                });
             });
         } catch (\Exception $e) {
             Log::channel(LOG_CHANNEL_LYNK)->error(
