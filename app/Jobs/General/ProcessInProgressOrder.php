@@ -70,8 +70,14 @@ class ProcessInProgressOrder implements ShouldQueue
             app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
 
             DB::transaction(function () use ($financingOrder, $trader) {
-                $trader->createTraderOrder($financingOrder);
+                $createdTraderOrder = $trader->createTraderOrder($financingOrder);
                 $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
+
+                DB::afterCommit(function () use ($createdTraderOrder) {
+                    if ($createdTraderOrder->needsProcessingAfterInitiation()) {
+                        $createdTraderOrder->processInitiatedTraderOrder();
+                    }
+                });
             });
         } catch (BalanceIsNotEnoughException $e) {
             Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has balance is not enough');
