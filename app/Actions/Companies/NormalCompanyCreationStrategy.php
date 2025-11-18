@@ -11,7 +11,7 @@ class NormalCompanyCreationStrategy implements CompanyCreationStrategy
     public function __construct(
         protected GenerateWebhookSecretKey $generateWebhookSecretKey
     ) {}
-    
+
     public function create(array $data): Lender
     {
         if (empty($data['webhook_secret_key'])) {

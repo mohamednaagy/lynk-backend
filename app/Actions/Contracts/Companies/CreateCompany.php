@@ -7,5 +7,5 @@ use App\Models\Lender;
 
 interface CreateCompany
 {
-    public function handle(array $data , int $companyType = CompanyType::Lender): Lender;
+    public function handle(array $data, int $companyType = CompanyType::Lender): Lender;
 }
