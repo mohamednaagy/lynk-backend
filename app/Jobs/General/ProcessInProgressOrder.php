@@ -80,7 +80,7 @@ class ProcessInProgressOrder implements ShouldQueue
                 $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
 
                 DB::afterCommit(function () use ($createdTraderOrder) {
-                    if ($createdTraderOrder && $createdTraderOrder->needsProcessingAfterInitiation()) {
+                    if ($createdTraderOrder->needsProcessingAfterInitiation()) {
                         $createdTraderOrder->processInitiatedTraderOrder();
                     }
                 });
