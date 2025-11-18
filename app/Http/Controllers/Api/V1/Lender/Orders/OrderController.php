@@ -72,6 +72,8 @@ class OrderController extends Controller
         'trader_orders.products.currency',
         'trader_orders.products.type',
         'trader_orders.products.location',
+        'trader_orders.products.original_supplier',
+        'trader_orders.products.previous_owner',
         'trader_orders.status',
         'trader_orders.expiry_date',
         'trader_orders.cancel_details',
@@ -81,6 +83,7 @@ class OrderController extends Controller
         'trader_orders.show_proceed_btn',
         'history',
         'commodity_type',
+        'type',
     ];
 
     public function __construct()
@@ -115,6 +118,7 @@ class OrderController extends Controller
         $financingOrders = $buildOrdersQuery->setCompany(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->latest(),
+                'latestStatusHistory.creator',
             ])
             ->handle()
             ->paginate();
@@ -143,7 +147,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load('creator', 'approver');
+        $order->load('creator', 'approver', 'latestStatusHistory.creator');
 
         $userRole = $request->user()->getRoleNames()->first();
         $fields = array_diff($this->sharedFields, $this->getFieldsForRole($userRole, OrderController::class, 'show'));
@@ -192,7 +196,6 @@ class OrderController extends Controller
                         [
                             'status' => $status,
                             'creator_id' => $user->id,
-                            'creator_type' => $user->getMorphClass(),
                             'approved_at' => $status === FinancingOrderStatus::PendingApproval ? null : now(),
                         ]
                     )
@@ -213,6 +216,7 @@ class OrderController extends Controller
                     'phone_country_code',
                     'phone_number',
                     'phone_number_formatted',
+                    'type',
                 ];
 
                 if ($financingOrder->commodity_type_id) {

@@ -2,96 +2,159 @@
 
 namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
-use App\Enums\CommodityTypeStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
+use App\Http\Requests\V1\Admin\FinancingOrders\Validators\AbstractFinancingOrderTypeValidator;
+use App\Http\Requests\V1\Admin\FinancingOrders\Validators\FinancingOrderTypeValidatorFactory;
 use App\Models\Company;
+use App\Models\Lender;
+use App\Rules\CheckFinancingOrderTypeExistAtCompanyRule;
+use App\Rules\ValidCommodityTypeAtFinancingOrderRule;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
+use Illuminate\Validation\ValidationException;
 
 class StoreOrderRequest extends FormRequest
 {
     use RequestHasMobileVerification;
 
+    protected $stopOnFirstFailure = true;
+
+    private AbstractFinancingOrderTypeValidator $financingOrderValidator;
+
+    private Lender $lender;
+
+    private $type;
+
     /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
+     * Always authorize this request.
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
+     * Validation rules.
      */
-    public function rules()
+    public function rules(): array
+    {
+        return array_merge(
+            $this->baseRules(),
+            $this->financingOrderValidator->getRules()
+        );
+    }
+
+    /**
+     * Validation messages.
+     */
+    public function messages(): array
+    {
+        return $this->financingOrderValidator->getMessages();
+    }
+
+    /**
+     * Validation attributes.
+     */
+    public function attributes(): array
+    {
+        return $this->financingOrderValidator->getAttributes();
+    }
+
+    /**
+     * Prepare input and initialize validator.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->validateCompanyExists();
+        $this->getLender();
+        $this->setFinancingOrderType();
+
+        $this->merge(['type' => $this->type]);
+
+        $this->initFinancingOrderValidator();
+    }
+
+    /**
+     * Base rules applied before delegating to financing order validator.
+     */
+    protected function baseRules(): array
     {
         return [
-            'company_id' => ['required', Rule::exists(Company::class, 'id')],
-            'customer_name' => ['required', 'string', 'max:255'],
-            'reference_number' => ['nullable', 'string', 'max:100', $this->handleUniqueReferenceNumber()],
-            'national_id' => ['required', 'integer', 'digits:10', 'gt:0'],
-            'phone_country_code' => ['required_with:phone_number', 'string', 'size:2'],
-            'phone_number' => ['required_if:is_verification_required,true', 'string', 'phone:phone_country_code,mobile'],
-            'amount' => ['required', 'numeric', 'gte:1'],
-            'selling_price' => ['required', 'numeric', 'gte:amount'],
-            'is_verification_required' => ['required', 'boolean'],
-            'commodity_type_id' => ['nullable', 'numeric', function ($attribute, $value, $fail) {
-                $this->validateCommodityType($attribute, $value, $fail);
-            }],
+            'commodity_type_id' => [
+                'nullable',
+                'numeric',
+                new ValidCommodityTypeAtFinancingOrderRule($this->company_id),
+            ],
+            'reference_number' => [
+                'nullable',
+                'string',
+                'max:100',
+                $this->handleUniqueReferenceNumber(),
+            ],
+
+            'type' => [
+                'required',
+                'numeric',
+                new EnumValue(FinancingOrderTypeEnum::class, false),
+                new CheckFinancingOrderTypeExistAtCompanyRule($this->lender->id),
+            ],
         ];
     }
 
     /**
-     * Custom validation for commodity_type_id
-     *
-     * @param  mixed  $value
+     * Ensure company exists before proceeding.
      */
-    protected function validateCommodityType(string $attribute, $value, \Closure $fail): void
+    private function validateCompanyExists(): void
     {
-        // If value is null or empty, allow it (valid scenario)
-        if (is_null($value) || $value === '') {
-            return;
-        }
+        $validator = Validator::make($this->all(), [
+            'company_id' => ['required', Rule::exists(Company::class, 'id')],
+        ]);
 
-        /** @var Company $company */
-        $company = Company::find(request('company_id'));
-
-        // Check if the company setting allows commodity type selection
-        $allowCommoditySelection = $company->lender?->lenderDetail?->allow_preferred_commodity_in_order ?? false;
-
-        // If field is provided (not null/empty) but setting is OFF, fail
-        if (! $allowCommoditySelection) {
-            $fail($attribute, 'Order not created. Commodity type selection is not allowed for this company.');
-
-            return;
-        }
-
-        // If we reach here, value is provided and setting is ON, so validate the commodity type
-        $commodityTypeExists = $company->lenderOrderAllowedCommodityTypes()
-            ->where('commodity_types.id', $value)
-            ->where('commodity_types.status', CommodityTypeStatus::Active)
-            ->exists();
-
-        if (! $commodityTypeExists) {
-            $fail($attribute, 'Order not created. Invalid commodity type '.$value.' for this company.');
+        if ($validator->fails()) {
+            throw new ValidationException($validator);
         }
     }
 
-    private function handleUniqueReferenceNumber(): ?Unique
+    /**
+     * Unique reference number rule if lender requires it.
+     */
+    protected function handleUniqueReferenceNumber(): ?Unique
     {
-        /** @var Company $company */
-        $company = Company::find($this->input('company_id'));
-        if ($company?->lender->lenderDetail->force_unique_reference_number) {
-            return $company->unique('financing_orders', 'reference_number')
+        if ($this->lender->isForceUniqueReferenceNumber()) {
+            return $this->lender
+                ->unique('financing_orders', 'reference_number')
                 ->whereNot('status', FinancingOrderStatus::Cancelled);
         }
 
         return null;
+    }
+
+    /**
+     * Resolve lender instance.
+     */
+    private function getLender(): void
+    {
+        $this->lender = Lender::find($this->input('company_id'));
+    }
+
+    /**
+     * Resolve financing order type from request or lender defaults.
+     */
+    private function setFinancingOrderType(): void
+    {
+        $this->type = (int) $this->input('type', $this->lender->default_financing_order_type);
+    }
+
+    /**
+     * Build financing order validator instance.
+     */
+    private function initFinancingOrderValidator(): void
+    {
+        $this->financingOrderValidator = FinancingOrderTypeValidatorFactory::create($this->type);
     }
 }

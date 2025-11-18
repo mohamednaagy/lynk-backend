@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Company;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel as MaatwebsiteExcel;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ExportOrders extends Controller
@@ -40,31 +41,26 @@ class ExportOrders extends Controller
                     : ['reference_number', 'national_id', 'selling_price', 'cost_with_vat', 'cost_without_vat']
             );
 
-        return Excel::download($export, $this->getFileName($request), null, [
-            'X-File-Name' => $this->getFileName($request),
+        return Excel::download($export, $this->getFileName($request, 'csv'), MaatwebsiteExcel::CSV, [
+            'X-File-Name' => $this->getFileName($request, 'csv'),
         ]);
     }
 
-    protected function getFileName(Request $request)
+    protected function getFileName(Request $request, string $type = 'xlsx')
     {
-        $todayDateInYYYYMMDD = now('Asia/Riyadh')->format('Ymd_His');
 
+        $today = saudi_now('Ymd_His');
         $company = $this->getFirstCompany($request);
 
-        if ($company) {
-            return "{$company->name}_LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
-        }
-
-        return "LYNKOrderList_{$todayDateInYYYYMMDD}.xlsx";
+        return $company
+            ? "{$company->name}_LYNKOrderList_{$today}.{$type}"
+            : "LYNKOrderList_{$today}.{$type}";
     }
 
     protected function getFirstCompany(Request $request)
     {
         $company = $request->company;
-        $company = is_array($company)
-            ? $company
-            : explode(',', $company);
-
+        $company = is_array($company) ? $company : explode(',', $company);
         if (count($company) !== 1) {
             return null;
         }

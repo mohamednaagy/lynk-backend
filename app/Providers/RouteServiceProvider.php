@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Enums\CompanyType;
-use App\Models\Company;
 use App\Models\CompanyLenderClient;
 use App\Models\Lender;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -43,10 +42,6 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('api')
                 ->prefix('api')
-                ->group(base_path('routes/api/trader.php'));
-
-            Route::middleware('api')
-                ->prefix('api')
                 ->group(base_path('routes/api/admin.php'));
 
             Route::middleware('api')
@@ -75,12 +70,6 @@ class RouteServiceProvider extends ServiceProvider
 
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
-        });
-
-        Route::bind('trader', function ($id) {
-            return Company::query()->where('id', $id)
-                ->where('type', CompanyType::Trader)
-                ->firstOrFail();
         });
 
         Route::bind('lender', function ($id) {

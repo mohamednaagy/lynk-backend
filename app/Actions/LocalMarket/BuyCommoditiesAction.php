@@ -5,10 +5,11 @@ namespace App\Actions\LocalMarket;
 use App\Actions\Contracts\LocalMarket\BuyCommodities;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Exceptions\LocalMarket\PurchaseProductException;
+use App\Jobs\LocalMarket\CompletePurchasing;
 use App\Jobs\LocalMarket\InsertOrderInventoriesAndUnits;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
-use App\Services\LocalMarket\UnitService;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 
 class BuyCommoditiesAction implements BuyCommodities
@@ -30,17 +31,11 @@ class BuyCommoditiesAction implements BuyCommodities
     {
         try {
             $startTime = microtime(true);
-            InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
-
-            $localMarketOrder->update([
-                'status' => OrderStatus::CommoditiesPurchased,
-                'data' => array_merge($localMarketOrder->data, ['data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder)]),
-            ]);
-
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('unit service for order '.$localMarketOrder->id, $localMarketOrder), [
-                'localMarketOrderId' => $localMarketOrder->id,
-                'data' => UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder),
-            ]);
+            Bus::chain([
+                new InsertOrderInventoriesAndUnits($localMarketOrder->id),
+                new CompletePurchasing($localMarketOrder->id),
+            ])
+                ->dispatch();
 
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('BuyCommoditiesAction Duration', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,

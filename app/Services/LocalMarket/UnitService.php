@@ -72,7 +72,6 @@ class UnitService
             'numberOfSuitableUnits' => $numberOfUnits,
             'totalCost' => $numberOfUnits * $inventory->price(),
         ];
-
     }
 
     public function holdEligibleUnits(LocalMarketOrder $localMarketOrder): void
@@ -424,12 +423,13 @@ DELIMITER ;
                     log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(
                         formatLocalMarketOrderTitle('Swapping unit ID '.$unit->id.
                             ' to owner '.$newCurrentOwner.
-                            ' of type '.$newCurrentOwnerType, $localMarketOrder), [
-                                'localMarketOrderId' => $localMarketOrder->id,
-                                'unit_id' => $unit->id,
-                                'new_current_owner' => $newCurrentOwner,
-                                'new_current_owner_type' => $newCurrentOwnerType,
-                            ]
+                            ' of type '.$newCurrentOwnerType, $localMarketOrder),
+                        [
+                            'localMarketOrderId' => $localMarketOrder->id,
+                            'unit_id' => $unit->id,
+                            'new_current_owner' => $newCurrentOwner,
+                            'new_current_owner_type' => $newCurrentOwnerType,
+                        ]
                     );
 
                     // Update the unit using Eloquent, which will trigger the observer

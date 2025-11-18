@@ -4,11 +4,10 @@ namespace App\Observers;
 
 use App\Actions\Commodities\CommoditySupplier\UpdateCommoditySupplierStatusAction;
 use App\Models\CompanySupplierDetail;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class CommoditySupplierObserver
+class CommoditySupplierObserver implements ShouldHandleEventsAfterCommit
 {
-    public $afterCommit = true;
-
     protected $UpdateCommoditySupplierStatusAction;
 
     public function __construct(UpdateCommoditySupplierStatusAction $UpdateCommoditySupplierStatusAction)
@@ -26,7 +25,6 @@ class CommoditySupplierObserver
         if ($supplierDetails->wasChanged('status')) {
             // Handle supplier status changes
             $this->UpdateCommoditySupplierStatusAction->handle($supplierDetails->company_id, $supplierDetails->status->value);
-
         }
     }
 }

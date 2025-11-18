@@ -42,7 +42,10 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
      */
     public function handle(): void
     {
-        DB::transaction(function () {
+        Log::channel(LOG_CHANNEL_BURSAM)->info('ProcessBursamSellingCommodityToOpenMarket: traderOrderId: '.$this->traderOrderId.' - Job handle', ['traderOrderId' => $this->traderOrderId]);
+
+        DB::beginTransaction();
+        try {
             $traderOrder = TraderOrder::query()
                 ->find($this->traderOrderId);
 
@@ -73,7 +76,16 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
             }
 
             $trader->sellCommodityToOpenMarket($traderOrder);
-        });
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - trader_order_id => '.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+                'message' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+            throw $th;
+        }
     }
 
     public function middleware(): array
@@ -88,6 +100,6 @@ class ProcessBursamSellingCommodityToOpenMarket implements ShouldBeUnique, Shoul
 
     public function failed($exception)
     {
-        log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamSellingCommodityToOpenMarket Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
+        log::channel(LOG_CHANNEL_BURSAM)->error('ProcessBursamSellingCommodityToOpenMarket Job Failed - trader_order_id => '.$this->traderOrderId, ['traderOrderId ' => $this->traderOrderId, 'message' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
     }
 }

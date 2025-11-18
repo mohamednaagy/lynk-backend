@@ -18,7 +18,6 @@ use App\Support\QueryScoper\Scopes\FinancingOrders\OrderStatusScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\TraderOrderCurrentStepScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Stancl\Tenancy\Database\TenantScope;
 
 class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
 {
@@ -78,13 +77,6 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
 
         if ($this->creator) {
             $baseQuery->byCreator($this->creator);
-        }
-
-        if ($this->company?->type?->is(CompanyType::Trader)) {
-            $baseQuery->withoutGlobalScope(TenantScope::class)
-                ->withWhereHas('traderOrders', function ($query) {
-                    $query->where('provider', $this->company->driver);
-                });
         }
 
         if ($this->company?->type?->is(CompanyType::Lender)) {

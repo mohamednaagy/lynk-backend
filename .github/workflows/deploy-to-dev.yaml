@@ -24,7 +24,9 @@ jobs:
            "cd /var/www/lynk-backend/ && \
             git pull origin dev && \
             composer install --ignore-platform-reqs && \
-            php artisan migrate && \
+            sudo php artisan migrate && \
+            sudo php artisan structure:clear && \
+            sudo php artisan structure:discover
             sudo supervisorctl stop all && \
             sudo supervisorctl start all"
 

@@ -38,8 +38,6 @@ class MakeOrderProceed extends Controller
             $this->authorize('view', $order);
             $traderOrder = $order->activeTraderOrder()->lockForUpdate()->firstOrFail();
 
-            $traderOrder->allowProgressToNextStep(); // TODO: Added to explicitly control order transitions (needs refactoring later)
-
             if (
                 $order->is_verification_required === false
                 && $clientWakala = $request->validated('client_wakala')

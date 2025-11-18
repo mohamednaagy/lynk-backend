@@ -33,9 +33,6 @@ class MakeOrderProceed extends Controller
     ): JsonResponse {
         return DB::transaction(function () use ($request, $traderOrder, $makeOrderProceed, $order) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
-
-            $traderOrder->allowProgressToNextStep(); // TODO: Added to explicitly control order transitions (needs refactoring later)
-
             if (
                 $order->is_verification_required === false
                 && $clientWakala = $request->validated('client_wakala')

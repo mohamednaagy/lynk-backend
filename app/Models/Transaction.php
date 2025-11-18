@@ -26,6 +26,7 @@ class Transaction extends Model implements HasMedia
     protected $casts = [
         'meta' => 'array',
         'amount' => MoneyStringCast::class.':currency',
+        'balance' => MoneyStringCast::class.':currency',
     ];
 
     public function getConnectionName()
@@ -70,5 +71,20 @@ class Transaction extends Model implements HasMedia
     public function scopeWhereFinancingOrderId($query, $financingOrderId)
     {
         return $query->whereJsonContains('meta->financing_order_id', $financingOrderId);
+    }
+
+    public function getCostWithVatAttribute()
+    {
+        $costAmount = $this->meta['order_cost']['amount'] ?? 0;
+        $vatAmount = $this->meta['vat_amount']['amount'] ?? 0;
+
+        return $costAmount + $vatAmount;
+    }
+
+    public function getCostWithoutVatAttribute()
+    {
+        $cost = $this->meta['order_cost']['amount'] ?? 0;
+
+        return $cost;
     }
 }

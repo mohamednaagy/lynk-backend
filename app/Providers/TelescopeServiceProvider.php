@@ -3,49 +3,54 @@
 namespace App\Providers;
 
 use Illuminate\Support\Facades\Gate;
+use Laravel\Telescope\EntryType;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
-    /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        // Telescope::night();
+    private array $allowedEntryTypes = [
+        EntryType::REQUEST,
+        EntryType::EXCEPTION,
+    ];
 
+    public function register(): void
+    {
+        // Always register Telescope
+        $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
         $this->hideSensitiveRequestDetails();
 
         Telescope::filter(function (IncomingEntry $entry) {
-            if ($this->app->environment('local')) {
+            // Always include reportable exceptions
+            if ($entry->isReportableException()) {
                 return true;
             }
 
-            return $entry->isReportableException() ||
-                   $entry->isFailedRequest() ||
-                   $entry->isFailedJob() ||
-                   $entry->isScheduledTask() ||
-                   $entry->hasMonitoredTag();
+            // Handle queries separately - only log slow ones
+            if ($entry->type === EntryType::QUERY) {
+                // Skip if query is on telescope's own connection
+                if (isset($entry->content['connection']) &&
+                    $entry->content['connection'] === config('telescope.storage.database.connection')) {
+                    return false;
+                }
+
+                // Only log slow queries
+                return $entry->content['slow'] ?? false;
+            }
+
+            // Allow other specific entry types
+            return in_array($entry->type, $this->allowedEntryTypes, true);
         });
     }
 
-    /**
-     * Prevent sensitive request details from being logged by Telescope.
-     *
-     * @return void
-     */
-    protected function hideSensitiveRequestDetails()
+    protected function hideSensitiveRequestDetails(): void
     {
         if ($this->app->environment('local')) {
             return;
         }
 
         Telescope::hideRequestParameters(['_token']);
-
         Telescope::hideRequestHeaders([
             'cookie',
             'x-csrf-token',
@@ -53,19 +58,8 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
         ]);
     }
 
-    /**
-     * Register the Telescope gate.
-     *
-     * This gate determines who can access Telescope in non-local environments.
-     *
-     * @return void
-     */
-    protected function gate()
+    protected function gate(): void
     {
-        Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
-        });
+        Gate::define('viewTelescope', fn ($user) => false);
     }
 }

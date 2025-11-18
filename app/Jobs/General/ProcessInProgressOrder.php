@@ -8,6 +8,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -21,6 +22,7 @@ use Throwable;
 class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use TraderHelperTrait;
 
     private int $financingOrderId;
 
@@ -69,7 +71,7 @@ class ProcessInProgressOrder implements ShouldQueue
 
             DB::transaction(function () use ($financingOrder, $trader) {
                 $trader->createTraderOrder($financingOrder);
-                $financingOrder->update(['status' => FinancingOrderStatus::InProgress]);
+                $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
             });
         } catch (BalanceIsNotEnoughException $e) {
             Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has balance is not enough');

@@ -7,18 +7,22 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderMode;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class ApproveOrderAction implements ApproveOrder
 {
+    use TraderHelperTrait;
+
     public function handle(FinancingOrder $financingOrder, User $user)
     {
         $status = ($financingOrder->company->lender->lenderDetail->require_initiate_trade_request || $financingOrder->company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Manual))
             ? FinancingOrderStatus::PendingTraderOrder
             : FinancingOrderStatus::Approved;
 
-        $financingOrder->status = $status;
-        $financingOrder->approver_id = $user->id;
-        $financingOrder->approved_at = now();
-        $financingOrder->save();
+        $this->updateOrderStatus($financingOrder, $status);
+        $financingOrder->update([
+            'approver_id' => $user->id,
+            'approved_at' => now(),
+        ]);
     }
 }

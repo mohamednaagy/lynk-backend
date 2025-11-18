@@ -6,6 +6,8 @@ use App\Actions\Contracts\Companies\CreateDefaultPricingTier;
 use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\EdaatInvoiceStatus;
+use App\Enums\FinancingOrderBorrowerTypeEnum;
+use App\Enums\FinancingOrderLenderTypeEnum;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\OrderFeeType;
 use App\Enums\TransactionReason;
@@ -13,7 +15,6 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
-use App\Models\User;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -130,11 +131,6 @@ trait InteractsWithCompany
         return $orderCostTiers;
     }
 
-    public function createTraderCompany($walletInitialAmount = 2000, $data = [])
-    {
-        return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Trader], $data));
-    }
-
     public function createSupplierCompany($walletInitialAmount = 2000, $data = [])
     {
         return $this->createCompany($walletInitialAmount, array_merge(['type' => CompanyType::Supplier], $data));
@@ -158,7 +154,6 @@ trait InteractsWithCompany
             'company_id' => $companyId,
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
-            'creator_type' => (new User)->getMorphClass(),
             'customer_name' => 'youssof okiel',
             'national_id' => '2553451234',
             'phone_number' => '+966500112233',
@@ -166,6 +161,10 @@ trait InteractsWithCompany
             'selling_price' => 220,
             'status' => FinancingOrderStatus::InProgress,
             'is_verification_required' => true,
+            'lender_type' => FinancingOrderLenderTypeEnum::NormalLending,
+            'lender_identifier' => $companyId,
+            'borrower_type' => FinancingOrderBorrowerTypeEnum::Customer,
+            'borrower_identifier' => 'youssof okiel',
         ], $data));
     }
 

@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Api\V1\Lender\Edaat;
 
 use App\Actions\Contracts\Edaat\CreateEdaatInvoice as CreateEdaatInvoiceInterface;
 use App\Actions\Contracts\Edaat\GetEdaatInvoices as GetEdaatInvoicesInterface;
-use App\Actions\Contracts\Wallets\CalculateOrdersCost;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Lender\Edaat\EdaatInvoiceFilterRequest;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
 use App\Models\Company;
-use App\Models\TieredPricing;
-use App\Support\QueryScoper\Scopes\Edaat\InvoiceSortByCreatedAtScope;
 use App\Transformers\EdaatInvoiceTransformer;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
@@ -38,10 +36,11 @@ class EdaatInvoiceController extends Controller
     }
 
     public function index(
-        Request $request,
+        EdaatInvoiceFilterRequest $request,
         GetEdaatInvoicesInterface $getEdaatInvoices
     ): JsonResponse {
-        $edaatInvoices = $getEdaatInvoices->handle(['sort_by_created_at' => InvoiceSortByCreatedAtScope::class])
+        $edaatInvoices = $getEdaatInvoices->setCompany(tenant())
+            ->handle()
             ->with('creator')
             ->paginate();
 
@@ -55,6 +54,7 @@ class EdaatInvoiceController extends Controller
                 'company_number',
                 'status',
                 'created_at',
+                'paid_at',
             ])
             ->respond();
     }
@@ -84,18 +84,9 @@ class EdaatInvoiceController extends Controller
 
     protected function resolveAmount(Request $request, Company $company)
     {
-        $orderCostForStandardPricing = TieredPricing::getOrderCostIfStandard($company);
-
-        if ($orderCostForStandardPricing) {
-            return app(CalculateOrdersCost::class)->handle(
-                $request->validated('orders_count'),
-                $orderCostForStandardPricing['costWithoutVat']
-            );
-        } else {
-            return Money::parseByDecimal(
-                $request->validated('amount'),
-                $company->getWallet(WalletType::CompanyWallet)->currency
-            );
-        }
+        return Money::parseByDecimal(
+            $request->validated('amount'),
+            $company->getWallet(WalletType::CompanyWallet)->currency
+        );
     }
 }

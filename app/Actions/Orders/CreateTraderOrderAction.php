@@ -13,11 +13,14 @@ use App\Exceptions\OrderIsCancelledException;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class CreateTraderOrderAction implements CreateTraderOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @return mixed
      */
@@ -48,15 +51,14 @@ class CreateTraderOrderAction implements CreateTraderOrder
         }
 
         $commodityTypeId = isset($data['commodity_type_id']) ? $data['commodity_type_id'] : null;
+        $data['creator_id'] = auth()?->user()?->id;
         $traderOrder = match ($data['mode']) {
             TraderOrderMode::Manual => $this->createTraderOrder($financingOrder, $data),
             TraderOrderMode::Automatic => Trader::driver($data['trader'], $data['version'])
                 ->createTraderOrder($financingOrder, $commodityTypeId),
         };
 
-        $financingOrder->update([
-            'status' => FinancingOrderStatus::InProgress,
-        ]);
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
 
         return $traderOrder;
     }
@@ -68,12 +70,11 @@ class CreateTraderOrderAction implements CreateTraderOrder
             'reference' => Arr::get($data, 'reference_number'),
             'version' => Arr::get($data, 'version'),
             'mode' => Arr::get($data, 'mode'),
+            'creator_id' => Arr::get($data, 'creator_id'),
             'status' => Trader::driver($data['trader'], $data['version'])->getDefaultInitialTradeOrderStatus(),
         ]);
 
-        $traderOrder->traderHistories()->create([
-            'action' => FinancingOrderHistory::GetTtiId,
-        ]);
+        $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
         return $traderOrder;
     }

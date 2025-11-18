@@ -64,6 +64,9 @@ class LenderController extends Controller
                 'name',
                 'status',
                 'orders_count',
+                'trading_mode',
+                'preferred_market_type',
+                'unique_name',
                 'created_at',
                 'order_cost',
             ])
@@ -139,6 +142,7 @@ class LenderController extends Controller
                 'default_contract_sign_time_limit',
                 'allow_preferred_commodity_in_order',
                 'lender_order_allowed_commodity_types',
+                'allowed_financing_order_types',
             ])
             ->respond();
     }
@@ -202,6 +206,7 @@ class LenderController extends Controller
                 ->handle();
 
             $tier['order_cost_without_vat'] = $orderCostWithVat->subtract($vatOfOrderCostAmount);
+            $tier['vat_amount'] = $vatOfOrderCostAmount;
 
             $tier['order_value_start'] = Money::parseByDecimal($tier['order_value_start'], $currency);
 

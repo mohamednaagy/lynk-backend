@@ -7,6 +7,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Telescope Prune Hours
+    |--------------------------------------------------------------------------
+    |
+    | Number of hours to keep Telescope entries before pruning.
+    |
+    */
+    'prune_hours' => env('TELESCOPE_PRUNE_HOURS', 72),
+
+    /*
+    |--------------------------------------------------------------------------
     | Telescope Domain
     |--------------------------------------------------------------------------
     |
@@ -46,7 +56,7 @@ return [
 
     'storage' => [
         'database' => [
-            'connection' => env('DB_CONNECTION', 'mysql'),
+            'connection' => env('TELESCOPE_DB_CONNECTION', 'telescope'),
             'chunk' => 1000,
         ],
     ],
@@ -162,7 +172,7 @@ return [
         Watchers\QueryWatcher::class => [
             'enabled' => env('TELESCOPE_QUERY_WATCHER', true),
             'ignore_packages' => true,
-            'slow' => 100,
+            'slow' => env('TELESCOPE_SLOW_QUERY', 100),
         ],
 
         Watchers\RedisWatcher::class => env('TELESCOPE_REDIS_WATCHER', true),

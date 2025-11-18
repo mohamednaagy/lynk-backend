@@ -31,8 +31,11 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
         ?string $referenceNumber,
         array $meta
     ): Transaction {
+        $traderOrderId = $meta['trader_order_id'] ?? 'unknown';
+        $walletId = $wallet->getKey();
+
         try {
-            Log::info('OrderCreationFeeType::process START trader_order_id => '.$meta['trader_order_id'] ?? 'unknown'.' wallet_id => '.$wallet->getKey().' reference_number => '.$referenceNumber, [
+            Log::info('OrderCreationFeeType::process START trader_order_id => '.$traderOrderId.' wallet_id => '.$walletId.' reference_number => '.$referenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'amount' => $amount->jsonSerialize(),
                 'reason' => $reason,
@@ -46,7 +49,7 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
 
             $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
-            Log::info('OrderCreationFeeType::process SUCCESS trader_order_id => '.$meta['trader_order_id'] ?? 'unknown'.' wallet_id => '.$wallet->getKey().' reference_number => '.$referenceNumber.' transaction_id => '.$result->id, [
+            Log::info('OrderCreationFeeType::process SUCCESS trader_order_id => '.$traderOrderId.' wallet_id => '.$walletId.' reference_number => '.$referenceNumber.' transaction_id => '.$result->id, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $result->id,
                 'execution_time_ms' => $executionTime,
@@ -55,7 +58,7 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
             return $result;
 
         } catch (\Exception $e) {
-            Log::error('OrderCreationFeeType::process FAILED trader_order_id => '.$meta['trader_order_id'] ?? 'unknown'.' wallet_id => '.$wallet->getKey().' reference_number => '.$referenceNumber.' transaction_id => '.$result->id, [
+            Log::error('OrderCreationFeeType::process FAILED trader_order_id => '.$traderOrderId.' wallet_id => '.$walletId.' reference_number => '.$referenceNumber.' transaction_id => '.($result?->id), [
                 'wallet_id' => $wallet->getKey(),
                 'reason' => $reason,
                 'error' => $e->getMessage(),

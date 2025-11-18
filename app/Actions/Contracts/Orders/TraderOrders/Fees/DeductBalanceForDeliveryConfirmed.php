@@ -2,9 +2,8 @@
 
 namespace App\Actions\Contracts\Orders\TraderOrders\Fees;
 
-use App\Models\TraderOrder;
-
-interface DeductBalanceForDeliveryConfirmed
+interface DeductBalanceForDeliveryConfirmed extends FeeActionInterface
 {
-    public function handle(TraderOrder $traderOrder): void;
+    // This interface now inherits the handle method from FeeActionInterface
+    // Specific implementations can add additional methods if needed
 }

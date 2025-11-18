@@ -15,6 +15,7 @@ use App\Models\TraderOrder;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileDoesNotExist;
 use Spatie\MediaLibrary\MediaCollections\Exceptions\FileIsTooBig;
 
@@ -36,17 +37,18 @@ class MakeOrderProceedAction implements MakeOrderProceed
             'trader_order_id' => $traderOrder->id,
             'case' => $case,
         ]);
-
         $signedClientWakala = $this->signedClientWakala;
 
-        return match ($case) {
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted) => app(ProceedClientWakalaAccepted::class)->handle($traderOrder, $signedClientWakala, $forceToProceed),
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSigned) => app(ProceedContractSigned::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractSignedDelivery) => app(ProceedContractSignedDelivery::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::IgnoreAndSell) => app(ProceedIgnoreAndSell::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ConfirmDeliver) => app(ProceedDeliveryConfirmation::class)->handle($traderOrder, $forceToProceed),
-            FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ContractAndClientWakalaCompleted) => app(ProceedContractAndClientWakalaCompleted::class)->handle($traderOrder, $forceToProceed),
-            default => []
+        $proceedCase = FinancingOrderProceedCase::getKeyByDescription($case);
+
+        return match ($proceedCase) {
+            FinancingOrderProceedCase::ClientWakalaAccepted => app(ProceedClientWakalaAccepted::class)->handle($traderOrder, $signedClientWakala, $forceToProceed),
+            FinancingOrderProceedCase::ContractSigned => app(ProceedContractSigned::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ContractSignedDelivery => app(ProceedContractSignedDelivery::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::IgnoreAndSell => app(ProceedIgnoreAndSell::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ConfirmDeliver => app(ProceedDeliveryConfirmation::class)->handle($traderOrder, $forceToProceed),
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted => app(ProceedContractAndClientWakalaCompleted::class)->handle($traderOrder, $forceToProceed),
+            default => throw new InvalidArgumentException("Unknown proceed case: {$proceedCase}"),
         };
     }
 

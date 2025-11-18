@@ -7,11 +7,9 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Support\QueryScoper\Scopes\Edaat\InvoiceCompanyScope;
-use App\Support\QueryScoper\Scopes\Edaat\InvoiceNumberScope;
+use App\Http\Requests\V1\Admin\Edaat\EdaatInvoiceFilterRequest;
 use App\Transformers\EdaatInvoiceTransformer;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class GetEdaatInvoices extends Controller
 {
@@ -26,9 +24,9 @@ class GetEdaatInvoices extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request, GetEdaatInvoicesInterface $getEdaatInvoices): JsonResponse
+    public function __invoke(EdaatInvoiceFilterRequest $request, GetEdaatInvoicesInterface $getEdaatInvoices): JsonResponse
     {
-        $edaatInvoices = $getEdaatInvoices->handle($this->scopes())
+        $edaatInvoices = $getEdaatInvoices->handle()
             ->with(['company', 'creator'])
             ->paginate();
 
@@ -43,15 +41,9 @@ class GetEdaatInvoices extends Controller
                 'company_number',
                 'status',
                 'company',
+                'created_at',
+                'paid_at',
             ])
             ->respond();
-    }
-
-    public function scopes(): array
-    {
-        return [
-            'invoice_number' => InvoiceNumberScope::class,
-            'company_id' => InvoiceCompanyScope::class,
-        ];
     }
 }

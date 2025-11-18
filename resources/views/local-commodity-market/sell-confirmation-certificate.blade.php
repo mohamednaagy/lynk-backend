@@ -791,7 +791,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
             <p class="text-black text-right">الوقت: {{ $current_time ?? '' }}</p>
             <p class="title-main text-black">شهادة إتمام بالبيع</p>
             <p class="text-right text-black section-spacing">
-                نؤكد نحن لينك من تاريخ وتوقيت هذه الشهادة بيع السلع المشار لها بناء على طلب {{ $customer_name }}
+                نؤكد نحن لينك من تاريخ وتوقيت هذه الشهادة بيع السلع المشار لها بناء على طلب {{ $borrower_name }}
                 مقابل مبلغ وقدره {{ $amount }} ريال سعودي
                 إلى <span style="font-weight: bold">عملاء متفرقين.</span>
             </p>
@@ -843,7 +843,7 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
                                     {{ $product['amount'] ?? '' }} {{ $product['currency'] ?? '' }}
                                 @endif
                             </td>
-                            <td>{{ $customer_name }}</td>
+                            <td>{{ $borrower_name }}</td>
                             <td>
                                 @if (is_object($product) && method_exists($product, 'getOriginalSupplier'))
                                     {{ $product->getOriginalSupplier() }}

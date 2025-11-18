@@ -20,6 +20,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
         'company_number',
         'status',
         'created_at',
+        'paid_at',
         'company',
     ];
 
@@ -53,7 +54,7 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeAmountFormatted(EdaatInvoice $edaatInvoice): Primitive
     {
-        return $this->primitive($edaatInvoice->amount->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($edaatInvoice->amount->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeCompanyName(): Primitive
@@ -93,6 +94,15 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCreatedAt(EdaatInvoice $edaatInvoice): Primitive
     {
-        return $this->primitive($edaatInvoice->created_at->format('Y-m-d h:i A'));
+        return $this->primitive(saudi_now('Y-m-d h:i A', $edaatInvoice->created_at));
+    }
+
+    public function includePaidAt(EdaatInvoice $edaatInvoice): Primitive
+    {
+        if (is_null($edaatInvoice->paid_at)) {
+            return $this->primitive(null);
+        }
+
+        return $this->primitive(saudi_now('Y-m-d h:i A', $edaatInvoice->paid_at));
     }
 }

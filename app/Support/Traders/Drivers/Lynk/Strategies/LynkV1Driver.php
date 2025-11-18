@@ -30,7 +30,6 @@ use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\Deliverable;
-use App\Support\Traders\Contracts\SellConfirmationCertifiable;
 use App\Support\Traders\Contracts\TraderInterface;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
@@ -42,13 +41,14 @@ use App\Support\Traders\Traits\TraderHelperTrait;
 use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Traits\Localizable;
 
 // TODO_LOCAL_MARKET need to review
-class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderInterface
+class LynkV1Driver implements Deliverable, TraderInterface
 {
     use Localizable;
     use TraderHelperTrait {
@@ -83,6 +83,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
+            'creator_id' => Auth::id(),
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
     }
@@ -145,32 +146,6 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
                     'version' => $traderOrder->version,
                 ],
                 $exception
-            );
-        }
-    }
-
-    public function createSellConfirmationDocument(TraderOrder $traderOrder): void
-    {
-        try {
-            $this->createTraderOrderHistory(
-                $traderOrder,
-                FinancingOrderHistory::AttachSellConfirmationDocument,
-            );
-        } catch (\Throwable $e) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create sell-confirmation-certificate', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id,
-                'traderOrderId' => $traderOrder->id,
-                'message' => $e->getMessage(),
-            ]);
-
-            throw new TraderException(
-                'Failed to create sell-confirmation-certificate',
-                [
-                    'trader_order_id' => $traderOrder->id,
-                    'provider' => $traderOrder->provider,
-                    'version' => $traderOrder->version,
-                ],
-                $e
             );
         }
     }
@@ -295,7 +270,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             app(CancelOrder::class)->handle($traderOrder->order, $cancelledBy);
         }
         if ($traderOrder->order->status->is(FinancingOrderStatus::InProgress) && $traderOrder->order->activeTraderOrder()->count() == 0) {
-            $traderOrder->order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+            $this->updateOrderStatus($traderOrder->order, FinancingOrderStatus::PendingTraderOrder);
         }
 
         app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
@@ -336,15 +311,15 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         $order = $traderOrder->order;
         $lender = $order->company->lender;
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-            $order->update(['status' => FinancingOrderStatus::Cancelled]);
+            $this->updateOrderStatus($order, FinancingOrderStatus::Cancelled);
         } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
             if (
                 $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Local())
                 && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)
             ) {
-                $order->update(['status' => FinancingOrderStatus::TradingFailure]);
+                $this->updateOrderStatus($order, FinancingOrderStatus::TradingFailure);
             } else {
-                $order->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+                $this->updateOrderStatus($order, FinancingOrderStatus::PendingTraderOrder);
             }
         }
     }
@@ -377,7 +352,7 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
     {
         if ($this->canRetryOrder($traderOrder)) {
             if ($traderOrder->order->status->is(FinancingOrderStatus::PendingTraderOrder)) {
-                $traderOrder->order->update(['status' => FinancingOrderStatus::InProgress]);
+                $this->updateOrderStatus($traderOrder->order, FinancingOrderStatus::InProgress);
             }
 
             Trader::driver(\App\Enums\Trader::Bursam, 'v2')->createTraderOrder($traderOrder->order);
@@ -430,10 +405,10 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             TraderOrderCancelReason::TraderOrderIsCancelled => __('order.user_cancel_request'),
             TraderOrderCancelReason::FinancingOrderIsCancelled => __('order.user_cancel_order'),
             TraderOrderCancelReason::ExpiredContractSignTime => __('order.trader.lynk.expired_contract_time', [
-                'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
+                'time' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
             TraderOrderCancelReason::ExpiredConfirmationTimeLimit => __('order.trader.lynk.expired_confirmation_time_limit', [
-                'TIME' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
+                'time' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
             default => null,
         };
@@ -489,6 +464,14 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
         };
     }
 
+    protected function handleAutomaticSellTransition(TraderOrder $traderOrder): void
+    {
+        (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
+            ->updateMurabhaCompleteDocument($traderOrder);
+
+        ProcessLynkSellingCommodityToOpenMarket::dispatch($traderOrder->id);
+    }
+
     protected function handleManualSellTransition(TraderOrder $traderOrder): void
     {
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
@@ -516,7 +499,12 @@ class LynkV1Driver implements Deliverable, SellConfirmationCertifiable, TraderIn
             (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
 
         if ($invalidSequence) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
     }
 

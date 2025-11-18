@@ -29,8 +29,6 @@ return new class extends Migration
 
                         if ($company->type->is(CompanyType::Lender)) {
                             $role = \App\Enums\Role::LenderAdmin;
-                        } elseif ($company->type->is(CompanyType::Trader)) {
-                            $role = \App\Enums\Role::TraderAdmin;
                         } else {
                             return;
                         }

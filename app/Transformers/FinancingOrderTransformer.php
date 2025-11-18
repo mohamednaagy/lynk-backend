@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
@@ -10,6 +11,7 @@ use App\Exceptions\TraderNotSupportedException;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use App\Transformers\TraderHistoryTransformers\TraderHistoryTransformerFactory;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\Primitive;
@@ -67,6 +69,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'company',
         'commodity_type',
         'commodity_type_id',
+        'type',
     ];
 
     public function transform(FinancingOrder $financingOrder)
@@ -91,9 +94,13 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeStatus(FinancingOrder $financingOrder)
     {
+        $latest = $financingOrder->latestStatusHistory;
+
         return $this->primitive([
             'description' => $financingOrder->status->description,
             'value' => $financingOrder->status->value,
+            'creator' => $latest?->getCreator(),
+            'created_at' => $latest?->created_at ? saudi_now('Y-m-d h:i:s A', $latest->created_at) : null,
         ]);
     }
 
@@ -118,7 +125,9 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCustomerName(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->customer_name);
+        $customerName = $financingOrder->type->is(FinancingOrderTypeEnum::NormalLending) ? $financingOrder->getBorrowerInfo()['name'] : $financingOrder->getLenderInfo()['name'];
+
+        return $this->primitive($customerName);
     }
 
     public function includeNationalId(FinancingOrder $financingOrder)
@@ -143,7 +152,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeAmountFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->amount->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($financingOrder->amount->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeSellingPrice(FinancingOrder $financingOrder)
@@ -153,7 +162,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeSellingPriceFormatted(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->selling_price->convertAndFormatByDecimal(sperator: ','));
+        return $this->primitive($financingOrder->selling_price->convertAndFormatByDecimal(separator: ','));
     }
 
     public function includeCreator(FinancingOrder $financingOrder)
@@ -252,7 +261,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
         $historiesActions = $activeTraderOrder->traderHistories()->pluck('action')->toArray();
 
-        return $this->collection([$historiesActions], new TraderHistoryTransformer($activeTraderOrder, $traderMurabhaSteps));
+        return $this->collection([$historiesActions], TraderHistoryTransformerFactory::make($activeTraderOrder, $traderMurabhaSteps));
     }
 
     public function includeTraderOrders(FinancingOrder $financingOrder): Collection
@@ -345,5 +354,13 @@ class FinancingOrderTransformer extends TransformerAbstract
         }
 
         return $this->primitive($commodityType->only(['id', 'name']));
+    }
+
+    public function includeType(FinancingOrder $financingOrder)
+    {
+        return $this->primitive([
+            'id' => $financingOrder->type,
+            'name' => FinancingOrderTypeEnum::getDescription($financingOrder->type),
+        ]);
     }
 }

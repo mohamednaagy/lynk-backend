@@ -35,6 +35,7 @@ use App\Http\Controllers\Api\V1\Admin\FinancingOrders\RejectOrder;
 use App\Http\Controllers\Api\V1\Admin\Images\UploadImage;
 use App\Http\Controllers\Api\V1\Admin\Lenders\CalculateAmountWithoutVatAndOrdersCount;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ChargeLenderBalanceManually;
+use App\Http\Controllers\Api\V1\Admin\Lenders\ExportWalletTransactions;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderBalance;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderMarketTypes;
 use App\Http\Controllers\Api\V1\Admin\Lenders\GetLenderSetting;
@@ -48,6 +49,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\CompleteOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\RetryProceedOrder;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrderController;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CancelTraderOrder;
+use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\CheckSettlement;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetCommodityCertificateForClient;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabahaPurchaseOffer;
 use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\TraderOrders\GetMurabhaCompleteDocument;
@@ -71,10 +73,6 @@ use App\Http\Controllers\Api\V1\Admin\Settings\LenderSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\LocalMurabahaSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\ProjectSettingsController;
 use App\Http\Controllers\Api\V1\Admin\Settings\WakalaTemplateController;
-use App\Http\Controllers\Api\V1\Admin\Traders\ResendInvitationToUser as ResendTraderInvitationToUser;
-use App\Http\Controllers\Api\V1\Admin\Traders\TraderController;
-use App\Http\Controllers\Api\V1\Admin\Traders\TraderUserController;
-use App\Http\Controllers\Api\V1\Admin\Traders\UpdateTraderStatus;
 use App\Http\Controllers\Api\V1\Lender\Wallets\CheckEdaatInvoiceStatus;
 use Illuminate\Support\Facades\Route;
 
@@ -135,6 +133,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::put('/{lender}/status', UpdateLenderStatus::class);
             Route::get('/{lender}/balance ', GetLenderBalance::class);
             Route::get('/{lender}/transactions ', [LenderTransactionController::class, 'index']);
+            Route::get('/{lender}/transactions/export', ExportWalletTransactions::class);
             Route::get('/{lender}/calculate-balance/{amount_with_vat}', CalculateAmountWithoutVatAndOrdersCount::class)
                 ->whereNumber('amount');
             Route::post('/{lender}/wallet/manual-deposit', ChargeLenderBalanceManually::class);
@@ -160,7 +159,6 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);
 
         Route::apiResource('lenders.users', LenderUserController::class)->scoped();
-
         Route::prefix('commodity-types')->group(function () {
             Route::get('/dropdown-list', CommodityTypesLiteList::class);
         });
@@ -189,6 +187,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
                 Route::post('/murabha-complete', UpdateMurabhaCompleteDocument::class);
                 Route::post('/attach-sell-confirmation-document', UpdateSellConfirmationDocument::class);
                 Route::put('/cancel', CancelTraderOrder::class);
+                Route::get('/check-settlement', CheckSettlement::class);
             });
 
         });
@@ -196,19 +195,10 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('orders', OrderController::class)
             ->only('index', 'show', 'store', 'update');
 
-        Route::prefix('traders')->group(function () {
-            Route::post('{trader}/users/{user}/resend-invitation', ResendTraderInvitationToUser::class);
-            Route::put('/{trader}/status', UpdateTraderStatus::class);
-        });
-
         Route::get('/traders-with-modes', GetTradersWithAvailableModes::class);
 
         Route::get('product-codes', [ProductCodeCacheController::class, 'index']);
         Route::delete('product-codes', [ProductCodeCacheController::class, 'delete']);
-
-        Route::apiResource('traders', TraderController::class)
-            ->only(['index', 'store', 'show', 'update']);
-        Route::apiResource('traders.users', TraderUserController::class);
 
         Route::get('edaat-invoices', GetEdaatInvoices::class);
         Route::post('edaat-invoices/{invoice}/check-status', CheckEdaatInvoiceStatus::class);

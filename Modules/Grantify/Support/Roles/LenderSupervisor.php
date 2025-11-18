@@ -39,5 +39,8 @@ class LenderSupervisor
         Subject::CommodityMarketCommodityTypes => [
             Action::Index,
         ],
+        Subject::FinancingOrderTypes => [
+            Action::Index,
+        ],
     ];
 }

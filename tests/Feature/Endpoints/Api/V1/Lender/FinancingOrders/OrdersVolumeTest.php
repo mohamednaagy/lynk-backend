@@ -66,14 +66,12 @@ class OrdersVolumeTest extends TestCase
         FinancingOrder::factory(self::$ordersCountForFirstCompany)->create([
             'company_id' => self::$company->id,
             'creator_id' => self::$userLenderAdmin->id,
-            'creator_type' => self::$userLenderAdmin->getMorphClass(),
             'created_at' => self::$firstDateForFirstCompany,
         ]);
 
         FinancingOrder::factory(self::$ordersCountForSecondDateInFrstCompany)->create([
             'company_id' => self::$company->id,
             'creator_id' => self::$userLenderAdmin->id,
-            'creator_type' => self::$userLenderAdmin->getMorphClass(),
             'created_at' => self::$secondDateForFirstCompany,
         ]);
 
@@ -90,14 +88,12 @@ class OrdersVolumeTest extends TestCase
         FinancingOrder::factory(self::$ordersCountForSecondDateSecondCompany)->create([
             'company_id' => self::$secondCompany->id,
             'creator_id' => self::$userLenderAdmin->id,
-            'creator_type' => self::$userLenderAdmin->getMorphClass(),
             'created_at' => self::$firstDateForSecondCompany,
         ]);
 
         FinancingOrder::factory(self::$ordersCountForSecondCompany)->create([
             'company_id' => self::$secondCompany->id,
             'creator_id' => self::$userLenderAdmin->id,
-            'creator_type' => self::$userLenderAdmin->getMorphClass(),
             'created_at' => self::$secondDateForSecondCompany,
         ]);
     }

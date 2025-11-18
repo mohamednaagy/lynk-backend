@@ -172,10 +172,8 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'order_cost_without_vat' => $orderCostWithoutVat->jsonSerialize(),
             ]);
 
-            [$vatAmount, $vatRate] = $this->calculateVatAmount
-                ->setAmount($orderCostWithoutVat)
-                ->setIsVatIncludedInAmount(false)
-                ->handle();
+            $vatRate = $this->getProjectSettings->handle()->getVatRate();
+            $vatAmount = TieredPricing::getVatAmount($company, $financingOrder->amount, $orderCostWithoutVat);
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: VAT calculated', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,

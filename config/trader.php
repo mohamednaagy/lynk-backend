@@ -64,6 +64,7 @@ return [
             'grant_type' => env('BURSAM_GRANT_TYPE', 'client_credentials'),
             'tenor' => env('BURSAM_TENOR', '00090'),
             'purchasing_commodity_job_backoff_time' => (int) env('BURSAM_PURCHASING_COMMODITY_JOB_BACKOFF_TIME', 10),
+            'http_timeout_seconds' => (int) env('BURSAM_HTTP_TIMEOUT_SECONDS', 115),
             'modes' => [
                 'v1' => [
                     TraderOrderMode::Manual,
@@ -92,7 +93,7 @@ return [
             ],
             'max_units_per_trader' => (int) env('LYNK_MAX_UNITS_PER_TRADER', 10000),
             'max_count_eligible_units_per_inventory' => (int) env('LYNK_MAX_COUNT_ELIGIBLE_UNITS_PER_INVENTORY', 10000),
-            'refresh_inventory_stock_delay' => (int) env('REFRESH_INVENTORY_STOCK_DELAY', 5), // minutes
+            'refresh_inventory_stock_delay' => (int) env('REFRESH_INVENTORY_STOCK_DELAY', 10), // seconds
             'loan_coverage_strategy' => env('LOAN_COVERAGE_STRATEGY', 'optimized'),
             'loan_coverage_timeout' => (int) env('LOAN_COVERAGE_TIMEOUT', 3), // 3sec
             'default_contract_sign_time_limit' => function () {

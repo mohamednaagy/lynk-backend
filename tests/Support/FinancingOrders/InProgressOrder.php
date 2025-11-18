@@ -46,6 +46,7 @@ class InProgressOrder
                 ->create(array_merge([
                     'provider' => $driver ?? $this->financingOrder->getPreferredTrader(),
                     'reference' => $reference,
+                    'creator_id' => auth()?->id(),
                     'status' => $status,
                 ], $data));
         });

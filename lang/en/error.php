@@ -19,7 +19,7 @@ return [
     'invalid_operator_tcn' => 'Invalid operator TCN',
     'no_enough_balance' => 'No enough balance',
     'user_doesnt_belong_to_company' => 'User Doesnt Belong To This Company',
-    'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence',
+    'order_status_doesnt_follow_sequence' => 'Order status cannot be updated because it doesn\'t follow the right sequence. Order ID: :financingOrderId, Trader Order ID: :traderOrderId',
     'order_require_client_verification' => 'You cannot proceed because order requires client verification.',
     'order_cannot_be_updated' => 'Order can be updated only if the status is '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
     'webhook_type_not_supported' => 'Unsupported webhook type',
@@ -58,5 +58,9 @@ return [
     'invalid_media_collection_type' => 'The specified media collection type is invalid.',
     'order_has_no_active_trade_request' => 'This order has been cancelled or does not have an active trade request.',
     'item_not_found' => 'This item was not found.',
+    'unable_to_settle_order' => 'This order cannot be settled. Settlement is only available for completed local market orders.',
+    'settlement_check_in_progress' => 'Checking settlement status in progress.',
+    'unable_to_generate_sell_confirmation_certificate' => 'Sell Confirmation Certificate is not available for this Trade Request. Please try again later. Last Check: :created_at by :creator_name',
+    'pending_settlement_check' => 'A settlement check operation is already in progress.',
 
 ];

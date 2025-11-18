@@ -5,7 +5,6 @@ namespace App\Support\Traders\Drivers\Bursam\Strategies;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToPendingCancel;
 use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
-use App\Enums\Area;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\FinancingOrderStatus;
@@ -57,7 +56,7 @@ class BursamV2Driver extends BursamV1Driver
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'mode' => TraderOrderMode::Automatic,
+            'creator_id' => auth()?->user()?->id,
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
 
@@ -157,15 +156,11 @@ class BursamV2Driver extends BursamV1Driver
     public function updateFinancingOrderStatus(FinancingOrder $financingOrder): void
     {
         if ($financingOrder->status->is(FinancingOrderStatus::PendingCancellation)) {
-            $financingOrder->update([
-                'status' => FinancingOrderStatus::Cancelled,
-            ]);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
         }
 
         if ($financingOrder->status->is(FinancingOrderStatus::InProgress) && $financingOrder->activeTraderOrder()->count() === 0) {
-            $financingOrder->update([
-                'status' => FinancingOrderStatus::PendingTraderOrder,
-            ]);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::PendingTraderOrder);
         }
     }
 
@@ -220,20 +215,13 @@ class BursamV2Driver extends BursamV1Driver
             return false;
         }
 
-        return $this->isNotInTransitionStateForSellingOrBuying($traderOrder)
-            && $this->isNotInContractSignedForLenderArea($traderOrder, $area);
+        return $this->isNotInTransitionStateForSellingOrBuying($traderOrder);
     }
 
     protected function isNotInTransitionStateForSellingOrBuying(TraderOrder $traderOrder)
     {
         return ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)
             && ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
-    }
-
-    protected function isNotInContractSignedForLenderArea(TraderOrder $traderOrder, $area)
-    {
-        return $area !== Area::Lender
-            || ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::ContractSigned);
     }
 
     /**
@@ -281,10 +269,23 @@ class BursamV2Driver extends BursamV1Driver
         if (! $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned)) {
             return null;
         }
+        $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
 
-        return $this->isContractAndWakalaCompleted($traderOrder)
-            ? __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell')
-            : __('order.trader.bursa.steps.contract_signed.v2.proceed');
+        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+        );
+
+        if ($contractAndClientWakalaCompletedCase) {
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCase, __('order.trader.bursa.steps.contract_signed.v2.wakalaAndSell'));
+        }
+
+        $contractSignedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ContractSigned
+        );
+
+        return str_replace('{USER}', $contractSignedCase, __('order.trader.bursa.steps.contract_signed.v2.proceed'));
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder): ?string
@@ -293,9 +294,24 @@ class BursamV2Driver extends BursamV1Driver
             return null;
         }
 
-        return $this->isContractAndWakalaCompleted($traderOrder)
-            ? __('order.trader.bursa.steps.client_wakala.v2.wakalaAndSell')
-            : __('order.trader.bursa.steps.client_wakala.v2.sell');
+        $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
+
+        // Prefer the more specific case; only query the fallback if needed
+        $contractAndClientWakalaCompletedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+        );
+
+        if ($contractAndClientWakalaCompletedCase) {
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCase, __('order.trader.bursa.steps.client_wakala.v2.wakalaAndSell'));
+        }
+
+        $clientWakalaAcceptedCase = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ClientWakalaAccepted
+        );
+
+        return str_replace('{USER}', $clientWakalaAcceptedCase, __('order.trader.bursa.steps.client_wakala.v2.sell'));
     }
 
     public function confirmCancelledFromProvider(TraderOrder $traderOrder): void {}

@@ -132,9 +132,13 @@ class TraderHelperTest extends TestCase
 
     public function test_trader_helper_update_order_status_successfully()
     {
+        $initialHistoryCount = self::$financingOrder->statusHistories()->count();
+
         self::$traderHelperTrait->updateOrderStatus(self::$financingOrder, FinancingOrderStatus::Approved);
 
         self::assertTrue(self::$financingOrder->status->is(FinancingOrderStatus::Approved));
+        self::assertEquals($initialHistoryCount + 1, self::$financingOrder->statusHistories()->count());
+        self::assertEquals(self::$userLender->id, self::$financingOrder->latestStatusHistory->creator_id);
     }
 
     public function test_trader_helper_create_trader_order_history_successfully()

@@ -2,6 +2,7 @@
 
 namespace App\Jobs\LocalMarket\states;
 
+use App\Enums\LocalMarket\CaseStatus;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
@@ -28,13 +29,13 @@ class TransferCommodityToCustomerStatus extends BaseStatus
         $this->unitService->changeOrderUnitsOwnershipTo(
             $this->localMarketOrder,
             OwnershipTypes::Customer,
-            $this->localMarketOrder->customer_name,
+            $this->localMarketOrder->borrower_identifier,
             UnitOwnershipAction::BorrowerOwnershipTransfer
         );
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we completed  changeOrderUnitsOwnershipTo at TransferCommodityToCustomerStatus job ', $this->localMarketOrder));
 
-        $this->localMarketWebhook->with(['case' => OrderStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
+        $this->localMarketWebhook->with(['case' => CaseStatus::TransferOwnershipToCustomer, 'external_order_no' => $this->localMarketOrder->external_order_no])->handle();
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('we send webhook to lynk from TransferCommodityToCustomerStatus job with case :'.OrderStatus::TransferOwnershipToCustomer, $this->localMarketOrder));
 

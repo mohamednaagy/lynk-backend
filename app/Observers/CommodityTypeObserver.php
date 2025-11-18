@@ -4,11 +4,10 @@ namespace App\Observers;
 
 use App\Actions\Commodities\CommodityType\UpdateCommodityTypeStatusAction;
 use App\Models\CommodityType;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class CommodityTypeObserver
+class CommodityTypeObserver implements ShouldHandleEventsAfterCommit
 {
-    public $afterCommit = true;
-
     protected $UpdateCommodityTypeStatusAction;
 
     public function __construct(

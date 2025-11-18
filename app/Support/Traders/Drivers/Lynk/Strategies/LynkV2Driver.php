@@ -15,7 +15,6 @@ use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
 use Illuminate\Support\Facades\Log;
 
@@ -31,7 +30,7 @@ class LynkV2Driver extends LynkV1Driver
             FinancingOrderHistory::CreateTransferOwnershipToLenderDocument => ProcessAutoCompleteSell::dispatch($traderOrder->id),
             FinancingOrderHistory::ContractSigned => ProcessLynkTransferOwnershipToCustomer::dispatch($traderOrder->id),
             FinancingOrderHistory::CreateSellingCommodityToCustomerDocument => ProcessAskClientForWakala::dispatch($traderOrder->id),
-            FinancingOrderHistory::ClientWakalaAccepted => ProcessLynkSellingCommodityToOpenMarket::dispatch($traderOrder->id),
+            FinancingOrderHistory::ClientWakalaAccepted => $this->handleAutomaticSellTransition($traderOrder),
             default => null,
         };
     }
@@ -52,9 +51,25 @@ class LynkV2Driver extends LynkV1Driver
             return null;
         }
 
-        return $this->isContractAndWakalaCompleted($traderOrder)
-            ? __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell')
-            : __('order.trader.lynk.steps.contract_signed.v2.proceed');
+        $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
+
+        // Prefer the more specific case; only query the fallback if needed
+        $contractAndClientWakalaCompletedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+        );
+
+        if ($contractAndClientWakalaCompletedCaseCreator) {
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCaseCreator, __('order.trader.lynk.steps.contract_signed.v2.wakalaAndSell'));
+        }
+
+        $contractSignedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ContractSigned
+        );
+
+        return str_replace('{USER}', $contractSignedCaseCreator, __('order.trader.lynk.steps.contract_signed.v2.proceed'));
+
     }
 
     public function clientWakalaMessage(TraderOrder $traderOrder): ?string
@@ -63,15 +78,45 @@ class LynkV2Driver extends LynkV1Driver
             return null;
         }
 
-        if ($this->isContractAndWakalaCompleted($traderOrder)) {
-            return __('order.trader.lynk.steps.client_wakala.v2.wakalaAndSell');
+        $traderOrderProceedCaseService = app(TraderOrderProceedCaseService::class);
+
+        $contractAndClientWakalaCompletedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ContractAndClientWakalaCompleted
+        );
+
+        if ($contractAndClientWakalaCompletedCaseCreator) {
+            return str_replace('{USER}', $contractAndClientWakalaCompletedCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.wakalaAndSell'));
         }
 
-        return match ($traderOrder->contract_signed_type->value) {
-            ContractSignedType::Sell => __('order.trader.lynk.steps.client_wakala.v2.sell'),
-            ContractSignedType::Delivery => __('order.trader.lynk.steps.client_wakala.v2.deliver'),
-            default => null,
-        };
+        $ignoreAndSellCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::IgnoreAndSell
+        );
+
+        if ($ignoreAndSellCaseCreator) {
+            return str_replace('{USER}', $ignoreAndSellCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.sell'));
+        }
+
+        $clientWakalaAcceptedCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ClientWakalaAccepted
+        );
+
+        if ($clientWakalaAcceptedCaseCreator) {
+            return str_replace('{USER}', $clientWakalaAcceptedCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.sell'));
+        }
+
+        $confirmDeliverCaseCreator = $traderOrderProceedCaseService->getCreatorNameForCase(
+            $traderOrder->id,
+            FinancingOrderProceedCase::ConfirmDeliver
+        );
+
+        if ($confirmDeliverCaseCreator) {
+            return str_replace('{USER}', $confirmDeliverCaseCreator, __('order.trader.lynk.steps.client_wakala.v2.deliver'));
+        }
+
+        return null;
     }
 
     public function validateDeliverySequence(TraderOrder $traderOrder, bool $forceToProceed): void
@@ -81,7 +126,12 @@ class LynkV2Driver extends LynkV1Driver
             (! $forceToProceed && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder));
 
         if ($invalidSequence) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $traderOrder->id,
+                ]
+            );
         }
     }
 
@@ -99,7 +149,7 @@ class LynkV2Driver extends LynkV1Driver
     //       The logic will then be implemented there, accepting $action as a second argument.
     public function isOrderInSellableState(TraderOrder $traderOrder): bool
     {
-        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ClientWakalaAccepted);
+        return $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted);
     }
 
     public function isContractSignLimitEligibleForExpiry(TraderOrder $traderOrder): bool

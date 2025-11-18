@@ -9,18 +9,21 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as EnumsTrader;
 use App\Enums\TraderOrderMode;
+use App\Enums\TraderOrderSettlementStatus;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamInitiatedTraderOrder;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Traits\HasCreator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Spatie\Activitylog\LogOptions;
@@ -41,7 +44,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
+    use HasCreator, HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
 
     protected $guarded = [];
 
@@ -57,7 +60,6 @@ class TraderOrder extends Model implements HasMedia
             'status',
             'is_base',
             'reference',
-            'can_continue_progress',
             'updated_at',
             'created_at',
             'contract_signed_type',
@@ -66,13 +68,13 @@ class TraderOrder extends Model implements HasMedia
             'commodity_type_id',
             'last_history_action',
             'last_history_action_updated_at',
+            'creator_id',
         ];
     }
 
     protected $casts = [
         'status' => TraderOrderStatus::class,
         'contract_signed_type' => ContractSignedType::class,
-        'can_continue_progress' => 'boolean',
         'created_at' => 'datetime',
     ];
 
@@ -128,6 +130,16 @@ class TraderOrder extends Model implements HasMedia
     public function traderHistories(): HasMany
     {
         return $this->hasMany(TraderHistory::class, 'trader_order_id', 'id');
+    }
+
+    public function settlements(): HasMany
+    {
+        return $this->hasMany(TraderOrderSettlement::class, 'trader_order_id', 'id');
+    }
+
+    public function latestSettlement(): HasOne
+    {
+        return $this->hasOne(TraderOrderSettlement::class, 'trader_order_id', 'id')->latestOfMany();
     }
 
     public function isCancellable(?string $area): bool
@@ -212,7 +224,12 @@ class TraderOrder extends Model implements HasMedia
     public function ensureCanAccessStep(string $step)
     {
         if (! $this->checkOrderStepComplete($step)) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $this->financing_order_id,
+                    'traderOrderId' => $this->id,
+                ]
+            );
         }
     }
 
@@ -274,7 +291,7 @@ class TraderOrder extends Model implements HasMedia
     {
         if ($this->provider == EnumsTrader::Bursam) {
             Log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => will fire processInitiatedTraderOrder Job by trader order observer', $this), ['traderOrderId' => $this->id]);
-            ProcessBursamInitiatedTraderOrder::dispatch($this->id)->afterCommit();
+            ProcessBursamInitiatedTraderOrder::dispatch($this->id);
         } elseif ($this->provider == EnumsTrader::Lynk) {
             ProcessLynkInitiatedTraderOrder::dispatch($this->id);
         }
@@ -300,6 +317,26 @@ class TraderOrder extends Model implements HasMedia
             FinancingOrderHistory::GetTtiId,
             FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
         ]) && ($this->status->is(TraderOrderStatus::InProgress) || $this->status->is(TraderOrderStatus::Initiated) || $this->status->is(TraderOrderStatus::Hold));
+    }
+
+    public function canBeSettled(): bool
+    {
+        return $this->status->value === TraderOrderStatus::Completed
+            && $this->provider === EnumsTrader::Lynk;
+    }
+
+    public function isCommoditiesSettled(): bool
+    {
+        $latestSettlement = $this->latestSettlement;
+
+        return $latestSettlement && $latestSettlement->is_commodities_settled;
+    }
+
+    public function hasPendingSettlementCheck(): bool
+    {
+        $latestSettlement = $this->latestSettlement;
+
+        return $latestSettlement && $latestSettlement->status->is(TraderOrderSettlementStatus::Pending);
     }
 
     public function isTraderManualAndPurchaseStepNotComplete(): bool
@@ -410,11 +447,6 @@ class TraderOrder extends Model implements HasMedia
             ->holdStatus()
             ->mode(TraderOrderMode::Automatic)
             ->orderBy('id', 'asc');
-    }
-
-    public function allowProgressToNextStep(bool $value = true): void
-    {
-        $this->update(['can_continue_progress' => $value]);
     }
 
     public function scopeCompletedSellStep($query)

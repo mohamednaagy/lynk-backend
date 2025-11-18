@@ -32,7 +32,7 @@ class UpdateTraderOrderStatusToPendingCancelAction implements UpdateTraderOrderS
         );
 
         $traderOrder->cancelDetail()->create([
-            'cancelled_by' => $cancelledBy?->id,
+            'creator_id' => $cancelledBy?->id,
             'cancel_type' => $cancelledByType,
             'cancel_step' => $currentStep,
             'cancel_reason' => $cancelReason,

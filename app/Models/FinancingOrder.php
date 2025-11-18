@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\Area;
+use App\Enums\FinancingOrderBorrowerTypeEnum;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Role;
@@ -15,6 +17,8 @@ use App\Enums\TransactionReason;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
+use App\Support\Traders\Traits\TraderHelperTrait;
+use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -43,10 +47,12 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
     use BelongsToTenant;
+    use HasCreator;
     use HasFactory;
     use HasScopes;
     use InteractsWithMedia;
     use LogsActivity;
+    use TraderHelperTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -64,15 +70,20 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approved_at',
         'approver_id',
         'creator_id',
-        'creator_type',
         'customer_name',
-        'customer_details',
         'status_reason',
         'is_verification_required',
         'company_id',
         'created_at',
         'charged_trader_orders_count',
         'commodity_type_id',
+        'type',
+        'borrower_identifier',
+        'lender_type',
+        'lender_identifier',
+        'borrower_type',
+        'cost_with_vat',
+        'cost_without_vat',
     ];
 
     protected $casts = [
@@ -80,10 +91,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'approved_at' => 'datetime',
         'data' => 'array',
         'is_verification_required' => 'boolean',
-        'customer_details' => 'array',
         'phone_number' => E164PhoneNumberCast::class,
         'amount' => MoneyStringCast::class.':currency',
         'selling_price' => MoneyStringCast::class.':currency',
+        'type' => FinancingOrderTypeEnum::class,
     ];
 
     protected function currentStep(): Attribute
@@ -191,11 +202,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->belongsTo(Company::class);
     }
 
-    public function creator()
-    {
-        return $this->morphTo('creator');
-    }
-
     public function approver()
     {
         return $this->belongsTo(User::class, 'approver_id', 'id');
@@ -214,6 +220,16 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function traderOrders()
     {
         return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
+    }
+
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(FinancingOrderStatusHistory::class, 'order_id', 'id');
+    }
+
+    public function latestStatusHistory(): HasOne
+    {
+        return $this->hasOne(FinancingOrderStatusHistory::class, 'order_id', 'id')->latestOfMany();
     }
 
     public function creationFeeTransactions()
@@ -326,13 +342,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function scopeByCreator($query, Model $model)
     {
-        $query->whereHasMorph(
-            'creator',
-            $model->getMorphClass(),
-            function ($query) use ($model) {
-                $query->where('creator_id', $model->getKey());
-            }
-        );
+        $query->where('creator_id', $model->getKey());
     }
 
     public function activeTraderOrder(): HasMany
@@ -490,7 +500,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function retry()
     {
-        $this->update(['status' => FinancingOrderStatus::PendingTraderOrder]);
+        $this->updateOrderStatus($this, FinancingOrderStatus::PendingTraderOrder);
     }
 
     public function commodityType(): BelongsTo
@@ -509,5 +519,58 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
             return Trader::Lynk;
         }
+    }
+
+    protected function customerName(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => ['borrower_identifier' => $value],
+            get: fn () => $this->getBorrowerName()
+        );
+    }
+
+    public function getLenderInfo(): array
+    {
+        return [
+            'id' => $this->lender_identifier,
+            'type' => $this->lender_type,
+            'name' => $this->getLenderName(),
+        ];
+    }
+
+    public function getBorrowerInfo()
+    {
+        return [
+            'type' => $this->borrower_type,
+            'name' => $this->getBorrowerName(),
+        ];
+    }
+
+    public function getLenderName()
+    {
+        return Lender::withTrashed()->find($this->lender_identifier)->name;
+    }
+
+    public function getBorrowerName()
+    {
+        if ($this->borrower_type == FinancingOrderBorrowerTypeEnum::Lender) {
+            return $this->company->name;
+        }
+
+        return $this->borrower_identifier;
+    }
+
+    public function addToFinancingOrderCosts(float $costWithVat, float $costWithoutVat): void
+    {
+        $this->cost_with_vat += $costWithVat;
+        $this->cost_without_vat += $costWithoutVat;
+        $this->save();
+    }
+
+    public function subtractFromFinancingOrderCosts(float $costWithVat, float $costWithoutVat): void
+    {
+        $this->cost_with_vat -= $costWithVat;
+        $this->cost_without_vat -= $costWithoutVat;
+        $this->save();
     }
 }

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('unique_name')->unique();
             $table->unsignedTinyInteger('status')->default(\App\Enums\CommodityTypeStatus::Inactive)->comment('1 => active  , 2 => inactive');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -12,6 +12,7 @@ use App\Enums\CompanyStatus;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\EnquiryStatus;
 use App\Enums\FinancingOrderStatus;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderCancelReason;
@@ -126,8 +127,8 @@ return [
         TraderOrderCancelReason::Manual => '',
         TraderOrderCancelReason::MurabhaTimeout => 'تم إلغاء طلب التداول بسبب وقت إغلاق السوق',
         TraderOrderCancelReason::FailureToPurchase => '',
-        TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار المستخدم إلغاء طلب التجارة هذا',
-        TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار المستخدم إلغاء هذا الطلب',
+        TraderOrderCancelReason::FinancingOrderIsCancelled => 'لقد اختار :user إلغاء طلب التجارة هذا',
+        TraderOrderCancelReason::TraderOrderIsCancelled => 'لقد اختار :user إلغاء هذا الطلب',
         TraderOrderCancelReason::NoEligibleCommoditiesAvailable => 'لا يوجد سلع كافيه',
         TraderOrderCancelReason::ExpiredContractSignTime => 'تم إلغاء طلب التجارة من قبل النظام بسبب انتهاء وقت توقيع العقد المحدد بـ :value ساعة.',
         TraderOrderCancelReason::BursamBuyOrderRetriesExceeded => 'تم إلغاء طلب التجارة من قبل النظام بسبب تجاوز عدد المحاولات المحددة.',
@@ -148,6 +149,13 @@ return [
         CompanyLenderClientType::Business => 'شركات',
         CompanyLenderClientType::Individual => 'فردي',
     ],
+
+    FinancingOrderTypeEnum::class => [
+        FinancingOrderTypeEnum::NormalLending => 'تمويل',
+        FinancingOrderTypeEnum::SpecialPurposeVehicle => 'مرابحة الاستثمار لغرض خاص',
+        FinancingOrderTypeEnum::TimeDeposit => 'وديعة لأجل',
+    ],
+
     'document_type' => [
         'client_wakala' => 'وكالة العميل',
         'transfer_ownership_to_lender' => 'نقل الملكية إلى المقرض',

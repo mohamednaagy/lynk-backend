@@ -5,14 +5,13 @@ namespace App\Actions\Orders\TraderOrders\ProceedAction;
 use App\Actions\Contracts\Orders\TraderOrders\ProceedAction\ProceedIgnoreAndSell;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\FinancingOrderProceedCase;
-use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderTimeLimitType;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
+use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
-use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -33,14 +32,17 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
      * @throws OrderStatusDoesNotFollowSequenceException
      * @throws BindingResolutionException
      */
-    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): array
+    public function handle(TraderOrder $traderOrder, bool $forceToProceed = false): void
     {
-        if (
-            $this->isPreviousStepOfCustomerDeliveryConfirmationNotCompleted($traderOrder)
-            || ($forceToProceed === false && $this->isCustomerDeliveryConfirmationStepCompleted($traderOrder))
-        ) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+        $proceedCaseHandler = TraderOrderProceedCaseFactory::handle(FinancingOrderProceedCase::IgnoreAndSell);
+
+        if (! $proceedCaseHandler->canProceed($traderOrder, $forceToProceed)) {
+            throw new OrderStatusDoesNotFollowSequenceException([
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $traderOrder->id,
+            ]);
         }
+
         app(TraderOrderProceedCaseService::class)->createCase($traderOrder->id, FinancingOrderProceedCase::IgnoreAndSell);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::DeliveryCancelled);
@@ -52,20 +54,5 @@ class ProceedIgnoreAndSellAction implements ProceedIgnoreAndSell
         };
 
         $this->timeLimitService->cancelExpiry($traderOrder, TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit);
-
-        return [];
-    }
-
-    protected function isPreviousStepOfCustomerDeliveryConfirmationNotCompleted(TraderOrder $traderOrder): bool
-    {
-        return ! $traderOrder->checkOrderStepComplete(
-            (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
-                ->getPreviousStepOf(MurabhaStep::CustomerDeliveryConfirmation)->step
-        );
-    }
-
-    protected function isCustomerDeliveryConfirmationStepCompleted(TraderOrder $traderOrder): bool
-    {
-        return $traderOrder->checkOrderHistoryAction([FinancingOrderHistory::DeliveryCancelled, FinancingOrderHistory::DeliveryConfirmed]);
     }
 }

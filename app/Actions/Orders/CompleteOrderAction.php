@@ -7,11 +7,14 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Support\Arr;
-use Log;
+use Illuminate\Support\Facades\Log;
 
 class CompleteOrderAction implements CompleteOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @return mixed
      */
@@ -25,7 +28,12 @@ class CompleteOrderAction implements CompleteOrder
             Log::error('financing_order_id '.$financingOrder->id.' cant be completed at CompleteOrderAction', [
                 'financingOrderId' => $financingOrder->id,
             ]);
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $financingOrder->id,
+                    'traderOrderId' => null,
+                ]
+            );
         }
 
         if ($paymentProofMedia = Arr::get($data, 'payment_proof')) {
@@ -33,6 +41,6 @@ class CompleteOrderAction implements CompleteOrder
                 ->toMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
         }
 
-        $financingOrder->update(['status' => FinancingOrderStatus::Completed]);
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Completed);
     }
 }

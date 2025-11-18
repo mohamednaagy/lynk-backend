@@ -6,9 +6,12 @@ use App\Actions\Contracts\Orders\RetryOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class RetryOrderAction implements RetryOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @throws OrderStatusDoesNotFollowSequenceException
      */
@@ -19,9 +22,14 @@ class RetryOrderAction implements RetryOrder
             ->findOrFail($orderId);
 
         if (! $financingOrder->status->is(FinancingOrderStatus::TradingFailure)) {
-            throw new OrderStatusDoesNotFollowSequenceException;
+            throw new OrderStatusDoesNotFollowSequenceException(
+                [
+                    'financingOrderId' => $financingOrder->id,
+                    'traderOrderId' => null,
+                ]
+            );
         }
 
-        $financingOrder->retry();
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::PendingTraderOrder);
     }
 }

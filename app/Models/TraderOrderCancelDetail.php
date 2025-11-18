@@ -3,15 +3,18 @@
 namespace App\Models;
 
 use App\Enums\TraderOrderCancelReason;
+use App\Enums\TraderOrderTimeLimitStatus;
+use App\Enums\TraderOrderTimeLimitType;
+use App\Traits\HasCreator;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TraderOrderCancelDetail extends Model
 {
-    use HasFactory;
+    use HasCreator, HasFactory;
 
     protected $fillable = [
-        'cancelled_by',
+        'creator_id',
         'cancel_reason',
         'cancel_step',
         'trader_order_id',
@@ -35,6 +38,38 @@ class TraderOrderCancelDetail extends Model
         }
 
         return true;
+    }
 
+    public function cancelMessage(): ?string
+    {
+        $reason = $this->cancel_reason;
+
+        if (! $reason) {
+            return '';
+        }
+        if ($reason->is(TraderOrderCancelReason::ExpiredContractSignTime)) {
+            $timeLimit = $this->traderOrder->getRecentTimeLimit(
+                TraderOrderTimeLimitType::ContractSignTimeLimit,
+                TraderOrderTimeLimitStatus::Expired
+            );
+
+            return str_replace(':value', $timeLimit->default_value, $reason->description);
+        }
+
+        // Order cancelled by user: include creator name safely
+        if ($reason->is(TraderOrderCancelReason::TraderOrderIsCancelled) ||
+            $reason->is(TraderOrderCancelReason::FinancingOrderIsCancelled)) {
+
+            return str_replace(':user', $this->getCreatorNameForDisplay(), $reason->description);
+        }
+
+        return $reason->description;
+    }
+
+    private function getCreatorNameForDisplay()
+    {
+        $creator = $this->getCreator();
+
+        return $creator['name'] ?? '';
     }
 }

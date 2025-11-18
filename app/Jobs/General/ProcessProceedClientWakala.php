@@ -43,32 +43,43 @@ class ProcessProceedClientWakala implements ShouldQueue
      */
     public function handle(MakeOrderProceed $makeOrderProceed): void
     {
-        $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
+        try {
+            $traderOrder = TraderOrder::query()->findOrFail($this->traderOrderId);
 
-        if ($this->isClientWakalaStepCompleted($traderOrder)) {
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Skipped ProceedClientWakalaAccepted: already completed', $traderOrder), [
+            if ($this->isClientWakalaStepCompleted($traderOrder)) {
+                Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('Skipped ProceedClientWakalaAccepted: already completed', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                ]);
+
+                return;
+            }
+
+            if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala)) {
+                Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted WaitingClientWakala not complete', $traderOrder), [
+                    'financingOrderId' => $traderOrder->financing_order_id,
+                    'traderOrderId' => $this->traderOrderId,
+                    'actual_last_action' => $traderOrder->last_history_action,
+                    'expected_action' => FinancingOrderHistory::WaitingClientWakala,
+                ]);
+
+                return;
+            }
+            $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted), false);
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted completed successfully', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
             ]);
-
-            return;
-        }
-
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::WaitingClientWakala)) {
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted WaitingClientWakala not complete', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id,
+        } catch (Exception $exception) {
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('ProceedClientWakalaAccepted failed to find trader order', $traderOrder), [
                 'traderOrderId' => $this->traderOrderId,
-                'actual_last_action' => $traderOrder->last_history_action,
-                'expected_action' => FinancingOrderHistory::WaitingClientWakala,
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTraceAsString(),
             ]);
-
-            return;
+            throw $exception;
         }
-        $makeOrderProceed->handle($traderOrder, FinancingOrderProceedCase::getDescription(FinancingOrderProceedCase::ClientWakalaAccepted), false);
-        Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('ProceedClientWakalaAccepted completed successfully', $traderOrder), [
-            'financingOrderId' => $traderOrder->financing_order_id,
-            'traderOrderId' => $this->traderOrderId,
-        ]);
     }
 
     protected function isClientWakalaStepCompleted(TraderOrder $traderOrder): bool

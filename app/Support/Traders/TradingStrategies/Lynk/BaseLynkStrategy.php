@@ -26,7 +26,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
     public function updatePurchasingCommodity(TraderOrder $traderOrder, array $data)
     {
         $traderOrder->ensureCanAccessStep(MurabhaStep::TraderOrderCreated);
-
         app(UpdateTraderOrder::class)->handle($traderOrder, $data);
         $traderOrder->update([
             'status' => TraderOrderStatus::InProgress,
@@ -122,11 +121,6 @@ abstract class BaseLynkStrategy implements TraderStrategyInterface
             TraderOrderMediaCollection::SellConfirmationDocument,
             'base64',
             $sellCOnfirmationDocumentFile->getClientOriginalName(),
-        );
-
-        $this->createTraderOrderHistory(
-            $traderOrder,
-            FinancingOrderHistory::AttachSellConfirmationDocument,
         );
     }
 

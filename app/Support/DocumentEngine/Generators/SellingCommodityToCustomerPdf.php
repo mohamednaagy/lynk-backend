@@ -29,8 +29,9 @@ class SellingCommodityToCustomerPdf extends BasePdfGenerator
     protected function prepareData(): array
     {
         $traderOrder = $this->getTraderOrder();
-        $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(sperator: ',');
-        $customerName = $traderOrder->order->customer_name;
+        $amount = $traderOrder->order->selling_price->convertAndFormatByDecimal(separator: ',');
+        $lenderName = $traderOrder->order->getLenderInfo()['name'];
+        $borrowerName = $traderOrder->order->getBorrowerInfo()['name'];
         $currentTimeInRiyadhTz = $traderOrder->traderHistories()
             ->where('action', FinancingOrderHistory::CreateSellingCommodityToCustomerDocument)
             ->first()->created_at;
@@ -38,10 +39,10 @@ class SellingCommodityToCustomerPdf extends BasePdfGenerator
         $data = [
             'reference_number' => $traderOrder->id,
             'trader_order_reference' => $traderOrder->reference,
-            'company_name' => $traderOrder->order->company()->withTrashed()->first()->name,
             'order_number' => $traderOrder->financing_order_id,
             'amount' => $amount,
-            'customer_name' => $customerName,
+            'lender_name' => $lenderName,
+            'borrower_name' => $borrowerName,
             'contract_signed_date' => saudi_now('Y-m-d', $currentTimeInRiyadhTz),
             'contract_signed_time' => saudi_now('h:i:s A', $currentTimeInRiyadhTz),
         ];

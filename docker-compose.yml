@@ -71,13 +71,6 @@ services:
         networks:
             - sail
 
-    browserless:
-        image: browserless/chrome
-        ports:
-            - "3002:3000"
-        networks:
-            - sail
-
     mailhog:
         image: mailhog/mailhog
         networks:

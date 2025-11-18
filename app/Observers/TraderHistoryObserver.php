@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\ApplyOrderFeesJob;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
@@ -15,14 +16,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
     use ObserverHelper;
 
     public function __construct(private FeesService $feesService) {}
-
-    public function creating(TraderHistory $traderHistory)
-    {
-        $traderHistory->traderOrder()->update([
-            'last_history_action' => $traderHistory->action,
-            'last_history_action_updated_at' => $traderHistory->created_at,
-        ]);
-    }
 
     /**
      * @throws \Exception
@@ -58,8 +51,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
                 'action' => $traderHistory->action,
                 'current_step_node' => $currentStepNode ? get_class($currentStepNode) : null,
             ]);
-
-            $this->notifyAdminsAboutOrderStopped($traderHistory, $currentStepNode);
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Admins notified, getting completed step node', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
@@ -153,7 +144,11 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
         $status = $traderHistory->action;
         $action = $this->feesService->getAction($provider, $status);
         if ($action) {
-            $action->handle($traderHistory->traderOrder);
+            Log::channel(getSuitableLoggingFromTraderProvider($traderHistory->traderOrder))->info(formatLogTitle('TraderHistoryObserver dispatching applyOrderFees job', $traderHistory->traderOrder), [
+                'trader_order_id' => $traderHistory->traderOrder->id,
+            ]);
+
+            ApplyOrderFeesJob::dispatch($traderHistory->traderOrder, $action);
         }
     }
 }

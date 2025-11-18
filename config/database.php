@@ -84,6 +84,17 @@ return [
             ]) : [],
         ],
 
+        'telescope' => [
+            'driver' => 'mysql',
+            'host' => env('TELESCOPE_DB_HOST', '127.0.0.1'),
+            'port' => env('TELESCOPE_DB_PORT', '3306'),
+            'database' => env('TELESCOPE_DB_DATABASE', 'forge'),
+            'username' => env('TELESCOPE_DB_USERNAME', 'forge'),
+            'password' => env('TELESCOPE_DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

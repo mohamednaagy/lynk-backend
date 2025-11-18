@@ -7,17 +7,17 @@ return [
     'no_eligible_commodities_available' => 'No commodities found with Trader',
     'trader' => [
         'bursa' => [
-            'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until :TIME KSA time.',
+            'hold_status' => 'Trade Request on hold due to International Trader (Bursa Malaysia) Market Cut-Off Time until :time KSA time.',
             'steps' => [
                 'contract_signed' => [
                     'v2' => [
-                        'proceed' => 'Contract Signed confirmed by user.',
-                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by user.',
+                        'proceed' => 'Contract Signed confirmed by {USER}.',
+                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by {USER}.',
                     ],
                 ],
                 'client_wakala' => [
                     'v2' => [
-                        'sell' => 'Client Wakala - Sell Customer confirmed by user.',
+                        'sell' => 'Client Wakala - Sell Customer confirmed by {USER}.',
                         'wakalaAndSell' => '',
                     ],
                 ],
@@ -27,23 +27,23 @@ return [
             'cancelled_status' => 'User has chosen to cancel this trade request.',
             'no_commodity_available' => 'No commodities found with Trader.',
             'internal_technical_error' => 'Internal Technical Error',
-            'expired_contract_time' => 'Contract Sign Time Limit of :TIME hours has expired.',
-            'expired_confirmation_time_limit' => 'Trade request cancelled by system due to Customer Delivery Confirmation Time Limit of :TIME hours has expired.',
+            'expired_contract_time' => 'Contract Sign Time Limit of :time hours has expired.',
+            'expired_confirmation_time_limit' => 'Trade request cancelled by System due to Customer Delivery Confirmation Time Limit of :time hours has expired.',
             'steps' => [
                 'contract_signed' => [
                     'v1' => [
-                        'sell' => 'Contract Signed - Sell for Customer confirmed by user.',
-                        'deliver' => 'Contract Signed - Delivery for Customer requested by user.',
+                        'sell' => 'Contract Signed - Sell for Customer confirmed by {USER}.',
+                        'deliver' => 'Contract Signed - Delivery for Customer requested by {USER}.',
                     ],
                     'v2' => [
-                        'proceed' => 'Contract Signed confirmed by user.',
-                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by user.',
+                        'proceed' => 'Contract Signed confirmed by {USER}.',
+                        'wakalaAndSell' => 'Contract Signed and Client Wakala - SELL confirmed by {USER}.',
                     ],
                 ],
                 'client_wakala' => [
                     'v2' => [
-                        'sell' => 'Client Wakala - Sell Customer confirmed by user.',
-                        'deliver' => 'Client Wakala - Deliver for Customer confirmed by user. Please contact a LYNK Administrator to confirm delivery process and logistics',
+                        'sell' => 'Client Wakala - Sell Customer confirmed by {USER}.',
+                        'deliver' => 'Client Wakala - Deliver for Customer confirmed by {USER}. Please contact a LYNK Administrator to confirm delivery process and logistics',
                         'wakalaAndSell' => '',
                     ],
                 ],

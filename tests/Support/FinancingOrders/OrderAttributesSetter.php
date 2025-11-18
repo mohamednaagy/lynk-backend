@@ -67,7 +67,6 @@ abstract class OrderAttributesSetter
     public function creator(User $creator)
     {
         $this->attributes['creator_id'] = $creator->id;
-        $this->attributes['creator_type'] = $creator->getMorphClass();
 
         return $this;
     }

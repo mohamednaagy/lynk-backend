@@ -31,10 +31,8 @@ class DeductOrderDeliveryConfirmedFeeAction implements DeductOrderDeliveryConfir
 
         $orderCostWithoutVat = TieredPricing::getOrderCostWithoutVat($company, $financingOrder->amount);
 
-        [$vatAmount, $vatRate] = $this->calculateVatAmount
-            ->setAmount($orderCostWithoutVat)
-            ->setIsVatIncludedInAmount(false)
-            ->handle();
+        $vatRate = $this->getProjectSettings->handle()->getVatRate();
+        $vatAmount = TieredPricing::getVatAmount($company, $financingOrder->amount, $orderCostWithoutVat);
 
         $totalAmountWithVat = $orderCostWithoutVat->add($vatAmount);
 

@@ -9,10 +9,13 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 
 class CreateFinancingOrderAction implements CreateFinancingOrder
 {
+    public function __construct(
+        private FinancingOrderTypeFactory $financingOrderTypeFactory
+    ) {}
+
     /**
      * @return FinancingOrder|Model
      */
@@ -36,24 +39,10 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
             ? (int) $commodityTypeId
             : $this->findCommodityTypeIdByUniqueName($commodityTypeId, $company);
 
-        return $company->orders()->create(
-            Arr::only($data, [
-                'customer_name',
-                'reference_number',
-                'national_id',
-                'contract_number',
-                'phone_number',
-                'amount',
-                'selling_price',
-                'currency',
-                'status',
-                'creator_id',
-                'creator_type',
-                'approved_at',
-                'is_verification_required',
-                'commodity_type_id',
-            ])
-        );
+        $strategy = $this->financingOrderTypeFactory->make($data['type']);
+
+        return $strategy->create($company, $data);
+
     }
 
     private function findCommodityTypeIdByUniqueName(?string $uniqueName, Company $company): ?int

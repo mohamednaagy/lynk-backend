@@ -2,28 +2,21 @@
 
 namespace App\Observers;
 
-use App\Actions\Contracts\Orders\CompleteOrder;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
+use App\Jobs\FinancingOrders\CompleteOrderJob;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class TraderOrderObserver
+class TraderOrderObserver implements ShouldHandleEventsAfterCommit
 {
     /**
      * Handle the TraderOrder "creating" event.
      *
      * @return void
      */
-    public function creating(TraderOrder $traderOrder)
-    {
-        $order = $traderOrder->order;
-        if ($this->shouldSetAsBaseTraderOrder($order)) {
-            $traderOrder->fill([
-                'is_base' => true,
-            ]);
-        }
-    }
+    public function creating(TraderOrder $traderOrder) {}
 
     /**
      * Handle the TraderOrder "created" event.
@@ -32,6 +25,13 @@ class TraderOrderObserver
      */
     public function created(TraderOrder $traderOrder)
     {
+        $order = $traderOrder->order;
+        if ($this->shouldSetAsBaseTraderOrder($order, $traderOrder)) {
+            $traderOrder->update([
+                'is_base' => true,
+            ]);
+        }
+
         if ($traderOrder->needsProcessingAfterInitiation()) {
             $traderOrder->processInitiatedTraderOrder();
         }
@@ -42,16 +42,27 @@ class TraderOrderObserver
      */
     protected function shouldSetAsBaseTraderOrder(FinancingOrder $order): bool
     {
-        if ($order->traderOrders()->count() === 0) {
-            return true;
-        }
+        return $this->isFirstTraderOrder($order)
+            || $this->hasDuplicatedBaseTraderOrder($order);
+    }
 
-        $baseTraderOrder = $order->traderOrders()
+    private function isFirstTraderOrder(FinancingOrder $order): bool
+    {
+        return $order->traderOrders()->count() === 1;
+    }
+
+    private function hasDuplicatedBaseTraderOrder(FinancingOrder $order, int $staleAfterHours = 72): bool
+    {
+        $currentBaseOrder = $order->traderOrders()
             ->where('is_base', true)
             ->latest('id')
             ->first();
 
-        return $baseTraderOrder && now()->diffInHours($baseTraderOrder->created_at) >= 72;
+        if (! $currentBaseOrder) {
+            return true;
+        }
+
+        return now()->diffInHours($currentBaseOrder->created_at) >= $staleAfterHours;
     }
 
     /**
@@ -63,7 +74,6 @@ class TraderOrderObserver
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
-
         }
     }
 
@@ -75,7 +85,7 @@ class TraderOrderObserver
 
         if ($traderOrder->status->is(TraderOrderStatus::Completed)) {
             if ($traderOrder->hasAutoCompleteFinancingOrder()) {
-                app(CompleteOrder::class)->handle($traderOrder->order->id, []);
+                CompleteOrderJob::dispatch($traderOrder->order->id, []);
             }
         }
 

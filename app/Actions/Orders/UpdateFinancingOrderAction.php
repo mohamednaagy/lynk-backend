@@ -5,12 +5,15 @@ namespace App\Actions\Orders;
 use App\Actions\Contracts\Orders\UpdateFinancingOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Cknow\Money\Money;
 use Illuminate\Support\Arr;
 use Propaganistas\LaravelPhone\PhoneNumber;
 
 class UpdateFinancingOrderAction implements UpdateFinancingOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @param  mixed  $data
      * @return mixed
@@ -41,6 +44,10 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
 
         $data['status_reason'] = null;
 
+        if (isset($data['status'])) {
+            $this->updateOrderStatus($financingOrder, $data['status']);
+        }
+
         $financingOrder->update(
             Arr::only(
                 $data,
@@ -50,7 +57,6 @@ class UpdateFinancingOrderAction implements UpdateFinancingOrder
                     'phone_number',
                     'amount',
                     'selling_price',
-                    'status',
                     'status_reason',
                     'customer_name',
                     'is_verification_required',

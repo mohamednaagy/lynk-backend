@@ -8,6 +8,7 @@ use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\OrderService;
 use App\Services\LocalMarket\UnitService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -47,10 +48,11 @@ class InsertOrderInventoriesAndUnits implements ShouldQueue
             $this->unitService->changeOrderUnitsOwnershipTo(
                 $order,
                 OwnershipTypes::Company,
-                $order->company_id,
+                $order->lender_identifier,
                 UnitOwnershipAction::PurchaseCommodity
             );
-        } catch (\Throwable $e) {
+
+        } catch (Exception $e) {
             if ($order) {
                 $order->update([
                     'status' => OrderStatus::FailedPurchase,

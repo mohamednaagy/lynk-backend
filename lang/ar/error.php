@@ -19,7 +19,7 @@ return [
     'invalid_operator_tcn' => 'معامل TCN غير صحيح',
     'no_enough_balance' => 'لا يوجد رصيد كافي',
     'user_doesnt_belong_to_company' => 'المستخدم لا بنتمي للشركه',
-    'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح',
+    'order_status_doesnt_follow_sequence' => 'حالة الطلب التمويلي لا يمكن تغييرها لأنها لا تتبع التسلسل الصحيح. رقم الطلب التمويلي: :financingOrderId، رقم طلب التداول: :traderOrderId',
     'order_require_client_verification' => 'لا يمكنك المتابعة لأن الطلب يتطلب التحقق من العميل',
     'order_cannot_be_updated' => 'لا يمكن تعديل الطلب إلا إذا كانت الحالة '.FinancingOrderStatus::joinDescription(FinancingOrderStatus::$allowedToUpdateStatuses),
     'webhook_type_not_supported' => 'هذا النوع غير مدعوم',
@@ -57,4 +57,9 @@ return [
     'invalid_media_collection_type' => 'نوع مجموعة الوسائط المحدد غير صالح.',
     'order_has_no_active_trade_request' => 'تم إلغاء هذا الطلب أو لا يحتوي على طلب تداول نشط.',
     'item_not_found' => 'هذا العنصر غير موجود',
+    'unable_to_settle_order' => 'لا يمكن تسوية هذا الطلب. التسوية متاحة فقط للطلبات المكتملة في السوق المحلي.',
+    'settlement_check_in_progress' => 'جارٍ التحقق من حالة التسوية.',
+    'unable_to_generate_sell_confirmation_certificate' => 'شهادة تأكيد البيع غير متوفرة لطلب التداول هذا. يرجى المحاولة لاحقًا. آخر فحص: :created_at بواسطة :creator_name',
+    'pending_settlement_check' => 'عملية فحص التسوية قيد التنفيذ بالفعل.',
+
 ];

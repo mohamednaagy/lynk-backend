@@ -13,7 +13,6 @@ class LocalMarketOrderHasUnit extends Model
         'local_market_order_id',
         'unit_id',
         'inventory_id',
-        'settlement_status',
     ];
 
     public function inventoryUnit()
