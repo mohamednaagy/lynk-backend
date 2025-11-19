@@ -32,6 +32,9 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
             ]);
         }
 
+        if ($traderOrder->needsProcessingAfterInitiation()) {
+            $traderOrder->processInitiatedTraderOrder();
+        }
     }
 
     /**

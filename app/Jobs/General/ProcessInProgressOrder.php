@@ -15,7 +15,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -69,16 +68,9 @@ class ProcessInProgressOrder implements ShouldQueue
 
             app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
 
-            DB::transaction(function () use ($financingOrder, $trader) {
-                $createdTraderOrder = $trader->createTraderOrder($financingOrder);
-                $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
+            $trader->createTraderOrder($financingOrder);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
 
-                DB::afterCommit(function () use ($createdTraderOrder) {
-                    if ($createdTraderOrder->needsProcessingAfterInitiation()) {
-                        $createdTraderOrder->processInitiatedTraderOrder();
-                    }
-                });
-            });
         } catch (BalanceIsNotEnoughException $e) {
             Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has balance is not enough');
             Log::channel(LOG_CHANNEL_LYNK)->alert($financingOrder->id);
