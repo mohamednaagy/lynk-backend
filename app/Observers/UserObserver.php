@@ -38,7 +38,7 @@ class UserObserver
 
     public function created(User $user): void
     {
-        if (config('app.auto_verified_users')) {
+        if ($user->email_auto_verified) {
             $user->markEmailAsVerifiedAndUpdatePassword(config('app.auto_verified_users_password'));
         }
     }
