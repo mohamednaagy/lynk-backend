@@ -32,7 +32,7 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
                 'company_id',
                 'phone_number',
                 'password',
-                'email_auto_verify',
+                'is_auto_verified',
             ]
         ));
 

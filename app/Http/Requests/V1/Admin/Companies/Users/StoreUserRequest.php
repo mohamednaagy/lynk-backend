@@ -43,7 +43,7 @@ class StoreUserRequest extends FormRequest
                 'required',
                 Rule::in(Area::roles(Area::Lender)),
             ],
-            'email_auto_verify' => ['boolean', new CheckAutoVerifiedUsersIsAllowedRule],
+            'is_auto_verified' => ['boolean', new CheckAutoVerifiedUsersIsAllowedRule],
         ];
     }
 }

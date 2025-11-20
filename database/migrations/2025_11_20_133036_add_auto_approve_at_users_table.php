@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('email_auto_verify')->default(false)->after('email');
+            $table->boolean('is_auto_verified')->default(false)->after('email');
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('email_auto_verify');
+            $table->dropColumn('is_auto_verified');
         });
     }
 };
