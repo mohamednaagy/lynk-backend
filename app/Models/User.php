@@ -50,7 +50,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         'company_id',
         'is_active',
         'can_manage_orders',
-        'email_auto_verified',
+        'email_auto_verify',
     ];
 
     /**
