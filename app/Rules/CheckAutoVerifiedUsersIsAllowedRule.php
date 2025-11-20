@@ -6,8 +6,6 @@ use Illuminate\Contracts\Validation\Rule;
 
 class CheckAutoVerifiedUsersIsAllowedRule implements Rule
 {
-    protected string $errorMessage = '';
-
     /**
      * Create a new rule instance.
      *
@@ -39,6 +37,6 @@ class CheckAutoVerifiedUsersIsAllowedRule implements Rule
      */
     public function message(): string
     {
-        return $this->errorMessage ?: __('validation.auto_verified_not_allowed');
+        return __('validation.auto_verified_not_allowed');
     }
 }
