@@ -31,10 +31,13 @@ use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Clients\LynkClient;
 use App\Support\Traders\Contracts\Deliverable;
 use App\Support\Traders\Contracts\TraderInterface;
+use App\Support\Traders\Drivers\Lynk\Jobs\FireCancellationWebhook;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelOrderAtLocalMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkCancelTraderOrder;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkSellingCommodityToOpenMarket;
 use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkTransferOwnershipToCustomer;
+use App\Support\Traders\Drivers\Lynk\Jobs\RetryTraderOrder;
+use App\Support\Traders\Drivers\Lynk\Jobs\UpdateFinancingOrderStatusAfterCancellation;
 use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -300,13 +303,13 @@ class LynkV1Driver implements Deliverable, TraderInterface
     {
         Bus::chain([
             new ProcessLynkCancelTraderOrder($traderOrder->id),
-            fn () => $this->updateFinancingOrderStatusAfterCancellation($traderOrder, $traderOrder->cancelDetail->cancel_reason->value),
-            fn () => $this->retryOrder($traderOrder),
-            fn () => app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder),
+            new UpdateFinancingOrderStatusAfterCancellation($traderOrder->id),
+            new RetryTraderOrder($traderOrder->id),
+            new FireCancellationWebhook($traderOrder->id),
         ])->dispatch();
     }
 
-    protected function updateFinancingOrderStatusAfterCancellation($traderOrder, int $cancelReason): void
+    public function updateFinancingOrderStatusAfterCancellation(TraderOrder $traderOrder, int $cancelReason): void
     {
         $order = $traderOrder->order;
         $lender = $order->company->lender;

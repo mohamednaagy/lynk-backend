@@ -2,7 +2,7 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
-use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
+use App\Actions\Contracts\Orders\Webhooks\FireWebhookWhenStatusIsCancelled;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
 use App\Support\Traders\Traits\TraderHelperTrait;
@@ -14,7 +14,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Log;
 
-class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
+class FireCancellationWebhook implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, TraderHelperTrait;
 
@@ -38,33 +38,36 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
         $traderOrder = TraderOrder::query()
             ->find($this->traderOrderId);
 
-        if (is_null($traderOrder)) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found trader_order_id:'.$this->traderOrderId, [
+        if (
+            (is_null($traderOrder))) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('FireCancellationWebhook not found trader_order_id => '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
 
             return;
         }
 
-        if ($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)) {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle(' trader order status is not cancelled at ProcessLynkCancelTraderOrder', $traderOrder), [
+        if ($traderOrder->status->isNot(TraderOrderStatus::Cancelled)) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle(' trader order status is not cancelled at FireCancellationWebhook', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
-                'status' => $traderOrder->status->value,
                 'traderOrderId' => $this->traderOrderId,
+                'status' => $traderOrder->status->value,
             ]);
 
             return;
         }
 
-        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $traderOrder->cancelDetail->cancel_reason->value);
+        app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
+
     }
 
     public function failed($exception)
     {
+
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found at failed function trader_order_id => '.$this->traderOrderId, [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('FireCancellationWebhook not found at failed function trader_order_id => '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
 
@@ -75,9 +78,9 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
             'status' => TraderOrderStatus::FailureToCancel,
         ]);
 
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at ProcessLynkCancelTraderOrder ', $traderOrder), [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at FireCancellationWebhook ', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
-            'traderOrderId' => $this->traderOrderId,
+            'traderOrderId ' => $this->traderOrderId,
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
         ]);
