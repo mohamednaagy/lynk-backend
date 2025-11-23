@@ -2,9 +2,9 @@
 
 namespace App\Support\Traders\Drivers\Lynk\Jobs;
 
-use App\Actions\Contracts\Orders\TraderOrders\UpdateTraderOrderStatusToCancel;
 use App\Enums\TraderOrderStatus;
 use App\Models\TraderOrder;
+use App\Support\Traders\Facades\Trader;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -12,10 +12,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
+class RetryTraderOrder implements ShouldBeUnique, ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, TraderHelperTrait;
 
@@ -36,37 +35,39 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        try {
-            DB::transaction(function () {
-                $traderOrder = TraderOrder::query()
-                    ->where('status', TraderOrderStatus::PendingCancellation)
-                    ->find($this->traderOrderId);
+        $traderOrder = TraderOrder::query()
+            ->find($this->traderOrderId);
 
-                if (
-                    (is_null($traderOrder))) {
-                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found trader_order_id:'.$this->traderOrderId, [
-                        'traderOrderId' => $this->traderOrderId,
-                    ]);
-
-                    return;
-                }
-                app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $traderOrder->cancelDetail->cancel_reason->value);
-            });
-        } catch (\Exception $e) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('error at ProcessLynkCancelTraderOrder ,cant add cancel details trader_order_id => '.$this->traderOrderId, [
+        if (
+            (is_null($traderOrder))) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('RetryTraderOrder not found trader_order_id => '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
-                'error' => $e->getMessage(),
             ]);
+
+            return;
         }
+
+        if ($traderOrder->status->isNot(TraderOrderStatus::Cancelled)) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle(' trader order status is not cancelled at RetryTraderOrder', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'status' => $traderOrder->status->value,
+                'traderOrderId' => $this->traderOrderId,
+            ]);
+
+            return;
+        }
+
+        Trader::driver($traderOrder->provider, $traderOrder->version)->retryOrder($traderOrder);
 
     }
 
     public function failed($exception)
     {
+
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
 
         if (! $traderOrder) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found at failed function trader_order_id => '.$this->traderOrderId, [
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('RetryTraderOrder not found at failed function trader_order_id => '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
             ]);
 
@@ -77,7 +78,7 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
             'status' => TraderOrderStatus::FailureToCancel,
         ]);
 
-        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at ProcessLynkCancelTraderOrder ', $traderOrder), [
+        log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at RetryTraderOrder ', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId ' => $this->traderOrderId,
             'message' => $exception->getMessage(),
