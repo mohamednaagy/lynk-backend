@@ -61,7 +61,7 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
 
     public function failed($exception)
     {
-        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (! $traderOrder) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found at failed function trader_order_id => '.$this->traderOrderId, [
