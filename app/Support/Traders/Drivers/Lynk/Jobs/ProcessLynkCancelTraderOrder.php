@@ -77,7 +77,7 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
 
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at ProcessLynkCancelTraderOrder ', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
-            'traderOrderId ' => $this->traderOrderId,
+            'traderOrderId' => $this->traderOrderId,
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
         ]);
