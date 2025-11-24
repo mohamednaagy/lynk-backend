@@ -40,7 +40,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'mode',
         'version',
         'failure_reason',
-        'expiry_date',
+        'expire_at',
         'refunded_at',
         'refund_status',
         'purchasing_commodity_information',
@@ -186,6 +186,26 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
+    }
+
+    public function includeExpireAt(TraderOrder $traderOrder): ?Primitive
+    {
+
+        if (! $traderOrder->isAutomaticMode()) {
+            return null;
+        }
+
+        $latestTimeLimit = $traderOrder->timeLimits()->latest()->first();
+
+        if (! $latestTimeLimit) {
+            return $this->primitive(null);
+        }
+
+        $expireAt = Carbon::parse($latestTimeLimit->effective_at);
+        $formattedExpireAt = saudi_now('Y-m-d h:i:s A', $expireAt);
+
+        return $this->primitive($formattedExpireAt);
+
     }
 
     public function includeCancelDetails(TraderOrder $traderOrder)
