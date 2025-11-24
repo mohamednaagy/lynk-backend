@@ -118,8 +118,8 @@ abstract class AbstractTraderHistoryTransformer extends TransformerAbstract
             'is_deliverable' => $this->traderOrder->isDeliverable(),
             'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => [
-                'url' => $history ? $this->getCertificateLURL(DocumentType::CLIENT_WAKALA,
-                    $this->traderOrder->id) : null,
+                'url' => $this->getCertificateLURL(DocumentType::CLIENT_WAKALA,
+                    $this->traderOrder->id),
                 'date' => $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null,
             ],
             'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
