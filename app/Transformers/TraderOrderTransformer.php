@@ -190,16 +190,22 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeExpireAt(TraderOrder $traderOrder): ?Primitive
     {
-        $effective_at = $traderOrder->timeLimits()->latest()->first()->effective_at;
-        if ($traderOrder->isAutomaticMode()) {
-            if ($effective_at) {
-                return $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at)));
-            }
 
+        if (! $traderOrder->isAutomaticMode()) {
+            return null;
+        }
+
+        $latestTimeLimit = $traderOrder->timeLimits()->latest()->first();
+
+        if (! $latestTimeLimit) {
             return $this->primitive(null);
         }
 
-        return null;
+        $expireAt = Carbon::parse($latestTimeLimit->effective_at);
+        $formattedExpireAt = saudi_now('Y-m-d h:i:s A', $expireAt);
+
+        return $this->primitive($formattedExpireAt);
+
     }
 
     public function includeCancelDetails(TraderOrder $traderOrder)
