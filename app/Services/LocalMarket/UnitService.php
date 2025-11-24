@@ -236,21 +236,20 @@ class UnitService
     public static function getUnitsByGroupedByPreviousOwner(LocalMarketOrder $localMarketOrder)
     {
         $ownershipTypeOriginalSupplier = OwnershipTypes::OriginalSupplier;
-        $previousOrdersText = trans('local-market.old_request', [], 'ar'); // Localized text
+        $previousOrdersText = trans('local-market.old_request', [], 'ar');
 
-        return LocalMarketInventoryUnits::select(
-            'local_market_inventory_units.local_market_inventory_id',
-            DB::raw("
+        return LocalMarketInventoryUnits::selectRaw(
+            'local_market_inventory_units.local_market_inventory_id,
             CASE
-                WHEN local_market_inventory_units.previous_owner_type = $ownershipTypeOriginalSupplier
+                WHEN local_market_inventory_units.previous_owner_type = ?
                 THEN companies.name
-                ELSE '$previousOrdersText'
-            END AS previous_owner
-        "),
-            'local_market_inventory_units.previous_owner_type',
-            DB::raw('COUNT(*) AS unit_count'),
+                ELSE ?
+            END AS previous_owner,
+            local_market_inventory_units.previous_owner_type,
+            COUNT(*) AS unit_count',
+            [$ownershipTypeOriginalSupplier, $previousOrdersText]
         )
-            ->join('local_market_inventories', 'local_market_inventories.id', '=', 'local_market_inventory_units.local_market_inventory_id')
+            ->fromRaw('local_market_inventory_units FORCE INDEX (idx_units_previous_owner_grouping)')
             ->leftJoin('companies', 'companies.id', '=', 'local_market_inventory_units.previous_owner')
             ->where('local_market_inventory_units.hold_for', $localMarketOrder->id)
             ->groupBy(
