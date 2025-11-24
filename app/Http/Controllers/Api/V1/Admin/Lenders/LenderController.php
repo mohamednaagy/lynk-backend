@@ -13,6 +13,7 @@ use App\Enums\CompanyType;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Companies\CompaniesListFilterRequest;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
 use App\Models\Lender;
@@ -52,8 +53,10 @@ class LenderController extends Controller
     }
 
     public function index(
+        CompaniesListFilterRequest $request,
         BuildPaginatedCompaniesQuery $buildPaginatedCompaniesQuery
     ): JsonResponse {
+        $request->validated();
         $companies = $buildPaginatedCompaniesQuery->setType(CompanyType::Lender)
             ->handle()
             ->paginate();
