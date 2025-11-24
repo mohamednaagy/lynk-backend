@@ -190,7 +190,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeExpireAt(TraderOrder $traderOrder): ?Primitive
     {
-        $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
+        $effective_at = $traderOrder->timeLimits()->latest()->first()->effective_at;
         if ($traderOrder->isAutomaticMode()) {
             if ($effective_at) {
                 return $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at)));
