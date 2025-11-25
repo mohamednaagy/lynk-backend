@@ -69,7 +69,6 @@ class LenderUserController extends Controller
                 'orders_count',
                 'role',
                 'is_invitation_accepted',
-                'company_name',
             ])->respond();
     }
 
