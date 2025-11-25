@@ -9,6 +9,7 @@ use App\Jobs\LocalMarket\CompletePurchasing;
 use App\Jobs\LocalMarket\InsertOrderInventoriesAndUnits;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
+use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 
@@ -31,11 +32,18 @@ class BuyCommoditiesAction implements BuyCommodities
     {
         try {
             $startTime = microtime(true);
-            Bus::chain([
-                new InsertOrderInventoriesAndUnits($localMarketOrder->id),
-                new CompletePurchasing($localMarketOrder->id),
-            ])
-                ->dispatch();
+
+            InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
+            $data = UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder);
+            $localMarketOrder->update([
+                'status' => OrderStatus::CommoditiesPurchased,
+                'data' => array_merge($localMarketOrder->data, ['data' => $data]),
+            ]);
+            // Bus::chain([
+            //     new InsertOrderInventoriesAndUnits($localMarketOrder->id),
+            //     new CompletePurchasing($localMarketOrder->id),
+            // ])
+            //     ->dispatch();
 
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('BuyCommoditiesAction Duration', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
