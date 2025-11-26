@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('local_market_inventory_units', function (Blueprint $table) {
-            $table->dropIndex('idx_units_previous_owner_grouping');
+            if (Schema::hasIndex('local_market_inventory_units', 'idx_units_previous_owner_grouping')) {
+                $table->dropIndex('idx_units_previous_owner_grouping');
+            }
         });
     }
 
