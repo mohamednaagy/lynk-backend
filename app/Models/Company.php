@@ -146,7 +146,7 @@ class Company extends BaseTenant
 
     public function lender()
     {
-        return $this->hasOne(Lender::class, 'id');
+        return $this->hasOne(Lender::class, 'id')->withTrashed();
     }
 
     public function getTokenExpireValue()
