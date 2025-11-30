@@ -70,7 +70,6 @@ class LynkV1Driver implements Deliverable, TraderInterface
         }
 
         $traderOrder = $this->createInitialTraderOrder($financingOrder, $preferredCommodityTypeId);
-        $this->updateReferenceNumber($traderOrder);
 
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::GetTtiId);
 
@@ -82,7 +81,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
         return $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
-            'reference' => $this->generateTemporaryReference($financingOrder),
+            'reference' => $this->generateFinalReferenceNumber($financingOrder),
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
@@ -91,25 +90,9 @@ class LynkV1Driver implements Deliverable, TraderInterface
         ]);
     }
 
-    private function generateTemporaryReference(Model $financingOrder): string
+    private function generateFinalReferenceNumber(Model $financingOrder): string
     {
-        return Str::upper(Str::random(14)).$financingOrder->id;
-    }
-
-    private function generateFinalReferenceNumber(Model $traderOrder): string
-    {
-        return sprintf(
-            'LYNK-%s-%s-%s',
-            $traderOrder->financing_order_id,
-            $traderOrder->id,
-            $traderOrder->created_at->format('Ymd')
-        );
-    }
-
-    private function updateReferenceNumber(Model $traderOrder): void
-    {
-        $referenceNumber = $this->generateFinalReferenceNumber($traderOrder);
-        $traderOrder->update(['reference' => $referenceNumber]);
+        return sprintf('LYNK-%s-%s', $financingOrder->id, now()->format('Ymd'));
     }
 
     /**
