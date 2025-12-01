@@ -15,7 +15,7 @@ RUN composer install \
 
 COPY . .
 
-RUN composer dump-autoload --optimize --no-dev
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # Stage 2: Runtime image
 FROM php:8.2-fpm-alpine
