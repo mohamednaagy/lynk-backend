@@ -92,7 +92,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
 
     private function generateFinalReferenceNumber(Model $financingOrder): string
     {
-        return sprintf('LYNK-%s-%s', $financingOrder->id, now()->format('Ymd'));
+        return sprintf('LYNK-%s-%s-%s', $financingOrder->id, Str::upper(Str::random(14)), now()->format('Ymd'));
     }
 
     /**
