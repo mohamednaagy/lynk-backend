@@ -16,7 +16,7 @@ class SupplierMonthlyUsageRequest extends FormRequest
     {
         return [
             'type' => [
-                'nullable',
+                'required',
                 'string',
                 Rule::in(['supplier_monthly_usage']),
             ],
