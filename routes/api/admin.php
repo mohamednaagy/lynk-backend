@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Commodities\SupplierMonthlyUsage;
 use App\Http\Controllers\Api\V1\Admin\Companies\LenderClients\ClientAutoSellPeriodController;
 use App\Http\Controllers\Api\V1\Admin\Constants\ConstantController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -154,6 +155,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
             Route::get('{supplier}/locations/dropdown-list', CommodityLocationLiteList::class);
             Route::apiResource('{supplier}/locations', CommodityLocationController::class);
+            Route::get('{commodity_supplier}/reports', SupplierMonthlyUsage::class);
         });
 
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);

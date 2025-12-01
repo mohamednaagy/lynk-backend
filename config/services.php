@@ -41,4 +41,13 @@ return [
         'selling_commodity_end_time' => env('BURSAM_SELLING_COMMODITY_END_TIME', '18:30:00'),
     ],
 
+    'reports' => [
+        'supplier_monthly_usage' => [
+            // If REPORTS_START_DATE and REPORTS_END_DATE are not set in .env (or null),
+            // the command will automatically use the previous month's date range
+            'start_date' => env('REPORTS_START_DATE'),
+            'end_date' => env('REPORTS_END_DATE'),
+        ],
+    ],
+
 ];

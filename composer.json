@@ -22,7 +22,6 @@
         "guzzlehttp/guzzle": "^7.2",
         "jenssegers/agent": "^2.6",
         "laravel/framework": "^12.0",
-        
         "laravel/nightwatch": "^1.10",
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.12",
@@ -53,6 +52,7 @@
         "symfony/mailgun-mailer": "^6.1",
         "symfony/sendgrid-mailer": "^7.3",
         "twilio/sdk": "^6.37",
+        "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.4",
         "web-token/jwt-encryption-algorithm-aescbc": "*",
         "web-token/jwt-encryption-algorithm-dir": "*",
         "web-token/jwt-framework": "^3.4",

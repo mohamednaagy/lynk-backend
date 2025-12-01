@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\GenerateSupplierMonthlyUsageReportsCommand;
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use Illuminate\Console\Scheduling\Schedule;
@@ -35,6 +36,11 @@ class Kernel extends ConsoleKernel
         $schedule->command("telescope:prune --hours={$hours}")
             ->timezone($timezone)
             ->dailyAt('00:00')
+            ->onOneServer();
+
+        $schedule->command(GenerateSupplierMonthlyUsageReportsCommand::class)
+            ->timezone($timezone)
+            ->monthlyOn(1, '00:00')
             ->onOneServer();
     }
 

@@ -71,6 +71,44 @@ return [
             'after_commit' => false,
         ],
 
+        // RabbitMQ via vladimir-yuldashev/laravel-queue-rabbitmq
+        // Simple CloudAMQP config following the package README.
+        'rabbitmq' => [
+            'driver' => 'rabbitmq',
+
+            // Connection class not specified - package will use default (handles SSL via 'secure' flag)
+            // Default queue / routing key
+            'queue' => env('RABBITMQ_QUEUE_NAME', 'QE.DEV.reports'),
+
+            'hosts' => [
+                [
+                    'host' => env('RABBITMQ_HOST', '127.0.0.1'),
+                    'port' => (int) env('RABBITMQ_PORT', 5672),
+                    'user' => env('RABBITMQ_USER', 'guest'),
+                    'password' => env('RABBITMQ_PASSWORD', 'guest'),
+                    'vhost' => env('RABBITMQ_VHOST', '/'),
+                ],
+            ],
+
+            // Enable TLS for CloudAMQP amqps endpoints
+            'secure' => env('RABBITMQ_SSL', true),
+
+            'options' => [
+                'ssl_options' => [
+                    'cafile' => env('RABBITMQ_SSL_CAFILE', null),
+                    'local_cert' => env('RABBITMQ_SSL_LOCALCERT', null),
+                    'local_key' => env('RABBITMQ_SSL_LOCALKEY', null),
+                    'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
+                    'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
+                ],
+                'heartbeat' => (int) env('RABBITMQ_HEARTBEAT', 60),
+                'prefetch_count' => (int) env('RABBITMQ_PREFETCH', 10),
+            ],
+
+            'retry_after' => 90,
+            'after_commit' => false,
+        ],
+
     ],
 
     /*
