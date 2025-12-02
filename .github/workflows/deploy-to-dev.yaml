@@ -1,114 +1,208 @@
-name: deploy on dev
+name: Deploy to Dev (Docker)
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - dev
+    workflow_dispatch:
+    push:
+        branches:
+            - dev
+
+concurrency:
+    group: deploy-dev
+    cancel-in-progress: false
 
 jobs:
-  deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install SSH key
-        id: install-ssh-key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    setup:
+        runs-on: ubuntu-latest
+        environment: dev
+        outputs:
+            servers: ${{ steps.set-servers.outputs.servers }}
+        steps:
+            - name: Set server IPs from environment variable
+              id: set-servers
+              env:
+                  SERVERS_JSON: ${{ vars.DEPLOYMENT_SERVER_IPS }}
+              run: |
+                  # Debug: Show what we're getting
+                  echo "Raw value from vars.DEPLOYMENT_SERVER_IPS:"
+                  echo "$SERVERS_JSON"
+                  echo "---"
 
-      - name: pulling and build code
-        id: pull-and-build
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} \
-           "cd /var/www/lynk-backend/ && \
-            git pull origin dev && \
-            composer install --ignore-platform-reqs && \
-            sudo php artisan migrate && \
-            sudo php artisan structure:clear && \
-            sudo php artisan structure:discover
-            sudo supervisorctl stop all && \
-            sudo supervisorctl start all"
+                  # Use env variable to avoid bash quote interpretation
+                  echo "servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
 
-      - name: set pr url
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
-        id: pr-url
-        uses: kceb/pull-request-url-action@v1
-        with:
-          github-oauth-token: ${{ secrets.GB_OAUTH_TOKEN }}
+    build:
+        runs-on: ubuntu-latest
+        environment: dev
 
-      - name: print info
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Build PHP-FPM image
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./docker/laravel/Dockerfile
+                  load: true
+                  tags: lynk-backend:${{ github.sha }}-dev
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@master
+              with:
+                  image-ref: lynk-backend:${{ github.sha }}-dev
+                  format: 'sarif'
+                  output: 'trivy-backend-results.sarif'
+                  severity: 'CRITICAL,HIGH'
+
+            - name: Save and compress Docker image
+              run: |
+                  # Save image to tar file
+                  docker save lynk-backend:${{ github.sha }}-dev | gzip > /tmp/lynk-backend-dev.tar.gz
+
+                  # Show compressed size
+                  echo "Compressed image size:"
+                  ls -lh /tmp/lynk-backend-dev.tar.gz
+
+            - name: Upload Docker image as artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: docker-image-dev
+                  path: /tmp/lynk-backend-dev.tar.gz
+                  retention-days: 1
+
+    deploy:
+        needs: [build, setup]
+        runs-on: ubuntu-latest
+        environment: dev
+        strategy:
+            matrix:
+                # Get servers from the setup job output
+                # DEPLOYMENT_SERVER_IPS must be a JSON array: ["10.0.0.1"]
+                server: ${{ fromJson(needs.setup.outputs.servers) }}
+            fail-fast: false
+
+        steps:
+            - name: Checkout code (for docker-compose files)
+              uses: actions/checkout@v4
+
+            - name: Download Docker image
+              uses: actions/download-artifact@v4
+              with:
+                  name: docker-image-dev
+                  path: /tmp/
+
+            - name: Setup SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+
+            - name: Transfer image and compose files to server ${{ matrix.server }}
+              run: |
+                  # Transfer image
+                  scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 -o Compression=yes -C /tmp/lynk-backend-dev.tar.gz ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/tmp/
+
+                  # Transfer docker-compose files
+                  scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -r docker/compose ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/tmp/lynk-backend-compose/
+                  scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no .env.example ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/tmp/lynk-backend-compose/
+
+                  echo "All files transferred to ${{ matrix.server }}"
+
+            - name: Deploy Docker containers on server ${{ matrix.server }}
+              run: |
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+                    set -euo pipefail
+
+                    # Load new image
+                    echo 'Loading Docker image...'
+                    gunzip -c /tmp/lynk-backend-dev.tar.gz | docker load
+                    docker tag lynk-backend:${{ github.sha }}-dev app-php-fpm:dev-latest
+
+                    # Clean up compressed file
+                    rm -f /tmp/lynk-backend-dev.tar.gz
+
+                    # Navigate to application directory
+                    cd /var/www/lynk-backend || exit 1
+
+                    # Pull latest code
+                    echo 'Pulling latest code...'
+                    git fetch origin
+                    git checkout dev
+                    git pull origin dev
+
+                    # Copy docker-compose files from temp
+                    cp -r /tmp/lynk-backend-compose/compose docker/
+                    rm -rf /tmp/lynk-backend-compose
+
+                    # Run migrations before deploying
+                    echo 'Running database migrations...'
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      run --rm app php artisan migrate --force
+
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      run --rm app php artisan structure:clear
+
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      run --rm app php artisan structure:discover
+
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      run --rm app php artisan config:cache
+
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      run --rm app php artisan route:cache
+
+                    # Deploy all services (single server gets everything)
+                    echo 'Deploying all services...'
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      -f docker/compose/docker-compose.scheduler.yml \
+                      -f docker/compose/docker-compose.group1.yml \
+                      -f docker/compose/docker-compose.group2.yml \
+                      -f docker/compose/docker-compose.group3.yml \
+                      up -d --force-recreate
+
+                    # Wait for services to start
+                    echo 'Waiting for services to start...'
+                    sleep 15
+
+                    # Verify deployment
+                    echo 'Verifying deployment...'
+                    docker compose -f docker/compose/docker-compose.base.yml \
+                      -f docker/compose/docker-compose.scheduler.yml \
+                      -f docker/compose/docker-compose.group1.yml \
+                      -f docker/compose/docker-compose.group2.yml \
+                      -f docker/compose/docker-compose.group3.yml \
+                      ps
+
+                    echo 'Deployment completed successfully'
+                  "
+
+    notify:
+        needs: deploy
         if: always()
-        run: |
-          echo "Repository Name: $GITHUB_REPOSITORY"
-          echo "Branch Name: $GITHUB_REF"
-          echo "pr-url: ${{ steps.pr-url.outputs.url }}"
-          echo "Execution Time: $(date)"
-          echo "Workflow Status: ${{ job.status }}"
+        runs-on: ubuntu-latest
+        environment: dev
 
-          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"${{ steps.pr-url.outputs.url }}"'"}'  ${{ secrets.SLACK_HOOK_URL }}
+        steps:
+            - name: Send Slack notification
+              run: |
+                  # Build PR URL if applicable
+                  PR_URL="${{ github.event.pull_request.html_url }}"
+                  if [ -z "$PR_URL" ]; then
+                    PR_URL="N/A"
+                  fi
 
-  test:
-    runs-on: ubuntu-latest
-    needs: deploy
-    steps:
-      - name: Install SSH key
-        id: install-ssh-key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+                  echo "Repository Name: $GITHUB_REPOSITORY"
+                  echo "Branch Name: $GITHUB_REF"
+                  echo "PR URL: $PR_URL"
+                  echo "Execution Time: $(date)"
+                  echo "Workflow Status: ${{ needs.deploy.result }}"
+                  echo "Docker Image Tag: ${{ github.sha }}"
 
-      - name: Run Tests with Docker Compose
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
-          sudo su - ubuntu
-          cd /home/ubuntu/lynk-backend-automation
-          docker-compose down || true
-          docker-compose up --abort-on-container-exit || true
-          docker-compose down
-          EOF
-
-      - name: Merge Allure Results
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
-          sudo su - ubuntu
-          cd /home/ubuntu/lynk-backend-automation
-          mkdir -p merged-allure-results
-          cp -R allure-results/admin/* merged-allure-results/
-          cp -R allure-results/lender/* merged-allure-results/
-          cp -R allure-results/supplier/* merged-allure-results/
-          EOF
-
-      - name: Generate Allure Report
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
-          sudo su - ubuntu
-          cd /home/ubuntu/lynk-backend-automation
-          allure generate merged-allure-results -o allure-report --clean
-          EOF
-
-      - name: Download Allure Report to Runner
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
-          sudo tar -czf /tmp/allure-report.tar.gz -C /home/ubuntu/lynk-backend-automation allure-report
-          EOF
-          scp -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/tmp/allure-report.tar.gz ./allure-report.tar.gz
-          ls -l
-          tar -xzf allure-report.tar.gz
-          ls -l
-
-      - name: Deploy Allure Report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GB_OAUTH_TOKEN }}
-          publish_dir: allure-report
-
-      - name: Cleanup Docker Containers - Fix Permissions
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
-          sudo su - ubuntu
-          cd /home/ubuntu/lynk-backend-automation
-          docker-compose down --remove-orphans
-          sudo chown -R $USER:$USER allure-results
-          sudo chown -R $USER:$USER allure-report
-          EOF
+                  curl -X POST -H 'Content-type: application/json' --data '{
+                    "text":"🐳 Backend Docker Deployment (Dev)\nRepository: '"$GITHUB_REPOSITORY"'\nBranch: '"$GITHUB_REF"'\nImage Tag: '"${{ github.sha }}"'\nTime: '"$(date)"'\nStatus: '"${{ needs.deploy.result }}"'\nPR: '"$PR_URL"'"
+                  }' ${{ secrets.SLACK_HOOK_URL }}

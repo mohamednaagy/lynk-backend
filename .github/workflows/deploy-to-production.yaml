@@ -1,19 +1,19 @@
-name: Deploy to Preprod (Docker)
+name: Deploy to Production (Docker)
 
 on:
     workflow_dispatch:
     push:
         branches:
-            - pre-production
+            - production
 
 concurrency:
-    group: deploy-preprod
+    group: deploy-production
     cancel-in-progress: false
 
 jobs:
     setup:
         runs-on: ubuntu-latest
-        environment: pre-production
+        environment: production
         outputs:
             servers: ${{ steps.set-servers.outputs.servers }}
         steps:
@@ -26,40 +26,40 @@ jobs:
                   echo "servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
 
     build:
-        runs-on: [self-hosted, backend]
-        environment: pre-production
+        runs-on: [self-hosted, production]
+        environment: production
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  ref: pre-production
+                  ref: production
 
             - name: Build PHP-FPM image
               run: |
-                  docker build -t lynk-backend:${{ github.sha }}-preprod \
-                    -t lynk-backend:preprod-latest \
+                  docker build -t lynk-backend:${{ github.sha }}-prod \
+                    -t lynk-backend:prod-latest \
                     -f docker/laravel/Dockerfile .
 
             - name: Save and compress Docker image
               run: |
                   # Save image to tar file
-                  docker save lynk-backend:${{ github.sha }}-preprod | gzip > /tmp/lynk-backend-preprod.tar.gz
+                  docker save lynk-backend:${{ github.sha }}-prod | gzip > /tmp/lynk-backend-prod.tar.gz
 
                   # Show compressed size
                   echo "Compressed image size:"
-                  ls -lh /tmp/lynk-backend-preprod.tar.gz
+                  ls -lh /tmp/lynk-backend-prod.tar.gz
 
     deploy-server-1:
         needs: [build, setup]
-        runs-on: [self-hosted, backend]
-        environment: pre-production
+        runs-on: [self-hosted, production]
+        environment: production
 
         steps:
             - name: Checkout code (for docker-compose files)
               uses: actions/checkout@v4
               with:
-                  ref: pre-production
+                  ref: production
 
             - name: Get first server IP
               id: server
@@ -68,33 +68,45 @@ jobs:
                   SERVER_1=$(echo $SERVERS | jq -r '.[0]')
                   echo "ip=$SERVER_1" >> $GITHUB_OUTPUT
 
+            - name: Setup SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  chmod 700 ~/.ssh
+
+                  # Write SSH key to file
+                  echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deployment_key
+                  chmod 600 ~/.ssh/deployment_key
+
+                  # Configure SSH with no host checking for simplicity
+                  cat >> ~/.ssh/config <<EOF
+                  Host *
+                      IdentityFile ~/.ssh/deployment_key
+                      StrictHostKeyChecking no
+                      UserKnownHostsFile /dev/null
+                  EOF
+
             - name: Transfer image and compose files to server 1
               run: |
                   # Transfer image
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    /tmp/lynk-backend-preprod.tar.gz \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
+                  scp /tmp/lynk-backend-prod.tar.gz ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
 
                   # Transfer docker-compose files
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no -r \
-                    docker/compose \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
+                  scp -r docker/compose ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
 
                   echo "All files transferred to server 1"
 
             - name: Deploy on server 1 (Base + Scheduler + Group 1)
               run: |
-                  ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                  ssh ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
                     set -euo pipefail
 
                     # Load new image
                     echo 'Loading Docker image...'
-                    gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
-                    docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
+                    gunzip -c /tmp/lynk-backend-prod.tar.gz | docker load
+                    docker tag lynk-backend:${{ github.sha }}-prod app-php-fpm:prod-latest
 
                     # Clean up compressed file
-                    rm -f /tmp/lynk-backend-preprod.tar.gz
+                    rm -f /tmp/lynk-backend-prod.tar.gz
 
                     # Navigate to application directory
                     cd /var/www/lynk-backend || exit 1
@@ -102,8 +114,8 @@ jobs:
                     # Pull latest code
                     echo 'Pulling latest code...'
                     sudo git fetch origin
-                    sudo git checkout pre-production
-                    sudo git pull origin pre-production
+                    sudo git checkout production
+                    sudo git pull origin production
 
                     # Copy docker-compose files from temp
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
@@ -148,14 +160,14 @@ jobs:
 
     deploy-server-2:
         needs: [build, setup, deploy-server-1]
-        runs-on: [self-hosted, backend]
-        environment: pre-production
+        runs-on: [self-hosted, production]
+        environment: production
 
         steps:
             - name: Checkout code (for docker-compose files)
               uses: actions/checkout@v4
               with:
-                  ref: pre-production
+                  ref: production
 
             - name: Get second server IP
               id: server
@@ -164,33 +176,45 @@ jobs:
                   SERVER_2=$(echo $SERVERS | jq -r '.[1]')
                   echo "ip=$SERVER_2" >> $GITHUB_OUTPUT
 
+            - name: Setup SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  chmod 700 ~/.ssh
+
+                  # Write SSH key to file
+                  echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deployment_key
+                  chmod 600 ~/.ssh/deployment_key
+
+                  # Configure SSH with no host checking for simplicity
+                  cat >> ~/.ssh/config <<EOF
+                  Host *
+                      IdentityFile ~/.ssh/deployment_key
+                      StrictHostKeyChecking no
+                      UserKnownHostsFile /dev/null
+                  EOF
+
             - name: Transfer image and compose files to server 2
               run: |
                   # Transfer image
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    /tmp/lynk-backend-preprod.tar.gz \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
+                  scp /tmp/lynk-backend-prod.tar.gz ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
 
                   # Transfer docker-compose files
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no -r \
-                    docker/compose \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
+                  scp -r docker/compose ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
 
                   echo "All files transferred to server 2"
 
             - name: Deploy on server 2 (Base + Group 2)
               run: |
-                  ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                  ssh ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
                     set -euo pipefail
 
                     # Load new image
                     echo 'Loading Docker image...'
-                    gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
-                    docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
+                    gunzip -c /tmp/lynk-backend-prod.tar.gz | docker load
+                    docker tag lynk-backend:${{ github.sha }}-prod app-php-fpm:prod-latest
 
                     # Clean up compressed file
-                    rm -f /tmp/lynk-backend-preprod.tar.gz
+                    rm -f /tmp/lynk-backend-prod.tar.gz
 
                     # Navigate to application directory
                     cd /var/www/lynk-backend || exit 1
@@ -198,8 +222,8 @@ jobs:
                     # Pull latest code
                     echo 'Pulling latest code...'
                     sudo git fetch origin
-                    sudo git checkout pre-production
-                    sudo git pull origin pre-production
+                    sudo git checkout production
+                    sudo git pull origin production
 
                     # Copy docker-compose files from temp
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
@@ -226,14 +250,14 @@ jobs:
 
     deploy-server-3:
         needs: [build, setup, deploy-server-2]
-        runs-on: [self-hosted, backend]
-        environment: pre-production
+        runs-on: [self-hosted, production]
+        environment: production
 
         steps:
             - name: Checkout code (for docker-compose files)
               uses: actions/checkout@v4
               with:
-                  ref: pre-production
+                  ref: production
 
             - name: Get third server IP
               id: server
@@ -242,33 +266,45 @@ jobs:
                   SERVER_3=$(echo $SERVERS | jq -r '.[2]')
                   echo "ip=$SERVER_3" >> $GITHUB_OUTPUT
 
+            - name: Setup SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  chmod 700 ~/.ssh
+
+                  # Write SSH key to file
+                  echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deployment_key
+                  chmod 600 ~/.ssh/deployment_key
+
+                  # Configure SSH with no host checking for simplicity
+                  cat >> ~/.ssh/config <<EOF
+                  Host *
+                      IdentityFile ~/.ssh/deployment_key
+                      StrictHostKeyChecking no
+                      UserKnownHostsFile /dev/null
+                  EOF
+
             - name: Transfer image and compose files to server 3
               run: |
                   # Transfer image
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    /tmp/lynk-backend-preprod.tar.gz \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
+                  scp /tmp/lynk-backend-prod.tar.gz ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
 
                   # Transfer docker-compose files
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no -r \
-                    docker/compose \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
+                  scp -r docker/compose ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
 
                   echo "All files transferred to server 3"
 
             - name: Deploy on server 3 (Base + Group 3)
               run: |
-                  ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                  ssh ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
                     set -euo pipefail
 
                     # Load new image
                     echo 'Loading Docker image...'
-                    gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
-                    docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
+                    gunzip -c /tmp/lynk-backend-prod.tar.gz | docker load
+                    docker tag lynk-backend:${{ github.sha }}-prod app-php-fpm:prod-latest
 
                     # Clean up compressed file
-                    rm -f /tmp/lynk-backend-preprod.tar.gz
+                    rm -f /tmp/lynk-backend-prod.tar.gz
 
                     # Navigate to application directory
                     cd /var/www/lynk-backend || exit 1
@@ -276,8 +312,8 @@ jobs:
                     # Pull latest code
                     echo 'Pulling latest code...'
                     sudo git fetch origin
-                    sudo git checkout pre-production
-                    sudo git pull origin pre-production
+                    sudo git checkout production
+                    sudo git pull origin production
 
                     # Copy docker-compose files from temp
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
@@ -305,13 +341,13 @@ jobs:
             - name: Cleanup local image
               if: always()
               run: |
-                  rm -f /tmp/lynk-backend-preprod.tar.gz
+                  rm -f /tmp/lynk-backend-prod.tar.gz
 
     notify:
         needs: [deploy-server-1, deploy-server-2, deploy-server-3]
         if: always()
         runs-on: ubuntu-latest
-        environment: pre-production
+        environment: production
 
         steps:
             - name: Send Slack notification
@@ -335,5 +371,5 @@ jobs:
                   echo "Docker Image Tag: ${{ github.sha }}"
 
                   curl -X POST -H 'Content-type: application/json' --data '{
-                    "text":"🐳 Backend Docker Deployment (Preprod)\n*Status:* '"$DEPLOYMENT_STATUS"'\n*Repository:* '"$GITHUB_REPOSITORY"'\n*Branch:* '"$GITHUB_REF"'\n*Image Tag:* '"${{ github.sha }}"'\n*Time:* '"$(date)"'\n*PR URL:* '"$PR_URL"'"
+                    "text":"🐳 Backend Docker Deployment (Production)\n*Status:* '"$DEPLOYMENT_STATUS"'\n*Repository:* '"$GITHUB_REPOSITORY"'\n*Branch:* '"$GITHUB_REF"'\n*Image Tag:* '"${{ github.sha }}"'\n*Time:* '"$(date)"'\n*PR URL:* '"$PR_URL"'"
                   }' ${{ secrets.SLACK_HOOK_URL }}
