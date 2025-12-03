@@ -7,7 +7,6 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\Admin\Commodities\CommoditySupplier\SupplierMonthlyUsageRequest;
 use App\Models\Supplier;
 use App\Transformers\SupplierMonthlyUsageTransformer;
 use Illuminate\Http\JsonResponse;
@@ -23,13 +22,11 @@ class SupplierMonthlyUsage extends Controller
     }
 
     public function __invoke(
-        SupplierMonthlyUsageRequest $request,
         Supplier $commoditySupplier,
-        BuildSupplierMonthlyUsageQuery $getCommoditySupplierReports
+        BuildSupplierMonthlyUsageQuery $buildSupplierMonthlyUsageQuery
     ): JsonResponse {
-        $reports = $getCommoditySupplierReports
+        $reports = $buildSupplierMonthlyUsageQuery
             ->setSupplier($commoditySupplier)
-            ->setType($request->validated('type'))
             ->handle()
             ->paginate();
 

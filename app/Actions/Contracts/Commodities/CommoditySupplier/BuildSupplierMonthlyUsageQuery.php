@@ -10,6 +10,4 @@ interface BuildSupplierMonthlyUsageQuery
     public function handle(): Builder;
 
     public function setSupplier(Supplier $supplier): self;
-
-    public function setType(string $type): self;
 }

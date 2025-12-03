@@ -19,9 +19,6 @@ if (! defined('LOG_CHANNEL_AUTO_COMPLETE_SELL')) {
 if (! defined('LOG_CHANNEL_WEBHOOKS')) {
     define('LOG_CHANNEL_WEBHOOKS', 'webhooks');
 }
-if (! defined('LOG_CHANNEL_REPORTS')) {
-    define('LOG_CHANNEL_REPORTS', 'reports');
-}
 
 return [
 
@@ -184,12 +181,6 @@ return [
         LOG_CHANNEL_WEBHOOKS => [
             'driver' => 'daily',
             'path' => storage_path('logs/lynk/webhooks.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 30,
-        ],
-        'reports' => [
-            'driver' => 'daily',
-            'path' => storage_path('logs/reports/reports.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
         ],

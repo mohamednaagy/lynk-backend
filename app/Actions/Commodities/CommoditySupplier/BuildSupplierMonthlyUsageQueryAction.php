@@ -3,6 +3,7 @@
 namespace App\Actions\Commodities\CommoditySupplier;
 
 use App\Actions\Contracts\Commodities\CommoditySupplier\BuildSupplierMonthlyUsageQuery;
+use App\Jobs\Reports\Enums\ReportType;
 use App\Models\Company;
 use App\Models\Media;
 use App\Models\Supplier;
@@ -12,27 +13,18 @@ class BuildSupplierMonthlyUsageQueryAction implements BuildSupplierMonthlyUsageQ
 {
     protected Supplier $supplier;
 
-    protected string $type;
-
     public function handle(): Builder
     {
         return Media::query()
             ->where('model_type', Company::class)
             ->where('model_id', $this->supplier->id)
-            ->where('collection_name', $this->type)
+            ->where('collection_name', ReportType::SupplierMonthlyUsage)
             ->latest('id');
     }
 
-    public function setSupplier(Supplier $supplier): static
+    public function setSupplier(Supplier $supplier): self
     {
         $this->supplier = $supplier;
-
-        return $this;
-    }
-
-    public function setType(string $type): static
-    {
-        $this->type = $type;
 
         return $this;
     }

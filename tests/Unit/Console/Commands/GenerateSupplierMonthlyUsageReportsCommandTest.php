@@ -10,22 +10,11 @@ use App\Models\CompanySupplierDetail;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Clear any config overrides
-        Config::set('services.reports.supplier_monthly_usage.start_date', null);
-        Config::set('services.reports.supplier_monthly_usage.end_date', null);
-    }
 
     public function test_command_dispatches_jobs_for_all_suppliers()
     {
@@ -43,11 +32,9 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
         // Create non-supplier company (should be ignored)
         Company::factory()->create(['type' => CompanyType::Lender]);
 
-        $command = new GenerateSupplierMonthlyUsageReportsCommand;
-        $result = $command->handle();
-
-        // Assert command succeeded
-        $this->assertEquals(0, $result);
+        // Run the command via Artisan so IO/options are properly initialized
+        $this->artisan('reports:generate-supplier-monthly-usage')
+            ->assertSuccessful();
 
         // Assert jobs were dispatched for all suppliers (including inactive one)
         // Status should not affect the result - all suppliers should get jobs
@@ -76,14 +63,10 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
     {
         Bus::fake();
 
-        // Ensure env dates are not set
-        Config::set('services.reports.supplier_monthly_usage.start_date', null);
-        Config::set('services.reports.supplier_monthly_usage.end_date', null);
-
         $supplier = Company::factory()->create(['type' => CompanyType::Supplier]);
 
-        $command = new GenerateSupplierMonthlyUsageReportsCommand;
-        $command->handle();
+        $this->artisan('reports:generate-supplier-monthly-usage')
+            ->assertSuccessful();
 
         // Calculate expected previous month dates
         $now = Carbon::now();
@@ -98,28 +81,6 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
         });
     }
 
-    public function test_command_uses_env_dates_when_set()
-    {
-        Bus::fake();
-
-        $customStartDate = '2025-08-01 00:00:00';
-        $customEndDate = '2025-08-31 23:59:59';
-
-        Config::set('services.reports.supplier_monthly_usage.start_date', $customStartDate);
-        Config::set('services.reports.supplier_monthly_usage.end_date', $customEndDate);
-
-        $supplier = Company::factory()->create(['type' => CompanyType::Supplier]);
-
-        $command = new GenerateSupplierMonthlyUsageReportsCommand;
-        $command->handle();
-
-        // Verify jobs were dispatched with custom dates
-        Bus::assertDispatched(SupplierMonthlyUsageJob::class, function ($job) use ($customStartDate, $customEndDate) {
-            return $job->startDate === $customStartDate
-                && $job->endDate === $customEndDate;
-        });
-    }
-
     public function test_command_handles_chunking_correctly()
     {
         Bus::fake();
@@ -127,10 +88,8 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
         // Create 250 suppliers to test chunking (should process in 3 chunks: 100, 100, 50)
         Company::factory()->count(250)->create(['type' => CompanyType::Supplier]);
 
-        $command = new GenerateSupplierMonthlyUsageReportsCommand;
-        $result = $command->handle();
-
-        $this->assertEquals(0, $result);
+        $this->artisan('reports:generate-supplier-monthly-usage')
+            ->assertSuccessful();
 
         // Assert all 250 jobs were dispatched
         Bus::assertDispatched(SupplierMonthlyUsageJob::class, 250);
@@ -147,29 +106,6 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
 
         Bus::assertNothingDispatched();
     }
-
-    //    public function test_command_logs_appropriately()
-    //    {
-    //        // Ensure the reports channel is configured for testing
-    //        Config::set('logging.channels.reports', [
-    //            'driver' => 'single',
-    //            'path' => storage_path('logs/reports.log'),
-    //            'level' => 'debug',
-    //        ]);
-    //
-    //        Log::spy();
-    //        Bus::fake();
-    //
-    //        $supplier = Company::factory()->create(['type' => CompanyType::Supplier]);
-    //
-    //        $command = new GenerateSupplierMonthlyUsageReportsCommand;
-    //        $command->handle();
-    //
-    //        // Verify logging occurred
-    //        Log::shouldHaveReceived('channel')
-    //            ->with(LOG_CHANNEL_REPORTS)
-    //            ->atLeast()->once();
-    //    }
 
     public function test_command_handles_job_dispatch_failure_gracefully()
     {
@@ -222,8 +158,8 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
 
         $supplier = Company::factory()->create(['type' => CompanyType::Supplier]);
 
-        $command = new GenerateSupplierMonthlyUsageReportsCommand;
-        $command->handle();
+        $this->artisan('reports:generate-supplier-monthly-usage')
+            ->assertSuccessful();
 
         // Verify the job was dispatched with correct structure
         Bus::assertDispatched(SupplierMonthlyUsageJob::class, function ($job) use ($supplier) {
@@ -239,10 +175,6 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
     {
         Bus::fake();
 
-        // Ensure env dates are not set
-        Config::set('services.reports.supplier_monthly_usage.start_date', null);
-        Config::set('services.reports.supplier_monthly_usage.end_date', null);
-
         // Create test suppliers
         $supplier1 = Company::factory()->create(['type' => CompanyType::Supplier]);
         $supplier2 = Company::factory()->create(['type' => CompanyType::Supplier]);
@@ -253,11 +185,8 @@ class GenerateSupplierMonthlyUsageReportsCommandTest extends TestCase
         Carbon::setTestNow($futureDate);
 
         try {
-            $command = new GenerateSupplierMonthlyUsageReportsCommand;
-            $result = $command->handle();
-
-            // Assert command succeeded
-            $this->assertEquals(0, $result);
+            $this->artisan('reports:generate-supplier-monthly-usage')
+                ->assertSuccessful();
 
             // Calculate expected previous month dates (one month before the fake date)
             $expectedPreviousMonth = $futureDate->copy()->subMonth();

@@ -2,7 +2,8 @@
 
 namespace App\Jobs\Reports;
 
-use App\Models\Company;
+use App\Jobs\Reports\Dto\ReportMessage;
+use App\Jobs\Reports\Dto\SupplierMonthlyUsageMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,17 +31,10 @@ class SupplierMonthlyUsageJob implements ShouldQueue
     {
         $queueName = config('services.rabbitmq.queue_name');
 
-        $message = [
-            'type' => 'SUPPLIER_MONTHLY_USAGE',
-            'model_type' => Company::class,
-            'model_id' => $this->modelId,
-            'filters' => [
-                'start_date' => $this->startDate,
-                'end_date' => $this->endDate,
-            ],
-        ];
-
-        Queue::connection('rabbitmq')->pushRaw(json_encode($message), $queueName);
+        Queue::connection('rabbitmq')->pushRaw(
+            json_encode($this->buildMessage()->toArray()),
+            $queueName
+        );
     }
 
     /**
@@ -48,7 +42,7 @@ class SupplierMonthlyUsageJob implements ShouldQueue
      */
     public function failed(?Throwable $exception): void
     {
-        Log::channel(LOG_CHANNEL_REPORTS)->error('SupplierMonthlyUsageJob failed after all retries', [
+        Log::error("SupplierMonthlyUsageJob failed after all retries - supplier id {$this->modelId}", [
             'model_id' => $this->modelId,
             'start_date' => $this->startDate,
             'end_date' => $this->endDate,
@@ -56,5 +50,14 @@ class SupplierMonthlyUsageJob implements ShouldQueue
             'exception' => $exception?->getMessage(),
             'exception_trace' => $exception?->getTraceAsString(),
         ]);
+    }
+
+    private function buildMessage(): ReportMessage
+    {
+        return new SupplierMonthlyUsageMessage(
+            modelId: $this->modelId,
+            startDate: $this->startDate,
+            endDate: $this->endDate,
+        );
     }
 }

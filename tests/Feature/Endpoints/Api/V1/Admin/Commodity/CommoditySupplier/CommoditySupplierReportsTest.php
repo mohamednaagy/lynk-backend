@@ -3,6 +3,7 @@
 namespace Tests\Feature\Endpoints\Api\V1\Admin\Commodity\CommoditySupplier;
 
 use App\Enums\Role;
+use App\Jobs\Reports\Enums\ReportType;
 use App\Models\Company;
 use App\Models\Media;
 use App\Models\Supplier;
@@ -55,7 +56,7 @@ class CommoditySupplierReportsTest extends TestCase
         $reports = $this->createSupplierReports(self::$supplier, 3);
 
         $response = $this->actingAs(self::$userAdmin)
-            ->getJson($this->endpoint.'?type=supplier_monthly_usage&page=1')
+            ->getJson($this->endpoint.'?type='.ReportType::SupplierMonthlyUsage.'&page=1')
             ->assertOk();
 
         // Verify response structure
@@ -90,7 +91,7 @@ class CommoditySupplierReportsTest extends TestCase
         $reports = $this->createSupplierReports(self::$supplier, 15);
 
         $response = $this->actingAs(self::$userAdmin)
-            ->getJson($this->endpoint.'?type=supplier_monthly_usage&page=1')
+            ->getJson($this->endpoint.'?type='.ReportType::SupplierMonthlyUsage.'&page=1')
             ->assertOk();
 
         // Verify pagination meta exists
@@ -134,7 +135,7 @@ class CommoditySupplierReportsTest extends TestCase
         Grantify::syncPermissionToModel(self::$userManager, []);
 
         $this->actingAs(self::$userManager)
-            ->getJson($this->endpoint.'?type=supplier_monthly_usage&page=1')
+            ->getJson($this->endpoint.'?type='.ReportType::SupplierMonthlyUsage.'&page=1')
             ->assertForbidden();
     }
 
@@ -142,7 +143,7 @@ class CommoditySupplierReportsTest extends TestCase
     {
         // Don't create any reports for this supplier
         $response = $this->actingAs(self::$userAdmin)
-            ->getJson($this->endpoint.'?type=supplier_monthly_usage&page=1')
+            ->getJson($this->endpoint.'?type='.ReportType::SupplierMonthlyUsage.'&page=1')
             ->assertOk();
 
         // Verify empty data array
@@ -175,7 +176,7 @@ class CommoditySupplierReportsTest extends TestCase
 
         // Request reports for the main supplier
         $response = $this->actingAs(self::$userAdmin)
-            ->getJson($this->endpoint.'?type=supplier_monthly_usage&page=1')
+            ->getJson($this->endpoint.'?type='.ReportType::SupplierMonthlyUsage.'&page=1')
             ->assertOk();
 
         // Verify only the main supplier's reports are returned
@@ -200,7 +201,7 @@ class CommoditySupplierReportsTest extends TestCase
             $reports[] = Media::create([
                 'model_type' => Company::class,
                 'model_id' => $supplier->id,
-                'collection_name' => 'supplier_monthly_usage',
+                'collection_name' => ReportType::SupplierMonthlyUsage,
                 'name' => "report_{$i}.pdf",
                 'file_name' => "report_{$i}.pdf",
                 'mime_type' => 'application/pdf',

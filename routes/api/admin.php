@@ -155,7 +155,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
             Route::get('{supplier}/locations/dropdown-list', CommodityLocationLiteList::class);
             Route::apiResource('{supplier}/locations', CommodityLocationController::class);
-            Route::get('{commodity_supplier}/reports', SupplierMonthlyUsage::class);
+            Route::get('{commodity_supplier}/commodities-monthly-usage', SupplierMonthlyUsage::class);
         });
 
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);

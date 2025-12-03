@@ -8,7 +8,6 @@ use App\Models\Company;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Psr\Log\LoggerInterface;
 
 class GenerateSupplierMonthlyUsageReportsCommand extends Command
 {
@@ -17,7 +16,9 @@ class GenerateSupplierMonthlyUsageReportsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'reports:generate-supplier-monthly-usage';
+    protected $signature = 'reports:generate-supplier-monthly-usage
+                            {--start-date= : Optional period start datetime (Y-m-d H:i:s)}
+                            {--end-date= : Optional period end datetime (Y-m-d H:i:s)}';
 
     /**
      * The console command description.
@@ -26,81 +27,98 @@ class GenerateSupplierMonthlyUsageReportsCommand extends Command
      */
     protected $description = 'Generate monthly usage reports for all suppliers';
 
-    protected function log(): LoggerInterface
-    {
-        return Log::channel(LOG_CHANNEL_REPORTS);
-    }
-
     /**
      * Execute the console command.
      */
     public function handle(): int
     {
-        // Get date range from .env (REPORTS_START_DATE, REPORTS_END_DATE) or fallback to previous month
-        // Format: Y-m-d H:i:s (e.g., 2025-08-01 00:00:00)
-        $startDate = config('services.reports.supplier_monthly_usage.start_date');
-        $endDate = config('services.reports.supplier_monthly_usage.end_date');
+        $startInput = $this->option('start-date');
+        $endInput = $this->option('end-date');
 
-        // If not set in .env, use previous month as default
-        if (! $startDate || ! $endDate) {
-            $now = Carbon::now();
-            $previousMonth = $now->copy()->subMonth();
+        // If one of the dates is provided, both must be.
+        if (($startInput && ! $endInput) || ($endInput && ! $startInput)) {
+            $this->error('Both --start-date and --end-date must be provided together.');
 
-            $startDate = $previousMonth->copy()->startOfMonth()->format('Y-m-d H:i:s');
-            $endDate = $previousMonth->copy()->endOfMonth()->format('Y-m-d H:i:s');
+            return Command::FAILURE;
         }
 
-        $this->log()->info('GenerateSupplierMonthlyUsageReportsCommand started', [
+        if ($startInput && $endInput) {
+            try {
+                $start = Carbon::parse($startInput);
+                $end = Carbon::parse($endInput);
+            } catch (\Throwable $e) {
+                $this->error('Invalid start or end date provided. Please use a valid datetime string (Y-m-d H:i:s).');
+
+                return Command::FAILURE;
+            }
+
+            if ($end->lt($start)) {
+                $this->error('The end date must be greater than or equal to the start date.');
+
+                return Command::FAILURE;
+            }
+
+            $startDate = $start->format('Y-m-d H:i:s');
+            $endDate = $end->format('Y-m-d H:i:s');
+        } else {
+            // No explicit dates provided, fall back to previous full month.
+            [$startDate, $endDate] = $this->getReportingPeriod();
+        }
+
+        Log::info('GenerateSupplierMonthlyUsageReportsCommand started', [
             'period_start' => $startDate,
             'period_end' => $endDate,
         ]);
 
-        $this->log()->info("Period: {$startDate} to {$endDate}");
+        Log::info("Period: {$startDate} to {$endDate}");
 
-        $totalSuppliers = Company::where('type', CompanyType::Supplier)->count();
+        // Load all suppliers once and rely on collection helpers to check emptiness / count.
+        $suppliers = Company::where('type', CompanyType::Supplier)->get();
 
-        if ($totalSuppliers === 0) {
-            $this->log()->warning('No suppliers found.');
+        if ($suppliers->isEmpty()) {
+            Log::warning('No suppliers found.');
             $this->warn('No suppliers found.');
 
             return Command::SUCCESS;
         }
 
-        $this->log()->info("Processing {$totalSuppliers} supplier(s)...");
+        Log::info("Processing {$suppliers->count()} supplier(s)...");
 
         $successCount = 0;
         $failureCount = 0;
         $failedSuppliers = [];
 
-        Company::where('type', CompanyType::Supplier)
-            ->chunk(100, function ($suppliers) use ($startDate, $endDate, &$successCount, &$failureCount, &$failedSuppliers) {
-                foreach ($suppliers as $supplier) {
-                    try {
-                        SupplierMonthlyUsageJob::dispatch(
-                            $supplier->id,
-                            $startDate,
-                            $endDate
-                        );
+        foreach ($suppliers as $supplier) {
+            try {
+                SupplierMonthlyUsageJob::dispatch(
+                    $supplier->id,
+                    $startDate,
+                    $endDate
+                );
 
-                        $successCount++;
-                    } catch (\Exception $e) {
-                        $this->error("Failed to dispatch job for supplier ID: {$supplier->id} ({$e->getMessage()})");
-                        $failedSuppliers[] = [
-                            'id' => $supplier->id,
-                            'name' => $supplier->name ?? 'N/A',
-                        ];
-                        $failureCount++;
-                    }
-                }
-            });
+                $successCount++;
+            } catch (\Exception $e) {
+                Log::error("Failed to dispatch SupplierMonthlyUsageJob for supplier id {$supplier->id}", [
+                    'supplier_id' => $supplier->id,
+                    'period_start' => $startDate,
+                    'period_end' => $endDate,
+                    'exception' => $e->getMessage(),
+                ]);
+                $failedSuppliers[] = [
+                    'id' => $supplier->id,
+                    'name' => $supplier->name ?? 'N/A',
+                ];
+                $failureCount++;
+            }
+        }
 
-        $this->log()->info("Summary: {$successCount} dispatched, {$failureCount} failed", [
+        Log::info("Summary: {$successCount} dispatched, {$failureCount} failed", [
             'success_count' => $successCount,
             'failure_count' => $failureCount,
         ]);
 
         if ($failureCount > 0) {
-            $this->log()->error('Failed suppliers', [
+            Log::error('Failed suppliers', [
                 'failed_suppliers' => $failedSuppliers,
             ]);
             $this->error('Failed suppliers:');
@@ -111,10 +129,29 @@ class GenerateSupplierMonthlyUsageReportsCommand extends Command
             return Command::FAILURE;
         }
 
-        $this->log()->info('All jobs dispatched successfully.', [
+        Log::info('All jobs dispatched successfully.', [
             'total_dispatched' => $successCount,
         ]);
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Get the default reporting period as start and end datetime strings.
+     *
+     * This returns the previous full calendar month based on the
+     * current time when explicit dates are not provided.
+     *
+     * @return array{0:string,1:string}
+     */
+    private function getReportingPeriod(): array
+    {
+        $now = Carbon::now();
+        $previousMonth = $now->copy()->subMonth();
+
+        $startDate = $previousMonth->copy()->startOfMonth()->format('Y-m-d H:i:s');
+        $endDate = $previousMonth->copy()->endOfMonth()->format('Y-m-d H:i:s');
+
+        return [$startDate, $endDate];
     }
 }
