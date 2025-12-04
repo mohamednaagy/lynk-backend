@@ -45,7 +45,7 @@ class ProcessInProgressOrder implements ShouldQueue
     public function handle(): void
     {
         try {
-            $financingOrder = FinancingOrder::findOrFail($this->financingOrderId);
+            $financingOrder = FinancingOrder::withoutGlobalScopes()->lockForUpdate()->findOrFail($this->financingOrderId);
             $trader = Trader::getSuitableDriverForCompany($financingOrder);
 
             if ($financingOrder->traderOrders()->where('status', TraderOrderStatus::InProgress)->count() > 0) {
