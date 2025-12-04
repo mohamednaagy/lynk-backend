@@ -1,0 +1,165 @@
+# Local Development Override
+# Minimal setup for local development with live code reload
+
+services:
+  # Override app with bind mount for hot reload
+  app:
+    volumes:
+      - ../../../:/var/www/html
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  # Local infrastructure services
+  nginx:
+    image: nginx:alpine
+    container_name: laravel-nginx
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ../../../public:/var/www/html/public:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    command: >
+      sh -c "
+      cat > /etc/nginx/conf.d/default.conf <<'EOF'
+      server {
+          listen 80;
+          server_name _;
+          root /var/www/html/public;
+          index index.php index.html;
+          client_max_body_size 100M;
+
+          location /healthz {
+              access_log off;
+              return 200 'OK';
+              add_header Content-Type text/plain;
+          }
+
+          location / {
+              try_files \$$uri \$$uri/ /index.php?\$$query_string;
+          }
+
+          location ~ \.php$$ {
+              fastcgi_pass app:9000;
+              fastcgi_index index.php;
+              fastcgi_param SCRIPT_FILENAME \$$document_root\$$fastcgi_script_name;
+              include fastcgi_params;
+              fastcgi_read_timeout 300;
+          }
+
+          location ~ /\.ht {
+              deny all;
+          }
+      }
+      EOF
+      nginx -g 'daemon off;'
+      "
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  redis:
+    image: redis:7-alpine
+    container_name: laravel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:8.0
+    container_name: laravel-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psecret"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: laravel-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - laravel
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: laravel-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - laravel
+
+  # Only essential workers for local development
+  worker-default:
+    <<: *worker-template
+    command: php artisan queue:work redis --verbose --tries=3 --queue=default,notifications
+    volumes:
+      - ../../../:/var/www/html
+
+  worker-local-market:
+    <<: *worker-template
+    command: php artisan queue:work redis --verbose --tries=5 --queue=local_market,local_market_states
+    volumes:
+      - ../../../:/var/www/html
+
+  # Only 2 workers for local dev - add more as needed
+  # worker-trader-initiation:
+  #   <<: *worker-template
+  #   command: php artisan queue:work redis --verbose --tries=5 --queue=trader_order_initiation
+  #   volumes:
+  #     - ../../../:/var/www/html
+
+volumes:
+  mysql-data:
+
+networks:
+  laravel:
+    driver: bridge

@@ -1,0 +1,132 @@
+# Production Override
+# Resource limits and replica settings for production deployment
+
+services:
+  app:
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  scheduler:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  # Production workers with 2 replicas (except critical ones)
+  worker-local-market:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-order-initiation:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-buy-commodities:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-complete-commodities:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-default:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-trader-initiation:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-hold-units:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  # CRITICAL WORKERS - NEVER REPLICATE
+  worker-settlement:
+    deploy:
+      replicas: 1  # Financial settlement - MUST be single instance
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-order-fees:
+    deploy:
+      replicas: 1  # Fee charging - MUST be single instance
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Other workers
+  worker-inventory-logging:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+
+  worker-refresh-eligibilities:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  worker-external-integrations:
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  laravel:
+    driver: bridge
