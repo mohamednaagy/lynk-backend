@@ -45,6 +45,7 @@ class ProcessInProgressOrder implements ShouldQueue
     public function handle(): void
     {
         try {
+            // Add withoutGlobalScopes to prevent filtering orders with null company_id when looking for suitable trader
             $financingOrder = FinancingOrder::withoutGlobalScopes()->lockForUpdate()->findOrFail($this->financingOrderId);
             $trader = Trader::getSuitableDriverForCompany($financingOrder);
 
