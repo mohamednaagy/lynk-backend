@@ -67,7 +67,7 @@ docker.md                                # This documentation file
 - Production-optimized OPcache configuration
 - Exposes port 9000 for FastCGI
 
-**docker/compose/docker-compose.base.yml**
+**docker/compose/docker-compose.web.yml**
 - Defines the core `app` service (php-fpm)
 - Shared by all deployment scenarios
 - Reads `.env` file for application configuration
@@ -114,7 +114,7 @@ docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 Start the app, nginx, redis, mysql, and dev tools:
 
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.local.yml \
                up -d
 ```
@@ -135,7 +135,7 @@ Enable volumes for local development by editing the group compose files:
 
 **Group 1 only:**
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.local.yml \
                -f docker/compose/docker-compose.group1.yml \
                up -d
@@ -143,7 +143,7 @@ docker compose -f docker/compose/docker-compose.base.yml \
 
 **All groups:**
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.local.yml \
                -f docker/compose/docker-compose.group1.yml \
                -f docker/compose/docker-compose.group2.yml \
@@ -164,7 +164,7 @@ Or edit the `deploy.replicas` value in the compose file and restart.
 ### Stop All Services
 
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.local.yml \
                -f docker/compose/docker-compose.group1.yml \
                -f docker/compose/docker-compose.group2.yml \
@@ -278,7 +278,7 @@ cd /path/to/lynk-backend
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
 # Start base app + worker group 1
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.group1.yml \
                up -d
 ```
@@ -292,7 +292,7 @@ cd /path/to/lynk-backend
 
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.group2.yml \
                up -d
 ```
@@ -306,7 +306,7 @@ cd /path/to/lynk-backend
 
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.group3.yml \
                up -d
 ```
@@ -327,7 +327,7 @@ Laravel's task scheduler should run on exactly one server to prevent duplicate s
 To enable the scheduler on Server A (for example), include the scheduler compose file:
 
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.scheduler.yml \
                -f docker/compose/docker-compose.group1.yml \
                up -d
@@ -343,13 +343,13 @@ If you need to run migrations manually on a server:
 
 ```bash
 # Run migrations in the app container
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                exec app php artisan migrate --force
 
 # Cache configuration and routes
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                exec app php artisan config:cache
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                exec app php artisan route:cache
 ```
 
@@ -361,12 +361,12 @@ Each worker group has 4 dedicated worker containers. To scale a specific worker 
 
 ```bash
 # Scale the local market worker to 3 instances
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.group1.yml \
                up -d --scale worker-local-market=3
 
 # Scale multiple workers in Group 1
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.group1.yml \
                up -d \
                --scale worker-local-market=3 \
@@ -397,7 +397,7 @@ For zero-downtime updates:
 All services include health checks. Check status with:
 
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.local.yml \
                ps
 ```
@@ -440,7 +440,7 @@ docker compose -f docker/compose/docker-compose.local.yml exec mysql mysqladmin 
 
 **All services:**
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml \
+docker compose -f docker/compose/docker-compose.web.yml \
                -f docker/compose/docker-compose.local.yml \
                logs -f
 ```
@@ -448,7 +448,7 @@ docker compose -f docker/compose/docker-compose.base.yml \
 **Specific service:**
 ```bash
 # App logs
-docker compose -f docker/compose/docker-compose.base.yml logs -f app
+docker compose -f docker/compose/docker-compose.web.yml logs -f app
 
 # Worker group 1 logs
 docker compose -f docker/compose/docker-compose.group1.yml logs -f worker-group1
@@ -462,12 +462,12 @@ docker compose -f docker/compose/docker-compose.local.yml logs -f redis
 
 **Last 100 lines:**
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml logs --tail=100 app
+docker compose -f docker/compose/docker-compose.web.yml logs --tail=100 app
 ```
 
 **Laravel application logs** (inside container):
 ```bash
-docker compose -f docker/compose/docker-compose.base.yml exec app tail -f storage/logs/laravel.log
+docker compose -f docker/compose/docker-compose.web.yml exec app tail -f storage/logs/laravel.log
 ```
 
 ### Testing Queue Processing
@@ -476,7 +476,7 @@ Dispatch a test job to verify workers are processing:
 
 ```bash
 # Execute tinker in the app container
-docker compose -f docker/compose/docker-compose.base.yml exec app php artisan tinker
+docker compose -f docker/compose/docker-compose.web.yml exec app php artisan tinker
 
 # In tinker, dispatch a test job
 >>> dispatch(function() { \Log::info('Queue test successful'); })->onQueue('default');

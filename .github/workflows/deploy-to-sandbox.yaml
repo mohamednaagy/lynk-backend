@@ -138,24 +138,24 @@ jobs:
 
                     # Run migrations before deploying
                     echo 'Running database migrations...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan migrate --force
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan structure:clear
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan structure:discover
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan config:cache
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan route:cache
 
                     # Deploy all services (single server gets everything)
                     echo 'Deploying all services...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
                       -f docker/compose/docker-compose.group2.yml \
@@ -168,7 +168,7 @@ jobs:
 
                     # Verify deployment
                     echo 'Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
                       -f docker/compose/docker-compose.group2.yml \

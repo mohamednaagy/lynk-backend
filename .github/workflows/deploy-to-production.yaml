@@ -123,23 +123,23 @@ jobs:
 
                     # Run migrations (only on server 1)
                     echo 'Running database migrations...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan migrate --force
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan structure:clear && \
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan structure:discover
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan config:cache
 
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan route:cache
 
                     # Deploy server 1: Base + Scheduler + Worker Group 1
                     echo 'Deploying server 1 services...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
                       up -d --force-recreate
@@ -150,7 +150,7 @@ jobs:
 
                     # Verify deployment
                     echo 'Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
                       ps
@@ -231,7 +231,7 @@ jobs:
 
                     # Deploy server 2: Base + Worker Group 2
                     echo 'Deploying server 2 services...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group2.yml \
                       up -d --force-recreate
 
@@ -241,7 +241,7 @@ jobs:
 
                     # Verify deployment
                     echo 'Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group2.yml \
                       ps
 
@@ -321,7 +321,7 @@ jobs:
 
                     # Deploy server 3: Base + Worker Group 3
                     echo 'Deploying server 3 services...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group3.yml \
                       up -d --force-recreate
 
@@ -331,7 +331,7 @@ jobs:
 
                     # Verify deployment
                     echo 'Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.base.yml \
+                    docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group3.yml \
                       ps
 
