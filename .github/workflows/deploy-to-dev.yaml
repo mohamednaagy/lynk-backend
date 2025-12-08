@@ -67,6 +67,7 @@ jobs:
           docker-compose up --abort-on-container-exit || true
           docker-compose down
           EOF
+
       - name: Merge Allure Results
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
@@ -77,6 +78,7 @@ jobs:
           cp -R allure-results/lender/* merged-allure-results/
           cp -R allure-results/supplier/* merged-allure-results/
           EOF
+
       - name: Generate Allure Report
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
@@ -84,6 +86,7 @@ jobs:
           cd /home/ubuntu/lynk-backend-automation
           allure generate merged-allure-results -o allure-report --clean
           EOF
+
       - name: Download Allure Report to Runner
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} << 'EOF'
@@ -93,6 +96,7 @@ jobs:
           ls -l
           tar -xzf allure-report.tar.gz
           ls -l
+
       - name: Deploy Allure Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
