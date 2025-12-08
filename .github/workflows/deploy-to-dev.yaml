@@ -71,53 +71,62 @@ jobs:
       - name: 🧹 Prepare Test Environment
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            sudo chown -R \$USER:\$USER . &&
-            rm -rf allure-results merged-allure-results allure-report &&
-            mkdir -p allure-results/admin allure-results/lender allure-results/supplier merged-allure-results &&
-            git pull origin main
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              rm -rf allure-results merged-allure-results allure-report &&
+              mkdir -p allure-results/admin allure-results/lender allure-results/supplier merged-allure-results &&
+              git pull origin main
+            '
           "
 
       - name: 🧪 Run Regression Tests
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            docker-compose down --remove-orphans 2>/dev/null || true &&
-            docker-compose build --no-cache &&
-            docker-compose up --abort-on-container-exit || true &&
-            docker-compose down
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              docker-compose down --remove-orphans 2>/dev/null || true &&
+              docker-compose build --no-cache &&
+              docker-compose up --abort-on-container-exit || true &&
+              docker-compose down
+            '
           "
         continue-on-error: true
 
       - name: 🔧 Fix Permissions
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            sudo chown -R \$USER:\$USER allure-results allure-report merged-allure-results 2>/dev/null || true
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/lynk-backend-automation/allure-results /home/ubuntu/lynk-backend-automation/allure-report /home/ubuntu/lynk-backend-automation/merged-allure-results 2>/dev/null || true
           "
 
       - name: 📊 Merge Allure Results
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            mkdir -p merged-allure-results &&
-            cp -R allure-results/admin/* merged-allure-results/ 2>/dev/null || true &&
-            cp -R allure-results/lender/* merged-allure-results/ 2>/dev/null || true &&
-            cp -R allure-results/supplier/* merged-allure-results/ 2>/dev/null || true
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              mkdir -p merged-allure-results &&
+              cp -R allure-results/admin/* merged-allure-results/ 2>/dev/null || true &&
+              cp -R allure-results/lender/* merged-allure-results/ 2>/dev/null || true &&
+              cp -R allure-results/supplier/* merged-allure-results/ 2>/dev/null || true
+            '
           "
 
       - name: 📈 Generate Allure Report
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            allure generate merged-allure-results -o allure-report --clean
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              allure generate merged-allure-results -o allure-report --clean
+            '
           "
 
       - name: 📥 Download Allure Report
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            tar -czf /tmp/allure-report.tar.gz allure-report merged-allure-results
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              tar -czf /tmp/allure-report.tar.gz allure-report merged-allure-results
+            '
+            sudo chmod 644 /tmp/allure-report.tar.gz
           "
           scp -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/tmp/allure-report.tar.gz ./allure-report.tar.gz
           tar -xzf allure-report.tar.gz
@@ -188,10 +197,11 @@ jobs:
         if: always()
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd /home/ubuntu/lynk-backend-automation &&
-            docker-compose down --remove-orphans 2>/dev/null || true &&
-            sudo chown -R \$USER:\$USER . 2>/dev/null || true &&
-            rm -f /tmp/allure-report.tar.gz
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              docker-compose down --remove-orphans 2>/dev/null || true
+            '
+            sudo rm -f /tmp/allure-report.tar.gz
           "
 
       - name: 📢 Send Slack Notification
