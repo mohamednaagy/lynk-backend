@@ -58,21 +58,11 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 🔍 Debug SSH User
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            echo 'Current user:' && whoami &&
-            echo 'Home directory:' && echo \$HOME &&
-            echo 'Looking for automation repo...' &&
-            sudo find /home -name 'lynk-backend-automation' -type d 2>/dev/null &&
-            echo 'Permissions on /home:' && ls -la /home/
-          "
-
       - name: 🧹 Prepare Test Environment
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
-            sudo chown -R \$USER:\$USER . &&
+            cd /home/ubuntu/lynk-backend-automation &&
+            sudo chown -R ubuntu:ubuntu . &&
             rm -rf allure-results merged-allure-results allure-report &&
             mkdir -p allure-results/admin allure-results/lender allure-results/supplier merged-allure-results &&
             git pull origin main
@@ -81,7 +71,7 @@ jobs:
       - name: 🧪 Run Regression Tests
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
+            cd /home/ubuntu/lynk-backend-automation &&
             docker-compose down --remove-orphans 2>/dev/null || true &&
             docker-compose build --no-cache &&
             docker-compose up --abort-on-container-exit || true &&
@@ -92,14 +82,14 @@ jobs:
       - name: 🔧 Fix Permissions
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
-            sudo chown -R \$USER:\$USER allure-results allure-report merged-allure-results 2>/dev/null || true
+            cd /home/ubuntu/lynk-backend-automation &&
+            sudo chown -R ubuntu:ubuntu allure-results allure-report merged-allure-results 2>/dev/null || true
           "
 
       - name: 📊 Merge Allure Results
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
+            cd /home/ubuntu/lynk-backend-automation &&
             mkdir -p merged-allure-results &&
             cp -R allure-results/admin/* merged-allure-results/ 2>/dev/null || true &&
             cp -R allure-results/lender/* merged-allure-results/ 2>/dev/null || true &&
@@ -109,14 +99,14 @@ jobs:
       - name: 📈 Generate Allure Report
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
+            cd /home/ubuntu/lynk-backend-automation &&
             allure generate merged-allure-results -o allure-report --clean
           "
 
       - name: 📥 Download Allure Report
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
+            cd /home/ubuntu/lynk-backend-automation &&
             tar -czf /tmp/allure-report.tar.gz allure-report merged-allure-results
           "
           scp -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/tmp/allure-report.tar.gz ./allure-report.tar.gz
@@ -188,9 +178,9 @@ jobs:
         if: always()
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-            cd ~/lynk-backend-automation &&
+            cd /home/ubuntu/lynk-backend-automation &&
             docker-compose down --remove-orphans 2>/dev/null || true &&
-            sudo chown -R \$USER:\$USER . 2>/dev/null || true &&
+            sudo chown -R ubuntu:ubuntu . 2>/dev/null || true &&
             rm -f /tmp/allure-report.tar.gz
           "
 
@@ -211,7 +201,8 @@ jobs:
                 "fields": [
                   {"title": "Status", "value": "${{ steps.test-results.outputs.status }}", "short": true},
                   {"title": "Branch", "value": "'"$GITHUB_REF_NAME"'", "short": true},
-                  {"title": "Test Summary", "value": "Total: ${{ steps.test-results.outputs.total }}\n✅ Passed: ${{ steps.test-results.outputs.passed }}\n❌ Failed: ${{ steps.test-results.outputs.failed }}", "short": true},
+                  {"title": "Test Summary", "value": "Total: ${{ steps.test-results.outputs.total }}\n✅ Passed: ${{ steps.test-results.outputs.passed }}\n❌ Failed: ${{ steps.test-results.outputs.failed }}", "short": 
+true},
                   {"title": "Triggered By", "value": "'"$GITHUB_ACTOR"'", "short": true}
                 ],
                 "actions": [
@@ -229,7 +220,7 @@ jobs:
           REPORT_URL="https://${{ github.repository_owner }}.github.io/lynk-backend/deploy-validation/${{ github.run_number }}/"
           LATEST_URL="https://${{ github.repository_owner }}.github.io/lynk-backend/deploy-validation/latest/"
 
-          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          cat >> $GITHUB_STEP_SUMMARY << EOF
           # 🧪 Regression Test Results
 
           ## Status: ${{ steps.test-results.outputs.status }}
@@ -241,10 +232,9 @@ jobs:
           | ❌ Failed | ${{ steps.test-results.outputs.failed }} |
 
           ## Reports
-          - 📊 [This Run Report](REPORT_URL_PLACEHOLDER)
-          - 📈 [Latest Report](LATEST_URL_PLACEHOLDER)
+          - 📊 [This Run Report]($REPORT_URL)
+          - 📈 [Latest Report]($LATEST_URL)
 
           ---
+          *Run #${{ github.run_number }} • Branch: $GITHUB_REF_NAME*
           EOF
-          sed -i "s|REPORT_URL_PLACEHOLDER|$REPORT_URL|g" $GITHUB_STEP_SUMMARY
-          sed -i "s|LATEST_URL_PLACEHOLDER|$LATEST_URL|g" $GITHUB_STEP_SUMMARY
