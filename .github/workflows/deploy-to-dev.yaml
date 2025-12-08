@@ -57,16 +57,25 @@ jobs:
           uses: webfactory/ssh-agent@v0.5.3
           with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        - name: 🔍 Debug SSH User
+          run: |
+            ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+              echo 'Current user:' && whoami &&
+              echo 'Home directory:' && echo \$HOME &&
+              echo 'Looking for automation repo...' &&
+              sudo find /home -name 'lynk-backend-automation' -type d 2>/dev/null &&
+              echo 'Permissions on /home:' && ls -la /home/
 
         - name: 🧹 Prepare Test Environment
           run: |
             ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
-              cd /home/ubuntu/lynk-backend-automation &&
-              sudo chown -R ubuntu:ubuntu . &&
+              cd ~/lynk-backend-automation &&
+              sudo chown -R \$USER:\$USER . &&
               rm -rf allure-results merged-allure-results allure-report &&
               mkdir -p allure-results/admin allure-results/lender allure-results/supplier merged-allure-results &&
               git pull origin main
             "
+
 
         - name: 🧪 Run Regression Tests
           run: |
