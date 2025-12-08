@@ -65,7 +65,7 @@ jobs:
               echo 'Looking for automation repo...' &&
               sudo find /home -name 'lynk-backend-automation' -type d 2>/dev/null &&
               echo 'Permissions on /home:' && ls -la /home/
-
+            "
         - name: 🧹 Prepare Test Environment
           run: |
             ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
