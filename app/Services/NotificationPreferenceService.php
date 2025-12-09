@@ -14,8 +14,8 @@ class NotificationPreferenceService
 {
     public function ensureDefaults(User $user): void
     {
-        foreach (SystemNotificationType::cases() as $case) {
-            $type = NotificationType::where('name', $case->value)->first();
+        foreach (SystemNotificationType::getValues() as $value) {
+            $type = NotificationType::where('name', $value)->first();
             if (! $type) {
                 continue;
             }
@@ -33,13 +33,14 @@ class NotificationPreferenceService
                 $join->on('uns.notification_type_id', '=', 'notification_types.id')
                     ->where('uns.user_id', '=', $user->id);
             })
-            ->selectRaw('notification_types.id, notification_types.name, COALESCE(uns.is_enabled, 1) as is_enabled')
+            ->selectRaw('notification_types.id as id, notification_types.name as name, COALESCE(uns.is_enabled, 1) as is_enabled')
+            ->orderBy('notification_types.id')
             ->get();
     }
 
-    public function set(User $user, SystemNotificationType $type, bool $enabled): void
+    public function set(User $user, string $type, bool $enabled): void
     {
-        $typeModel = NotificationType::where('name', $type->value)->firstOrFail();
+        $typeModel = NotificationType::where('name', $type)->firstOrFail();
 
         $this->setByModel($user, $typeModel, $enabled);
     }

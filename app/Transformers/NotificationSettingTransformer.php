@@ -6,12 +6,20 @@ use League\Fractal\TransformerAbstract;
 
 class NotificationSettingTransformer extends TransformerAbstract
 {
-    public function transform(array $data): array
+    public function transform($data): array
     {
+        if (is_array($data)) {
+            return [
+                'id' => $data['id'],
+                'name' => $data['name'],
+                'is_enabled' => (bool) $data['is_enabled'],
+            ];
+        }
+
         return [
-            'id' => $data['id'],
-            'name' => $data['name'],
-            'is_enabled' => $data['is_enabled'],
+            'id' => $data->id,
+            'name' => $data->name,
+            'is_enabled' => (bool) $data->is_enabled,
         ];
     }
 }

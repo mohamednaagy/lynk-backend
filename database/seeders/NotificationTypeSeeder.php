@@ -10,8 +10,8 @@ class NotificationTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (SystemNotificationType::cases() as $case) {
-            NotificationType::firstOrCreate(['name' => $case->value]);
+        foreach (SystemNotificationType::getValues() as $value) {
+            NotificationType::firstOrCreate(['name' => $value]);
         }
     }
 }
