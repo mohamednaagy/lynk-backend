@@ -15,6 +15,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
+use App\Enums\SystemNotificationType;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
@@ -121,6 +122,13 @@ return [
 
     TraderOrderStatus::class => [
         TraderOrderStatus::Hold => 'معلق',
+    ],
+
+    SystemNotificationType::class => [
+        SystemNotificationType::TRADE_REQUEST_CANCELLED => 'تم إلغاء طلب التداول',
+        SystemNotificationType::ORDER_CANCELLED => 'تم إلغاء الطلب',
+        SystemNotificationType::ORDER_REQUIRES_APPROVAL => 'الطلب يتطلب موافقة',
+        SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => 'تم استلام تأكيد التسليم',
     ],
 
     TraderOrderCancelReason::class => [

@@ -6,16 +6,17 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
 use App\Models\User;
 use App\Notifications\FinancingOrders\TraderOrderCancelled;
+use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
-use Stancl\Tenancy\Database\TenantScope;
 
 class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
 {
@@ -40,22 +41,24 @@ class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
     {
         $company = $this->traderOrder->order->company()->withTrashed()->first();
 
-        $notifiables = User::query()
-            ->withoutGlobalScope(TenantScope::class)
-            ->role(Role::Admin)
-            ->orWhere(function ($query) {
-                $query->role(Role::Manager)
-                    ->permission(
-                        perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
-                    );
-            })
-            ->orWhere(function ($query) use ($company) {
-                $query->role(Role::LenderAdmin)
-                    ->whereHas('company', function ($query) use ($company) {
-                        $query->where('id', $company->id);
-                    });
-            })
-            ->get();
+        $notifiables = app(NotificationPreferenceService::class)
+            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($company) {
+                $query->where(function ($query) use ($company) {
+                    $query->role(Role::Admin)
+                        ->orWhere(function ($query) {
+                            $query->role(Role::Manager)
+                                ->permission(
+                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
+                                );
+                        })
+                        ->orWhere(function ($query) use ($company) {
+                            $query->role(Role::LenderAdmin)
+                                ->whereHas('company', function ($query) use ($company) {
+                                    $query->where('id', $company->id);
+                                });
+                        });
+                });
+            });
 
         Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder, $this->canceller));
     }

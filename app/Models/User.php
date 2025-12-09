@@ -156,6 +156,11 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         return $this->hasMany(Enquiry::class);
     }
 
+    public function notificationSettings(): HasMany
+    {
+        return $this->hasMany(UserNotificationSetting::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(FinancingOrder::class, 'creator_id', 'id');
