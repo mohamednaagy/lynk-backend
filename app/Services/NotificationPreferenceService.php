@@ -14,11 +14,17 @@ class NotificationPreferenceService
 {
     public function ensureDefaults(User $user): void
     {
+        $types = NotificationType::whereIn('name', SystemNotificationType::getValues())
+            ->get()
+            ->keyBy('name');
+
         foreach (SystemNotificationType::getValues() as $value) {
-            $type = NotificationType::where('name', $value)->first();
+            $type = $types->get($value);
+
             if (! $type) {
                 continue;
             }
+
             UserNotificationSetting::firstOrCreate(
                 ['user_id' => $user->id, 'notification_type_id' => $type->id],
                 ['is_enabled' => true]
