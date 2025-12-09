@@ -211,7 +211,7 @@ jobs:
       - name: 🌐 Deploy Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GB_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-report
           destination_dir: deploy-validation/${{ github.run_number }}
           keep_files: true
@@ -219,7 +219,7 @@ jobs:
       - name: 🌐 Deploy Latest Report
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GB_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./allure-report
           destination_dir: deploy-validation/latest
           keep_files: true
@@ -230,7 +230,7 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
 
           # Checkout gh-pages to get existing dashboard data
-          git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GB_OAUTH_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-checkout || mkdir -p gh-pages-checkout
+          git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-checkout || mkdir -p gh-pages-checkout
 
           # Create data directory for deploy-validation
           mkdir -p dashboard-deploy/deploy-validation/data
@@ -415,7 +415,7 @@ jobs:
       - name: Deploy Dashboard
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GB_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dashboard-deploy
           publish_branch: gh-pages
           destination_dir: .
