@@ -3,30 +3,49 @@
 namespace App\Transformers;
 
 use App\Enums\SystemNotificationType;
+use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
 class NotificationSettingTransformer extends TransformerAbstract
 {
+    protected array $availableIncludes = [
+        'id',
+        'name',
+        'label',
+        'is_enabled',
+    ];
+
+    protected array $defaultIncludes = [
+        'id',
+        'name',
+        'label',
+        'is_enabled',
+    ];
+
     public function transform($data): array
     {
-        if (is_array($data)) {
-            $label = SystemNotificationType::getDescription($data['name']);
+        return [];
+    }
 
-            return [
-                'id' => $data['id'],
-                'name' => $data['name'],
-                'label' => $label,
-                'is_enabled' => (bool) $data['is_enabled'],
-            ];
-        }
+    public function includeId($data): Primitive
+    {
+        return $this->primitive(data_get($data, 'id'));
+    }
 
-        $label = SystemNotificationType::getDescription($data->name);
+    public function includeName($data): Primitive
+    {
+        return $this->primitive(data_get($data, 'name'));
+    }
 
-        return [
-            'id' => $data->id,
-            'name' => $data->name,
-            'label' => $label,
-            'is_enabled' => (bool) $data->is_enabled,
-        ];
+    public function includeLabel($data): Primitive
+    {
+        $name = data_get($data, 'name');
+
+        return $this->primitive(SystemNotificationType::getDescription($name));
+    }
+
+    public function includeIsEnabled($data): Primitive
+    {
+        return $this->primitive((bool) data_get($data, 'is_enabled'));
     }
 }
