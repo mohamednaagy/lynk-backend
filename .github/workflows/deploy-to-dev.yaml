@@ -93,7 +93,11 @@ jobs:
               cd /home/ubuntu/lynk-backend-automation &&
               docker-compose down --remove-orphans 2>/dev/null || true &&
               docker-compose build --no-cache &&
-              docker-compose up --abort-on-container-exit || true &&
+              docker-compose up -d &&
+              echo \"Waiting for all test containers to complete...\" &&
+              docker wait test-admin test-lender test-supplier || true &&
+              echo \"All containers finished\" &&
+              docker-compose logs &&
               docker-compose down
             '
           "
@@ -490,7 +494,7 @@ jobs:
               ]
             }
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_HOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: 📝 Create GitHub Summary
         if: always()
