@@ -62,7 +62,7 @@ class SupplierMonthlyUsageTransformer extends TransformerAbstract
 
     public function includeCreatedAt(Media $media): Primitive
     {
-        return $this->primitive(optional($media->created_at)->format('Y-m-d h:i A'));
+        return $this->primitive($media->created_at);
     }
 
     public function includeDownloadUrl(Media $media): Primitive
