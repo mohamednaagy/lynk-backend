@@ -76,6 +76,17 @@ jobs:
             echo 'Permissions on /home:' && ls -la /home/
           "
 
+      - name: 🔄 Update Automation Repo
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              git fetch origin main &&
+              git reset --hard origin/main &&
+              echo \"Updated to commit: \$(git rev-parse HEAD)\"
+            '
+          "
+
       - name: 🧹 Prepare Test Environment
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
