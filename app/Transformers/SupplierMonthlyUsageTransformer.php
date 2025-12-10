@@ -62,7 +62,7 @@ class SupplierMonthlyUsageTransformer extends TransformerAbstract
 
     public function includeCreatedAt(Media $media): Primitive
     {
-        return $this->primitive($media->created_at);
+        return $this->primitive(saudi_now('Y-m-d h:i A', $media->created_at));
     }
 
     public function includeDownloadUrl(Media $media): Primitive
