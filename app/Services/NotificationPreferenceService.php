@@ -40,11 +40,11 @@ class NotificationPreferenceService
     public function listForUser(User $user): Collection
     {
         return NotificationType::query()
-            ->leftJoin('user_notification_settings as uns', function ($join) use ($user) {
+            ->join('user_notification_settings as uns', function ($join) use ($user) {
                 $join->on('uns.notification_type_id', '=', 'notification_types.id')
                     ->where('uns.user_id', '=', $user->id);
             })
-            ->selectRaw('notification_types.id as id, notification_types.name as name, COALESCE(uns.is_enabled, 1) as is_enabled')
+            ->select(['notification_types.id as id', 'notification_types.name as name', 'uns.is_enabled'])
             ->orderBy('notification_types.id')
             ->get();
     }
