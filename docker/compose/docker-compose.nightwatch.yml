@@ -1,15 +1,14 @@
 services:
-  scheduler:
+  nightwatch:
     image: app-php-fpm:latest
-    container_name: laravel-scheduler
+    container_name: laravel-nightwatch
     working_dir: /var/www/html
     restart: unless-stopped
     env_file:
       - ../../.env
-    command: php artisan schedule:work
+    command: tail -f /dev/null
     depends_on:
-      app:
-        condition: service_healthy
+      - app
     healthcheck:
       test: ["CMD", "php", "-r", "exit(0);"]
       interval: 30s
@@ -20,4 +19,3 @@ services:
 
 networks:
   laravel:
-    driver: bridge

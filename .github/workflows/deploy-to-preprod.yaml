@@ -35,6 +35,29 @@ jobs:
               with:
                   ref: pre-production
 
+            - name: Write encrypted environment from secret
+              run: |
+                  echo "${{ secrets.ENV_ENCRYPTED_CONTENT }}" > .env.preprod.encrypted
+                  if [ ! -f ".env.preprod.encrypted" ] || [ ! -s ".env.preprod.encrypted" ]; then
+                    echo "❌ Error: Failed to write encrypted env file"
+                    exit 1
+                  fi
+                  echo "✅ Encrypted environment file created"
+
+            - name: Install composer dependencies
+              run: composer install --no-dev --no-scripts --no-interaction --prefer-dist
+
+            - name: Decrypt environment file
+              env:
+                  LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
+              run: |
+                  php artisan env:decrypt --env=preprod --force
+                  if [ ! -f ".env" ]; then
+                    echo "❌ Failed to decrypt environment file"
+                    exit 1
+                  fi
+                  echo "✅ Environment decrypted successfully"
+
             - name: Build PHP-FPM image
               run: |
                   docker build -t lynk-backend:${{ github.sha }}-preprod \
@@ -89,36 +112,28 @@ jobs:
                     set -euo pipefail
 
                     # Load new image
-                    echo 'Loading Docker image...'
+                    echo '📦 Loading Docker image...'
                     gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
                     docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
 
                     # Clean up compressed file
                     rm -f /tmp/lynk-backend-preprod.tar.gz
 
-                    # Navigate to application directory
-                    cd /var/www/lynk-backend || exit 1
+                    # Prepare deployment directory
+                    sudo mkdir -p /var/www/lynk-backend/docker
+                    cd /var/www/lynk-backend
 
-                    # Pull latest code
-                    echo 'Pulling latest code...'
-                    sudo git fetch origin
-                    sudo git checkout pre-production
-                    sudo git pull origin pre-production
-
-                    # Copy docker-compose files from temp
+                    # Copy docker-compose files
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
                     sudo rm -rf /tmp/lynk-backend-compose
 
                     # Run migrations (only on server 1)
-                    echo 'Running database migrations...'
+                    echo '🗄️  Running database migrations...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan migrate --force
 
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan structure:clear && \
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan structure:discover
-
+                    # Cache optimization
+                    echo '⚡ Optimizing caches...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan config:cache
 
@@ -126,24 +141,24 @@ jobs:
                       run --rm app php artisan route:cache
 
                     # Deploy server 1: Base + Scheduler + Worker Group 1
-                    echo 'Deploying server 1 services...'
+                    echo '🚀 Deploying server 1 services...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
                       up -d --force-recreate
 
                     # Wait for services to start
-                    echo 'Waiting for services to start...'
+                    echo '⏳ Waiting for services to start...'
                     sleep 15
 
                     # Verify deployment
-                    echo 'Verifying deployment...'
+                    echo '✅ Verifying deployment...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
                       ps
 
-                    echo 'Server 1 deployment completed successfully'
+                    echo '🎉 Server 1 deployment completed successfully'
                   "
 
     deploy-server-2:
@@ -185,43 +200,38 @@ jobs:
                     set -euo pipefail
 
                     # Load new image
-                    echo 'Loading Docker image...'
+                    echo '📦 Loading Docker image...'
                     gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
                     docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
 
                     # Clean up compressed file
                     rm -f /tmp/lynk-backend-preprod.tar.gz
 
-                    # Navigate to application directory
-                    cd /var/www/lynk-backend || exit 1
+                    # Prepare deployment directory
+                    sudo mkdir -p /var/www/lynk-backend/docker
+                    cd /var/www/lynk-backend
 
-                    # Pull latest code
-                    echo 'Pulling latest code...'
-                    sudo git fetch origin
-                    sudo git checkout pre-production
-                    sudo git pull origin pre-production
-
-                    # Copy docker-compose files from temp
+                    # Copy docker-compose files
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
                     sudo rm -rf /tmp/lynk-backend-compose
 
                     # Deploy server 2: Base + Worker Group 2
-                    echo 'Deploying server 2 services...'
+                    echo '🚀 Deploying server 2 services...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group2.yml \
                       up -d --force-recreate
 
                     # Wait for services to start
-                    echo 'Waiting for services to start...'
+                    echo '⏳ Waiting for services to start...'
                     sleep 15
 
                     # Verify deployment
-                    echo 'Verifying deployment...'
+                    echo '✅ Verifying deployment...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group2.yml \
                       ps
 
-                    echo 'Server 2 deployment completed successfully'
+                    echo '🎉 Server 2 deployment completed successfully'
                   "
 
     deploy-server-3:
@@ -263,43 +273,38 @@ jobs:
                     set -euo pipefail
 
                     # Load new image
-                    echo 'Loading Docker image...'
+                    echo '📦 Loading Docker image...'
                     gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
                     docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
 
                     # Clean up compressed file
                     rm -f /tmp/lynk-backend-preprod.tar.gz
 
-                    # Navigate to application directory
-                    cd /var/www/lynk-backend || exit 1
+                    # Prepare deployment directory
+                    sudo mkdir -p /var/www/lynk-backend/docker
+                    cd /var/www/lynk-backend
 
-                    # Pull latest code
-                    echo 'Pulling latest code...'
-                    sudo git fetch origin
-                    sudo git checkout pre-production
-                    sudo git pull origin pre-production
-
-                    # Copy docker-compose files from temp
+                    # Copy docker-compose files
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
                     sudo rm -rf /tmp/lynk-backend-compose
 
                     # Deploy server 3: Base + Worker Group 3
-                    echo 'Deploying server 3 services...'
+                    echo '🚀 Deploying server 3 services...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group3.yml \
                       up -d --force-recreate
 
                     # Wait for services to start
-                    echo 'Waiting for services to start...'
+                    echo '⏳ Waiting for services to start...'
                     sleep 15
 
                     # Verify deployment
-                    echo 'Verifying deployment...'
+                    echo '✅ Verifying deployment...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.group3.yml \
                       ps
 
-                    echo 'Server 3 deployment completed successfully'
+                    echo '🎉 Server 3 deployment completed successfully'
                   "
 
             - name: Cleanup local image

@@ -18,7 +18,7 @@ COPY . .
 RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # Stage 2: Runtime image
-FROM php:8.2-fpm-alpine
+FROM php:8.3-fpm-alpine
 
 # Install system dependencies and PHP extensions
 RUN apk add --no-cache \
@@ -79,6 +79,13 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framewor
     bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+# Remove any stale Laravel caches and refresh package discovery
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php \
+    && php artisan package:discover --ansi || true \
+    && php artisan config:clear || true \
+    && php artisan event:clear || true \
+    && php artisan cache:clear || true
 
 # Switch to www-data user
 USER www-data

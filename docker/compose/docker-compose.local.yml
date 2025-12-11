@@ -12,43 +12,11 @@ services:
       - "8080:80"
     volumes:
       - ../../public:/var/www/html/public:ro
+      - ../../docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       app:
         condition: service_healthy
-    command: >
-      sh -c "
-      cat > /etc/nginx/conf.d/default.conf <<'EOF'
-      server {
-          listen 80;
-          server_name _;
-          root /var/www/html/public;
-          index index.php index.html;
-          client_max_body_size 100M;
-
-          location /healthz {
-              access_log off;
-              return 200 'OK';
-              add_header Content-Type text/plain;
-          }
-
-          location / {
-              try_files \$$uri \$$uri/ /index.php?\$$query_string;
-          }
-
-          location ~ \.php$$ {
-              fastcgi_pass app:9000;
-              fastcgi_index index.php;
-              fastcgi_param SCRIPT_FILENAME \$$document_root\$$fastcgi_script_name;
-              include fastcgi_params;
-              fastcgi_read_timeout 300;
-          }
-
-          location ~ /\.ht {
-              deny all;
-          }
-      }
-      EOF
-      nginx -g 'daemon off;'"
+    command: ["nginx", "-g", "daemon off;"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost/healthz"]
       interval: 30s
@@ -75,27 +43,19 @@ services:
       - laravel
 
   mysql:
-    image: mysql:8
-    container_name: laravel-mysql
-    restart: unless-stopped
+    image: "mysql:8.0"
+    env_file:
+      - ../../.env
     ports:
-      - "3306:3306"
+        - "${FORWARD_DB_PORT:-3306}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
-      MYSQL_USER: ${DB_USERNAME:-laravel}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_ALLOW_EMPTY_PASSWORD: 0
+        MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+        MYSQL_DATABASE: "${DB_DATABASE}"
     volumes:
-      - mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password --log-bin-trust-function-creators=1
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-secret}"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+          - "../../.docker/mysql:/var/lib/mysql"
     networks:
-      - laravel
+          - laravel
+    command: --log-bin-trust-function-creators=1
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -113,21 +73,6 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    networks:
-      - laravel
-
-  mailhog:
-    image: mailhog/mailhog
-    container_name: laravel-mailhog
-    restart: unless-stopped
-    ports:
-      - "8025:8025"
-      - "1025:1025"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8025"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -152,8 +97,6 @@ services:
       - laravel
 
 volumes:
-  mysql_data:
-    driver: local
   redis_data:
     driver: local
 

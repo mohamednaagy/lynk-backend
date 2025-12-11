@@ -172,7 +172,145 @@ docker compose -f docker/compose/docker-compose.web.yml \
                down
 ```
 
-## d) Environment Configuration
+## d) Environment Encryption & Management
+
+### Overview
+
+This application uses Laravel's built-in environment encryption (`env:encrypt`) to securely manage environment variables. Each environment has its own encrypted file stored in the repository, with the encryption key stored as a GitHub environment secret.
+
+### Encrypted Environment Storage
+
+**All environment files are stored as GitHub secrets** - nothing is committed to the repository.
+
+Each environment requires **two secrets** configured in GitHub:
+
+1. **Repository → Settings → Environments** → Select environment (dev/sandbox/preprod/production)
+2. Add two secrets:
+   - **`ENV_ENCRYPTION_KEY`** - The 32-character encryption key
+   - **`ENV_ENCRYPTED_CONTENT`** - The entire encrypted environment file content
+
+**Important:**
+- Never commit `.env` or `.env.*.encrypted` files to the repository
+- All environment files (plain and encrypted) are blocked by `.gitignore`
+- Encrypted content is only stored in GitHub secrets
+
+### Creating and Storing Encrypted Environments
+
+To create or update encrypted environment files:
+
+```bash
+# 1. Prepare your .env file for the environment
+cp .env.example .env.dev
+# Edit .env.dev with environment-specific values
+
+# 2. Encrypt the file
+php artisan env:encrypt --env=dev
+
+# Output example:
+# Environment successfully encrypted.
+# Encryption key: 3UVsEgGVK36XN82KKeyLFMhvosbZN1aF
+
+# 3. Copy the encrypted file content
+cat .env.dev.encrypted
+# Copy the entire output (it's a JSON string)
+
+# 4. Store BOTH secrets in GitHub
+# Go to: Settings → Environments → dev → Secrets
+
+# Add ENV_ENCRYPTION_KEY:
+# Value: 3UVsEgGVK36XN82KKeyLFMhvosbZN1aF
+
+# Add ENV_ENCRYPTED_CONTENT:
+# Value: (paste the entire content from step 3)
+
+# 5. Clean up local files (don't commit them!)
+rm .env.dev .env.dev.encrypted
+```
+
+Repeat for each environment (sandbox, preprod, production).
+
+**Security Note:** The encrypted content is safe to store in GitHub secrets (it's already encrypted), but storing it there instead of the repository provides an extra layer of security and allows for rotation without code commits.
+
+### Deployment Flow with Encryption
+
+The deployment workflow handles decryption automatically:
+
+```
+1. Checkout code from repository
+2. Write ENV_ENCRYPTED_CONTENT secret to .env.{environment}.encrypted file
+3. Install PHP and composer dependencies
+4. Decrypt using ENV_ENCRYPTION_KEY: php artisan env:decrypt --env={environment} --force
+5. Build Docker image (with decrypted .env included)
+6. Transfer image to servers
+7. Deploy containers
+```
+
+The `.env` file is baked into the Docker image during build, so servers don't need:
+- Git repository access
+- Access to encryption keys or encrypted files
+- Access to GitHub secrets
+- Source code on disk
+
+**Security Benefits:**
+- No environment files in repository (not even encrypted ones)
+- Encryption keys never leave GitHub secrets
+- Images are self-contained with all configuration
+
+### Key Rotation
+
+To rotate encryption keys (recommended every 90 days):
+
+```bash
+# 1. Get current environment and decrypt it
+# (You'll need the current ENV_ENCRYPTION_KEY from GitHub secrets)
+export LARAVEL_ENV_ENCRYPTION_KEY="<current-key>"
+
+# Create the encrypted file temporarily (use ENV_ENCRYPTED_CONTENT from secrets)
+echo "<paste-current-encrypted-content>" > .env.production.encrypted
+php artisan env:decrypt --env=production --force
+
+# 2. Generate new key and re-encrypt
+NEW_KEY=$(openssl rand -base64 32 | head -c 32)
+php artisan env:encrypt --env=production --key="$NEW_KEY"
+
+echo "New key: $NEW_KEY"
+# Save this key!
+
+# 3. Update BOTH GitHub Secrets
+# Go to: Settings → Environments → production → Secrets
+
+# Update ENV_ENCRYPTION_KEY:
+# Value: (paste NEW_KEY from above)
+
+# Update ENV_ENCRYPTED_CONTENT:
+cat .env.production.encrypted
+# Copy output and paste as secret value
+
+# 4. Clean up local files
+rm .env .env.production.encrypted
+unset LARAVEL_ENV_ENCRYPTION_KEY
+```
+
+### Local Testing with Encrypted Environments
+
+To test decryption locally:
+
+```bash
+# Set the encryption key
+export LARAVEL_ENV_ENCRYPTION_KEY="<your-key>"
+
+# Decrypt the file
+php artisan env:decrypt --env=dev
+
+# Verify .env was created
+cat .env
+
+# Clean up
+rm .env
+unset LARAVEL_ENV_ENCRYPTION_KEY
+```
+
+## e) Environment Configuration
 
 ### Local Development (.env)
 
@@ -247,7 +385,7 @@ MAIL_ENCRYPTION=tls
 - Do NOT use bind mounts (volumes) in worker group compose files
 - Ensure `.env` file is present on each server but NOT committed to git
 
-## e) Running in Pre-Production / Production (3 Servers)
+## f) Running in Pre-Production / Production (3 Servers)
 
 ### Production Deployment Strategy
 
@@ -390,7 +528,7 @@ For zero-downtime updates:
    - Server B: repeat
    - Server C: repeat
 
-## f) Health Checks & Logs
+## g) Health Checks & Logs
 
 ### Health Check Endpoints
 
@@ -498,7 +636,20 @@ docker stats
 docker stats laravel-app worker-group1
 ```
 
-## g) Changelog
+## h) Changelog
+
+### 2025-12-10 - Environment Encryption Implementation
+- **Added**: Laravel env:encrypt integration for secure environment management
+- **Security**: All environment files stored as GitHub secrets (not in repository)
+- **Updated**: All deployment workflows to write encrypted content from secrets before decryption
+- **Removed**: Git pull steps from deployment workflows (images are now self-contained)
+- **Updated**: `.gitignore` to block all `.env.*` files (including encrypted)
+- **Security**: Environment variables baked into Docker images at build time
+- **Benefit**: Servers no longer need Git repository access, encryption keys, or environment files
+- **Documentation**: Added comprehensive environment encryption guide (section d)
+- **GitHub Secrets**: Each environment requires `ENV_ENCRYPTION_KEY` and `ENV_ENCRYPTED_CONTENT`
+
+## i) Changelog (Historical)
 
 ### 2025-11-16 - Worker Groups Reorganization
 - **Updated**: Reorganized worker groups based on actual production queue configuration

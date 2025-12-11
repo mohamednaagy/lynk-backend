@@ -33,6 +33,35 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Write encrypted environment from secret
+              run: |
+                  echo "${{ secrets.ENV_ENCRYPTED_CONTENT }}" > .env.sandbox.encrypted
+                  if [ ! -f ".env.sandbox.encrypted" ] || [ ! -s ".env.sandbox.encrypted" ]; then
+                    echo "❌ Error: Failed to write encrypted env file"
+                    exit 1
+                  fi
+                  echo "✅ Encrypted environment file created"
+
+            - name: Setup PHP for decryption
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.2'
+                  extensions: mbstring, xml
+
+            - name: Install composer dependencies
+              run: composer install --no-dev --no-scripts --no-interaction --prefer-dist
+
+            - name: Decrypt environment file
+              env:
+                  LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
+              run: |
+                  php artisan env:decrypt --env=sandbox --force
+                  if [ ! -f ".env" ]; then
+                    echo "❌ Failed to decrypt environment file"
+                    exit 1
+                  fi
+                  echo "✅ Environment decrypted successfully"
+
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
@@ -116,37 +145,28 @@ jobs:
                     set -euo pipefail
 
                     # Load new image
-                    echo 'Loading Docker image...'
+                    echo '📦 Loading Docker image...'
                     gunzip -c /tmp/lynk-backend-sandbox.tar.gz | docker load
                     docker tag lynk-backend:${{ github.sha }}-sandbox app-php-fpm:sandbox-latest
 
                     # Clean up compressed file
                     rm -f /tmp/lynk-backend-sandbox.tar.gz
 
-                    # Navigate to application directory
-                    cd /var/www/lynk-backend || exit 1
+                    # Prepare deployment directory
+                    sudo mkdir -p /var/www/lynk-backend/docker
+                    cd /var/www/lynk-backend
 
-                    # Pull latest code
-                    echo 'Pulling latest code...'
-                    sudo git fetch origin
-                    sudo git checkout sandbox
-                    sudo git pull origin sandbox
-
-                    # Copy docker-compose files from temp
+                    # Copy docker-compose files
                     sudo cp -r /tmp/lynk-backend-compose/compose docker/
                     sudo rm -rf /tmp/lynk-backend-compose
 
-                    # Run migrations before deploying
-                    echo 'Running database migrations...'
+                    # Run migrations
+                    echo '🗄️  Running database migrations...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan migrate --force
 
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan structure:clear
-
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan structure:discover
-
+                    # Cache optimization
+                    echo '⚡ Optimizing caches...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       run --rm app php artisan config:cache
 
@@ -154,7 +174,7 @@ jobs:
                       run --rm app php artisan route:cache
 
                     # Deploy all services (single server gets everything)
-                    echo 'Deploying all services...'
+                    echo '🚀 Deploying all services...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
@@ -163,11 +183,11 @@ jobs:
                       up -d --force-recreate
 
                     # Wait for services to start
-                    echo 'Waiting for services to start...'
+                    echo '⏳ Waiting for services to start...'
                     sleep 15
 
                     # Verify deployment
-                    echo 'Verifying deployment...'
+                    echo '✅ Verifying deployment...'
                     docker compose -f docker/compose/docker-compose.web.yml \
                       -f docker/compose/docker-compose.scheduler.yml \
                       -f docker/compose/docker-compose.group1.yml \
@@ -175,7 +195,7 @@ jobs:
                       -f docker/compose/docker-compose.group3.yml \
                       ps
 
-                    echo 'Deployment completed successfully'
+                    echo '🎉 Deployment completed successfully'
                   "
 
     notify:
