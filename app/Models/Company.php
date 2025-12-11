@@ -76,11 +76,6 @@ class Company extends BaseTenant
         return $this->morphMany(Wallet::class, 'holder');
     }
 
-    public function walletNotification()
-    {
-        return $this->hasOne(WalletNotification::class, 'company_id')->ofMany();
-    }
-
     public function tieredPricing()
     {
         return $this->hasMany(TieredPricing::class, 'company_id');
