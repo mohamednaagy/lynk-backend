@@ -81,7 +81,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
             sudo -u ubuntu bash -c '
               cd /home/ubuntu/lynk-backend-automation &&
-              git remote set-url origin https://x-access-token:${{ secrets.slack }}@github.com/lynksa/lynk-backend-automation.git &&
+              git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
               git fetch origin main &&
               git reset --hard origin/main &&
               echo \"Updated to commit: \$(git rev-parse HEAD)\"
