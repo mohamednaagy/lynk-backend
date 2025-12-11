@@ -61,6 +61,7 @@
     "require-dev": {
         "andyabih/laravel-to-uml": "^1.0",
         "barryvdh/laravel-ide-helper": "^3.0",
+        "beyondcode/laravel-dump-server": "^2.1",
         "fakerphp/faker": "^1.9.1",
         "laravel-lang/attributes": "^2.0",
         "laravel-lang/lang": "^12.0",
