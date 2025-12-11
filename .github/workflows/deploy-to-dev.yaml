@@ -81,7 +81,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
             sudo -u ubuntu bash -c '
               cd /home/ubuntu/lynk-backend-automation &&
-              git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
+              git remote set-url origin https://x-access-token:${{ secrets.slack }}@github.com/lynksa/lynk-backend-automation.git &&
               git fetch origin main &&
               git reset --hard origin/main &&
               echo \"Updated to commit: \$(git rev-parse HEAD)\"
@@ -469,7 +469,7 @@ jobs:
                     },
                     {
                       "title": "Test Summary",
-                      "value": "Total: ${{ steps.test-results.outputs.total }}\n✅ Passed: ${{ steps.test-results.outputs.passed }}\n❌ Failed: ${{ steps.test-results.outputs.failed }}",
+                      "value": "Total: ${{ steps.test-results.outputs.total }}\n✅ Passed: ${{ steps.test-results.outputs.passed }}\n❌ Failed: ${{ steps.test-results.outputs.failed }}\n⏭️ Skipped: ${{ steps.test-results.outputs.skipped }}",
                       "short": true
                     },
                     {
@@ -520,6 +520,7 @@ jobs:
           echo "| Total | ${{ steps.test-results.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ✅ Passed | ${{ steps.test-results.outputs.passed }} |" >> $GITHUB_STEP_SUMMARY
           echo "| ❌ Failed | ${{ steps.test-results.outputs.failed }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏭️ Skipped | ${{ steps.test-results.outputs.skipped }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📊 Reports" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
