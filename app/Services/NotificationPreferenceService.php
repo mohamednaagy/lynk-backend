@@ -18,7 +18,12 @@ class NotificationPreferenceService
             ->get()
             ->keyBy('name');
 
-        foreach (SystemNotificationType::getValues() as $value) {
+        if ($user->isAdmin()) {
+            $notificationTypes = SystemNotificationType::getAdminNotificationTypes();
+        } else {
+            $notificationTypes = SystemNotificationType::getLenderNotificationTypes();
+        }
+        foreach ($notificationTypes as $value) {
             $type = $types->get($value);
 
             if (! $type) {
