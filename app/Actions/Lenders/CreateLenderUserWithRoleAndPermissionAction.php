@@ -7,6 +7,7 @@ use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateUser;
 use App\Actions\Contracts\Lenders\CreateLenderUserWithRoleAndPermission;
 use App\Models\User;
+use App\Services\NotificationPreferenceService;
 use Illuminate\Support\Arr;
 
 class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWithRoleAndPermission
@@ -46,6 +47,7 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
             $this->assignPermissionToUser->handle($user, $data['permissions']);
         }
 
+        app(NotificationPreferenceService::class)->ensureDefaults($user);
         // return user
         return $user;
     }
