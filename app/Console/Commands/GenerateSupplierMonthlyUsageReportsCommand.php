@@ -139,18 +139,20 @@ class GenerateSupplierMonthlyUsageReportsCommand extends Command
     /**
      * Get the default reporting period as start and end datetime strings.
      *
-     * This returns the previous full calendar month based on the
-     * current time when explicit dates are not provided.
+     * We build the period in Saudi local time (command is scheduled in Riyadh)
+     * to capture the intended calendar month, then convert to UTC because the
+     * downstream reporting service expects UTC timestamps and the database
+     * stores datetimes in UTC.
      *
      * @return array{0:string,1:string}
      */
     private function getReportingPeriod(): array
     {
-        $now = Carbon::now();
+        $now = Carbon::now('Asia/Riyadh');
         $previousMonth = $now->copy()->subMonth();
 
-        $startDate = $previousMonth->copy()->startOfMonth()->format('Y-m-d H:i:s');
-        $endDate = $previousMonth->copy()->endOfMonth()->format('Y-m-d H:i:s');
+        $startDate = $previousMonth->copy()->startOfMonth()->utc()->format('Y-m-d H:i:s');
+        $endDate = $previousMonth->copy()->endOfMonth()->utc()->format('Y-m-d H:i:s');
 
         return [$startDate, $endDate];
     }
