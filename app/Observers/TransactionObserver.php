@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Actions\Wallets\SetTransactionBalanceAction;
-use App\Jobs\Transaction\CheckWalletNotificaitonJob;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\Transaction;
@@ -22,7 +21,6 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
         $cost_without_vat = $transaction->cost_without_vat;
 
         if ($transaction->amount->isNegative()) {
-            CheckWalletNotificaitonJob::dispatch($transaction->wallet);
             Log::info('increment transaction FOR REFUND financing_order_id => '.$transaction->financing_order_id.' transaction_id => '.$transaction->id.' wallet_id => '.$transaction->wallet_id);
             FinancingOrder::where('id', $transaction->financing_order_id)->increment('charged_trader_orders_count');
 

@@ -5,13 +5,10 @@ namespace Tests\Unit\Wallets\Transactions;
 use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
-use App\Jobs\Transaction\CheckWalletNotificaitonJob;
 use App\Models\Company;
 use App\Models\Wallet;
-use App\Models\WalletNotification;
 use Cknow\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Tests\Traits\InteractsWithCompany;
 
@@ -32,40 +29,6 @@ class TransactionObserverTest extends TestCase
 
         [self::$lender] = $this->createCompany();
         self::$wallet = self::$lender->getWallet(WalletType::CompanyWallet);
-    }
-
-    public function test_fire_job_to_check_balance_threshold_reached_when_negative_transaction_is_created()
-    {
-        Queue::fake([
-            CheckWalletNotificaitonJob::class,
-        ]);
-        $wallet = self::$lender->getWallet(WalletType::CompanyWallet);
-        $amount = Money::parseByDecimal(10000, $wallet->currency);
-
-        app(CreateTransactions::class)->handle($wallet, TransactionReason::OrderCreationFee, $amount, []);
-
-        Queue::assertPushed(CheckWalletNotificaitonJob::class);
-    }
-
-    public function test_clear_notified_for_wallet_notification_when_positive_transaction_is_created()
-    {
-        Queue::fake([
-            CheckWalletNotificaitonJob::class,
-        ]);
-        $wallet = self::$lender->getWallet(WalletType::CompanyWallet);
-
-        WalletNotification::factory()
-            ->for(self::$lender)
-            ->for($wallet)
-            ->notified()
-            ->create();
-
-        $amount = Money::parseByDecimal(10000, $wallet->currency);
-
-        app(CreateTransactions::class)->handle($wallet, TransactionReason::ManualDeposit, $amount, []);
-
-        Queue::assertNotPushed(CheckWalletNotificaitonJob::class);
-        $this->assertFalse(self::$lender->walletNotification->isNotified());
     }
 
     public function test_sets_balance_correctly_for_first_transaction()
