@@ -15,7 +15,6 @@ final class SystemNotificationType extends Enum implements LocalizedEnum
 
     const DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
 
-
     public static function getAdminNotificationTypes(): array
     {
         return [
@@ -25,7 +24,6 @@ final class SystemNotificationType extends Enum implements LocalizedEnum
             self::DELIVERY_CONFIRMATION_RECEIVED,
         ];
     }
-
 
     public static function getLenderNotificationTypes(): array
     {
