@@ -48,14 +48,48 @@ docker/
 ├── laravel/
 │   └── Dockerfile                      # Multi-stage PHP 8.2-fpm image with all required extensions
 └── compose/
-    ├── docker-compose.base.yml         # Base app service (php-fpm), shared by all environments
-    ├── docker-compose.local.yml        # Local dev infrastructure (nginx, redis, mysql, tools)
-    ├── docker-compose.scheduler.yml    # Laravel task scheduler (run on ONE server only)
-    ├── docker-compose.group1.yml       # Worker group 1 (local_market queues)
-    ├── docker-compose.group2.yml       # Worker group 2 (default, bursam queues)
-    └── docker-compose.group3.yml       # Worker group 3 (expire, inventory queues)
+    ├── docker-compose.web.yml          # [DEPRECATED] Use docker-compose.yml with --profile web
+    ├── docker-compose.local.yml        # [DEPRECATED] Use docker-compose.yml with --profile local
+    ├── docker-compose.group1.yml       # [DEPRECATED] Use docker-compose.yml with --profile group1
+    ├── docker-compose.group2.yml       # [DEPRECATED] Use docker-compose.yml with --profile group2
+    ├── docker-compose.group3.yml       # [DEPRECATED] Use docker-compose.yml with --profile group3
+    ├── docker-compose.mailhog.yml      # [DEPRECATED] Use docker-compose.yml with --profile local
+    └── docker-compose.nightwatch.yml   # [DEPRECATED] Use docker-compose.yml with --profile local
+docker-compose.yml                       # Consolidated compose file with all services and profiles
 docker.md                                # This documentation file
 ```
+
+### Profile Organization
+
+**docker-compose.yml** (Single consolidated file)
+All services are organized into profiles for flexible deployment:
+
+**Profile: `web`**
+- Core `app` service (PHP-FPM)
+- Required for all deployment scenarios
+- Serves HTTP requests via FastCGI
+
+**Profile: `local`**
+- Local development infrastructure services
+- nginx (8080), redis (6379), mysql (3306)
+- Development tools: phpMyAdmin (8081), MailHog (8025), Browserless (3002), nightwatch
+- All services include health checks
+- Use for local development only
+
+**Profile: `group1`** - Local Market Core Processing
+- 8 worker services for local market core processing queues
+- Includes: commodities settlement, eligible quantities, order initiation, trader orders, etc.
+- Deploy on Server A in production
+
+**Profile: `group2`** - General & Trader Operations
+- 13 worker services for general operations and trader processing
+- Includes: default queue, notifications, trader orders, market states, etc.
+- Deploy on Server B in production
+
+**Profile: `group3`** - Supporting Operations & External Integrations
+- 7 worker services for supporting operations and external integrations
+- Includes: webhooks, order expiration, unit generation, external integrations
+- Deploy on Server C in production
 
 ### File Purposes
 
@@ -67,31 +101,11 @@ docker.md                                # This documentation file
 - Production-optimized OPcache configuration
 - Exposes port 9000 for FastCGI
 
-**docker/compose/docker-compose.web.yml**
-- Defines the core `app` service (php-fpm)
-- Shared by all deployment scenarios
-- Reads `.env` file for application configuration
-
-**docker/compose/docker-compose.local.yml**
-- Local development infrastructure services
-- Overrides `app` with bind mount for live code editing
-- Provides: nginx (8080), redis (6379), mysql (3306), phpMyAdmin (8081), MailHog (8025), Browserless (3002)
-- All services include health checks
-
-**docker/compose/docker-compose.scheduler.yml**
-- Defines Laravel's task scheduler service (`php artisan schedule:work`)
-- Should be deployed on ONLY ONE server in production to prevent duplicate scheduled jobs
-- Can be used in local development or combined with any worker group in production
-- Includes health check
-
-**docker/compose/docker-compose.group[1-3].yml**
-- Each file defines multiple workers for a specific functional area
-- Group 1: 4 workers for local market core processing
-- Group 2: 4 workers for general operations and trader processing
-- Group 3: 4 workers for supporting operations and external integrations
-- Each worker is a separate container with its own queue configuration
-- Development mode: uncomment volumes for live code reload
-- Production mode: use immutable images (no volumes)
+**docker-compose.yml**
+- Consolidated compose file with all services
+- Services organized by profiles: web, local, group1, group2, group3
+- Replicas controlled via `--scale` flag at runtime (no hardcoded values)
+- Single source of truth for all deployment scenarios
 
 ## c) Build & Run (Local Development)
 
@@ -114,9 +128,7 @@ docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 Start the app, nginx, redis, mysql, and dev tools:
 
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.local.yml \
-               up -d
+docker compose --profile web --profile local up -d
 ```
 
 Access points:
@@ -128,48 +140,46 @@ Access points:
 
 ### Start Worker Groups (Local)
 
-Enable volumes for local development by editing the group compose files:
-
-1. Uncomment the `volumes` section in `docker-compose.group[1-3].yml`
-2. Start one or more groups:
-
 **Group 1 only:**
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.local.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               up -d
+docker compose --profile web --profile local --profile group1 up -d
+```
+
+**Group 2 only:**
+```bash
+docker compose --profile web --profile local --profile group2 up -d
 ```
 
 **All groups:**
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.local.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               -f docker/compose/docker-compose.group2.yml \
-               -f docker/compose/docker-compose.group3.yml \
-               up -d
+docker compose --profile web --profile local --profile group1 --profile group2 --profile group3 up -d
 ```
 
 ### Scale Worker Groups Locally
 
-To run more replicas of a specific group:
+To run more replicas of specific workers:
 
 ```bash
-docker compose -f docker/compose/docker-compose.group1.yml up -d --scale worker-group1=4
+# Scale a single worker to 3 replicas
+docker compose --profile group1 up -d --scale local-market-order-initiation=3
+
+# Scale multiple workers in group1
+docker compose --profile group1 up -d \
+  --scale local-market-order-initiation=3 \
+  --scale trader-order-initiation=2 \
+  --scale buy-commodities-local-market-orders-worker-group1=2
 ```
 
-Or edit the `deploy.replicas` value in the compose file and restart.
+**Note**: Worker replicas are controlled entirely via the `--scale` flag. There are no hardcoded replica values in the compose file.
 
 ### Stop All Services
 
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.local.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               -f docker/compose/docker-compose.group2.yml \
-               -f docker/compose/docker-compose.group3.yml \
-               down
+# Stop specific profiles
+docker compose --profile web --profile local down
+
+# Stop all services (all profiles)
+docker compose down
 ```
 
 ## d) Environment Encryption & Management
@@ -416,9 +426,7 @@ cd /path/to/lynk-backend
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
 # Start base app + worker group 1
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               up -d
+docker compose --profile web --profile group1 up -d
 ```
 
 ### Server B: Base App + Group 2 Workers
@@ -430,9 +438,8 @@ cd /path/to/lynk-backend
 
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.group2.yml \
-               up -d
+# Start base app + worker group 2
+docker compose --profile web --profile group2 up -d
 ```
 
 ### Server C: Base App + Group 3 Workers
@@ -444,9 +451,8 @@ cd /path/to/lynk-backend
 
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.group3.yml \
-               up -d
+# Start base app + worker group 3
+docker compose --profile web --profile group3 up -d
 ```
 
 ### Load Balancer Configuration
@@ -456,22 +462,26 @@ Configure your classic load balancer to distribute traffic across:
 - Server B: `<server-b-ip>:9000` (php-fpm) or use nginx container
 - Server C: `<server-c-ip>:9000` (php-fpm) or use nginx container
 
-**Note**: In production, you may want to run nginx on each server. To do so, extract the nginx service from `docker-compose.local.yml` into a separate `docker-compose.nginx.yml` and use it on each server.
+**Note**: In production, nginx is typically not needed as you'll use an external load balancer. If you need nginx on each server for some reason, you can add the `local` profile, but it will also start mysql/redis which you may not want in production.
 
 ### Scheduler Service (Run on ONE Server Only)
 
 Laravel's task scheduler should run on exactly one server to prevent duplicate scheduled jobs.
 
-To enable the scheduler on Server A (for example), include the scheduler compose file:
+**Note**: The current docker-compose.yml does not include a scheduler service. If you need to run the Laravel scheduler (`php artisan schedule:work`), you can either:
 
+1. Run it manually in a separate container:
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.scheduler.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               up -d
+docker run -d --name laravel-scheduler \
+  --env-file .env \
+  --network lynk-backend_laravel \
+  app-php-fpm:latest \
+  php artisan schedule:work
 ```
 
-**Important**: Only run the scheduler on one server. Do NOT include `docker-compose.scheduler.yml` on Server B and Server C.
+2. Or add a scheduler profile to docker-compose.yml following the same pattern as the worker profiles.
+
+**Important**: Only run the scheduler on one server to prevent duplicate scheduled jobs.
 
 ### Database Migrations
 
@@ -481,36 +491,43 @@ If you need to run migrations manually on a server:
 
 ```bash
 # Run migrations in the app container
-docker compose -f docker/compose/docker-compose.web.yml \
-               exec app php artisan migrate --force
+docker compose exec app php artisan migrate --force
 
 # Cache configuration and routes
-docker compose -f docker/compose/docker-compose.web.yml \
-               exec app php artisan config:cache
-docker compose -f docker/compose/docker-compose.web.yml \
-               exec app php artisan route:cache
+docker compose exec app php artisan config:cache
+docker compose exec app php artisan route:cache
 ```
 
 ### Scaling Worker Groups in Production
 
-Each worker group has 4 dedicated worker containers. To scale a specific worker horizontally:
+To scale specific workers horizontally using the `--scale` flag:
 
-**Scale individual workers using `--scale` flag:**
+**Scale individual workers:**
 
 ```bash
-# Scale the local market worker to 3 instances
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               up -d --scale worker-local-market=3
+# On Server A - Scale group1 workers
+docker compose --profile group1 up -d --scale local-market-order-initiation=3
 
 # Scale multiple workers in Group 1
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.group1.yml \
-               up -d \
-               --scale worker-local-market=3 \
-               --scale worker-order-initiation=2 \
-               --scale worker-buy-commodities=2 \
-               --scale worker-complete-commodities=2
+docker compose --profile group1 up -d \
+  --scale local-market-order-initiation=3 \
+  --scale trader-order-initiation=2 \
+  --scale buy-commodities-local-market-orders-worker-group1=2
+
+# On Server B - Scale group2 workers
+docker compose --profile group2 up -d \
+  --scale default-worker=5 \
+  --scale notifications-worker-group2=3
+
+# On Server C - Scale group3 workers
+docker compose --profile group3 up -d \
+  --scale local-market-webhooks-worker=2
+```
+
+**View worker service names:**
+```bash
+# List all services in a profile
+docker compose --profile group1 config --services
 ```
 
 **Vertical Scaling**: To handle higher load, allocate more CPU/memory to specific servers or adjust queue worker timeout/tries values in the compose files.
@@ -535,9 +552,11 @@ For zero-downtime updates:
 All services include health checks. Check status with:
 
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.local.yml \
-               ps
+# Check status of all running services
+docker compose ps
+
+# Check status of specific profile services
+docker compose --profile web --profile local ps
 ```
 
 **Service Health Checks:**
@@ -564,13 +583,13 @@ curl http://localhost:8080/healthz
 
 **Redis:**
 ```bash
-docker compose -f docker/compose/docker-compose.local.yml exec redis redis-cli ping
+docker compose exec redis redis-cli ping
 # Expected: PONG
 ```
 
 **MySQL:**
 ```bash
-docker compose -f docker/compose/docker-compose.local.yml exec mysql mysqladmin ping -u root -p<password>
+docker compose exec mysql mysqladmin ping -u root -p<password>
 # Expected: mysqld is alive
 ```
 
@@ -578,34 +597,36 @@ docker compose -f docker/compose/docker-compose.local.yml exec mysql mysqladmin 
 
 **All services:**
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml \
-               -f docker/compose/docker-compose.local.yml \
-               logs -f
+# All running services
+docker compose logs -f
+
+# Specific profile services
+docker compose --profile web --profile local logs -f
 ```
 
 **Specific service:**
 ```bash
 # App logs
-docker compose -f docker/compose/docker-compose.web.yml logs -f app
+docker compose logs -f app
 
-# Worker group 1 logs
-docker compose -f docker/compose/docker-compose.group1.yml logs -f worker-group1
+# Specific worker logs
+docker compose logs -f local-market-order-initiation
 
 # Nginx logs
-docker compose -f docker/compose/docker-compose.local.yml logs -f nginx
+docker compose logs -f nginx
 
 # Redis logs
-docker compose -f docker/compose/docker-compose.local.yml logs -f redis
+docker compose logs -f redis
 ```
 
 **Last 100 lines:**
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml logs --tail=100 app
+docker compose logs --tail=100 app
 ```
 
 **Laravel application logs** (inside container):
 ```bash
-docker compose -f docker/compose/docker-compose.web.yml exec app tail -f storage/logs/laravel.log
+docker compose exec app tail -f storage/logs/laravel.log
 ```
 
 ### Testing Queue Processing
@@ -614,14 +635,14 @@ Dispatch a test job to verify workers are processing:
 
 ```bash
 # Execute tinker in the app container
-docker compose -f docker/compose/docker-compose.web.yml exec app php artisan tinker
+docker compose exec app php artisan tinker
 
 # In tinker, dispatch a test job
 >>> dispatch(function() { \Log::info('Queue test successful'); })->onQueue('default');
 >>> exit
 
-# Check worker-group2 logs (handles 'default' queue)
-docker compose -f docker/compose/docker-compose.group2.yml logs -f worker-group2
+# Check default-worker logs (handles 'default' queue in group2)
+docker compose logs -f default-worker
 ```
 
 Expected output in logs: Job processed successfully.
@@ -637,6 +658,17 @@ docker stats laravel-app worker-group1
 ```
 
 ## h) Changelog
+
+### 2025-12-14 - Docker Compose Profiles Refactoring
+- **Refactored**: Consolidated all 7 separate compose files into single `docker-compose.yml`
+- **Added**: Profile-based service organization (web, local, group1, group2, group3)
+- **Changed**: Deployment uses `--profile` flag instead of multiple `-f` flags
+- **Removed**: Hardcoded `deploy.replicas` values - now controlled via `--scale` flag at runtime
+- **Renamed**: Duplicate worker services across groups with suffixes (e.g., `notifications-worker-group2`, `notifications-worker-group3`)
+- **Simplified**: Single source of truth for all deployment scenarios
+- **Updated**: All documentation commands to use profile-based approach
+- **Benefit**: Simplified deployment, better organization, runtime flexibility for replica scaling
+- **Deprecated**: All files in `docker/compose/` directory (kept for reference)
 
 ### 2025-12-10 - Environment Encryption Implementation
 - **Added**: Laravel env:encrypt integration for secure environment management
