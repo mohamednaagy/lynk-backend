@@ -5,12 +5,14 @@ namespace App\Jobs\FinancingOrders;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\SystemNotificationType;
 use App\Enums\GlobalNewOrderNotificationForAdminStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Notifications\FinancingOrders\OrderCreated;
+use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -47,20 +49,18 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
             return;
         }
 
-        $admins = User::query()
-            ->withoutGlobalScope(TenantScope::class)
-            ->role(Role::Admin)
-            ->get();
-
-        $managersHasPermissions = User::query()
-            ->withoutGlobalScope(TenantScope::class)
-            ->role(Role::Manager)
-            ->permission(
-                perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
-            )
-            ->get();
-
-        $notifiables = $admins->merge($managersHasPermissions);
+        $notifiables = app(NotificationPreferenceService::class)
+            ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) {
+                $query->where(function ($query) {
+                    $query->role(Role::Admin)
+                        ->orWhere(function ($query) {
+                            $query->role(Role::Manager)
+                                ->permission(
+                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
+                                );
+                        });
+                });
+            });
 
         Notification::send($notifiables, new OrderCreated($this->financingOrder, $this->user));
     }
