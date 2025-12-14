@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAssignableScope;
+use App\Support\QueryScoper\Scopes\FinancingOrders\OrderChargedTransactionScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderCompanyScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderDateScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderFilterScope;
@@ -47,6 +48,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
             'filter' => new OrderFilterScope,
             'company' => new OrderCompanyScope,
             'date' => new OrderDateScope,
+            'charged_transaction' => new OrderChargedTransactionScope,
         ];
     }
 
