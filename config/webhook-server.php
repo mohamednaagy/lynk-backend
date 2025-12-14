@@ -44,7 +44,7 @@ return [
      * If a call to a webhook takes longer that this amount of seconds
      * the attempt will be considered failed.
      */
-    'timeout_in_seconds' => 3,
+    'timeout_in_seconds' => env('WEBHOOK_TIMEOUT_IN_SECONDS', 10),
 
     /*
      * The amount of times the webhook should be called before we give up.
