@@ -38,7 +38,6 @@
         "salla/zatca": "^2.0",
         "shivella/laravel-bitly": "^1.1",
         "spatie/fractalistic": "^2.9",
-        "spatie/laravel-activitylog": "^4.6",
         "spatie/laravel-fractal": "^6.0",
         "spatie/laravel-medialibrary": "^11.0",
         "spatie/laravel-permission": "^6.0",

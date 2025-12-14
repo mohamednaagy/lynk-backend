@@ -7,12 +7,10 @@ use App\Enums\CommoitySupplierStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class CompanySupplierDetail extends Model
 {
-    use HasFactory , LogsActivity;
+    use HasFactory;
 
     protected $fillable = [
         'description',
@@ -25,12 +23,6 @@ class CompanySupplierDetail extends Model
         'status' => CommoitySupplierStatus::class,
         'market_type' => CommoitySupplierMarketType::class,
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['status']);
-    }
 
     public function supplier()
     {

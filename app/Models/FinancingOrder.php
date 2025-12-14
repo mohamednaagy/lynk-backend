@@ -30,8 +30,6 @@ use Illuminate\Support\Facades\Log;
 use Modules\Otpify\Contracts\Otpifiable;
 use Propaganistas\LaravelPhone\Casts\E164PhoneNumberCast;
 use Propaganistas\LaravelPhone\PhoneNumber;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
@@ -51,7 +49,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     use HasFactory;
     use HasScopes;
     use InteractsWithMedia;
-    use LogsActivity;
     use TraderHelperTrait;
 
     /**
@@ -176,12 +173,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return Attribute::make(
             get: fn () => $this->phone_number?->formatForMobileDialingInCountry($this->phone_number?->getCountry()),
         );
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logAll();
-        // Chain fluent methods for configuration options
     }
 
     public function registerMediaCollections(): void
