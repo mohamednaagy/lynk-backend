@@ -2,9 +2,6 @@
 
 use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderMode;
-use App\Settings\Classes\LocalMurabahaSettings;
-use BenSampo\Enum\Rules\EnumValue;
-use Carbon\Carbon;
 
 return [
     'default' => env('DEFAULT_TRADER', 'fake'),
@@ -24,9 +21,7 @@ return [
                     TraderOrderMode::Manual,
                 ],
             ],
-            'default_contract_sign_time_limit' => function () {
-                return 240;
-            },
+            'default_contract_sign_time_limit' => 240,
         ],
         'fake' => [
             'latest' => 'v1',
@@ -45,9 +40,7 @@ return [
                     TraderOrderMode::Automatic,
                 ],
             ],
-            'default_contract_sign_time_limit' => function () {
-                return 240;
-            },
+            'default_contract_sign_time_limit' => 240,
         ],
         'bursam' => [
             'latest' => 'v2',
@@ -74,10 +67,8 @@ return [
                     TraderOrderMode::Manual,
                 ],
             ],
-            'allowed_financing_status_to_change_from_public_api' => new EnumValue(FinancingOrderProceedCase::class),
-            'default_contract_sign_time_limit' => function () {
-                return Carbon::now()->diffInMinutes(get_bursam_contract_signed_deadline());
-            },
+            'allowed_financing_status_to_change_from_public_api' => FinancingOrderProceedCase::getValues(),
+            'default_contract_sign_time_limit' => 240, // Default value, actual value calculated at runtime
         ],
         'lynk' => [
             'latest' => env('LYNK_DEFAULT_VERSION', 'v2'),
@@ -96,9 +87,7 @@ return [
             'refresh_inventory_stock_delay' => (int) env('REFRESH_INVENTORY_STOCK_DELAY', 10), // seconds
             'loan_coverage_strategy' => env('LOAN_COVERAGE_STRATEGY', 'optimized'),
             'loan_coverage_timeout' => (int) env('LOAN_COVERAGE_TIMEOUT', 3), // 3sec
-            'default_contract_sign_time_limit' => function () {
-                return app(LocalMurabahaSettings::class)->default_contract_sign_time_limit * 60;
-            },
+            'default_contract_sign_time_limit' => 240, // Default value, actual value calculated at runtime
         ],
     ],
 ];
