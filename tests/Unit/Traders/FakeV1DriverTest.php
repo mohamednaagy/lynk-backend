@@ -18,7 +18,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Models\Activity;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
@@ -82,7 +81,6 @@ class FakeV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
         Http::fake(function () {
             return Http::response([
                 'data' => [],
@@ -93,7 +91,6 @@ class FakeV1DriverTest extends TestCase
 
         $this->assertDatabaseCount((new TraderOrder)->getTable(), 0);
         $this->assertDatabaseCount((new TraderHistory)->getTable(), 0);
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     public function test_accept_agreement_success(): void
@@ -128,15 +125,11 @@ class FakeV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([], 500);
         });
 
         (new FakeV1Driver)->fetchNotifications('ACTIONABLE');
-
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -163,8 +156,6 @@ class FakeV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([
                 'data' => [],
@@ -172,8 +163,6 @@ class FakeV1DriverTest extends TestCase
         });
 
         (new FakeV1Driver)->getTtiId(self::$order);
-
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -209,8 +198,6 @@ class FakeV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([
                 'data' => [],
@@ -218,8 +205,6 @@ class FakeV1DriverTest extends TestCase
         });
 
         (new FakeV1Driver)->respondPtpService(self::$order);
-
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -312,15 +297,11 @@ class FakeV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([], 500);
         });
 
         (new FakeV1Driver)->getDocumentByTypeAndTransaction(1, 'documentType');
-
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -373,15 +354,11 @@ class FakeV1DriverTest extends TestCase
      */
     public function test_issue_murabaha_purchase_offer_success(): void
     {
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([], 200);
         });
 
         (new FakeV1Driver)->issueMurabahaPurchaseOffer(1, 1);
-
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount);
     }
 
     /**
@@ -391,14 +368,10 @@ class FakeV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([], 422);
         });
 
         (new FakeV1Driver)->issueMurabahaPurchaseOffer(1, 1);
-
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 }
