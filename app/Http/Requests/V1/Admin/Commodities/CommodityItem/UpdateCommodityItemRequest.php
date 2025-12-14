@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1\Admin\CommodityItem;
+namespace App\Http\Requests\V1\Admin\Commodities\CommodityItem;
 
 use App\Models\CommodityItem;
 use App\Rules\CommodityItemUniqueNameRole;

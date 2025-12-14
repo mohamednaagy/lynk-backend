@@ -13,7 +13,7 @@ use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommodityItem\ListCommodityItemsRequest;
 use App\Http\Requests\V1\Admin\Commodities\CommodityItem\StoreCommodityItemRequest;
-use App\Http\Requests\V1\Admin\CommodityItem\UpdateCommodityItemRequest;
+use App\Http\Requests\V1\Admin\Commodities\CommodityItem\UpdateCommodityItemRequest;
 use App\Models\CommodityItem;
 use App\Transformers\Admin\CommodityItem\CommodityItemsTransformer;
 use Illuminate\Http\JsonResponse;
