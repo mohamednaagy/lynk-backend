@@ -39,8 +39,6 @@ class UpdateCommodityCertificateForClient extends Controller
         return DB::transaction(function () use ($request, $order, $traderOrder) {
             [$order, $traderOrder] = app(GetOrderAndTraderOrderLockedForUpdate::class)->handle($traderOrder);
 
-            $traderOrder->allowProgressToNextStep(); // TODO: Added to explicitly control order transitions (needs refactoring later)
-
             (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
                 ->updateCommodityCertificateForClient($traderOrder, $request);
 

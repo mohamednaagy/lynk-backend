@@ -58,9 +58,7 @@ class CreateTraderOrderAction implements CreateTraderOrder
                 ->createTraderOrder($financingOrder, $commodityTypeId),
         };
 
-        $financingOrder->update([
-            'status' => FinancingOrderStatus::InProgress,
-        ]);
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
 
         return $traderOrder;
     }

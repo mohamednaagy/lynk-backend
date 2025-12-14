@@ -313,4 +313,5 @@ return [
         'need_to_select_financing_order_type' => 'يجب اختيار نوع الطلب لإنشاء الطلب.',
     ],
     'amount_gte' => 'يجب أن تكون القيمة أكبر من أو تساوي :amount ريال سعودي',
+    'auto_verified_not_allowed' => 'لا يسمح بتمكين التحقق التلقائي للبريد الإلكتروني',
 ];

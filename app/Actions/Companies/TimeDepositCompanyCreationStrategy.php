@@ -11,6 +11,7 @@ class TimeDepositCompanyCreationStrategy implements CompanyCreationStrategy
     public function create(array $data): Lender
     {
         $data['status'] = CompanyStatus::Approved();
+
         return Lender::create(
             Arr::only(
                 $data,

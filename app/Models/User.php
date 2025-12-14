@@ -50,6 +50,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         'company_id',
         'is_active',
         'can_manage_orders',
+        'is_auto_verified',
     ];
 
     /**
@@ -153,6 +154,11 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     public function enquiries(): HasMany
     {
         return $this->hasMany(Enquiry::class);
+    }
+
+    public function notificationSettings(): HasMany
+    {
+        return $this->hasMany(UserNotificationSetting::class);
     }
 
     public function orders(): HasMany

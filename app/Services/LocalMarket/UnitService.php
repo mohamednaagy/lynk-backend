@@ -236,7 +236,7 @@ class UnitService
     public static function getUnitsByGroupedByPreviousOwner(LocalMarketOrder $localMarketOrder)
     {
         $ownershipTypeOriginalSupplier = OwnershipTypes::OriginalSupplier;
-        $previousOrdersText = trans('local-market.old_request', [], 'ar'); // Localized text
+        $previousOrdersText = trans('local-market.old_request', [], 'ar');
 
         return LocalMarketInventoryUnits::select(
             'local_market_inventory_units.local_market_inventory_id',

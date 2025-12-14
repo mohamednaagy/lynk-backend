@@ -12,9 +12,12 @@ use App\Exceptions\TradeRequestCreationNotAllowedException;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class InitiateTraderOrderAction implements InitiateTraderOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @throws OrderHasCompletedTraderOrderException
      * @throws TradeRequestCreationNotAllowedException
@@ -30,10 +33,7 @@ class InitiateTraderOrderAction implements InitiateTraderOrder
         $trader = Trader::driver($driver, get_latest_version_of_trader($driver));
         $trader->createTraderOrder($order);
 
-        // Ensure status is updated only after successful trader order creation
-        $order->update([
-            'status' => FinancingOrderStatus::InProgress,
-        ]);
+        $this->updateOrderStatus($order, FinancingOrderStatus::InProgress);
     }
 
     private function ensureTraderOrderCanBeCreated(FinancingOrder $order, User $user): void

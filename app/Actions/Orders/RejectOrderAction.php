@@ -6,14 +6,18 @@ use App\Actions\Contracts\Orders\RejectOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\User;
+use App\Support\Traders\Traits\TraderHelperTrait;
 
 class RejectOrderAction implements RejectOrder
 {
+    use TraderHelperTrait;
+
     public function handle(FinancingOrder $financingOrder, User $user, array $data): void
     {
-        $financingOrder->status = FinancingOrderStatus::Rejected;
-        $financingOrder->status_reason = $data['status_reason'] ?? null;
-        $financingOrder->approved_at = null;
-        $financingOrder->save();
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Rejected);
+        $financingOrder->update([
+            'status_reason' => $data['status_reason'] ?? null,
+            'approved_at' => null,
+        ]);
     }
 }

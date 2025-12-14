@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Enums\ErrorCode;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedByRequestDataException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -60,6 +61,13 @@ class Handler extends ExceptionHandler
             $code = Response::HTTP_NOT_FOUND;
 
             return response()->errorResponse($message, $code, ErrorCode::ITEM_NOT_FOUND);
+        });
+
+        $this->renderable(function (ValidationException $e, $request) {
+            return response()->json([
+                'message' => __('validation.failed'),
+                'errors' => $e->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         });
     }
 }

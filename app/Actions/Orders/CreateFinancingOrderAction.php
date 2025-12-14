@@ -15,6 +15,7 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
     public function __construct(
         private FinancingOrderTypeFactory $financingOrderTypeFactory
     ) {}
+
     /**
      * @return FinancingOrder|Model
      */
@@ -37,12 +38,11 @@ class CreateFinancingOrderAction implements CreateFinancingOrder
         $data['commodity_type_id'] = is_numeric($commodityTypeId)
             ? (int) $commodityTypeId
             : $this->findCommodityTypeIdByUniqueName($commodityTypeId, $company);
-        
-            
+
         $strategy = $this->financingOrderTypeFactory->make($data['type']);
 
         return $strategy->create($company, $data);
-        
+
     }
 
     private function findCommodityTypeIdByUniqueName(?string $uniqueName, Company $company): ?int

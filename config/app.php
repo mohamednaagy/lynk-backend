@@ -216,6 +216,7 @@ return [
 
         App\Providers\TokenServiceProvider::class,
         App\Providers\SendGridServiceProvider::class,
+        VladimirYuldashev\LaravelQueueRabbitMQ\LaravelQueueRabbitMQServiceProvider::class,
     ],
 
     /*

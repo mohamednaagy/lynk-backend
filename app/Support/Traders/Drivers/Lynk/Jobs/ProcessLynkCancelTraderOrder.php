@@ -12,13 +12,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, TraderHelperTrait;
+    use Dispatchable, InteractsWithQueue, Queueable, TraderHelperTrait;
 
     /**
      * Create a new job instance.
@@ -37,39 +35,39 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
      */
     public function handle(): void
     {
-        try {
-            DB::transaction(function () {
-                $traderOrder = TraderOrder::query()
-                    ->where('status', TraderOrderStatus::PendingCancellation)
-                    ->lockForUpdate()
-                    ->find($this->traderOrderId);
+        $traderOrder = TraderOrder::query()
+            ->find($this->traderOrderId);
 
-                if (
-                    (is_null($traderOrder))) {
-                    log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found trader_order_id:'.$this->traderOrderId, [
-                        'traderOrderId' => $this->traderOrderId,
-                    ]);
-
-                    return;
-                }
-                app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $traderOrder->cancelDetail->cancel_reason->value);
-            });
-        } catch (\Exception $e) {
-            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('error at ProcessLynkCancelTraderOrder ,cant add cancel details trader_order_id => '.$this->traderOrderId, [
+        if (is_null($traderOrder)) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found trader_order_id:'.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
-                'error' => $e->getMessage(),
             ]);
+
+            return;
         }
 
+        if ($traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle(' trader order status is not cancelled at ProcessLynkCancelTraderOrder', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'status' => $traderOrder->status->value,
+                'traderOrderId' => $this->traderOrderId,
+            ]);
+
+            return;
+        }
+
+        app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $traderOrder->cancelDetail->cancel_reason->value);
     }
 
     public function failed($exception)
     {
-        $traderOrder = null;
-
-        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        $traderOrder = TraderOrder::find($this->traderOrderId);
 
         if (! $traderOrder) {
+            log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('ProcessLynkCancelTraderOrder not found at failed function trader_order_id => '.$this->traderOrderId, [
+                'traderOrderId' => $this->traderOrderId,
+            ]);
+
             return;
         }
 
@@ -79,7 +77,7 @@ class ProcessLynkCancelTraderOrder implements ShouldBeUnique, ShouldQueue
 
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('failed at ProcessLynkCancelTraderOrder ', $traderOrder), [
             'financingOrderId' => $traderOrder->financing_order_id,
-            'traderOrderId ' => $this->traderOrderId,
+            'traderOrderId' => $this->traderOrderId,
             'message' => $exception->getMessage(),
             'trace' => $exception->getTraceAsString(),
         ]);

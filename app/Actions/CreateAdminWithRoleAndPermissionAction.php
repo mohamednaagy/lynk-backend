@@ -7,6 +7,7 @@ use App\Actions\Contracts\AssignRoleToUser;
 use App\Actions\Contracts\CreateAdminWithRoleAndPermission;
 use App\Actions\Contracts\CreateUser;
 use App\Models\User;
+use App\Services\NotificationPreferenceService;
 
 class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPermission
 {
@@ -33,8 +34,8 @@ class CreateAdminWithRoleAndPermissionAction implements CreateAdminWithRoleAndPe
         if (! empty($data['permissions'])) {
             $this->assignPermissionToUser->handle($user, $data['permissions']);
         }
+        app(NotificationPreferenceService::class)->ensureDefaults($user);
 
-        // return user
         return $user;
     }
 }

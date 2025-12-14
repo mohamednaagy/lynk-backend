@@ -11,7 +11,7 @@ return new class extends Migration
     {
         DB::statement('
                     CREATE VIEW commodity_type_statistics_view AS
-                    SELECT 
+                    SELECT
                         lmi.commodity_type_id,
 
                         -- Value Calculations
@@ -21,8 +21,8 @@ return new class extends Migration
 
                     FROM local_market_inventories lmi
 
-                    JOIN commodity_items ci 
-                        ON lmi.commodity_item_id = ci.id 
+                    JOIN commodity_items ci
+                        ON lmi.commodity_item_id = ci.id
                         AND ci.deleted_at IS NULL
 
                     WHERE lmi.deleted_at IS NULL

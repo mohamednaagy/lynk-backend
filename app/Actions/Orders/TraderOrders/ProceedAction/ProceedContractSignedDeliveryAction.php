@@ -48,8 +48,6 @@ class ProceedContractSignedDeliveryAction implements ProceedContractSignedDelive
         $trader = Trader::driver($traderOrder->provider, $traderOrder->version);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::ContractSigned);
 
-        $traderOrder->allowProgressToNextStep();
-
         $trader->createSellingCommodityToCustomerDocument($traderOrder);
         $this->createTraderOrderHistory($traderOrder, FinancingOrderHistory::PendingDelivery);
 

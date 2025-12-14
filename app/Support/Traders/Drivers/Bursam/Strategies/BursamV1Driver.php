@@ -33,6 +33,7 @@ use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -92,7 +93,7 @@ class BursamV1Driver implements TraderInterface
             'status' => $status,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'creator_id' => auth()?->user()?->id,
+            'creator_id' => Auth::id(),
             'commodity_type_id' => $preferredCommodityTypeId,
 
         ];
@@ -468,7 +469,7 @@ class BursamV1Driver implements TraderInterface
         app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, TraderOrderCancelReason::Manual, cancelledByType: TraderOrderCancelType::User, cancelledBy: auth()->user());
 
         ProcessBursamStbCertificateAfterCancellation::dispatch($traderOrder->id, TraderOrderCancelReason::Manual, TraderOrderCancelType::User,
-            auth()->user());
+            Auth::user());
 
         app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
 
@@ -499,15 +500,11 @@ class BursamV1Driver implements TraderInterface
         $order = $traderOrder->order;
 
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-            $order->update([
-                'status' => FinancingOrderStatus::Cancelled,
-            ]);
+            $this->updateOrderStatus($order, FinancingOrderStatus::Cancelled);
         }
 
         if ($order->status->is(FinancingOrderStatus::InProgress)) {
-            $order->update([
-                'status' => FinancingOrderStatus::PendingTraderOrder,
-            ]);
+            $this->updateOrderStatus($order, FinancingOrderStatus::PendingTraderOrder);
         }
         app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
         app(TimeLimitService::class)->cancelPendingTimeLimits($traderOrder);

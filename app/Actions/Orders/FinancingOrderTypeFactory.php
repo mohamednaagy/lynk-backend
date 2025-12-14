@@ -15,10 +15,10 @@ class FinancingOrderTypeFactory
     public function make($financingOrderType): FinancingOrderTypeStrategy
     {
         return match ($financingOrderType) {
-            FinancingOrderTypeEnum::NormalLending   => $this->normalLendingFinancingOrderStrategy,
+            FinancingOrderTypeEnum::NormalLending => $this->normalLendingFinancingOrderStrategy,
             FinancingOrderTypeEnum::SpecialPurposeVehicle => $this->specialPurposeVehicleFinancingOrderStrategy,
-            FinancingOrderTypeEnum::TimeDeposit    => $this->timeDepositFinancingOrderStrategy,
-            default    => $this->normalLendingFinancingOrderStrategy, 
+            FinancingOrderTypeEnum::TimeDeposit => $this->timeDepositFinancingOrderStrategy,
+            default => $this->normalLendingFinancingOrderStrategy,
         };
     }
 }

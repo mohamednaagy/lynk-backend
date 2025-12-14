@@ -40,5 +40,4 @@ return [
         'selling_commodity_start_time' => env('BURSAM_SELLING_COMMODITY_START_TIME', '18:15:00'),
         'selling_commodity_end_time' => env('BURSAM_SELLING_COMMODITY_END_TIME', '18:30:00'),
     ],
-
 ];

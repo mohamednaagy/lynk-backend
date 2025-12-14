@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1\Admin\Companies\Users;
 
 use App\Enums\Area;
 use App\Models\User;
+use App\Rules\CheckAutoVerifiedUsersIsAllowedRule;
 use App\Rules\HostWhitelistRule;
 use App\Rules\UrlProtocolRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -42,6 +43,7 @@ class StoreUserRequest extends FormRequest
                 'required',
                 Rule::in(Area::roles(Area::Lender)),
             ],
+            'is_auto_verified' => ['boolean', new CheckAutoVerifiedUsersIsAllowedRule],
         ];
     }
 }

@@ -37,6 +37,7 @@ class CreateUserAction implements CreateUser
                     'company_id',
                     'locale',
                     'is_active',
+                    'is_auto_verified',
                 ]
             )
         );

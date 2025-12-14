@@ -94,9 +94,13 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeStatus(FinancingOrder $financingOrder)
     {
+        $latest = $financingOrder->latestStatusHistory;
+
         return $this->primitive([
             'description' => $financingOrder->status->description,
             'value' => $financingOrder->status->value,
+            'creator' => $latest?->getCreator(),
+            'created_at' => $latest?->created_at ? saudi_now('Y-m-d h:i:s A', $latest->created_at) : null,
         ]);
     }
 

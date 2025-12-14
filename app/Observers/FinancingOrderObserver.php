@@ -19,6 +19,12 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
         if (FinancingOrder::readyForProcessing()->exists()) {
             ProcessInProgressOrder::dispatch($financingOrder->id);
         }
+
+        // Record initial status history
+        $financingOrder->statusHistories()->create([
+            'status' => $financingOrder->status,
+            'creator_id' => auth()?->id(),
+        ]);
     }
 
     /**

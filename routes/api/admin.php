@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Admin\Commodities\CommodityTypesLiteList;
 use App\Http\Controllers\Api\V1\Admin\Commodities\LocalMarketInventoryController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ProductCodeCacheController;
 use App\Http\Controllers\Api\V1\Admin\Commodities\ResendInvitationToUserController as ResendSupplierInvitationToUser;
+use App\Http\Controllers\Api\V1\Admin\Commodities\SupplierMonthlyUsage;
 use App\Http\Controllers\Api\V1\Admin\Companies\LenderClients\ClientAutoSellPeriodController;
 use App\Http\Controllers\Api\V1\Admin\Constants\ConstantController;
 use App\Http\Controllers\Api\V1\Admin\Edaat\GetEdaatInvoices;
@@ -65,6 +66,7 @@ use App\Http\Controllers\Api\V1\Admin\Lenders\Orders\UpdateOrderPaymentProof;
 use App\Http\Controllers\Api\V1\Admin\Lenders\ResendInvitationToUser as ResendLenderInvitationToUser;
 use App\Http\Controllers\Api\V1\Admin\Lenders\UpdateLenderStatus;
 use App\Http\Controllers\Api\V1\Admin\Media\DownloadMedia;
+use App\Http\Controllers\Api\V1\Admin\Notifications\UserNotificationSettingsController;
 use App\Http\Controllers\Api\V1\Admin\PdfController;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllPermissions;
 use App\Http\Controllers\Api\V1\Admin\Roles\GetAllRoles;
@@ -97,6 +99,13 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::apiResource('admins', AdminController::class);
         Route::patch('admins/{admin}', [AdminController::class, 'partiallyUpdate']);
+
+        Route::prefix('users/{user}/notifications')->group(function () {
+            Route::get('/', [UserNotificationSettingsController::class, 'index'])
+                ->middleware('permission:'.perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage]));
+            Route::patch('{notification_type}', [UserNotificationSettingsController::class, 'toggle'])
+                ->middleware('permission:'.perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage]));
+        });
 
         Route::get('/roles', GetAllRoles::class)->middleware(
             'permission:'.perm(Area::SuperAdmin, [Subject::Roles, Action::Index])
@@ -154,6 +163,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
             Route::get('/dropdown-list', CommoditySupplierLiteList::class);
             Route::get('{supplier}/locations/dropdown-list', CommodityLocationLiteList::class);
             Route::apiResource('{supplier}/locations', CommodityLocationController::class);
+            Route::get('{commodity_supplier}/commodities-monthly-usage', SupplierMonthlyUsage::class);
         });
 
         Route::apiResource('commodity-suppliers', CommoditySupplierController::class);

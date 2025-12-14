@@ -63,6 +63,7 @@ class OrderController extends Controller
             'activeTraderOrder' => fn ($query) => $query->latest(),
             'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'creator',
+            'latestStatusHistory.creator',
         ])
             ->handle()
             ->paginate();
@@ -92,6 +93,7 @@ class OrderController extends Controller
     {
         $order->load([
             'creator',
+            'latestStatusHistory.creator',
             'traderOrders' => function ($query) {
                 $query->latest('id');
             },
@@ -139,6 +141,7 @@ class OrderController extends Controller
                 'trader_orders.products.currency',
                 'trader_orders.status',
                 'trader_orders.created_at',
+                'trader_orders.expire_at',
                 'trader_orders.cancel_details',
                 'trader_orders.hover_message',
                 'trader_orders.contract_signed_type',

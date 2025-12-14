@@ -3,16 +3,16 @@
 namespace App\Jobs\FinancingOrders;
 
 use App\Enums\Role;
+use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
-use App\Models\User;
 use App\Notifications\FinancingOrders\OrderDeliveryConfirmed;
+use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
-use Stancl\Tenancy\Database\TenantScope;
 
 class NotifyAdminsAboutOrderDeliveryConfirmed implements ShouldQueue
 {
@@ -35,11 +35,10 @@ class NotifyAdminsAboutOrderDeliveryConfirmed implements ShouldQueue
      */
     public function handle()
     {
-
-        $admins = User::query()
-            ->withoutGlobalScope(TenantScope::class)
-            ->role(Role::Admin)
-            ->get();
+        $admins = app(NotificationPreferenceService::class)
+            ->getEnabledUsersFor(SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED, function ($query) {
+                $query->role(Role::Admin);
+            });
 
         Notification::send($admins, new OrderDeliveryConfirmed($this->traderOrder));
     }

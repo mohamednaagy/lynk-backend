@@ -8,19 +8,20 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\BalanceIsNotEnoughException;
 use App\Models\FinancingOrder;
 use App\Support\Traders\Facades\Trader;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class ProcessInProgressOrder implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use TraderHelperTrait;
 
     private int $financingOrderId;
 
@@ -44,41 +45,39 @@ class ProcessInProgressOrder implements ShouldQueue
     public function handle(): void
     {
         try {
-            $financingOrder = FinancingOrder::query()->lockForUpdate()->findOrFail($this->financingOrderId);
+            // Add withoutGlobalScopes to prevent filtering orders with null company_id when looking for suitable trader
+            $financingOrder = FinancingOrder::withoutGlobalScopes()->lockForUpdate()->findOrFail($this->financingOrderId);
             $trader = Trader::getSuitableDriverForCompany($financingOrder);
 
-            DB::multipleTransaction(function () use ($trader, $financingOrder) {
-                if ($financingOrder->traderOrders()->whereIn('status', [
-                    TraderOrderStatus::InProgress,
-                ])->count() > 0) {
-                    Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has in progress trader order');
+            if ($financingOrder->traderOrders()->where('status', TraderOrderStatus::InProgress)->count() > 0) {
+                Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has in progress trader order');
 
-                    return;
-                }
-                if (
-                    $financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)
-                    || $financingOrder->company->lender->lenderDetail->require_initiate_trade_request
-                ) {
-                    Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has in progress trader order');
+                return;
+            }
 
-                    return;
-                }
+            if ($financingOrder->status->cantMoveTo(FinancingOrderStatus::InProgress)) {
+                Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' can not move to in progress status');
 
-                try {
-                    app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
-                } catch (BalanceIsNotEnoughException $e) {
-                    Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has balance is not enough');
-                    Log::channel(LOG_CHANNEL_LYNK)->alert($financingOrder->id);
+                return;
+            }
 
-                    return;
-                }
+            if ($financingOrder->company->lender->lenderDetail->require_initiate_trade_request) {
+                Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' require initiate trade request');
 
-                $trader->createTraderOrder($financingOrder);
+                return;
+            }
 
-                $financingOrder->update([
-                    'status' => FinancingOrderStatus::InProgress,
-                ]);
-            });
+            app(CanCreateOrder::class)->handle($financingOrder->company, $financingOrder->amount);
+
+            $trader->createTraderOrder($financingOrder);
+            $this->updateOrderStatus($financingOrder, FinancingOrderStatus::InProgress);
+
+        } catch (BalanceIsNotEnoughException $e) {
+            Log::channel(LOG_CHANNEL_LYNK)->info('financing_order_id '.$financingOrder->id.' has balance is not enough');
+            Log::channel(LOG_CHANNEL_LYNK)->alert($financingOrder->id);
+
+            // don't throw exception as this case to handle no wallet balance so no need to retry.
+            return;
         } catch (\Exception $e) {
             Log::channel(LOG_CHANNEL_LYNK)->error(
                 'An error occurred while processing the financing order.',
@@ -86,7 +85,10 @@ class ProcessInProgressOrder implements ShouldQueue
                     'financingOrderId' => $this->financingOrderId,
                     'error' => $e->getMessage(),
                     'trace' => $e->getTraceAsString(),
-                ]);
+                ]
+            );
+
+            throw $e;
         }
     }
 

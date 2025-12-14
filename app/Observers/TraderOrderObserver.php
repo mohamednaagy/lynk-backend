@@ -2,9 +2,10 @@
 
 namespace App\Observers;
 
-use App\Actions\Contracts\Orders\CompleteOrder;
+use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
+use App\Jobs\FinancingOrders\CompleteOrderJob;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
@@ -74,7 +75,6 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
     {
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
-
         }
     }
 
@@ -84,10 +84,12 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
             TraderOrderCancelled::dispatch($traderOrder);
         }
 
-        if ($traderOrder->status->is(TraderOrderStatus::Completed)) {
-            if ($traderOrder->hasAutoCompleteFinancingOrder()) {
-                app(CompleteOrder::class)->handle($traderOrder->order->id, []);
-            }
+        if (
+            $traderOrder->status->is(TraderOrderStatus::Completed) &&
+            $traderOrder->hasAutoCompleteFinancingOrder() &&
+            ! $traderOrder->checkOrderHistoryAction(FinancingOrderHistory::DeliveryConfirmed)
+        ) {
+            CompleteOrderJob::dispatch($traderOrder->order->id, []);
         }
 
     }

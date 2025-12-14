@@ -7,11 +7,14 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Models\FinancingOrder;
+use App\Support\Traders\Traits\TraderHelperTrait;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
 class CompleteOrderAction implements CompleteOrder
 {
+    use TraderHelperTrait;
+
     /**
      * @return mixed
      */
@@ -38,6 +41,6 @@ class CompleteOrderAction implements CompleteOrder
                 ->toMediaCollection(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
         }
 
-        $financingOrder->update(['status' => FinancingOrderStatus::Completed]);
+        $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Completed);
     }
 }

@@ -6,7 +6,6 @@ use App\Enums\CompanyType;
 
 class CompanyCreationStrategyFactory
 {
-
     public function __construct(
         private NormalCompanyCreationStrategy $normalCompanyCreationStrategy,
         private SpecialPurposeVehicleCompanyCreationStrategy $spvCompanyCreationStrategy,
