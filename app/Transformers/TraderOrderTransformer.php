@@ -8,8 +8,6 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
-use App\Enums\TraderOrderTimeLimitStatus;
-use App\Enums\TraderOrderTimeLimitType;
 use App\Models\TraderOrder;
 use App\Support\DataTransferObjects\CommodityProductDto;
 use App\Support\DataTransferObjects\LynkCommodityProductDto;
@@ -40,7 +38,7 @@ class TraderOrderTransformer extends TransformerAbstract
         'mode',
         'version',
         'failure_reason',
-        'expire_at',
+        'expiry_date',
         'refunded_at',
         'refund_status',
         'purchasing_commodity_information',
@@ -188,7 +186,7 @@ class TraderOrderTransformer extends TransformerAbstract
         return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
     }
 
-    public function includeExpireAt(TraderOrder $traderOrder): ?Primitive
+    public function includeExpiryDate(TraderOrder $traderOrder): ?Primitive
     {
 
         if (! $traderOrder->isAutomaticMode()) {
@@ -241,13 +239,6 @@ class TraderOrderTransformer extends TransformerAbstract
         $this->currentOrderTraderOrders = $currentOrderTraderOrders;
 
         return $this;
-    }
-
-    public function includeExpiryDate(TraderOrder $traderOrder)
-    {
-        $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
-
-        return ($effective_at) ? $this->primitive(saudi_now('Y-m-d h:i:s A', Carbon::parse($effective_at))) : null;
     }
 
     public function includeShowProceedBtn(TraderOrder $traderOrder): Primitive
