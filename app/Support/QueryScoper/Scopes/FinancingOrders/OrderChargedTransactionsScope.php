@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-class OrderChargedTransactionScope extends QueryScoper
+class OrderChargedTransactionsScope extends QueryScoper
 {
     /**
      * Prepare data for validation
@@ -18,7 +18,7 @@ class OrderChargedTransactionScope extends QueryScoper
     public function prepareData()
     {
         return [
-            'charged_transaction' => Request::query('charged_transaction'),
+            'charged_transactions' => Request::query('charged_transactions'),
         ];
     }
 
@@ -33,7 +33,7 @@ class OrderChargedTransactionScope extends QueryScoper
         return Validator::make(
             $data,
             [
-                'charged_transaction' => ['required', Rule::in('1', '0')],
+                'charged_transactions' => ['required', Rule::in('1', '0')],
             ]
         );
     }
@@ -47,7 +47,7 @@ class OrderChargedTransactionScope extends QueryScoper
      */
     public function prepareBuilder($builder, $data)
     {
-        return match ($data['charged_transaction']) {
+        return match ($data['charged_transactions']) {
             '1' => $builder->where('charged_trader_orders_count', '>', 0),
             '0' => $builder->where('charged_trader_orders_count', '=', 0),
             default => $builder,
