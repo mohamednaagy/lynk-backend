@@ -47,15 +47,16 @@ class CommodityTypeController extends Controller
         ListCommodityTypeRequest $request,
         BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypesQuery
     ): JsonResponse {
-
-        $commidityTypes = $buildPaginatedCommodityTypesQuery
-            ->setStatus($request->status)
+        $commodityTypes = $buildPaginatedCommodityTypesQuery
+            ->setStatus($request->validated('status'))
             ->setActive($request->validated('active'))
             ->setProvider($request->validated('provider'))
+            ->setName($request->validated('name'))
+            ->setUniqueName($request->validated('unique_name'))
             ->handle()
             ->paginate();
 
-        return fractal($commidityTypes, new CommodityTypeTransformer)
+        return fractal($commodityTypes, new CommodityTypeTransformer)
             ->parseIncludes([
                 'id',
                 'name',

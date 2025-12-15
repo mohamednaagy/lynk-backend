@@ -10,11 +10,13 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 {
     private $status;
 
-    private $name;
+    private ?string $name = null;
+
+    private ?string $uniqueName = null;
 
     private ?int $active = null;
 
-    private $provider;
+    private ?string $provider = null;
 
     private ?int $companyId = null;
 
@@ -25,6 +27,8 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
                 $query->where('status', $this->status);
             })->when($this->name, function ($query) {
                 $query->where('name', 'like', "%{$this->name}%");
+            })->when($this->uniqueName, function ($query) {
+                $query->where('unique_name', $this->uniqueName);
             })->when($this->provider, function ($query) {
                 $query->where('provider', $this->provider);
             })->when($this->active, function ($query) {
@@ -34,7 +38,7 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
             });
     }
 
-    public function setStatus($status = null)
+    public function setStatus($status = null): self
     {
         $this->status = $status;
 
@@ -42,12 +46,22 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     }
 
     /**
-     * @param  string|null  $name
+     * @param  string|null  $name  The name of the commodity type.
      * @return $this
      */
-    public function setName($name = null)
+    public function setName(?string $name = null): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setUniqueName(?string $uniqueName = null): self
+    {
+        $this->uniqueName = $uniqueName;
 
         return $this;
     }
@@ -69,10 +83,9 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     }
 
     /**
-     * @param  string|null  $provider
      * @return $this
      */
-    public function setProvider($provider = null)
+    public function setProvider(?string $provider = null): self
     {
         $this->provider = $provider;
 

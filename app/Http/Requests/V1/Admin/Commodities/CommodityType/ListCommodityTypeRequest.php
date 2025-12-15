@@ -31,7 +31,8 @@ class ListCommodityTypeRequest extends FormRequest
             'status' => ['nullable',  new EnumValue(CommodityTypeStatus::class)],
             'active' => ['nullable', 'integer', Rule::in([1, 2, 3])],
             'provider' => ['nullable', 'string', new EnumValue(CommodityTypeProvider::class)],
-
+            'name' => ['nullable', 'string', 'max:255'],
+            'unique_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
