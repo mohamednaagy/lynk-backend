@@ -27,7 +27,9 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
 
     public function handle(): void
     {
+        $queryStart = microtime(true);
         $traderOrder = TraderOrder::where('reference', $this->data['external_order_no'])->first();
+        $queryDuration = round((microtime(true) - $queryStart) * 1000, 2);
 
         if (! $traderOrder) {
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error("Trader order not found for the given reference => {$this->data['external_order_no']}", [
@@ -41,6 +43,7 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
             'traderOrderId' => $traderOrder->id,
             'reference' => $this->data['external_order_no'],
             'case' => $this->data['case'],
+            'query_duration_ms' => $queryDuration,
         ]);
 
         switch ($this->data['case']) {
