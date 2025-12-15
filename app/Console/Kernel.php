@@ -39,9 +39,7 @@ class Kernel extends ConsoleKernel
             ->onOneServer();
 
         $schedule->command(GenerateSupplierMonthlyUsageReportsCommand::class)
-//            ->timezone($timezone)/   /TODO we commented temporarily to for testing(Aligned with the team)
-//            ->monthlyOn(1, '00:00') //TODO we commented temporarily to for testing(Aligned with the team)
-            ->dailyAt('02:00')
+            ->monthlyOn(1, '02:00')
             ->onOneServer();
     }
 
