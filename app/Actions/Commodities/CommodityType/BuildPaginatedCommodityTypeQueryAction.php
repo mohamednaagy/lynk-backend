@@ -16,7 +16,7 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
 
     private ?int $active = null;
 
-    private ?string $provider = null;
+    private array $providers = [];
 
     private ?int $companyId = null;
 
@@ -29,8 +29,8 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
                 $query->where('name', 'like', "%{$this->name}%");
             })->when($this->uniqueName, function ($query) {
                 $query->where('unique_name', $this->uniqueName);
-            })->when($this->provider, function ($query) {
-                $query->where('provider', $this->provider);
+            })->when($this->providers, function ($query) {
+                $query->whereIn('provider', $this->providers);
             })->when($this->active, function ($query) {
                 $query->active($this->active);
             })->when($this->companyId, function ($query) {
@@ -85,9 +85,9 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     /**
      * @return $this
      */
-    public function setProvider(?string $provider = null): self
+    public function setProvider(?string $providers = null): self
     {
-        $this->provider = $provider;
+        $this->providers = $providers ? explode(',', $providers) : [];
 
         return $this;
     }
