@@ -183,7 +183,7 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includeCreatedAt(TraderOrder $traderOrder): Primitive
     {
-        return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->toDateTimeString());
+        return $this->primitive($traderOrder->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i A'));
     }
 
     public function includeExpiryDate(TraderOrder $traderOrder): ?Primitive
@@ -203,7 +203,6 @@ class TraderOrderTransformer extends TransformerAbstract
         $formattedExpireAt = saudi_now('Y-m-d h:i:s A', $expireAt);
 
         return $this->primitive($formattedExpireAt);
-
     }
 
     public function includeCancelDetails(TraderOrder $traderOrder)
