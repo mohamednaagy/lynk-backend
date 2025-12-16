@@ -32,11 +32,11 @@ jobs:
            "cd /var/www/lynk-backend/ && \
             git pull origin dev && \
             composer install --ignore-platform-reqs && \
-            sudo php artisan migrate && \
-            sudo php artisan structure:clear && \
-            sudo php artisan structure:discover
-            sudo supervisorctl stop all && \
-            sudo supervisorctl start all"
+            php artisan migrate && \
+            php artisan structure:clear && \
+            php artisan package:discover
+            supervisorctl stop all && \
+            supervisorctl start all"
 
       - name: set pr url
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'

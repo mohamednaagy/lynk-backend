@@ -21,7 +21,7 @@ jobs:
         id: pull-and-build
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SANDBOX_USER_NAME }}@144.24.208.157 \
-           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate && sudo php artisan structure:clear && sudo php artisan structure:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
+           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate && sudo php artisan structure:clear && sudo php artisan package:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
 
       - name: set pr url
         if: always()
@@ -34,7 +34,6 @@ jobs:
             | jq -r 'if type == "array" and length > 0 then .[0].html_url else "" end')
 
           echo "pr-url=$PR_URL" >> $GITHUB_OUTPUT
-
 
       - name: print info
         if: always()

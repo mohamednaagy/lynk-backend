@@ -18,7 +18,7 @@ jobs:
         id: pull-and-build-backend-preprod-server-1
         run: |
           ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_1 }}@${{ secrets.BACKEND_PREPRD_1_IP }} \
-           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan structure:clear && sudo php artisan structure:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan package:discover && sudo php artisan structure:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
 
       # Pull and build code on Backend Preprod Server 2
       - name: pulling and build code on backend preprod server 2
