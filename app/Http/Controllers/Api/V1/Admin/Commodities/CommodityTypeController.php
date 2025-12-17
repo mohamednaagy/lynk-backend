@@ -50,7 +50,7 @@ class CommodityTypeController extends Controller
         $commodityTypes = $buildPaginatedCommodityTypesQuery
             ->setStatus($request->validated('status'))
             ->setActive($request->validated('active'))
-            ->setProvider($request->validated('provider'))
+            ->setProviders($request->validated('provider'))
             ->setName($request->validated('name'))
             ->setUniqueName($request->validated('unique_name'))
             ->handle()

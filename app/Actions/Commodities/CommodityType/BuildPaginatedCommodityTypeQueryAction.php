@@ -83,9 +83,12 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
     }
 
     /**
+     * Set providers to filter commodity types by.
+     *
+     * @param  string|null  $providers  A comma-separated string of provider names.
      * @return $this
      */
-    public function setProvider(?string $providers = null): self
+    public function setProviders(?string $providers = null): self
     {
         $this->providers = collect(explode(',', $providers ?? ''))
             ->map(fn ($provider) => trim($provider))
