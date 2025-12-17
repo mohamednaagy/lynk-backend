@@ -19,14 +19,13 @@ class ProviderValidator implements ValidationRule
             return;
         }
 
-        $providers = explode(',', $value);
-        foreach ($providers as $provider) {
-            $provider = trim($provider);
-            if ($provider && ! CommodityTypeProvider::hasValue($provider)) {
-                $fail("The :attribute contains an invalid provider value: '{$provider}'.");
+        $invalidProvider = collect(explode(',', $value))
+            ->map(fn ($provider) => trim($provider))
+            ->filter()
+            ->first(fn ($provider) => ! CommodityTypeProvider::hasValue($provider));
 
-                return;
-            }
+        if ($invalidProvider !== null) {
+            $fail("The :attribute contains an invalid provider value: '{$invalidProvider}'.");
         }
     }
 }
