@@ -103,7 +103,8 @@ jobs:
       - name: 🧪 Run Regression Tests
         id: run-tests
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+          # Use SSH with keepalive to prevent connection timeout during long test runs
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=30 ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
             sudo -u ubuntu bash -c '
               cd /home/ubuntu/lynk-backend-automation &&
 
@@ -130,12 +131,34 @@ jobs:
               echo \"📋 Checking container status...\"
               docker ps -a
 
-              echo \"⏳ Waiting for all test containers to complete...\"
+              echo \"⏳ Waiting for all test containers to complete (this may take 15-25 minutes)...\"
 
-              # Capture exit codes for each container
-              ADMIN_EXIT=\$(docker wait test-admin 2>/dev/null) || ADMIN_EXIT=999
-              LENDER_EXIT=\$(docker wait test-lender 2>/dev/null) || LENDER_EXIT=999
-              SUPPLIER_EXIT=\$(docker wait test-supplier 2>/dev/null) || SUPPLIER_EXIT=999
+              # Wait for containers with progress updates to keep connection alive
+              # Check every 30 seconds and print status
+              while true; do
+                ADMIN_RUNNING=\$(docker ps -q -f name=test-admin 2>/dev/null)
+                LENDER_RUNNING=\$(docker ps -q -f name=test-lender 2>/dev/null)
+                SUPPLIER_RUNNING=\$(docker ps -q -f name=test-supplier 2>/dev/null)
+
+                if [ -z \"\$ADMIN_RUNNING\" ] && [ -z \"\$LENDER_RUNNING\" ] && [ -z \"\$SUPPLIER_RUNNING\" ]; then
+                  echo \"All containers have stopped.\"
+                  break
+                fi
+
+                # Print which containers are still running
+                RUNNING=\"\"
+                [ -n \"\$ADMIN_RUNNING\" ] && RUNNING=\"\$RUNNING admin\"
+                [ -n \"\$LENDER_RUNNING\" ] && RUNNING=\"\$RUNNING lender\"
+                [ -n \"\$SUPPLIER_RUNNING\" ] && RUNNING=\"\$RUNNING supplier\"
+                echo \"[$(date +%H:%M:%S)] Still running:\$RUNNING\"
+
+                sleep 30
+              done
+
+              # Get exit codes from stopped containers
+              ADMIN_EXIT=\$(docker inspect test-admin --format=\"{{.State.ExitCode}}\" 2>/dev/null) || ADMIN_EXIT=999
+              LENDER_EXIT=\$(docker inspect test-lender --format=\"{{.State.ExitCode}}\" 2>/dev/null) || LENDER_EXIT=999
+              SUPPLIER_EXIT=\$(docker inspect test-supplier --format=\"{{.State.ExitCode}}\" 2>/dev/null) || SUPPLIER_EXIT=999
 
               echo \"Container exit codes:\"
               echo \"  test-admin: \$ADMIN_EXIT\"
@@ -143,7 +166,8 @@ jobs:
               echo \"  test-supplier: \$SUPPLIER_EXIT\"
 
               # Show logs for debugging
-              docker-compose logs
+              echo \"📋 Container logs:\"
+              docker-compose logs --tail=100
 
               # Check if any container failed catastrophically
               # Exit code 0 = all tests passed
@@ -202,6 +226,7 @@ jobs:
             '
           "
         continue-on-error: true
+        timeout-minutes: 45
 
       - name: 🔧 Fix Permissions
         run: |
