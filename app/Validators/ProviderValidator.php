@@ -2,7 +2,7 @@
 
 namespace App\Validators;
 
-use App\Enums\Trader;
+use App\Enums\CommodityTypeProvider;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
@@ -22,7 +22,7 @@ class ProviderValidator implements ValidationRule
         $providers = explode(',', $value);
         foreach ($providers as $provider) {
             $provider = trim($provider);
-            if (! Trader::hasValue($provider)) {
+            if (! CommodityTypeProvider::hasValue($provider)) {
                 $fail('The :attribute contains invalid provider value.');
 
                 return;
