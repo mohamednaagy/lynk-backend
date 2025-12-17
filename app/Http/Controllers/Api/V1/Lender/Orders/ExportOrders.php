@@ -30,7 +30,7 @@ class ExportOrders extends Controller
             $buildOrdersQuery->setCreator($request->user());
         }
 
-        $query = $buildOrdersQuery->setLender(tenant()->lender)
+        $query = $buildOrdersQuery->setLender(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->latest(),
                 'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
@@ -51,7 +51,7 @@ class ExportOrders extends Controller
 
     protected function getFileName(string $type = 'xlsx')
     {
-        $lenderName = tenant()->lender->name;
+        $lenderName = tenant()->name;
         $todayDateInYYYYMMDD = saudi_now('Ymd_His');
 
         return "{$lenderName}_LYNKOrderList_{$todayDateInYYYYMMDD}.{$type}";

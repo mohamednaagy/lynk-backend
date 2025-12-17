@@ -115,7 +115,7 @@ class OrderController extends Controller
             $buildOrdersQuery->setCreator($request->user());
         }
 
-        $financingOrders = $buildOrdersQuery->setLender(tenant()->lender)
+        $financingOrders = $buildOrdersQuery->setLender(tenant())
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->latest(),
                 'latestStatusHistory.creator',

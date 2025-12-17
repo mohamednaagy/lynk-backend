@@ -39,7 +39,7 @@ class EdaatInvoiceController extends Controller
         EdaatInvoiceFilterRequest $request,
         GetEdaatInvoicesInterface $getEdaatInvoices
     ): JsonResponse {
-        $edaatInvoices = $getEdaatInvoices->setLender(tenant()->lender)
+        $edaatInvoices = $getEdaatInvoices->setLender(tenant())
             ->handle()
             ->with('creator')
             ->paginate();
