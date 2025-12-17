@@ -5,6 +5,7 @@ namespace App\Services\LocalMarket;
 use App\Enums\CompanyType;
 use App\Enums\LocalMarket\InventoryStatus;
 use App\Models\Company;
+use App\Models\Lender;
 use App\Models\LocalMarketEligibleQuantity;
 use App\Models\LocalMarketInventory;
 use Illuminate\Database\Eloquent\Collection;
@@ -61,11 +62,11 @@ class EligibleQuantityService
             // Remove existing records
             LocalMarketEligibleQuantity::where('inventory_id', $inventory->id)->delete();
 
-            $companies = $this->getLenderCompanies();
+            $lenders = $this->getLenderCompanies();
 
-            foreach ($companies as $company) {
-                $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company);
-                $this->createEligibleQuantityRecord($inventory, $company, $eligibleQuantity);
+            foreach ($lenders as $lender) {
+                $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $lender);
+                $this->createEligibleQuantityRecord($inventory, $lender, $eligibleQuantity);
             }
 
             $inventory->status = InventoryStatus::Active;
@@ -85,29 +86,29 @@ class EligibleQuantityService
     /**
      * Rebuild eligible quantities for a specific lender
      */
-    public function rebuildForLender(Company $company): void
+    public function rebuildForLender(Lender $lender): void
     {
         try {
             $this->logInfo('Rebuilding eligible quantities for lender', [
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
             ]);
 
             // Remove existing records
-            LocalMarketEligibleQuantity::where('company_id', $company->id)->delete();
+            LocalMarketEligibleQuantity::where('company_id', $lender->id)->delete();
 
             $inventories = $this->getInventories();
 
             foreach ($inventories as $inventory) {
-                $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $company);
-                $this->createEligibleQuantityRecord($inventory, $company, $eligibleQuantity);
+                $eligibleQuantity = $this->calculateEligibleQuantity($inventory, $lender);
+                $this->createEligibleQuantityRecord($inventory, $lender, $eligibleQuantity);
             }
 
             $this->logInfo('Completed rebuilding eligible quantities for lender', [
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
             ]);
         } catch (\Throwable $e) {
             $this->logError('Failed to rebuild eligible quantities for lender', $e, [
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
             ]);
             throw $e;
         }
@@ -147,14 +148,14 @@ class EligibleQuantityService
     /**
      * Delete eligible quantities for a specific lender
      */
-    public function deleteForLender(Company $company): void
+    public function deleteForLender(Lender $lender): void
     {
         try {
             $this->logInfo('Deleting eligible quantities for lender', [
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
             ]);
 
-            LocalMarketEligibleQuantity::where('company_id', $company->id)
+            LocalMarketEligibleQuantity::where('company_id', $lender->id)
                 ->chunkById(1000, function ($records) {
                     foreach ($records as $record) {
                         $record->delete();
@@ -162,11 +163,11 @@ class EligibleQuantityService
                 });
 
             $this->logInfo('Successfully deleted eligible quantities for lender', [
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
             ]);
         } catch (\Throwable $e) {
             $this->logError('Failed to delete eligible quantities for lender', $e, [
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
             ]);
             throw $e;
         }
@@ -224,19 +225,19 @@ class EligibleQuantityService
      */
     private function createEligibleQuantityRecord(
         LocalMarketInventory $inventory,
-        Company $company,
+        Lender $lender,
         int $eligibleQuantity
     ): void {
         try {
             LocalMarketEligibleQuantity::create([
                 'inventory_id' => $inventory->id,
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
                 'eligible_quantity' => $eligibleQuantity,
             ]);
         } catch (\Throwable $e) {
             $this->logError('Failed to create eligible quantity record', $e, [
                 'inventory_id' => $inventory->id,
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
                 'eligible_quantity' => $eligibleQuantity,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -247,9 +248,9 @@ class EligibleQuantityService
     /**
      * Calculate eligible quantity for inventory-company combination
      */
-    private function calculateEligibleQuantity(LocalMarketInventory $inventory, Company $company): int
+    private function calculateEligibleQuantity(LocalMarketInventory $inventory, Lender $lender): int
     {
-        return $this->unitService->countEligibleUnits($company, $inventory);
+        return $this->unitService->countEligibleUnits($lender, $inventory);
     }
 
     /**
@@ -257,7 +258,7 @@ class EligibleQuantityService
      */
     private function getLenderCompanies(): Collection
     {
-        return Company::query()
+        return Lender::query()
             ->where('type', CompanyType::Lender)
             ->get();
     }

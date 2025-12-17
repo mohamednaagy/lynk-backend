@@ -7,7 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Http\JsonResponse;
 
 class GetLenderBalance extends Controller
@@ -20,7 +20,7 @@ class GetLenderBalance extends Controller
         );
     }
 
-    public function __invoke(Company $lender, GetLenderBalanceInterface $getBalance): JsonResponse
+    public function __invoke(Lender $lender, GetLenderBalanceInterface $getBalance): JsonResponse
     {
         $balances = $getBalance->handle($lender);
 

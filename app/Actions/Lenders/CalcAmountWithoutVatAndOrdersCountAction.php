@@ -5,7 +5,7 @@ namespace App\Actions\Lenders;
 use App\Actions\Contracts\Companies\CalculateVatAmount;
 use App\Actions\Contracts\Lenders\CalcAmountWithoutVatAndOrdersCount;
 use App\Actions\Contracts\ProjectSettings\GetProjectSettings;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\TieredPricing;
 use Cknow\Money\Money;
 
@@ -21,7 +21,7 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
      *
      * @return array $user
      */
-    public function handle(Company $company, Money $chargeAmountWithVat): array
+    public function handle(Lender $lender, Money $chargeAmountWithVat): array
     {
         [$vatOfChargeAmount, $vatRateOfChargeAmount] = $this->calculateVatAmount
             ->setAmount($chargeAmountWithVat)
@@ -30,7 +30,7 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
 
         $chargeAmountWithoutVat = $chargeAmountWithVat->subtract($vatOfChargeAmount);
 
-        $ordersCount = $this->calcOrdersCount($company, $chargeAmountWithVat);
+        $ordersCount = $this->calcOrdersCount($lender, $chargeAmountWithVat);
 
         return [
             $chargeAmountWithoutVat,
@@ -40,11 +40,11 @@ class CalcAmountWithoutVatAndOrdersCountAction implements CalcAmountWithoutVatAn
         ];
     }
 
-    protected function calcOrdersCount(Company $company, Money $chargeAmountWithVat)
+    protected function calcOrdersCount(Lender $lender, Money $chargeAmountWithVat)
     {
         $ordersCount = null;
-        if ($company->isStandard()) {
-            $orderCostWithVat = TieredPricing::getOrderCostIfStandard($company)['costWithVat'];
+        if ($lender->isStandard()) {
+            $orderCostWithVat = TieredPricing::getOrderCostIfStandard($lender)['costWithVat'];
             $ordersCount = $chargeAmountWithVat->getAmount() / $orderCostWithVat->getAmount();
         }
 

@@ -115,7 +115,7 @@ class OrderController extends Controller
             $buildOrdersQuery->setCreator($request->user());
         }
 
-        $financingOrders = $buildOrdersQuery->setCompany(tenant())
+        $financingOrders = $buildOrdersQuery->setLender(tenant()->lender)
             ->setRelations([
                 'activeTraderOrder' => fn ($query) => $query->latest(),
                 'latestStatusHistory.creator',
@@ -171,26 +171,26 @@ class OrderController extends Controller
                 $createFinancingOrder,
                 $canCreateOrder
             ) {
-                $company = tenant();
+                $lender = tenant();
                 // throw exception is balance not enough
                 $canCreateOrder->handle(
-                    $company,
+                    $lender,
                     Money::parseByDecimal(
                         $request->validated('amount'),
-                        $company->getWallet(WalletType::CompanyWallet)->currency
+                        $lender->getWallet(WalletType::CompanyWallet)->currency
                     )
                 );
 
-                $status = $company->lender->lenderDetail->does_order_require_approval
+                $status = $lender->lenderDetail->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : ($company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) && ! $company->lender->lenderDetail->require_initiate_trade_request
+                    : ($lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) && ! $lender->lenderDetail->require_initiate_trade_request
                         ? FinancingOrderStatus::Approved
                         : FinancingOrderStatus::PendingTraderOrder);
 
                 $user = $request->user();
 
                 $financingOrder = $createFinancingOrder->handle(
-                    $company,
+                    $lender,
                     array_merge(
                         $request->validated(),
                         [

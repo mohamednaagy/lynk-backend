@@ -24,10 +24,10 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
         $seller = $this->getProjectSettings->handle();
         $financingOrder = $traderOrder->order;
         $financingOrder->load([
-            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'lender' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
         ]);
-        $company = $financingOrder->company;
-        $vatAmount = $company->order_cost->multiply($seller->getVatRate());
+        $lender = $financingOrder->lender;
+        $vatAmount = $lender->order_cost->multiply($seller->getVatRate());
 
         $order = new Order(
             $creationFeeTransaction->reference_number,
@@ -37,7 +37,7 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
                         'trader_order_id' => $traderOrder->getKey(),
                         'financing_order_id' => $traderOrder->financing_order_id,
                     ]),
-                    $company->order_cost,
+                    $lender->order_cost,
                     $seller->getVatRateInPercentage()
                 ),
             ],
@@ -50,10 +50,10 @@ class GenerateTraderOrderInvoiceAction implements GenerateTraderOrderInvoice
             $seller,
             $seller->getVatId(),
             $traderOrder->created_at,
-            $company->order_cost->add($vatAmount)->convertAndFormatByDecimal(),
+            $lender->order_cost->add($vatAmount)->convertAndFormatByDecimal(),
             $vatAmount->convertAndFormatByDecimal(),
             $order,
-            $company->name,
+            $lender->name,
             $creationFeeTransaction
         );
 

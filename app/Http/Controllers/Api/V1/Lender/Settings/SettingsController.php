@@ -18,20 +18,20 @@ class SettingsController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderSettings, Action::Index, Action::Manage])
+                perm(Area::Lender, [Subject::LenderSettings, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderSettings, Action::Edit, Action::Manage])
+                perm(Area::Lender, [Subject::LenderSettings, Action::Edit, Action::Manage])
         )->only('update');
     }
 
     public function index()
     {
-        $company = tenant();
+        $lender = tenant();
 
-        return fractal($company, new CompanyTransformer)
+        return fractal($lender, new CompanyTransformer)
             ->parseIncludes([
                 'order_cost',
                 'does_order_require_approval',
@@ -44,15 +44,15 @@ class SettingsController extends Controller
 
     public function update(UpdateSettingsRequest $request, UpdateLenderSettingsAction $settings): JsonResponse
     {
-        $company = tenant();
+        $lender = tenant();
         $data = $request->validated();
 
         // Set require_initiate_trade_request to true for manual mode
-        if ($company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Manual)) {
+        if ($lender->lenderDetail->trading_mode->is(TraderOrderMode::Manual)) {
             $data['require_initiate_trade_request'] = true;
         }
 
-        $settings->handle($company, $data);
+        $settings->handle($lender, $data);
 
         return $this->successResponse([]);
     }

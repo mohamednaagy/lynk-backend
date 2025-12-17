@@ -23,9 +23,9 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
             ->getNextStepOf($lastCompletedStep);
-        $company = $financingOrder->company()->withTrashed()->first();
+        $lender = $financingOrder->lender()->withTrashed()->first();
         WebhookEvent::fire(
-            $company,
+            $lender,
             WebhookType::OrderUpdates,
             [
                 'order_id' => $financingOrder->id,

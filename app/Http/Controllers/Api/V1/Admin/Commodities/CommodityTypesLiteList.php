@@ -8,7 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Commodities\CommodityItem\CommodityTypesLiteListRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Transformers\CommodityTypeTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
@@ -42,11 +42,11 @@ class CommodityTypesLiteList extends Controller
             ->respond();
     }
 
-    private function canCompanySelectPreferredCommodityForOrder(int $companyId): bool
+    private function canCompanySelectPreferredCommodityForOrder(int $lenderId): bool
     {
-        $company = Company::with('lender.lenderDetail')->find($companyId);
+        $lender = Lender::with('lenderDetail')->find($lenderId);
 
-        return $company->lender->lenderDetail->allow_preferred_commodity_in_order;
+        return $lender->lenderDetail->allow_preferred_commodity_in_order;
     }
 
     private function respondWithEmptyData(): JsonResponse

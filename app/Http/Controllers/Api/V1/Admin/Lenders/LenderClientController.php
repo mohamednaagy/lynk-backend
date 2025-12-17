@@ -14,7 +14,6 @@ use App\Http\Requests\V1\Admin\Companies\LenderClients\DeleteLenderClientRequest
 use App\Http\Requests\V1\Admin\Companies\LenderClients\ListLenderClientRequest;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\StoreLenderClientRequest;
 use App\Http\Requests\V1\Admin\Companies\LenderClients\UpdateLenderClientRequest;
-use App\Models\Company;
 use App\Models\CompanyLenderClient;
 use App\Models\Lender;
 use App\Transformers\CompanyLenderClientTransformer;
@@ -43,7 +42,7 @@ class LenderClientController extends Controller
     }
 
     public function index(
-        Company $lender,
+        Lender $lender,
         GetPaginatedLenderClients $getPaginatedLenderClients,
         ListLenderClientRequest $request
     ): JsonResponse {
@@ -67,7 +66,7 @@ class LenderClientController extends Controller
             ->respond();
     }
 
-    public function show(Company $lender, CompanyLenderClient $client): JsonResponse
+    public function show(Lender $lender, CompanyLenderClient $client): JsonResponse
     {
         // Load relationships to avoid N+1 queries
         $client->load(['autoSellPeriods.media']);
@@ -84,16 +83,16 @@ class LenderClientController extends Controller
     }
 
     public function store(
-        Company $lender,
+        Lender $lender,
         StoreLenderClientRequest $request,
         CreateLenderClient $createLenderClient,
     ): JsonResponse {
         $data = $request->validated();
 
         return DB::transaction(function () use ($lender, $data, $createLenderClient) {
-            $company = $createLenderClient->handle($lender, $data);
+            $lenderClient = $createLenderClient->handle($lender, $data);
 
-            return fractal($company, new CompanyLenderClientTransformer)
+            return fractal($lenderClient, new CompanyLenderClientTransformer)
                 ->parseIncludes([
                     'name',
                     'type',

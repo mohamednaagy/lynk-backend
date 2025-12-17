@@ -327,7 +327,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
                         TraderOrderStatus::InProgress,
                     ]);
             }])
-            ->whereRelation('company.lender.lenderDetail', 'trading_mode', TraderOrderMode::Automatic)
+            ->whereRelation('lender.lenderDetail', 'trading_mode', TraderOrderMode::Automatic)
             ->having('trader_orders_count', 0);
     }
 
@@ -459,7 +459,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     public function isTradingMode(TraderOrderMode|string $mode)
     {
-        return $this->company?->lender->lenderDetail->trading_mode->is($mode);
+        return $this->lender?->lenderDetail->trading_mode->is($mode);
     }
 
     public function isDefaultTraderAvailable()
@@ -504,7 +504,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         if ($this->commodity_type_id) {
             return $this->commodityType->provider->value;
         } else {
-            if ($this->company->isInternationalMarketType()) {
+            if ($this->lender->isInternationalMarketType()) {
                 return Trader::Bursam;
             }
 
@@ -545,7 +545,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     public function getBorrowerName()
     {
         if ($this->borrower_type == FinancingOrderBorrowerTypeEnum::Lender) {
-            return $this->company->name;
+            return $this->lender->name;
         }
 
         return $this->borrower_identifier;
@@ -563,5 +563,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $this->cost_with_vat -= $costWithVat;
         $this->cost_without_vat -= $costWithoutVat;
         $this->save();
+    }
+
+    public function lender()
+    {
+        return $this->belongsTo(Lender::class, 'company_id')->withTrashed();
     }
 }

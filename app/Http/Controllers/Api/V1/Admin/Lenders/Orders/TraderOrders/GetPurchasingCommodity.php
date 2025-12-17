@@ -6,8 +6,8 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Models\TraderOrder;
 use App\Transformers\TraderOrderTransformer;
 use Illuminate\Http\JsonResponse;
@@ -23,7 +23,7 @@ class GetPurchasingCommodity extends Controller
     }
 
     public function __invoke(
-        Company $lender,
+        Lender $lender,
         FinancingOrder $order,
         TraderOrder $trader_order
     ): JsonResponse {

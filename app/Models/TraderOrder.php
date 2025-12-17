@@ -457,7 +457,7 @@ class TraderOrder extends Model implements HasMedia
     public function hasAutoCompleteFinancingOrder()
     {
         return $this->completedSellStep()->exists() &&
-            $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
+            $this->order->lender->isCompanyHasMurabahaAutoCompleteOrder();
     }
 
     public function setAutoCompletePeriodId(int $periodId): void

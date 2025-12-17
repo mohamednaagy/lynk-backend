@@ -4,8 +4,8 @@ namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\BuildFinancingOrdersQuery;
 use App\Enums\CompanyType;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAmountScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderAssignableScope;
 use App\Support\QueryScoper\Scopes\FinancingOrders\OrderChargedTransactionsScope;
@@ -24,7 +24,7 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
 {
     protected ?Model $creator = null;
 
-    protected ?Company $company = null;
+    protected ?Lender $lender = null;
 
     private ?array $relations = [];
 
@@ -59,9 +59,9 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
         return $this;
     }
 
-    public function setCompany(Company $company): static
+    public function setLender(Lender $lender): static
     {
-        $this->company = $company;
+        $this->lender = $lender;
 
         return $this;
     }
@@ -81,12 +81,12 @@ class BuildFinancingOrdersQueryAction implements BuildFinancingOrdersQuery
             $baseQuery->byCreator($this->creator);
         }
 
-        if ($this->company?->type?->is(CompanyType::Lender)) {
+        if ($this->lender?->type?->is(CompanyType::Lender)) {
             $baseQuery->with([
                 'creator',
                 'activeTraderOrder' => fn ($query) => $query->latest(),
             ])
-                ->where('company_id', $this->company->id);
+                ->where('company_id', $this->lender->id);
         }
 
         return $baseQuery;

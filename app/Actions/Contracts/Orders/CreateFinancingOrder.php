@@ -2,10 +2,10 @@
 
 namespace App\Actions\Contracts\Orders;
 
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 
 interface CreateFinancingOrder
 {
-    public function handle(Company $company, array $data): FinancingOrder;
+    public function handle(Lender $lender, array $data): FinancingOrder;
 }

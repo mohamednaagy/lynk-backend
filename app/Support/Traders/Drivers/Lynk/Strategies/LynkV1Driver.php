@@ -295,7 +295,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
     public function updateFinancingOrderStatusAfterCancellation(TraderOrder $traderOrder, int $cancelReason): void
     {
         $order = $traderOrder->order;
-        $lender = $order->company->lender;
+        $lender = $order->lender;
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
             $this->updateOrderStatus($order, FinancingOrderStatus::Cancelled);
         } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
@@ -312,7 +312,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
 
     protected function canRetryOrder(TraderOrder $traderOrder): bool
     {
-        $lenderDetail = $traderOrder->order->company->lender->lenderDetail;
+        $lenderDetail = $traderOrder->order->lender->lenderDetail;
 
         // Check if the order can be retried based on several conditions:
         // 1. No previous trader orders with a commodity type exist for this order
@@ -357,7 +357,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
             TraderOrderMediaCollection::SellConfirmationDocument => 'SellConfCert',
         };
 
-        return 'LYNK_'.$fileType.'_'.$traderOrder->order->company->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
+        return 'LYNK_'.$fileType.'_'.$traderOrder->order->lender->unique_name.'_'.$traderOrder->financing_order_id.'_'.$traderOrder->reference.'_'.date('Ymd').'.pdf';
     }
 
     public function processProceedContractSigned(TraderOrder $traderOrder): void {}

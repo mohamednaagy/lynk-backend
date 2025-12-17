@@ -2,10 +2,10 @@
 
 namespace App\Actions\Contracts\Companies\LenderClients;
 
-use App\Models\Company;
 use App\Models\CompanyLenderClient;
+use App\Models\Lender;
 
 interface CreateLenderClient
 {
-    public function handle(Company $lender, array $data): CompanyLenderClient;
+    public function handle(Lender $lender, array $data): CompanyLenderClient;
 }

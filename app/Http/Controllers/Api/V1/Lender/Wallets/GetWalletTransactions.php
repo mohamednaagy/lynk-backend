@@ -27,7 +27,7 @@ class GetWalletTransactions extends Controller
     ): JsonResponse {
         $data = $request->validated();
         $transactions = $getTransactions
-            ->setCompany(tenant())
+            ->setLender(tenant()->lender)
             ->setFilters($data)
             ->attachZatcaInvoicesMedia()
             ->handle()

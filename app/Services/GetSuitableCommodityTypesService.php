@@ -151,8 +151,8 @@ final class GetSuitableCommodityTypesService
      */
     private function resolveFromCompany(): ?collection
     {
-        $company = $this->traderOrder->order->company;
-        $commodities = $company->commodityTypes()
+        $lender = $this->traderOrder->order->lender;
+        $commodities = $lender->commodityTypes()
             ->where('provider', $this->traderOrder->provider)
             ->where('status', CommodityTypeStatus::Active)
             ->get();

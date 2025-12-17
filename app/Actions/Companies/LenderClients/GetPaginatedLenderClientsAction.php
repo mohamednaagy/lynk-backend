@@ -3,8 +3,8 @@
 namespace App\Actions\Companies\LenderClients;
 
 use App\Actions\Contracts\Companies\LenderClients\GetPaginatedLenderClients;
-use App\Models\Company;
 use App\Models\CompanyLenderClient;
+use App\Models\Lender;
 use Illuminate\Database\Eloquent\Builder;
 
 class GetPaginatedLenderClientsAction implements GetPaginatedLenderClients
@@ -16,7 +16,7 @@ class GetPaginatedLenderClientsAction implements GetPaginatedLenderClients
         $this->query = CompanyLenderClient::query();
     }
 
-    public function setLender(Company $lender): self
+    public function setLender(Lender $lender): self
     {
         $this->query->where('company_id', $lender->id);
 

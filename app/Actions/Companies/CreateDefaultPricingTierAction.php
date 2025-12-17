@@ -6,7 +6,7 @@ use App\Actions\Contracts\Companies\CreateDefaultPricingTier;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Area;
 use App\Enums\OrderFeeType;
-use App\Models\Company;
+use App\Models\Lender;
 use Cknow\Money\Money;
 
 class CreateDefaultPricingTierAction implements CreateDefaultPricingTier
@@ -15,7 +15,7 @@ class CreateDefaultPricingTierAction implements CreateDefaultPricingTier
         protected GetSettingsClassInstance $getSettingsClassInstance
     ) {}
 
-    public function handle(Company $company)
+    public function handle(Lender $lender)
     {
         $orderCostWithoutVat = Money::parseByDecimal(
             $this->getSettingsClassInstance
@@ -24,7 +24,7 @@ class CreateDefaultPricingTierAction implements CreateDefaultPricingTier
             Money::getDefaultCurrency()
         );
 
-        $company->tieredPricing()->create([
+        $lender->tieredPricing()->create([
             'order_value_start' => 0,
             'order_value_end' => null,
             'fee_type' => OrderFeeType::Fixed,

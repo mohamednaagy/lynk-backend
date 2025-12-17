@@ -3,7 +3,7 @@
 namespace App\Rules;
 
 use App\Enums\WalletType;
-use App\Models\Company;
+\use App\Models\Lender;
 use App\Models\TieredPricing;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Validation\Rule;
@@ -17,10 +17,10 @@ class IsAmountMultiplesOfOrderCost implements Rule
      *
      * @return void
      */
-    public function __construct(protected Company $company)
+    public function __construct(protected Lender $lender)
     {
-        if ($this->company->isStandard()) {
-            $orderCostWithoutVat = TieredPricing::getOrderCostIfStandard($company);
+        if ($this->lender->isStandard()) {
+            $orderCostWithoutVat = TieredPricing::getOrderCostIfStandard($lender);
             $this->orderCostWithVat = $orderCostWithoutVat['costWithVat'];
         }
     }
@@ -40,7 +40,7 @@ class IsAmountMultiplesOfOrderCost implements Rule
 
         $totalAmountWithVat = Money::parseByDecimal(
             $value,
-            $this->company->getWallet(WalletType::CompanyWallet)->currency
+            $this->lender->getWallet(WalletType::CompanyWallet)->currency
         );
 
         return $totalAmountWithVat->mod($this->orderCostWithVat)->getAmount() === '0';

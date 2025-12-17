@@ -134,7 +134,7 @@ class StoreOrderRequest extends FormRequest
      */
     private function getLender(): void
     {
-        $this->lender = tenant()->lender;
+        $this->lender = tenant();
     }
 
     /**

@@ -9,6 +9,7 @@ use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Exceptions\LocalMarket\ErrorPurchasingAtLocalMarket;
 use App\Jobs\LocalMarket\states\ClearEligibleFlagAndRefreshInventory;
 use App\Models\Company;
+use App\Models\Lender;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
@@ -265,13 +266,13 @@ class UnitService
     /**
      * Count eligible units for a company in an inventory
      */
-    public function countEligibleUnits(Company $company, LocalMarketInventory $inventory): int
+    public function countEligibleUnits(Lender $lender, LocalMarketInventory $inventory): int
     {
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units start at inventory_id => '.$inventory->id.' at '.now(), [
             'inventory_id' => $inventory->id,
         ]);
 
-        $count = $this->buildEligibleUnitsCountQuery($inventory->id, $company->id)->count();
+        $count = $this->buildEligibleUnitsCountQuery($inventory->id, $lender->id)->count();
 
         log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('time of count eligible units end at inventory_id => '.$inventory->id.' at '.now());
 
@@ -281,7 +282,7 @@ class UnitService
     /**
      * Build base query for eligible units based on company and rotation rules
      */
-    private function buildEligibleUnitsQuery(int $inventoryId, int $companyId): \Illuminate\Database\Query\Builder
+    private function buildEligibleUnitsQuery(int $inventoryId, int $lenderId): \Illuminate\Database\Query\Builder
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
         // The business logic should be stored procedure "hold_order_unit"
@@ -330,8 +331,8 @@ DELIMITER ;
 
         if ($numberOfRotation > 0) {
             for ($i = 0; $i < $numberOfRotation; $i++) {
-                $query->where(function ($query) use ($companyId, $i) {
-                    $query->where("previous_company_id_owner_$i", '!=', $companyId)
+                $query->where(function ($query) use ($lenderId, $i) {
+                    $query->where("previous_company_id_owner_$i", '!=', $lenderId)
                         ->orWhereNull("previous_company_id_owner_$i");
                 });
             }
@@ -340,7 +341,7 @@ DELIMITER ;
         return $query;
     }
 
-    private function buildEligibleUnitsCountQuery(int $inventoryId, int $companyId): \Illuminate\Database\Query\Builder
+    private function buildEligibleUnitsCountQuery(int $inventoryId, int $lenderId): \Illuminate\Database\Query\Builder
     {
         $numberOfRotation = app(LocalMurabahaSettings::class)->default_trade_order_rotation_count;
 
@@ -354,8 +355,8 @@ DELIMITER ;
 
         if ($numberOfRotation > 0) {
             for ($i = 0; $i < $numberOfRotation; $i++) {
-                $baseQuery->where(function ($q) use ($companyId, $i) {
-                    $q->where("previous_company_id_owner_$i", '!=', $companyId)
+                $baseQuery->where(function ($q) use ($lenderId, $i) {
+                    $q->where("previous_company_id_owner_$i", '!=', $lenderId)
                         ->orWhereNull("previous_company_id_owner_$i");
                 });
             }

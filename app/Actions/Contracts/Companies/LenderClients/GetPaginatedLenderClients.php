@@ -2,14 +2,14 @@
 
 namespace App\Actions\Contracts\Companies\LenderClients;
 
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Database\Eloquent\Builder;
 
 interface GetPaginatedLenderClients
 {
     public function handle(): Builder;
 
-    public function setLender(Company $lender): self;
+    public function setLender(Lender $lender): self;
 
     public function setName(?string $name): self;
 

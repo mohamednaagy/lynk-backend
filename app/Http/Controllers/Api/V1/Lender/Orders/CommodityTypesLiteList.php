@@ -28,14 +28,14 @@ final class CommodityTypesLiteList extends Controller
     public function __invoke(Request $request, BuildPaginatedCommodityTypeQuery $buildPaginatedCommodityTypeQuery): JsonResponse
     {
         $user = $request->user();
-        $company = $user->company;
+        $lender = $user->lender;
 
-        if (! $company->lender?->isPreferredCommoditySelectionAllowed()) {
+        if (! $lender?->isPreferredCommoditySelectionAllowed()) {
             return $this->errorResponse('This action is not allowed for this company.', 400);
         }
 
         $commodities = $buildPaginatedCommodityTypeQuery
-            ->setCompanyId($company->id)
+            ->setCompanyId($lender->id)
             ->setStatus(CommodityTypeStatus::Active)
             ->handle();
 

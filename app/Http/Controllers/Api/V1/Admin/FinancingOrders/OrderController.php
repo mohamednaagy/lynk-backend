@@ -17,8 +17,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\FinancingOrders\ListOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\StoreOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\UpdateOrderRequest;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Transformers\FinancingOrderTransformer;
 use Cknow\Money\Money;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -61,7 +61,7 @@ class OrderController extends Controller
     {
         $orders = $buildFinancingOrdersQuery->setRelations([
             'activeTraderOrder' => fn ($query) => $query->latest(),
-            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'lender' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'creator',
             'latestStatusHistory.creator',
         ])
@@ -172,26 +172,26 @@ class OrderController extends Controller
                 $createFinancingOrder,
                 $canCreateOrder
             ) {
-                $company = Company::find($request->input('company_id'));
+                $lender = Lender::find($request->input('company_id'));
                 // throw exception is balance not enough
                 $canCreateOrder->handle(
-                    $company,
+                    $lender,
                     Money::parseByDecimal(
                         $request->validated('amount'),
-                        $company->getWallet(WalletType::CompanyWallet)->currency
+                        $lender->getWallet(WalletType::CompanyWallet)->currency
                     )
                 );
 
-                $status = $company->lender->lenderDetail->does_order_require_approval
+                $status = $lender->lenderDetail->does_order_require_approval
                     ? FinancingOrderStatus::PendingApproval
-                    : ($company->lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) && ! $company->lender->lenderDetail->require_initiate_trade_request
+                    : ($lender->lenderDetail->trading_mode->is(TraderOrderMode::Automatic) && ! $lender->lenderDetail->require_initiate_trade_request
                         ? FinancingOrderStatus::Approved
                         : FinancingOrderStatus::PendingTraderOrder);
 
                 $user = $request->user();
 
                 $financingOrder = $createFinancingOrder->handle(
-                    $company,
+                    $lender,
                     array_merge(
                         $request->validated(),
                         [

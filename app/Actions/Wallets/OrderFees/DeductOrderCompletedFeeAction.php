@@ -46,9 +46,9 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 return null;
             }
 
-            $company = $financingOrder->company()->withTrashed()->first();
-            if (! $company) {
-                Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Company not found', $traderOrder), [
+            $lender = $financingOrder->lender()->withTrashed()->first();
+            if (! $lender) {
+                Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Lender not found', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
                 ]);
@@ -56,28 +56,28 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 return null;
             }
 
-            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Found company and financing order', $traderOrder), [
+            Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Found lender and financing order', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
-                'company_id' => $company->id,
-                'company_name' => $company->name,
+                'lender_id' => $lender->id,
+                'lender_name' => $lender->name,
                 'order_amount' => $financingOrder->amount->jsonSerialize(),
             ]);
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Attempting to get company wallet', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
-                'company_id' => $company->id,
+                'lender_id' => $lender->id,
                 'wallet_type' => WalletType::CompanyWallet,
             ]);
 
             try {
-                $wallet = $company->getWallet(WalletType::CompanyWallet, false);
+                $wallet = $lender->getWallet(WalletType::CompanyWallet, false);
 
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Wallet retrieval completed', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
-                    'company_id' => $company->id,
+                    'company_id' => $lender->id,
                     'wallet_found' => $wallet !== null,
                     'wallet_id' => $wallet?->id,
                 ]);
@@ -86,7 +86,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Exception during wallet retrieval', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
-                    'company_id' => $company->id,
+                    'company_id' => $lender->id,
                     'exception_class' => get_class($walletException),
                     'message' => $walletException->getMessage(),
                     'trace' => $walletException->getTraceAsString(),
@@ -98,18 +98,18 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Company wallet not found', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
-                    'company_id' => $company->id,
-                    'company_name' => $company->name,
+                    'company_id' => $lender->id,
+                    'company_name' => $lender->name,
                     'wallet_type_requested' => WalletType::CompanyWallet,
                 ]);
 
                 // Let's also check what wallets this company DOES have
                 try {
-                    $allWallets = $company->wallets()->get();
+                    $allWallets = $lender->wallets()->get();
                     Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Company existing wallets', $traderOrder), [
                         'financingOrderId' => $traderOrder->financing_order_id,
                         'traderOrderId' => $traderOrder->id,
-                        'company_id' => $company->id,
+                        'company_id' => $lender->id,
                         'total_wallets' => $allWallets->count(),
                         'wallet_details' => $allWallets->map(function ($w) {
                             return [
@@ -123,7 +123,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                     Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Failed to retrieve company wallets list', $traderOrder), [
                         'financingOrderId' => $traderOrder->financing_order_id,
                         'traderOrderId' => $traderOrder->id,
-                        'company_id' => $company->id,
+                        'company_id' => $lender->id,
                         'message' => $walletListException->getMessage(),
                         'trace' => $walletListException->getTraceAsString(),
                     ]);
@@ -160,11 +160,11 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Calculating TieredPricing', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
-                'company_id' => $company->id,
+                'company_id' => $lender->id,
                 'order_amount' => $financingOrder->amount->jsonSerialize(),
             ]);
 
-            $orderCostWithoutVat = TieredPricing::getOrderCostWithoutVat($company, $financingOrder->amount);
+            $orderCostWithoutVat = TieredPricing::getOrderCostWithoutVat($lender, $financingOrder->amount);
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: TieredPricing calculated', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
@@ -173,7 +173,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
             ]);
 
             $vatRate = $this->getProjectSettings->handle()->getVatRate();
-            $vatAmount = TieredPricing::getVatAmount($company, $financingOrder->amount, $orderCostWithoutVat);
+            $vatAmount = TieredPricing::getVatAmount($lender, $financingOrder->amount, $orderCostWithoutVat);
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: VAT calculated', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
@@ -200,7 +200,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'order_cost' => $orderCostWithoutVat,
                 'vat_rate' => $vatRate,
                 'is_vat_included' => true,
-                'pricing_tier' => TieredPricing::getPricingTier($company, $financingOrder->amount),
+                'pricing_tier' => TieredPricing::getPricingTier($lender, $financingOrder->amount),
             ];
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Creating wallet transaction', $traderOrder), [
@@ -235,7 +235,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'error' => $e->getMessage(),
-                'company_id' => $company->id ?? 'unknown',
+                'company_id' => $lender->id ?? 'unknown',
                 'order_amount' => $financingOrder->amount->jsonSerialize() ?? 'unknown',
             ]);
             throw $e;
