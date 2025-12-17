@@ -87,7 +87,7 @@ class BuildPaginatedCommodityTypeQueryAction implements BuildPaginatedCommodityT
      */
     public function setProvider(?string $providers = null): self
     {
-        $this->providers = $providers ? array_map('trim', explode(',', $providers)) : [];
+        $this->providers = $providers ? array_filter(array_map('trim', explode(',', $providers))) : [];
 
         return $this;
     }

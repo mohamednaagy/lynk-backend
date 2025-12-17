@@ -22,7 +22,7 @@ class ProviderValidator implements ValidationRule
         $providers = explode(',', $value);
         foreach ($providers as $provider) {
             $provider = trim($provider);
-            if (! CommodityTypeProvider::hasValue($provider)) {
+            if ($provider && ! CommodityTypeProvider::hasValue($provider)) {
                 $fail('The :attribute contains invalid provider value.');
 
                 return;
