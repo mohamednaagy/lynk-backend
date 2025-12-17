@@ -106,15 +106,36 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
             sudo -u ubuntu bash -c '
               cd /home/ubuntu/lynk-backend-automation &&
-              docker-compose down --remove-orphans 2>/dev/null || true &&
-              docker-compose build --no-cache &&
-              docker-compose up -d &&
-              echo \"Waiting for all test containers to complete...\" &&
+
+              # Thorough cleanup of any existing containers and networks
+              echo \"🧹 Cleaning up existing Docker resources...\"
+              docker-compose down --remove-orphans -v 2>/dev/null || true
+              docker rm -f test-admin test-lender test-supplier 2>/dev/null || true
+              docker network rm lynk-backend-automation_default 2>/dev/null || true
+
+              # Small delay to ensure cleanup is complete
+              sleep 2
+
+              echo \"🔨 Building containers...\"
+              docker-compose build --no-cache
+
+              echo \"🚀 Starting containers...\"
+              if ! docker-compose up -d; then
+                echo \"❌ Failed to start containers\"
+                docker-compose logs
+                exit 2
+              fi
+
+              # Verify containers are running
+              echo \"📋 Checking container status...\"
+              docker ps -a
+
+              echo \"⏳ Waiting for all test containers to complete...\"
 
               # Capture exit codes for each container
-              ADMIN_EXIT=\$(docker wait test-admin)
-              LENDER_EXIT=\$(docker wait test-lender)
-              SUPPLIER_EXIT=\$(docker wait test-supplier)
+              ADMIN_EXIT=\$(docker wait test-admin 2>/dev/null) || ADMIN_EXIT=999
+              LENDER_EXIT=\$(docker wait test-lender 2>/dev/null) || LENDER_EXIT=999
+              SUPPLIER_EXIT=\$(docker wait test-supplier 2>/dev/null) || SUPPLIER_EXIT=999
 
               echo \"Container exit codes:\"
               echo \"  test-admin: \$ADMIN_EXIT\"
@@ -124,19 +145,33 @@ jobs:
               # Show logs for debugging
               docker-compose logs
 
-              # Check if any container failed catastrophically (non-zero and not test failures)
-              # Exit code 1 from Maven means test failures (acceptable)
-              # Exit codes > 1 typically mean infrastructure issues
+              # Check if any container failed catastrophically
+              # Exit code 0 = all tests passed
+              # Exit code 1 = Maven test failures (acceptable - tests ran)
+              # Exit code > 1 = infrastructure issues
+              # Exit code 999 = container did not exist/start
               FAILED=0
-              if [ \"\$ADMIN_EXIT\" -gt 1 ]; then
+
+              if [ \"\$ADMIN_EXIT\" -eq 999 ]; then
+                echo \"❌ test-admin container did not start\"
+                FAILED=1
+              elif [ \"\$ADMIN_EXIT\" -gt 1 ]; then
                 echo \"❌ test-admin crashed with exit code \$ADMIN_EXIT\"
                 FAILED=1
               fi
-              if [ \"\$LENDER_EXIT\" -gt 1 ]; then
+
+              if [ \"\$LENDER_EXIT\" -eq 999 ]; then
+                echo \"❌ test-lender container did not start\"
+                FAILED=1
+              elif [ \"\$LENDER_EXIT\" -gt 1 ]; then
                 echo \"❌ test-lender crashed with exit code \$LENDER_EXIT\"
                 FAILED=1
               fi
-              if [ \"\$SUPPLIER_EXIT\" -gt 1 ]; then
+
+              if [ \"\$SUPPLIER_EXIT\" -eq 999 ]; then
+                echo \"❌ test-supplier container did not start\"
+                FAILED=1
+              elif [ \"\$SUPPLIER_EXIT\" -gt 1 ]; then
                 echo \"❌ test-supplier crashed with exit code \$SUPPLIER_EXIT\"
                 FAILED=1
               fi
@@ -156,7 +191,7 @@ jobs:
                 FAILED=1
               fi
 
-              docker-compose down
+              docker-compose down --remove-orphans 2>/dev/null || true
 
               if [ \"\$FAILED\" -eq 1 ]; then
                 echo \"❌ Test execution had infrastructure issues\"
@@ -277,38 +312,27 @@ jobs:
           echo "  - Latest: ${BASE_URL}/deploy-validation/latest/"
           echo "  - Dashboard: ${BASE_URL}/deploy-validation/"
 
-      - name: 🌐 Deploy Report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
-          destination_dir: deploy-validation/${{ github.run_number }}
-          keep_files: true
-
-      - name: 🌐 Deploy Latest Report
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./allure-report
-          destination_dir: deploy-validation/latest
-          keep_files: true
-
-      - name: Create dashboard
+      - name: 📦 Prepare GitHub Pages Content
         run: |
-          # Install jq
-          sudo apt-get update && sudo apt-get install -y jq
+          # Create unified deployment directory structure
+          mkdir -p gh-pages-deploy/deploy-validation/${{ github.run_number }}
+          mkdir -p gh-pages-deploy/deploy-validation/latest
+          mkdir -p gh-pages-deploy/deploy-validation/data
+
+          # Copy allure report to run number directory
+          cp -R allure-report/* gh-pages-deploy/deploy-validation/${{ github.run_number }}/
+
+          # Copy allure report to latest directory
+          cp -R allure-report/* gh-pages-deploy/deploy-validation/latest/
 
           # Checkout gh-pages to get existing dashboard data
           git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-checkout || mkdir -p gh-pages-checkout
 
-          # Create data directory for deploy-validation
-          mkdir -p dashboard-deploy/deploy-validation/data
-
           # Initialize or update runs.json
           if [[ -f gh-pages-checkout/deploy-validation/data/runs.json ]]; then
-            cp gh-pages-checkout/deploy-validation/data/runs.json dashboard-deploy/deploy-validation/data/runs.json
+            cp gh-pages-checkout/deploy-validation/data/runs.json gh-pages-deploy/deploy-validation/data/runs.json
           else
-            echo "[]" > dashboard-deploy/deploy-validation/data/runs.json
+            echo "[]" > gh-pages-deploy/deploy-validation/data/runs.json
           fi
 
           # Add current run to metadata
@@ -320,11 +344,11 @@ jobs:
              --arg passed "${{ steps.test-results.outputs.passed }}" \
              --arg failed "${{ steps.test-results.outputs.failed }}" \
              '. + [{"run": $run, "branch": $branch, "status": $status, "timestamp": $timestamp, "total": $total|tonumber, "passed": $passed|tonumber, "failed": $failed|tonumber}] | unique_by(.run) | sort_by(.run | tonumber) | reverse | .[0:50]' \
-             dashboard-deploy/deploy-validation/data/runs.json > dashboard-deploy/deploy-validation/data/runs_new.json
-          mv dashboard-deploy/deploy-validation/data/runs_new.json dashboard-deploy/deploy-validation/data/runs.json
+             gh-pages-deploy/deploy-validation/data/runs.json > gh-pages-deploy/deploy-validation/data/runs_new.json
+          mv gh-pages-deploy/deploy-validation/data/runs_new.json gh-pages-deploy/deploy-validation/data/runs.json
 
           # Create deploy-validation-specific dashboard HTML
-          cat > dashboard-deploy/deploy-validation/index.html << 'HTMLEOF'
+          cat > gh-pages-deploy/deploy-validation/index.html << 'HTMLEOF'
           <!DOCTYPE html>
           <html>
           <head>
@@ -412,23 +436,23 @@ jobs:
           <body>
               <div class="container">
                   <div class="header">
-                      <h1>🚀 Deploy Validation Reports</h1>
+                      <h1>Deploy Validation Reports</h1>
                       <p>Post-Deploy Regression Testing - Test Execution Dashboard</p>
                   </div>
 
                   <div class="quick-links">
                       <a href="latest/" class="quick-link">
-                          <h3>📊 Latest Report</h3>
+                          <h3>Latest Report</h3>
                           <p>View the most recent test execution</p>
                       </a>
                       <a href="../" class="quick-link">
-                          <h3>🏠 All Workflows</h3>
+                          <h3>All Workflows</h3>
                           <p>Back to main dashboard</p>
                       </a>
                   </div>
 
                   <div class="runs-container">
-                      <h2>📜 Deploy Validation Run History</h2>
+                      <h2>Deploy Validation Run History</h2>
                       <table>
                           <thead>
                               <tr>
@@ -455,7 +479,7 @@ jobs:
                           const tbody = document.getElementById('runs-table');
                           runs.forEach(run => {
                               const row = document.createElement('tr');
-                              const testSummary = `${run.passed}✅ / ${run.failed}❌ / ${run.total} total`;
+                              const testSummary = `${run.passed} passed / ${run.failed} failed / ${run.total} total`;
                               const statusClass = run.status.includes('PASSED') ? 'status-success' : 'status-failure';
                               row.innerHTML = `
                                   <td><strong>#${run.run}</strong></td>
@@ -478,14 +502,14 @@ jobs:
           </html>
           HTMLEOF
 
-          echo "✅ Deploy validation dashboard created"
-          ls -la dashboard-deploy/
+          echo "GitHub Pages content prepared"
+          ls -laR gh-pages-deploy/deploy-validation/ | head -50
 
-      - name: Deploy Dashboard
+      - name: 🌐 Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dashboard-deploy
+          publish_dir: ./gh-pages-deploy
           publish_branch: gh-pages
           destination_dir: .
           keep_files: true
