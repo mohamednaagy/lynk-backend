@@ -101,6 +101,7 @@ jobs:
           "
 
       - name: 🧪 Run Regression Tests
+        id: run-tests
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
             sudo -u ubuntu bash -c '
@@ -109,10 +110,60 @@ jobs:
               docker-compose build --no-cache &&
               docker-compose up -d &&
               echo \"Waiting for all test containers to complete...\" &&
-              docker wait test-admin test-lender test-supplier || true &&
-              echo \"All containers finished\" &&
-              docker-compose logs &&
+
+              # Capture exit codes for each container
+              ADMIN_EXIT=\$(docker wait test-admin)
+              LENDER_EXIT=\$(docker wait test-lender)
+              SUPPLIER_EXIT=\$(docker wait test-supplier)
+
+              echo \"Container exit codes:\"
+              echo \"  test-admin: \$ADMIN_EXIT\"
+              echo \"  test-lender: \$LENDER_EXIT\"
+              echo \"  test-supplier: \$SUPPLIER_EXIT\"
+
+              # Show logs for debugging
+              docker-compose logs
+
+              # Check if any container failed catastrophically (non-zero and not test failures)
+              # Exit code 1 from Maven means test failures (acceptable)
+              # Exit codes > 1 typically mean infrastructure issues
+              FAILED=0
+              if [ \"\$ADMIN_EXIT\" -gt 1 ]; then
+                echo \"❌ test-admin crashed with exit code \$ADMIN_EXIT\"
+                FAILED=1
+              fi
+              if [ \"\$LENDER_EXIT\" -gt 1 ]; then
+                echo \"❌ test-lender crashed with exit code \$LENDER_EXIT\"
+                FAILED=1
+              fi
+              if [ \"\$SUPPLIER_EXIT\" -gt 1 ]; then
+                echo \"❌ test-supplier crashed with exit code \$SUPPLIER_EXIT\"
+                FAILED=1
+              fi
+
+              # Verify result files exist
+              ADMIN_COUNT=\$(find allure-results/admin -name \"*-result.json\" 2>/dev/null | wc -l)
+              LENDER_COUNT=\$(find allure-results/lender -name \"*-result.json\" 2>/dev/null | wc -l)
+              SUPPLIER_COUNT=\$(find allure-results/supplier -name \"*-result.json\" 2>/dev/null | wc -l)
+
+              echo \"Result file counts:\"
+              echo \"  admin: \$ADMIN_COUNT\"
+              echo \"  lender: \$LENDER_COUNT\"
+              echo \"  supplier: \$SUPPLIER_COUNT\"
+
+              if [ \"\$ADMIN_COUNT\" -eq 0 ] || [ \"\$LENDER_COUNT\" -eq 0 ] || [ \"\$SUPPLIER_COUNT\" -eq 0 ]; then
+                echo \"❌ Missing test results from one or more containers\"
+                FAILED=1
+              fi
+
               docker-compose down
+
+              if [ \"\$FAILED\" -eq 1 ]; then
+                echo \"❌ Test execution had infrastructure issues\"
+                exit 2
+              fi
+
+              echo \"✅ All containers completed with test results\"
             '
           "
         continue-on-error: true
