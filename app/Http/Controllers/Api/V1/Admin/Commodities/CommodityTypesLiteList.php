@@ -32,7 +32,7 @@ class CommodityTypesLiteList extends Controller
         $commodityTypes = $buildPaginatedCommodityTypeQuery
             ->setName($request->validated('search'))
             ->setStatus($request->validated('status'))
-            ->setProvider($request->validated('provider'))
+            ->setProviders($request->validated('provider'))
             ->setCompanyId($request->validated('company_id'))
             ->handle()
             ->get(['id', 'name', 'provider']);
