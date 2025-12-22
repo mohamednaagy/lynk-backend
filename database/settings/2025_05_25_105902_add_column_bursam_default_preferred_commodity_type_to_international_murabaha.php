@@ -12,7 +12,7 @@ return new class extends SettingsMigration
 
     private function getDefaultBursamDefaultPreferredCommodityType(): ?int
     {
-        $code = env('APP_ENV') === 'production' ? 'PR-B MSIA14' : 'PR-B-MSIA14';
+        $code = config('app.env') === 'production' ? 'PR-B MSIA14' : 'PR-B-MSIA14';
 
         $product = TraderProduct::where('code', $code)->first();
 
