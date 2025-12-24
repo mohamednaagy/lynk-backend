@@ -7,9 +7,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserNotificationSetting extends Model
 {
-    protected $fillable = ['user_id', 'notification_type_id', 'is_enabled'];
+    protected $fillable = [
+        'user_id',
+        'notification_type_id',
+        'email_enabled',
+        'portal_enabled',
+    ];
 
-    protected $casts = ['is_enabled' => 'boolean'];
+    protected $casts = [
+        'email_enabled' => 'boolean',
+        'portal_enabled' => 'boolean',
+    ];
 
     public function user(): BelongsTo
     {

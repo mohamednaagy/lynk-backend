@@ -2,7 +2,6 @@
 
 namespace App\Settings\Classes\Areas;
 
-use App\Casts\GlobalNewOrderNotificationForAdminStatusCast;
 use Spatie\LaravelSettings\Settings;
 
 class LenderSettings extends Settings
@@ -17,8 +16,6 @@ class LenderSettings extends Settings
 
     public float $default_order_cost;
 
-    public $notify_admins_about_new_orders;
-
     public bool $require_initiate_trade_request;
 
     public static function group(): string
@@ -29,7 +26,6 @@ class LenderSettings extends Settings
     public static function casts(): array
     {
         return [
-            'notify_admins_about_new_orders' => GlobalNewOrderNotificationForAdminStatusCast::class,
         ];
     }
 }

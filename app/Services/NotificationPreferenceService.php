@@ -32,7 +32,10 @@ class NotificationPreferenceService
 
             UserNotificationSetting::firstOrCreate(
                 ['user_id' => $user->id, 'notification_type_id' => $type->id],
-                ['is_enabled' => true]
+                [
+                    'email_enabled' => false,  // Default = Disabled (OFF) as per requirements
+                    'portal_enabled' => false,  // Default = Disabled (OFF), NOT editable as per requirements
+                ]
             );
         }
     }
@@ -44,33 +47,62 @@ class NotificationPreferenceService
                 $join->on('uns.notification_type_id', '=', 'notification_types.id')
                     ->where('uns.user_id', '=', $user->id);
             })
-            ->select(['notification_types.id as id', 'notification_types.name as name', 'uns.is_enabled'])
+            ->select([
+                'notification_types.id as id',
+                'notification_types.name as name',
+                'uns.email_enabled',
+                'uns.portal_enabled',
+            ])
             ->orderBy('notification_types.id')
             ->get();
     }
 
-    public function set(User $user, string $type, bool $enabled): void
+    public function setEmailNotification(User $user, string $type, bool $enabled): void
     {
         $typeModel = NotificationType::where('name', $type)->firstOrFail();
 
-        $this->setByModel($user, $typeModel, $enabled);
+        $this->setEmailNotificationByModel($user, $typeModel, $enabled);
     }
 
-    public function setByModel(User $user, NotificationType $typeModel, bool $enabled): void
+    public function setPortalNotification(User $user, string $type, bool $enabled): void
+    {
+        $typeModel = NotificationType::where('name', $type)->firstOrFail();
+
+        $this->setPortalNotificationByModel($user, $typeModel, $enabled);
+    }
+
+    public function setEmailNotificationByModel(User $user, NotificationType $typeModel, bool $enabled): void
     {
         UserNotificationSetting::updateOrCreate(
             ['user_id' => $user->id, 'notification_type_id' => $typeModel->id],
-            ['is_enabled' => $enabled]
+            ['email_enabled' => $enabled]
         );
     }
 
-    public function isEnabled(User $user, NotificationType $typeModel): bool
+    public function setPortalNotificationByModel(User $user, NotificationType $typeModel, bool $enabled): void
+    {
+        UserNotificationSetting::updateOrCreate(
+            ['user_id' => $user->id, 'notification_type_id' => $typeModel->id],
+            ['portal_enabled' => $enabled]
+        );
+    }
+
+    public function isEmailEnabled(User $user, NotificationType $typeModel): bool
     {
         $setting = UserNotificationSetting::where('user_id', $user->id)
             ->where('notification_type_id', $typeModel->id)
             ->first();
 
-        return (bool) optional($setting)->is_enabled ?? true;
+        return (bool) optional($setting)->email_enabled ?? false;
+    }
+
+    public function isPortalEnabled(User $user, NotificationType $typeModel): bool
+    {
+        $setting = UserNotificationSetting::where('user_id', $user->id)
+            ->where('notification_type_id', $typeModel->id)
+            ->first();
+
+        return (bool) optional($setting)->portal_enabled ?? false;
     }
 
     public function getEnabledUsersFor(string $type, ?Closure $extra = null): Collection
@@ -82,7 +114,26 @@ class NotificationPreferenceService
         $usersQuery = User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->whereHas('notificationSettings', function ($q) use ($typeModel) {
-                $q->where('notification_type_id', $typeModel->id)->where('is_enabled', true);
+                $q->where('notification_type_id', $typeModel->id)->where('email_enabled', true);
+            });
+
+        if ($extra) {
+            $usersQuery->where($extra);
+        }
+
+        return $usersQuery->get();
+    }
+
+    public function getEnabledUsersForPortal(string $type, ?Closure $extra = null): Collection
+    {
+        $typeModel = NotificationType::where('name', $type)->first();
+        if (! $typeModel) {
+            return collect();
+        }
+        $usersQuery = User::query()
+            ->withoutGlobalScope(TenantScope::class)
+            ->whereHas('notificationSettings', function ($q) use ($typeModel) {
+                $q->where('notification_type_id', $typeModel->id)->where('portal_enabled', true);
             });
 
         if ($extra) {

@@ -12,14 +12,16 @@ class NotificationSettingTransformer extends TransformerAbstract
         'id',
         'name',
         'label',
-        'is_enabled',
+        'email_enabled',
+        'portal_enabled',
     ];
 
     protected array $defaultIncludes = [
         'id',
         'name',
         'label',
-        'is_enabled',
+        'email_enabled',
+        'portal_enabled',
     ];
 
     public function transform($data): array
@@ -44,8 +46,13 @@ class NotificationSettingTransformer extends TransformerAbstract
         return $this->primitive(SystemNotificationType::getDescription($name));
     }
 
-    public function includeIsEnabled($data): Primitive
+    public function includeEmailEnabled($data): Primitive
     {
-        return $this->primitive((bool) data_get($data, 'is_enabled'));
+        return $this->primitive((bool) data_get($data, 'email_enabled'));
+    }
+
+    public function includePortalEnabled($data): Primitive
+    {
+        return $this->primitive((bool) data_get($data, 'portal_enabled'));
     }
 }

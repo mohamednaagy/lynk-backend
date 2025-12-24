@@ -32,14 +32,29 @@ class UserNotificationSettingsController extends Controller
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
     }
 
-    public function toggle(
+    public function toggleEmail(
         User $user,
         NotificationType $notification_type,
         NotificationPreferenceService $service
     ): JsonResponse {
-        $isEnabled = $service->isEnabled($user, $notification_type);
-        $service->setByModel($user, $notification_type, ! $isEnabled);
+        $isEnabled = $service->isEmailEnabled($user, $notification_type);
+        $service->setEmailNotificationByModel($user, $notification_type, ! $isEnabled);
 
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
+    }
+
+    public function togglePortal(
+        User $user,
+        NotificationType $notification_type,
+        NotificationPreferenceService $service
+    ): JsonResponse {
+        // Portal notifications are NOT editable per requirements
+        // We return an error response to indicate that portal notifications cannot be toggled
+        return response()->json([
+            'message' => 'Portal notifications cannot be modified as per system requirements',
+            'errors' => [
+                'portal_notifications' => ['Portal notifications are not editable'],
+            ],
+        ], 422);
     }
 }

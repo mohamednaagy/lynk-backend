@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Admin\Companies;
 
 use App\Enums\CompanyMarketType;
-use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\CompanyType;
 use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\OrderFeeType;
@@ -144,11 +143,6 @@ class UpdateCompanyRequest extends FormRequest
                 'email:filter',
                 'string',
                 'max:255',
-            ],
-            'notify_admins_about_new_orders' => [
-                'required',
-                'integer',
-                new EnumValue(CompanyNewOrderNotificationForAdminStatus::class, false),
             ],
 
             'allow_preferred_commodity_in_order' => [
