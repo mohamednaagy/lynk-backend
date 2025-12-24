@@ -3,7 +3,7 @@
 namespace App\Rules;
 
 use App\Enums\WalletType;
-\use App\Models\Lender;
+use App\Models\Lender;
 use App\Models\TieredPricing;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Validation\Rule;

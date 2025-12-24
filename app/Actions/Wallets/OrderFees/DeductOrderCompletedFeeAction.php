@@ -77,7 +77,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Wallet retrieval completed', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
-                    'company_id' => $lender->id,
+                    'lender_id' => $lender->id,
                     'wallet_found' => $wallet !== null,
                     'wallet_id' => $wallet?->id,
                 ]);
@@ -86,7 +86,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Exception during wallet retrieval', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
-                    'company_id' => $lender->id,
+                    'lender_id' => $lender->id,
                     'exception_class' => get_class($walletException),
                     'message' => $walletException->getMessage(),
                     'trace' => $walletException->getTraceAsString(),
@@ -98,7 +98,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Company wallet not found', $traderOrder), [
                     'financingOrderId' => $traderOrder->financing_order_id,
                     'traderOrderId' => $traderOrder->id,
-                    'company_id' => $lender->id,
+                    'lender_id' => $lender->id,
                     'company_name' => $lender->name,
                     'wallet_type_requested' => WalletType::CompanyWallet,
                 ]);
@@ -109,7 +109,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                     Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Company existing wallets', $traderOrder), [
                         'financingOrderId' => $traderOrder->financing_order_id,
                         'traderOrderId' => $traderOrder->id,
-                        'company_id' => $lender->id,
+                        'lender_id' => $lender->id,
                         'total_wallets' => $allWallets->count(),
                         'wallet_details' => $allWallets->map(function ($w) {
                             return [
@@ -123,7 +123,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                     Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('DeductOrderCompletedFeeAction: Failed to retrieve company wallets list', $traderOrder), [
                         'financingOrderId' => $traderOrder->financing_order_id,
                         'traderOrderId' => $traderOrder->id,
-                        'company_id' => $lender->id,
+                        'lender_id' => $lender->id,
                         'message' => $walletListException->getMessage(),
                         'trace' => $walletListException->getTraceAsString(),
                     ]);
@@ -160,7 +160,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('DeductOrderCompletedFeeAction: Calculating TieredPricing', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
                 'order_amount' => $financingOrder->amount->jsonSerialize(),
             ]);
 
@@ -235,7 +235,7 @@ class DeductOrderCompletedFeeAction implements DeductOrderCompletedFee
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
                 'error' => $e->getMessage(),
-                'company_id' => $lender->id ?? 'unknown',
+                'lender_id' => $lender->id ?? 'unknown',
                 'order_amount' => $financingOrder->amount->jsonSerialize() ?? 'unknown',
             ]);
             throw $e;

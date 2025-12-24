@@ -90,7 +90,7 @@ class EligibleQuantityService
     {
         try {
             $this->logInfo('Rebuilding eligible quantities for lender', [
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
             ]);
 
             // Remove existing records
@@ -104,11 +104,11 @@ class EligibleQuantityService
             }
 
             $this->logInfo('Completed rebuilding eligible quantities for lender', [
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
             ]);
         } catch (\Throwable $e) {
             $this->logError('Failed to rebuild eligible quantities for lender', $e, [
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
             ]);
             throw $e;
         }
@@ -152,7 +152,7 @@ class EligibleQuantityService
     {
         try {
             $this->logInfo('Deleting eligible quantities for lender', [
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
             ]);
 
             LocalMarketEligibleQuantity::where('company_id', $lender->id)
@@ -163,11 +163,11 @@ class EligibleQuantityService
                 });
 
             $this->logInfo('Successfully deleted eligible quantities for lender', [
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
             ]);
         } catch (\Throwable $e) {
             $this->logError('Failed to delete eligible quantities for lender', $e, [
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
             ]);
             throw $e;
         }
@@ -231,13 +231,13 @@ class EligibleQuantityService
         try {
             LocalMarketEligibleQuantity::create([
                 'inventory_id' => $inventory->id,
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
                 'eligible_quantity' => $eligibleQuantity,
             ]);
         } catch (\Throwable $e) {
             $this->logError('Failed to create eligible quantity record', $e, [
                 'inventory_id' => $inventory->id,
-                'company_id' => $lender->id,
+                'lender_id' => $lender->id,
                 'eligible_quantity' => $eligibleQuantity,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),

@@ -131,11 +131,6 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         return $this->hasMany(AuthorizationToken::class);
     }
 
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'company_id');
