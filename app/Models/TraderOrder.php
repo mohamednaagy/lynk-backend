@@ -295,9 +295,9 @@ class TraderOrder extends Model implements HasMedia
         }
     }
 
-    public function company()
+    public function lender()
     {
-        return $this->order->company;
+        return $this->order->lender;
     }
 
     public function isCancelled(): bool
