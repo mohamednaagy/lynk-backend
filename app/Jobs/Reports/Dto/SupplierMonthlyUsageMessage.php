@@ -12,6 +12,7 @@ final class SupplierMonthlyUsageMessage extends AbstractReportMessage
         int $modelId,
         string $startDate,
         string $endDate,
+        string $outputTimezone = 'Asia/Riyadh',
     ) {
         parent::__construct(
             type: Str::upper(ReportType::SupplierMonthlyUsage),
@@ -20,6 +21,9 @@ final class SupplierMonthlyUsageMessage extends AbstractReportMessage
             filters: [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
+            ],
+            options: [
+                'output_timezone' => $outputTimezone,
             ],
         );
     }

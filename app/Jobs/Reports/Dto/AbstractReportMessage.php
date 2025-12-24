@@ -9,6 +9,7 @@ abstract class AbstractReportMessage implements ReportMessage
         protected readonly string $modelType,
         protected readonly int $modelId,
         protected readonly array $filters = [],
+        protected readonly array $options = [],
     ) {}
 
     public function getType(): string
@@ -31,6 +32,11 @@ abstract class AbstractReportMessage implements ReportMessage
         return $this->filters;
     }
 
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
     public function toArray(): array
     {
         return [
@@ -38,6 +44,7 @@ abstract class AbstractReportMessage implements ReportMessage
             'model_type' => $this->getModelType(),
             'model_id' => $this->getModelId(),
             'filters' => $this->getFilters(),
+            'options' => $this->getOptions(),
         ];
     }
 }
