@@ -10,8 +10,8 @@ class UserNotificationSetting extends Model
     protected $fillable = [
         'user_id',
         'notification_type',
-        'email_enabled',
-        'portal_enabled',
+        'channel',
+        'is_enabled',
     ];
 
     public function user(): BelongsTo
