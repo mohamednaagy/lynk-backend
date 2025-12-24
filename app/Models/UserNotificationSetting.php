@@ -9,23 +9,13 @@ class UserNotificationSetting extends Model
 {
     protected $fillable = [
         'user_id',
-        'notification_type_id',
+        'notification_type',
         'email_enabled',
         'portal_enabled',
-    ];
-
-    protected $casts = [
-        'email_enabled' => 'boolean',
-        'portal_enabled' => 'boolean',
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function type(): BelongsTo
-    {
-        return $this->belongsTo(NotificationType::class, 'notification_type_id');
     }
 }
