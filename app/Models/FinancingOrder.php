@@ -188,11 +188,6 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->singleFile();
     }
 
-    public function company()
-    {
-        return $this->belongsTo(Company::class)->withTrashed();
-    }
-
     public function approver()
     {
         return $this->belongsTo(User::class, 'approver_id', 'id');

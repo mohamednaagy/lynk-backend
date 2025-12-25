@@ -34,9 +34,7 @@ class EligibleQuantityService
             $this->truncateEligibleQuantities();
             $companies = $this->getLenderCompanies();
             $inventories = $this->getInventories();
-
             $result = $this->processInventoriesAndCompanies($companies, $inventories, $progressCallback);
-
             $this->logInfo('Completed eligible quantities build', $result);
 
             return $result;
@@ -231,7 +229,7 @@ class EligibleQuantityService
         try {
             LocalMarketEligibleQuantity::create([
                 'inventory_id' => $inventory->id,
-                'lender_id' => $lender->id,
+                'company_id' => $lender->id,
                 'eligible_quantity' => $eligibleQuantity,
             ]);
         } catch (\Throwable $e) {
