@@ -9,7 +9,7 @@ use App\Enums\Subject;
 use App\Exports\WalletTransactionsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\ListTransactionRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use Maatwebsite\Excel\Excel as MaatwebsiteExcel;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -19,7 +19,7 @@ class ExportWalletTransactions extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::LenderTransactions, Action::Index])
+                perm(Area::Lender, [Subject::LenderTransactions, Action::Index])
         );
     }
 
@@ -28,25 +28,25 @@ class ExportWalletTransactions extends Controller
         GetTransactions $getTransactions
     ) {
         $data = $request->validated();
-        $company = tenant();
+        $lender = tenant();
 
         $transactionsQuery = $getTransactions
-            ->setCompany($company)
+            ->setLender($lender)
             ->setFilters($data)
             ->handle();
 
-        $export = new WalletTransactionsExport($request, $transactionsQuery, $company);
+        $export = new WalletTransactionsExport($request, $transactionsQuery, $lender);
 
-        return Excel::download($export, $this->getFileName($company, 'csv'), MaatwebsiteExcel::CSV, [
-            'X-File-Name' => $this->getFileName($company, 'csv'),
+        return Excel::download($export, $this->getFileName($lender, 'csv'), MaatwebsiteExcel::CSV, [
+            'X-File-Name' => $this->getFileName($lender, 'csv'),
         ]);
     }
 
-    protected function getFileName(Company $company, string $type = 'xlsx')
+    protected function getFileName(Lender $lender, string $type = 'xlsx')
     {
-        $companyName = str_replace(' ', '', $company->name);
+        $lenderName = str_replace(' ', '', $lender->name);
         $todayDateInYYYYMMDD = saudi_now('Ymd_His');
 
-        return "{$companyName}_LYNKWalletTransactions_{$todayDateInYYYYMMDD}.{$type}";
+        return "{$lenderName}_LYNKWalletTransactions_{$todayDateInYYYYMMDD}.{$type}";
     }
 }

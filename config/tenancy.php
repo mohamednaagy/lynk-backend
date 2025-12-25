@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Models\Company;
+use App\Models\Lender;
 use Stancl\Tenancy\Database\Models\Domain;
 
 return [
-    'tenant_model' => Company::class,
+    'tenant_model' => Lender::class,
     'id_generator' => null,
 
     'domain_model' => Domain::class,

@@ -8,7 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyStatusRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Http\JsonResponse;
 
 class UpdateLenderStatus extends Controller
@@ -26,7 +26,7 @@ class UpdateLenderStatus extends Controller
      */
     public function __invoke(
         UpdateCompanyStatusRequest $request,
-        Company $lender,
+        Lender $lender,
         UpdateCompany $updateCompany
     ): JsonResponse {
         $updateCompany->handle($lender, $request->validated());

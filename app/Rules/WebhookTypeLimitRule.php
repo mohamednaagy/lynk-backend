@@ -2,14 +2,14 @@
 
 namespace App\Rules;
 
-use App\Models\Company;
+use App\Models\Lender;
 use App\Support\Webhooks\Exceptions\WebhookTypeNotFoundException;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Config;
 
 class WebhookTypeLimitRule implements Rule
 {
-    protected $company;
+    protected $lender;
 
     protected $limit;
 
@@ -18,9 +18,9 @@ class WebhookTypeLimitRule implements Rule
      *
      * @return void
      */
-    public function __construct(Company $company)
+    public function __construct(Lender $lender)
     {
-        $this->company = $company;
+        $this->lender = $lender;
     }
 
     /**
@@ -35,7 +35,7 @@ class WebhookTypeLimitRule implements Rule
         $this->limit = $this->getLimit($type);
 
         return $this->limit === -1
-            || $this->company->webhooks()->where('type', $type)->count() < $this->limit;
+            || $this->lender->webhooks()->where('type', $type)->count() < $this->limit;
     }
 
     /**

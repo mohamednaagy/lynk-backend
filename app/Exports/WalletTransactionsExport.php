@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\Company;
+use App\Models\Lender;
 use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -18,7 +18,7 @@ class WalletTransactionsExport implements FromGenerator, WithCustomChunkSize, Wi
     public function __construct(
         protected Request $request,
         protected Builder $transactionsQuery,
-        protected Company $company
+        protected Lender $lender
     ) {}
 
     protected array $headings = [

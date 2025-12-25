@@ -2,17 +2,17 @@
 
 namespace App\Transformers;
 
-use App\Models\Company;
+use App\Models\Lender;
 use League\Fractal\TransformerAbstract;
 
 class CompanySettingTransformer extends TransformerAbstract
 {
-    public function transform(Company $company): array
+    public function transform(Lender $lender): array
     {
         return [
-            'id' => $company->id,
-            'does_order_require_approval' => $company->lender->lenderDetail->does_order_require_approval,
-            'trading_mode' => $company->lender->lenderDetail->trading_mode,
+            'id' => $lender->id,
+            'does_order_require_approval' => $lender->lenderDetail->does_order_require_approval,
+            'trading_mode' => $lender->lenderDetail->trading_mode,
         ];
     }
 }

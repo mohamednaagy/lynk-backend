@@ -3,9 +3,18 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderTypeEnum;
+use Watson\Rememberable\Rememberable;
 
 class Lender extends Company
 {
+    use Rememberable;
+
+    protected $rememberCacheTag = 'lenders';
+
+    protected $rememberCachePrefix = 'lenders';
+
+    protected $rememberFor = 60 * 60;
+
     public function getMorphClass()
     {
         return Company::class;

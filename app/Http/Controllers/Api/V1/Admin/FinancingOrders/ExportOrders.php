@@ -8,7 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel as MaatwebsiteExcel;
@@ -28,7 +28,7 @@ class ExportOrders extends Controller
     {
         $query = $buildOrdersQuery->setRelations([
             'activeTraderOrder' => fn ($query) => $query->latest(),
-            'company' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'lender' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'responsableAdmin' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
             'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
         ])
@@ -65,6 +65,6 @@ class ExportOrders extends Controller
             return null;
         }
 
-        return Company::find($company[0], ['name']);
+        return Lender::find($company[0], ['name']);
     }
 }

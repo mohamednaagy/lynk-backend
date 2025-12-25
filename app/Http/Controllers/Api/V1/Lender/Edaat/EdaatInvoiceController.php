@@ -11,7 +11,7 @@ use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Edaat\EdaatInvoiceFilterRequest;
 use App\Http\Requests\V1\Lender\Wallets\CalculateOrdersRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Transformers\EdaatInvoiceTransformer;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
@@ -39,7 +39,7 @@ class EdaatInvoiceController extends Controller
         EdaatInvoiceFilterRequest $request,
         GetEdaatInvoicesInterface $getEdaatInvoices
     ): JsonResponse {
-        $edaatInvoices = $getEdaatInvoices->setCompany(tenant())
+        $edaatInvoices = $getEdaatInvoices->setLender(tenant())
             ->handle()
             ->with('creator')
             ->paginate();
@@ -64,10 +64,10 @@ class EdaatInvoiceController extends Controller
         CreateEdaatInvoiceInterface $createEdaatInvoice
     ) {
         return DB::transaction(function () use ($createEdaatInvoice, $request) {
-            /** @var Company $company */
-            $company = tenant();
+            /** @var Lender $lender */
+            $lender = tenant();
 
-            $amount = $this->resolveAmount($request, $company);
+            $amount = $this->resolveAmount($request, $lender);
 
             $invoice = $createEdaatInvoice->handle($amount);
 
@@ -82,11 +82,11 @@ class EdaatInvoiceController extends Controller
         });
     }
 
-    protected function resolveAmount(Request $request, Company $company)
+    protected function resolveAmount(Request $request, Lender $lender)
     {
         return Money::parseByDecimal(
             $request->validated('amount'),
-            $company->getWallet(WalletType::CompanyWallet)->currency
+            $lender->getWallet(WalletType::CompanyWallet)->currency
         );
     }
 }

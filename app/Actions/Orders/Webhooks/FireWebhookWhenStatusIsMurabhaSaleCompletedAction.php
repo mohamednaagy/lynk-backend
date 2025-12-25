@@ -28,8 +28,8 @@ class FireWebhookWhenStatusIsMurabhaSaleCompletedAction implements FireWebhookWh
         $wakalaDocumentMediaFile = get_media_of_model($traderOrder, TraderOrderMediaCollection::SignedClientWakala);
         $lastHistory = $this->getTraderOrderLastHistory($traderOrder);
         $lastCompletedStep = $this->getCompletedStep($traderOrder);
-        $company = $financingOrder->company()->withTrashed()->first();
-        WebhookEvent::fire($company, WebhookType::OrderUpdates, [
+        $lender = $financingOrder->lender()->withTrashed()->first();
+        WebhookEvent::fire($lender, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
             'order_status' => [
                 'value' => $financingOrder->status->value,

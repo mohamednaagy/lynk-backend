@@ -47,8 +47,8 @@ class CommodityType extends Model
      */
     public function scopeGetCommoditiesBasedOnCompany(Builder $query, int $value): Builder
     {
-        $company = Company::with(['lenderOrderAllowedCommodityTypes'])->find($value);
-        $commodityTypeIds = $company->lenderOrderAllowedCommodityTypes->pluck('id');
+        $lender = Lender::with(['lenderOrderAllowedCommodityTypes'])->find($value);
+        $commodityTypeIds = $lender->lenderOrderAllowedCommodityTypes->pluck('id');
         $query = $query->whereIn('id', $commodityTypeIds);
 
         return $query;

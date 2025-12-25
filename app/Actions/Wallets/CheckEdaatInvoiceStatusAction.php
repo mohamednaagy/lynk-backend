@@ -37,8 +37,8 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                     'paid_at' => now(),
                 ]);
 
-                $company = $edaatInvoice->company;
-                $wallet = $company->getWallet(WalletType::CompanyWallet);
+                $lender = $edaatInvoice->lender;
+                $wallet = $lender->getWallet(WalletType::CompanyWallet);
                 $totalAmountWithVat = $edaatInvoice->amount;
 
                 [$vatAmount, $vatRate] = $this->calculateVatAmount
@@ -69,7 +69,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
 
                 $invoiceSpecs = $this->getInvoiceSpecs(
                     $vatTransaction,
-                    $company,
+                    $lender,
                     $totalAmountWithVat,
                     $vatAmount,
                     $vatPercentage
@@ -82,20 +82,20 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
 
     private function getInvoiceSpecs(
         $transaction,
-        $company,
+        $lender,
         $totalAmountWithVat,
         $vatAmount,
         $vatPercentage
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
 
-        if ($company->isTiered()) {
+        if ($lender->isTiered()) {
             $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
             $ordersCount = 1;
         } else {
-            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
+            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($lender)['costWithoutVat'];
             [, , ,$ordersCount] = $this->calcAmountWithoutVatAndOrdersCount
-                ->handle($company, $totalAmountWithVat);
+                ->handle($lender, $totalAmountWithVat);
         }
 
         return new InvoiceSpecs(
@@ -117,7 +117,7 @@ class CheckEdaatInvoiceStatusAction implements CheckEdaatInvoiceStatus
                 ],
                 $transaction->created_at->clone()->tz('Asia/Riyadh'),
             ),
-            $company->name,
+            $lender->name,
             $transaction,
         );
     }

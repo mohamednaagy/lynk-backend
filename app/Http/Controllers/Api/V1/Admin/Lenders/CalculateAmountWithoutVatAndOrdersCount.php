@@ -8,7 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
+use App\Models\Lender;
 use Cknow\Money\Money;
 use Illuminate\Http\JsonResponse;
 
@@ -26,7 +26,7 @@ class CalculateAmountWithoutVatAndOrdersCount extends Controller
      * Handle the incoming request.
      */
     public function __invoke(
-        Company $lender,
+        Lender $lender,
         float $amountWithVat,
         CalcAmountWithoutVatAndOrdersCount $calcHandler
     ): JsonResponse {

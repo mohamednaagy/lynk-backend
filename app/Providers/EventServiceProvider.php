@@ -22,6 +22,7 @@ use App\Observers\CommodityTypeObserver;
 use App\Observers\CompanyLenderDetailObserver;
 use App\Observers\CompanyObserver;
 use App\Observers\FinancingOrderObserver;
+use App\Observers\LenderObserver;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Observers\LocalMarketOrderObserver;
 use App\Observers\TraderHistoryObserver;
@@ -63,6 +64,7 @@ class EventServiceProvider extends ServiceProvider
         Company::class => [CompanyObserver::class],
         Lender::class => [CompanyObserver::class],
         CompanyLenderDetail::class => [CompanyLenderDetailObserver::class],
+        Lender::class => [LenderObserver::class],
 
     ];
 

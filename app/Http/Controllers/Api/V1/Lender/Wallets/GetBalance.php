@@ -22,8 +22,8 @@ class GetBalance extends Controller
 
     public function __invoke(Request $request, GetLenderBalance $getBalance): JsonResponse
     {
-        $company = tenant();
-        $balances = $getBalance->handle(tenant());
+        $lender = tenant();
+        $balances = $getBalance->handle($lender);
 
         return $this->successResponse(data: [
             'balance' => $balances['balance']->convertAndFormatByDecimal(),

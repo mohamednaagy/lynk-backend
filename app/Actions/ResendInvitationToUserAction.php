@@ -14,7 +14,7 @@ class ResendInvitationToUserAction implements ResendInvitationToUser
 {
     public function handle(Supplier|Company $company, User $user, string $redirect_url): void
     {
-        $userBelongToCompany = $user->company->is($company);
+        $userBelongToCompany = $user->lender->is($company);
         if (! $userBelongToCompany) {
             throw new UserDoesntBelongToCompany;
         }

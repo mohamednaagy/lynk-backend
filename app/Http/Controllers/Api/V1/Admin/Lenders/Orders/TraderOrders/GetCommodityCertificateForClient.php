@@ -7,7 +7,7 @@ use App\Enums\Area;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 
@@ -21,7 +21,7 @@ class GetCommodityCertificateForClient extends Controller
         );
     }
 
-    public function __invoke(Company $lender, int $order, TraderOrder $traderOrder): JsonResponse
+    public function __invoke(Lender $lender, int $order, TraderOrder $traderOrder): JsonResponse
     {
         $media = $traderOrder->getFirstMedia(TraderOrderMediaCollection::SellingCommodityToCustomer);
 

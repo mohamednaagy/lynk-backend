@@ -16,7 +16,7 @@ class VerifyTokenVersion
 
             $payload = JWTAuth::parseToken()->getPayload();
             $tokenVersionFromToken = $payload->get('version');
-            $dbVersion = $user->company?->lender?->lenderDetail?->token_version ?? 1;
+            $dbVersion = $user->lender?->lenderDetail?->token_version ?? 1;
 
             if ($tokenVersionFromToken != $dbVersion) {
                 return response()->json([

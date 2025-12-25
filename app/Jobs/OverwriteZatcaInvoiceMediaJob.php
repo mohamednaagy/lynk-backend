@@ -41,7 +41,7 @@ class OverwriteZatcaInvoiceMediaJob implements ShouldQueue
             ->chunk(100, function ($orders) {
                 $orders->map(function ($financingOrder) {
                     // Skip if the company is soft deleted
-                    if (is_null($financingOrder->company)) {
+                    if (is_null($financingOrder->lender)) {
                         return;
                     }
 

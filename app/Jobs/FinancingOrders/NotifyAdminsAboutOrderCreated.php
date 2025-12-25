@@ -75,7 +75,6 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
 
         if ($isNotificationSettingBasedOnCompany) {
             return (bool) $this->financingOrder
-                ->company
                 ->lender
                 ->lenderDetail
                 ->notify_admins_about_new_orders
