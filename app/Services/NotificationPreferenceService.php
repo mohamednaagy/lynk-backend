@@ -49,7 +49,7 @@ class NotificationPreferenceService
             return [
                 'id' => $typeKey,
                 'name' => $typeKey,
-                'label' => $typeConfig['label'] ?? '',
+                'label' => __($typeConfig['label']) ?? '',
                 'channels' => $channels,
                 'roles' => $typeConfig['roles'] ?? [],
             ];

@@ -6,7 +6,7 @@ use App\Enums\SystemNotificationType;
 
 return [
     SystemNotificationType::TRADE_REQUEST_CANCELLED => [
-        'label' => __('notifications.trade_request_cancelled.label'),
+        'label' => 'notifications.trade_request_cancelled.label',
         'channels' => [
             NotificationChannel::platform => [
                 'default' => true,
@@ -24,7 +24,7 @@ return [
         ],
     ],
     SystemNotificationType::ORDER_CANCELLED => [
-        'label' => __('notifications.order_cancelled.label'),
+        'label' => 'notifications.order_cancelled.label',
         'channels' => [
             NotificationChannel::platform => [
                 'default' => true,
@@ -42,7 +42,7 @@ return [
         ],
     ],
     SystemNotificationType::ORDER_REQUIRES_APPROVAL => [
-        'label' => __('notifications.order_requires_approval.label'),
+        'label' => 'notifications.order_requires_approval.label',
         'channels' => [
             NotificationChannel::platform => [
                 'default' => true,
@@ -60,7 +60,7 @@ return [
         ],
     ],
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => [
-        'label' => __('notifications.delivery_confirmation_received.label'),
+        'label' => 'notifications.delivery_confirmation_received.label',
         'channels' => [
             NotificationChannel::platform => [
                 'default' => true,
