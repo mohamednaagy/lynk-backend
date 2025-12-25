@@ -17,15 +17,17 @@ return new class extends Migration
             $table->string('channel');
             $table->boolean('is_enabled')->default(false);
             $table->timestamps();
-            $table->unique(['user_id', 'notification_type', 'channel']);
+            $table->unique(['user_id', 'notification_type', 'channel'], 'user_type_channel_unique');
         });
 
-        $oldSettings = DB::table('user_notification_settings')->get();
+        $oldSettings = DB::table('user_notification_settings')
+            ->join('notification_types', 'notification_types.id', '=', 'user_notification_settings.notification_type_id')
+            ->get();
 
         foreach ($oldSettings as $setting) {
             DB::table('user_notification_settings_new')->insert([
                 'user_id' => $setting->user_id,
-                'notification_type' => $setting->notification_type,
+                'notification_type' => $setting->name,
                 'channel' => NotificationChannel::MAIL,
                 'is_enabled' => $setting->email_enabled,
                 'created_at' => $setting->created_at,
@@ -33,7 +35,7 @@ return new class extends Migration
             ]);
             DB::table('user_notification_settings_new')->insert([
                 'user_id' => $setting->user_id,
-                'notification_type' => $setting->notification_type,
+                'notification_type' => $setting->name,
                 'channel' => NotificationChannel::PLATFORM,
                 'is_enabled' => $setting->portal_enabled,
                 'created_at' => $setting->created_at,
