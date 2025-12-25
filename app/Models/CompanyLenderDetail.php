@@ -12,7 +12,7 @@ class CompanyLenderDetail extends Model
 {
     use Rememberable;
 
-    protected $rememberCacheTag = ['company_lender_details'];
+    protected $rememberCacheTag = 'company_lender_details';
 
     protected $rememberCachePrefix = 'company_lender_details';
 

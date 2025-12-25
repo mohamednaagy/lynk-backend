@@ -9,7 +9,7 @@ class Lender extends Company
 {
     use Rememberable;
 
-    protected $rememberCacheTag = ['lenders'];
+    protected $rememberCacheTag = 'lenders';
 
     protected $rememberCachePrefix = 'lenders';
 
