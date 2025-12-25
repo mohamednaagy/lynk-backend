@@ -58,12 +58,12 @@ class NotificationPreferenceService
 
     public function setEmailNotification(User $user, string $type, bool $enabled): void
     {
-        $this->setEmailNotificationByTypeAndChannel($user, $type, NotificationChannel::mail, $enabled);
+        $this->setEmailNotificationByTypeAndChannel($user, $type, NotificationChannel::MAIL, $enabled);
     }
 
     public function setPortalNotification(User $user, string $type, bool $enabled): void
     {
-        $this->setPortalNotificationByTypeAndChannel($user, $type, NotificationChannel::platform, $enabled);
+        $this->setPortalNotificationByTypeAndChannel($user, $type, NotificationChannel::PLATFORM, $enabled);
     }
 
     public function setEmailNotificationByTypeAndChannel(User $user, string $type, string $channel, bool $enabled): void
@@ -84,12 +84,12 @@ class NotificationPreferenceService
 
     public function isEmailEnabled(User $user, string $type): bool
     {
-        return $this->isChannelEnabled($user, $type, NotificationChannel::mail);
+        return $this->isChannelEnabled($user, $type, NotificationChannel::MAIL);
     }
 
     public function isPortalEnabled(User $user, string $type): bool
     {
-        return $this->isChannelEnabled($user, $type, NotificationChannel::platform);
+        return $this->isChannelEnabled($user, $type, NotificationChannel::PLATFORM);
     }
 
     public function isChannelEnabled(User $user, string $type, string $channel): bool
@@ -104,12 +104,12 @@ class NotificationPreferenceService
 
     public function getEnabledUsersFor(string $type, ?Closure $extra = null): Collection
     {
-        return $this->getEnabledUsersForChannel($type, NotificationChannel::mail, $extra);
+        return $this->getEnabledUsersForChannel($type, NotificationChannel::MAIL, $extra);
     }
 
     public function getEnabledUsersForPortal(string $type, ?Closure $extra = null): Collection
     {
-        return $this->getEnabledUsersForChannel($type, NotificationChannel::platform, $extra);
+        return $this->getEnabledUsersForChannel($type, NotificationChannel::PLATFORM, $extra);
     }
 
     public function getEnabledUsersForChannel(string $type, string $channel, ?Closure $extra = null): Collection

@@ -6,7 +6,7 @@ use BenSampo\Enum\Enum;
 
 final class NotificationChannel extends Enum
 {
-    const platform = 'platform';
+    const PLATFORM = 'database';
 
-    const mail = 'mail';
+    const MAIL = 'mail';
 }

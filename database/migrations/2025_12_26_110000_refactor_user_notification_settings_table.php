@@ -3,6 +3,7 @@
 use App\Enums\NotificationChannel;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -25,7 +26,7 @@ return new class extends Migration
             DB::table('user_notification_settings_new')->insert([
                 'user_id' => $setting->user_id,
                 'notification_type' => $setting->notification_type,
-                'channel' => NotificationChannel::mail,
+                'channel' => NotificationChannel::MAIL,
                 'is_enabled' => $setting->email_enabled,
                 'created_at' => $setting->created_at,
                 'updated_at' => $setting->updated_at,
@@ -33,7 +34,7 @@ return new class extends Migration
             DB::table('user_notification_settings_new')->insert([
                 'user_id' => $setting->user_id,
                 'notification_type' => $setting->notification_type,
-                'channel' => NotificationChannel::platform,
+                'channel' => NotificationChannel::PLATFORM,
                 'is_enabled' => $setting->portal_enabled,
                 'created_at' => $setting->created_at,
                 'updated_at' => $setting->updated_at,
@@ -61,8 +62,8 @@ return new class extends Migration
         foreach ($newSettings as $userSettings) {
             $userSettingsByType = $userSettings->groupBy('notification_type');
             foreach ($userSettingsByType as $notificationTypeSettings) {
-                $emailSetting = $notificationTypeSettings->where('channel', NotificationChannel::mail)->first();
-                $portalSetting = $notificationTypeSettings->where('channel', NotificationChannel::platform)->first();
+                $emailSetting = $notificationTypeSettings->where('channel', NotificationChannel::MAIL)->first();
+                $portalSetting = $notificationTypeSettings->where('channel', NotificationChannel::PLATFORM)->first();
                 DB::table('user_notification_settings_old')->insert([
                     'user_id' => $userSettings->first()->user_id,
                     'notification_type' => $notificationTypeSettings->first()->notification_type,

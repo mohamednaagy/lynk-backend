@@ -2,6 +2,8 @@
 
 namespace App\Notifications\FinancingOrders;
 
+use App\Enums\NotificationChannel;
+use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -10,9 +12,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 
-class OrderCreated extends Notification implements ShouldQueue
+final class OrderCreated extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    private const TYPE = SystemNotificationType::ORDER_CREATED;
 
     /**
      * Create a new notification instance.
@@ -32,7 +36,26 @@ class OrderCreated extends Notification implements ShouldQueue
      */
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        $channels = [];
+
+        // Get the user's notification settings for this type
+        $settings = $notifiable->notificationSettings()
+            ->where('notification_type', self::TYPE)
+            ->get();
+
+        // Check if platform notification is enabled
+        $platformSetting = $settings->where('channel', NotificationChannel::PLATFORM)->first();
+        if ($platformSetting && $platformSetting->is_enabled) {
+            $channels[] = 'database';
+        }
+
+        // Check if mail is enabled
+        $mailSetting = $settings->where('channel', NotificationChannel::MAIL)->first();
+        if ($mailSetting && $mailSetting->is_enabled) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**

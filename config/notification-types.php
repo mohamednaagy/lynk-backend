@@ -8,11 +8,11 @@ return [
     SystemNotificationType::TRADE_REQUEST_CANCELLED => [
         'label' => 'notifications.trade_request_cancelled.label',
         'channels' => [
-            NotificationChannel::platform => [
+            NotificationChannel::PLATFORM => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::mail => [
+            NotificationChannel::MAIL => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -26,11 +26,11 @@ return [
     SystemNotificationType::ORDER_CANCELLED => [
         'label' => 'notifications.order_cancelled.label',
         'channels' => [
-            NotificationChannel::platform => [
+            NotificationChannel::PLATFORM => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::mail => [
+            NotificationChannel::MAIL => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -44,11 +44,11 @@ return [
     SystemNotificationType::ORDER_REQUIRES_APPROVAL => [
         'label' => 'notifications.order_requires_approval.label',
         'channels' => [
-            NotificationChannel::platform => [
+            NotificationChannel::PLATFORM => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::mail => [
+            NotificationChannel::MAIL => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -62,16 +62,34 @@ return [
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => [
         'label' => 'notifications.delivery_confirmation_received.label',
         'channels' => [
-            NotificationChannel::platform => [
+            NotificationChannel::PLATFORM => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::mail => [
+            NotificationChannel::MAIL => [
                 'default' => false,
                 'is_editable' => true,
             ],
         ],
         'roles' => [
+            Role::Admin,
+        ],
+    ],
+    SystemNotificationType::ORDER_CREATED => [
+        'label' => 'notifications.order_created.label',
+        'channels' => [
+            NotificationChannel::PLATFORM => [
+                'default' => true,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
             Role::Admin,
         ],
     ],

@@ -15,6 +15,8 @@ final class SystemNotificationType extends Enum implements LocalizedEnum
 
     const DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
 
+    const ORDER_CREATED = 'order_created';
+
     public static function getAdminNotificationTypes(): array
     {
         return [
@@ -31,6 +33,7 @@ final class SystemNotificationType extends Enum implements LocalizedEnum
             self::TRADE_REQUEST_CANCELLED,
             self::ORDER_CANCELLED,
             self::ORDER_REQUIRES_APPROVAL,
+            self::ORDER_CREATED,
         ];
     }
 }
