@@ -39,9 +39,12 @@ final class OrderCreated extends Notification implements ShouldQueue
         $channels = [];
 
         // Get the user's notification settings for this type
-        $settings = $notifiable->notificationSettings()
-            ->where('notification_type', self::TYPE)
-            ->get();
+        // Use the already loaded relationship if available to avoid N+1 queries
+        $settings = $notifiable->relationLoaded('notificationSettings')
+            ? $notifiable->notificationSettings->where('notification_type', self::TYPE)
+            : $notifiable->notificationSettings()
+                ->where('notification_type', self::TYPE)
+                ->get();
 
         // Check if platform notification is enabled
         $platformSetting = $settings->where('channel', NotificationChannel::PLATFORM)->first();
