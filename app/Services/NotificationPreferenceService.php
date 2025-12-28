@@ -84,37 +84,38 @@ class NotificationPreferenceService
         );
     }
 
-    public function isEmailEnabled(User $user, string $type): bool
+    public function isEmailEnabled(User $user, SystemNotificationType $type): bool
     {
         return $this->isChannelEnabled($user, $type, NotificationChannel::MAIL);
     }
 
-    public function isPortalEnabled(User $user, string $type): bool
+    public function isPortalEnabled(User $user, SystemNotificationType $type): bool
     {
         return $this->isChannelEnabled($user, $type, NotificationChannel::PLATFORM);
     }
 
-    public function isChannelEnabled(User $user, string $type, string $channel): bool
+    public function isChannelEnabled(User $user, SystemNotificationType $type, NotificationChannel $channel): bool
     {
+        /** @var UserNotificationSetting|null $setting */
         $setting = UserNotificationSetting::where('user_id', $user->id)
             ->where('notification_type', $type)
             ->where('channel', $channel)
             ->first();
 
-        return (bool) optional($setting)->is_enabled ?? false;
+        return $setting->is_enabled ?? false;
     }
 
-    public function getEnabledUsersFor(string $type, ?Closure $extra = null): Collection
+    public function getEnabledUsersFor(SystemNotificationType $type, ?Closure $extra = null): Collection
     {
         return $this->getEnabledUsersForChannel($type, NotificationChannel::MAIL, $extra);
     }
 
-    public function getEnabledUsersForPortal(string $type, ?Closure $extra = null): Collection
+    public function getEnabledUsersForPortal(SystemNotificationType $type, ?Closure $extra = null): Collection
     {
         return $this->getEnabledUsersForChannel($type, NotificationChannel::PLATFORM, $extra);
     }
 
-    public function getEnabledUsersForChannel(string $type, string $channel, ?Closure $extra = null): Collection
+    public function getEnabledUsersForChannel(SystemNotificationType $type, NotificationChannel $channel, ?Closure $extra = null): Collection
     {
         $usersQuery = User::query()
             ->withoutGlobalScope(TenantScope::class)

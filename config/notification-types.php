@@ -5,14 +5,14 @@ use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 
 return [
-    SystemNotificationType::TRADE_REQUEST_CANCELLED => [
+    SystemNotificationType::TRADE_REQUEST_CANCELLED->value => [
         'label' => 'notifications.trade_request_cancelled.label',
         'channels' => [
-            NotificationChannel::PLATFORM => [
+            NotificationChannel::PLATFORM->value => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::MAIL => [
+            NotificationChannel::MAIL->value => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -23,14 +23,14 @@ return [
             Role::Admin,
         ],
     ],
-    SystemNotificationType::ORDER_CANCELLED => [
+    SystemNotificationType::ORDER_CANCELLED->value => [
         'label' => 'notifications.order_cancelled.label',
         'channels' => [
-            NotificationChannel::PLATFORM => [
+            NotificationChannel::PLATFORM->value => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::MAIL => [
+            NotificationChannel::MAIL->value => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -41,14 +41,14 @@ return [
             Role::Admin,
         ],
     ],
-    SystemNotificationType::ORDER_REQUIRES_APPROVAL => [
+    SystemNotificationType::ORDER_REQUIRES_APPROVAL->value => [
         'label' => 'notifications.order_requires_approval.label',
         'channels' => [
-            NotificationChannel::PLATFORM => [
+            NotificationChannel::PLATFORM->value => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::MAIL => [
+            NotificationChannel::MAIL->value => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -59,14 +59,14 @@ return [
             Role::Admin,
         ],
     ],
-    SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => [
+    SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => [
         'label' => 'notifications.delivery_confirmation_received.label',
         'channels' => [
-            NotificationChannel::PLATFORM => [
+            NotificationChannel::PLATFORM->value => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::MAIL => [
+            NotificationChannel::MAIL->value => [
                 'default' => false,
                 'is_editable' => true,
             ],
@@ -75,14 +75,14 @@ return [
             Role::Admin,
         ],
     ],
-    SystemNotificationType::ORDER_CREATED => [
+    SystemNotificationType::ORDER_CREATED->value => [
         'label' => 'notifications.order_created.label',
         'channels' => [
-            NotificationChannel::PLATFORM => [
+            NotificationChannel::PLATFORM->value => [
                 'default' => true,
                 'is_editable' => false,
             ],
-            NotificationChannel::MAIL => [
+            NotificationChannel::MAIL->value => [
                 'default' => false,
                 'is_editable' => true,
             ],

@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\Role;
 use App\Enums\SystemNotificationType;
-use App\Models\NotificationType;
 use App\Models\User;
 use App\Models\UserNotificationSetting;
 use App\Services\NotificationPreferenceService;
@@ -39,17 +38,17 @@ class NotificationPreferencesTest extends TestCase
         $service = app(NotificationPreferenceService::class);
         $service->ensureDefaults($user);
 
-        $notificationType = NotificationType::where('name', SystemNotificationType::ORDER_REQUIRES_APPROVAL)->first();
+        $notificationType = SystemNotificationType::ORDER_REQUIRES_APPROVAL;
 
         // Initially should be disabled
         $this->assertFalse($service->isEmailEnabled($user, $notificationType));
 
         // Toggle to enabled
-        $service->setEmailNotificationByModel($user, $notificationType, true);
+        $service->setEmailNotification($user, $notificationType, true);
         $this->assertTrue($service->isEmailEnabled($user, $notificationType));
 
         // Toggle back to disabled
-        $service->setEmailNotificationByModel($user, $notificationType, false);
+        $service->setEmailNotification($user, $notificationType, false);
         $this->assertFalse($service->isEmailEnabled($user, $notificationType));
     }
 
@@ -61,13 +60,13 @@ class NotificationPreferencesTest extends TestCase
         $service = app(NotificationPreferenceService::class);
         $service->ensureDefaults($user);
 
-        $notificationType = NotificationType::where('name', SystemNotificationType::ORDER_REQUIRES_APPROVAL)->first();
+        $notificationType = SystemNotificationType::ORDER_REQUIRES_APPROVAL;
 
         // Initially should be disabled
         $this->assertFalse($service->isPortalEnabled($user, $notificationType));
 
         // Even if we try to enable it, it should remain disabled per requirements
-        $service->setPortalNotificationByModel($user, $notificationType, true);
+        $service->setPortalNotification($user, $notificationType, true);
         $this->assertFalse($service->isPortalEnabled($user, $notificationType), 'Portal notifications should not be editable and remain disabled');
     }
 
@@ -83,10 +82,10 @@ class NotificationPreferencesTest extends TestCase
         $service->ensureDefaults($admin1);
         $service->ensureDefaults($admin2);
 
-        $notificationType = NotificationType::where('name', SystemNotificationType::ORDER_REQUIRES_APPROVAL)->first();
+        $notificationType = SystemNotificationType::ORDER_REQUIRES_APPROVAL;
 
         // Enable notification for admin1 only
-        $service->setEmailNotificationByModel($admin1, $notificationType, true);
+        $service->setEmailNotification($admin1, $notificationType, true);
 
         $enabledUsers = $service->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL);
 

@@ -2,11 +2,9 @@
 
 namespace App\Enums;
 
-use BenSampo\Enum\Enum;
-
-final class NotificationChannel extends Enum
+enum NotificationChannel: string
 {
-    const PLATFORM = 'database';
+    case PLATFORM = 'database';
 
-    const MAIL = 'mail';
+    case MAIL = 'mail';
 }

@@ -124,12 +124,10 @@ return [
         TraderOrderStatus::Hold => 'معلق',
     ],
 
-    SystemNotificationType::class => [
-        SystemNotificationType::TRADE_REQUEST_CANCELLED => 'تم إلغاء طلب التداول',
-        SystemNotificationType::ORDER_CANCELLED => 'تم إلغاء الطلب',
-        SystemNotificationType::ORDER_REQUIRES_APPROVAL => 'الطلب يتطلب موافقة',
-        SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => 'تم استلام تأكيد التسليم',
-    ],
+    SystemNotificationType::TRADE_REQUEST_CANCELLED => 'تم إلغاء طلب التداول',
+    SystemNotificationType::ORDER_CANCELLED => 'تم إلغاء الطلب',
+    SystemNotificationType::ORDER_REQUIRES_APPROVAL => 'الطلب يتطلب موافقة',
+    SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => 'تم استلام تأكيد التسليم',
 
     TraderOrderCancelReason::class => [
         TraderOrderCancelReason::Manual => '',

@@ -2,7 +2,6 @@
 
 namespace App\Transformers;
 
-use App\Enums\SystemNotificationType;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -43,7 +42,7 @@ class NotificationSettingTransformer extends TransformerAbstract
     {
         $name = data_get($data, 'name');
 
-        return $this->primitive(SystemNotificationType::getDescription($name));
+        return $this->primitive(__('enums.'.$name));
     }
 
     public function includeEmailEnabled($data): Primitive
