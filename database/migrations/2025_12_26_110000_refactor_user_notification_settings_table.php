@@ -28,7 +28,7 @@ return new class extends Migration
             DB::table('user_notification_settings_new')->insert([
                 'user_id' => $setting->user_id,
                 'notification_type' => $setting->name,
-                'channel' => NotificationChannel::MAIL,
+                'channel' => NotificationChannel::MAIL->value,
                 'is_enabled' => $setting->email_enabled,
                 'created_at' => $setting->created_at,
                 'updated_at' => $setting->updated_at,
@@ -36,7 +36,7 @@ return new class extends Migration
             DB::table('user_notification_settings_new')->insert([
                 'user_id' => $setting->user_id,
                 'notification_type' => $setting->name,
-                'channel' => NotificationChannel::PLATFORM,
+                'channel' => NotificationChannel::PLATFORM->value,
                 'is_enabled' => $setting->portal_enabled,
                 'created_at' => $setting->created_at,
                 'updated_at' => $setting->updated_at,
@@ -64,8 +64,8 @@ return new class extends Migration
         foreach ($newSettings as $userSettings) {
             $userSettingsByType = $userSettings->groupBy('notification_type');
             foreach ($userSettingsByType as $notificationTypeSettings) {
-                $emailSetting = $notificationTypeSettings->where('channel', NotificationChannel::MAIL)->first();
-                $portalSetting = $notificationTypeSettings->where('channel', NotificationChannel::PLATFORM)->first();
+                $emailSetting = $notificationTypeSettings->where('channel', NotificationChannel::MAIL->value)->first();
+                $portalSetting = $notificationTypeSettings->where('channel', NotificationChannel::PLATFORM->value)->first();
                 DB::table('user_notification_settings_old')->insert([
                     'user_id' => $userSettings->first()->user_id,
                     'notification_type' => $notificationTypeSettings->first()->notification_type,
