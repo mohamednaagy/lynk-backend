@@ -38,9 +38,7 @@ class NotificationSettingTransformer extends TransformerAbstract
 
     public function includeLabel($data): Primitive
     {
-        $name = data_get($data, 'name');
-
-        return $this->primitive(__('enums.'.$name));
+        return $this->primitive(data_get($data, 'label'));
     }
 
     public function includeChannels($data): Primitive

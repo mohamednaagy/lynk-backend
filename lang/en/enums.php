@@ -14,7 +14,6 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\FinancingOrderTypeEnum;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Enums\MurabhaStep;
-use App\Enums\SystemNotificationType;
 use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderNoRefundReason;
 use App\Enums\TraderOrderRefundReason;
@@ -118,11 +117,6 @@ return [
     TraderOrderStatus::class => [
         TraderOrderStatus::Hold => 'Initiated - On Hold',
     ],
-
-    SystemNotificationType::TRADE_REQUEST_CANCELLED->value => 'Trade Request Cancelled',
-    SystemNotificationType::ORDER_CANCELLED->value => 'Order Cancelled',
-    SystemNotificationType::ORDER_REQUIRES_APPROVAL->value => 'Order Requires Approval',
-    SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => 'Delivery Confirmation Received',
 
     TraderOrderCancelReason::class => [
         TraderOrderCancelReason::Manual => '',

@@ -47,14 +47,14 @@ final class OrderCreated extends Notification implements ShouldQueue
                 ->get();
 
         // Check if platform notification is enabled
-        $platformSetting = $settings->where('channel', NotificationChannel::PLATFORM)->first();
-        if ($platformSetting && $platformSetting->is_enabled) {
+        $platformSetting = $settings->where('channel', NotificationChannel::PLATFORM->value)->first();
+        if ($platformSetting?->is_enabled) {
             $channels[] = 'database';
         }
 
         // Check if mail is enabled
-        $mailSetting = $settings->where('channel', NotificationChannel::MAIL)->first();
-        if ($mailSetting && $mailSetting->is_enabled) {
+        $mailSetting = $settings->where('channel', NotificationChannel::MAIL->value)->first();
+        if ($mailSetting?->is_enabled) {
             $channels[] = 'mail';
         }
 
