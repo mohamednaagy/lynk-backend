@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use App\Actions\Contracts\GetConstantApi;
@@ -23,8 +25,8 @@ class GetConstantApiAction implements GetConstantApi
                 $constants['measurements'] = Measurement::get();
             }
 
-            if ($set->contains('channels')) {
-                $constants['channels'] = NotificationChannel::cases();
+            if ($set->contains('notificationChannels')) {
+                $constants['notificationChannels'] = NotificationChannel::cases();
             }
         }
 

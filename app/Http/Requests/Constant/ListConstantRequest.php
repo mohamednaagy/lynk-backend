@@ -25,7 +25,7 @@ class ListConstantRequest extends FormRequest
     {
         return [
             'constants' => 'required',
-            'constants.*' => 'required|in:measurements,currencies,channels',
+            'constants.*' => 'required|in:measurements,currencies,notificationChannels',
         ];
     }
 
