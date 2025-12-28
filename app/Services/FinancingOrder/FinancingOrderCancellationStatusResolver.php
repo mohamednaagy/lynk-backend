@@ -14,7 +14,7 @@ class FinancingOrderCancellationStatusResolver
      *
      * @return int|null Returns the FinancingOrderStatus value or null if no change is needed.
      */
-    public function resolve(FinancingOrder $order, int $cancelReason): ?int
+    public function resolve(FinancingOrder $order, int $cancelReason): int
     {
         if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
             return FinancingOrderStatus::Cancelled;
@@ -24,7 +24,13 @@ class FinancingOrderCancellationStatusResolver
             return $this->resolveForInProgressOrder($order, $cancelReason);
         }
 
-        return null;
+        throw new \InvalidArgumentException(
+            sprintf(
+                'Cannot cancel financing order #%d: status "%s" is not eligible for cancellation.',
+                $order->id,
+                $order->status->value
+            )
+        );
     }
 
     /**
@@ -45,11 +51,6 @@ class FinancingOrderCancellationStatusResolver
     private function shouldFailTrading(FinancingOrder $order, int $cancelReason): bool
     {
         $lender = $order->lender;
-
-        // Ensure relationships exist
-        if (! $lender || ! $lender->lenderDetail) {
-            return false;
-        }
 
         $isLocalMarket = $lender->lenderDetail?->preferred_market_type?->is(CompanyMarketType::Local());
         $isFailureReason = in_array($cancelReason, [

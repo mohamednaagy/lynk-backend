@@ -295,12 +295,8 @@ class LynkV1Driver implements Deliverable, TraderInterface
 
     public function updateFinancingOrderStatusAfterCancellation(TraderOrder $traderOrder, int $cancelReason): void
     {
-        $nextStatus = app(FinancingOrderCancellationStatusResolver::class)
-            ->resolve($traderOrder->order, $cancelReason);
-
-        if ($nextStatus !== null) {
-            $this->updateOrderStatus($traderOrder->order, $nextStatus);
-        }
+        $nextStatus = app(FinancingOrderCancellationStatusResolver::class)->resolve($traderOrder->order, $cancelReason);
+        $this->updateOrderStatus($traderOrder->order, $nextStatus);
     }
 
     protected function canRetryOrder(TraderOrder $traderOrder): bool
