@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Api\V1\Admin\Notifications;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Enums\SystemNotificationType;
 use App\Http\Controllers\Controller;
-use App\Models\NotificationType;
 use App\Models\User;
 use App\Services\NotificationPreferenceService;
 use App\Transformers\NotificationSettingTransformer;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserNotificationSettingsController extends Controller
 {
@@ -34,18 +35,18 @@ class UserNotificationSettingsController extends Controller
 
     public function toggleEmail(
         User $user,
-        NotificationType $notification_type,
+        SystemNotificationType $notificationType,
         NotificationPreferenceService $service
     ): JsonResponse {
-        $isEnabled = $service->isEmailEnabled($user, $notification_type);
-        $service->setEmailNotificationByModel($user, $notification_type, ! $isEnabled);
+        $isEnabled = $service->isEmailEnabled($user, $notificationType);
+        $service->setEmailNotification($user, $notificationType, ! $isEnabled);
 
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
     }
 
     public function togglePortal(
         User $user,
-        NotificationType $notification_type,
+        SystemNotificationType $notificationType,
         NotificationPreferenceService $service
     ): JsonResponse {
         // Portal notifications are NOT editable per requirements
@@ -55,6 +56,6 @@ class UserNotificationSettingsController extends Controller
             'errors' => [
                 'portal_notifications' => ['Portal notifications are not editable'],
             ],
-        ], 422);
+        ], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

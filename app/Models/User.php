@@ -26,7 +26,11 @@ use Spatie\Permission\Traits\HasRoles;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 /**
- * @method static create(array $data)
+ * User Model.
+ *
+ * @property int $id
+ *
+ * @mixin Builder
  */
 class User extends Authenticatable implements Grantifiable, HasLocalePreference, JWTSubject, MustVerifyEmail, Otpifiable
 {

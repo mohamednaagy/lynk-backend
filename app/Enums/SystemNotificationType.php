@@ -7,15 +7,15 @@ use BenSampo\Enum\Enum;
 
 final class SystemNotificationType extends Enum implements LocalizedEnum
 {
-    const TRADE_REQUEST_CANCELLED = 'trade_request_cancelled';
+    public const TRADE_REQUEST_CANCELLED = 'trade_request_cancelled';
 
-    const ORDER_CANCELLED = 'order_cancelled';
+    public const ORDER_CANCELLED = 'order_cancelled';
 
-    const ORDER_REQUIRES_APPROVAL = 'order_requires_approval';
+    public const ORDER_REQUIRES_APPROVAL = 'order_requires_approval';
 
-    const DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
+    public const DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
 
-    const ORDER_CREATED = 'order_created';
+    public const ORDER_CREATED = 'order_created';
 
     public static function getAdminNotificationTypes(): array
     {

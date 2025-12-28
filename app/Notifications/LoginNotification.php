@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Enums\NotificationType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -22,12 +21,14 @@ class LoginNotification extends Notification implements ShouldQueue
 
     public string $browser;
 
+    private const NOTIFICATION_TYPE = 'NEW_SIGN_IN';
+
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($ipAddress, $timeLogin, $device, $platform, $browser)
+    public function __construct(string $ipAddress, string $timeLogin, string $device, string $platform, string $browser)
     {
         $this->ipAddress = $ipAddress;
         $this->timeLogin = $timeLogin;
@@ -84,7 +85,7 @@ class LoginNotification extends Notification implements ShouldQueue
 
     public function databaseType()
     {
-        return NotificationType::NewSignIn;
+        return self::NOTIFICATION_TYPE;
     }
 
     public function viaQueues()
