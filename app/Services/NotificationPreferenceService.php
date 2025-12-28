@@ -15,12 +15,13 @@ class NotificationPreferenceService
     public function ensureDefaults(User $user): void
     {
         $notificationTypes = collect(config('notification-types'));
-        $roles = $user->relationLoaded('roles') ? $user->roles : $user->roles()->get()->all();
+        $roles = $user->relationLoaded('roles') ? $user->roles : $user->roles()->get();
+        $userRoleNames = $roles->pluck('name')->all();
 
         /* TODO: refactor this */
         foreach ($notificationTypes as $typeKey => $typeConfig) {
             foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
-                if (! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $roles))) {
+                if (! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoleNames))) {
                     UserNotificationSetting::firstOrCreate(
                         [
                             'user_id' => $user->id,
