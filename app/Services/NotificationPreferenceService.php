@@ -14,26 +14,37 @@ class NotificationPreferenceService
 {
     public function ensureDefaults(User $user): void
     {
+        $notificationTypes = $this->getNotificationTypesForUserRoles($user);
+
+        foreach ($notificationTypes as $typeKey => $typeConfig) {
+            $this->processNotificationTypeChannels($user, $typeKey, $typeConfig);
+        }
+    }
+
+    private function getNotificationTypesForUserRoles(User $user): Collection
+    {
         $notificationTypes = collect(config('notification-types'));
         $roles = $user->relationLoaded('roles') ? $user->roles : $user->roles()->get();
         $userRoleNames = $roles->pluck('name')->all();
 
-        /* TODO: refactor this */
-        foreach ($notificationTypes as $typeKey => $typeConfig) {
-            foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
-                if (! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoleNames))) {
-                    UserNotificationSetting::firstOrCreate(
-                        [
-                            'user_id' => $user->id,
-                            'notification_type' => $typeKey,
-                            'channel' => $channelKey,
-                        ],
-                        [
-                            'is_enabled' => $channelConfig['default'] ?? false,
-                        ]
-                    );
-                }
-            }
+        return $notificationTypes->filter(function ($typeConfig) use ($userRoleNames) {
+            return ! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoleNames));
+        });
+    }
+
+    private function processNotificationTypeChannels(User $user, string $typeKey, array $typeConfig): void
+    {
+        foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
+            UserNotificationSetting::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'notification_type' => $typeKey,
+                    'channel' => $channelKey,
+                ],
+                [
+                    'is_enabled' => $channelConfig['default'] ?? false,
+                ]
+            );
         }
     }
 
@@ -44,32 +55,43 @@ class NotificationPreferenceService
         $roles = $user->relationLoaded('roles') ? $user->roles : $user->roles()->get();
         $userRoles = $roles->pluck('name')->all();
 
-        /** TODO: refactor this to separate functions */
-        return $notificationTypesConfig->map(function ($typeConfig, $typeKey) use ($allSettings, $userRoles) {
-            if (! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoles))) {
-                $channels = collect();
-                foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
-                    $setting = $allSettings->where('notification_type', $typeKey)
-                        ->where('channel', $channelKey)
-                        ->first();
+        $filteredNotificationTypes = $this->filterNotificationTypesForUserRoles($notificationTypesConfig, $userRoles);
 
-                    $channels->put($channelKey, [
-                        'enabled' => (bool) optional($setting)->is_enabled,
-                        'is_editable' => $channelConfig['is_editable'] ?? true,
-                    ]);
-                }
+        return $filteredNotificationTypes->map(function ($typeConfig, $typeKey) use ($allSettings) {
+            $channels = $this->buildChannelSettings($typeConfig, $typeKey, $allSettings);
 
-                return [
-                    'id' => $typeKey,
-                    'name' => $typeKey,
-                    'label' => __($typeConfig['label']),
-                    'channels' => $channels,
-                    'roles' => $typeConfig['roles'] ?? [],
-                ];
-            }
+            return [
+                'id' => $typeKey,
+                'name' => $typeKey,
+                'label' => __($typeConfig['label']),
+                'channels' => $channels,
+                'roles' => $typeConfig['roles'] ?? [],
+            ];
+        })->values();
+    }
 
-            return null;
-        })->filter()->values();
+    private function filterNotificationTypesForUserRoles(Collection $notificationTypesConfig, array $userRoles): Collection
+    {
+        return $notificationTypesConfig->filter(function ($typeConfig, $typeKey) use ($userRoles) {
+            return ! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoles));
+        });
+    }
+
+    private function buildChannelSettings(array $typeConfig, string $typeKey, Collection $allSettings): Collection
+    {
+        $channels = collect();
+        foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
+            $setting = $allSettings->where('notification_type', $typeKey)
+                ->where('channel', $channelKey)
+                ->first();
+
+            $channels->put($channelKey, [
+                'enabled' => (bool) optional($setting)->is_enabled,
+                'is_editable' => $channelConfig['is_editable'] ?? true,
+            ]);
+        }
+
+        return $channels;
     }
 
     public function setEmailNotification(User $user, SystemNotificationType $type, bool $enabled): void
