@@ -119,10 +119,10 @@ return [
         TraderOrderStatus::Hold => 'Initiated - On Hold',
     ],
 
-    SystemNotificationType::TRADE_REQUEST_CANCELLED => 'Trade Request Cancelled',
-    SystemNotificationType::ORDER_CANCELLED => 'Order Cancelled',
-    SystemNotificationType::ORDER_REQUIRES_APPROVAL => 'Order Requires Approval',
-    SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED => 'Delivery Confirmation Received',
+    SystemNotificationType::TRADE_REQUEST_CANCELLED->value => 'Trade Request Cancelled',
+    SystemNotificationType::ORDER_CANCELLED->value => 'Order Cancelled',
+    SystemNotificationType::ORDER_REQUIRES_APPROVAL->value => 'Order Requires Approval',
+    SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => 'Delivery Confirmation Received',
 
     TraderOrderCancelReason::class => [
         TraderOrderCancelReason::Manual => '',

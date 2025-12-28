@@ -40,13 +40,18 @@ class NotificationPreferenceService
     {
         $allSettings = UserNotificationSetting::where('user_id', $user->id)->get();
         $notificationTypesConfig = collect(config('notification-types'));
-        $roles = $user->relationLoaded('roles') ? $user->roles : $user->roles()->get()->all();
+        $roles = $user->relationLoaded('roles') ? $user->roles : $user->roles()->get();
+        $userRoles = $roles->pluck('name')->all();
 
-        return $notificationTypesConfig->map(function ($typeConfig, $typeKey) use ($allSettings, $roles) {
-            if (! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $roles))) {
+        /** TODO: refactor this to separate functions */
+        return $notificationTypesConfig->map(function ($typeConfig, $typeKey) use ($allSettings, $userRoles) {
+            if (! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoles))) {
                 $channels = collect();
                 foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
-                    $setting = $allSettings->first(fn (UserNotificationSetting $s) => $s->notification_type === $typeKey && $s->channel === $channelKey);
+                    $setting = $allSettings->where('notification_type', $typeKey)
+                        ->where('channel', $channelKey)
+                        ->first();
+
                     $channels->put($channelKey, [
                         'enabled' => (bool) optional($setting)->is_enabled,
                         'is_editable' => $channelConfig['is_editable'] ?? true,
@@ -56,7 +61,7 @@ class NotificationPreferenceService
                 return [
                     'id' => $typeKey,
                     'name' => $typeKey,
-                    'label' => __($typeConfig['label']) ?? '',
+                    'label' => __($typeConfig['label']),
                     'channels' => $channels,
                     'roles' => $typeConfig['roles'] ?? [],
                 ];

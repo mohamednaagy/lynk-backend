@@ -100,7 +100,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::apiResource('admins', AdminController::class);
         Route::patch('admins/{admin}', [AdminController::class, 'partiallyUpdate']);
 
-        Route::prefix('users/{user}/notifications')->group(function () {
+        Route::prefix('users/{user}/notifications-settings')->group(function () {
             Route::get('/', [UserNotificationSettingsController::class, 'index'])
                 ->middleware('permission:'.perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage]));
             Route::patch('{notification_type}/email', [UserNotificationSettingsController::class, 'toggleEmail'])

@@ -11,16 +11,14 @@ class NotificationSettingTransformer extends TransformerAbstract
         'id',
         'name',
         'label',
-        'email_enabled',
-        'portal_enabled',
+        'channels',
     ];
 
     protected array $defaultIncludes = [
         'id',
         'name',
         'label',
-        'email_enabled',
-        'portal_enabled',
+        'channels',
     ];
 
     public function transform($data): array
@@ -45,13 +43,8 @@ class NotificationSettingTransformer extends TransformerAbstract
         return $this->primitive(__('enums.'.$name));
     }
 
-    public function includeEmailEnabled($data): Primitive
+    public function includeChannels($data): Primitive
     {
-        return $this->primitive((bool) data_get($data, 'email_enabled'));
-    }
-
-    public function includePortalEnabled($data): Primitive
-    {
-        return $this->primitive((bool) data_get($data, 'portal_enabled'));
+        return $this->primitive(data_get($data, 'channels'));
     }
 }
