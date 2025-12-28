@@ -7,6 +7,7 @@ use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\Commodities\SupplierMonthlyUsageRequest;
 use App\Models\Supplier;
 use App\Transformers\SupplierMonthlyUsageTransformer;
 use Illuminate\Http\JsonResponse;
@@ -22,11 +23,14 @@ class SupplierMonthlyUsage extends Controller
     }
 
     public function __invoke(
+        SupplierMonthlyUsageRequest $request,
         Supplier $commoditySupplier,
         BuildSupplierMonthlyUsageQuery $buildSupplierMonthlyUsageQuery
     ): JsonResponse {
         $reports = $buildSupplierMonthlyUsageQuery
             ->setSupplier($commoditySupplier)
+            ->setDateFrom($request->input('date_from'))
+            ->setDateTo($request->input('date_to'))
             ->handle()
             ->paginate();
 
