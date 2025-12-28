@@ -9,7 +9,7 @@ return [
         'label' => 'notifications.trade_request_cancelled.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
-                'default' => true,
+                'default' => false,
                 'is_editable' => false,
             ],
             NotificationChannel::MAIL->value => [
@@ -27,7 +27,7 @@ return [
         'label' => 'notifications.order_cancelled.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
-                'default' => true,
+                'default' => false,
                 'is_editable' => false,
             ],
             NotificationChannel::MAIL->value => [
@@ -45,7 +45,7 @@ return [
         'label' => 'notifications.order_requires_approval.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
-                'default' => true,
+                'default' => false,
                 'is_editable' => false,
             ],
             NotificationChannel::MAIL->value => [
@@ -63,7 +63,7 @@ return [
         'label' => 'notifications.delivery_confirmation_received.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
-                'default' => true,
+                'default' => false,
                 'is_editable' => false,
             ],
             NotificationChannel::MAIL->value => [
@@ -79,7 +79,7 @@ return [
         'label' => 'notifications.order_created.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
-                'default' => true,
+                'default' => false,
                 'is_editable' => false,
             ],
             NotificationChannel::MAIL->value => [
