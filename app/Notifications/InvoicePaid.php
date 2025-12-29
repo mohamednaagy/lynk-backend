@@ -2,15 +2,12 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
+use App\Enums\SystemNotificationType;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class InvoicePaid extends Notification implements ShouldQueue
+class InvoicePaid extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     /**
      * Create a new notification instance.
      *
@@ -22,14 +19,12 @@ class InvoicePaid extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable)
+    public function getType(): SystemNotificationType
     {
-        return ['mail'];
+        return SystemNotificationType::INVOICE_PAID;
     }
 
     /**
@@ -44,18 +39,5 @@ class InvoicePaid extends Notification implements ShouldQueue
             ->line('The introduction to the notification.')
             ->action('Notification Action', url('/'))
             ->line('Thank you for using our application!');
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
-    public function toArray($notifiable)
-    {
-        return [
-            //
-        ];
     }
 }

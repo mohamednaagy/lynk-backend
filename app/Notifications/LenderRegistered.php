@@ -2,16 +2,13 @@
 
 namespace App\Notifications;
 
+use App\Enums\SystemNotificationType;
 use App\Models\Lender;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class LenderRegistered extends Notification implements ShouldQueue
+class LenderRegistered extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     /**
      * Create a new notification instance.
      *
@@ -20,13 +17,12 @@ class LenderRegistered extends Notification implements ShouldQueue
     public function __construct(private Lender $lender) {}
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable): array
+    public function getType(): SystemNotificationType
     {
-        return ['mail', 'database'];
+        return SystemNotificationType::LENDER_REGISTERED;
     }
 
     /**
@@ -56,17 +52,11 @@ class LenderRegistered extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
+            ...parent::toArray($notifiable),
             'company_id' => $this->lender->id,
             'company_name' => $this->lender->name,
             'registered_at' => $this->lender->created_at,
             'company_status' => $this->lender->status,
-        ];
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }

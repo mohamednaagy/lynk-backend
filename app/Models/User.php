@@ -32,6 +32,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property string $email
  * @property string $password
  * @property-read string $fullName
+ * @property-read string $full_name
  * @property \Spatie\Permission\Models\Role[] $roles
  *
  * @mixin Builder

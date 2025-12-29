@@ -95,4 +95,74 @@ return [
             Role::Admin,
         ],
     ],
+    SystemNotificationType::ORDER_APPROVED->value => [
+        'label' => 'notification-types.order_approved.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+            Role::Admin,
+        ],
+    ],
+    SystemNotificationType::INVOICE_PAID->value => [
+        'label' => 'notification-types.invoice_paid.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+            Role::Admin,
+        ],
+    ],
+    SystemNotificationType::LENDER_REGISTERED->value => [
+        'label' => 'notification-types.lender_registered.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+        ],
+    ],
+    SystemNotificationType::NEW_SIGN_IN->value => [
+        'label' => 'notification-types.new_sign_in.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::LenderAdmin,
+            Role::LenderOrderCreator,
+        ],
+    ],
 ];

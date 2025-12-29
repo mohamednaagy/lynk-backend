@@ -2,18 +2,15 @@
 
 namespace App\Notifications;
 
+use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class OrderApproved extends Notification implements ShouldQueue
+class OrderApproved extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     /**
      * Create a new notification instance.
      *
@@ -26,13 +23,12 @@ class OrderApproved extends Notification implements ShouldQueue
     ) {}
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable): array
+    public function getType(): SystemNotificationType
     {
-        return ['mail', 'database'];
+        return SystemNotificationType::ORDER_APPROVED;
     }
 
     /**
@@ -61,17 +57,11 @@ class OrderApproved extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
+            ...parent::toArray($notifiable),
             'approver_id' => $this->approver->id,
             'approver_name' => $this->approver->full_name,
             'approved_at' => $this->approvalTime,
             'order_id' => $this->financingOrder->id,
-        ];
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }

@@ -18,4 +18,16 @@ return [
     'delivery_confirmation_received' => [
         'label' => 'Delivery Confirmation Received',
     ],
+    'order_approved' => [
+        'label' => 'Order Approved',
+    ],
+    'invoice_paid' => [
+        'label' => 'Invoice Paid',
+    ],
+    'lender_registered' => [
+        'label' => 'Lender Registered',
+    ],
+    'new_sign_in' => [
+        'label' => 'New Sign In',
+    ],
 ];

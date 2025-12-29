@@ -14,6 +14,14 @@ enum SystemNotificationType: string
 
     case ORDER_CREATED = 'order_created';
 
+    case ORDER_APPROVED = 'order_approved';
+
+    case INVOICE_PAID = 'invoice_paid';
+
+    case LENDER_REGISTERED = 'lender_registered';
+
+    case NEW_SIGN_IN = 'new_sign_in';
+
     public static function getAdminNotificationTypes(): array
     {
         return [
@@ -21,6 +29,10 @@ enum SystemNotificationType: string
             self::ORDER_CANCELLED,
             self::ORDER_REQUIRES_APPROVAL,
             self::DELIVERY_CONFIRMATION_RECEIVED,
+            self::ORDER_APPROVED,
+            self::INVOICE_PAID,
+            self::LENDER_REGISTERED,
+            self::NEW_SIGN_IN,
         ];
     }
 
@@ -31,6 +43,10 @@ enum SystemNotificationType: string
             self::ORDER_CANCELLED,
             self::ORDER_REQUIRES_APPROVAL,
             self::ORDER_CREATED,
+            self::ORDER_APPROVED,
+            self::INVOICE_PAID,
+            self::LENDER_REGISTERED,
+            self::NEW_SIGN_IN,
         ];
     }
 }
