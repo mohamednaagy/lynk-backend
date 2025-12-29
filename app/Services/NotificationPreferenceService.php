@@ -159,4 +159,15 @@ class NotificationPreferenceService
 
         return $usersQuery->get();
     }
+
+    public function getUserNotificationTypeSettings($notifiable, SystemNotificationType $type): mixed
+    {
+        // Get the user's notification settings for this type
+        // Use the already loaded relationship if available to avoid N+1 queries
+        return $notifiable->relationLoaded('notificationSettings')
+            ? $notifiable->notificationSettings->where('notification_type', $type)
+            : $notifiable->notificationSettings()
+                ->where('notification_type', $type)
+                ->get();
+    }
 }

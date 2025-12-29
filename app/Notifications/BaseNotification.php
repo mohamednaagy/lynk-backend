@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Enums\NotificationChannel;
 use App\Enums\SystemNotificationType;
+use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -30,27 +31,16 @@ abstract class BaseNotification extends Notification
      */
     public function via($notifiable): array
     {
-        $typeSettings = $this->getUserNotificationTypeSettings($notifiable);
+        $typeSettings = app(NotificationPreferenceService::class)->getUserNotificationTypeSettings($notifiable, $this->getType());
 
         return $this->getUserEnabledChannels($typeSettings);
-    }
-
-    private function getUserNotificationTypeSettings($notifiable): mixed
-    {
-        // Get the user's notification settings for this type
-        // Use the already loaded relationship if available to avoid N+1 queries
-        return $notifiable->relationLoaded('notificationSettings')
-                    ? $notifiable->notificationSettings->where('notification_type', $this->getType()->value)
-                    : $notifiable->notificationSettings()
-                        ->where('notification_type', $this->getType()->value)
-                        ->get();
     }
 
     private function getUserEnabledChannels($typeSettings): array
     {
         $channels = [];
         foreach (NotificationChannel::cases() as $channel) {
-            $setting = $typeSettings->where('channel', $channel->value)->first();
+            $setting = $typeSettings->where('channel', $channel)->first();
             if ($setting?->is_enabled) {
                 $channels[] = $channel->value;
             }
