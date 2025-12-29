@@ -7,7 +7,7 @@ use App\Actions\Contracts\Wallets\CreateTransactions;
 use App\Actions\Contracts\Wallets\DeductTraderOrderVatPercentage;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\TraderOrder;
 use App\Models\Transaction;
 
@@ -18,14 +18,14 @@ class DeductTraderOrderVatPercentageAction implements DeductTraderOrderVatPercen
         protected GetProjectSettings $getProjectSettings
     ) {}
 
-    public function handle(TraderOrder $traderOrder, Transaction $transaction, Company $company)
+    public function handle(TraderOrder $traderOrder, Transaction $transaction, Lender $lender)
     {
         $financingOrder = $traderOrder->order;
         $vatRate = $this->getProjectSettings->handle()->getVatRate();
-        $vatPercentageFee = $company->order_cost->multiply($vatRate);
+        $vatPercentageFee = $lender->order_cost->multiply($vatRate);
 
         return $this->createTransactions->handle(
-            $company->getWallet(WalletType::CompanyWallet),
+            $lender->getWallet(WalletType::CompanyWallet),
             TransactionReason::VatPercentageFee,
             $vatPercentageFee,
             [

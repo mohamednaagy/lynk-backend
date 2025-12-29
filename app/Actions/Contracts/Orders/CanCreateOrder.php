@@ -2,10 +2,10 @@
 
 namespace App\Actions\Contracts\Orders;
 
-use App\Models\Company;
+use App\Models\Lender;
 use Cknow\Money\Money;
 
 interface CanCreateOrder
 {
-    public function handle(Company $company, Money $amount): bool;
+    public function handle(Lender $lender, Money $amount): bool;
 }

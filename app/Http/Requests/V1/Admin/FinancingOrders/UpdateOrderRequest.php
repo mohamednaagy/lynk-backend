@@ -4,8 +4,8 @@ namespace App\Http\Requests\V1\Admin\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Http\Requests\Traits\RequestHasMobileVerification;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Unique;
 
@@ -44,10 +44,10 @@ class UpdateOrderRequest extends FormRequest
     {
         /** @var FinancingOrder $financingOrder */
         $financingOrder = $this->route('order');
-        /** @var Company $company */
-        $company = $financingOrder->company;
-        if ($company?->lender->lenderDetail->force_unique_reference_number) {
-            return $company->unique('financing_orders', 'reference_number')
+        /** @var Lender $lender */
+        $lender = $financingOrder->lender;
+        if ($lender?->lenderDetail->force_unique_reference_number) {
+            return $lender->unique('financing_orders', 'reference_number')
                 ->whereNot('status', FinancingOrderStatus::Cancelled)
                 ->ignoreModel($financingOrder);
         }

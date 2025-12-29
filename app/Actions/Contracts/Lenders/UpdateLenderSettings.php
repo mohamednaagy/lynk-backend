@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Lenders;
 
-use App\Models\Company;
+use App\Models\Lender;
 
 interface UpdateLenderSettings
 {
-    public function handle(Company $company, array $data): void;
+    public function handle(Lender $lender, array $data): void;
 }

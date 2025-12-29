@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -17,7 +17,7 @@ class LenderRegistered extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private Company $company) {}
+    public function __construct(private Lender $lender) {}
 
     /**
      * Get the notification's delivery channels.
@@ -38,13 +38,13 @@ class LenderRegistered extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject(trans('emails/lender-registered.subject', [
-                'company_name' => $this->company->name,
+                'company_name' => $this->lender->name,
                 'app_name' => config('app.name'),
             ]))
             ->greeting(__('Hello'))
             ->line(trans('emails/lender-registered.registered_message', [
-                'company_name' => $this->company->name,
-                'status_description' => $this->company->status->description,
+                'company_name' => $this->lender->name,
+                'status_description' => $this->lender->status->description,
             ]));
     }
 
@@ -56,10 +56,10 @@ class LenderRegistered extends Notification implements ShouldQueue
     public function toArray($notifiable): array
     {
         return [
-            'company_id' => $this->company->id,
-            'company_name' => $this->company->name,
-            'registered_at' => $this->company->created_at,
-            'company_status' => $this->company->status,
+            'company_id' => $this->lender->id,
+            'company_name' => $this->lender->name,
+            'registered_at' => $this->lender->created_at,
+            'company_status' => $this->lender->status,
         ];
     }
 

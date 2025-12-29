@@ -5,9 +5,18 @@ namespace App\Models;
 use App\Enums\CompanyMarketType;
 use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Model;
+use Watson\Rememberable\Rememberable;
 
 class CompanyLenderDetail extends Model
 {
+    use Rememberable;
+
+    protected $rememberCacheTag = 'company_lender_details';
+
+    protected $rememberCachePrefix = 'company_lender_details';
+
+    protected $rememberFor = 60 * 60;
+
     protected $casts = [
         'preferred_market_type' => CompanyMarketType::class,
         'does_order_require_approval' => 'boolean',

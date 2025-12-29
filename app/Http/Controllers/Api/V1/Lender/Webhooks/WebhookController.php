@@ -85,11 +85,11 @@ class WebhookController extends Controller
 
     public function refreshSecret(UpdateWebhookSecretKey $updateWebhookSecretKey): JsonResponse
     {
-        $company = tenant();
+        $lender = tenant();
 
-        $company = $updateWebhookSecretKey->handle($company);
+        $lender = $updateWebhookSecretKey->handle($lender);
 
-        return fractal($company, new CompanyTransformer)
+        return fractal($lender, new CompanyTransformer)
             ->parseIncludes(['webhook_secret_key'])
             ->respond();
     }

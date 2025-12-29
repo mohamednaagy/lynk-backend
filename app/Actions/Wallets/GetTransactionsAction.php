@@ -5,7 +5,7 @@ namespace App\Actions\Wallets;
 use App\Actions\Contracts\Wallets\GetTransactions;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\WalletType;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Support\Money\Money;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -13,7 +13,7 @@ class GetTransactionsAction implements GetTransactions
 {
     private ?Builder $query = null;
 
-    private ?Company $company = null;
+    private ?Lender $lender = null;
 
     private array $filters = [];
 
@@ -30,9 +30,9 @@ class GetTransactionsAction implements GetTransactions
         return $this->query->latest('id');
     }
 
-    public function setCompany(Company $company): self
+    public function setLender(Lender $lender): self
     {
-        $this->company = $company;
+        $this->lender = $lender;
 
         return $this;
     }
@@ -100,8 +100,8 @@ class GetTransactionsAction implements GetTransactions
 
     private function initQuery()
     {
-        if (! $this->query && $this->company) {
-            $this->query = $this->company->transactions(WalletType::CompanyWallet);
+        if (! $this->query && $this->lender) {
+            $this->query = $this->lender->transactions(WalletType::CompanyWallet);
         }
     }
 }

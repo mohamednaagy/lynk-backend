@@ -39,11 +39,11 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
      */
     public function handle()
     {
-        $company = $this->financingOrder->company()->withTrashed()->first();
+        $lender = $this->financingOrder->lender()->withTrashed()->first();
 
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED, function ($query) use ($company) {
-                $query->where(function ($query) use ($company) {
+            ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED, function ($query) use ($lender) {
+                $query->where(function ($query) use ($lender) {
                     $query->role(Role::Admin)
                         ->orWhere(function ($query) {
                             $query->role(Role::Manager)
@@ -51,10 +51,10 @@ class NotifyAdminAndLenderAboutOrderCancelled implements ShouldQueue
                                     perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
                                 );
                         })
-                        ->orWhere(function ($query) use ($company) {
+                        ->orWhere(function ($query) use ($lender) {
                             $query->role(Role::LenderAdmin)
-                                ->whereHas('company', function ($query) use ($company) {
-                                    $query->where('id', $company->id);
+                                ->whereHas('lender', function ($query) use ($lender) {
+                                    $query->where('id', $lender->id);
                                 });
                         });
                 });

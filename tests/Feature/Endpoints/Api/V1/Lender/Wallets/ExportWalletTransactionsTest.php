@@ -78,7 +78,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();
@@ -114,7 +114,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();
@@ -167,7 +167,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();
@@ -210,7 +210,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();
@@ -244,7 +244,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();
@@ -291,7 +291,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();
@@ -325,7 +325,7 @@ class ExportWalletTransactionsTest extends TestCase
         $mockGetTransactions = Mockery::mock(GetTransactions::class);
         $mockQuery = Mockery::mock(Builder::class);
 
-        $mockGetTransactions->shouldReceive('setCompany')
+        $mockGetTransactions->shouldReceive('setLender')
             ->once()
             ->with($this->company)
             ->andReturnSelf();

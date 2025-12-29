@@ -75,13 +75,13 @@ class EnquiryTransformer extends TransformerAbstract
 
     public function includeCompany(Enquiry $enquiry): Primitive
     {
-        if (! $enquiry->user || ! $enquiry->user->company) {
+        if (! $enquiry->user || ! $enquiry->user->lender) {
             return $this->primitive(null);
         }
 
         return $this->primitive([
-            'id' => $enquiry->user->company->id,
-            'name' => $enquiry->user->company->name,
+            'id' => $enquiry->user->lender->id,
+            'name' => $enquiry->user->lender->name,
         ]);
     }
 

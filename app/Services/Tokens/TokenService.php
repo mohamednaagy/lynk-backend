@@ -68,7 +68,7 @@ class TokenService implements TokenGeneratorInterface
         return new TokenResult(
             type: self::TOKEN_TYPE,
             token: $token,
-            companyId: $user->company?->id,
+            companyId: $user->lender?->id,
             expiresIn: $ttl,
         );
     }

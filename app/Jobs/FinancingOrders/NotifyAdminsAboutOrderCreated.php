@@ -54,4 +54,27 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
 
         Notification::send($notifiables, new OrderCreated($this->financingOrder, $this->user));
     }
+
+    public function isNotifyAllowed()
+    {
+        $setting = app(GetSettingsClassInstance::class)
+            ->handle(Area::Lender);
+
+        $isNotificationSettingBasedOnCompany = $setting
+            ->notify_admins_about_new_orders
+            ->is(GlobalNewOrderNotificationForAdminStatus::BasedOnCompanySettings);
+
+        if ($isNotificationSettingBasedOnCompany) {
+            return (bool) $this->financingOrder
+                ->lender
+                ->lenderDetail
+                ->notify_admins_about_new_orders
+                ->value;
+        }
+
+        return $setting->notify_admins_about_new_orders
+            ->is(GlobalNewOrderNotificationForAdminStatus::On)
+            ? true
+            : false;
+    }
 }

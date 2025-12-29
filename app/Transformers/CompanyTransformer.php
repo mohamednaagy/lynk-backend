@@ -3,7 +3,7 @@
 namespace App\Transformers;
 
 use App\Enums\FinancingOrderTypeEnum;
-use App\Models\Company;
+use App\Models\Lender;
 use Cknow\Money\Money;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Primitive;
@@ -43,135 +43,135 @@ class CompanyTransformer extends TransformerAbstract
 
     ];
 
-    public function transform(Company $company): array
+    public function transform(Lender $lender): array
     {
         return [];
     }
 
-    public function includeId(Company $company): Primitive
+    public function includeId(Lender $lender): Primitive
     {
-        return $this->primitive($company->id);
+        return $this->primitive($lender->id);
     }
 
-    public function includeName(Company $company): Primitive
+    public function includeName(Lender $lender): Primitive
     {
-        return $this->primitive($company->name);
+        return $this->primitive($lender->name);
     }
 
-    public function includeUniqueName(Company $company): Primitive
+    public function includeUniqueName(Lender $lender): Primitive
     {
-        return $this->primitive($company->unique_name);
+        return $this->primitive($lender->unique_name);
     }
 
-    public function includeIsTiered(Company $company): Primitive
+    public function includeIsTiered(Lender $lender): Primitive
     {
-        return $this->primitive($company->isTiered());
+        return $this->primitive($lender->isTiered());
     }
 
-    public function includeCompanyCr(Company $company): Primitive
+    public function includeCompanyCr(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail?->company_cr);
+        return $this->primitive($lender->lenderDetail?->company_cr);
     }
 
-    public function includeContractNumber(Company $company): Primitive
+    public function includeContractNumber(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail?->contract_number);
+        return $this->primitive($lender->lenderDetail?->contract_number);
     }
 
-    public function includeNotificationsEmail(Company $company): Primitive
+    public function includeNotificationsEmail(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail?->notifications_email);
+        return $this->primitive($lender->lenderDetail?->notifications_email);
     }
 
-    public function includeStatus(Company $company): Primitive
+    public function includeStatus(Lender $lender): Primitive
     {
         return $this->primitive([
-            'value' => $company->status->value,
-            'description' => $company->status->description,
+            'value' => $lender->status->value,
+            'description' => $lender->status->description,
         ]);
     }
 
-    public function includeOrdersCount(Company $company): Primitive
+    public function includeOrdersCount(Lender $lender): Primitive
     {
-        return $this->primitive($company->orders_count);
+        return $this->primitive($lender->orders_count);
     }
 
-    public function includeDoesOrderRequireApproval(Company $company): Primitive
+    public function includeDoesOrderRequireApproval(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail?->does_order_require_approval);
+        return $this->primitive($lender->lenderDetail?->does_order_require_approval);
     }
 
-    public function includeTradingMode(Company $company): Primitive
+    public function includeTradingMode(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail->trading_mode);
+        return $this->primitive($lender->lenderDetail->trading_mode);
     }
 
-    public function includeWebhookSecretKey(Company $company): Primitive
+    public function includeWebhookSecretKey(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail->webhook_secret_key);
+        return $this->primitive($lender->lenderDetail->webhook_secret_key);
     }
 
-    public function includeCreatedAt(Company $company): Primitive
+    public function includeCreatedAt(Lender $lender): Primitive
     {
-        return $this->primitive(optional($company->created_at)->format('Y-m-d'));
+        return $this->primitive(optional($lender->created_at)->format('Y-m-d'));
     }
 
-    public function includePublicStatusComment(Company $company): Primitive
+    public function includePublicStatusComment(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail->public_status_comment);
+        return $this->primitive($lender->lenderDetail->public_status_comment);
     }
 
-    public function includeDriver(Company $company): Primitive
+    public function includeDriver(Lender $lender): Primitive
     {
-        return $this->primitive($company->driver);
+        return $this->primitive($lender->driver);
     }
 
-    public function includeOrdersSumAmount(Company $company): Primitive
+    public function includeOrdersSumAmount(Lender $lender): Primitive
     {
-        $amount = (new Money($company->orders_sum_amount, Money::getDefaultCurrency()))->convertAndFormatByDecimal();
+        $amount = (new Money($lender->orders_sum_amount, Money::getDefaultCurrency()))->convertAndFormatByDecimal();
 
         return $this->primitive(
             number_format($amount, 2)
         );
     }
 
-    public function includeNotifyAdminsAboutNewOrders(Company $company)
+    public function includeNotifyAdminsAboutNewOrders(Lender $lender)
     {
-        return $this->primitive($company->lender->lenderDetail?->notify_admins_about_new_orders);
+        return $this->primitive($lender->lenderDetail?->notify_admins_about_new_orders);
     }
 
-    public function includeForceUniqueReferenceNumber(Company $company)
+    public function includeForceUniqueReferenceNumber(Lender $lender)
     {
-        return $this->primitive($company->lender->lenderDetail?->force_unique_reference_number);
+        return $this->primitive($lender->lenderDetail?->force_unique_reference_number);
     }
 
-    public function includeAllowPreferredCommodityInOrder(Company $company)
+    public function includeAllowPreferredCommodityInOrder(Lender $lender)
     {
-        return $this->primitive($company->lender->lenderDetail->allow_preferred_commodity_in_order);
+        return $this->primitive($lender->lenderDetail->allow_preferred_commodity_in_order);
     }
 
-    public function includeOrderCostTiers(Company $company): Collection
+    public function includeOrderCostTiers(Lender $lender): Collection
     {
-        $orderCostTiers = $company->tieredPricing()
+        $orderCostTiers = $lender->tieredPricing()
             ->orderBy('order_value_start')
             ->get();
 
         return $this->collection($orderCostTiers, new OrderCostTierTransformer);
     }
 
-    public function includeRequireInitiateTradeRequest(Company $company)
+    public function includeRequireInitiateTradeRequest(Lender $lender)
     {
-        return $this->primitive($company->lender->lenderDetail?->require_initiate_trade_request);
+        return $this->primitive($lender->lenderDetail?->require_initiate_trade_request);
     }
 
-    public function includeAutoCompleteMurabahaOrder(Company $company)
+    public function includeAutoCompleteMurabahaOrder(Lender $lender)
     {
-        return $this->primitive($company->lender->lenderDetail->auto_complete_murabaha_order);
+        return $this->primitive($lender->lenderDetail->auto_complete_murabaha_order);
     }
 
-    public function includePreferredMarketType(Company $company): Primitive
+    public function includePreferredMarketType(Lender $lender): Primitive
     {
-        $market_type = $company->lender->lenderDetail?->preferred_market_type;
+        $market_type = $lender->lenderDetail?->preferred_market_type;
         if (is_null($market_type)) {
             return $this->primitive(null);
         }
@@ -183,9 +183,9 @@ class CompanyTransformer extends TransformerAbstract
 
     }
 
-    public function includePreferredCommodityTypes(Company $company): Primitive
+    public function includePreferredCommodityTypes(Lender $lender): Primitive
     {
-        $types = $company->commodityTypes;
+        $types = $lender->commodityTypes;
 
         if ($types->isEmpty()) {
             return $this->primitive([]);
@@ -201,19 +201,19 @@ class CompanyTransformer extends TransformerAbstract
 
     }
 
-    public function includeDefaultContractSignTimeLimit(Company $company): Primitive
+    public function includeDefaultContractSignTimeLimit(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail?->default_contract_sign_time_limit);
+        return $this->primitive($lender->lenderDetail?->default_contract_sign_time_limit);
     }
 
-    public function includeTokenExpireIn(Company $company): Primitive
+    public function includeTokenExpireIn(Lender $lender): Primitive
     {
-        return $this->primitive($company->lender->lenderDetail?->token_expire_in);
+        return $this->primitive($lender->lenderDetail?->token_expire_in);
     }
 
-    public function includeLenderOrderAllowedCommodityTypes(Company $company): Primitive
+    public function includeLenderOrderAllowedCommodityTypes(Lender $lender): Primitive
     {
-        $types = $company->lenderOrderAllowedCommodityTypes;
+        $types = $lender->lenderOrderAllowedCommodityTypes;
 
         if ($types->isEmpty()) {
             return $this->primitive([]);
@@ -228,9 +228,9 @@ class CompanyTransformer extends TransformerAbstract
         );
     }
 
-    public function includeAllowedFinancingOrderTypes(Company $company): Primitive
+    public function includeAllowedFinancingOrderTypes(Lender $lender): Primitive
     {
-        return $this->primitive(collect($company->lender->allowedFinancingOrderTypes())->map(function ($value) {
+        return $this->primitive(collect($lender->allowedFinancingOrderTypes())->map(function ($value) {
             return [
                 'id' => $value,
                 'name' => FinancingOrderTypeEnum::getDescription($value),

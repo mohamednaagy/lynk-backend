@@ -5,7 +5,7 @@ namespace App\Jobs\Lenders;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\User;
 use App\Notifications\LenderRegistered;
 use Illuminate\Bus\Queueable;
@@ -24,7 +24,7 @@ class NotifyAdminsAboutLenderRegistration implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private Company $company)
+    public function __construct(private Lender $lender)
     {
         $this->onQueue('notifications');
     }
@@ -44,6 +44,6 @@ class NotifyAdminsAboutLenderRegistration implements ShouldQueue
             ->withoutTenancy()
             ->get();
 
-        Notification::send($users, new LenderRegistered($this->company));
+        Notification::send($users, new LenderRegistered($this->lender));
     }
 }

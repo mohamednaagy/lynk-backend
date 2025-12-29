@@ -11,7 +11,7 @@ class TokenConfigResolver
     {
         if (
             $user->hasRole(Role::LenderApiUser) &&
-            ($ttl = $user->company?->getTokenExpireValue())
+            ($ttl = $user->lender?->getTokenExpireValue())
         ) {
             return $ttl * 60;
         }
@@ -22,7 +22,7 @@ class TokenConfigResolver
     public function getTokenVersion(User $user): int
     {
         if ($user->hasRole(Role::LenderApiUser)) {
-            return $user->company?->getTokenExpireVersion() ?? 1;
+            return $user->lender?->getTokenExpireVersion() ?? 1;
         }
 
         return 1;

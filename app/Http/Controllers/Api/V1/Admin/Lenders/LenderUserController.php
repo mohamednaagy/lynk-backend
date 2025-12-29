@@ -14,7 +14,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\Users\StoreUserRequest;
 use App\Http\Requests\V1\Admin\Companies\Users\UpdateUserRequest;
 use App\Mail\CompleteRegisterInvitation;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\User;
 use App\Transformers\UserTransformer;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -54,7 +54,7 @@ class LenderUserController extends Controller
     }
 
     public function index(
-        Company $lender,
+        Lender $lender,
         GetPaginatedLenderUsers $getPaginatedLenderUsers
     ): JsonResponse {
         return fractal($getPaginatedLenderUsers->handle($lender), new UserTransformer(Area::Lender))
@@ -78,7 +78,7 @@ class LenderUserController extends Controller
      *
      * @throws AuthorizationException
      */
-    public function show(Request $request, Company $lender, User $user): JsonResponse
+    public function show(Request $request, Lender $lender, User $user): JsonResponse
     {
         $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
 
@@ -100,7 +100,7 @@ class LenderUserController extends Controller
      */
     public function store(
         StoreUserRequest $request,
-        Company $lender,
+        Lender $lender,
         CreateLenderUserWithRoleAndPermission $createUserWithRoleAndPermission
     ): JsonResponse {
         return DB::transaction(function () use ($lender, $request, $createUserWithRoleAndPermission) {
@@ -133,7 +133,7 @@ class LenderUserController extends Controller
      */
     public function update(
         UpdateUserRequest $request,
-        Company $lender,
+        Lender $lender,
         User $user,
         UpdateLenderUserWithRoleAndPermission $updateUserWithRoleAndPermission,
     ): JsonResponse {
@@ -147,7 +147,7 @@ class LenderUserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Company $lender, User $user): JsonResponse
+    public function destroy(Lender $lender, User $user): JsonResponse
     {
         $this->ensureUserHasRoleInLenderAreaExceptApiUserRole($user);
 

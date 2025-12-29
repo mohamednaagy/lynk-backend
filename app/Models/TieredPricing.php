@@ -33,17 +33,12 @@ class TieredPricing extends Model
         'proration_amount' => MoneyStringCast::class,
     ];
 
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
     /**
      * @throws NoMatchOrderCostAndValueException
      */
-    public static function getOrderCostWithoutVat(Company $company, Money $orderValue): Money
+    public static function getOrderCostWithoutVat(Lender $lender, Money $orderValue): Money
     {
-        $pricing = self::getPricingTier($company, $orderValue);
+        $pricing = self::getPricingTier($lender, $orderValue);
 
         if (! $pricing) {
             throw new NoMatchOrderCostAndValueException;
@@ -61,9 +56,9 @@ class TieredPricing extends Model
     /**
      * @throws NoMatchOrderCostAndValueException
      */
-    public static function getOrderCostWithVat(Company $company, Money $orderValue): Money
+    public static function getOrderCostWithVat(Lender $lender, Money $orderValue): Money
     {
-        $orderCostWithoutVat = self::getOrderCostWithoutVat($company, $orderValue);
+        $orderCostWithoutVat = self::getOrderCostWithoutVat($lender, $orderValue);
 
         [$vatAmount] = app(CalculateVatAmount::class)
             ->setAmount($orderCostWithoutVat)
@@ -73,14 +68,14 @@ class TieredPricing extends Model
         return $orderCostWithoutVat->add($vatAmount);
     }
 
-    public static function getOrderCostIfStandard(Company $company): ?array
+    public static function getOrderCostIfStandard(Lender $lender): ?array
     {
-        if ($company->isTiered()) {
+        if ($lender->isTiered()) {
             return null;
         }
 
         $tier = (new static)->newQuery()
-            ->where('company_id', $company->getKey())
+            ->where('company_id', $lender->getKey())
             ->first();
 
         [$vatAmount, $vatRate] = app(CalculateVatAmount::class)
@@ -98,10 +93,10 @@ class TieredPricing extends Model
         ];
     }
 
-    public static function getPricingTier(Company $company, Money $orderValue): Builder|Model|null
+    public static function getPricingTier(Lender $lender, Money $orderValue): Builder|Model|null
     {
         return (new static)->newQuery()
-            ->where('company_id', $company->getKey())
+            ->where('company_id', $lender->getKey())
             ->where('order_value_start', '<=', $orderValue->getAmount())
             ->where(function (Builder $query) use ($orderValue) {
                 $query->where('order_value_end', '>=', $orderValue->getAmount())
@@ -123,7 +118,7 @@ class TieredPricing extends Model
      *   For fixed type, the method simply returns the VAT amount
      *   stored in the database (`vat_amount` column) without recalculation.
      *
-     * @param  \App\Models\Company  $company  The company whose pricing tiers apply.
+     * @param  \App\Models\Lender  $lender  The company whose pricing tiers apply.
      * @param  \App\ValueObjects\Money  $orderValue  The total order value used to locate the tier.
      * @param  \App\ValueObjects\Money  $orderCostWithoutVat  The order cost excluding VAT.
      * @return \App\ValueObjects\Money The VAT amount as a Money value object.
@@ -131,9 +126,9 @@ class TieredPricing extends Model
      * @throws \App\Exceptions\NoMatchOrderCostAndValueException
      *                                                           If no tiered pricing record matches the given order value.
      */
-    public static function getVatAmount(Company $company, Money $orderValue, Money $orderCostWithoutVat): Money
+    public static function getVatAmount(Lender $lender, Money $orderValue, Money $orderCostWithoutVat): Money
     {
-        $pricing = self::getPricingTier($company, $orderValue);
+        $pricing = self::getPricingTier($lender, $orderValue);
 
         if (! $pricing) {
             throw new NoMatchOrderCostAndValueException;
@@ -149,5 +144,10 @@ class TieredPricing extends Model
         }
 
         return $pricing->vat_amount;
+    }
+
+    public function lender(): BelongsTo
+    {
+        return $this->belongsTo(Lender::class, 'company_id');
     }
 }

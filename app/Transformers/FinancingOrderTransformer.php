@@ -8,8 +8,8 @@ use App\Enums\MediaCollections\FinancingOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderNotSupportedException;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Models\User;
 use App\Transformers\TraderHistoryTransformers\TraderHistoryTransformerFactory;
 use League\Fractal\Resource\Collection;
@@ -19,15 +19,15 @@ use League\Fractal\TransformerAbstract;
 
 class FinancingOrderTransformer extends TransformerAbstract
 {
-    protected ?Company $company;
+    protected ?Lender $lender;
 
     protected $area = null;
 
     protected User $user;
 
-    public function __construct(?Company $company = null)
+    public function __construct(?Lender $lender = null)
     {
-        $this->company = $company;
+        $this->lender = $lender;
     }
 
     protected array $defaultIncludes = [];
@@ -111,11 +111,11 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCompanyName(FinancingOrder $financingOrder): Primitive
     {
-        if ($this->company) {
-            return $this->primitive($this->company->name);
+        if ($this->lender) {
+            return $this->primitive($this->lender->name);
         }
 
-        return $this->primitive($financingOrder->company()->withTrashed()->first()->name);
+        return $this->primitive($financingOrder->lender()->withTrashed()->first()->name);
     }
 
     public function includeReferenceNumber(FinancingOrder $financingOrder)
@@ -339,11 +339,12 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeCompany(FinancingOrder $financingOrder)
     {
-        $company = $this->company ?? $financingOrder->company;
+        $lender = $this->lender ?? $financingOrder->lender;
 
         return $this->primitive([
-            'name' => $company->name,
-            'allow_preferred_commodity_in_order' => $company->lender->lenderDetail->allow_preferred_commodity_in_order]);
+            'name' => $lender->name,
+            'allow_preferred_commodity_in_order' => $lender->lenderDetail->allow_preferred_commodity_in_order,
+        ]);
     }
 
     public function includeCommodityType(FinancingOrder $financingOrder)

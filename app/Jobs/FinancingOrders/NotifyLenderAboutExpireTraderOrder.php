@@ -35,14 +35,14 @@ class NotifyLenderAboutExpireTraderOrder implements ShouldQueue
      */
     public function handle()
     {
-        $company = $this->traderOrder->order->company()->withTrashed()->first();
+        $lender = $this->traderOrder->order->lender()->withTrashed()->first();
 
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($company) {
-                $query->where(function ($query) use ($company) {
+            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($lender) {
+                $query->where(function ($query) use ($lender) {
                     $query->role(Role::LenderAdmin)
-                        ->whereHas('company', function ($query) use ($company) {
-                            $query->where('id', $company->id);
+                        ->whereHas('lender', function ($query) use ($lender) {
+                            $query->where('id', $lender->id);
                         });
                 });
             });

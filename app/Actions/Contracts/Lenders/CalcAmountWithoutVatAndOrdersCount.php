@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Lenders;
 
-use App\Models\Company;
+use App\Models\Lender;
 use Cknow\Money\Money;
 
 interface CalcAmountWithoutVatAndOrdersCount
@@ -10,5 +10,5 @@ interface CalcAmountWithoutVatAndOrdersCount
     /**
      * Create new user.
      */
-    public function handle(Company $company, Money $chargeAmountWithVat): array;
+    public function handle(Lender $lender, Money $chargeAmountWithVat): array;
 }

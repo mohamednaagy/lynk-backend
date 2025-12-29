@@ -52,6 +52,7 @@
         "symfony/sendgrid-mailer": "^7.3",
         "twilio/sdk": "^6.37",
         "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.4",
+        "watson/rememberable": "^7.0",
         "web-token/jwt-encryption-algorithm-aescbc": "*",
         "web-token/jwt-encryption-algorithm-dir": "*",
         "web-token/jwt-framework": "^3.4",

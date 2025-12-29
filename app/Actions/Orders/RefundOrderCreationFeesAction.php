@@ -23,8 +23,8 @@ class RefundOrderCreationFeesAction implements RefundOrderCreationFees
     public function handle(TraderOrder $traderOrder, ?int $refundReason = null)
     {
         $financingOrder = $traderOrder->order;
-        $company = $financingOrder->company()->withTrashed()->first();
-        $wallet = $company->getWallet(WalletType::CompanyWallet);
+        $lender = $financingOrder->lender()->withTrashed()->first();
+        $wallet = $lender->getWallet(WalletType::CompanyWallet);
 
         $transactions = $wallet->transactions()
             ->reasons([
