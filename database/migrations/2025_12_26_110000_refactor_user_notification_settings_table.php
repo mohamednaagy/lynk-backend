@@ -24,23 +24,28 @@ return new class extends Migration
             ->join('notification_types', 'notification_types.id', '=', 'user_notification_settings.notification_type_id')
             ->get();
 
+        $newSettings = [];
         foreach ($oldSettings as $setting) {
-            DB::table('user_notification_settings_new')->insert([
+            $newSettings[] = [
                 'user_id' => $setting->user_id,
                 'notification_type' => $setting->name,
                 'channel' => NotificationChannel::MAIL->value,
                 'is_enabled' => $setting->email_enabled,
                 'created_at' => $setting->created_at,
                 'updated_at' => $setting->updated_at,
-            ]);
-            DB::table('user_notification_settings_new')->insert([
+            ];
+            $newSettings[] = [
                 'user_id' => $setting->user_id,
                 'notification_type' => $setting->name,
                 'channel' => NotificationChannel::PLATFORM->value,
                 'is_enabled' => $setting->portal_enabled,
                 'created_at' => $setting->created_at,
                 'updated_at' => $setting->updated_at,
-            ]);
+            ];
+        }
+
+        if (! empty($newSettings)) {
+            DB::table('user_notification_settings_new')->insert($newSettings);
         }
 
         Schema::dropIfExists('user_notification_settings');
@@ -61,20 +66,25 @@ return new class extends Migration
 
         $newSettings = DB::table('user_notification_settings')->get()->groupBy('user_id');
 
+        $oldSettings = [];
         foreach ($newSettings as $userSettings) {
             $userSettingsByType = $userSettings->groupBy('notification_type');
             foreach ($userSettingsByType as $notificationTypeSettings) {
                 $emailSetting = $notificationTypeSettings->where('channel', NotificationChannel::MAIL->value)->first();
                 $portalSetting = $notificationTypeSettings->where('channel', NotificationChannel::PLATFORM->value)->first();
-                DB::table('user_notification_settings_old')->insert([
+                $oldSettings[] = [
                     'user_id' => $userSettings->first()->user_id,
                     'notification_type' => $notificationTypeSettings->first()->notification_type,
                     'email_enabled' => $emailSetting ? $emailSetting->is_enabled : false,
                     'portal_enabled' => $portalSetting ? $portalSetting->is_enabled : false,
                     'created_at' => $notificationTypeSettings->first()->created_at,
                     'updated_at' => $notificationTypeSettings->first()->updated_at,
-                ]);
+                ];
             }
+        }
+
+        if (! empty($oldSettings)) {
+            DB::table('user_notification_settings_old')->insert($oldSettings);
         }
 
         Schema::dropIfExists('user_notification_settings');
