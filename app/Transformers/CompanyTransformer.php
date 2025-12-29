@@ -27,7 +27,6 @@ class CompanyTransformer extends TransformerAbstract
         'driver',
         'notifications_email',
         'orders_sum_amount',
-        'notify_admins_about_new_orders',
         'force_unique_reference_number',
         'trading_mode',
         'require_initiate_trade_request',
@@ -133,11 +132,6 @@ class CompanyTransformer extends TransformerAbstract
         return $this->primitive(
             number_format($amount, 2)
         );
-    }
-
-    public function includeNotifyAdminsAboutNewOrders(Lender $lender)
-    {
-        return $this->primitive($lender->lenderDetail?->notify_admins_about_new_orders);
     }
 
     public function includeForceUniqueReferenceNumber(Lender $lender)

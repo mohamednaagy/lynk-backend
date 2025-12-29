@@ -24,7 +24,6 @@ class CompanyLenderDetailFactory extends Factory
                 CompanyMarketType::International->value ?? 2,
             ]),
             'does_order_require_approval' => $this->faker->boolean,
-            'notify_admins_about_new_orders' => $this->faker->boolean,
             'default_contract_sign_time_limit' => $this->faker->numberBetween(1, 48), // in hours
             'require_initiate_trade_request' => $this->faker->boolean,
             'internal_status_comment' => $this->faker->optional()->sentence,

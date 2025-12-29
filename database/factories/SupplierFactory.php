@@ -25,7 +25,6 @@ class SupplierFactory extends Factory
             'does_order_require_approval' => $this->faker->boolean,
             'require_initiate_trade_request' => $this->faker->boolean,
             'notifications_email' => $this->faker->email,
-            'notify_admins_about_new_orders' => $this->faker->boolean,
             'type' => CompanyType::Supplier,
         ];
     }

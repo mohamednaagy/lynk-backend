@@ -4,7 +4,6 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
@@ -53,7 +52,6 @@ class FinancingOrderControllerStoreTest extends TestCase
         parent::setUp();
 
         self::$company = $this->createLenderCompanyWithStandardOrderCost('11500000', data: [
-            'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::On,
         ]);
         self::$userLenderAdmin = $this->createLenderUser(self::$company->id, Role::LenderAdmin);
         self::$userLenderSupervisor = $this->createLenderUser(self::$company->id, Role::LenderSupervisor);
@@ -308,7 +306,6 @@ class FinancingOrderControllerStoreTest extends TestCase
     public function test_that_admin_and_managers_did_not_get_notification_about_new_order_when_disabled(): void
     {
         Notification::fake();
-        self::$company->lender->lenderDetail()->update(['notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::Off]);
         self::$company->refresh();
 
         $this->actingAs(self::$userLenderAdmin)

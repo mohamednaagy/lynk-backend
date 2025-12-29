@@ -39,7 +39,6 @@ class CompanyLenderDetail extends Model
         'contract_number',
         'preferred_market_type',
         'does_order_require_approval',
-        'notify_admins_about_new_orders',
         'require_initiate_trade_request',
         'trading_mode',
         'internal_status_comment',
