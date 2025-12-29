@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin\Notifications;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\NotificationChannel;
 use App\Enums\Subject;
 use App\Enums\SystemNotificationType;
 use App\Http\Controllers\Controller;
@@ -11,7 +12,6 @@ use App\Models\User;
 use App\Services\NotificationPreferenceService;
 use App\Transformers\NotificationSettingTransformer;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class UserNotificationSettingsController extends Controller
 {
@@ -33,29 +33,15 @@ class UserNotificationSettingsController extends Controller
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
     }
 
-    public function toggleEmail(
+    public function toggleChannel(
         User $user,
         SystemNotificationType $notificationType,
+        NotificationChannel $channel,
         NotificationPreferenceService $service
     ): JsonResponse {
-        $isEnabled = $service->isEmailEnabled($user, $notificationType);
-        $service->setEmailNotification($user, $notificationType, ! $isEnabled);
+        $isEnabled = $service->isChannelEnabled($user, $notificationType, $channel);
+        $service->setChannelNotification($user, $notificationType, $channel, ! $isEnabled);
 
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
-    }
-
-    public function togglePortal(
-        User $user,
-        SystemNotificationType $notificationType,
-        NotificationPreferenceService $service
-    ): JsonResponse {
-        // Portal notifications are NOT editable per requirements
-        // We return an error response to indicate that portal notifications cannot be toggled
-        return response()->json([
-            'message' => 'Portal notifications cannot be modified as per system requirements',
-            'errors' => [
-                'portal_notifications' => ['Portal notifications are not editable'],
-            ],
-        ], Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

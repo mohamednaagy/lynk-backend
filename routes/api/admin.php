@@ -103,9 +103,7 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
         Route::prefix('users/{user}/notifications-settings')->group(function () {
             Route::get('/', [UserNotificationSettingsController::class, 'index'])
                 ->middleware('permission:'.perm(Area::SuperAdmin, [Subject::Admins, Action::Show, Action::Manage]));
-            Route::patch('{notification_type}/email', [UserNotificationSettingsController::class, 'toggleEmail'])
-                ->middleware('permission:'.perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage]));
-            Route::patch('{notification_type}/portal', [UserNotificationSettingsController::class, 'togglePortal'])
+            Route::patch('{notification_type}/toggle-channel/{channel}', [UserNotificationSettingsController::class, 'toggleChannel'])
                 ->middleware('permission:'.perm(Area::SuperAdmin, [Subject::Admins, Action::Edit, Action::Manage]));
         });
 

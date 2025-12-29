@@ -94,17 +94,24 @@ class NotificationPreferenceService
         return $channels;
     }
 
-    public function setEmailNotification(User $user, SystemNotificationType $type, bool $enabled): void
+    /**
+     * Check if a specific channel is enabled for a notification type
+     */
+    public function isChannelEnabled(User $user, SystemNotificationType $type, NotificationChannel $channel): bool
     {
-        $this->setNotificationByTypeAndChannel($user, $type, NotificationChannel::MAIL, $enabled);
+        /** @var UserNotificationSetting|null $setting */
+        $setting = UserNotificationSetting::where('user_id', $user->id)
+            ->where('notification_type', $type)
+            ->where('channel', $channel)
+            ->first();
+
+        return $setting->is_enabled ?? false;
     }
 
-    public function setPortalNotification(User $user, SystemNotificationType $type, bool $enabled): void
-    {
-        $this->setNotificationByTypeAndChannel($user, $type, NotificationChannel::PLATFORM, $enabled);
-    }
-
-    public function setNotificationByTypeAndChannel(User $user, SystemNotificationType $type, NotificationChannel $channel, bool $enabled): void
+    /**
+     * Set notification for a specific channel
+     */
+    public function setChannelNotification(User $user, SystemNotificationType $type, NotificationChannel $channel, bool $enabled): void
     {
         // Validate the notification type exists in config
         $this->validateNotificationType($type);
@@ -143,6 +150,11 @@ class NotificationPreferenceService
         return config("notification-types.{$type->value}.channels.{$channel->value}");
     }
 
+    public function setNotificationByTypeAndChannel(User $user, SystemNotificationType $type, NotificationChannel $channel, bool $enabled): void
+    {
+        $this->setChannelNotification($user, $type, $channel, $enabled);
+    }
+
     public function isEmailEnabled(User $user, SystemNotificationType $type): bool
     {
         return $this->isChannelEnabled($user, $type, NotificationChannel::MAIL);
@@ -151,17 +163,6 @@ class NotificationPreferenceService
     public function isPortalEnabled(User $user, SystemNotificationType $type): bool
     {
         return $this->isChannelEnabled($user, $type, NotificationChannel::PLATFORM);
-    }
-
-    public function isChannelEnabled(User $user, SystemNotificationType $type, NotificationChannel $channel): bool
-    {
-        /** @var UserNotificationSetting|null $setting */
-        $setting = UserNotificationSetting::where('user_id', $user->id)
-            ->where('notification_type', $type)
-            ->where('channel', $channel)
-            ->first();
-
-        return $setting->is_enabled ?? false;
     }
 
     public function getEnabledUsersFor(SystemNotificationType $type, ?Closure $extra = null): Collection
