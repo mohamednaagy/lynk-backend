@@ -106,7 +106,12 @@ class NotificationPreferenceService
 
     public function setNotificationByTypeAndChannel(User $user, SystemNotificationType $type, NotificationChannel $channel, bool $enabled): void
     {
-        $channelConfig = config("notification-types.{$type->value}.channels.{$channel->value}");
+        // Validate the notification type exists in config
+        $this->validateNotificationType($type);
+
+        // Get the notification settings configuration
+        $channelConfig = $this->getNotificationChannelConfig($type, $channel);
+
         if (isset($channelConfig['is_editable']) && ! $channelConfig['is_editable']) {
             return;
         }
@@ -115,6 +120,27 @@ class NotificationPreferenceService
             ['user_id' => $user->id, 'notification_type' => $type, 'channel' => $channel],
             ['is_enabled' => $enabled]
         );
+    }
+
+    /**
+     * Validate that a notification type exists in the configuration
+     *
+     * @throws \InvalidArgumentException
+     */
+    private function validateNotificationType(SystemNotificationType $type): void
+    {
+        $typeConfig = config("notification-types.{$type->value}");
+        if ($typeConfig === null) {
+            throw new \InvalidArgumentException("Invalid notification type: {$type->value}");
+        }
+    }
+
+    /**
+     * Get the configuration for a specific notification type and channel
+     */
+    private function getNotificationChannelConfig(SystemNotificationType $type, NotificationChannel $channel): ?array
+    {
+        return config("notification-types.{$type->value}.channels.{$channel->value}");
     }
 
     public function isEmailEnabled(User $user, SystemNotificationType $type): bool
