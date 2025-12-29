@@ -165,7 +165,7 @@ class NotificationPreferenceService
         return $usersQuery->get();
     }
 
-    public function getUserNotificationTypeSettings($notifiable, SystemNotificationType $type): mixed
+    public function getUserNotificationTypeSettings($notifiable, SystemNotificationType $type): Collection
     {
         // Get the user's notification settings for this type
         // Use the already loaded relationship if available to avoid N+1 queries
