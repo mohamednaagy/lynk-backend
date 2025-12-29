@@ -109,7 +109,7 @@ class TenancyServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        @BelongsToTenant::$tenantIdColumn = 'company_id';
+        BelongsToTenant::$tenantIdColumn = 'company_id';
         InitializeTenancyByRequestData::$header = 'X-Company';
         InitializeTenancyByRequestData::$queryParameter = 'company';
 

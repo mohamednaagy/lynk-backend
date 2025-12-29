@@ -25,8 +25,8 @@ class NotificationPreferencesTest extends TestCase
         $settings = $service->listForUser($user);
 
         foreach ($settings as $setting) {
-            $this->assertFalse($setting['email_enabled'], "Email notification should default to disabled for {$setting['name']}");
-            $this->assertFalse($setting['portal_enabled'], "Portal notification should default to disabled for {$setting['name']}");
+            $this->assertFalse($setting['channels']['mail']['enabled'], "Email notification should default to disabled for {$setting['name']}");
+            $this->assertFalse($setting['channels']['platform']['enabled'], "Portal notification should default to disabled for {$setting['name']}");
         }
     }
 
@@ -105,15 +105,21 @@ class NotificationPreferencesTest extends TestCase
         $adminNotificationTypes = SystemNotificationType::getAdminNotificationTypes();
 
         foreach ($adminNotificationTypes as $type) {
-            $setting = UserNotificationSetting::where('user_id', $user->id)
-                ->whereHas('type', function ($query) use ($type) {
-                    $query->where('name', $type);
-                })
+            $mailSetting = UserNotificationSetting::where('user_id', $user->id)
+                ->where('notification_type', $type)
+                ->where('channel', \App\Enums\NotificationChannel::MAIL)
                 ->first();
 
-            $this->assertNotNull($setting, "Notification setting should exist for type: $type");
-            $this->assertFalse($setting->email_enabled, "Email notification should be disabled by default for $type");
-            $this->assertFalse($setting->portal_enabled, "Portal notification should be disabled by default for $type");
+            $this->assertNotNull($mailSetting, "Mail notification setting should exist for type: {$type->value}");
+            $this->assertFalse($mailSetting->is_enabled, "Email notification should be disabled by default for {$type->value}");
+
+            $portalSetting = UserNotificationSetting::where('user_id', $user->id)
+                ->where('notification_type', $type)
+                ->where('channel', \App\Enums\NotificationChannel::PLATFORM)
+                ->first();
+
+            $this->assertNotNull($portalSetting, "Portal notification setting should exist for type: {$type->value}");
+            $this->assertFalse($portalSetting->is_enabled, "Portal notification should be disabled by default for {$type->value}");
         }
     }
 }

@@ -106,6 +106,11 @@ class NotificationPreferenceService
 
     public function setNotificationByTypeAndChannel(User $user, SystemNotificationType $type, NotificationChannel $channel, bool $enabled): void
     {
+        $channelConfig = config("notification-types.{$type->value}.channels.{$channel->value}");
+        if (isset($channelConfig['is_editable']) && ! $channelConfig['is_editable']) {
+            return;
+        }
+
         UserNotificationSetting::updateOrCreate(
             ['user_id' => $user->id, 'notification_type' => $type, 'channel' => $channel],
             ['is_enabled' => $enabled]
