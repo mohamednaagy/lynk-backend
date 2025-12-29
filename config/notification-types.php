@@ -8,7 +8,7 @@ use App\Enums\SystemNotificationType;
 
 return [
     SystemNotificationType::TRADE_REQUEST_CANCELLED->value => [
-        'label' => 'notifications.trade_request_cancelled.label',
+        'label' => 'notification-types.trade_request_cancelled.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => false,
@@ -26,7 +26,7 @@ return [
         ],
     ],
     SystemNotificationType::ORDER_CANCELLED->value => [
-        'label' => 'notifications.order_cancelled.label',
+        'label' => 'notification-types.order_cancelled.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => false,
@@ -44,7 +44,7 @@ return [
         ],
     ],
     SystemNotificationType::ORDER_REQUIRES_APPROVAL->value => [
-        'label' => 'notifications.order_requires_approval.label',
+        'label' => 'notification-types.order_requires_approval.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => false,
@@ -62,7 +62,7 @@ return [
         ],
     ],
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => [
-        'label' => 'notifications.delivery_confirmation_received.label',
+        'label' => 'notification-types.delivery_confirmation_received.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => false,
@@ -78,7 +78,7 @@ return [
         ],
     ],
     SystemNotificationType::ORDER_CREATED->value => [
-        'label' => 'notifications.order_created.label',
+        'label' => 'notification-types.order_created.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => false,
