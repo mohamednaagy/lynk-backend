@@ -60,7 +60,7 @@ final class OrderCreated extends BaseNotification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            'type' => $this->getType()->value,
+            ...parent::toArray($notifiable),
             'order_id' => $this->financingOrder->id,
             'amount' => $this->financingOrder->amount,
             'selling_price' => $this->financingOrder->selling_price,

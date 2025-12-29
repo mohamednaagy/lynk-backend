@@ -57,16 +57,9 @@ class TraderOrderExpired extends BaseNotification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            'type' => $this->getType()->value,
+            ...parent::toArray($notifiable),
             'trader_order_id' => $this->traderOrder->id,
             'order_id' => $this->traderOrder->financing_order_id,
-        ];
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }

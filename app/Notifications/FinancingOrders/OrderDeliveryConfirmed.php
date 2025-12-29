@@ -64,21 +64,10 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
      */
     public function toArray($notifiable): array
     {
-        return array_merge(parent::toArray($notifiable), [
+        return [
+            ...parent::toArray($notifiable),
             'trader_order_id' => $this->traderOrder->id,
             'order_id' => $this->financingOrder->id,
-        ]);
-    }
-
-    /**
-     * Specify which queue should handle which channels.
-     *
-     * @return array
-     */
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 

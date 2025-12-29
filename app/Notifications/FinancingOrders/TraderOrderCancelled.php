@@ -57,20 +57,14 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
      */
     public function toArray($notifiable)
     {
-        return array_merge(parent::toArray($notifiable), [
+        return [
+            ...parent::toArray($notifiable),
             'trader_order_id' => $this->traderOrder->id,
             'order_id' => $this->traderOrder->financing_order_id,
             'amount' => $this->traderOrder->order->amount,
             'selling_price' => $this->traderOrder->order->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
-        ]);
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }
