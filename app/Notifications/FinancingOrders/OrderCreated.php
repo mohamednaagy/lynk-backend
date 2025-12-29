@@ -2,22 +2,16 @@
 
 namespace App\Notifications\FinancingOrders;
 
-use App\Enums\NotificationChannel;
 use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Notifications\BaseNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 
-final class OrderCreated extends Notification implements ShouldQueue
+final class OrderCreated extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
-    private const TYPE = SystemNotificationType::ORDER_CREATED;
-
     /**
      * Create a new notification instance.
      *
@@ -29,36 +23,12 @@ final class OrderCreated extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable)
+    public function getType(): SystemNotificationType
     {
-        $channels = [];
-
-        // Get the user's notification settings for this type
-        // Use the already loaded relationship if available to avoid N+1 queries
-        $settings = $notifiable->relationLoaded('notificationSettings')
-            ? $notifiable->notificationSettings->where('notification_type', self::TYPE)
-            : $notifiable->notificationSettings()
-                ->where('notification_type', self::TYPE)
-                ->get();
-
-        // Check if platform notification is enabled
-        $platformSetting = $settings->where('channel', NotificationChannel::PLATFORM->value)->first();
-        if ($platformSetting?->is_enabled) {
-            $channels[] = 'database';
-        }
-
-        // Check if mail is enabled
-        $mailSetting = $settings->where('channel', NotificationChannel::MAIL->value)->first();
-        if ($mailSetting?->is_enabled) {
-            $channels[] = 'mail';
-        }
-
-        return $channels;
+        return SystemNotificationType::ORDER_CREATED;
     }
 
     /**
@@ -90,18 +60,12 @@ final class OrderCreated extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
+            'type' => $this->getType()->value,
             'order_id' => $this->financingOrder->id,
             'amount' => $this->financingOrder->amount,
             'selling_price' => $this->financingOrder->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
-        ];
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }

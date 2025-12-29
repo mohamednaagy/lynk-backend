@@ -29,6 +29,9 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * User Model.
  *
  * @property int $id
+ * @property string $email
+ * @property string $password
+ * @property-read string $fullName
  * @property \Spatie\Permission\Models\Role[] $roles
  *
  * @mixin Builder

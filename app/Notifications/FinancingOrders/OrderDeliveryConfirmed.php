@@ -2,18 +2,16 @@
 
 namespace App\Notifications\FinancingOrders;
 
+use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
-use Illuminate\Bus\Queueable;
+use App\Notifications\BaseNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class OrderDeliveryConfirmed extends Notification implements ShouldQueue
+class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     private TraderOrder $traderOrder;
 
     private FinancingOrder $financingOrder;
@@ -28,14 +26,12 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable)
+    public function getType(): SystemNotificationType
     {
-        return ['mail', 'database'];
+        return SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED;
     }
 
     /**
@@ -62,6 +58,19 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
     }
 
     /**
+     * Get the array representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function toArray($notifiable): array
+    {
+        return array_merge(parent::toArray($notifiable), [
+            'trader_order_id' => $this->traderOrder->id,
+            'order_id' => $this->financingOrder->id,
+        ]);
+    }
+
+    /**
      * Specify which queue should handle which channels.
      *
      * @return array
@@ -81,13 +90,5 @@ class OrderDeliveryConfirmed extends Notification implements ShouldQueue
         return new Content(
             markdown: 'emails.order-delivery-confirmed',
         );
-    }
-
-    public function toDatabase($notifiable)
-    {
-        return [
-            'trader_order_id' => $this->traderOrder->id,
-            'order_id' => $this->financingOrder->id,
-        ];
     }
 }
