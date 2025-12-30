@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Admin\Settings;
 
 use App\Enums\CompanyStatus;
-use App\Enums\GlobalNewOrderNotificationForAdminStatus;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -28,7 +27,6 @@ class UpdateLenderSettingsRequest extends FormRequest
         return [
             'default_order_cost' => ['required', 'numeric'],
             'email_verification_enabled' => ['required', 'boolean'],
-            'notify_admins_about_new_orders' => ['required', 'integer', new EnumValue(GlobalNewOrderNotificationForAdminStatus::class)],
             'default_does_order_require_approval' => ['required', 'boolean'],
             'default_company_registration_status' => ['required', 'integer', new EnumValue(CompanyStatus::class)],
             'default_company_status_created_by_operation' => ['required', 'integer', new EnumValue(CompanyStatus::class)],

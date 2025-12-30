@@ -16,7 +16,6 @@ class LenderSettingsTransformer extends TransformerAbstract
         'default_does_order_require_approval',
         'default_company_registration_status',
         'default_company_status_created_by_operation',
-        'notify_admins_about_new_orders',
         'require_initiate_trade_request',
     ];
 
@@ -49,11 +48,6 @@ class LenderSettingsTransformer extends TransformerAbstract
     public function includeDefaultCompanyStatusCreatedByOperation(Settings $settings): Primitive
     {
         return $this->primitive($settings->default_company_status_created_by_operation);
-    }
-
-    public function includeNotifyAdminsAboutNewOrders(Settings $settings): Primitive
-    {
-        return $this->primitive($settings->notify_admins_about_new_orders);
     }
 
     public function includeRequireInitiateTradeRequest(Settings $settings): Primitive

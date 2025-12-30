@@ -134,7 +134,6 @@ class LenderController extends Controller
                 'order_cost_tiers.order_cost_with_vat',
                 'order_cost_tiers.proration_amount',
                 'notifications_email',
-                'notify_admins_about_new_orders',
                 'force_unique_reference_number',
                 'require_initiate_trade_request',
                 'auto_complete_murabaha_order',

@@ -2,18 +2,23 @@
 
 namespace App\Enums;
 
-use BenSampo\Enum\Contracts\LocalizedEnum;
-use BenSampo\Enum\Enum;
-
-final class SystemNotificationType extends Enum implements LocalizedEnum
+enum SystemNotificationType: string
 {
-    const TRADE_REQUEST_CANCELLED = 'trade_request_cancelled';
+    case TRADE_REQUEST_CANCELLED = 'trade_request_cancelled';
 
-    const ORDER_CANCELLED = 'order_cancelled';
+    case ORDER_CANCELLED = 'order_cancelled';
 
-    const ORDER_REQUIRES_APPROVAL = 'order_requires_approval';
+    case ORDER_REQUIRES_APPROVAL = 'order_requires_approval';
 
-    const DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
+    case DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
+
+    case ORDER_CREATED = 'order_created';
+
+    case ORDER_APPROVED = 'order_approved';
+
+    case LENDER_REGISTERED = 'lender_registered';
+
+    case NEW_SIGN_IN = 'new_sign_in';
 
     public static function getAdminNotificationTypes(): array
     {
@@ -22,6 +27,9 @@ final class SystemNotificationType extends Enum implements LocalizedEnum
             self::ORDER_CANCELLED,
             self::ORDER_REQUIRES_APPROVAL,
             self::DELIVERY_CONFIRMATION_RECEIVED,
+            self::ORDER_APPROVED,
+            self::LENDER_REGISTERED,
+            self::NEW_SIGN_IN,
         ];
     }
 
@@ -31,6 +39,10 @@ final class SystemNotificationType extends Enum implements LocalizedEnum
             self::TRADE_REQUEST_CANCELLED,
             self::ORDER_CANCELLED,
             self::ORDER_REQUIRES_APPROVAL,
+            self::ORDER_CREATED,
+            self::ORDER_APPROVED,
+            self::LENDER_REGISTERED,
+            self::NEW_SIGN_IN,
         ];
     }
 }

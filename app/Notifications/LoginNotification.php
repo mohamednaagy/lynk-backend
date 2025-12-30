@@ -2,16 +2,12 @@
 
 namespace App\Notifications;
 
-use App\Enums\NotificationType;
-use Illuminate\Bus\Queueable;
+use App\Enums\SystemNotificationType;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class LoginNotification extends Notification implements ShouldQueue
+class LoginNotification extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     public string $ipAddress;
 
     public string $timeLogin;
@@ -27,7 +23,7 @@ class LoginNotification extends Notification implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($ipAddress, $timeLogin, $device, $platform, $browser)
+    public function __construct(string $ipAddress, string $timeLogin, string $device, string $platform, string $browser)
     {
         $this->ipAddress = $ipAddress;
         $this->timeLogin = $timeLogin;
@@ -37,14 +33,12 @@ class LoginNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable)
+    public function getType(): SystemNotificationType
     {
-        return ['mail', 'database'];
+        return SystemNotificationType::NEW_SIGN_IN;
     }
 
     /**
@@ -69,28 +63,18 @@ class LoginNotification extends Notification implements ShouldQueue
     /**
      * Get the array representation of the notification.
      *
+     * @param  mixed  $notifiable
      * @return array
      */
-    public function toArray()
+    public function toArray($notifiable)
     {
         return [
+            ...parent::toArray($notifiable),
             'ip_address' => $this->ipAddress,
             'login_timestamp' => $this->timeLogin,
             'device' => $this->device,
             'platform' => $this->platform,
             'browser' => $this->browser,
-        ];
-    }
-
-    public function databaseType()
-    {
-        return NotificationType::NewSignIn;
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }

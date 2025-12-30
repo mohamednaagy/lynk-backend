@@ -2,7 +2,6 @@
 
 namespace App\Transformers;
 
-use App\Enums\SystemNotificationType;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
 
@@ -12,14 +11,14 @@ class NotificationSettingTransformer extends TransformerAbstract
         'id',
         'name',
         'label',
-        'is_enabled',
+        'channels',
     ];
 
     protected array $defaultIncludes = [
         'id',
         'name',
         'label',
-        'is_enabled',
+        'channels',
     ];
 
     public function transform($data): array
@@ -39,13 +38,11 @@ class NotificationSettingTransformer extends TransformerAbstract
 
     public function includeLabel($data): Primitive
     {
-        $name = data_get($data, 'name');
-
-        return $this->primitive(SystemNotificationType::getDescription($name));
+        return $this->primitive(data_get($data, 'label'));
     }
 
-    public function includeIsEnabled($data): Primitive
+    public function includeChannels($data): Primitive
     {
-        return $this->primitive((bool) data_get($data, 'is_enabled'));
+        return $this->primitive(data_get($data, 'channels'));
     }
 }

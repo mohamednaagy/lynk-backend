@@ -63,7 +63,7 @@ class BursamV1Driver implements TraderInterface
 
     protected function calculateTimeDifference()
     {
-        $marketEndTime = env('BURSAM_MARKET_OPENING_END_TIME');
+        $marketEndTime = config('services.bursam.market_opening_end_time');
         $marketEnd = Carbon::createFromFormat('H:i:s', $marketEndTime);
         // Calculate the difference in hours
         $now = Carbon::now('Asia/Riyadh');

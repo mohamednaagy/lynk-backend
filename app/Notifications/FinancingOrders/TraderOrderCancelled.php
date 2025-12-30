@@ -2,17 +2,15 @@
 
 namespace App\Notifications\FinancingOrders;
 
+use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Notifications\BaseNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
-class TraderOrderCancelled extends Notification implements ShouldQueue
+class TraderOrderCancelled extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     /**
      * Create a new notification instance.
      *
@@ -24,14 +22,12 @@ class TraderOrderCancelled extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable)
+    public function getType(): SystemNotificationType
     {
-        return ['mail', 'database'];
+        return SystemNotificationType::TRADE_REQUEST_CANCELLED;
     }
 
     /**
@@ -62,19 +58,13 @@ class TraderOrderCancelled extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
+            ...parent::toArray($notifiable),
             'trader_order_id' => $this->traderOrder->id,
             'order_id' => $this->traderOrder->financing_order_id,
             'amount' => $this->traderOrder->order->amount,
             'selling_price' => $this->traderOrder->order->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
-        ];
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }
