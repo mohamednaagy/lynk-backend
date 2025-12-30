@@ -82,13 +82,13 @@ class EdaatInvoiceTransformer extends TransformerAbstract
 
     public function includeCompany(EdaatInvoice $edaatInvoice): Primitive
     {
-        if (is_null($edaatInvoice->company)) {
+        if (is_null($edaatInvoice->lender)) {
             return $this->primitive(null);
         }
 
         return $this->primitive([
-            'id' => $edaatInvoice->company->id,
-            'name' => $edaatInvoice->company->name,
+            'id' => $edaatInvoice->lender->id,
+            'name' => $edaatInvoice->lender->name,
         ]);
     }
 

@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Wallets;
 
-use App\Models\Company;
+use App\Models\Lender;
 
 interface GetTransactions
 {
@@ -10,7 +10,7 @@ interface GetTransactions
 
     public function attachZatcaInvoicesMedia(): self;
 
-    public function setCompany(Company $company): self;
+    public function setLender(Lender $lender): self;
 
     public function setFilters(array $filters): self;
 }

@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Companies;
 
-use App\Models\Company;
+use App\Models\Lender;
 
 interface ChargeLenderBalanceManually
 {
-    public function handle(Company $company, array $data);
+    public function handle(Lender $lender, array $data);
 }

@@ -9,7 +9,7 @@ use App\Enums\Subject;
 use App\Enums\WalletNotificationType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Wallets\WalletNotificationRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Transformers\WalletNotificationTransformer;
 
 class WalletNotificationController extends Controller
@@ -18,24 +18,24 @@ class WalletNotificationController extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::WalletNotifications, Action::Index, Action::Manage])
+                perm(Area::Lender, [Subject::WalletNotifications, Action::Index, Action::Manage])
         )->only('index');
 
         $this->middleware(
             'permission:'.
-            perm(Area::Lender, [Subject::WalletNotifications, Action::Create, Action::Manage])
+                perm(Area::Lender, [Subject::WalletNotifications, Action::Create, Action::Manage])
         )->only('store');
     }
 
     public function index()
     {
-        /** @var Company $company */
-        $company = tenant();
+        /** @var Lender $lender */
+        $lender = tenant();
 
-        return fractal($company->walletNotification, new WalletNotificationTransformer)
+        return fractal($lender->walletNotification, new WalletNotificationTransformer)
             ->addMeta([
-                'types' => collect(WalletNotificationType::asSelectArray())->reject(function ($item, $value) use ($company) {
-                    return $company->isTiered() && $value == WalletNotificationType::ORDER_COUNT;
+                'types' => collect(WalletNotificationType::asSelectArray())->reject(function ($item, $value) use ($lender) {
+                    return $lender->isTiered() && $value == WalletNotificationType::ORDER_COUNT;
                 }),
             ])
             ->respond();
@@ -43,9 +43,9 @@ class WalletNotificationController extends Controller
 
     public function store(WalletNotificationRequest $request, SyncWalletNotification $syncWalletNotification)
     {
-        $company = tenant();
+        $lender = tenant();
 
-        $notifications = $syncWalletNotification->handle($company, $request->validated());
+        $notifications = $syncWalletNotification->handle($lender, $request->validated());
 
         return fractal($notifications, new WalletNotificationTransformer)->respond();
     }

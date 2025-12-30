@@ -6,12 +6,10 @@ use App\Enums\LocalMarket\OwnershipTypes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class LocalMarketInventoryUnits extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'local_market_inventory_id',
@@ -31,12 +29,6 @@ class LocalMarketInventoryUnits extends Model
     protected $casts = [
         'previous_company_id_owners' => 'array',
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll();
-    }
 
     public function item()
     {

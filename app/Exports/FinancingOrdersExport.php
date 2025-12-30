@@ -75,7 +75,7 @@ class FinancingOrdersExport implements FromGenerator, WithCustomChunkSize, WithH
             'selling_price' => round($order->selling_price->formatByDecimal(), 2),
             'charged_transactions' => (string) $order->charged_trader_orders_count,
             'order_owner' => $order->creator?->full_name,
-            'company_name' => $order->company->name ?? null,
+            'company_name' => $order->lender->name ?? null,
             'assigned_to' => $order->responsableAdmin?->full_name,
             'latest_activity' => $this->withLocale('en', function () use ($order) {
                 return $order->status->isNot(FinancingOrderStatus::InProgress)

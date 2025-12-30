@@ -29,7 +29,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Spatie\Activitylog\Models\Activity;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
@@ -173,7 +172,6 @@ class BursamV1DriverTest extends TestCase
     {
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
         Http::fake(function () {
             return Http::response([
                 'header' => [
@@ -186,7 +184,6 @@ class BursamV1DriverTest extends TestCase
 
         $this->assertDatabaseCount((new TraderOrder)->getTable(), 2);
         $this->assertDatabaseCount((new TraderHistory)->getTable(), 0);
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
     }
 
     /**
@@ -219,8 +216,6 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         Http::fake(function () {
             return Http::response([
                 'header' => [
@@ -232,7 +227,7 @@ class BursamV1DriverTest extends TestCase
         self::$driver->cancelOrder(self::$order);
 
         Queue::assertNotPushed(ProcessBursamStbCertificateAfterCancellation::class);
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
+
     }
 
     public function test_cancel_trader_order_manual_mode()
@@ -275,12 +270,10 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         self::$driver->createSellingCommodityToCustomerDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::SellingCommodityToCustomer));
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
+
     }
 
     /**
@@ -306,12 +299,10 @@ class BursamV1DriverTest extends TestCase
 
         $this->expectException(TraderException::class);
 
-        $activityLogCount = Activity::query()->count();
-
         self::$driver->createTransferOwnershipToLenderDocument(new TraderOrder);
 
         $this->assertNull(self::$traderOrder->getFirstMediaUrl(TraderOrderMediaCollection::TransferOwnershipToLender));
-        $this->assertDatabaseCount((new Activity)->getTable(), $activityLogCount + 1);
+
     }
 
     public function test_fetch_order_result_ynn_success()

@@ -3,8 +3,8 @@
 namespace App\Actions\Edaat;
 
 use App\Actions\Contracts\Edaat\GetEdaatInvoices;
-use App\Models\Company;
 use App\Models\EdaatInvoice;
+use App\Models\Lender;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceAmountGteScope;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceAmountLteScope;
 use App\Support\QueryScoper\Scopes\Edaat\InvoiceCompaniesScope;
@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class GetEdaatInvoicesAction implements GetEdaatInvoices
 {
-    protected ?Company $company = null;
+    protected ?Lender $lender = null;
 
     /**
      * Get edaat invoices for tenant (company) or admin
@@ -39,19 +39,19 @@ class GetEdaatInvoicesAction implements GetEdaatInvoices
             'company' => InvoiceCompaniesScope::class,
         ];
 
-        if ($this->company) {
-            $query = $query->where('company_id', $this->company->id);
+        if ($this->lender) {
+            $query = $query->where('company_id', $this->lender->id);
         }
 
         return $query->toScopes($scopes);
     }
 
     /**
-     * Set company for query scoping
+     * Set lender for query scoping
      */
-    public function setCompany(Company $company): self
+    public function setLender(Lender $lender): self
     {
-        $this->company = $company;
+        $this->lender = $lender;
 
         return $this;
     }

@@ -4,20 +4,20 @@ namespace App\Actions\Orders;
 
 use App\Enums\FinancingOrderBorrowerTypeEnum;
 use App\Enums\FinancingOrderLenderTypeEnum;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use Illuminate\Support\Arr;
 
 class NormalLendingFinancingOrderStrategy implements FinancingOrderTypeStrategy
 {
-    public function create(Company $company, array $data): FinancingOrder
+    public function create(Lender $lender, array $data): FinancingOrder
     {
         $data['lender_type'] = FinancingOrderLenderTypeEnum::NormalLending;
-        $data['lender_identifier'] = $company->id;
+        $data['lender_identifier'] = $lender->id;
         $data['borrower_type'] = FinancingOrderBorrowerTypeEnum::Customer;
         $data['borrower_identifier'] = $data['customer_name'];
 
-        return $company->orders()->create(
+        return $lender->orders()->create(
             Arr::only($data, [
                 'borrower_identifier',
                 'reference_number',

@@ -27,7 +27,7 @@ class RegisterLenderAction implements RegisterLender
      */
     public function handle(array $data): User
     {
-        $company = $this->createCompany->handle([
+        $lender = $this->createCompany->handle([
             'name' => $data['company_name'],
             'notifications_email' => $data['notifications_email'],
             'unique_name' => $data['company_unique_name'],
@@ -36,8 +36,8 @@ class RegisterLenderAction implements RegisterLender
             'does_order_require_approval' => $data['does_order_require_approval'],
         ]);
 
-        $company->lender->lenderDetail()->updateOrCreate(
-            ['company_id' => $company->id],
+        $lender->lenderDetail()->updateOrCreate(
+            ['company_id' => $lender->id],
             Arr::only($data, [
                 'require_initiate_trade_request',
                 'does_order_require_approval',
@@ -46,11 +46,11 @@ class RegisterLenderAction implements RegisterLender
             ])
         );
 
-        tenancy()->initialize($company);
+        tenancy()->initialize($lender);
 
-        $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
+        $lender->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
-        app(CreateDefaultPricingTier::class)->handle($company);
+        app(CreateDefaultPricingTier::class)->handle($lender);
 
         $user = $this->createUser->handle(
             Arr::only($data, [

@@ -2,29 +2,29 @@
 
 namespace App\Support\Webhooks;
 
-use App\Models\Company;
+use App\Models\Lender;
 use Spatie\WebhookServer\WebhookCall;
 
 class WebhookEventManager
 {
     /**
-     * fire company webhook by webhook type
+     * fire lender webhook by webhook type
      *
      * @return void
      */
-    public function fire(Company $company, string $webhookType, array $payload)
+    public function fire(Lender $lender, string $webhookType, array $payload)
     {
-        $company->webhooks()
+        $lender->webhooks()
             ->whereType($webhookType)
             ->chunk(
                 50,
-                function ($webhooks) use ($company, $payload) {
+                function ($webhooks) use ($lender, $payload) {
                     $webhooks->each(
-                        function ($webhook) use ($company, $payload) {
+                        function ($webhook) use ($lender, $payload) {
                             WebhookCall::create()
                                 ->url($webhook->url)
                                 ->payload($payload)
-                                ->useSecret($company->lender->lenderDetail->webhook_secret_key)
+                                ->useSecret($lender->lenderDetail->webhook_secret_key)
                                 ->dispatch();
                         }
                     );

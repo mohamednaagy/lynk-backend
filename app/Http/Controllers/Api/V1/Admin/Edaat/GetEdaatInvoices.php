@@ -27,7 +27,7 @@ class GetEdaatInvoices extends Controller
     public function __invoke(EdaatInvoiceFilterRequest $request, GetEdaatInvoicesInterface $getEdaatInvoices): JsonResponse
     {
         $edaatInvoices = $getEdaatInvoices->handle()
-            ->with(['company', 'creator'])
+            ->with(['lender', 'creator'])
             ->paginate();
 
         return fractal($edaatInvoices, new EdaatInvoiceTransformer)

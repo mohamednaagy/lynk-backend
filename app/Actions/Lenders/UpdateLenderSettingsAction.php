@@ -3,14 +3,14 @@
 namespace App\Actions\Lenders;
 
 use App\Actions\Contracts\Lenders\UpdateLenderSettings;
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Support\Arr;
 
 class UpdateLenderSettingsAction implements UpdateLenderSettings
 {
-    public function handle(Company $company, array $data): void
+    public function handle(Lender $lender, array $data): void
     {
-        $lenderDetail = $company->lender->lenderDetail;
+        $lenderDetail = $lender->lenderDetail;
 
         // Update model attributes without saving yet
         $lenderDetail->fill(Arr::only($data, [

@@ -131,11 +131,6 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         return $this->hasMany(AuthorizationToken::class);
     }
 
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class, 'company_id');
@@ -200,13 +195,13 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         $this->update(['password' => $password, 'email_verified_at' => now()]);
     }
 
-    public function lender(): BelongsTo
-    {
-        return $this->belongsTo(Lender::class, 'company_id');
-    }
-
     public function isAdmin(): bool
     {
         return $this->hasRole(Role::Admin) || $this->hasRole(Role::Manager);
+    }
+
+    public function lender(): BelongsTo
+    {
+        return $this->belongsTo(Lender::class, 'company_id');
     }
 }

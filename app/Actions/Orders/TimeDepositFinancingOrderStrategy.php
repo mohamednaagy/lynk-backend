@@ -6,8 +6,8 @@ use App\Actions\Contracts\Companies\CreateCompany;
 use App\Enums\CompanyType;
 use App\Enums\FinancingOrderBorrowerTypeEnum;
 use App\Enums\FinancingOrderLenderTypeEnum;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use Illuminate\Support\Arr;
 
 class TimeDepositFinancingOrderStrategy implements FinancingOrderTypeStrategy
@@ -16,7 +16,7 @@ class TimeDepositFinancingOrderStrategy implements FinancingOrderTypeStrategy
         private CreateCompany $createCompany
     ) {}
 
-    public function create(Company $company, array $data): FinancingOrder
+    public function create(Lender $lender, array $data): FinancingOrder
     {
         $companyData['name'] = $data['customer_name'];
         $newTimeDespoistCompany = $this->createCompany->handle($companyData, CompanyType::TimeDeposit);
@@ -24,9 +24,9 @@ class TimeDepositFinancingOrderStrategy implements FinancingOrderTypeStrategy
         $data['lender_type'] = FinancingOrderLenderTypeEnum::TimeDeposit;
         $data['lender_identifier'] = $newTimeDespoistCompany->id;
         $data['borrower_type'] = FinancingOrderBorrowerTypeEnum::Lender;
-        $data['borrower_identifier'] = $company->id;
+        $data['borrower_identifier'] = $lender->id;
 
-        return $company->orders()->create(
+        return $lender->orders()->create(
             Arr::only($data, [
                 'borrower_identifier',
                 'reference_number',

@@ -12,7 +12,7 @@ use App\Actions\Contracts\Wallets\GenerateZatcaInvoice;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Enums\WalletType;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\Transaction;
 use App\Support\ZatcaEInvoice\InvoiceSpecs;
 use App\Support\ZatcaEInvoice\Order;
@@ -31,9 +31,9 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
         protected CalcAmountWithoutVatAndOrdersCount $calcAmountWithoutVatAndOrdersCount
     ) {}
 
-    public function handle(Company $company, array $data)
+    public function handle(Lender $lender, array $data)
     {
-        $wallet = $company->getWallet(WalletType::CompanyWallet);
+        $wallet = $lender->getWallet(WalletType::CompanyWallet);
         $totalAmountWithVat = Money::parseByDecimal(Arr::get($data, 'amount'), $wallet->currency);
         [$vatAmount, $vatRate] = $this->calculateVatAmount
             ->setAmount($totalAmountWithVat)
@@ -70,7 +70,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 
         $invoiceSpecs = $this->getInvoiceSpecs(
             $vatTransaction,
-            $company,
+            $lender,
             $totalAmountWithVat,
             $vatAmount,
             $vatPercentage
@@ -83,7 +83,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
 
     private function getInvoiceSpecs(
         Transaction $transaction,
-        Company $company,
+        Lender $lender,
         Money $totalAmountWithVat,
         Money $vatAmount,
         $vatPercentage
@@ -111,7 +111,7 @@ class ChargeLenderBalanceManuallyAction implements ChargeLenderBalanceManually
                 ],
                 $transaction->created_at->clone()->tz('Asia/Riyadh'),
             ),
-            $company->name,
+            $lender->name,
             $transaction,
         );
     }

@@ -8,12 +8,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class CommodityType extends Model
 {
-    use HasFactory , LogsActivity , SoftDeletes;
+    use HasFactory , SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -27,14 +25,7 @@ class CommodityType extends Model
     protected $casts = [
         'status' => CommodityTypeStatus::class,
         'provider' => CommodityTypeProvider::class,
-
     ];
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['status']);
-    }
 
     public function scopeActive(Builder $query, ?int $value): Builder
     {
@@ -56,8 +47,8 @@ class CommodityType extends Model
      */
     public function scopeGetCommoditiesBasedOnCompany(Builder $query, int $value): Builder
     {
-        $company = Company::with(['lenderOrderAllowedCommodityTypes'])->find($value);
-        $commodityTypeIds = $company->lenderOrderAllowedCommodityTypes->pluck('id');
+        $lender = Lender::with(['lenderOrderAllowedCommodityTypes'])->find($value);
+        $commodityTypeIds = $lender->lenderOrderAllowedCommodityTypes->pluck('id');
         $query = $query->whereIn('id', $commodityTypeIds);
 
         return $query;

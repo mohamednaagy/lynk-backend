@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Actions\Contracts\VerifyEmail as VerifyEmailInterface;
 use App\Http\Controllers\Controller;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,7 +20,7 @@ class VerifyEmail extends Controller
      * Handle the incoming request.
      *
      * @param  VerifyEmailInterface  $verifyEmail
-     * @param  Company  $company
+     * @param  Lender  $lender
      * @return JsonResponse
      */
     public function __invoke(Request $request, User $user)

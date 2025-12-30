@@ -3,6 +3,7 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Webhooks\GenerateWebhookSecretKey;
+use App\Enums\FinancingOrderTypeEnum;
 use App\Models\Lender;
 use Arr;
 
@@ -21,7 +22,6 @@ class NormalCompanyCreationStrategy implements CompanyCreationStrategy
         if (array_key_exists('require_initiate_trade_request', $data) && is_null($data['require_initiate_trade_request'])) {
             unset($data['require_initiate_trade_request']);
         }
-
         $lender = Lender::create(
             Arr::only(
                 $data,
@@ -35,6 +35,9 @@ class NormalCompanyCreationStrategy implements CompanyCreationStrategy
             )
         );
 
+        if (! isset($data['allowed_financing_order_types'])) {
+            $data['allowed_financing_order_types'] = [FinancingOrderTypeEnum::NormalLending];
+        }
         $lender->lenderDetail()->create(
             Arr::only(
                 $data,

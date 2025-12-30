@@ -36,8 +36,8 @@ class WebhookController extends Controller
                     if ($invoice->status->isNot(EdaatInvoiceStatus::Pending)) {
                         continue;
                     }
-                    $company = $invoice->company;
-                    $wallet = $company->getWallet(WalletType::CompanyWallet);
+                    $lender = $invoice->lender;
+                    $wallet = $lender->getWallet(WalletType::CompanyWallet);
                     $invoice->update([
                         'status' => EdaatInvoiceStatus::Paid,
                         'paid_at' => now(),
@@ -47,7 +47,7 @@ class WebhookController extends Controller
                     [$amountWithoutVat,
                         $roundedOrdersCount,
                         $vatRateOfChargeAmount,
-                        $rawOrdersCount] = $calcAmountWithoutVatAndOrdersCount->handle($company, $amountWithVat);
+                        $rawOrdersCount] = $calcAmountWithoutVatAndOrdersCount->handle($lender, $amountWithVat);
 
                     $vatAmount = $amountWithVat->subtract($amountWithoutVat);
 
@@ -74,7 +74,7 @@ class WebhookController extends Controller
 
                     $invoiceSpecs = $this->getInvoiceSpecs(
                         $vatTransaction,
-                        $company,
+                        $lender,
                         $amountWithVat,
                         $vatAmount,
                         $rawOrdersCount,
@@ -89,7 +89,7 @@ class WebhookController extends Controller
 
     private function getInvoiceSpecs(
         $transaction,
-        $company,
+        $lender,
         $totalAmountWithVat,
         $vatAmount,
         $ordersCount,
@@ -97,11 +97,11 @@ class WebhookController extends Controller
     ): InvoiceSpecs {
         $project = $this->getProjectSettings->handle();
 
-        if ($company->isTiered()) {
+        if ($lender->isTiered()) {
             $itemCostWithoutVat = $totalAmountWithVat->subtract($vatAmount);
             $ordersCount = 1;
         } else {
-            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($company)['costWithoutVat'];
+            $itemCostWithoutVat = TieredPricing::getOrderCostIfStandard($lender)['costWithoutVat'];
         }
 
         return new InvoiceSpecs(
@@ -123,7 +123,7 @@ class WebhookController extends Controller
                 ],
                 $transaction->created_at->clone()->tz('Asia/Riyadh'),
             ),
-            $company->name,
+            $lender->name,
             $transaction,
         );
     }

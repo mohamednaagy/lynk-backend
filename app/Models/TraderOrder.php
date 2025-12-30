@@ -26,8 +26,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\VirtualColumn\VirtualColumn;
@@ -44,7 +42,7 @@ use UnexpectedValueException;
  */
 class TraderOrder extends Model implements HasMedia
 {
-    use HasCreator, HasFactory, InteractsWithMedia, LogsActivity, VirtualColumn;
+    use HasCreator, HasFactory, InteractsWithMedia, VirtualColumn;
 
     protected $guarded = [];
 
@@ -297,9 +295,9 @@ class TraderOrder extends Model implements HasMedia
         }
     }
 
-    public function company()
+    public function lender()
     {
-        return $this->order->company;
+        return $this->order->lender;
     }
 
     public function isCancelled(): bool
@@ -459,7 +457,7 @@ class TraderOrder extends Model implements HasMedia
     public function hasAutoCompleteFinancingOrder()
     {
         return $this->completedSellStep()->exists() &&
-            $this->order->company->isCompanyHasMurabahaAutoCompleteOrder();
+            $this->order->lender->isCompanyHasMurabahaAutoCompleteOrder();
     }
 
     public function setAutoCompletePeriodId(int $periodId): void
@@ -514,10 +512,5 @@ class TraderOrder extends Model implements HasMedia
     public function hasSpecificCommodityType(): bool
     {
         return $this->commodity_type_id > 0;
-    }
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()->logAll();
     }
 }

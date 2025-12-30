@@ -34,8 +34,8 @@ class EdaatInvoice extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function company(): BelongsTo
+    public function lender(): BelongsTo
     {
-        return $this->belongsTo(Company::class, 'company_id', 'id')->withTrashed();
+        return $this->belongsTo(Lender::class, 'company_id', 'id')->withTrashed();
     }
 }

@@ -8,7 +8,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\UpdateMurabahaPurchaseOfferRequest;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Support\Traders\TradingStrategies\TraderStrategyContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +25,7 @@ class UpdateMurabahaPurchaseOffer extends Controller
 
     public function __invoke(
         UpdateMurabahaPurchaseOfferRequest $request,
-        Company $lender,
+        Lender $lender,
         int $order,
         int $traderOrder
     ): JsonResponse {

@@ -90,13 +90,13 @@ class LenderController extends Controller
             $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
                 ->default_company_status_created_by_operation;
 
-            $company = $createCompany->handle($data);
+            $lender = $createCompany->handle($data);
 
-            $company->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
+            $lender->createWallet(WalletType::CompanyWallet, Money::getDefaultCurrency());
 
-            $company->tieredPricing()->createMany($data['order_cost_tiers']);
+            $lender->tieredPricing()->createMany($data['order_cost_tiers']);
 
-            return fractal($company, new CompanyTransformer)
+            return fractal($lender, new CompanyTransformer)
                 ->parseIncludes([
                     'id',
                     'name',

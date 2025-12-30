@@ -5,10 +5,10 @@ namespace App\Jobs\FinancingOrders;
 use App\Actions\Contracts\GetSettingsClassInstance;
 use App\Enums\Action;
 use App\Enums\Area;
-use App\Enums\SystemNotificationType;
 use App\Enums\GlobalNewOrderNotificationForAdminStatus;
 use App\Enums\Role;
 use App\Enums\Subject;
+use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Notifications\FinancingOrders\OrderCreated;
@@ -19,7 +19,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
-use Stancl\Tenancy\Database\TenantScope;
 
 class NotifyAdminsAboutOrderCreated implements ShouldQueue
 {
@@ -76,7 +75,6 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
 
         if ($isNotificationSettingBasedOnCompany) {
             return (bool) $this->financingOrder
-                ->company
                 ->lender
                 ->lenderDetail
                 ->notify_admins_about_new_orders

@@ -2,7 +2,7 @@
 
 namespace App\Actions\Contracts\Edaat;
 
-use App\Models\Company;
+use App\Models\Lender;
 use Illuminate\Database\Eloquent\Builder;
 
 interface GetEdaatInvoices
@@ -13,7 +13,7 @@ interface GetEdaatInvoices
     public function handle(): Builder;
 
     /**
-     * Set company for query scoping
+     * Set lender for query scoping
      */
-    public function setCompany(Company $company): self;
+    public function setLender(Lender $lender): self;
 }

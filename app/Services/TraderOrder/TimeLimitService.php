@@ -6,7 +6,7 @@ use App\Enums\Trader;
 use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
-use App\Models\Company;
+use App\Models\Lender;
 use App\Models\TraderOrder;
 use App\Settings\Classes\LocalMurabahaSettings;
 use Carbon\Carbon;
@@ -40,8 +40,8 @@ class TimeLimitService
      */
     public function setContractSignTimeLimit(TraderOrder $traderOrder): void
     {
-        $company = $traderOrder->order->company;
-        $config = $this->getContractSignedLimitTimeConfig($company, $traderOrder->provider);
+        $lender = $traderOrder->order->lender;
+        $config = $this->getContractSignedLimitTimeConfig($lender, $traderOrder->provider);
         $this->setTimeLimit(
             $traderOrder,
             TraderOrderTimeLimitType::ContractSignTimeLimit,
@@ -141,7 +141,7 @@ class TimeLimitService
      * @return array An associative array containing 'default_value' (the default contract sign time limit in hours)
      *               and 'effective_at' (the calculated effective contract sign time as a string in 'Y-m-d H:i:s' format).
      */
-    private function getContractSignedLimitTimeConfig(Company $company, $provider): array
+    private function getContractSignedLimitTimeConfig(Lender $lender, $provider): array
     {
         [$defaultValue, $effectiveAt] = match ($provider) {
             Trader::Bursam => [
@@ -149,12 +149,12 @@ class TimeLimitService
                 get_bursam_contract_signed_deadline(), // Effective time
             ],
             Trader::Lynk => [
-                ($company->lender->lenderDetail->default_contract_sign_time_limit
+                ($lender->lenderDetail->default_contract_sign_time_limit
                     ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit), // default value
                 Carbon::now()
                     ->timezone('UTC')
                     ->addHours(
-                        ($company->lender->lenderDetail->default_contract_sign_time_limit
+                        ($lender->lenderDetail->default_contract_sign_time_limit
                             ?? app(LocalMurabahaSettings::class)->default_contract_sign_time_limit)
                     )
                     ->format('Y-m-d H:i:s'), // Effective time

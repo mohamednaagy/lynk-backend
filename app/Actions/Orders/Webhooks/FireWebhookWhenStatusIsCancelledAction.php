@@ -19,8 +19,8 @@ class FireWebhookWhenStatusIsCancelledAction implements FireWebhookWhenStatusIsC
         $financingOrder = $traderOrder->order;
 
         $lastCompletedStep = $this->getDictionaryOfTraderOrder($traderOrder)->getLastCompletedStepOf($traderOrder);
-        $company = $financingOrder->company()->withTrashed()->first();
-        WebhookEvent::fire($company, WebhookType::OrderUpdates, [
+        $lender = $financingOrder->lender()->withTrashed()->first();
+        WebhookEvent::fire($lender, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
             'order_status' => [
                 'value' => $financingOrder->status->value,

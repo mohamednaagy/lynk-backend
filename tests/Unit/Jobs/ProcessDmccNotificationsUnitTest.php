@@ -2,7 +2,6 @@
 
 namespace Tests\Unit\Jobs;
 
-use App\Exceptions\TraderException;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccCancelNotification;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccMpoSaleCompleteNotification;
 use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccNotifications;
@@ -11,7 +10,6 @@ use App\Support\Traders\Drivers\Dmcc\Jobs\V1\ProcessDmccPtpNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
-use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 class ProcessDmccNotificationsUnitTest extends TestCase
@@ -106,41 +104,5 @@ class ProcessDmccNotificationsUnitTest extends TestCase
         (new ProcessDmccNotifications)->handle();
 
         Bus::assertDispatched(ProcessDmccCancelNotification::class);
-    }
-
-    public function test_process_dmcc_ptp_notification_error_logged()
-    {
-        $logCount = Activity::query()->count();
-        $this->expectException(TraderException::class);
-        Http::fake(function () {
-            return Http::response([
-                'Body' => [
-                    'notification' => 'Action Required for Promise to Purchase',
-                    'ttiId' => 252,
-                    'id' => '3dc10552-e6d0-4776-ad16-8ab5efde260d',
-                ],
-            ], 500);
-        });
-
-        (new ProcessDmccNotifications)->handle();
-        $this->assertDatabaseCount((new Activity)->getTable(), $logCount + 1);
-    }
-
-    public function test_process_dmcc_mpo_sale_complete_notification_error_logged()
-    {
-        $logCount = Activity::query()->count();
-        $this->expectException(TraderException::class);
-        Http::fake(function () {
-            return Http::response([
-                'Body' => [
-                    'notification' => 'Murabaha Sale Completed',
-                    'ttiId' => 252,
-                    'id' => '3dc10552-e6d0-4776-ad16-8ab5efde260d',
-                ],
-            ], 500);
-        });
-
-        (new ProcessDmccNotifications)->handle();
-        $this->assertDatabaseCount((new Activity)->getTable(), $logCount + 1);
     }
 }

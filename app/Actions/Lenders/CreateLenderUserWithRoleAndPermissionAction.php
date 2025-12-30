@@ -48,6 +48,7 @@ class CreateLenderUserWithRoleAndPermissionAction implements CreateLenderUserWit
         }
 
         app(NotificationPreferenceService::class)->ensureDefaults($user);
+
         // return user
         return $user;
     }

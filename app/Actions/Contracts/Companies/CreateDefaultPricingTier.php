@@ -2,9 +2,9 @@
 
 namespace App\Actions\Contracts\Companies;
 
-use App\Models\Company;
+use App\Models\Lender;
 
 interface CreateDefaultPricingTier
 {
-    public function handle(Company $company);
+    public function handle(Lender $lender);
 }

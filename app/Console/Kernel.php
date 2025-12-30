@@ -32,16 +32,8 @@ class Kernel extends ConsoleKernel
             ->between($sellingCommodityStartTime, $sellingCommodityEndTime)
             ->onOneServer();
 
-        $hours = config('telescope.prune_hours');
-        $schedule->command("telescope:prune --hours={$hours}")
-            ->timezone($timezone)
-            ->dailyAt('00:00')
-            ->onOneServer();
-
         $schedule->command(GenerateSupplierMonthlyUsageReportsCommand::class)
-//            ->timezone($timezone)/   /TODO we commented temporarily to for testing(Aligned with the team)
-//            ->monthlyOn(1, '00:00') //TODO we commented temporarily to for testing(Aligned with the team)
-            ->dailyAt('02:00')
+            ->monthlyOn(1, '02:00')
             ->onOneServer();
     }
 

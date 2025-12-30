@@ -8,8 +8,8 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\Lenders\Orders\MakeOrderProceedRequest;
-use App\Models\Company;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +27,7 @@ class MakeOrderProceed extends Controller
     public function __invoke(
         MakeOrderProceedRequest $request,
         MakeOrderProceedInterface $makeOrderProceed,
-        Company $lender,
+        Lender $lender,
         FinancingOrder $order,
         int $traderOrder,
     ): JsonResponse {

@@ -12,14 +12,12 @@ use App\Support\Wallets\Traits\HasWallet;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
 class Company extends BaseTenant
 {
-    use HasFactory, HasScopedValidationRules, HasScopes, HasWallet, LogsActivity, SoftDeletes;
+    use HasFactory, HasScopedValidationRules, HasScopes, HasWallet, SoftDeletes;
 
     protected $table = 'companies';
 
@@ -45,12 +43,6 @@ class Company extends BaseTenant
         ];
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['status']);
-    }
-
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'company_id', 'id');
@@ -74,11 +66,6 @@ class Company extends BaseTenant
     public function wallets()
     {
         return $this->morphMany(Wallet::class, 'holder');
-    }
-
-    public function walletNotification()
-    {
-        return $this->hasOne(WalletNotification::class, 'company_id')->ofMany();
     }
 
     public function tieredPricing()
