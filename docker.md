@@ -21,25 +21,61 @@ This setup implements a production-ready, containerized Laravel API with separat
 4. **Immutable Images in Production**: Production/pre-production uses immutable images; no bind mounts
 5. **Flexible Scaling**: Worker replica counts can be adjusted per server using docker compose scaling
 
+### Deployment Profiles
+
+The application uses Docker Compose profiles to organize services into logical deployment groups:
+
+- **web**: PHP-FPM application (required for all scenarios)
+- **local**: Development infrastructure (nginx, redis, mysql, dev tools)
+- **observability**: Monitoring tools (nightwatch)
+- **group1**: 8 workers for local market core processing
+- **group2**: 13 workers for general & trader operations
+- **group3**: 6 workers for supporting operations & external integrations
+
+**Total**: 27 independent queue worker services across 3 worker groups
+
+### Benefits of Profile-Based Architecture
+
+1. **Simplified Deployment**: Use `--profile` flag instead of multiple `-f compose-file.yml` arguments
+2. **Flexible Scaling**: Each worker can be scaled independently using `--scale worker-name=N`
+3. **Clear Separation**: Services are logically grouped by function and deployment target
+4. **Environment-Specific**: Easily enable/disable service groups per environment
+5. **Single Source of Truth**: One `docker-compose.yml` file for all deployment scenarios
+6. **Production Ready**: No hardcoded replica counts - all scaling done at runtime
+
 ### Queue Groups
 
 **Group 1 - Local Market Core Processing (Server A):**
-- `worker-local-market`: local_market, local_market_states, local_market_process
-- `worker-order-initiation`: local_market_order_initiation
-- `worker-buy-commodities`: buy_commodities_local_market_orders
-- `worker-complete-commodities`: complete_commodities_purchased_local_market
+- Commodities settlement: `local_market_commodities_settlement`
+- Eligible quantities tracking: `local_market_eligible_quantities`
+- Order inventories logging: `local_market_order_inventories_units_logging`
+- Order initiation: `local_market_order_initiation`
+- Trader order initiation: `trader_order_initiation`
+- Complete commodities: `complete_commodities_purchased_local_market`
+- Buy commodities: `buy_commodities_local_market_orders`
+- Apply order fees: `apply_order_fees`
 
 **Group 2 - General & Trader Operations (Server B):**
-- `worker-default`: default, notifications, local_market_webhooks, create_trader_orders, local_market_eligible_quantities
-- `worker-trader-initiation`: trader_order_initiation
-- `worker-hold-units`: hold_eligible_units_local_market_orders (with backoff)
-- `worker-settlement`: local_market_commodities_settlement
+- Market states: `local_market_states`
+- Market process: `local_market_process`
+- Eligible quantities: `local_market_eligible_quantities`
+- Hold eligible units: `hold_eligible_units_local_market_orders`
+- Complete commodities: `complete_commodities_purchased_local_market`
+- Refresh eligibilities: `refresh_eligibilities`
+- Notifications: `notifications`
+- Create trader orders: `create_trader_orders`
+- Default queue: `default`
+- Bursam integration: `bursam`
+- Complete purchasing: `complete_purchasing_local_market_orders`
+- Message queue: `mq`
 
 **Group 3 - Supporting Operations & External Integrations (Server C):**
-- `worker-inventory-logging`: local_market_order_inventories_units_logging
-- `worker-refresh-eligibilities`: refresh_eligibilities
-- `worker-order-fees`: apply_order_fees
-- `worker-external-integrations`: bursam, unit-inventory, expire_trader_order (with backoff)
+- Webhooks: `local_market_webhooks`
+- Expire trader orders: `expire_trader_order`
+- Generate units: `unit-inventory`
+- Buy commodities: `buy_commodities_local_market_orders`
+- Notifications: `notifications`
+- Bursam integration: `bursam`
 
 ## b) File Map
 
@@ -47,15 +83,19 @@ This setup implements a production-ready, containerized Laravel API with separat
 docker/
 ├── laravel/
 │   └── Dockerfile                      # Multi-stage PHP 8.2-fpm image with all required extensions
+├── nginx/
+│   └── default.conf                    # Nginx configuration with PHP-FPM proxy and health endpoint
 └── compose/
+    ├── README.md                       # Migration guide from old compose files to profiles
     ├── docker-compose.web.yml          # [DEPRECATED] Use docker-compose.yml with --profile web
     ├── docker-compose.local.yml        # [DEPRECATED] Use docker-compose.yml with --profile local
     ├── docker-compose.group1.yml       # [DEPRECATED] Use docker-compose.yml with --profile group1
     ├── docker-compose.group2.yml       # [DEPRECATED] Use docker-compose.yml with --profile group2
     ├── docker-compose.group3.yml       # [DEPRECATED] Use docker-compose.yml with --profile group3
     ├── docker-compose.mailhog.yml      # [DEPRECATED] Use docker-compose.yml with --profile local
-    └── docker-compose.nightwatch.yml   # [DEPRECATED] Use docker-compose.yml with --profile local
+    └── docker-compose.nightwatch.yml   # [DEPRECATED] Use docker-compose.yml with --profile observability
 docker-compose.yml                       # Consolidated compose file with all services and profiles
+.dockerignore                            # Excludes unnecessary files from Docker build context
 docker.md                                # This documentation file
 ```
 
@@ -71,24 +111,29 @@ All services are organized into profiles for flexible deployment:
 
 **Profile: `local`**
 - Local development infrastructure services
-- nginx (8080), redis (6379), mysql (3306)
-- Development tools: phpMyAdmin (8081), MailHog (8025), Browserless (3002), nightwatch
+- nginx (80), redis (6379), mysql (3306)
+- Development tools: phpMyAdmin (8081), MailHog (8025), Browserless (3002)
 - All services include health checks
 - Use for local development only
 
+**Profile: `observability`**
+- Nightwatch monitoring service
+- Provides a long-running container for debugging and monitoring
+- Independent profile for better separation of concerns
+
 **Profile: `group1`** - Local Market Core Processing
 - 8 worker services for local market core processing queues
-- Includes: commodities settlement, eligible quantities, order initiation, trader orders, etc.
+- Workers: settlement, eligible quantities, inventories logging, order initiation, trader initiation, commodities completion, buy commodities, order fees
 - Deploy on Server A in production
 
 **Profile: `group2`** - General & Trader Operations
 - 13 worker services for general operations and trader processing
-- Includes: default queue, notifications, trader orders, market states, etc.
+- Workers: market states, market process, eligible quantities, hold units, commodities completion, refresh eligibilities, notifications, trader orders, default, bursam, purchasing completion, message queue
 - Deploy on Server B in production
 
 **Profile: `group3`** - Supporting Operations & External Integrations
-- 7 worker services for supporting operations and external integrations
-- Includes: webhooks, order expiration, unit generation, external integrations
+- 6 worker services for supporting operations and external integrations
+- Workers: webhooks, expire trader orders, generate units, buy commodities, notifications, bursam
 - Deploy on Server C in production
 
 ### File Purposes
@@ -103,11 +148,61 @@ All services are organized into profiles for flexible deployment:
 
 **docker-compose.yml**
 - Consolidated compose file with all services
-- Services organized by profiles: web, local, group1, group2, group3
+- Services organized by profiles: web, local, observability, group1, group2, group3
 - Replicas controlled via `--scale` flag at runtime (no hardcoded values)
 - Single source of truth for all deployment scenarios
 
-## c) Build & Run (Local Development)
+**.dockerignore**
+- Excludes unnecessary files from Docker build context
+- Prevents git history, node_modules, vendor, logs, and cache from being copied into images
+- Significantly reduces image build time and size
+
+## c) Migrating from Old Docker Setup
+
+If you're coming from the old docker-compose setup (before December 2025), here's what changed:
+
+### Old Setup (Before)
+```bash
+# Old way - using multiple compose files
+docker compose -f docker/compose/docker-compose.web.yml \
+               -f docker/compose/docker-compose.local.yml \
+               up -d
+
+# Scaling workers
+docker compose -f docker/compose/docker-compose.group1.yml \
+               up -d --scale worker-name=3
+```
+
+### New Setup (Current)
+```bash
+# New way - using profiles
+docker compose --profile web --profile local up -d
+
+# Scaling workers
+docker compose --profile group1 up -d --scale local-market-order-initiation=3
+```
+
+### Key Differences
+
+1. **Single File**: All services now in one `docker-compose.yml` instead of 7 separate files
+2. **Profiles Not Files**: Use `--profile` flag instead of `-f compose-file.yml`
+3. **No Hardcoded Replicas**: Worker counts set at runtime via `--scale`, not in compose file
+4. **Renamed Workers**: Some workers have group suffixes (e.g., `notifications-worker-group2`)
+5. **New Profiles**: Added `observability` profile for nightwatch (previously in `local`)
+6. **Standard Ports**: Nginx now on port 80 (was 8080)
+
+### Migration Checklist
+
+- [ ] Update deployment scripts to use `--profile` instead of `-f`
+- [ ] Update CI/CD pipelines with new profile-based commands
+- [ ] Review worker scaling requirements and update `--scale` flags
+- [ ] Update monitoring to use new service names with group suffixes
+- [ ] Test local development setup with new profile approach
+- [ ] Verify production deployment works with new profiles
+
+For detailed migration examples, see `docker/compose/README.md`.
+
+## d) Build & Run (Local Development)
 
 ### Prerequisites
 
@@ -132,8 +227,8 @@ docker compose --profile web --profile local up -d
 ```
 
 Access points:
-- Application: http://localhost:8080
-- Nginx health: http://localhost:8080/healthz
+- Application: http://localhost
+- Nginx health: http://localhost/healthz
 - phpMyAdmin: http://localhost:8081
 - MailHog: http://localhost:8025
 - Browserless: http://localhost:3002
@@ -182,7 +277,7 @@ docker compose --profile web --profile local down
 docker compose down
 ```
 
-## d) Environment Encryption & Management
+## e) Environment Encryption & Management
 
 ### Overview
 
@@ -320,7 +415,7 @@ rm .env
 unset LARAVEL_ENV_ENCRYPTION_KEY
 ```
 
-## e) Environment Configuration
+## f) Environment Configuration
 
 ### Local Development (.env)
 
@@ -330,13 +425,13 @@ For local development, configure your `.env` file with containerized service hos
 APP_NAME=Lynk
 APP_ENV=local
 APP_DEBUG=true
-APP_URL=http://localhost:8080
+APP_URL=http://localhost
 
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
-DB_DATABASE=laravel
-DB_USERNAME=laravel
+DB_DATABASE=lynk_local
+DB_USERNAME=root
 DB_PASSWORD=secret
 
 REDIS_HOST=redis
@@ -395,7 +490,7 @@ MAIL_ENCRYPTION=tls
 - Do NOT use bind mounts (volumes) in worker group compose files
 - Ensure `.env` file is present on each server but NOT committed to git
 
-## f) Running in Pre-Production / Production (3 Servers)
+## g) Running in Pre-Production / Production (3 Servers)
 
 ### Production Deployment Strategy
 
@@ -457,12 +552,21 @@ docker compose --profile web --profile group3 up -d
 
 ### Load Balancer Configuration
 
-Configure your classic load balancer to distribute traffic across:
-- Server A: `<server-a-ip>:9000` (php-fpm) or use nginx container
-- Server B: `<server-b-ip>:9000` (php-fpm) or use nginx container
-- Server C: `<server-c-ip>:9000` (php-fpm) or use nginx container
+Configure your classic load balancer to distribute traffic across the servers. Each server runs the `app` service (PHP-FPM on port 9000):
 
-**Note**: In production, nginx is typically not needed as you'll use an external load balancer. If you need nginx on each server for some reason, you can add the `local` profile, but it will also start mysql/redis which you may not want in production.
+- Server A: `<server-a-ip>:9000` (FastCGI)
+- Server B: `<server-b-ip>:9000` (FastCGI)
+- Server C: `<server-c-ip>:9000` (FastCGI)
+
+**Using Nginx on Production Servers:**
+If you prefer to use nginx as a reverse proxy on each production server (instead of direct FastCGI from the load balancer):
+
+```bash
+# Include the local profile to get nginx (without mysql/redis if using external services)
+docker compose --profile web --profile group1 up -d nginx
+```
+
+Note: The `local` profile includes nginx, mysql, redis, and dev tools. In production, you may want to run nginx separately or use only the nginx service from the compose file while excluding mysql/redis (which should be external managed services).
 
 ### Scheduler Service (Run on ONE Server Only)
 
@@ -545,7 +649,7 @@ For zero-downtime updates:
    - Server B: repeat
    - Server C: repeat
 
-## g) Health Checks & Logs
+## h) Health Checks & Logs
 
 ### Health Check Endpoints
 
@@ -577,7 +681,7 @@ docker compose --profile web --profile local ps
 
 **Nginx:**
 ```bash
-curl http://localhost:8080/healthz
+curl http://localhost/healthz
 # Expected: OK
 ```
 
@@ -657,18 +761,29 @@ docker stats
 docker stats laravel-app worker-group1
 ```
 
-## h) Changelog
+## i) Changelog
+
+### 2025-12-30 - Nginx Port and Observability Profile Updates
+- **Changed**: Nginx port mapping from 8080 to standard port 80 for production readiness
+- **Refactored**: Moved nightwatch service from `local` profile to new `observability` profile
+- **Improved**: Better separation of concerns between development tools and monitoring services
+- **Updated**: Documentation to reflect port changes and new profile structure
 
 ### 2025-12-14 - Docker Compose Profiles Refactoring
 - **Refactored**: Consolidated all 7 separate compose files into single `docker-compose.yml`
-- **Added**: Profile-based service organization (web, local, group1, group2, group3)
+- **Added**: Profile-based service organization (web, local, observability, group1, group2, group3)
+- **Added**: `.dockerignore` file to exclude unnecessary files from Docker build context
+- **Added**: Migration guide in `docker/compose/README.md` for transitioning from old compose files
 - **Changed**: Deployment uses `--profile` flag instead of multiple `-f` flags
 - **Removed**: Hardcoded `deploy.replicas` values - now controlled via `--scale` flag at runtime
-- **Renamed**: Duplicate worker services across groups with suffixes (e.g., `notifications-worker-group2`, `notifications-worker-group3`)
+- **Renamed**: Duplicate worker services across groups with suffixes for clarity
+  - Example: `notifications-worker-group2`, `notifications-worker-group3`
+  - Example: `buy-commodities-local-market-orders-worker-group1`, `buy-commodities-local-market-orders-worker-group3`
 - **Simplified**: Single source of truth for all deployment scenarios
 - **Updated**: All documentation commands to use profile-based approach
+- **Optimized**: Docker build context with .dockerignore reduces build time and image size
 - **Benefit**: Simplified deployment, better organization, runtime flexibility for replica scaling
-- **Deprecated**: All files in `docker/compose/` directory (kept for reference)
+- **Deprecated**: All files in `docker/compose/` directory (kept for reference only)
 
 ### 2025-12-10 - Environment Encryption Implementation
 - **Added**: Laravel env:encrypt integration for secure environment management
@@ -681,7 +796,7 @@ docker stats laravel-app worker-group1
 - **Documentation**: Added comprehensive environment encryption guide (section d)
 - **GitHub Secrets**: Each environment requires `ENV_ENCRYPTION_KEY` and `ENV_ENCRYPTED_CONTENT`
 
-## i) Changelog (Historical)
+## j) Changelog (Historical)
 
 ### 2025-11-16 - Worker Groups Reorganization
 - **Updated**: Reorganized worker groups based on actual production queue configuration
