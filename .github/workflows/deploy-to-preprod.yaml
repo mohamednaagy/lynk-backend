@@ -1,344 +1,54 @@
-name: Deploy to Preprod (Docker)
+name: deploy on pre-production
 
 on:
-    workflow_dispatch:
-    push:
-        branches:
-            - pre-production
-
-concurrency:
-    group: deploy-preprod
-    cancel-in-progress: false
+  workflow_dispatch:
+  push:
+    branches:
+      - pre-production
 
 jobs:
-    setup:
-        runs-on: ubuntu-latest
-        environment: pre-production
-        outputs:
-            servers: ${{ steps.set-servers.outputs.servers }}
-        steps:
-            - name: Set server IPs from environment variable
-              id: set-servers
-              env:
-                  SERVERS_JSON: ${{ vars.DEPLOYMENT_SERVER_IPS }}
-              run: |
-                  # Use env variable to avoid bash quote interpretation
-                  echo "servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
+  deploy:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+    runs-on:
+      group: pre-prod-runner-group
+      labels: [self-hosted]
+    steps:
+      # Pull and build code on Backend Preprod Server 1
+      - name: pulling and build code on backend preprod server 1
+        id: pull-and-build-backend-preprod-server-1
+        run: |
+          ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_1 }}@${{ secrets.BACKEND_PREPRD_1_IP }} \
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan package:discover && sudo php artisan structure:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
 
-    build:
-        runs-on: [self-hosted, backend]
-        environment: pre-production
+      # Pull and build code on Backend Preprod Server 2
+      - name: pulling and build code on backend preprod server 2
+        id: pull-and-build-backend-preprod-server-2
+        run: |
+          ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_2 }}@${{ secrets.BACKEND_PREPRD_2_IP }} \
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan structure:clear && sudo supervisorctl stop all && sudo supervisorctl start all"
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  ref: pre-production
+      # Pull and build code on Backend Preprod Server 3
+      - name: pulling and build code on backend preprod server 3
+        id: pull-and-build-backend-preprod-server-3
+        run: |
+          ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no ${{ secrets.BACKEND_USER_PREPRD_3 }}@${{ secrets.BACKEND_PREPRD_3_IP }} \
+           "cd /var/www/lynk-backend/ && sudo git pull origin pre-production && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate --force && sudo php artisan structure:clear && sudo supervisorctl stop all && sudo supervisorctl start all"
 
-            - name: Write encrypted environment from secret
-              run: |
-                  echo "${{ secrets.ENV_ENCRYPTED_CONTENT }}" > .env.preprod.encrypted
-                  if [ ! -f ".env.preprod.encrypted" ] || [ ! -s ".env.preprod.encrypted" ]; then
-                    echo "❌ Error: Failed to write encrypted env file"
-                    exit 1
-                  fi
-                  echo "✅ Encrypted environment file created"
+      # Set PR URL if the event is 'pull_request' or 'pull_request_target'
+      - name: set pr url
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        id: pr-url
+        uses: kceb/pull-request-url-action@v1
+        with:
+          github-oauth-token: ${{ secrets.GB_OAUTH_TOKEN }}
 
-            - name: Install composer dependencies
-              run: composer install --no-dev --no-scripts --no-interaction --prefer-dist
-
-            - name: Decrypt environment file
-              env:
-                  LARAVEL_ENV_ENCRYPTION_KEY: ${{ secrets.ENV_ENCRYPTION_KEY }}
-              run: |
-                  php artisan env:decrypt --env=preprod --force
-                  if [ ! -f ".env" ]; then
-                    echo "❌ Failed to decrypt environment file"
-                    exit 1
-                  fi
-                  echo "✅ Environment decrypted successfully"
-
-            - name: Build PHP-FPM image
-              run: |
-                  docker build -t lynk-backend:${{ github.sha }}-preprod \
-                    -t lynk-backend:preprod-latest \
-                    -f docker/laravel/Dockerfile .
-
-            - name: Save and compress Docker image
-              run: |
-                  # Save image to tar file
-                  docker save lynk-backend:${{ github.sha }}-preprod | gzip > /tmp/lynk-backend-preprod.tar.gz
-
-                  # Show compressed size
-                  echo "Compressed image size:"
-                  ls -lh /tmp/lynk-backend-preprod.tar.gz
-
-    deploy-server-1:
-        needs: [build, setup]
-        runs-on: [self-hosted, backend]
-        environment: pre-production
-
-        steps:
-            - name: Checkout code (for docker-compose files)
-              uses: actions/checkout@v4
-              with:
-                  ref: pre-production
-
-            - name: Get first server IP
-              id: server
-              run: |
-                  SERVERS='${{ needs.setup.outputs.servers }}'
-                  SERVER_1=$(echo $SERVERS | jq -r '.[0]')
-                  echo "ip=$SERVER_1" >> $GITHUB_OUTPUT
-
-            - name: Transfer image and compose files to server 1
-              run: |
-                  # Transfer image
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    /tmp/lynk-backend-preprod.tar.gz \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
-
-                  # Transfer docker-compose files
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no -r \
-                    docker/compose \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
-
-                  echo "All files transferred to server 1"
-
-            - name: Deploy on server 1 (Base + Scheduler + Group 1)
-              run: |
-                  ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
-                    set -euo pipefail
-
-                    # Load new image
-                    echo '📦 Loading Docker image...'
-                    gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
-                    docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
-
-                    # Clean up compressed file
-                    rm -f /tmp/lynk-backend-preprod.tar.gz
-
-                    # Prepare deployment directory
-                    sudo mkdir -p /var/www/lynk-backend/docker
-                    cd /var/www/lynk-backend
-
-                    # Copy docker-compose files
-                    sudo cp -r /tmp/lynk-backend-compose/compose docker/
-                    sudo rm -rf /tmp/lynk-backend-compose
-
-                    # Run migrations (only on server 1)
-                    echo '🗄️  Running database migrations...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan migrate --force
-
-                    # Cache optimization
-                    echo '⚡ Optimizing caches...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan config:cache
-
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      run --rm app php artisan route:cache
-
-                    # Deploy server 1: Base + Scheduler + Worker Group 1
-                    echo '🚀 Deploying server 1 services...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      -f docker/compose/docker-compose.scheduler.yml \
-                      -f docker/compose/docker-compose.group1.yml \
-                      up -d --force-recreate
-
-                    # Wait for services to start
-                    echo '⏳ Waiting for services to start...'
-                    sleep 15
-
-                    # Verify deployment
-                    echo '✅ Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      -f docker/compose/docker-compose.scheduler.yml \
-                      -f docker/compose/docker-compose.group1.yml \
-                      ps
-
-                    echo '🎉 Server 1 deployment completed successfully'
-                  "
-
-    deploy-server-2:
-        needs: [build, setup, deploy-server-1]
-        runs-on: [self-hosted, backend]
-        environment: pre-production
-
-        steps:
-            - name: Checkout code (for docker-compose files)
-              uses: actions/checkout@v4
-              with:
-                  ref: pre-production
-
-            - name: Get second server IP
-              id: server
-              run: |
-                  SERVERS='${{ needs.setup.outputs.servers }}'
-                  SERVER_2=$(echo $SERVERS | jq -r '.[1]')
-                  echo "ip=$SERVER_2" >> $GITHUB_OUTPUT
-
-            - name: Transfer image and compose files to server 2
-              run: |
-                  # Transfer image
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    /tmp/lynk-backend-preprod.tar.gz \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
-
-                  # Transfer docker-compose files
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no -r \
-                    docker/compose \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
-
-                  echo "All files transferred to server 2"
-
-            - name: Deploy on server 2 (Base + Group 2)
-              run: |
-                  ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
-                    set -euo pipefail
-
-                    # Load new image
-                    echo '📦 Loading Docker image...'
-                    gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
-                    docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
-
-                    # Clean up compressed file
-                    rm -f /tmp/lynk-backend-preprod.tar.gz
-
-                    # Prepare deployment directory
-                    sudo mkdir -p /var/www/lynk-backend/docker
-                    cd /var/www/lynk-backend
-
-                    # Copy docker-compose files
-                    sudo cp -r /tmp/lynk-backend-compose/compose docker/
-                    sudo rm -rf /tmp/lynk-backend-compose
-
-                    # Deploy server 2: Base + Worker Group 2
-                    echo '🚀 Deploying server 2 services...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      -f docker/compose/docker-compose.group2.yml \
-                      up -d --force-recreate
-
-                    # Wait for services to start
-                    echo '⏳ Waiting for services to start...'
-                    sleep 15
-
-                    # Verify deployment
-                    echo '✅ Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      -f docker/compose/docker-compose.group2.yml \
-                      ps
-
-                    echo '🎉 Server 2 deployment completed successfully'
-                  "
-
-    deploy-server-3:
-        needs: [build, setup, deploy-server-2]
-        runs-on: [self-hosted, backend]
-        environment: pre-production
-
-        steps:
-            - name: Checkout code (for docker-compose files)
-              uses: actions/checkout@v4
-              with:
-                  ref: pre-production
-
-            - name: Get third server IP
-              id: server
-              run: |
-                  SERVERS='${{ needs.setup.outputs.servers }}'
-                  SERVER_3=$(echo $SERVERS | jq -r '.[2]')
-                  echo "ip=$SERVER_3" >> $GITHUB_OUTPUT
-
-            - name: Transfer image and compose files to server 3
-              run: |
-                  # Transfer image
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    /tmp/lynk-backend-preprod.tar.gz \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
-
-                  # Transfer docker-compose files
-                  scp -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no -r \
-                    docker/compose \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/
-
-                  echo "All files transferred to server 3"
-
-            - name: Deploy on server 3 (Base + Group 3)
-              run: |
-                  ssh -i ~/.ssh/lynk-backend.pem -o StrictHostKeyChecking=no \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
-                    set -euo pipefail
-
-                    # Load new image
-                    echo '📦 Loading Docker image...'
-                    gunzip -c /tmp/lynk-backend-preprod.tar.gz | docker load
-                    docker tag lynk-backend:${{ github.sha }}-preprod app-php-fpm:preprod-latest
-
-                    # Clean up compressed file
-                    rm -f /tmp/lynk-backend-preprod.tar.gz
-
-                    # Prepare deployment directory
-                    sudo mkdir -p /var/www/lynk-backend/docker
-                    cd /var/www/lynk-backend
-
-                    # Copy docker-compose files
-                    sudo cp -r /tmp/lynk-backend-compose/compose docker/
-                    sudo rm -rf /tmp/lynk-backend-compose
-
-                    # Deploy server 3: Base + Worker Group 3
-                    echo '🚀 Deploying server 3 services...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      -f docker/compose/docker-compose.group3.yml \
-                      up -d --force-recreate
-
-                    # Wait for services to start
-                    echo '⏳ Waiting for services to start...'
-                    sleep 15
-
-                    # Verify deployment
-                    echo '✅ Verifying deployment...'
-                    docker compose -f docker/compose/docker-compose.web.yml \
-                      -f docker/compose/docker-compose.group3.yml \
-                      ps
-
-                    echo '🎉 Server 3 deployment completed successfully'
-                  "
-
-            - name: Cleanup local image
-              if: always()
-              run: |
-                  rm -f /tmp/lynk-backend-preprod.tar.gz
-
-    notify:
-        needs: [deploy-server-1, deploy-server-2, deploy-server-3]
+      - name: print info
         if: always()
-        runs-on: ubuntu-latest
-        environment: pre-production
+        run: |
+          echo "Repository Name: $GITHUB_REPOSITORY"
+          echo "Branch Name: $GITHUB_REF"
+          echo "pr-url: ${{ steps.pr-url.outputs.url }}"
+          echo "Execution Time: $(date)"
+          echo "Workflow Status: ${{ job.status }}"
 
-        steps:
-            - name: Send Slack notification
-              run: |
-                  # Build PR URL if applicable
-                  PR_URL="${{ github.event.pull_request.html_url }}"
-                  if [ -z "$PR_URL" ]; then
-                    PR_URL="N/A"
-                  fi
-
-                  DEPLOYMENT_STATUS="✅ SUCCESS"
-                  if [ "${{ needs.deploy-server-1.result }}" != "success" ] || [ "${{ needs.deploy-server-2.result }}" != "success" ] || [ "${{ needs.deploy-server-3.result }}" != "success" ]; then
-                    DEPLOYMENT_STATUS="❌ FAILED"
-                  fi
-
-                  echo "Repository Name: $GITHUB_REPOSITORY"
-                  echo "Branch Name: $GITHUB_REF"
-                  echo "PR URL: $PR_URL"
-                  echo "Execution Time: $(date)"
-                  echo "Deployment Status: $DEPLOYMENT_STATUS"
-                  echo "Docker Image Tag: ${{ github.sha }}"
-
-                  curl -X POST -H 'Content-type: application/json' --data '{
-                    "text":"🐳 Backend Docker Deployment (Preprod)\n*Status:* '"$DEPLOYMENT_STATUS"'\n*Repository:* '"$GITHUB_REPOSITORY"'\n*Branch:* '"$GITHUB_REF"'\n*Image Tag:* '"${{ github.sha }}"'\n*Time:* '"$(date)"'\n*PR URL:* '"$PR_URL"'"
-                  }' ${{ secrets.SLACK_HOOK_URL }}
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"${{ steps.pr-url.outputs.url }}"'"}' ${{ secrets.SLACK_HOOK_URL }}
