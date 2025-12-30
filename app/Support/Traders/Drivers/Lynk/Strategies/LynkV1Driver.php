@@ -26,6 +26,7 @@ use App\Jobs\TraderOrder\AutoCompleteSell\ProcessAutoCompleteSell;
 use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
+use App\Services\FinancingOrder\FinancingOrderCancellationStatusResolver;
 use App\Services\GetSuitableCommodityTypesService;
 use App\Services\TraderOrder\TimeLimitService;
 use App\Support\Traders\Clients\LynkClient;
@@ -294,20 +295,8 @@ class LynkV1Driver implements Deliverable, TraderInterface
 
     public function updateFinancingOrderStatusAfterCancellation(TraderOrder $traderOrder, int $cancelReason): void
     {
-        $order = $traderOrder->order;
-        $lender = $order->lender;
-        if ($order->status->is(FinancingOrderStatus::PendingCancellation)) {
-            $this->updateOrderStatus($order, FinancingOrderStatus::Cancelled);
-        } elseif ($order->status->is(FinancingOrderStatus::InProgress)) {
-            if (
-                $lender->lenderDetail->preferred_market_type->is(CompanyMarketType::Local())
-                && ($cancelReason == TraderOrderCancelReason::FailureToPurchase || $cancelReason == TraderOrderCancelReason::FailureToSellAtLocalMarket)
-            ) {
-                $this->updateOrderStatus($order, FinancingOrderStatus::TradingFailure);
-            } else {
-                $this->updateOrderStatus($order, FinancingOrderStatus::PendingTraderOrder);
-            }
-        }
+        $nextStatus = app(FinancingOrderCancellationStatusResolver::class)->resolve($traderOrder->order, $cancelReason);
+        $this->updateOrderStatus($traderOrder->order, $nextStatus);
     }
 
     protected function canRetryOrder(TraderOrder $traderOrder): bool
