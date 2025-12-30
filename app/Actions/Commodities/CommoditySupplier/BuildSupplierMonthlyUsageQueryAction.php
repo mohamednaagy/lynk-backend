@@ -26,11 +26,11 @@ class BuildSupplierMonthlyUsageQueryAction implements BuildSupplierMonthlyUsageQ
             ->where('collection_name', ReportType::SupplierMonthlyUsage);
 
         if ($this->dateFrom) {
-            $query->where('created_at', '>=', Carbon::parse($this->dateFrom)->startOfDay());
+            $query->where('created_at', '>=', toUtc(Carbon::parse($this->dateFrom, 'Asia/Riyadh')->startOfDay()));
         }
 
         if ($this->dateTo) {
-            $query->where('created_at', '<=', Carbon::parse($this->dateTo)->endOfDay());
+            $query->where('created_at', '<=', toUtc(Carbon::parse($this->dateTo, 'Asia/Riyadh')->endOfDay()));
         }
 
         return $query->latest('id');
