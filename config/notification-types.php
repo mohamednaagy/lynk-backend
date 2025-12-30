@@ -20,9 +20,11 @@ return [
             ],
         ],
         'roles' => [
-            Role::LenderAdmin,
-            Role::LenderOrderCreator,
             Role::Admin,
+            Role::Manager,
+            Role::LenderAdmin,
+            Role::LenderSupervisor,
+            Role::LenderOrderCreator,
         ],
     ],
     SystemNotificationType::ORDER_CANCELLED->value => [
@@ -38,9 +40,11 @@ return [
             ],
         ],
         'roles' => [
-            Role::LenderAdmin,
-            Role::LenderOrderCreator,
             Role::Admin,
+            Role::Manager,
+            Role::LenderAdmin,
+            Role::LenderSupervisor,
+            Role::LenderOrderCreator,
         ],
     ],
     SystemNotificationType::ORDER_REQUIRES_APPROVAL->value => [
@@ -56,9 +60,11 @@ return [
             ],
         ],
         'roles' => [
+            Role::Admin,
+            Role::Manager,
             Role::LenderAdmin,
             Role::LenderSupervisor,
-            Role::Admin,
+            Role::LenderOrderCreator,
         ],
     ],
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => [
@@ -75,6 +81,7 @@ return [
         ],
         'roles' => [
             Role::Admin,
+            Role::Manager,
         ],
     ],
     SystemNotificationType::ORDER_CREATED->value => [
@@ -90,9 +97,8 @@ return [
             ],
         ],
         'roles' => [
-            Role::LenderAdmin,
-            Role::LenderOrderCreator,
             Role::Admin,
+            Role::Manager,
         ],
     ],
     SystemNotificationType::ORDER_APPROVED->value => [
@@ -108,27 +114,12 @@ return [
             ],
         ],
         'roles' => [
-            Role::LenderAdmin,
-            Role::LenderOrderCreator,
             Role::Admin,
-        ],
-    ],
-    SystemNotificationType::INVOICE_PAID->value => [
-        'label' => 'notification-types.invoice_paid.label',
-        'channels' => [
-            NotificationChannel::PLATFORM->value => [
-                'default' => false,
-                'is_editable' => false,
-            ],
-            NotificationChannel::MAIL->value => [
-                'default' => false,
-                'is_editable' => true,
-            ],
-        ],
-        'roles' => [
+            Role::Manager,
             Role::LenderAdmin,
+            Role::LenderApiUser,
+            Role::LenderSupervisor,
             Role::LenderOrderCreator,
-            Role::Admin,
         ],
     ],
     SystemNotificationType::LENDER_REGISTERED->value => [
@@ -145,6 +136,7 @@ return [
         ],
         'roles' => [
             Role::Admin,
+            Role::Manager,
         ],
     ],
     SystemNotificationType::NEW_SIGN_IN->value => [
@@ -161,8 +153,12 @@ return [
         ],
         'roles' => [
             Role::Admin,
+            Role::Manager,
             Role::LenderAdmin,
+            Role::LenderSupervisor,
+            Role::LenderBilling,
             Role::LenderOrderCreator,
+            Role::SupplierAdmin,
         ],
     ],
 ];
