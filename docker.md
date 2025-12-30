@@ -202,28 +202,22 @@ docker compose --profile group1 up -d --scale local-market-order-initiation=3
 
 For detailed migration examples, see `docker/compose/README.md`.
 
-## d) Build & Run (Local Development)
+## d) Environment-Specific Deployment Commands
 
-### Prerequisites
+This section provides ready-to-use commands for deploying the application in different environments with production-grade worker scaling.
 
-- Docker 20.10+ and Docker Compose 2.0+
-- Git repository cloned
-- `.env` file configured (copy from `.env.example`)
+### Local Development Environment
 
-### Build the Base Image
+**Purpose**: Development with all services running locally at minimal scale (1 replica per worker)
 
-From the repository root:
-
+**Build the image:**
 ```bash
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 ```
 
-### Start Base Application + Local Infrastructure
-
-Start the app, nginx, redis, mysql, and dev tools:
-
+**Start all services:**
 ```bash
-docker compose --profile web --profile local up -d
+docker compose --profile web --profile local --profile group1 --profile group2 --profile group3 up -d
 ```
 
 Access points:
@@ -233,49 +227,226 @@ Access points:
 - MailHog: http://localhost:8025
 - Browserless: http://localhost:3002
 
-### Start Worker Groups (Local)
+**Note**: Local development runs all workers at scale 1 (default) for resource efficiency.
 
-**Group 1 only:**
+**Stop all services:**
 ```bash
-docker compose --profile web --profile local --profile group1 up -d
-```
-
-**Group 2 only:**
-```bash
-docker compose --profile web --profile local --profile group2 up -d
-```
-
-**All groups:**
-```bash
-docker compose --profile web --profile local --profile group1 --profile group2 --profile group3 up -d
-```
-
-### Scale Worker Groups Locally
-
-To run more replicas of specific workers:
-
-```bash
-# Scale a single worker to 3 replicas
-docker compose --profile group1 up -d --scale local-market-order-initiation=3
-
-# Scale multiple workers in group1
-docker compose --profile group1 up -d \
-  --scale local-market-order-initiation=3 \
-  --scale trader-order-initiation=2 \
-  --scale buy-commodities-local-market-orders-worker-group1=2
-```
-
-**Note**: Worker replicas are controlled entirely via the `--scale` flag. There are no hardcoded replica values in the compose file.
-
-### Stop All Services
-
-```bash
-# Stop specific profiles
-docker compose --profile web --profile local down
-
-# Stop all services (all profiles)
 docker compose down
 ```
+
+### Sandbox Environment
+
+**Purpose**: Single-server testing environment with all worker groups running together at production scale
+
+**Command:**
+```bash
+docker compose --profile web --profile observability --profile group1 --profile group2 --profile group3 up -d \
+  --scale local-market-states-worker=8 \
+  --scale local-market-webhooks-worker=5 \
+  --scale local-market-process-worker=8 \
+  --scale local-market-expire-trader-order-worker=8 \
+  --scale local-market-commodities-settlement-worker=8 \
+  --scale local-market-eligible-quantities-worker-group1=8 \
+  --scale local-market-eligible-quantities-worker-group2=8 \
+  --scale local-market-order-inventories-units-logging=5 \
+  --scale local-market-order-initiation=5 \
+  --scale trader-order-initiation=5 \
+  --scale local-market-generate-units=1 \
+  --scale hold-eligible-local-order-units-worker=5 \
+  --scale complete-commodities-purchased-local-market-worker-group1=5 \
+  --scale complete-commodities-purchased-local-market-worker-group2=5 \
+  --scale buy-commodities-local-market-orders-worker-group1=5 \
+  --scale buy-commodities-local-market-orders-worker-group3=5 \
+  --scale refresh-eligibilities-worker=1 \
+  --scale notifications-worker-group2=5 \
+  --scale notifications-worker-group3=5 \
+  --scale create-trader-orders-worker=8 \
+  --scale default-worker=8 \
+  --scale bursam-worker-group2=1 \
+  --scale bursam-worker-group3=1 \
+  --scale apply-order-fees-worker=1 \
+  --scale complete-purchasing-local-market-orders-worker=5 \
+  --scale message-queue-worker=2
+```
+
+**Total Workers**: 27 services with 142 total replicas across all groups
+
+### Pre-Production Environment (3 Servers)
+
+**Architecture**: Distributed deployment across 3 servers behind a load balancer
+
+#### Server A (Pre-Prod) - Web + Group 1 Workers
+
+```bash
+# Build image
+docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+
+# Start app + Group 1 workers with production scaling
+docker compose --profile web --profile group1 up -d \
+  --scale local-market-commodities-settlement-worker=8 \
+  --scale local-market-eligible-quantities-worker-group1=8 \
+  --scale local-market-order-inventories-units-logging=5 \
+  --scale local-market-order-initiation=5 \
+  --scale trader-order-initiation=5 \
+  --scale complete-commodities-purchased-local-market-worker-group1=5 \
+  --scale buy-commodities-local-market-orders-worker-group1=5 \
+  --scale apply-order-fees-worker=1
+```
+
+**Group 1 Total**: 8 services, 42 replicas
+
+#### Server B (Pre-Prod) - Web + Group 2 Workers
+
+```bash
+# Build image
+docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+
+# Start app + Group 2 workers with production scaling
+docker compose --profile web --profile group2 up -d \
+  --scale local-market-states-worker=8 \
+  --scale local-market-process-worker=8 \
+  --scale local-market-eligible-quantities-worker-group2=8 \
+  --scale hold-eligible-local-order-units-worker=5 \
+  --scale complete-commodities-purchased-local-market-worker-group2=5 \
+  --scale refresh-eligibilities-worker=1 \
+  --scale notifications-worker-group2=5 \
+  --scale create-trader-orders-worker=8 \
+  --scale default-worker=8 \
+  --scale bursam-worker-group2=1 \
+  --scale complete-purchasing-local-market-orders-worker=5 \
+  --scale message-queue-worker=2
+```
+
+**Group 2 Total**: 12 services, 64 replicas
+
+#### Server C (Pre-Prod) - Web + Group 3 Workers
+
+```bash
+# Build image
+docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+
+# Start app + Group 3 workers with production scaling
+docker compose --profile web --profile group3 up -d \
+  --scale local-market-webhooks-worker=5 \
+  --scale local-market-expire-trader-order-worker=8 \
+  --scale local-market-generate-units=1 \
+  --scale buy-commodities-local-market-orders-worker-group3=5 \
+  --scale notifications-worker-group3=5 \
+  --scale bursam-worker-group3=1
+```
+
+**Group 3 Total**: 6 services, 25 replicas
+
+### Production Environment (3 Servers)
+
+**Architecture**: Same as pre-production - distributed deployment across 3 servers behind a load balancer
+
+#### Server A (Production) - Web + Group 1 Workers
+
+```bash
+# Build image (or pull from registry)
+docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+
+# Start app + Group 1 workers with production scaling
+docker compose --profile web --profile group1 up -d \
+  --scale local-market-commodities-settlement-worker=8 \
+  --scale local-market-eligible-quantities-worker-group1=8 \
+  --scale local-market-order-inventories-units-logging=5 \
+  --scale local-market-order-initiation=5 \
+  --scale trader-order-initiation=5 \
+  --scale complete-commodities-purchased-local-market-worker-group1=5 \
+  --scale buy-commodities-local-market-orders-worker-group1=5 \
+  --scale apply-order-fees-worker=1
+```
+
+#### Server B (Production) - Web + Group 2 Workers
+
+```bash
+# Build image (or pull from registry)
+docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+
+# Start app + Group 2 workers with production scaling
+docker compose --profile web --profile group2 up -d \
+  --scale local-market-states-worker=8 \
+  --scale local-market-process-worker=8 \
+  --scale local-market-eligible-quantities-worker-group2=8 \
+  --scale hold-eligible-local-order-units-worker=5 \
+  --scale complete-commodities-purchased-local-market-worker-group2=5 \
+  --scale refresh-eligibilities-worker=1 \
+  --scale notifications-worker-group2=5 \
+  --scale create-trader-orders-worker=8 \
+  --scale default-worker=8 \
+  --scale bursam-worker-group2=1 \
+  --scale complete-purchasing-local-market-orders-worker=5 \
+  --scale message-queue-worker=2
+```
+
+#### Server C (Production) - Web + Group 3 Workers
+
+```bash
+# Build image (or pull from registry)
+docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+
+# Start app + Group 3 workers with production scaling
+docker compose --profile web --profile group3 up -d \
+  --scale local-market-webhooks-worker=5 \
+  --scale local-market-expire-trader-order-worker=8 \
+  --scale local-market-generate-units=1 \
+  --scale buy-commodities-local-market-orders-worker-group3=5 \
+  --scale notifications-worker-group3=5 \
+  --scale bursam-worker-group3=1
+```
+
+### Worker Replica Summary by Environment
+
+| Environment | Group 1 Replicas | Group 2 Replicas | Group 3 Replicas | Total Replicas |
+|-------------|------------------|------------------|------------------|----------------|
+| Local       | 8 (scale 1)      | 12 (scale 1)     | 6 (scale 1)      | 26             |
+| Sandbox     | 42               | 64               | 25               | 131            |
+| Pre-Prod    | 42               | 64               | 25               | 131            |
+| Production  | 42               | 64               | 25               | 131            |
+
+### Worker Scale Reference by Group
+
+**Group 1 Workers:**
+- `local-market-commodities-settlement-worker`: 8 replicas
+- `local-market-eligible-quantities-worker-group1`: 8 replicas
+- `local-market-order-inventories-units-logging`: 5 replicas
+- `local-market-order-initiation`: 5 replicas
+- `trader-order-initiation`: 5 replicas
+- `complete-commodities-purchased-local-market-worker-group1`: 5 replicas
+- `buy-commodities-local-market-orders-worker-group1`: 5 replicas
+- `apply-order-fees-worker`: 1 replica
+
+**Group 2 Workers:**
+- `local-market-states-worker`: 8 replicas
+- `local-market-process-worker`: 8 replicas
+- `local-market-eligible-quantities-worker-group2`: 8 replicas
+- `hold-eligible-local-order-units-worker`: 5 replicas
+- `complete-commodities-purchased-local-market-worker-group2`: 5 replicas
+- `refresh-eligibilities-worker`: 1 replica
+- `notifications-worker-group2`: 5 replicas
+- `create-trader-orders-worker`: 8 replicas
+- `default-worker`: 8 replicas
+- `bursam-worker-group2`: 1 replica
+- `complete-purchasing-local-market-orders-worker`: 5 replicas
+- `message-queue-worker`: 2 replicas
+
+**Group 3 Workers:**
+- `local-market-webhooks-worker`: 5 replicas
+- `local-market-expire-trader-order-worker`: 8 replicas
+- `local-market-generate-units`: 1 replica
+- `buy-commodities-local-market-orders-worker-group3`: 5 replicas
+- `notifications-worker-group3`: 5 replicas
+- `bursam-worker-group3`: 1 replica
+
+### Deployment Notes
+
+1. **Local Development**: No scaling needed, all workers default to 1 replica
+2. **Sandbox**: All groups on one server, use all --scale flags together
+3. **Pre-Prod/Prod**: Each server runs app + one worker group with specific scaling
+4. **Load Balancer**: Configure to distribute traffic across all 3 servers on port 9000 (FastCGI)
+5. **Monitoring**: Use `docker compose ps` to verify all replicas are running healthy
 
 ## e) Environment Encryption & Management
 
@@ -490,64 +661,55 @@ MAIL_ENCRYPTION=tls
 - Do NOT use bind mounts (volumes) in worker group compose files
 - Ensure `.env` file is present on each server but NOT committed to git
 
-## g) Running in Pre-Production / Production (3 Servers)
+## g) Additional Production Deployment Information
 
 ### Production Deployment Strategy
 
 In production, deploy the application across three servers behind a classic load balancer:
 
-- **Server A**: Base app + Worker Group 1 (4 workers for local market core processing)
-- **Server B**: Base app + Worker Group 2 (4 workers for general & trader operations)
-- **Server C**: Base app + Worker Group 3 (4 workers for supporting operations & external integrations)
+- **Server A**: Base app + Worker Group 1 (8 services, 42 replicas)
+- **Server B**: Base app + Worker Group 2 (12 services, 64 replicas)
+- **Server C**: Base app + Worker Group 3 (6 services, 25 replicas)
 
-Each server runs the base `app` service to handle HTTP requests via the load balancer, plus its designated worker group (4 worker containers per group).
+Each server runs the base `app` service to handle HTTP requests via the load balancer, plus its designated worker group with production-scale replicas.
+
+**For complete deployment commands with all --scale flags, see Section d) Environment-Specific Deployment Commands above.**
 
 ### Prerequisites (Each Server)
 
-1. Docker and Docker Compose installed
+1. Docker 20.10+ and Docker Compose 2.0+ installed
 2. Application code deployed (git clone or CI/CD)
-3. `.env` file configured with production credentials
+3. `.env` file configured with production credentials (see Section f)
 4. Image built and tagged: `docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .`
    - OR pull from a container registry if using CI/CD
 
-### Server A: Base App + Group 1 Workers
+### Quick Start Commands
 
-SSH to Server A and run:
-
+**Server A (Production):**
 ```bash
 cd /path/to/lynk-backend
-
-# Build image (or pull from registry)
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
-
-# Start base app + worker group 1
-docker compose --profile web --profile group1 up -d
+# See Section d) for full command with all --scale flags
+docker compose --profile web --profile group1 up -d \
+  --scale local-market-commodities-settlement-worker=8 \
+  # ... (see Section d for complete command)
 ```
 
-### Server B: Base App + Group 2 Workers
-
-SSH to Server B and run:
-
+**Server B (Production):**
 ```bash
 cd /path/to/lynk-backend
-
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
-
-# Start base app + worker group 2
-docker compose --profile web --profile group2 up -d
+# See Section d) for full command with all --scale flags
+docker compose --profile web --profile group2 up -d \
+  --scale local-market-states-worker=8 \
+  # ... (see Section d for complete command)
 ```
 
-### Server C: Base App + Group 3 Workers
-
-SSH to Server C and run:
-
+**Server C (Production):**
 ```bash
 cd /path/to/lynk-backend
-
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
-
-# Start base app + worker group 3
-docker compose --profile web --profile group3 up -d
+# See Section d) for full command with all --scale flags
+docker compose --profile web --profile group3 up -d \
+  --scale local-market-webhooks-worker=5 \
+  # ... (see Section d for complete command)
 ```
 
 ### Load Balancer Configuration
@@ -604,37 +766,32 @@ docker compose exec app php artisan route:cache
 
 ### Scaling Worker Groups in Production
 
-To scale specific workers horizontally using the `--scale` flag:
+Production scaling is defined in **Section d) Environment-Specific Deployment Commands** with recommended replica counts for each worker.
 
-**Scale individual workers:**
+**To adjust scaling dynamically:**
 
 ```bash
-# On Server A - Scale group1 workers
-docker compose --profile group1 up -d --scale local-market-order-initiation=3
+# View current replica counts
+docker compose ps
 
-# Scale multiple workers in Group 1
+# Scale specific workers (example)
 docker compose --profile group1 up -d \
-  --scale local-market-order-initiation=3 \
-  --scale trader-order-initiation=2 \
-  --scale buy-commodities-local-market-orders-worker-group1=2
+  --scale local-market-order-initiation=10 \
+  --scale trader-order-initiation=7
 
-# On Server B - Scale group2 workers
-docker compose --profile group2 up -d \
-  --scale default-worker=5 \
-  --scale notifications-worker-group2=3
-
-# On Server C - Scale group3 workers
-docker compose --profile group3 up -d \
-  --scale local-market-webhooks-worker=2
-```
-
-**View worker service names:**
-```bash
-# List all services in a profile
+# View all available worker service names
 docker compose --profile group1 config --services
 ```
 
-**Vertical Scaling**: To handle higher load, allocate more CPU/memory to specific servers or adjust queue worker timeout/tries values in the compose files.
+**Scaling Strategies:**
+1. **Horizontal Scaling**: Adjust `--scale` values per worker based on queue depth and processing time
+2. **Vertical Scaling**: Allocate more CPU/memory to specific servers in your infrastructure
+3. **Queue Monitoring**: Monitor queue depths to determine which workers need more replicas
+
+**Recommended Production Scaling** (see Section d for full details):
+- High-volume queues (states, process, settlement): 8 replicas
+- Medium-volume queues (notifications, trader orders): 5 replicas
+- Low-volume queues (refresh, fees, bursam): 1 replica
 
 ### Blue-Green Deployment / Zero-Downtime Updates
 

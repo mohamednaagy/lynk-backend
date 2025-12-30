@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: docker/laravel/Dockerfile
     image: app-php-fpm:latest
-    container_name: laravel-app
+    container_name: lynk-laravel-app
     working_dir: /var/www/html
     restart: unless-stopped
     env_file:
@@ -27,7 +27,7 @@ services:
   nginx:
     profiles: ["local"]
     image: nginx:alpine
-    container_name: laravel-nginx
+    container_name: lynk-laravel-nginx
     restart: unless-stopped
     ports:
       - "80:80"
@@ -66,23 +66,28 @@ services:
 
   mysql:
     profiles: ["local"]
-    image: "mysql:8.0"
-    env_file:
-      - .env
+    image: mysql/mysql-server:8.0
+    container_name: lynk-laravel-mysql
+    restart: unless-stopped
     ports:
       - "${FORWARD_DB_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_HOST: "%"
       MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
     volumes:
-      - ".docker/mysql:/var/lib/mysql"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - .docker/mysql:/var/lib/mysql
     networks:
       - laravel
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    command: --log-bin-trust-function-creators=1
 
   phpmyadmin:
     profiles: ["local"]
