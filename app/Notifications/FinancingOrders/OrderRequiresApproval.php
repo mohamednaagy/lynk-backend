@@ -28,7 +28,7 @@ final class OrderRequiresApproval extends BaseNotification implements ShouldQueu
      */
     public function getType(): SystemNotificationType
     {
-        return SystemNotificationType::ORDER_CREATED;
+        return SystemNotificationType::ORDER_REQUIRES_APPROVAL;
     }
 
     /**

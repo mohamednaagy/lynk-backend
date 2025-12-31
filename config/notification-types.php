@@ -23,8 +23,6 @@ return [
             Role::Admin,
             Role::Manager,
             Role::LenderAdmin,
-            Role::LenderSupervisor,
-            Role::LenderOrderCreator,
         ],
     ],
     SystemNotificationType::ORDER_CANCELLED->value => [
@@ -43,8 +41,6 @@ return [
             Role::Admin,
             Role::Manager,
             Role::LenderAdmin,
-            Role::LenderSupervisor,
-            Role::LenderOrderCreator,
         ],
     ],
     SystemNotificationType::ORDER_REQUIRES_APPROVAL->value => [
@@ -62,9 +58,6 @@ return [
         'roles' => [
             Role::Admin,
             Role::Manager,
-            Role::LenderAdmin,
-            Role::LenderSupervisor,
-            Role::LenderOrderCreator,
         ],
     ],
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => [
@@ -81,24 +74,6 @@ return [
         ],
         'roles' => [
             Role::Admin,
-            Role::Manager,
-        ],
-    ],
-    SystemNotificationType::ORDER_CREATED->value => [
-        'label' => 'notification-types.order_created.label',
-        'channels' => [
-            NotificationChannel::PLATFORM->value => [
-                'default' => false,
-                'is_editable' => false,
-            ],
-            NotificationChannel::MAIL->value => [
-                'default' => false,
-                'is_editable' => true,
-            ],
-        ],
-        'roles' => [
-            Role::Admin,
-            Role::Manager,
         ],
     ],
     SystemNotificationType::ORDER_APPROVED->value => [
@@ -119,6 +94,7 @@ return [
             Role::LenderAdmin,
             Role::LenderApiUser,
             Role::LenderSupervisor,
+            Role::LenderBilling,
             Role::LenderOrderCreator,
         ],
     ],
@@ -158,7 +134,9 @@ return [
             Role::LenderSupervisor,
             Role::LenderBilling,
             Role::LenderOrderCreator,
+            Role::LenderApiUser,
             Role::SupplierAdmin,
+            Role::SupplierApiAdmin,
         ],
     ],
 ];

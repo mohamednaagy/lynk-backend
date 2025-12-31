@@ -12,8 +12,6 @@ enum SystemNotificationType: string
 
     case DELIVERY_CONFIRMATION_RECEIVED = 'delivery_confirmation_received';
 
-    case ORDER_CREATED = 'order_created';
-
     case ORDER_APPROVED = 'order_approved';
 
     case LENDER_REGISTERED = 'lender_registered';
@@ -39,7 +37,6 @@ enum SystemNotificationType: string
             self::TRADE_REQUEST_CANCELLED,
             self::ORDER_CANCELLED,
             self::ORDER_REQUIRES_APPROVAL,
-            self::ORDER_CREATED,
             self::ORDER_APPROVED,
             self::LENDER_REGISTERED,
             self::NEW_SIGN_IN,
