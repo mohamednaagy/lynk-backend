@@ -45,7 +45,7 @@ class FillNotificationSettings extends Command
                         $settingExists = $user->notificationSettings
                             ->where('notification_type', $notificationType)
                             ->where('channel', $channel)
-                            ->exists();
+                            ->count() > 0;
 
                         if (! $settingExists) {
                             UserNotificationSetting::firstOrCreate(
