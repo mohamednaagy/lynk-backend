@@ -9,7 +9,7 @@ use App\Enums\Subject;
 use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use App\Notifications\FinancingOrders\OrderCreated;
+use App\Notifications\FinancingOrders\OrderRequiresApproval;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +18,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
 
-class NotifyAdminsAboutOrderCreated implements ShouldQueue
+class NotifyAdminsAboutOrderRequiresApproval implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -52,7 +52,7 @@ class NotifyAdminsAboutOrderCreated implements ShouldQueue
                 });
             });
 
-        Notification::send($notifiables, new OrderCreated($this->financingOrder, $this->user));
+        Notification::send($notifiables, new OrderRequiresApproval($this->financingOrder, $this->user));
     }
 
     public function isNotifyAllowed()

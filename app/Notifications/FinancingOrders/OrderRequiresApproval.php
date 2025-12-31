@@ -10,7 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Config;
 
-final class OrderCreated extends BaseNotification implements ShouldQueue
+final class OrderRequiresApproval extends BaseNotification implements ShouldQueue
 {
     /**
      * Create a new notification instance.
@@ -42,13 +42,13 @@ final class OrderCreated extends BaseNotification implements ShouldQueue
         $url = Config::get('front-end.prod.base_url').'/orders/'.$this->financingOrder->id;
 
         return (new MailMessage)
-            ->subject(__('emails/order-created.subject', [
+            ->subject(__('emails/order-requires-approval.subject', [
                 'order_id' => $this->financingOrder->id,
             ]))
-            ->line(__('emails/order-created.body', [
+            ->line(__('emails/order-requires-approval.body', [
                 'order_id' => $this->financingOrder->id,
             ]))
-            ->action(__('emails/order-created.action'), $url);
+            ->action(__('emails/order-requires-approval.action'), $url);
     }
 
     /**

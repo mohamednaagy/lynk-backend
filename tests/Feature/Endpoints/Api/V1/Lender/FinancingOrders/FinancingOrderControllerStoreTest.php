@@ -10,7 +10,7 @@ use App\Enums\Subject;
 use App\Models\Company;
 use App\Models\User;
 use App\Models\Wallet;
-use App\Notifications\FinancingOrders\OrderCreated;
+use App\Notifications\FinancingOrders\OrderRequiresApproval;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
@@ -298,9 +298,9 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_OK);
 
-        Notification::assertSentTo(self::$admin, OrderCreated::class);
-        Notification::assertSentTo(self::$managerHasPermissions, OrderCreated::class);
-        Notification::assertNotSentTo(self::$mangerHasNoPermissions, OrderCreated::class);
+        Notification::assertSentTo(self::$admin, OrderRequiresApproval::class);
+        Notification::assertSentTo(self::$managerHasPermissions, OrderRequiresApproval::class);
+        Notification::assertNotSentTo(self::$mangerHasNoPermissions, OrderRequiresApproval::class);
     }
 
     public function test_that_admin_and_managers_did_not_get_notification_about_new_order_when_disabled(): void
@@ -313,7 +313,7 @@ class FinancingOrderControllerStoreTest extends TestCase
             ->postJson('api/v1/lender/orders', self::$orderDetails)
             ->assertStatus(Response::HTTP_OK);
 
-        Notification::assertNotSentTo(self::$admin, OrderCreated::class);
-        Notification::assertNotSentTo(self::$managerHasPermissions, OrderCreated::class);
+        Notification::assertNotSentTo(self::$admin, OrderRequiresApproval::class);
+        Notification::assertNotSentTo(self::$managerHasPermissions, OrderRequiresApproval::class);
     }
 }

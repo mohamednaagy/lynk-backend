@@ -6,9 +6,6 @@ return [
     'trade_request_cancelled' => [
         'label' => 'تم إلغاء طلب التداول',
     ],
-    'order_created' => [
-        'label' => 'تم انشاء الطلب',
-    ],
     'order_cancelled' => [
         'label' => 'تم إلغاء الطلب',
     ],
@@ -25,7 +22,7 @@ return [
         'label' => 'تم دفع الفاتورة',
     ],
     'lender_registered' => [
-        'label' => 'تم تسجيل المقرض',
+        'label' => 'تم تسجيل مقرض جديد',
     ],
     'new_sign_in' => [
         'label' => 'تسجيل دخول جديد',

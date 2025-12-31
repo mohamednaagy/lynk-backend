@@ -6,9 +6,6 @@ return [
     'trade_request_cancelled' => [
         'label' => 'Trade Request Cancelled',
     ],
-    'order_created' => [
-        'label' => 'Order Created',
-    ],
     'order_cancelled' => [
         'label' => 'Order Cancelled',
     ],
@@ -25,7 +22,7 @@ return [
         'label' => 'Invoice Paid',
     ],
     'lender_registered' => [
-        'label' => 'Lender Registered',
+        'label' => 'New Lender Registered',
     ],
     'new_sign_in' => [
         'label' => 'New Sign In',
