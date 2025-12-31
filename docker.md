@@ -129,9 +129,20 @@ docker.md                   # This documentation
 
 **Purpose**: Development with all services running locally at minimal scale
 
-**Build the image:**
+**Build the image (requires encrypted environment):**
 ```bash
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
+# Create encrypted environment for local dev
+php artisan env:encrypt
+# This creates .env.encrypted in your project directory
+
+# Build with encrypted environment
+LARAVEL_ENV_ENCRYPTION_KEY="your-local-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:latest \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
 ```
 
 **Start all services:**
@@ -158,6 +169,26 @@ docker compose down
 ### Sandbox Environment
 
 **Purpose**: Single-server testing environment with production-scale workers
+
+**Build the image (with encrypted environment):**
+```bash
+# Ensure .env.encrypted exists in project directory
+# Create it with: php artisan env:encrypt
+
+# Build with encrypted environment
+LARAVEL_ENV_ENCRYPTION_KEY="your-sandbox-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:sandbox \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Or use docker-compose (requires export)
+export ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)"
+export LARAVEL_ENV_ENCRYPTION_KEY="your-sandbox-key"
+docker-compose build app
+```
 
 **Start command:**
 ```bash
@@ -202,8 +233,19 @@ docker compose --profile web --profile local --profile group1 --profile group2 -
 
 ```bash
 cd /path/to/lynk-backend
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-preprod-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:preprod \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Deploy workers
 docker compose --profile web --profile group1 up -d \
   --scale local-market-commodities-settlement-worker=8 \
   --scale local-market-eligible-quantities-worker-group1=8 \
@@ -221,8 +263,19 @@ docker compose --profile web --profile group1 up -d \
 
 ```bash
 cd /path/to/lynk-backend
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-preprod-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:preprod \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Deploy workers
 docker compose --profile web --profile group2 up -d \
   --scale local-market-states-worker=8 \
   --scale local-market-process-worker=8 \
@@ -244,8 +297,19 @@ docker compose --profile web --profile group2 up -d \
 
 ```bash
 cd /path/to/lynk-backend
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-preprod-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:preprod \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Deploy workers
 docker compose --profile web --profile group3 up -d \
   --scale local-market-webhooks-worker=5 \
   --scale local-market-expire-trader-order-worker=8 \
@@ -267,8 +331,19 @@ docker compose --profile web --profile group3 up -d \
 
 ```bash
 cd /path/to/lynk-backend
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-production-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:production \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Deploy workers
 docker compose --profile web --profile group1 up -d \
   --scale local-market-commodities-settlement-worker=8 \
   --scale local-market-eligible-quantities-worker-group1=8 \
@@ -284,8 +359,19 @@ docker compose --profile web --profile group1 up -d \
 
 ```bash
 cd /path/to/lynk-backend
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-production-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:production \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Deploy workers
 docker compose --profile web --profile group2 up -d \
   --scale local-market-states-worker=8 \
   --scale local-market-process-worker=8 \
@@ -305,8 +391,19 @@ docker compose --profile web --profile group2 up -d \
 
 ```bash
 cd /path/to/lynk-backend
-docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile .
 
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-production-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -t app-php-fpm:production \
+  -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Deploy workers
 docker compose --profile web --profile group3 up -d \
   --scale local-market-webhooks-worker=5 \
   --scale local-market-expire-trader-order-worker=8 \
@@ -640,96 +737,343 @@ docker compose ps -a
 
 ### Overview
 
-The application uses Laravel's built-in environment encryption (`env:encrypt`) to securely manage environment variables. Environment files are stored as GitHub secrets, never committed to the repository.
+The application uses Laravel's built-in environment encryption (`env:encrypt`) with Docker BuildKit secrets for secure environment management. This section covers two approaches:
 
-### GitHub Secrets Configuration
+1. **Build-Time Decryption** (Recommended for Docker deployments) - Decrypt during image build
+2. **CI/CD Decryption** (Current SSH-based deployments) - Decrypt before deployment
+
+### Approach 1: Build-Time Decryption with Docker BuildKit (Recommended)
+
+This approach decrypts environment files during Docker image build using BuildKit secrets, ensuring encryption keys never appear in image layers.
+
+#### Creating Encrypted Environments
+
+```bash
+# 1. Prepare your environment file
+# Edit .env with your environment-specific values
+
+# 2. Encrypt the file
+php artisan env:encrypt
+
+# Output example:
+# Environment successfully encrypted.
+# Encryption key: 3UVsEgGVK36XN82KKeyLFMhvosbZN1aF
+
+# This creates .env.encrypted in your project directory
+
+# 3. Store in GitHub Secrets
+# Navigate to: Settings → Secrets and variables → Actions
+# Add two secrets:
+#   - PROD_ENV_ENCRYPTION_KEY: 3UVsEgGVK36XN82KKeyLFMhvosbZN1aF
+#   - PROD_ENV_ENCRYPTED_CONTENT: (paste the raw content of .env.encrypted file)
+
+# 4. Clean up plaintext environment file (keep encrypted version)
+rm -f .env
+```
+
+#### Building Docker Images with Encrypted Environments
+
+**IMPORTANT**: You must pass the encrypted environment content as a build argument. The encrypted content is passed as text via `--build-arg ENCRYPTED_ENV_CONTENT`.
+
+**Method 1: Using Inline Environment Variable (No Export - Recommended)**
+
+```bash
+# Ensure .env.encrypted exists in your project directory
+
+# Set encryption key inline (no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="your-32-char-encryption-key" \
+DOCKER_BUILDKIT=1 docker build \
+  --file docker/laravel/Dockerfile \
+  --tag app-php-fpm:production \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+
+# Verify .env exists in image
+docker run --rm app-php-fpm:production sh -c 'test -f .env && echo "✅ .env exists" || echo "❌ .env missing"'
+
+# Test the application can start
+docker run --rm app-php-fpm:production php artisan --version
+```
+
+**Method 2: Using Export (Traditional)**
+
+```bash
+# Ensure .env.encrypted exists in your project directory
+
+# Export environment variable
+export LARAVEL_ENV_ENCRYPTION_KEY="your-32-char-encryption-key"
+
+# Build with BuildKit secrets
+DOCKER_BUILDKIT=1 docker build \
+  --file docker/laravel/Dockerfile \
+  --tag app-php-fpm:production \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+```
+
+**Method 3: Using File-Based Secret (Most Secure)**
+
+```bash
+# Ensure .env.encrypted exists in your project directory
+
+# Save encryption key to a temporary file
+echo "your-32-char-encryption-key" > /tmp/encryption.key
+
+# Build using file-based secret (key never in command line history)
+DOCKER_BUILDKIT=1 docker build \
+  --file docker/laravel/Dockerfile \
+  --tag app-php-fpm:production \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,src=/tmp/encryption.key \
+  .
+
+# Clean up key file
+rm /tmp/encryption.key
+```
+
+**Using docker-compose:**
+
+```bash
+# Ensure .env.encrypted exists in your project directory
+
+# Set environment variables
+export ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)"
+export LARAVEL_ENV_ENCRYPTION_KEY="your-32-char-key"
+
+# Build with encrypted environment
+docker-compose build app
+
+# Run the application
+docker-compose --profile web up -d
+
+# Or combine with other profiles
+docker-compose --profile web --profile group1 up -d
+```
+
+#### GitHub Actions CI/CD Integration
+
+Example workflow for Docker-based deployments:
+
+```yaml
+name: Build and Deploy Docker Image (Production)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - production
+
+env:
+  ENVIRONMENT: production
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create encrypted environment file
+        run: |
+          # Restore encrypted environment file from GitHub secret
+          echo "${{ secrets.PROD_ENV_ENCRYPTED_CONTENT }}" > .env.encrypted
+
+      - name: Build Docker image with encrypted environment
+        run: |
+          # Build with BuildKit secrets
+          docker buildx build \
+            --file docker/laravel/Dockerfile \
+            --tag app-php-fpm:production-${{ github.sha }} \
+            --tag app-php-fpm:production-latest \
+            --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+            --secret id=laravel_env_key,env=PROD_ENV_ENCRYPTION_KEY \
+            --load \
+            .
+        env:
+          PROD_ENV_ENCRYPTION_KEY: ${{ secrets.PROD_ENV_ENCRYPTION_KEY }}
+
+      - name: Verify image
+        run: |
+          docker run --rm app-php-fpm:production-latest \
+            sh -c 'test -f .env && echo "✅ .env file exists" || (echo "❌ .env missing" && exit 1)'
+
+          docker run --rm app-php-fpm:production-latest \
+            php artisan --version
+
+      - name: Save and deploy image
+        run: |
+          docker save app-php-fpm:production-latest | gzip > app-image.tar.gz
+          # Transfer to servers and deploy
+```
+
+#### Local Development
+
+For local development, you must also use encrypted environment:
+
+```bash
+# Create encrypted environment
+php artisan env:encrypt
+# This creates .env.encrypted in your project directory
+
+# Build with encrypted environment
+LARAVEL_ENV_ENCRYPTION_KEY="your-local-key" \
+DOCKER_BUILDKIT=1 docker build \
+  -f docker/laravel/Dockerfile \
+  -t app-php-fpm:local \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  .
+```
+
+**Note**: All builds require encrypted environment content passed as a build argument.
+
+#### Security Benefits
+
+✅ **BuildKit Secrets Approach**:
+- Encryption keys mounted at `/run/secrets/` - never persisted in image layers
+- Keys don't appear in `docker history` or build cache
+- Encrypted content can be in build cache (still encrypted - secure)
+- No secrets in final image
+- Supports key rotation without rebuilding infrastructure
+
+#### Troubleshooting Build-Time Decryption
+
+**Error: "Encryption key secret not found"**
+
+```bash
+# Ensure secret is passed with correct ID
+DOCKER_BUILDKIT=1 docker build \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+  ...
+
+# Verify environment variable is set
+echo $LARAVEL_ENV_ENCRYPTION_KEY
+# Should output your 32-character key
+```
+
+**Error: "Decryption failed - .env file not created"**
+
+```bash
+# Test decryption locally first
+php artisan env:decrypt --env=production --key="your-key"
+
+# Verify the encrypted file exists
+ls -lh .env.encrypted
+```
+
+**Error: "COPY failed: file not found"**
+
+```bash
+# Ensure the encrypted file exists in your project directory
+ls -lh .env.encrypted
+
+# If missing, create it
+php artisan env:encrypt --env=production
+```
+
+---
+
+### Approach 2: CI/CD Decryption (Current SSH Deployments)
+
+This approach is used for current SSH-based deployments where Docker is not used for production.
+
+#### GitHub Secrets Configuration
 
 Each environment requires two secrets in GitHub:
 
 1. Navigate to: **Repository → Settings → Environments** → Select environment
 2. Add two secrets:
    - `ENV_ENCRYPTION_KEY` - 32-character encryption key
-   - `ENV_ENCRYPTED_CONTENT` - Entire encrypted file content
+   - `ENV_ENCRYPTED_CONTENT` - Entire encrypted file content (not base64 encoded)
 
-### Creating Encrypted Environments
+#### Deployment Flow (SSH-based)
 
-```bash
-# 1. Prepare environment file
-cp .env.example .env.dev
-# Edit .env.dev with environment-specific values
-
-# 2. Encrypt the file
-php artisan env:encrypt --env=dev
-
-# Output:
-# Environment successfully encrypted.
-# Encryption key: 3UVsEgGVK36XN82KKeyLFMhvosbZN1aF
-
-# 3. Copy encrypted content
-cat .env.dev.encrypted
-# Copy entire output
-
-# 4. Store in GitHub Secrets
-# Go to: Settings → Environments → dev → Secrets
-# Add ENV_ENCRYPTION_KEY: 3UVsEgGVK36XN82KKeyLFMhvosbZN1aF
-# Add ENV_ENCRYPTED_CONTENT: (paste encrypted content)
-
-# 5. Clean up
-rm .env.dev .env.dev.encrypted
-```
-
-### Deployment Flow
-
-The CI/CD workflow handles decryption:
+The current CI/CD workflow handles decryption:
 
 1. Checkout code
 2. Write `ENV_ENCRYPTED_CONTENT` to temporary file
 3. Install PHP and composer
 4. Decrypt: `php artisan env:decrypt --env={environment} --force`
-5. Build Docker image with decrypted `.env`
-6. Deploy to servers
+5. SSH to servers and deploy
+6. Restart supervisor services
 
 **Security Benefits:**
 - No environment files in repository
 - Encryption keys only in GitHub secrets
-- Self-contained Docker images
+- Environment decrypted on deployment server only
+
+---
 
 ### Key Rotation
 
 Rotate encryption keys every 90 days:
 
 ```bash
-# 1. Decrypt current environment
-export LARAVEL_ENV_ENCRYPTION_KEY="<current-key>"
-echo "<encrypted-content>" > .env.production.encrypted
+# 1. Retrieve current encrypted content from GitHub secrets
+# (Copy from GitHub UI or use gh CLI)
+echo "$GITHUB_SECRET_PROD_ENV_ENCRYPTED_CONTENT" | base64 -d > .env.encrypted
+
+# 2. Decrypt with current key
+export LARAVEL_ENV_ENCRYPTION_KEY="current-key"
 php artisan env:decrypt --env=production --force
 
-# 2. Generate new key and re-encrypt
+# 3. Generate new key and re-encrypt
 NEW_KEY=$(openssl rand -base64 32 | head -c 32)
-php artisan env:encrypt --env=production --key="$NEW_KEY"
-echo "New key: $NEW_KEY"
+php artisan env:encrypt --env=production --key="$NEW_KEY" --force
+echo "New encryption key: $NEW_KEY"
 
-# 3. Update GitHub Secrets
-# Update ENV_ENCRYPTION_KEY and ENV_ENCRYPTED_CONTENT
+# 4. Update GitHub Secrets
+# Navigate to: Settings → Secrets → Actions
+# Update PROD_ENV_ENCRYPTION_KEY with $NEW_KEY
+# Update PROD_ENV_ENCRYPTED_CONTENT with content of .env.encrypted file
 
-# 4. Clean up
-rm .env .env.production.encrypted
-unset LARAVEL_ENV_ENCRYPTION_KEY
+# 5. Clean up plaintext file (keep encrypted version for Docker builds)
+rm -f .env.production
+unset LARAVEL_ENV_ENCRYPTION_KEY NEW_KEY
 ```
 
-### Local Testing
+### Local Testing of Encrypted Environments
 
-Test decryption locally:
+Test decryption locally before deploying:
 
 ```bash
-export LARAVEL_ENV_ENCRYPTION_KEY="<your-key>"
-php artisan env:decrypt --env=dev
+# Test with encryption key
+export LARAVEL_ENV_ENCRYPTION_KEY="your-key"
+php artisan env:decrypt --env=production
 cat .env
 
 # Clean up
 rm .env
 unset LARAVEL_ENV_ENCRYPTION_KEY
 ```
+
+### Migration Path to Docker Builds
+
+**Current State (SSH-based):**
+- Environment files managed via GitHub secrets
+- Decrypted during CI/CD before SSH deployment
+- Git pull + composer install + supervisor restart
+
+**Future State (Docker-based):**
+- Encrypted environments in GitHub secrets (same)
+- Decrypted during Docker image build (new)
+- Immutable Docker images with baked-in `.env`
+- Container orchestration deployment
+
+**Transition Steps:**
+1. ✅ Implement build-time decryption in Dockerfile (complete)
+2. Test Docker builds with encrypted environments in dev/sandbox
+3. Update CI/CD workflows to build Docker images
+4. Deploy to preprod using Docker images
+5. Migrate production to Docker-based deployment
+6. Deprecate SSH-based deployment workflow
 
 ---
 
@@ -745,12 +1089,23 @@ docker compose --profile web --profile local --profile group1 --profile group2 -
 # Stop
 docker compose down
 
-# Rebuild
+# Rebuild (non-encrypted for local dev)
 docker build -t app-php-fpm:latest -f docker/laravel/Dockerfile . && docker compose up -d
+
+# Or use docker-compose
+docker-compose build app && docker-compose --profile web --profile local up -d
 ```
 
 **Sandbox:**
 ```bash
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment
+LARAVEL_ENV_ENCRYPTION_KEY="sandbox-key" \
+DOCKER_BUILDKIT=1 docker build -t app-php-fpm:sandbox -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY .
+
 # See Section c) for full command with all --scale flags
 docker compose --profile web --profile local --profile group1 --profile group2 --profile group3 up -d \
   --scale local-market-states-worker=8 \
@@ -759,6 +1114,14 @@ docker compose --profile web --profile local --profile group1 --profile group2 -
 
 **Production (Server A):**
 ```bash
+# Ensure .env.encrypted exists in project directory
+
+# Build with encrypted environment first (inline - no export needed)
+LARAVEL_ENV_ENCRYPTION_KEY="production-key" \
+DOCKER_BUILDKIT=1 docker build -t app-php-fpm:production -f docker/laravel/Dockerfile \
+  --build-arg ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)" \
+  --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY .
+
 # See Section c) for full command with all --scale flags
 docker compose --profile web --profile group1 up -d \
   --scale local-market-commodities-settlement-worker=8 \

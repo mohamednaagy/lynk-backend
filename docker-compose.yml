@@ -1,3 +1,18 @@
+# Docker Compose configuration with encrypted environment support
+#
+# IMPORTANT: All builds require encrypted environment content and encryption key.
+#
+# To build with encrypted environment:
+#   1. Create encrypted content: php artisan env:encrypt
+#   2. Set environment variables:
+#      export ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)"
+#      export LARAVEL_ENV_ENCRYPTION_KEY="your-32-char-key"
+#   3. Build and run:
+#      docker-compose build
+#      docker-compose --profile web up -d
+#
+# See docker.md Section g) for detailed documentation
+
 services:
   # ============================================================================
   # WEB PROFILE - PHP-FPM Application
@@ -106,24 +121,6 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    networks:
-      - laravel
-
-  browserless:
-    profiles: ["local"]
-    image: browserless/chrome
-    container_name: laravel-browserless
-    restart: unless-stopped
-    ports:
-      - "3002:3000"
-    environment:
-      MAX_CONCURRENT_SESSIONS: 10
-      CONNECTION_TIMEOUT: 60000
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -649,3 +646,14 @@ volumes:
 networks:
   laravel:
     driver: bridge
+
+# ============================================================================
+# BUILDKIT SECRETS (for encrypted environment builds)
+# ============================================================================
+# Secret is read from LARAVEL_ENV_ENCRYPTION_KEY environment variable
+# Required for decrypting .env.encrypted during build
+secrets:
+  laravel_env_key:
+    environment: "LARAVEL_ENV_ENCRYPTION_KEY"
+
+#USE array profiles instead of duplicate the service in 2 or more group profiles

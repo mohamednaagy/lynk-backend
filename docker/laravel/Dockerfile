@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 # Multi-stage Dockerfile for Laravel application
 # Stage 1: Composer dependencies
 FROM composer:2 AS composer-stage
@@ -62,6 +63,37 @@ COPY --chown=www-data:www-data . .
 
 # Copy vendor from composer stage
 COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
+
+# Build argument for encrypted environment content
+ARG ENCRYPTED_ENV_CONTENT
+
+# Environment decryption - decrypt encrypted content passed as build arg
+RUN --mount=type=secret,id=laravel_env_key,required=true \
+    set -eux; \
+    \
+    echo "🔐 Decrypting environment..."; \
+    \
+    # Write encrypted content to file using printf to preserve content
+    printf '%s' "${ENCRYPTED_ENV_CONTENT}" > .env.encrypted; \
+    echo "✓ Encrypted content written ($(wc -c < .env.encrypted) bytes)"; \
+    \
+    # Get encryption key from BuildKit secret
+    ENCRYPTION_KEY=$(cat /run/secrets/laravel_env_key); \
+    echo "✓ Encryption key loaded (${#ENCRYPTION_KEY} chars)"; \
+    echo "Encryption content: ${ENCRYPTED_ENV_CONTENT}"; \
+    \
+    # Decrypt using Laravel artisan
+    php artisan env:decrypt --key="${ENCRYPTION_KEY}" --force --no-interaction; \
+    \
+    # Verify decryption
+    test -f .env || (echo "❌ Decryption failed" && exit 1); \
+    echo "✓ Decrypted .env created ($(wc -c < .env) bytes)"; \
+    \
+    # Clean up
+    rm -f .env.encrypted; \
+    unset ENCRYPTION_KEY; \
+    \
+    echo "✅ Environment decrypted successfully"
 
 # Ensure storage and bootstrap/cache permissions
 RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
