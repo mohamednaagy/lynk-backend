@@ -18,7 +18,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\ListOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\StoreOrderRequest;
 use App\Http\Requests\V1\Lender\Orders\UpdateOrderRequest;
-use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderRequiresApproval;
+use App\Jobs\FinancingOrders\NotifyAboutOrderRequiresApproval;
 use App\Models\FinancingOrder;
 use App\Traits\HandlesFractal;
 use App\Transformers\Lender\Order\FinancingOrderTransformer;
@@ -201,7 +201,7 @@ class OrderController extends Controller
                     )
                 );
 
-                dispatch(new NotifyAdminsAboutOrderRequiresApproval($financingOrder, $user));
+                dispatch(new NotifyAboutOrderRequiresApproval($financingOrder, $user));
                 $includes = [
                     'id',
                     'status',

@@ -8,7 +8,7 @@ use App\Actions\Contracts\LoginUser;
 use App\Enums\Area;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Auth\RegisterLenderRequest;
-use App\Jobs\Lenders\NotifyAdminsAboutLenderRegistration;
+use App\Jobs\Lenders\NotifyAboutLenderRegistration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +37,7 @@ class Register extends Controller
 
             $user = $registerLender->handle($data);
 
-            dispatch(new NotifyAdminsAboutLenderRegistration(tenant()));
+            dispatch(new NotifyAboutLenderRegistration(tenant()));
 
             return $this->successResponse(
                 $loginUser->handle($user, $request->validated('source'), $request),
