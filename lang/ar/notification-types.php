@@ -24,7 +24,4 @@ return [
     'lender_registered' => [
         'label' => 'تم تسجيل مقرض جديد',
     ],
-    'new_sign_in' => [
-        'label' => 'تسجيل دخول جديد',
-    ],
 ];

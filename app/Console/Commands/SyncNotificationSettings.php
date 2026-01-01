@@ -68,8 +68,8 @@ class SyncNotificationSettings extends Command
                                 'is_enabled' => $channelConfig['default'],
                             ]);
                             $createdSettings++;
-                        } elseif ($channelConfig['default'] !== $existingSetting->is_enabled && $channelConfig['default'] === true) {
-                            // Update the setting if the default has changed to true
+                        } elseif (app()->environment() !== 'production' && $channelConfig['default'] !== $existingSetting->is_enabled && $channelConfig['default'] === true) {
+                            // Update the setting if the default has changed to true (only in non-production environments)
                             $existingSetting->update([
                                 'is_enabled' => $channelConfig['default'],
                             ]);

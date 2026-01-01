@@ -24,7 +24,4 @@ return [
     'lender_registered' => [
         'label' => 'New Lender Registered',
     ],
-    'new_sign_in' => [
-        'label' => 'New Sign In',
-    ],
 ];

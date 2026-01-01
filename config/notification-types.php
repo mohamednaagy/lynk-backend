@@ -115,28 +115,4 @@ return [
             Role::Manager,
         ],
     ],
-    SystemNotificationType::NEW_SIGN_IN->value => [
-        'label' => 'notification-types.new_sign_in.label',
-        'channels' => [
-            NotificationChannel::PLATFORM->value => [
-                'default' => false,
-                'is_editable' => false,
-            ],
-            NotificationChannel::MAIL->value => [
-                'default' => false,
-                'is_editable' => true,
-            ],
-        ],
-        'roles' => [
-            Role::Admin,
-            Role::Manager,
-            Role::LenderAdmin,
-            Role::LenderSupervisor,
-            Role::LenderBilling,
-            Role::LenderOrderCreator,
-            Role::LenderApiUser,
-            Role::SupplierAdmin,
-            Role::SupplierApiAdmin,
-        ],
-    ],
 ];
