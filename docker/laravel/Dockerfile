@@ -95,8 +95,12 @@ RUN --mount=type=secret,id=laravel_env_key,required=true \
     \
     echo "✅ Environment decrypted successfully"
 
-# Ensure storage and bootstrap/cache permissions
-RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views \
+# Ensure storage and bootstrap/cache directories and permissions
+RUN mkdir -p storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs/lynk \
+    storage/app/public \
     bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
