@@ -34,8 +34,6 @@ services:
     container_name: lynk-laravel-app
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     healthcheck:
       test: ["CMD", "php", "-r", "exit(0);"]
       interval: 30s
@@ -158,8 +156,6 @@ services:
     container_name: laravel-nightwatch
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: tail -f /dev/null
     depends_on:
       - app
@@ -180,8 +176,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=local_market_commodities_settlement
     depends_on:
       - app
@@ -199,8 +193,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_eligible_quantities
     depends_on:
       - app
@@ -218,8 +210,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_inventories_units_logging
     depends_on:
       - app
@@ -237,8 +227,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_initiation
     depends_on:
       - app
@@ -256,8 +244,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=trader_order_initiation
     depends_on:
       - app
@@ -275,8 +261,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_commodities_purchased_local_market
     depends_on:
       - app
@@ -294,8 +278,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=buy_commodities_local_market_orders
     depends_on:
       - app
@@ -313,8 +295,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=apply_order_fees
     depends_on:
       - app
@@ -335,8 +315,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_states
     depends_on:
       - app
@@ -354,8 +332,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_process
     depends_on:
       - app
@@ -373,8 +349,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_eligible_quantities
     depends_on:
       - app
@@ -392,8 +366,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=hold_eligible_units_local_market_orders
     depends_on:
       - app
@@ -411,8 +383,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_commodities_purchased_local_market
     depends_on:
       - app
@@ -430,8 +400,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=refresh_eligibilities
     depends_on:
       - app
@@ -449,8 +417,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=notifications
     depends_on:
       - app
@@ -468,8 +434,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=create_trader_orders
     depends_on:
       - app
@@ -487,8 +451,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=default
     depends_on:
       - app
@@ -506,8 +468,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=bursam
     depends_on:
       - app
@@ -525,8 +485,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_purchasing_local_market_orders
     depends_on:
       - app
@@ -544,8 +502,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=mq
     depends_on:
       - app
@@ -566,8 +522,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_webhooks
     depends_on:
       - app
@@ -585,8 +539,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=expire_trader_order
     depends_on:
       - app
@@ -604,8 +556,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=unit-inventory
     depends_on:
       - app
@@ -623,8 +573,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=buy_commodities_local_market_orders
     depends_on:
       - app
@@ -642,8 +590,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=notifications
     depends_on:
       - app
@@ -661,8 +607,6 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    env_file:
-      - .env
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=bursam
     depends_on:
       - app
