@@ -38,7 +38,8 @@ class RefundOrderCost
 
             $order = $traderOrder->order;
 
-            $baseTraderOrder = $order->activeTraderOrder()
+            $baseTraderOrder = $order->traderOrders()
+                ->latest()
                 ->lockForUpdate()
                 ->first();
 
