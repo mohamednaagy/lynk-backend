@@ -38,9 +38,7 @@ class RefundOrderCost
 
             $order = $traderOrder->order;
 
-            $baseTraderOrder = $order->traderOrders()
-                ->where('is_base', true)
-                ->latest('id')
+            $baseTraderOrder = $order->activeTraderOrder()
                 ->lockForUpdate()
                 ->first();
 

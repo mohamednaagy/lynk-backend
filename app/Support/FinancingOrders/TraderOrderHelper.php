@@ -15,7 +15,6 @@ trait TraderOrderHelper
     {
         return $this->currentOrderTraderOrders
             ->where('id', '<=', $traderOrder->id)
-            ->where('is_base', true)
             ->last();
     }
 
