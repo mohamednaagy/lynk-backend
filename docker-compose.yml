@@ -13,11 +13,19 @@
 #
 # See docker.md Section g) for detailed documentation
 
+# ============================================================================
+# HOST CONNECTIVITY - Allow containers to connect to host services
+# ============================================================================
+x-extra-hosts: &default-extra-hosts
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
 services:
   # ============================================================================
   # WEB PROFILE - PHP-FPM Application
   # ============================================================================
   app:
+    <<: *default-extra-hosts
     profiles: ["web"]
     build:
       context: .
@@ -144,6 +152,7 @@ services:
       - laravel
 
   nightwatch:
+    <<: *default-extra-hosts
     profiles: ["observability"]
     image: app-php-fpm:latest
     container_name: laravel-nightwatch
@@ -166,6 +175,7 @@ services:
   # GROUP1 PROFILE - Local Market Core Processing Workers
   # ============================================================================
   local-market-commodities-settlement-worker:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -184,6 +194,7 @@ services:
       - laravel
 
   local-market-eligible-quantities-worker-group1:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -202,6 +213,7 @@ services:
       - laravel
 
   local-market-order-inventories-units-logging:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -220,6 +232,7 @@ services:
       - laravel
 
   local-market-order-initiation:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -238,6 +251,7 @@ services:
       - laravel
 
   trader-order-initiation:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -256,6 +270,7 @@ services:
       - laravel
 
   complete-commodities-purchased-local-market-worker-group1:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -274,6 +289,7 @@ services:
       - laravel
 
   buy-commodities-local-market-orders-worker-group1:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -292,6 +308,7 @@ services:
       - laravel
 
   apply-order-fees-worker:
+    <<: *default-extra-hosts
     profiles: ["group1"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -313,6 +330,7 @@ services:
   # GROUP2 PROFILE - General & Trader Operations Workers
   # ============================================================================
   local-market-states-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -331,6 +349,7 @@ services:
       - laravel
 
   local-market-process-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -349,6 +368,7 @@ services:
       - laravel
 
   local-market-eligible-quantities-worker-group2:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -367,6 +387,7 @@ services:
       - laravel
 
   hold-eligible-local-order-units-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -385,6 +406,7 @@ services:
       - laravel
 
   complete-commodities-purchased-local-market-worker-group2:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -403,6 +425,7 @@ services:
       - laravel
 
   refresh-eligibilities-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -421,6 +444,7 @@ services:
       - laravel
 
   notifications-worker-group2:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -439,6 +463,7 @@ services:
       - laravel
 
   create-trader-orders-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -457,6 +482,7 @@ services:
       - laravel
 
   default-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -475,6 +501,7 @@ services:
       - laravel
 
   bursam-worker-group2:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -493,6 +520,7 @@ services:
       - laravel
 
   complete-purchasing-local-market-orders-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -511,6 +539,7 @@ services:
       - laravel
 
   message-queue-worker:
+    <<: *default-extra-hosts
     profiles: ["group2"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -532,6 +561,7 @@ services:
   # GROUP3 PROFILE - Supporting Operations & External Integrations Workers
   # ============================================================================
   local-market-webhooks-worker:
+    <<: *default-extra-hosts
     profiles: ["group3"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -550,6 +580,7 @@ services:
       - laravel
 
   local-market-expire-trader-order-worker:
+    <<: *default-extra-hosts
     profiles: ["group3"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -568,6 +599,7 @@ services:
       - laravel
 
   local-market-generate-units:
+    <<: *default-extra-hosts
     profiles: ["group3"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -586,6 +618,7 @@ services:
       - laravel
 
   buy-commodities-local-market-orders-worker-group3:
+    <<: *default-extra-hosts
     profiles: ["group3"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -604,6 +637,7 @@ services:
       - laravel
 
   notifications-worker-group3:
+    <<: *default-extra-hosts
     profiles: ["group3"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
@@ -622,6 +656,7 @@ services:
       - laravel
 
   bursam-worker-group3:
+    <<: *default-extra-hosts
     profiles: ["group3"]
     image: app-php-fpm:latest
     working_dir: /var/www/html
