@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Models\UserNotificationSetting;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 
 class SyncNotificationSettings extends Command
@@ -28,7 +29,17 @@ class SyncNotificationSettings extends Command
      */
     public function handle()
     {
-        $this->info('Start syncing notification settings for all users...');
+        if (app()->isProduction()) {
+            $this->error('This command should not be run in production environment.');
+
+            return;
+        }
+
+        $this->info('Start syncing notification settings for all users (only in non-production environments)');
+
+        // Cleanup invalid settings
+        Artisan::call('config:clear');
+        Artisan::call('notifications:cleanup-invalid');
 
         $notificationTypes = Config::get('notification-types');
         $processedUsers = 0;
@@ -68,8 +79,8 @@ class SyncNotificationSettings extends Command
                                 'is_enabled' => $channelConfig['default'],
                             ]);
                             $createdSettings++;
-                        } elseif (app()->environment() !== 'production' && $channelConfig['default'] !== $existingSetting->is_enabled && $channelConfig['default'] === true) {
-                            // Update the setting if the default has changed to true (only in non-production environments)
+                        } elseif ($channelConfig['default'] !== $existingSetting->is_enabled && $channelConfig['default'] === true) {
+                            // Update the setting if the default has changed to true
                             $existingSetting->update([
                                 'is_enabled' => $channelConfig['default'],
                             ]);
