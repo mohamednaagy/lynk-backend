@@ -15,10 +15,14 @@ yarn-error.log
 /.vscode
 report.html
 **/.DS_Store
+.docker/
 storage/.DS_Store
 dump.rdb
 sail-mysql/
 _ide_helper.php
+
+# Ignore Laravel bootstrap cache
+bootstrap/cache/*.php
 
 composer.lock
 

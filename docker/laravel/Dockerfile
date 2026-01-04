@@ -1,87 +1,113 @@
-FROM php:8.3.22-apache
+# syntax=docker/dockerfile:1.4
+# Multi-stage Dockerfile for Laravel application
+# Stage 1: Composer dependencies
+FROM composer:2 AS composer-stage
 
-# 1. Install development packages and clean up apt cache.
-RUN apt-get update && apt-get install -y \
-    curl \
-    g++ \
+WORKDIR /app
+
+COPY composer.json ./
+
+RUN composer install \
+    --no-scripts \
+    --no-autoloader \
+    --prefer-dist \
+    --ignore-platform-reqs
+
+COPY . .
+
+RUN composer dump-autoload --optimize --no-scripts
+
+# Stage 2: Runtime image
+FROM php:8.4-fpm-alpine
+
+# Install system dependencies and PHP extensions
+RUN apk add --no-cache \
     git \
-    libbz2-dev \
-    libfreetype6-dev \
-    libicu-dev \
-    libjpeg-dev \
-    libmcrypt-dev \
-    libpng-dev \
-    libreadline-dev \
-    libonig-dev \
-    libzip-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    sudo \
     unzip \
-    default-mysql-client \
-    libmagickwand-dev \
-    zip \
-    awscli \
- && rm -rf /var/lib/apt/lists/*
+    bash \
+    icu-dev \
+    libzip-dev \
+    oniguruma-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    mysql-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_mysql \
+        mbstring \
+        bcmath \
+        intl \
+        zip \
+        gd \
+        opcache
 
-RUN apt-get update && apt-get install -y jq
-
-# Install Java - use default-jdk which is more reliable across different Debian versions
-RUN apt-get update && apt-get install -y default-jdk ca-certificates-java
-
-# 2. Apache configs + document root.
-RUN echo "ServerName lynkapp.local" >> /etc/apache2/apache2.conf
-
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# 3. mod_rewrite for URL rewrite and mod_headers for .htaccess extra headers like Access-Control-Allow-Origin-
-RUN a2enmod rewrite headers
-
-# 4. Start with base PHP config, then add extensions.
-RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
-
-RUN docker-php-ext-install \
-    bcmath \
-    bz2 \
-    calendar \
-    exif \
-    iconv \
-    intl \
-    mbstring \
-    opcache \
-    pdo_mysql \
-    gd \
-    soap \
-    xsl \
-    zip
-
-RUN docker-php-ext-install mysqli
-
-RUN docker-php-ext-configure pcntl --enable-pcntl \
-  && docker-php-ext-install \
-    pcntl
-
-RUN pecl install redis  && docker-php-ext-enable redis
-RUN pecl install xdebug && docker-php-ext-enable xdebug
+# Install Redis extension via PECL
+RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apk del .build-deps
 
 
-RUN mkdir -p /usr/src/php/ext/imagick; \
-    curl -fsSL https://github.com/Imagick/imagick/archive/06116aa24b76edaf6b1693198f79e6c295eda8a9.tar.gz | tar xvz -C "/usr/src/php/ext/imagick" --strip 1; \
-    docker-php-ext-install imagick;
+# Create non-root user www-data with uid/gid 1000
+RUN deluser www-data 2>/dev/null || true \
+    && delgroup www-data 2>/dev/null || true \
+    && addgroup -g 1000 www-data \
+    && adduser -u 1000 -G www-data -s /bin/sh -D www-data
 
-# 5. Composer.
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Set working directory
+WORKDIR /var/www/html
 
-# 6. We need a user with the same UID/GID as the host user
-# so when we execute CLI commands, all the host file's permissions and ownership remain intact.
-# Otherwise commands from inside the container would create root-owned files and directories.
-ARG uid
-RUN useradd -G www-data,root -u $uid -d /home/devuser devuser
-RUN mkdir -p /home/devuser/.composer && \
-    chown -R devuser:devuser /home/devuser
+# Copy application files
+COPY --chown=www-data:www-data . .
 
-# RUN chmod 777 -R storage/
-# RUN composer update
+# Copy vendor from composer stage
+COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 
+# Build argument for environment file content from GitHub secrets/variables
+ARG ENV_FILE_CONTENT
+
+# Create .env file from build argument or use existing file
+RUN set -eux; \
+    \
+    if [ -n "${ENV_FILE_CONTENT}" ]; then \
+        echo "📝 Creating .env from build arguments..."; \
+        printf '%s' "${ENV_FILE_CONTENT}" > .env; \
+        echo "✓ .env file created ($(wc -c < .env) bytes)"; \
+    elif [ -f .env ]; then \
+        echo "✓ Using existing .env file from build context ($(wc -c < .env) bytes)"; \
+    else \
+        echo "⚠️  No .env file provided, using .env.example as template"; \
+        cp .env.example .env; \
+    fi; \
+    \
+    # Verify .env exists
+    test -f .env || (echo "❌ .env file creation failed" && exit 1); \
+    \
+    echo "✅ Environment configuration ready"
+
+# Ensure storage and bootstrap/cache directories and permissions
+RUN mkdir -p storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs/lynk \
+    storage/app/public \
+    bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Remove any stale Laravel caches and refresh package discovery
+RUN rm -f bootstrap/cache/packages.php bootstrap/cache/services.php \
+    && php artisan package:discover --ansi || true \
+    && php artisan config:clear || true \
+    && php artisan event:clear || true \
+    && php artisan cache:clear || true
+
+# Switch to www-data user
+USER www-data
+
+# Expose php-fpm port
+EXPOSE 9000
+
+# Start php-fpm
+CMD ["php-fpm", "-F"]

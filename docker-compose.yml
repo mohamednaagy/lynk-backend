@@ -1,125 +1,638 @@
-version: "3.5"
+# Docker Compose configuration with encrypted environment support
+#
+# IMPORTANT: All builds require encrypted environment content and encryption key.
+#
+# To build with encrypted environment:
+#   1. Create encrypted content: php artisan env:encrypt
+#   2. Set environment variables:
+#      export ENCRYPTED_ENV_CONTENT="$(cat .env.encrypted)"
+#      export LARAVEL_ENV_ENCRYPTION_KEY="your-32-char-key"
+#   3. Build and run:
+#      docker-compose build
+#      docker-compose --profile web up -d
+#
+# See docker.md Section g) for detailed documentation
+
+# ============================================================================
+# HOST CONNECTIVITY - Allow containers to connect to host services
+# ============================================================================
+x-extra-hosts: &default-extra-hosts
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
 
 services:
-    laravel-app:
-        build:
-            context: "./docker/laravel"
-            args:
-                uid: 1000
-        container_name: laravel-lynk-backend
-        ports:
-            - 80:80
-            - 443:443
-        environment:
-            - APACHE_RUN_USER=#1000
-            - APACHE_RUN_GROUP=#1000
-        volumes:
-            - .:/var/www/html
-            - ./docker/config/conf.d:/usr/local/etc/php/conf.d/extra
-            - ./docker/config/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
-            - ./docker/config/conf.d/php.ini:/usr/local/etc/php/php.ini
+  # ============================================================================
+  # WEB PROFILE - PHP-FPM Application
+  # ============================================================================
+  app:
+    <<: *default-extra-hosts
+    profiles: ["web"]
+    build:
+      context: .
+      dockerfile: docker/laravel/Dockerfile
+    image: app-php-fpm:latest
+    container_name: lynk-laravel-app
+    working_dir: /var/www/html
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-        networks:
-            - sail
-        extra_hosts:
-            - "host.docker.internal:host-gateway"
+  # ============================================================================
+  # LOCAL PROFILE - Development Infrastructure
+  # ============================================================================
+  nginx:
+    profiles: ["local"]
+    image: nginx:alpine
+    container_name: lynk-laravel-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    command: ["nginx", "-g", "daemon off;"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-    mysql:
-        image: "mysql/mysql-server:8.0"
-        ports:
-            - "${FORWARD_DB_PORT:-3306}:3306"
-        environment:
-            MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
-            MYSQL_ROOT_HOST: "%"
-            MYSQL_DATABASE: "${DB_DATABASE}"
-            MYSQL_USER: "${DB_USERNAME}"
-            MYSQL_PASSWORD: "${DB_PASSWORD}"
-            MYSQL_ALLOW_EMPTY_PASSWORD: 1
-        volumes:
-            - "sail-mysql:/var/lib/mysql"
-        networks:
-            - sail
-        healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-            retries: 3
-            timeout: 5s
-        command: --log-bin-trust-function-creators=1
+  redis:
+    profiles: ["local"]
+    image: redis:7-alpine
+    container_name: laravel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        container_name: pma-lynk
-        links:
-            - mysql
-        environment:
-            PMA_HOST: mysql
-            PMA_PORT: 3306
-            PMA_ARBITRARY: 1
-            UPLOAD_LIMIT: 1G
-        restart: always
-        ports:
-            - 8081:80
-        networks:
-            - sail
+  mysql:
+    profiles: ["local"]
+    image: mysql/mysql-server:8.0
+    container_name: lynk-laravel-mysql
+    restart: unless-stopped
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: "${DB_DATABASE}"
+      MYSQL_USER: "${DB_USERNAME}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    volumes:
+      - .docker/mysql:/var/lib/mysql
+    networks:
+      - laravel
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    command: --log-bin-trust-function-creators=1
 
-    redis:
-        image: "redis:alpine"
-        container_name: "lynk1-redis"
-        command: redis-server
-        restart: "${RESTART:-always}"
-        ports:
-            - "${APPLICATION_OUTSIDE_REDIS_PORT:-6379}:6379"
-        networks:
-            - sail
+  phpmyadmin:
+    profiles: ["local"]
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 1G
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-    mailhog:
-        image: mailhog/mailhog
-        networks:
-            - sail
-        ports:
-        - "8025:8025"
+  mailhog:
+    profiles: ["local"]
+    image: mailhog/mailhog
+    container_name: laravel-mailhog
+    restart: unless-stopped
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8025"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-    worker-1:
-      image: lynk/backend:latest
-      container_name: worker-1
-      restart: always
-      working_dir: /var/www/html/
-      command: php artisan queue:work redis --verbose --tries=3 --queue=local_market,initiate_local_market_orders
-      depends_on:
-          - laravel-app
-      volumes:
-          - ./:/var/www/html
-      networks:
-          - sail
+  nightwatch:
+    <<: *default-extra-hosts
+    profiles: ["observability"]
+    image: app-php-fpm:latest
+    container_name: laravel-nightwatch
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: tail -f /dev/null
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-    worker-2:
-      image: lynk/backend:latest
-      container_name: worker-2
-      restart: always
-      working_dir: /var/www/html/
-      command: php artisan queue:work redis --verbose --tries=3 --queue=default,bursam
-      depends_on:
-          - laravel-app
-      volumes:
-          - ./:/var/www/html
-      networks:
-          - sail
+  # ============================================================================
+  # GROUP1 PROFILE - Local Market Core Processing Workers
+  # ============================================================================
+  local-market-commodities-settlement-worker:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=local_market_commodities_settlement
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
 
-    worker-3:
-      image: lynk/backend:latest
-      container_name: worker-3
-      restart: always
-      working_dir: /var/www/html/
-      command: php artisan queue:work redis --verbose --tries=3 --queue=expire_trader_order,unit-inventory
-      depends_on:
-          - laravel-app
-      volumes:
-          - ./:/var/www/html
-      networks:
-          - sail
+  local-market-eligible-quantities-worker-group1:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_eligible_quantities
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  local-market-order-inventories-units-logging:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_inventories_units_logging
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  local-market-order-initiation:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_initiation
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  trader-order-initiation:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=trader_order_initiation
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  complete-commodities-purchased-local-market-worker-group1:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_commodities_purchased_local_market
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  buy-commodities-local-market-orders-worker-group1:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=buy_commodities_local_market_orders
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  apply-order-fees-worker:
+    <<: *default-extra-hosts
+    profiles: ["group1"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=apply_order_fees
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  # ============================================================================
+  # GROUP2 PROFILE - General & Trader Operations Workers
+  # ============================================================================
+  local-market-states-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_states
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  local-market-process-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_process
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  local-market-eligible-quantities-worker-group2:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_eligible_quantities
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  hold-eligible-local-order-units-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=hold_eligible_units_local_market_orders
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  complete-commodities-purchased-local-market-worker-group2:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_commodities_purchased_local_market
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  refresh-eligibilities-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=refresh_eligibilities
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  notifications-worker-group2:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=notifications
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  create-trader-orders-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=create_trader_orders
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  default-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=default
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  bursam-worker-group2:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=bursam
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  complete-purchasing-local-market-orders-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_purchasing_local_market_orders
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  message-queue-worker:
+    <<: *default-extra-hosts
+    profiles: ["group2"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=mq
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  # ============================================================================
+  # GROUP3 PROFILE - Supporting Operations & External Integrations Workers
+  # ============================================================================
+  local-market-webhooks-worker:
+    <<: *default-extra-hosts
+    profiles: ["group3"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_webhooks
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  local-market-expire-trader-order-worker:
+    <<: *default-extra-hosts
+    profiles: ["group3"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=expire_trader_order
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  local-market-generate-units:
+    <<: *default-extra-hosts
+    profiles: ["group3"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=unit-inventory
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  buy-commodities-local-market-orders-worker-group3:
+    <<: *default-extra-hosts
+    profiles: ["group3"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=buy_commodities_local_market_orders
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  notifications-worker-group3:
+    <<: *default-extra-hosts
+    profiles: ["group3"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=notifications
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+  bursam-worker-group3:
+    <<: *default-extra-hosts
+    profiles: ["group3"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=bursam
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - laravel
+
+volumes:
+  redis_data:
+    driver: local
 
 networks:
-    sail:
-        driver: bridge
-volumes:
-    sail-mysql:
-        driver: local
+  laravel:
+    driver: bridge
+
+# ============================================================================
+# BUILDKIT SECRETS (for encrypted environment builds)
+# ============================================================================
+# Secret is read from LARAVEL_ENV_ENCRYPTION_KEY environment variable
+# Required for decrypting .env.encrypted during build
+secrets:
+  laravel_env_key:
+    environment: "LARAVEL_ENV_ENCRYPTION_KEY"
+
+#USE array profiles instead of duplicate the service in 2 or more group profiles
