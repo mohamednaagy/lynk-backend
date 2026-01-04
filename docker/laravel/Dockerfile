@@ -64,11 +64,11 @@ COPY --chown=www-data:www-data . .
 # Copy vendor from composer stage
 COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 
-# Build argument for environment file content from GitHub secrets/variables
-ARG ENV_FILE_CONTENT
+# Build argument for environment file content from GitHub secrets/variables (optional)
+ARG ENV_FILE_CONTENT=""
 
 # Create .env file from build argument or use existing file
-RUN set -eux; \
+RUN set -ex; \
     \
     if [ -n "${ENV_FILE_CONTENT}" ]; then \
         echo "📝 Creating .env from build arguments..."; \
