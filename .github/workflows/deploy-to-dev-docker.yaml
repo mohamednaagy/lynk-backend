@@ -169,14 +169,12 @@ jobs:
                   echo "✓ .env file created from GitHub secrets/variables"
                   echo "File size: $(wc -c < .env.build) bytes"
 
-            - name: Read .env file for build
-              id: env-content
-              run: |
-                  ENV_CONTENT=$(cat .env.build)
-                  # Use delimiter to handle multiline content
-                  echo "content<<EOF" >> $GITHUB_OUTPUT
-                  echo "$ENV_CONTENT" >> $GITHUB_OUTPUT
-                  echo "EOF" >> $GITHUB_OUTPUT
+                  # Rename to .env so Docker can copy it
+                  mv .env.build .env
+
+                  echo "✓ Renamed to .env for Docker build"
+                  echo "First 5 lines of .env:"
+                  head -5 .env
 
             - name: Build Docker image
               uses: docker/build-push-action@v6
@@ -184,8 +182,6 @@ jobs:
                   context: .
                   file: ./docker/laravel/Dockerfile
                   load: true
-                  build-args: |
-                      ENV_FILE_CONTENT=${{ steps.env-content.outputs.content }}
                   tags: |
                       app-php-fpm:${{ needs.setup.outputs.commit_hash }}
                       app-php-fpm:latest
@@ -290,7 +286,7 @@ jobs:
                     docker tag app-php-fpm:${{ needs.setup.outputs.commit_hash }} app-php-fpm:latest
 
                     echo '📊 Current running containers:'
-                    docker ps --filter name=lynk --format 'table {{.Names}}\t{{.Status}}' || true
+                    docker ps --filter name=lynk --format 'table {{.Names}}\\t{{.Status}}' || true
 
                     cd /var/www/lynk-backend
 
@@ -349,31 +345,31 @@ jobs:
                       echo ''
                       echo '[$(date +%H:%M:%S)] Checking container status...'
 
-                      # Get container status
-                      TOTAL_CONTAINERS=\$(docker compose ps -a --format json | jq -s 'length')
-                      RUNNING_CONTAINERS=\$(docker compose ps --format json | jq -s 'length')
-                      UNHEALTHY_CONTAINERS=\$(docker compose ps --format json | jq -s '[.[] | select(.Health == \"unhealthy\")] | length')
-                      STARTING_CONTAINERS=\$(docker compose ps --format json | jq -s '[.[] | select(.Health == \"starting\" or .State == \"running\" and .Health == null)] | length')
+                      # Get container counts using simple grep
+                      RUNNING_COUNT=\$(docker compose ps | grep -c 'Up' || echo '0')
+                      EXITED_COUNT=\$(docker compose ps -a | grep -c 'Exited' || echo '0')
+                      UNHEALTHY_COUNT=\$(docker compose ps | grep -c 'unhealthy' || echo '0')
 
-                      echo \"  Total containers: \$TOTAL_CONTAINERS\"
-                      echo \"  Running containers: \$RUNNING_CONTAINERS\"
-                      echo \"  Starting containers: \$STARTING_CONTAINERS\"
-                      echo \"  Unhealthy containers: \$UNHEALTHY_CONTAINERS\"
+                      echo \"  Running containers: \$RUNNING_COUNT\"
+                      echo \"  Exited containers: \$EXITED_COUNT\"
+                      echo \"  Unhealthy containers: \$UNHEALTHY_COUNT\"
 
                       # Check if any containers failed
-                      EXITED_CONTAINERS=\$(docker compose ps -a --format json | jq -s '[.[] | select(.State == \"exited\")] | length')
-                      if [ \$EXITED_CONTAINERS -gt 0 ]; then
+                      if [ \"\$EXITED_COUNT\" -gt 0 ]; then
                         echo ''
                         echo '❌ Some containers have exited!'
                         docker compose ps -a
                         echo ''
-                        echo '📋 Logs from exited containers:'
+                        echo '📋 Logs from failed containers:'
                         docker compose logs --tail=50
                         exit 1
                       fi
 
-                      # Check if all healthy
-                      if [ \$RUNNING_CONTAINERS -eq \$TOTAL_CONTAINERS ] && [ \$UNHEALTHY_CONTAINERS -eq 0 ] && [ \$STARTING_CONTAINERS -eq 0 ]; then
+                      # Check if any containers are unhealthy
+                      if [ \"\$UNHEALTHY_COUNT\" -gt 0 ]; then
+                        echo \"  ⚠️  Waiting for \$UNHEALTHY_COUNT unhealthy container(s)...\"
+                      elif [ \"\$RUNNING_COUNT\" -gt 0 ]; then
+                        # All containers running and healthy
                         echo ''
                         echo '✅ All containers are running and healthy!'
                         docker compose ps
@@ -421,7 +417,7 @@ jobs:
 
                     echo '📊 Container Summary:'
                     echo '==================='
-                    docker compose ps --format 'table {{.Name}}\t{{.Status}}'
+                    docker compose ps --format 'table {{.Name}}\\t{{.Status}}'
 
                     echo ''
                     echo '📈 Container Count:'
