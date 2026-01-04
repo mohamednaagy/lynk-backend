@@ -64,36 +64,27 @@ COPY --chown=www-data:www-data . .
 # Copy vendor from composer stage
 COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 
-# Build argument for encrypted environment content
-ARG ENCRYPTED_ENV_CONTENT
+# Build argument for environment file content from GitHub secrets/variables
+ARG ENV_FILE_CONTENT
 
-# Environment decryption - decrypt encrypted content passed as build arg
-RUN --mount=type=secret,id=laravel_env_key,required=true \
-    set -eux; \
+# Create .env file from build argument or use existing file
+RUN set -eux; \
     \
-    echo "🔐 Decrypting environment..."; \
+    if [ -n "${ENV_FILE_CONTENT}" ]; then \
+        echo "📝 Creating .env from build arguments..."; \
+        printf '%s' "${ENV_FILE_CONTENT}" > .env; \
+        echo "✓ .env file created ($(wc -c < .env) bytes)"; \
+    elif [ -f .env ]; then \
+        echo "✓ Using existing .env file from build context ($(wc -c < .env) bytes)"; \
+    else \
+        echo "⚠️  No .env file provided, using .env.example as template"; \
+        cp .env.example .env; \
+    fi; \
     \
-    # Write encrypted content to file using printf to preserve content
-    printf '%s' "${ENCRYPTED_ENV_CONTENT}" > .env.encrypted; \
-    echo "✓ Encrypted content written ($(wc -c < .env.encrypted) bytes)"; \
+    # Verify .env exists
+    test -f .env || (echo "❌ .env file creation failed" && exit 1); \
     \
-    # Get encryption key from BuildKit secret
-    ENCRYPTION_KEY=$(cat /run/secrets/laravel_env_key); \
-    echo "✓ Encryption key loaded (${#ENCRYPTION_KEY} chars)"; \
-    echo "Encryption content: ${ENCRYPTED_ENV_CONTENT}"; \
-    \
-    # Decrypt using Laravel artisan
-    php artisan env:decrypt --key="${ENCRYPTION_KEY}" --force --no-interaction; \
-    \
-    # Verify decryption
-    test -f .env || (echo "❌ Decryption failed" && exit 1); \
-    echo "✓ Decrypted .env created ($(wc -c < .env) bytes)"; \
-    \
-    # Clean up
-    rm -f .env.encrypted; \
-    unset ENCRYPTION_KEY; \
-    \
-    echo "✅ Environment decrypted successfully"
+    echo "✅ Environment configuration ready"
 
 # Ensure storage and bootstrap/cache directories and permissions
 RUN mkdir -p storage/framework/cache \
