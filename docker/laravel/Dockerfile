@@ -58,31 +58,26 @@ RUN deluser www-data 2>/dev/null || true \
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy application files
+# Copy application files (includes .env created by GitHub Actions workflow)
 COPY --chown=www-data:www-data . .
 
 # Copy vendor from composer stage
 COPY --from=composer-stage --chown=www-data:www-data /app/vendor ./vendor
 
-# Build argument for environment file content from GitHub secrets/variables (optional)
-ARG ENV_FILE_CONTENT=""
-
-# Create .env file from build argument or use existing file
+# Verify .env file exists and show size
 RUN set -ex; \
     \
-    if [ -n "${ENV_FILE_CONTENT}" ]; then \
-        echo "📝 Creating .env from build arguments..."; \
-        printf '%s' "${ENV_FILE_CONTENT}" > .env; \
-        echo "✓ .env file created ($(wc -c < .env) bytes)"; \
-    elif [ -f .env ]; then \
-        echo "✓ Using existing .env file from build context ($(wc -c < .env) bytes)"; \
+    if [ -f .env ]; then \
+        echo "✓ Using .env file from build context ($(wc -c < .env) bytes)"; \
+        echo "First 3 lines:"; \
+        head -3 .env; \
     else \
-        echo "⚠️  No .env file provided, using .env.example as template"; \
+        echo "⚠️  No .env file found, using .env.example as template"; \
         cp .env.example .env; \
     fi; \
     \
-    # Verify .env exists
-    test -f .env || (echo "❌ .env file creation failed" && exit 1); \
+    # Final verification
+    test -f .env || (echo "❌ .env file not found" && exit 1); \
     \
     echo "✅ Environment configuration ready"
 
