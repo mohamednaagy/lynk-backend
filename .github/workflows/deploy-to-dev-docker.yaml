@@ -13,7 +13,7 @@ concurrency:
 jobs:
     setup:
         runs-on: ubuntu-latest
-        environment: dev
+        environment: development
         outputs:
             servers: ${{ steps.set-servers.outputs.servers }}
             commit_hash: ${{ steps.commit.outputs.short_sha }}
@@ -44,7 +44,7 @@ jobs:
     build:
         needs: setup
         runs-on: ubuntu-latest
-        environment: dev
+        environment: development
 
         steps:
             - name: Checkout code
@@ -225,7 +225,7 @@ jobs:
     deploy:
         needs: [build, setup]
         runs-on: ubuntu-latest
-        environment: dev
+        environment: development
         strategy:
             matrix:
                 # Get servers from the setup job output
@@ -439,7 +439,7 @@ jobs:
         needs: [deploy, setup]
         if: always()
         runs-on: ubuntu-latest
-        environment: dev
+        environment: development
 
         steps:
             - name: Send Slack notification
