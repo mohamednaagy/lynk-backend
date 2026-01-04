@@ -1,0 +1,337 @@
+name: Deploy to Dev (Docker)
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+env:
+  ENVIRONMENT: dev
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: dev
+    strategy:
+      matrix:
+        server:
+          - name: dev-server-1
+            ip: DEV_IP
+            user: USER_NAME
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract commit hash
+        id: commit
+        run: |
+          SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "Image will be tagged as: app-php-fpm:${SHORT_SHA}"
+
+      - name: Build Docker image with encrypted environment
+        run: |
+          echo "🔨 Building Docker image with encrypted environment..."
+
+          LARAVEL_ENV_ENCRYPTION_KEY="${{ vars.ENV_ENCRYPTION_KEY }}" \
+          DOCKER_BUILDKIT=1 docker buildx build \
+            --platform linux/amd64 \
+            --tag app-php-fpm:${{ steps.commit.outputs.short_sha }} \
+            --tag app-php-fpm:latest \
+            --file docker/laravel/Dockerfile \
+            --build-arg ENCRYPTED_ENV_CONTENT="${{ vars.ENV_ENCRYPTED_CONTENT }}" \
+            --secret id=laravel_env_key,env=LARAVEL_ENV_ENCRYPTION_KEY \
+            --load \
+            .
+
+          echo "✅ Docker image built successfully"
+          docker images | grep app-php-fpm
+
+      - name: Save Docker image to tar
+        run: |
+          echo "📦 Saving Docker image to tar archive..."
+          docker save app-php-fpm:${{ steps.commit.outputs.short_sha }} | gzip > app-php-fpm-${{ steps.commit.outputs.short_sha }}.tar.gz
+          ls -lh app-php-fpm-${{ steps.commit.outputs.short_sha }}.tar.gz
+          echo "✅ Image saved successfully"
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Transfer Docker image to server
+        run: |
+          echo "🚀 Transferring Docker image to ${{ matrix.server.name }}..."
+
+          scp -o StrictHostKeyChecking=no \
+            app-php-fpm-${{ steps.commit.outputs.short_sha }}.tar.gz \
+            ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }}:/tmp/
+
+          echo "✅ Image transferred successfully"
+
+      - name: Load Docker image on server
+        run: |
+          echo "📥 Loading Docker image on server..."
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }} "\
+            cd /tmp && \
+            gunzip -c app-php-fpm-${{ steps.commit.outputs.short_sha }}.tar.gz | docker load && \
+            docker tag app-php-fpm:${{ steps.commit.outputs.short_sha }} app-php-fpm:latest && \
+            rm -f app-php-fpm-${{ steps.commit.outputs.short_sha }}.tar.gz && \
+            docker images | grep app-php-fpm
+          "
+
+          echo "✅ Image loaded on server"
+
+      - name: Transfer docker-compose.yml to server
+        run: |
+          echo "📋 Transferring docker-compose.yml to server..."
+
+          scp -o StrictHostKeyChecking=no \
+            docker-compose.yml \
+            ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }}:/var/www/lynk-backend/
+
+          echo "✅ docker-compose.yml transferred"
+
+      - name: Deploy containers with docker-compose
+        id: deploy
+        run: |
+          echo "🚀 Deploying containers on ${{ matrix.server.name }}..."
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }} "\
+            cd /var/www/lynk-backend && \
+            \
+            echo '📊 Current running containers:' && \
+            docker ps --format 'table {{.Names}}\t{{.Status}}' || true && \
+            \
+            echo '' && \
+            echo '🛑 Stopping existing containers...' && \
+            docker compose --profile web --profile local --profile group1 --profile group2 --profile group3 down || true && \
+            \
+            echo '' && \
+            echo '🚀 Starting all containers with scaling...' && \
+            docker compose --profile web --profile local --profile group1 --profile group2 --profile group3 up -d \
+              --scale local-market-states-worker=8 \
+              --scale local-market-webhooks-worker=5 \
+              --scale local-market-process-worker=8 \
+              --scale local-market-expire-trader-order-worker=8 \
+              --scale local-market-commodities-settlement-worker=8 \
+              --scale local-market-eligible-quantities-worker-group1=8 \
+              --scale local-market-eligible-quantities-worker-group2=8 \
+              --scale local-market-order-inventories-units-logging=5 \
+              --scale local-market-order-initiation=5 \
+              --scale trader-order-initiation=5 \
+              --scale local-market-generate-units=1 \
+              --scale hold-eligible-local-order-units-worker=5 \
+              --scale complete-commodities-purchased-local-market-worker-group1=5 \
+              --scale complete-commodities-purchased-local-market-worker-group2=5 \
+              --scale buy-commodities-local-market-orders-worker-group1=5 \
+              --scale buy-commodities-local-market-orders-worker-group3=5 \
+              --scale refresh-eligibilities-worker=1 \
+              --scale notifications-worker-group2=5 \
+              --scale notifications-worker-group3=5 \
+              --scale create-trader-orders-worker=8 \
+              --scale default-worker=8 \
+              --scale bursam-worker-group2=1 \
+              --scale bursam-worker-group3=1 \
+              --scale apply-order-fees-worker=1 \
+              --scale complete-purchasing-local-market-orders-worker=5 \
+              --scale message-queue-worker=2 && \
+            \
+            echo '' && \
+            echo '✅ Containers started, waiting for them to be healthy...'
+          "
+
+          echo "✅ Deploy command executed"
+
+      - name: Wait for containers to be healthy
+        id: health-check
+        run: |
+          echo "🏥 Checking container health on ${{ matrix.server.name }}..."
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }} "\
+            cd /var/www/lynk-backend && \
+            \
+            # Wait up to 5 minutes for containers to be healthy
+            MAX_WAIT=300
+            ELAPSED=0
+            SLEEP_INTERVAL=10
+
+            while [ \$ELAPSED -lt \$MAX_WAIT ]; do
+              echo '' && \
+              echo '[$(date +%H:%M:%S)] Checking container status...' && \
+              \
+              # Get container status
+              TOTAL_CONTAINERS=\$(docker compose ps -a --format json | jq -s 'length') && \
+              RUNNING_CONTAINERS=\$(docker compose ps --format json | jq -s 'length') && \
+              UNHEALTHY_CONTAINERS=\$(docker compose ps --format json | jq -s '[.[] | select(.Health == \"unhealthy\")] | length') && \
+              STARTING_CONTAINERS=\$(docker compose ps --format json | jq -s '[.[] | select(.Health == \"starting\" or .State == \"running\" and .Health == null)] | length') && \
+              \
+              echo \"  Total containers: \$TOTAL_CONTAINERS\" && \
+              echo \"  Running containers: \$RUNNING_CONTAINERS\" && \
+              echo \"  Starting containers: \$STARTING_CONTAINERS\" && \
+              echo \"  Unhealthy containers: \$UNHEALTHY_CONTAINERS\" && \
+              \
+              # Check if any containers failed to start
+              EXITED_CONTAINERS=\$(docker compose ps -a --format json | jq -s '[.[] | select(.State == \"exited\")] | length') && \
+              if [ \$EXITED_CONTAINERS -gt 0 ]; then
+                echo '' && \
+                echo '❌ Some containers have exited!' && \
+                docker compose ps -a && \
+                echo '' && \
+                echo '📋 Logs from exited containers:' && \
+                docker compose logs --tail=50 && \
+                exit 1
+              fi && \
+              \
+              # Check if all containers are healthy (or running without healthcheck)
+              if [ \$RUNNING_CONTAINERS -eq \$TOTAL_CONTAINERS ] && [ \$UNHEALTHY_CONTAINERS -eq 0 ] && [ \$STARTING_CONTAINERS -eq 0 ]; then
+                echo '' && \
+                echo '✅ All containers are running and healthy!' && \
+                docker compose ps && \
+                exit 0
+              fi && \
+              \
+              # Wait and retry
+              echo \"  Waiting ${SLEEP_INTERVAL}s before next check...\" && \
+              sleep \$SLEEP_INTERVAL && \
+              ELAPSED=\$((ELAPSED + SLEEP_INTERVAL))
+            done && \
+            \
+            # Timeout reached
+            echo '' && \
+            echo '⚠️ Timeout reached waiting for containers to be healthy' && \
+            echo '' && \
+            echo '📊 Final container status:' && \
+            docker compose ps -a && \
+            echo '' && \
+            echo '📋 Recent logs:' && \
+            docker compose logs --tail=100 && \
+            exit 1
+          "
+
+          echo "✅ All containers are healthy"
+
+      - name: Verify deployment
+        id: verify
+        run: |
+          echo "🔍 Verifying deployment on ${{ matrix.server.name }}..."
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }} "\
+            cd /var/www/lynk-backend && \
+            \
+            echo '📊 Container Summary:' && \
+            echo '===================' && \
+            docker compose ps --format 'table {{.Name}}\t{{.Status}}\t{{.Ports}}' && \
+            \
+            echo '' && \
+            echo '📈 Container Count by Profile:' && \
+            echo 'Total containers: '\$(docker compose ps -q | wc -l) && \
+            \
+            echo '' && \
+            echo '🏷️  Image Information:' && \
+            docker images | grep app-php-fpm && \
+            \
+            echo '' && \
+            echo '✅ Deployment verification complete'
+          "
+
+      - name: Run database migrations
+        run: |
+          echo "🗄️  Running database migrations..."
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }} "\
+            docker exec lynk-laravel-app php artisan migrate --force && \
+            echo '✅ Migrations completed'
+          "
+
+      - name: Clear application cache
+        run: |
+          echo "🧹 Clearing application cache..."
+
+          ssh -o StrictHostKeyChecking=no ${{ secrets[matrix.server.user] }}@${{ secrets[matrix.server.ip] }} "\
+            docker exec lynk-laravel-app php artisan structure:clear && \
+            docker exec lynk-laravel-app php artisan package:discover && \
+            echo '✅ Cache cleared'
+          "
+
+      - name: Print deployment summary
+        if: always()
+        run: |
+          echo "📝 Deployment Summary"
+          echo "===================="
+          echo "Server: ${{ matrix.server.name }}"
+          echo "IP: ${{ secrets[matrix.server.ip] }}"
+          echo "Image Tag: app-php-fpm:${{ steps.commit.outputs.short_sha }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Status: ${{ job.status }}"
+          echo "Execution Time: $(date)"
+
+      - name: Send Slack notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            STATUS_EMOJI="✅"
+            STATUS_TEXT="SUCCESSFUL"
+            COLOR="good"
+          else
+            STATUS_EMOJI="❌"
+            STATUS_TEXT="FAILED"
+            COLOR="danger"
+          fi
+
+          curl --insecure -X POST -H 'Content-type: application/json' --data '{
+            "attachments": [
+              {
+                "color": "'"$COLOR"'",
+                "title": "'"$STATUS_EMOJI"' Docker Deployment to Dev - '"$STATUS_TEXT"'",
+                "fields": [
+                  {
+                    "title": "Server",
+                    "value": "${{ matrix.server.name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Image Tag",
+                    "value": "app-php-fpm:${{ steps.commit.outputs.short_sha }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Triggered By",
+                    "value": "${{ github.actor }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Commit",
+                    "value": "${{ github.sha }}",
+                    "short": false
+                  }
+                ],
+                "footer": "Lynk Backend • Docker Deployment",
+                "ts": '$(date +%s)'
+              }
+            ]
+          }' ${{ secrets.SLACK_HOOK_URL }}
+
+      - name: Cleanup local artifacts
+        if: always()
+        run: |
+          echo "🧹 Cleaning up local artifacts..."
+          rm -f app-php-fpm-${{ steps.commit.outputs.short_sha }}.tar.gz
+          echo "✅ Cleanup complete"
