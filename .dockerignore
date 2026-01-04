@@ -6,8 +6,10 @@ storage/logs
 storage/framework/cache
 storage/framework/sessions
 storage/framework/views
-.env
-.env.*
+# Allow .env file to be copied (created by GitHub Actions workflow)
+# Still exclude encrypted .env files
+.env.*.encrypted
+.env.example
 docker-compose.yml
 docker/
 .idea
