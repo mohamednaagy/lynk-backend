@@ -60,7 +60,7 @@ jobs:
                   # Application Configuration
                   APP_NAME=${{ vars.APP_NAME }}
                   APP_ENV=${{ vars.APP_ENV }}
-                  APP_KEY=${{ secrets.APP_KEY }}
+                  APP_KEY=${{ vars.APP_KEY }}
                   APP_DEBUG=${{ vars.APP_DEBUG }}
                   APP_URL=${{ vars.APP_URL }}
 
