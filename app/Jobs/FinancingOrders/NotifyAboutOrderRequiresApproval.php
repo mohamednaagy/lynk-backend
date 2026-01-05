@@ -7,9 +7,9 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Enums\SystemNotificationType;
-use App\Models\TraderOrder;
+use App\Models\FinancingOrder;
 use App\Models\User;
-use App\Notifications\FinancingOrders\TraderOrderCancelled;
+use App\Notifications\FinancingOrders\OrderRequiresApproval;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,7 +18,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Notification;
 
-class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
+class NotifyAboutOrderRequiresApproval implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -27,7 +27,7 @@ class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private TraderOrder $traderOrder, private User $canceller)
+    public function __construct(private FinancingOrder $financingOrder, private User $user)
     {
         $this->onQueue('notifications');
     }
@@ -39,27 +39,26 @@ class NotifyAdminAndLenderAboutTraderOrderCancelled implements ShouldQueue
      */
     public function handle()
     {
-        $lender = $this->traderOrder->order->lender()->withTrashed()->first();
-
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($lender) {
-                $query->where(function ($query) use ($lender) {
+            ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) {
+                $query->where(function ($query) {
                     $query->role(Role::Admin)
                         ->orWhere(function ($query) {
                             $query->role(Role::Manager)
                                 ->permission(
-                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
+                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
                                 );
-                        })
-                        ->orWhere(function ($query) use ($lender) {
-                            $query->role(Role::LenderAdmin)
-                                ->whereHas('lender', function ($query) use ($lender) {
-                                    $query->where('id', $lender->id);
-                                });
                         });
                 });
             });
 
-        Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder, $this->canceller));
+        Notification::send($notifiables, new OrderRequiresApproval($this->financingOrder, $this->user));
+    }
+
+    public function isNotifyAllowed()
+    {
+        // Since notify_admins_about_new_orders has been removed, always return true
+        // to maintain notification functionality
+        return true;
     }
 }

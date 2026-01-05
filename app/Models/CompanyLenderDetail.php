@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\CompanyMarketType;
-use App\Enums\CompanyNewOrderNotificationForAdminStatus;
 use App\Enums\TraderOrderMode;
 use Illuminate\Database\Eloquent\Model;
 use Watson\Rememberable\Rememberable;
@@ -21,7 +20,6 @@ class CompanyLenderDetail extends Model
     protected $casts = [
         'preferred_market_type' => CompanyMarketType::class,
         'does_order_require_approval' => 'boolean',
-        'notify_admins_about_new_orders' => CompanyNewOrderNotificationForAdminStatus::class,
         'force_unique_reference_number' => 'boolean',
         'require_initiate_trade_request' => 'boolean',
         'trading_mode' => TraderOrderMode::class,
@@ -41,7 +39,6 @@ class CompanyLenderDetail extends Model
         'contract_number',
         'preferred_market_type',
         'does_order_require_approval',
-        'notify_admins_about_new_orders',
         'require_initiate_trade_request',
         'trading_mode',
         'internal_status_comment',

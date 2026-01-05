@@ -19,6 +19,17 @@ class CreateLocalMarketOrderAction implements CreateLocalMarketOrder
      */
     public function handle(array $data): LocalMarketOrder
     {
+        $existingOrder = LocalMarketOrder::where('external_order_no', $data['external_order_no'])->first();
+
+        if ($existingOrder) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->warning(formatLocalMarketOrderTitle("Attempted to create duplicate LocalMarketOrder with external_order_no => {$data['external_order_no']}", $existingOrder), [
+                'localMarketOrderId' => $existingOrder->id,
+                'external_order_no' => $data['external_order_no'],
+            ]);
+
+            return $existingOrder;
+        }
+
         $order = LocalMarketOrder::create(
             Arr::only($data, [
                 'company_id',

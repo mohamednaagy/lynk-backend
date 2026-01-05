@@ -36,3 +36,12 @@ composer.lock
 
 # Ignore tenant folders
 /storage/tenant*/
+
+# AI assistant files
+GEMINI.md
+CLAUDE.md
+boost.json
+.mcp.json
+.serena/
+.qwen/
+.gemini/

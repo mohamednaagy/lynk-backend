@@ -8,7 +8,7 @@ use App\Enums\FinancingOrderProceedCase;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\OrderStatusDoesNotFollowSequenceException;
 use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
-use App\Jobs\FinancingOrders\NotifyAdminsAboutOrderDeliveryConfirmed;
+use App\Jobs\FinancingOrders\NotifyAboutOrderDeliveryConfirmed;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\TraderOrderProceedCaseService;
 use App\Support\Traders\Facades\Trader;
@@ -40,7 +40,7 @@ class ProceedDeliveryConfirmationAction implements ProceedDeliveryConfirmation
         (new TraderStrategyContext($traderOrder->provider, $traderOrder->version))
             ->confirmDeliverCommodityToCustomer($traderOrder);
 
-        dispatch(new NotifyAdminsAboutOrderDeliveryConfirmed($traderOrder));
+        dispatch(new NotifyAboutOrderDeliveryConfirmed($traderOrder));
 
         $canUpdateOrderStatus = Trader::driver($traderOrder->provider, $traderOrder->version)->confirmDelivery($traderOrder);
 

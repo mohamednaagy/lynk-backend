@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api\V1\Admin\Notifications;
 
 use App\Enums\Action;
 use App\Enums\Area;
+use App\Enums\NotificationChannel;
 use App\Enums\Subject;
+use App\Enums\SystemNotificationType;
 use App\Http\Controllers\Controller;
-use App\Models\NotificationType;
 use App\Models\User;
 use App\Services\NotificationPreferenceService;
 use App\Transformers\NotificationSettingTransformer;
@@ -32,13 +33,14 @@ class UserNotificationSettingsController extends Controller
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
     }
 
-    public function toggle(
+    public function toggleChannel(
         User $user,
-        NotificationType $notification_type,
+        SystemNotificationType $notificationType,
+        NotificationChannel $channel,
         NotificationPreferenceService $service
     ): JsonResponse {
-        $isEnabled = $service->isEnabled($user, $notification_type);
-        $service->setByModel($user, $notification_type, ! $isEnabled);
+        $isEnabled = $service->isChannelEnabled($user, $notificationType, $channel);
+        $service->setChannelNotification($user, $notificationType, $channel, ! $isEnabled);
 
         return fractal($service->listForUser($user), new NotificationSettingTransformer)->respond();
     }

@@ -6,7 +6,7 @@ use App\Enums\TraderOrderCancelReason;
 use App\Enums\TraderOrderTimeLimitAction;
 use App\Enums\TraderOrderTimeLimitStatus;
 use App\Enums\TraderOrderTimeLimitType;
-use App\Jobs\FinancingOrders\NotifyLenderAboutExpireTraderOrder;
+use App\Jobs\FinancingOrders\NotifyAboutExpireTraderOrder;
 use App\Models\TraderOrder;
 use App\Models\TraderOrderTimeLimit;
 use App\Support\Traders\Facades\Trader;
@@ -136,7 +136,7 @@ class ExpireOrderJob implements ShouldQueue
             $trader->cancelTraderOrder($this->traderOrder, TraderOrderCancelReason::ExpiredContractSignTime);
             $this->traderOrderTimeLimit->expire();
 
-            NotifyLenderAboutExpireTraderOrder::dispatch($this->traderOrder);
+            NotifyAboutExpireTraderOrder::dispatch($this->traderOrder);
 
             Log::channel($this->logChannel)->info(formatLogTitle('Expire order successfully', $this->traderOrder), [
                 'time_limit_id' => $this->traderOrderTimeLimit->id,

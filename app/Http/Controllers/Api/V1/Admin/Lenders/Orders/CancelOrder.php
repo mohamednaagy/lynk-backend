@@ -10,7 +10,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders\CancelOrderRequest;
-use App\Jobs\FinancingOrders\NotifyAdminAndLenderAboutOrderCancelled;
+use App\Jobs\FinancingOrders\NotifyAboutOrderCancelled;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +55,7 @@ class CancelOrder extends Controller
                 $request->validated()
             );
 
-            dispatch(new NotifyAdminAndLenderAboutOrderCancelled($order, $canceller));
+            dispatch(new NotifyAboutOrderCancelled($order, $canceller));
 
             return $this->successResponse();
         });

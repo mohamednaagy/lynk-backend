@@ -47,7 +47,7 @@ return new class extends Migration
         }
 
         // Step 3: Add Foreign Keys if Not Existing
-        if (! in_array(env('APP_ENV'), ['dev', 'sandbox', 'local'])) {
+        if (! in_array(config('app.env'), ['dev', 'sandbox', 'local'])) {
             $foreignKeyQueries = [
                 'local_market_inventory_units' => [
                     'inventory_units_commodity_item_id_foreign' => 'ALTER TABLE local_market_inventory_units ADD CONSTRAINT inventory_units_commodity_item_id_foreign FOREIGN KEY (commodity_item_id) REFERENCES commodity_items (id) ON DELETE CASCADE;',

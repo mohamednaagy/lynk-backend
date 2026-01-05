@@ -2,18 +2,16 @@
 
 namespace App\Notifications\FinancingOrders;
 
+use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
+use App\Notifications\BaseNotification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Config;
 
-class OrderCreated extends Notification implements ShouldQueue
+final class OrderRequiresApproval extends BaseNotification implements ShouldQueue
 {
-    use Queueable;
-
     /**
      * Create a new notification instance.
      *
@@ -25,14 +23,12 @@ class OrderCreated extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
+     * Get the notification's type.
+     * This should be a value from SystemNotificationType enum.
      */
-    public function via($notifiable)
+    public function getType(): SystemNotificationType
     {
-        return ['mail', 'database'];
+        return SystemNotificationType::ORDER_REQUIRES_APPROVAL;
     }
 
     /**
@@ -46,13 +42,13 @@ class OrderCreated extends Notification implements ShouldQueue
         $url = Config::get('front-end.prod.base_url').'/orders/'.$this->financingOrder->id;
 
         return (new MailMessage)
-            ->subject(__('emails/order-created.subject', [
+            ->subject(__('emails/order-requires-approval.subject', [
                 'order_id' => $this->financingOrder->id,
             ]))
-            ->line(__('emails/order-created.body', [
+            ->line(__('emails/order-requires-approval.body', [
                 'order_id' => $this->financingOrder->id,
             ]))
-            ->action(__('emails/order-created.action'), $url);
+            ->action(__('emails/order-requires-approval.action'), $url);
     }
 
     /**
@@ -64,18 +60,12 @@ class OrderCreated extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
+            ...parent::toArray($notifiable),
             'order_id' => $this->financingOrder->id,
             'amount' => $this->financingOrder->amount,
             'selling_price' => $this->financingOrder->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
-        ];
-    }
-
-    public function viaQueues()
-    {
-        return [
-            'mail' => 'notifications',
         ];
     }
 }
