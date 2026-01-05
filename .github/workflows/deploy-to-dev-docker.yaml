@@ -155,6 +155,9 @@ jobs:
                   MSEGAT_USERNAME=${{ secrets.MSEGAT_USERNAME }}
                   MSEGAT_API_KEY=${{ secrets.MSEGAT_API_KEY }}
 
+                  # JWT Secret
+                  JWT_SECRET=${{ secrets.JWT_SECRET }}
+
                   # Wallet Configuration
                   WALLET_CACHE_DRIVER=${{ vars.WALLET_CACHE_DRIVER }}
                   WALLET_CACHE_TTL=${{ vars.WALLET_CACHE_TTL }}
