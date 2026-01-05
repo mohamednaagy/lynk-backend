@@ -92,6 +92,9 @@ jobs:
                   SESSION_DRIVER=${{ vars.SESSION_DRIVER }}
                   SESSION_LIFETIME=${{ vars.SESSION_LIFETIME }}
 
+                  # Memcached Configuration
+                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
+
                   # Redis Configuration
                   REDIS_HOST=${{ vars.REDIS_HOST }}
                   REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
@@ -114,6 +117,20 @@ jobs:
                   AWS_BUCKET=${{ vars.AWS_BUCKET }}
                   AWS_USE_PATH_STYLE_ENDPOINT=${{ vars.AWS_USE_PATH_STYLE_ENDPOINT }}
 
+                  # OCI Object Storage Configuration
+                  OCI_ACCESS_KEY_ID=${{ secrets.OCI_ACCESS_KEY_ID }}
+                  OCI_SECRET_ACCESS_KEY=${{ secrets.OCI_SECRET_ACCESS_KEY }}
+                  OCI_DEFAULT_REGION=${{ vars.OCI_DEFAULT_REGION }}
+                  OCI_BUCKET=${{ vars.OCI_BUCKET }}
+                  OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
+
+                  # OCI Public Object Storage Configuration
+                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
+                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
+                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
+                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
+                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
+
                   # SES Configuration
                   SES_ACCESS_KEY_ID=${{ secrets.SES_ACCESS_KEY_ID }}
                   SES_SECRET_ACCESS_KEY=${{ secrets.SES_SECRET_ACCESS_KEY }}
@@ -128,10 +145,27 @@ jobs:
                   MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
                   MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
 
-                  # Application Specific
+                  # Twilio Configuration
+                  OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
+                  OTPIFY_TWILIO_TOKEN=${{ secrets.OTPIFY_TWILIO_TOKEN }}
+                  OTPIFY_TWILIO_FROM=${{ vars.OTPIFY_TWILIO_FROM }}
+                  OTPIFY_TWILIO_VERIFY_SID=${{ secrets.OTPIFY_TWILIO_VERIFY_SID }}
+                  OTPIFY_TWILIO_SSL_VERIFY_PEER=${{ vars.OTPIFY_TWILIO_SSL_VERIFY_PEER }}
+                  OTPIFY_TWILIO_SSL_VERIFY_HOST=${{ vars.OTPIFY_TWILIO_SSL_VERIFY_HOST }}
+
+                  # Application Specific - OTP & Auth
                   OTPIFY_DEFAULT_DRIVER=${{ vars.OTPIFY_DEFAULT_DRIVER }}
                   OTPIFY_CODE_LENGTH=${{ vars.OTPIFY_CODE_LENGTH }}
                   OTPIFY_CODE_EXPIRATION_TIME=${{ vars.OTPIFY_CODE_EXPIRATION_TIME }}
+                  OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
+                  OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
+
+                  # SMS & Mobile Verification
+                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
+                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
+
+                  # Bitly
+                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
 
                   AUTHORIZED_TOKEN_LENGTH=${{ vars.AUTHORIZED_TOKEN_LENGTH }}
                   DEFAULT_GUARD=${{ vars.DEFAULT_GUARD }}
@@ -139,6 +173,9 @@ jobs:
                   GRANTIFY_DEFAULT_DRIVER=${{ vars.GRANTIFY_DEFAULT_DRIVER }}
                   SETTINGS_CACHE_ENABLED=${{ vars.SETTINGS_CACHE_ENABLED }}
                   HOST_WHITELIST=${{ vars.HOST_WHITELIST }}
+
+                  # Sanctum
+                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
 
                   # Telescope
                   TELESCOPE_ENABLED=${{ vars.TELESCOPE_ENABLED }}
@@ -154,6 +191,15 @@ jobs:
                   DEFAULT_TRADER=${{ vars.DEFAULT_TRADER }}
                   MSEGAT_USERNAME=${{ secrets.MSEGAT_USERNAME }}
                   MSEGAT_API_KEY=${{ secrets.MSEGAT_API_KEY }}
+
+                  # Bursam Trader Configuration
+                  BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
+                  BURSAM_BASE_URL=${{ vars.BURSAM_BASE_URL }}
+                  BURSAM_SELLING_COMMODITY_START_TIME=${{ vars.BURSAM_SELLING_COMMODITY_START_TIME }}
+                  BURSAM_SELLING_COMMODITY_END_TIME=${{ vars.BURSAM_SELLING_COMMODITY_END_TIME }}
+                  BURSAM_MARKET_OPENING_START_TIME=${{ vars.BURSAM_MARKET_OPENING_START_TIME }}
+                  BURSAM_MARKET_OPENING_END_TIME=${{ vars.BURSAM_MARKET_OPENING_END_TIME }}
+                  BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION=${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}
 
                   # JWT Secret
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -258,6 +304,33 @@ jobs:
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
                   STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
+
+                  # Lynk Application Configuration
+                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
+                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
+                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
+
+                  # Rate Limiting
+                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
+
+                  # Loan Coverage
+                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
+                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
+
+                  # Auto-Verified Users (Development/Testing)
+                  AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
+                  AUTO_VERIFIED_USERS_PASSWORD=${{ secrets.AUTO_VERIFIED_USERS_PASSWORD }}
+
+                  # Master OTP for Development
+                  ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
+                  MASTER_OTP_KEY=${{ secrets.MASTER_OTP_KEY }}
+
+                  # Nightwatch Monitoring
+                  NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
+                  NIGHTWATCH_TOKEN=${{ secrets.NIGHTWATCH_TOKEN }}
+                  NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
+                  NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
+                  NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
                   ENVEOF
 
                   echo "✓ .env file created from GitHub secrets/variables"
