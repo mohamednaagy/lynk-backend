@@ -187,6 +187,73 @@ jobs:
                   # reCAPTCHA Configuration
                   RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
                   RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+                  
+                  # Lynk Application Configuration
+                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
+                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
+                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
+
+                  # Rate Limiting
+                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
+
+                  # Loan Coverage
+                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
+                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
+
+                  # Auto-Verified Users (Development/Testing)
+                  AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
+                  AUTO_VERIFIED_USERS_PASSWORD=${{ vars.AUTO_VERIFIED_USERS_PASSWORD }}
+
+                  # Master OTP for Development
+                  ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
+                  MASTER_OTP_KEY=${{ vars.MASTER_OTP_KEY }}
+
+                  # Nightwatch Monitoring
+                  NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
+                  NIGHTWATCH_TOKEN=${{ secrets.NIGHTWATCH_TOKEN }}
+                  NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
+                  NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
+                  NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
+
+
+                  # Bursam Trader Configuration
+                  BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
+                  BURSAM_BASE_URL=${{ vars.BURSAM_BASE_URL }}
+                  BURSAM_SELLING_COMMODITY_START_TIME=${{ vars.BURSAM_SELLING_COMMODITY_START_TIME }}
+                  BURSAM_SELLING_COMMODITY_END_TIME=${{ vars.BURSAM_SELLING_COMMODITY_END_TIME }}
+                  BURSAM_MARKET_OPENING_START_TIME=${{ vars.BURSAM_MARKET_OPENING_START_TIME }}
+                  BURSAM_MARKET_OPENING_END_TIME=${{ vars.BURSAM_MARKET_OPENING_END_TIME }}
+                  BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION=${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}
+
+                  # Sanctum
+                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
+
+                  OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
+                  OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
+
+                  # SMS & Mobile Verification
+                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
+                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
+
+                  # Bitly
+                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
+
+                  # Memcached Configuration
+                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
+
+                  # OCI Object Storage Configuration
+                  OCI_ACCESS_KEY_ID=${{ secrets.OCI_ACCESS_KEY_ID }}
+                  OCI_SECRET_ACCESS_KEY=${{ secrets.OCI_SECRET_ACCESS_KEY }}
+                  OCI_DEFAULT_REGION=${{ vars.OCI_DEFAULT_REGION }}
+                  OCI_BUCKET=${{ vars.OCI_BUCKET }}
+                  OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
+
+                  # OCI Public Object Storage Configuration
+                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
+                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
+                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
+                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
+                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
 
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
