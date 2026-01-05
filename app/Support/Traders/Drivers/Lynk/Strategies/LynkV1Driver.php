@@ -117,13 +117,11 @@ class LynkV1Driver implements Deliverable, TraderInterface
     public function createTransferOwnershipToLenderDocument(TraderOrder $traderOrder)
     {
         try {
-            $this->withLocale('ar', function () use ($traderOrder) {
-                $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
-                $this->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
-                );
-            });
+            $this->setTimeLimitByType($traderOrder, TraderOrderTimeLimitType::ContractSignTimeLimit);
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument
+            );
         } catch (\Throwable $exception) {
             throw new TraderException(
                 'Failed to create lender ownership certificate',
@@ -157,20 +155,18 @@ class LynkV1Driver implements Deliverable, TraderInterface
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
             ]);
-            $this->withLocale('ar', function () use ($traderOrder) {
-                $dateTime = $traderOrder->traderHistories()
-                    ->where('action', FinancingOrderHistory::ContractSigned)
-                    ->first()
-                    ?->created_at;
+            $dateTime = $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::ContractSigned)
+                ->first()
+                ?->created_at;
 
-                $this->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-                    [
-                        'created_at' => CarbonImmutable::parse($dateTime),
-                    ]
-                );
-            });
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                [
+                    'created_at' => CarbonImmutable::parse($dateTime),
+                ]
+            );
         } catch (Exception $exception) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLogTitle('Failed to create customer ownership document', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,

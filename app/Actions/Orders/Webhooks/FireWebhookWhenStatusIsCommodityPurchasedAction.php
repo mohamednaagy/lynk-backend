@@ -32,8 +32,6 @@ class FireWebhookWhenStatusIsCommodityPurchasedAction implements FireWebhookWhen
         $effective_at = $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::ContractSignTimeLimit, TraderOrderTimeLimitStatus::Pending)?->effective_at;
         $isBursaOrder = $traderOrder->provider === Trader::Bursam;
         $lender = $financingOrder->lender()->withTrashed()->first();
-
-        app()->setLocale('en');
         WebhookEvent::fire($lender, WebhookType::OrderUpdates, [
             'order_id' => $financingOrder->id,
             'order_status' => [

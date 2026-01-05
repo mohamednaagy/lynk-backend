@@ -158,7 +158,6 @@ jobs:
                   # JWT Secret
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
 
-                  #EDAAT
                   # EDAAT Configuration
                   EDAAT_BASE_URL=${{ vars.EDAAT_BASE_URL }}
                   EDAAT_WEBHOOK_URL=${{ vars.EDAAT_WEBHOOK_URL }}
