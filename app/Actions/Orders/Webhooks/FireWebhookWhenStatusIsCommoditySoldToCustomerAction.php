@@ -24,6 +24,7 @@ class FireWebhookWhenStatusIsCommoditySoldToCustomerAction implements FireWebhoo
         $nextStep = $this->getDictionaryOfTraderOrder($traderOrder)
             ->getNextStepOf($lastCompletedStep);
         $lender = $financingOrder->lender()->withTrashed()->first();
+        app()->setLocale('en');
         WebhookEvent::fire(
             $lender,
             WebhookType::OrderUpdates,
