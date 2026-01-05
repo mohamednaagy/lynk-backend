@@ -3,6 +3,10 @@ x-app-volumes: &app-volumes
   volumes:
     - ./storage/logs:/var/www/html/storage/logs
 
+# Shared network configuration - use host network to access Redis/MySQL on host
+x-host-network: &host-network
+  network_mode: host
+
 services:
   # ============================================================================
   # WEB PROFILE - PHP-FPM Application
@@ -17,12 +21,12 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     healthcheck:
       test: ["CMD", "php", "-r", "exit(0);"]
       interval: 30s
       timeout: 5s
       retries: 3
-    network_mode: host
 
   # ============================================================================
   # LOCAL PROFILE - Development Infrastructure
@@ -128,6 +132,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: tail -f /dev/null
     depends_on:
       - app
@@ -146,6 +151,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=local_market_commodities_settlement
     depends_on:
       - app
@@ -161,6 +167,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_eligible_quantities
     depends_on:
       - app
@@ -176,6 +183,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_inventories_units_logging
     depends_on:
       - app
@@ -191,6 +199,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_initiation
     depends_on:
       - app
@@ -206,6 +215,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=trader_order_initiation
     depends_on:
       - app
@@ -221,6 +231,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_commodities_purchased_local_market
     depends_on:
       - app
@@ -236,6 +247,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=buy_commodities_local_market_orders
     depends_on:
       - app
@@ -251,6 +263,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=apply_order_fees
     depends_on:
       - app
@@ -269,6 +282,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_states
     depends_on:
       - app
@@ -284,6 +298,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_process
     depends_on:
       - app
@@ -299,6 +314,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=hold_eligible_units_local_market_orders
     depends_on:
       - app
@@ -314,6 +330,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=refresh_eligibilities
     depends_on:
       - app
@@ -329,6 +346,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=notifications
     depends_on:
       - app
@@ -344,6 +362,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=create_trader_orders
     depends_on:
       - app
@@ -359,6 +378,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=default
     depends_on:
       - app
@@ -374,6 +394,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=bursam
     depends_on:
       - app
@@ -389,6 +410,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_purchasing_local_market_orders
     depends_on:
       - app
@@ -404,6 +426,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=mq
     depends_on:
       - app
@@ -422,6 +445,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_webhooks
     depends_on:
       - app
@@ -437,6 +461,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=expire_trader_order
     depends_on:
       - app
@@ -452,6 +477,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: *app-volumes
+    <<: *host-network
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=unit-inventory
     depends_on:
       - app

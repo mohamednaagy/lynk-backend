@@ -290,6 +290,13 @@ jobs:
 
                     cd /var/www/lynk-backend
 
+                    # Create and setup logs directory with proper permissions
+                    echo '📁 Setting up logs directory...'
+                    mkdir -p storage/logs/lynk
+                    sudo chown -R 1000:1000 storage/logs
+                    sudo chmod -R 775 storage/logs
+                    echo '✓ Logs directory ready (UID:GID 1000:1000, permissions 775)'
+
                     echo ''
                     echo '🛑 Stopping existing containers...'
                     docker compose --profile web --profile group1 --profile group2 --profile group3 down || true
