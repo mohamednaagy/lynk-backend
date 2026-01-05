@@ -26,9 +26,10 @@ bootstrap/cache/*.php
 
 composer.lock
 
-# Ignore worker log files
-/storage/logs/workers/*.log*
-/storage/logs/workers/*.log
+# Ignore all log files (logs are persisted on host via Docker volumes)
+/storage/logs/**/*.log
+/storage/logs/**/*.log.*
+/storage/logs/**/laravel-*.log
 
 # Ignore logs backup folder
 /storage/logs_backup/
