@@ -91,11 +91,14 @@ RUN mkdir -p storage/framework/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Configure PHP-FPM to listen on port 8000
+RUN echo "listen = 8000" >> /usr/local/etc/php-fpm.d/zz-docker.conf
+
 # Switch to www-data user
 USER www-data
 
 # Expose php-fpm port
-EXPOSE 9000
+EXPOSE 8000
 
 # Start php-fpm
 CMD ["php-fpm", "-F"]
