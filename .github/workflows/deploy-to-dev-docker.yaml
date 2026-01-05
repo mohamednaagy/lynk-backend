@@ -158,11 +158,36 @@ jobs:
                   # JWT Secret
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
 
+                  #EDAAT
+                  # EDAAT Configuration
+                  EDAAT_BASE_URL=${{ vars.EDAAT_BASE_URL }}
+                  EDAAT_WEBHOOK_URL=${{ vars.EDAAT_WEBHOOK_URL }}
+                  EDAAT_PRODUCT=${{ vars.EDAAT_PRODUCT }}
+                  EDAAT_USERNAME=${{ vars.EDAAT_USERNAME }}
+                  EDAAT_PASSWORD=${{ secrets.EDAAT_PASSWORD }}
+                  EDAAT_COMPANY=${{ vars.EDAAT_COMPANY }}
+                  EDAAT_VERIFY_TLS_CERTS=${{ vars.EDAAT_VERIFY_TLS_CERTS }}
+                  EDAAT_PAYMENT_URL=${{ vars.EDAAT_PAYMENT_URL }}
+                  EDAAT_BILL_URL=${{ vars.EDAAT_BILL_URL }}
+                  EDAAT_RECONCILE_URL=${{ vars.EDAAT_RECONCILE_URL }}
+
                   # Wallet Configuration
                   WALLET_CACHE_DRIVER=${{ vars.WALLET_CACHE_DRIVER }}
                   WALLET_CACHE_TTL=${{ vars.WALLET_CACHE_TTL }}
                   WALLET_LOCK_DRIVER=${{ vars.WALLET_LOCK_DRIVER }}
                   WALLET_LOCK_SECONDS=${{ vars.WALLET_LOCK_SECONDS }}
+
+                  # RabbitMQ Configuration
+                  RABBITMQ_QUEUE_NAME=${{ vars.RABBITMQ_QUEUE_NAME }}
+                  RABBITMQ_HOST=${{ vars.RABBITMQ_HOST }}
+                  RABBITMQ_PORT=${{ vars.RABBITMQ_PORT }}
+                  RABBITMQ_USER=${{ vars.RABBITMQ_USER }}
+                  RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+                  RABBITMQ_VHOST=${{ vars.RABBITMQ_VHOST }}
+
+                  # reCAPTCHA Configuration
+                  RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
+                  RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
 
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
