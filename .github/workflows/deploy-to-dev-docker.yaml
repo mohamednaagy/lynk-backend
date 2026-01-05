@@ -155,6 +155,9 @@ jobs:
                   MSEGAT_USERNAME=${{ secrets.MSEGAT_USERNAME }}
                   MSEGAT_API_KEY=${{ secrets.MSEGAT_API_KEY }}
 
+                  # JWT Secret
+                  JWT_SECRET=${{ secrets.JWT_SECRET }}
+
                   # Wallet Configuration
                   WALLET_CACHE_DRIVER=${{ vars.WALLET_CACHE_DRIVER }}
                   WALLET_CACHE_TTL=${{ vars.WALLET_CACHE_TTL }}
@@ -303,28 +306,28 @@ jobs:
 
                     echo ''
                     echo '🚀 Starting all containers with scaling...'
-                    docker compose --profile web --profile group1 --profile group2 --profile group3 up -d \
-                      --scale local-market-states-worker=8 \
-                      --scale local-market-webhooks-worker=5 \
-                      --scale local-market-process-worker=8 \
-                      --scale local-market-expire-trader-order-worker=8 \
-                      --scale local-market-commodities-settlement-worker=8 \
-                      --scale local-market-eligible-quantities-worker=8 \
-                      --scale local-market-order-inventories-units-logging=5 \
-                      --scale local-market-order-initiation=5 \
-                      --scale trader-order-initiation=5 \
-                      --scale local-market-generate-units=1 \
-                      --scale hold-eligible-local-order-units-worker=5 \
-                      --scale complete-commodities-purchased-local-market-worker=5 \
-                      --scale buy-commodities-local-market-orders-worker=5 \
-                      --scale refresh-eligibilities-worker=1 \
-                      --scale notifications-worker=5 \
-                      --scale create-trader-orders-worker=8 \
-                      --scale default-worker=8 \
-                      --scale bursam-worker=1 \
-                      --scale apply-order-fees-worker=1 \
-                      --scale complete-purchasing-local-market-orders-worker=5 \
-                      --scale message-queue-worker=2
+                        docker compose --profile web --profile group1 --profile group2 --profile group3 up -d \
+                          --scale local-market-states-worker=8 \
+                          --scale local-market-webhooks-worker=5 \
+                          --scale local-market-process-worker=8 \
+                          --scale local-market-expire-trader-order-worker=8 \
+                          --scale local-market-commodities-settlement-worker=8 \
+                          --scale local-market-eligible-quantities-worker=8 \
+                          --scale local-market-order-inventories-units-logging=5 \
+                          --scale local-market-order-initiation=5 \
+                          --scale trader-order-initiation=5 \
+                          --scale local-market-generate-units=1 \
+                          --scale hold-eligible-local-order-units-worker=5 \
+                          --scale complete-commodities-purchased-local-market-worker=5 \
+                          --scale buy-commodities-local-market-orders-worker=5 \
+                          --scale refresh-eligibilities-worker=1 \
+                          --scale notifications-worker=5 \
+                          --scale create-trader-orders-worker=8 \
+                          --scale default-worker=8 \
+                          --scale bursam-worker=1 \
+                          --scale apply-order-fees-worker=1 \
+                          --scale complete-purchasing-local-market-orders-worker=5 \
+                          --scale message-queue-worker=2
 
                     echo ''
                     echo '✅ Containers started, waiting for health checks...'
