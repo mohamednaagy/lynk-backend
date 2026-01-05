@@ -269,17 +269,15 @@ class BursamV1Driver implements TraderInterface
             $timeLimitService = new TimeLimitService;
             $timeLimitService->setContractSignTimeLimit($traderOrder);
 
-            $this->withLocale('ar', function () use ($traderOrder) {
-                $currentTimeInUtcTz = CarbonImmutable::now();
-                $this->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
-                    [
-                        'created_at' => $currentTimeInUtcTz,
-                    ]
-                );
+            $currentTimeInUtcTz = CarbonImmutable::now();
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::CreateTransferOwnershipToLenderDocument,
+                [
+                    'created_at' => $currentTimeInUtcTz,
+                ]
+            );
 
-            });
             log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => transferOwnershipToLenderDocument certificate generated successfully', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
@@ -314,20 +312,18 @@ class BursamV1Driver implements TraderInterface
     public function createSellingCommodityToCustomerDocument(TraderOrder $traderOrder)
     {
         try {
-            $this->withLocale('ar', function () use ($traderOrder) {
-                $dateTime = $traderOrder->traderHistories()
-                    ->where('action', FinancingOrderHistory::ContractSigned)
-                    ->first()
-                    ?->created_at;
+            $dateTime = $traderOrder->traderHistories()
+                ->where('action', FinancingOrderHistory::ContractSigned)
+                ->first()
+                ?->created_at;
 
-                $this->createTraderOrderHistory(
-                    $traderOrder,
-                    FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
-                    [
-                        'created_at' => CarbonImmutable::parse($dateTime),
-                    ]
-                );
-            });
+            $this->createTraderOrderHistory(
+                $traderOrder,
+                FinancingOrderHistory::CreateSellingCommodityToCustomerDocument,
+                [
+                    'created_at' => CarbonImmutable::parse($dateTime),
+                ]
+            );
         } catch (Exception $exception) {
             throw new TraderException(
                 'Failed to create customer ownership document',
