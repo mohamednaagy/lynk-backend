@@ -48,6 +48,14 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
     && docker-php-ext-enable redis \
     && apk del .build-deps
 
+# Configure PHP settings for production
+RUN { \
+        echo 'memory_limit = 512M'; \
+        echo 'max_execution_time = 300'; \
+        echo 'post_max_size = 100M'; \
+        echo 'upload_max_filesize = 100M'; \
+        echo 'max_input_vars = 5000'; \
+    } > /usr/local/etc/php/conf.d/custom.ini
 
 # Create non-root user www-data with uid/gid 1000
 RUN deluser www-data 2>/dev/null || true \
