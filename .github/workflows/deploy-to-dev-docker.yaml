@@ -321,10 +321,6 @@ jobs:
                   AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
                   AUTO_VERIFIED_USERS_PASSWORD=${{ secrets.AUTO_VERIFIED_USERS_PASSWORD }}
 
-                  # Master OTP for Development
-                  ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
-                  MASTER_OTP_KEY=${{ secrets.MASTER_OTP_KEY }}
-
                   # Nightwatch Monitoring
                   NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
                   NIGHTWATCH_TOKEN=${{ secrets.NIGHTWATCH_TOKEN }}
