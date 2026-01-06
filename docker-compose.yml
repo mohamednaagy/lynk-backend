@@ -7,6 +7,12 @@ x-app-volumes: &app-volumes
 x-host-network: &host-network
   network_mode: host
 
+# Profile Usage:
+# - Production deployment: --profile web --profile group1 --profile group2 --profile group3 --profile dev-services
+# - Local development: --profile local (includes nginx, redis, mysql, phpmyadmin, mailhog)
+# - Dev infrastructure only: --profile dev-services (redis, mailhog)
+# - Observability: --profile observability (nightwatch)
+
 services:
   # ============================================================================
   # WEB PROFILE - PHP-FPM Application
@@ -29,6 +35,7 @@ services:
 
   # ============================================================================
   # LOCAL PROFILE - Development Infrastructure
+  # Note: redis and mailhog are also available via 'dev-services' profile
   # ============================================================================
   nginx:
     profiles: ["local"]
@@ -51,7 +58,7 @@ services:
       retries: 3
 
   redis:
-    profiles: ["local"]
+    profiles: ["local", "dev-services"]
     image: redis:7-alpine
     container_name: laravel-redis
     restart: unless-stopped
@@ -111,7 +118,7 @@ services:
       retries: 3
 
   mailhog:
-    profiles: ["local"]
+    profiles: ["local", "dev-services"]
     image: mailhog/mailhog
     container_name: laravel-mailhog
     restart: unless-stopped
