@@ -33,7 +33,8 @@ class CheckProceedOrderSequenceRule implements Rule
         }
 
         $value = FinancingOrderProceedCase::getKeyByDescription($value);
-        if (! \in_array($value, FinancingOrderProceedCase::ALLOWED_TO_PROCEED_STATUS[$traderOrder->provider][$traderOrder->version])) {
+        $allowedStatuses = data_get(FinancingOrderProceedCase::ALLOWED_TO_PROCEED_STATUS, "{$traderOrder->provider}.{$traderOrder->version}", []);
+        if (! \in_array($value, $allowedStatuses, true)) {
             $this->errorMessage = __('validation.attributes.invalid_case_proceed');
 
             return false;
