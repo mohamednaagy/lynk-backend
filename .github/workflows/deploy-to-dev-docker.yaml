@@ -17,7 +17,12 @@ jobs:
         outputs:
             servers: ${{ steps.set-servers.outputs.servers }}
             commit_hash: ${{ steps.commit.outputs.short_sha }}
+            start_ts: ${{ steps.start.outputs.start_ts }}
         steps:
+            - name: Record start time
+              id: start
+              run: echo "start_ts=$(date +%s)" >> $GITHUB_OUTPUT
+
             - name: Checkout code
               uses: actions/checkout@v4
 
@@ -609,6 +614,15 @@ jobs:
                     STATUS_LABEL="Failed"
                   fi
 
+                  START_TS="${{ needs.setup.outputs.start_ts }}"
+                  END_TS=$(date +%s)
+                  DURATION_SEC=$((END_TS - START_TS))
+                  if [ "$DURATION_SEC" -lt 0 ]; then DURATION_SEC=0; fi
+                  D_H=$((DURATION_SEC/3600))
+                  D_M=$(((DURATION_SEC%3600)/60))
+                  D_S=$((DURATION_SEC%60))
+                  DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
+
                   PR_URL="${{ github.event.pull_request.html_url }}"
                   if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
                     PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
@@ -632,6 +646,7 @@ jobs:
                           { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
                           { "title": "Image Tag", "value": "REPLACE_IMAGE", "short": true },
                           { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
+                          { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
                           { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
                           { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
                           { "title": "Time", "value": "REPLACE_TIME", "short": true }
@@ -651,6 +666,7 @@ jobs:
                     -e "s|REPLACE_BRANCH|$BRANCH|g" \
                     -e "s|REPLACE_IMAGE|$IMAGE_TAG|g" \
                     -e "s|REPLACE_EMOJI|$EMOJI|g" \
+                    -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
                     -e "s|REPLACE_PR|$PR_URL|g" \
                     -e "s|REPLACE_TIME|$TIMESTAMP|g" \
                     /tmp/slack-payload.json
