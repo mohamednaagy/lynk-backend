@@ -639,10 +639,9 @@ jobs:
                     "attachments": [
                       {
                         "color": "REPLACE_COLOR",
-                        "title": "Deployment #REPLACE_RUN",
+                        "title": "Repository #REPLACE_REPO",
                         "title_link": "REPLACE_RUN_URL",
                         "fields": [
-                          { "title": "Repository", "value": "REPLACE_REPO", "short": true },
                           { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
                           { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
                           { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
@@ -659,8 +658,8 @@ jobs:
                   sed -i \
                     -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
                     -e "s|REPLACE_COLOR|$COLOR|g" \
-                    -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
                     -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
+                    -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
                     -e "s|REPLACE_REPO|$GITHUB_REPOSITORY|g" \
                     -e "s|REPLACE_BRANCH|$BRANCH|g" \
                     -e "s|REPLACE_EMOJI|$EMOJI|g" \
