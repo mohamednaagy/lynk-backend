@@ -650,7 +650,7 @@ jobs:
                           { "title": "Run", "value": "REPLACE_RUN_URL", "short": true },
                           { "title": "Time", "value": "REPLACE_TIME", "short": true }
                         ],
-                        "footer": "Lynk Backend • Docker Deploy (Dev)"
+                        "footer": "Lynk Backend (Dev)"
                       }
                     ]
                   }
