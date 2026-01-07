@@ -77,18 +77,18 @@ class NotificationPreferenceService
         });
     }
 
-    private function buildChannelSettings(array $typeConfig, string $typeKey, Collection $allSettings): Collection
+    private function buildChannelSettings(array $typeConfig, string $typeKey, Collection $allSettings): array
     {
-        $channels = collect();
+        $channels = [];
         foreach ($typeConfig['channels'] as $channelKey => $channelConfig) {
             $setting = $allSettings->where('notification_type', $typeKey)
                 ->where('channel', $channelKey)
                 ->first();
 
-            $channels->put($channelKey, [
+            $channels[$channelKey] = [
                 'enabled' => (bool) optional($setting)->is_enabled,
                 'is_editable' => $channelConfig['is_editable'] ?? true,
-            ]);
+            ];
         }
 
         return $channels;

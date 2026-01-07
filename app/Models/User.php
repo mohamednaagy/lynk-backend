@@ -147,7 +147,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
 
     public function preferredLocale(): string
     {
-        return $this->locale;
+        return $this->locale ?? config('app.locale', 'en');
     }
 
     public function isRegisterCompleted()
