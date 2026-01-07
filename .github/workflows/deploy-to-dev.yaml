@@ -631,7 +631,9 @@ jobs:
                   RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
                   IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
-                  TIMESTAMP="$(TZ=Africa/Cairo date +"%Y-%m-%d %H:%M:%S %Z")"
+                  # Use workflow start time (captured in setup) for display
+                  START_TS="${{ needs.setup.outputs.start_ts }}"
+                  TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
 
                   cat > /tmp/slack-payload.json <<'EOF'
                   {
