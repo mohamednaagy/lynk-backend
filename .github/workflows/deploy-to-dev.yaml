@@ -631,11 +631,15 @@ jobs:
                   fi
                   if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
                     if [ -n "$COMMIT_MESSAGE" ] && [ "$COMMIT_MESSAGE" != "null" ]; then
-                      PR_TITLE="$COMMIT_MESSAGE"
+                      # Use only the first line of the commit message to avoid newlines breaking sed
+                      PR_TITLE="$(printf '%s' "$COMMIT_MESSAGE" | head -n1)"
                     else
                       PR_TITLE="$GITHUB_REPOSITORY"
                     fi
                   fi
+
+                  # Make a sed-safe version of the title (remove '|' which is used as sed delimiter)
+                  SAFE_PR_TITLE="$(printf '%s' "$PR_TITLE" | tr '|' '-')"
 
                   RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
@@ -671,7 +675,7 @@ jobs:
                     -e "s|REPLACE_COLOR|$COLOR|g" \
                     -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
                     -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
-                    -e "s|REPLACE_TITLE|$PR_TITLE|g" \
+                    -e "s|REPLACE_TITLE|$SAFE_PR_TITLE|g" \
                     -e "s|REPLACE_BRANCH|$BRANCH|g" \
                     -e "s|REPLACE_EMOJI|$EMOJI|g" \
                     -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
