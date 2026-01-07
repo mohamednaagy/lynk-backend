@@ -635,7 +635,7 @@ jobs:
 
                   cat > /tmp/slack-payload.json <<'EOF'
                   {
-                    "text": "🐳 Laravel Docker Deployment (Dev) - REPLACE_STATUS",
+                    "text": "Backend Deployment (Dev) - REPLACE_STATUS",
                     "attachments": [
                       {
                         "color": "REPLACE_COLOR",
@@ -644,11 +644,10 @@ jobs:
                         "fields": [
                           { "title": "Repository", "value": "REPLACE_REPO", "short": true },
                           { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
-                          { "title": "Image Tag", "value": "REPLACE_IMAGE", "short": true },
                           { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
                           { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
                           { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
-                          { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
+                          { "title": "Run", "value": "REPLACE_RUN_URL", "short": true },
                           { "title": "Time", "value": "REPLACE_TIME", "short": true }
                         ],
                         "footer": "Lynk Backend • Docker Deploy (Dev)"
@@ -664,7 +663,6 @@ jobs:
                     -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
                     -e "s|REPLACE_REPO|$GITHUB_REPOSITORY|g" \
                     -e "s|REPLACE_BRANCH|$BRANCH|g" \
-                    -e "s|REPLACE_IMAGE|$IMAGE_TAG|g" \
                     -e "s|REPLACE_EMOJI|$EMOJI|g" \
                     -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
                     -e "s|REPLACE_PR|$PR_URL|g" \
