@@ -28,7 +28,6 @@ class HealthCheckService
         $this->checkQueue();
         $this->checkRabbitMQ();
         $this->checkStorage();
-        $this->checkApplication();
 
         return $this->buildResponse();
     }
@@ -37,12 +36,9 @@ class HealthCheckService
     {
         try {
             DB::connection($connection)->select('SELECT 1');
-            $version = DB::connection($connection)->selectOne('SELECT VERSION() as version');
 
             $this->checks[$connection.'_database'] = [
                 'status' => 'healthy',
-                'connection' => $connection,
-                'version' => $version->version ?? 'unknown',
             ];
         } catch (Throwable $e) {
             $this->fail(
@@ -60,13 +56,9 @@ class HealthCheckService
         try {
             $redis = Redis::connection();
             $redis->ping();
-            $info = $redis->info();
 
             $this->checks['redis'] = [
                 'status' => 'healthy',
-                'version' => $info['redis_version'] ?? 'unknown',
-                'connected_clients' => $info['connected_clients'] ?? 'unknown',
-                'used_memory_human' => $info['used_memory_human'] ?? 'unknown',
             ];
         } catch (Throwable $e) {
             $this->fail('redis', [
@@ -178,17 +170,6 @@ class HealthCheckService
                 'error' => $e->getMessage(),
             ]);
         }
-    }
-
-    protected function checkApplication(): void
-    {
-        $this->checks['application'] = [
-            'name' => config('app.name'),
-            'env' => config('app.env'),
-            'debug' => config('app.debug'),
-            'php_version' => PHP_VERSION,
-            'laravel_version' => app()->version(),
-        ];
     }
 
     protected function fail(string $key, array $data): void
