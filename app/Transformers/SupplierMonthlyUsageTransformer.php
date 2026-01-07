@@ -67,6 +67,6 @@ class SupplierMonthlyUsageTransformer extends TransformerAbstract
 
     public function includeDownloadUrl(Media $media): Primitive
     {
-        return $this->primitive($media->fileUrl);
+        return $this->primitive(formatMediaUrl($media->fileUrl));
     }
 }
