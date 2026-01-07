@@ -21,15 +21,19 @@ class LoggingWebhookJob extends CallWebhookJob
             'payload_size' => strlen(json_encode($this->payload)),
             'timeout' => $this->requestTimeout,
             'attempt' => $this->attempts(),
+            'order_id' => $this->getOrderId(),
+            'trader_order_id' => $this->getTraderOrderId(),
         ]);
 
         try {
             // Log the outgoing request details
-            Log::channel(LOG_CHANNEL_WEBHOOKS)->debug('Sending HTTP request', [
+            Log::channel(LOG_CHANNEL_WEBHOOKS)->debug('Sending HTTP request with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
                 'url' => $this->webhookUrl,
                 'method' => strtoupper($this->httpVerb),
                 'headers' => $this->headers,
                 'payload' => $this->payload,
+                'order_id' => $this->getOrderId(),
+                'trader_order_id' => $this->getTraderOrderId(),
                 'attempt' => $this->attempts(),
             ]);
 
@@ -49,11 +53,13 @@ class LoggingWebhookJob extends CallWebhookJob
 
             // Check if response is successful (2xx status codes)
             if ($response->successful()) {
-                Log::channel(LOG_CHANNEL_WEBHOOKS)->info('Webhook HTTP request completed successfully', [
+                Log::channel(LOG_CHANNEL_WEBHOOKS)->info('Webhook HTTP request completed successfully with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
                     'webhook_url' => $this->webhookUrl,
                     'status_code' => $response->status(),
                     'duration_ms' => $duration,
                     'attempt' => $this->attempts(),
+                    'order_id' => $this->getOrderId(),
+                    'trader_order_id' => $this->getTraderOrderId(),
                 ]);
 
                 return;
@@ -61,7 +67,6 @@ class LoggingWebhookJob extends CallWebhookJob
 
             // Handle non-2xx responses
             $this->handleFailedResponse($response, $duration);
-
         } catch (Exception $e) {
             $endTime = microtime(true);
             $duration = round(($endTime - $startTime) * 1000, 2);
@@ -80,7 +85,7 @@ class LoggingWebhookJob extends CallWebhookJob
     {
         $logLevel = $isSuccess ? 'info' : 'warning';
 
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->{$logLevel}('HTTP webhook response received', [
+        Log::channel(LOG_CHANNEL_WEBHOOKS)->{$logLevel}('HTTP webhook response received with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
             'status_code' => $response->status(),
             'status_text' => $response->reason(),
@@ -90,6 +95,8 @@ class LoggingWebhookJob extends CallWebhookJob
             'response_size' => strlen($response->body()),
             'attempt' => $this->attempts(),
             'is_success' => $isSuccess,
+            'order_id' => $this->getOrderId(),
+            'trader_order_id' => $this->getTraderOrderId(),
         ]);
     }
 
@@ -98,7 +105,7 @@ class LoggingWebhookJob extends CallWebhookJob
      */
     private function handleFailedResponse(Response $response, float $duration): void
     {
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->error('Webhook HTTP request failed', [
+        Log::channel(LOG_CHANNEL_WEBHOOKS)->error('Webhook HTTP request failed with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
             'status_code' => $response->status(),
             'status_text' => $response->reason(),
@@ -107,10 +114,12 @@ class LoggingWebhookJob extends CallWebhookJob
             'response_body' => $this->truncateResponseBody($response->body()),
             'attempt' => $this->attempts(),
             'max_attempts' => $this->tries,
+            'order_id' => $this->getOrderId(),
+            'trader_order_id' => $this->getTraderOrderId(),
         ]);
 
         // Throw exception to trigger retry mechanism
-        throw new Exception("Webhook failed with status {$response->status()}: {$response->reason()}");
+        throw new Exception("Webhook failed permanently with order id: {$this->getOrderId()} and trader order id: {$this->getTraderOrderId()} with status {$response->status()}: {$response->reason()}");
     }
 
     /**
@@ -118,7 +127,7 @@ class LoggingWebhookJob extends CallWebhookJob
      */
     private function logHttpException(Exception $e, float $duration): void
     {
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->error('Webhook HTTP request exception', [
+        Log::channel(LOG_CHANNEL_WEBHOOKS)->error('Webhook HTTP request exception with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
             'duration_ms' => $duration,
             'exception_class' => get_class($e),
@@ -128,6 +137,8 @@ class LoggingWebhookJob extends CallWebhookJob
             'exception_line' => $e->getLine(),
             'attempt' => $this->attempts(),
             'max_attempts' => $this->tries,
+            'order_id' => $this->getOrderId(),
+            'trader_order_id' => $this->getTraderOrderId(),
         ]);
     }
 
@@ -148,18 +159,30 @@ class LoggingWebhookJob extends CallWebhookJob
      */
     public function failed(\Throwable $exception)
     {
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->critical('Webhook HTTP request permanently failed', [
+        Log::channel(LOG_CHANNEL_WEBHOOKS)->critical('Webhook HTTP request permanently failed with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
             'total_attempts' => $this->attempts(),
             'max_attempts' => $this->tries,
             'final_exception_class' => get_class($exception),
             'final_exception_message' => $exception->getMessage(),
             'payload' => $this->payload,
+            'order_id' => $this->getOrderId(),
+            'trader_order_id' => $this->getTraderOrderId(),
         ]);
 
         // Call parent failed method if it exists
         if (method_exists(parent::class, 'failed')) {
             parent::failed($exception);
         }
+    }
+
+    private function getOrderId(): ?int
+    {
+        return $this->payload['order_id'] ?? null;
+    }
+
+    private function getTraderOrderId(): ?int
+    {
+        return $this->payload['trading_information']['trading_id'] ?? null;
     }
 }
