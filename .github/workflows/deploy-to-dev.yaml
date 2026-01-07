@@ -581,6 +581,11 @@ jobs:
                       "title": "Triggered By",
                       "value": "${{ github.actor }}",
                       "short": true
+                    },
+                    {
+                      "title": "PR / Commit",
+                      "value": "<${{ steps.pr-link.outputs.pr_url }}|View in GitHub>",
+                      "short": true
                     }
                   ],
                   "actions": [
@@ -592,13 +597,19 @@ jobs:
                     },
                     {
                       "type": "button",
+                      "text": "🔗 PR / Commit",
+                      "url": "${{ steps.pr-link.outputs.pr_url }}",
+                      "style": "default"
+                    },
+                    {
+                      "type": "button",
                       "text": "📈 Latest Report",
                       "url": "${{ steps.links.outputs.LATEST_URL }}"
                     },
                     {
                       "type": "button",
                       "text": "🔧 Workflow Details",
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      "url": "${{ steps.pr-link.outputs.run_url }}"
                     }
                   ],
                   "footer": "Lynk Backend • Deploy Validation"

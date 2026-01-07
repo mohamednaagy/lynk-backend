@@ -598,19 +598,64 @@ jobs:
         steps:
             - name: Send Slack notification
               run: |
-                  # Build PR URL if applicable
-                  PR_URL="${{ github.event.pull_request.html_url }}"
-                  if [ -z "$PR_URL" ]; then
-                    PR_URL="N/A"
+                  STATUS="${{ needs.deploy.result }}"
+                  if [ "$STATUS" = "success" ]; then
+                    EMOJI="✅"
+                    COLOR="good"
+                    STATUS_LABEL="Success"
+                  else
+                    EMOJI="❌"
+                    COLOR="danger"
+                    STATUS_LABEL="Failed"
                   fi
 
-                  echo "Repository Name: $GITHUB_REPOSITORY"
-                  echo "Branch Name: $GITHUB_REF"
-                  echo "PR URL: $PR_URL"
-                  echo "Execution Time: $(date)"
-                  echo "Workflow Status: ${{ needs.deploy.result }}"
-                  echo "Docker Image Tag: ${{ needs.setup.outputs.commit_hash }}"
+                  PR_URL="${{ github.event.pull_request.html_url }}"
+                  if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
+                    PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+                  fi
 
-                  curl -X POST -H 'Content-type: application/json' --data '{
-                    "text":"🐳 Laravel Docker Deployment (Dev)\nRepository: '"$GITHUB_REPOSITORY"'\nBranch: '"$GITHUB_REF"'\nImage Tag: app-php-fpm:'"${{ needs.setup.outputs.commit_hash }}"'\nTime: '"$(date)"'\nStatus: '"${{ needs.deploy.result }}"'\nPR: '"$PR_URL"'"
-                  }' ${{ secrets.SLACK_HOOK_URL }}
+                  RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
+                  IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
+                  TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+
+                  cat > /tmp/slack-payload.json <<'EOF'
+                  {
+                    "text": "🐳 Laravel Docker Deployment (Dev) - REPLACE_STATUS",
+                    "attachments": [
+                      {
+                        "color": "REPLACE_COLOR",
+                        "title": "Deployment #REPLACE_RUN",
+                        "title_link": "REPLACE_RUN_URL",
+                        "fields": [
+                          { "title": "Repository", "value": "REPLACE_REPO", "short": true },
+                          { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
+                          { "title": "Image Tag", "value": "REPLACE_IMAGE", "short": true },
+                          { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
+                          { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
+                          { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
+                          { "title": "Time", "value": "REPLACE_TIME", "short": true }
+                        ],
+                        "footer": "Lynk Backend • Docker Deploy (Dev)"
+                      }
+                    ]
+                  }
+                  EOF
+
+                  sed -i \
+                    -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
+                    -e "s|REPLACE_COLOR|$COLOR|g" \
+                    -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
+                    -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
+                    -e "s|REPLACE_REPO|$GITHUB_REPOSITORY|g" \
+                    -e "s|REPLACE_BRANCH|$BRANCH|g" \
+                    -e "s|REPLACE_IMAGE|$IMAGE_TAG|g" \
+                    -e "s|REPLACE_EMOJI|$EMOJI|g" \
+                    -e "s|REPLACE_PR|$PR_URL|g" \
+                    -e "s|REPLACE_TIME|$TIMESTAMP|g" \
+                    /tmp/slack-payload.json
+
+                  echo "Slack payload:"
+                  cat /tmp/slack-payload.json
+
+                  curl -X POST -H 'Content-type: application/json' --data @/tmp/slack-payload.json ${{ secrets.SLACK_HOOK_URL }}
