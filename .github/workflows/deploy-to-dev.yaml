@@ -624,8 +624,12 @@ jobs:
                   DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
 
                   PR_URL="${{ github.event.pull_request.html_url }}"
+                  PR_TITLE="${{ github.event.pull_request.title }}"
                   if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
                     PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+                  fi
+                  if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
+                    PR_TITLE="$GITHUB_REPOSITORY"
                   fi
 
                   RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
@@ -641,7 +645,7 @@ jobs:
                     "attachments": [
                       {
                         "color": "REPLACE_COLOR",
-                        "title": "Repository #REPLACE_REPO",
+                        "title": "REPLACE_TITLE",
                         "title_link": "REPLACE_RUN_URL",
                         "fields": [
                           { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
@@ -662,7 +666,7 @@ jobs:
                     -e "s|REPLACE_COLOR|$COLOR|g" \
                     -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
                     -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
-                    -e "s|REPLACE_REPO|$GITHUB_REPOSITORY|g" \
+                    -e "s|REPLACE_TITLE|$PR_TITLE|g" \
                     -e "s|REPLACE_BRANCH|$BRANCH|g" \
                     -e "s|REPLACE_EMOJI|$EMOJI|g" \
                     -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
