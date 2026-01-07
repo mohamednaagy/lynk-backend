@@ -625,11 +625,16 @@ jobs:
 
                   PR_URL="${{ github.event.pull_request.html_url }}"
                   PR_TITLE="${{ github.event.pull_request.title }}"
+                  COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
                   if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
                     PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
                   fi
                   if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
-                    PR_TITLE="$GITHUB_REPOSITORY"
+                    if [ -n "$COMMIT_MESSAGE" ] && [ "$COMMIT_MESSAGE" != "null" ]; then
+                      PR_TITLE="$COMMIT_MESSAGE"
+                    else
+                      PR_TITLE="$GITHUB_REPOSITORY"
+                    fi
                   fi
 
                   RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
