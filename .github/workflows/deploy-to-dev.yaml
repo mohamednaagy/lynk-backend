@@ -631,7 +631,7 @@ jobs:
                   RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
                   IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
-                  TIMESTAMP="$(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+                  TIMESTAMP="$(TZ=Africa/Cairo date +"%Y-%m-%d %H:%M:%S %Z")"
 
                   cat > /tmp/slack-payload.json <<'EOF'
                   {
@@ -647,7 +647,7 @@ jobs:
                           { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
                           { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
                           { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
-                          { "title": "Run", "value": "REPLACE_RUN_URL", "short": true },
+                          { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
                           { "title": "Time", "value": "REPLACE_TIME", "short": true }
                         ],
                         "footer": "Lynk Backend (Dev)"
