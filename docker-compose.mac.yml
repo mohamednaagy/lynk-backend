@@ -9,7 +9,7 @@
 # Shared configuration for volume mounts
 x-app-volumes: &app-volumes
   volumes:
-    - app_logs:/var/www/html/storage/logs
+    - .:/var/www/html
 
 # Shared network configuration - bridge network for macOS/Windows
 x-bridge-network: &bridge-network
@@ -28,6 +28,9 @@ services:
     build:
       context: .
       dockerfile: docker/laravel/Dockerfile
+      args:
+        USER_ID: ${USER_ID:-501}
+        GROUP_ID: ${GROUP_ID:-1000}
     image: app-php-fpm:latest
     container_name: lynk-backend-app
     working_dir: /var/www/html
@@ -478,6 +481,4 @@ networks:
 
 volumes:
   redis_data:
-    driver: local
-  app_logs:
     driver: local

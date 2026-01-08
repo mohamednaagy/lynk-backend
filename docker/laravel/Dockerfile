@@ -20,6 +20,11 @@ RUN composer dump-autoload --optimize --no-scripts
 # Stage 2: Runtime image
 FROM php:8.4-fpm-alpine
 
+# Accept build arguments for user ID and group ID
+# For macOS: Use UID 501, but use GID 1000 to avoid Alpine's GID 20 conflict
+ARG USER_ID=501
+ARG GROUP_ID=1000
+
 # Install system dependencies and PHP extensions
 RUN apk add --no-cache \
     git \
@@ -57,11 +62,11 @@ RUN { \
         echo 'max_input_vars = 5000'; \
     } > /usr/local/etc/php/conf.d/custom.ini
 
-# Create non-root user www-data with uid/gid 1000
+# Create non-root user www-data with host-matching uid (GID 1000 avoids Alpine conflicts)
 RUN deluser www-data 2>/dev/null || true \
     && delgroup www-data 2>/dev/null || true \
-    && addgroup -g 1000 www-data \
-    && adduser -u 1000 -G www-data -s /bin/sh -D www-data
+    && addgroup -g ${GROUP_ID} www-data \
+    && adduser -u ${USER_ID} -G www-data -s /bin/sh -D www-data
 
 # Set working directory
 WORKDIR /var/www/html
