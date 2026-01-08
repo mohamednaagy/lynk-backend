@@ -236,4 +236,88 @@ class NotificationsControllerTest extends TestCase
 
         $response->assertStatus(401);
     }
+
+    public function test_user_can_get_unread_notifications_only(): void
+    {
+        $user = User::factory()->create();
+
+        // Create an unread notification
+        $user->notify(new class extends BaseNotification
+        {
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+
+            public function toDatabase($notifiable)
+            {
+                return [
+                    'message' => 'Unread notification',
+                    'action' => 'unread_action',
+                ];
+            }
+        });
+
+        // Create a read notification
+        $user->notify(new class extends BaseNotification
+        {
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+
+            public function toDatabase($notifiable)
+            {
+                return [
+                    'message' => 'Read notification',
+                    'action' => 'read_action',
+                ];
+            }
+        });
+
+        // Mark the second notification as read
+        $readNotification = $user->notifications()->where('data->message', 'Read notification')->first();
+        if ($readNotification) {
+            $readNotification->markAsRead();
+        }
+
+        // Test with unread_only parameter set to true
+        $response = $this->actingAs($user, 'api')
+            ->getJson('/api/v1/notifications?unread_only=true');
+
+        $response->assertStatus(200);
+
+        // Should only return the unread notification
+        $response->assertJsonCount(1, 'data');
+        $response->assertJson([
+            'data' => [
+                [
+                    'data' => [
+                        'message' => 'Unread notification',
+                        'action' => 'unread_action',
+                    ],
+                    'read_at' => null,
+                ],
+            ],
+        ]);
+
+        // Test with unread_only parameter set to false (should return all notifications)
+        $response = $this->actingAs($user, 'api')
+            ->getJson('/api/v1/notifications?unread_only=false');
+
+        $response->assertStatus(200);
+
+        // Should return both notifications
+        $response->assertJsonCount(2, 'data');
+    }
 }
