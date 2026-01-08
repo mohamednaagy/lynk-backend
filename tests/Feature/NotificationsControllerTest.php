@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
+use App\Enums\SystemNotificationType;
 use App\Models\User;
+use App\Notifications\BaseNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Notifications\Notification;
 use Tests\TestCase;
 
 class NotificationsControllerTest extends TestCase
@@ -16,9 +19,14 @@ class NotificationsControllerTest extends TestCase
         $user = User::factory()->create();
 
         // Create a notification that is within the last 30 days
-        $user->notify(new class extends Notification
+        $user->notify(new class extends BaseNotification
         {
-            public function via($notifiable)
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
             {
                 return ['database'];
             }
@@ -33,9 +41,14 @@ class NotificationsControllerTest extends TestCase
         });
 
         // Create another notification that is older than 30 days (should not appear)
-        $user->notify(new class extends Notification
+        $user->notify(new class extends BaseNotification
         {
-            public function via($notifiable)
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
             {
                 return ['database'];
             }
@@ -106,9 +119,14 @@ class NotificationsControllerTest extends TestCase
         $user = User::factory()->create();
 
         // Create two notifications with different timestamps using the notification system
-        $user->notify(new class extends Notification
+        $user->notify(new class extends BaseNotification
         {
-            public function via($notifiable)
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
             {
                 return ['database'];
             }
@@ -125,9 +143,14 @@ class NotificationsControllerTest extends TestCase
             $earlierNotification->update(['created_at' => now()->subSecond()]);
         }
 
-        $user->notify(new class extends Notification
+        $user->notify(new class extends BaseNotification
         {
-            public function via($notifiable)
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
             {
                 return ['database'];
             }
@@ -163,7 +186,7 @@ class NotificationsControllerTest extends TestCase
 
         // Create 15 notifications to test pagination
         for ($i = 0; $i < 15; $i++) {
-            $user->notify(new class($i) extends Notification
+            $user->notify(new class($i) extends BaseNotification
             {
                 private $index;
 
@@ -172,7 +195,12 @@ class NotificationsControllerTest extends TestCase
                     $this->index = $index;
                 }
 
-                public function via($notifiable)
+                public function getType(): SystemNotificationType
+                {
+                    return SystemNotificationType::ORDER_CANCELLED;
+                }
+
+                public function via($notifiable): array
                 {
                     return ['database'];
                 }
