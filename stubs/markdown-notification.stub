@@ -26,7 +26,7 @@ class {{ class }} extends BaseNotification
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via($notifiable): array
     {
         return ['mail'];
     }
@@ -34,7 +34,7 @@ class {{ class }} extends BaseNotification
     /**
      * Get the mail representation of the notification.
      */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)->markdown('{{ view }}');
     }
@@ -44,7 +44,7 @@ class {{ class }} extends BaseNotification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+    public function toArray($notifiable): array
     {
         return [
             //

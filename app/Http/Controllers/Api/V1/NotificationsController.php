@@ -16,16 +16,22 @@ class NotificationsController extends Controller
 
     public const NOTIFICATIONS_PER_PAGE = 10;
 
+    /**
+     * Get a paginated list of user notifications.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
+        /* @var User $user */
         $user = Auth::user();
 
         $query = $user->notifications();
 
         // Filter for unread notifications only if requested
-        if ($request->boolean('unread_only')) {
+        $query->when($request->boolean('unread_only'), function ($query) {
             $query->whereNull('read_at');
-        }
+        });
 
         // Get notifications for the authenticated user from the last 30 days
         $notifications = $query
@@ -40,8 +46,9 @@ class NotificationsController extends Controller
     }
 
     /**
-     * Mark a notification as read
+     * Mark a notification as read.
      *
+     * @param  string  $id  The ID of the notification to mark as read.
      * @return \Illuminate\Http\JsonResponse
      */
     public function markAsRead($id)
@@ -76,10 +83,10 @@ class NotificationsController extends Controller
         /* @var User $user */
         $user = Auth::user();
 
-        $user->unreadNotifications->each->markAsRead();
+        $user->unreadNotifications()->update(['read_at' => now()]);
 
         return response()->json([
             'message' => 'All notifications marked as read',
-        ]);
+        ], Response::HTTP_OK);
     }
 }
