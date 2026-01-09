@@ -320,4 +320,167 @@ class NotificationsControllerTest extends TestCase
         // Should return both notifications
         $response->assertJsonCount(2, 'data');
     }
+
+    public function test_user_can_mark_a_notification_as_read(): void
+    {
+        $user = User::factory()->create();
+
+        // Create an unread notification
+        $user->notify(new class extends BaseNotification
+        {
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+
+            public function toDatabase($notifiable)
+            {
+                return [
+                    'message' => 'Test notification to mark as read',
+                    'action' => 'test_action',
+                ];
+            }
+        });
+
+        $notification = $user->notifications()->first();
+        $this->assertNull($notification->read_at);
+
+        // Mark the notification as read
+        $response = $this->actingAs($user, 'api')
+            ->putJson("/api/v1/notifications/{$notification->id}/read");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Notification marked as read',
+            ]);
+
+        // Verify the notification is now marked as read
+        $notification->refresh();
+        $this->assertNotNull($notification->read_at);
+    }
+
+    public function test_user_cannot_mark_nonexistent_notification_as_read(): void
+    {
+        $user = User::factory()->create();
+
+        // Try to mark a non-existent notification as read
+        $response = $this->actingAs($user, 'api')
+            ->putJson('/api/v1/notifications/999/read');
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'This item was not found.',
+                'code' => 1052,
+            ]);
+    }
+
+    public function test_user_cannot_mark_another_users_notification_as_read(): void
+    {
+        $user = User::factory()->create();
+        $anotherUser = User::factory()->create();
+
+        // Create a notification for another user
+        $anotherUser->notify(new class extends BaseNotification
+        {
+            public function getType(): SystemNotificationType
+            {
+                return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function via($notifiable): array
+            {
+                return ['database'];
+            }
+
+            public function toDatabase($notifiable)
+            {
+                return [
+                    'message' => 'Another user notification',
+                ];
+            }
+        });
+
+        $notification = $anotherUser->notifications()->first();
+
+        // Try to mark another user's notification as read
+        $response = $this->actingAs($user, 'api')
+            ->putJson("/api/v1/notifications/{$notification->id}/read");
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'This item was not found.',
+                'code' => 1052,
+            ]);
+    }
+
+    public function test_user_can_mark_all_notifications_as_read(): void
+    {
+        $user = User::factory()->create();
+
+        // Create multiple unread notifications
+        for ($i = 0; $i < 3; $i++) {
+            $user->notify(new class($i) extends BaseNotification
+            {
+                private $index;
+
+                public function __construct($index)
+                {
+                    $this->index = $index;
+                }
+
+                public function getType(): SystemNotificationType
+                {
+                    return SystemNotificationType::ORDER_CANCELLED;
+                }
+
+                public function via($notifiable): array
+                {
+                    return ['database'];
+                }
+
+                public function toDatabase($notifiable)
+                {
+                    return [
+                        'message' => "Unread notification #{$this->index}",
+                    ];
+                }
+            });
+        }
+
+        // Verify all notifications are unread
+        $unreadCount = $user->unreadNotifications()->count();
+        $this->assertEquals(3, $unreadCount);
+
+        // Mark all notifications as read
+        $response = $this->actingAs($user, 'api')
+            ->putJson('/api/v1/notifications/read-all');
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'All notifications marked as read',
+            ]);
+
+        // Verify all notifications are now read
+        $unreadCount = $user->unreadNotifications()->count();
+        $this->assertEquals(0, $unreadCount);
+    }
+
+    public function test_unauthenticated_user_cannot_mark_notification_as_read(): void
+    {
+        $response = $this->putJson('/api/v1/notifications/1/read');
+
+        $response->assertStatus(401);
+    }
+
+    public function test_unauthenticated_user_cannot_mark_all_notifications_as_read(): void
+    {
+        $response = $this->putJson('/api/v1/notifications/read-all');
+
+        $response->assertStatus(401);
+    }
 }

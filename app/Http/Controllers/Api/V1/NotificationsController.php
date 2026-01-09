@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Transformers\NotificationTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use Symfony\Component\HttpFoundation\Response;
 
 class NotificationsController extends Controller
 {
@@ -35,5 +37,49 @@ class NotificationsController extends Controller
         return fractal($notifications, new NotificationTransformer)
             ->paginateWith(new IlluminatePaginatorAdapter($notifications))
             ->respond();
+    }
+
+    /**
+     * Mark a notification as read
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function markAsRead($id)
+    {
+        /* @var User $user */
+        $user = Auth::user();
+
+        $notification = $user->notifications()->where('id', $id)->first();
+
+        if (! $notification) {
+            return response()->errorResponse(
+                trans('error.item_not_found'),
+                Response::HTTP_NOT_FOUND,
+                \App\Enums\ErrorCode::ITEM_NOT_FOUND
+            );
+        }
+
+        $notification->markAsRead();
+
+        return response()->json([
+            'message' => 'Notification marked as read',
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Mark all notifications as read
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function markAllAsRead()
+    {
+        /* @var User $user */
+        $user = Auth::user();
+
+        $user->unreadNotifications->each->markAsRead();
+
+        return response()->json([
+            'message' => 'All notifications marked as read',
+        ]);
     }
 }
