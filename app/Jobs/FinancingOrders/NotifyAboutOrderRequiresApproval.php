@@ -16,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutOrderRequiresApproval implements ShouldQueue
@@ -40,6 +41,12 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
     public function handle()
     {
         $financingOrder = FinancingOrder::find($this->financingOrderId);
+
+        if (! $financingOrder) {
+            Log::channel(LOG_CHANNEL_LYNK)->error('NotifyAboutOrderRequiresApproval: Financing order not found', ['financing_order_id' => $this->financingOrderId]);
+
+            return;
+        }
 
         $notifiables = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) {
