@@ -5,6 +5,7 @@ namespace App\Rules;
 use App\Enums\FinancingOrderProceedCase;
 use App\Factories\TraderOrders\TraderOrderProceedCaseFactory;
 use App\Models\FinancingOrder;
+use App\Models\TraderOrder;
 use Illuminate\Contracts\Validation\Rule;
 
 class CheckProceedOrderSequenceRule implements Rule
@@ -22,6 +23,7 @@ class CheckProceedOrderSequenceRule implements Rule
      */
     public function passes($attribute, $value)
     {
+        /** @var ?TraderOrder $traderOrder */
         $traderOrder = $this->financingOrder->activeTraderOrder()->first();
 
         if (! $traderOrder) {
@@ -29,13 +31,22 @@ class CheckProceedOrderSequenceRule implements Rule
 
             return false;
         }
+
         $value = FinancingOrderProceedCase::getKeyByDescription($value);
+        $allowedStatuses = data_get(FinancingOrderProceedCase::ALLOWED_TO_PROCEED_STATUS, "{$traderOrder->provider}.{$traderOrder->version}", []);
+        if (! \in_array($value, $allowedStatuses, true)) {
+            $this->errorMessage = __('validation.attributes.invalid_case_proceed');
+
+            return false;
+        }
+
         $proceedCaseHandler = TraderOrderProceedCaseFactory::handle($value);
         $canProceed = $proceedCaseHandler->canProceed($traderOrder, false);
 
         if ($canProceed) {
             return true;
         }
+
         $this->errorMessage = __('error.order_status_doesnt_follow_sequence', [
             'financingOrderId' => $traderOrder->financing_order_id,
             'traderOrderId' => $traderOrder->id,

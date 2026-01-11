@@ -16,12 +16,16 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
 
     private ?int $active = null;
 
+    private ?string $uniqueName = null;
+
     public function handle(): Builder
     {
         return Company::when($this->type, function ($query) {
             $query->type($this->type);
         })->when($this->name, function ($query) {
             $query->where('name', 'like', "%{$this->name}%");
+        })->when($this->uniqueName, function ($query) {
+            $query->where('unique_name', 'like', "%{$this->uniqueName}%");
         })->when($this->status, function ($query) {
             $query->where('status', $this->status);
         })->when($this->active, fn ($q) => $q->whereHas('commoditySupplier', function ($commoditySupplier) {
@@ -63,6 +67,13 @@ class BuildPaginatedCommoditySuppliersQueryAction implements BuildPaginatedCommo
     public function setActive(?int $value): self
     {
         $this->active = $value;
+
+        return $this;
+    }
+
+    public function setUniqueName(?string $uniqueName): self
+    {
+        $this->uniqueName = $uniqueName;
 
         return $this;
     }

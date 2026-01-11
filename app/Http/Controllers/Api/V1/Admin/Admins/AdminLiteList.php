@@ -16,7 +16,7 @@ class AdminLiteList extends Controller
     {
         $this->middleware(
             'permission:'.
-            perm(Area::SuperAdmin, [Subject::Admins, Action::Index, Action::Manage])
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Index, Action::Manage])
         );
     }
 

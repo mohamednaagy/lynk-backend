@@ -33,6 +33,8 @@ class LenderController extends Controller
 
         $this->middleware(
             'permission:'.
+            perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Show, Action::Manage]).
+            '|'.
             perm(Area::SuperAdmin, [Subject::Lenders, Action::Show, Action::Manage])
         )->only('show');
 

@@ -49,6 +49,8 @@ class CommoditySupplierController extends Controller
 
         $commiditySuppliers = $buildPaginatedCommoditySuppliersQuery->setType(CompanyType::Supplier)
             ->setActive($request->validated('active'))
+            ->setName($request->validated('name'))
+            ->setUniqueName($request->validated('unique_name'))
             ->handle()
             ->paginate();
 
