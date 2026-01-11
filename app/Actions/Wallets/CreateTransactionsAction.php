@@ -27,8 +27,6 @@ class CreateTransactionsAction implements CreateTransactions
                 'meta_keys' => array_keys($meta),
             ]);
 
-            $startTime = microtime(true);
-
             $result = app(TransactionUtilInterface::class)->process(
                 $wallet,
                 $amount,
@@ -37,12 +35,9 @@ class CreateTransactionsAction implements CreateTransactions
                 $meta
             );
 
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
-
             Log::info('CreateTransactionsAction::handle SUCCESS with wallet_id => '.$wallet->getKey().' and reference_number => '.$referenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $result->id,
-                'execution_time_ms' => $executionTime,
             ]);
 
             return $result;

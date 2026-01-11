@@ -26,7 +26,6 @@ class UnitService
      */
     public function getEligibleUnits(LocalMarketOrder $localMarketOrder, $eligibleInventories)
     {
-        $startTime = microtime(true);
         $inventories = [];
         foreach ($eligibleInventories as $eligibleInventory) {
             $inventory = LocalMarketInventory::find($eligibleInventory['id']);
@@ -35,7 +34,6 @@ class UnitService
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getEligibleUnits Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
         ]);
 
         return $inventories;
@@ -141,8 +139,6 @@ class UnitService
             'inventory_id' => $inventory->id,
         ]);
 
-        $startTime = microtime(true);
-
         // Get eligible unit IDs
         $eligibleUnitIds = $this->getEligibleUnitIds(
             $inventory,
@@ -190,7 +186,6 @@ class UnitService
         LocalMarketOrder $localMarketOrder,
         int $limit
     ): Collection {
-        $startTime = microtime(true);
         $data = collect(
             $this->buildEligibleUnitsQuery($inventory->id, $localMarketOrder->company_id)
                 ->select('id')
@@ -201,7 +196,6 @@ class UnitService
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getEligibleUnitIds Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             'inventoryId' => $inventory->id,
         ]);
 
