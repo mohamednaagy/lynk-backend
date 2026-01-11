@@ -22,7 +22,7 @@ FROM php:8.4-fpm-alpine
 
 # Accept build arguments for user ID and group ID
 # For macOS: Use UID 501, but use GID 1000 to avoid Alpine's GID 20 conflict
-ARG USER_ID=501
+ARG USER_ID=1000
 ARG GROUP_ID=1000
 
 # Install system dependencies and PHP extensions
