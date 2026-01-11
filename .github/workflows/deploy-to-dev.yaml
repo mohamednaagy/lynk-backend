@@ -1181,7 +1181,6 @@ jobs:
                     COLOR="danger"
                     STATUS_LABEL="Failed"
                   fi
-
                   START_TS="${{ needs.setup.outputs.start_ts }}"
                   END_TS=$(date +%s)
                   DURATION_SEC=$((END_TS - START_TS))
@@ -1190,7 +1189,6 @@ jobs:
                   D_M=$(((DURATION_SEC%3600)/60))
                   D_S=$((DURATION_SEC%60))
                   DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
-
                   PR_URL="${{ github.event.pull_request.html_url }}"
                   PR_TITLE="${{ github.event.pull_request.title }}"
                   COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
@@ -1205,17 +1203,14 @@ jobs:
                       PR_TITLE="$GITHUB_REPOSITORY"
                     fi
                   fi
-
                   # Make a sed-safe version of the title (remove '|' which is used as sed delimiter)
                   SAFE_PR_TITLE="$(printf '%s' "$PR_TITLE" | tr '|' '-')"
-
                   RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                   BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
                   IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
                   # Use workflow start time (captured in setup) for display
                   START_TS="${{ needs.setup.outputs.start_ts }}"
                   TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
-
                   cat > /tmp/slack-payload.json <<'EOF'
                   {
                     "text": "Backend Deployment (Dev) - REPLACE_STATUS",
@@ -1237,7 +1232,6 @@ jobs:
                     ]
                   }
                   EOF
-
                   sed -i \
                     -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
                     -e "s|REPLACE_COLOR|$COLOR|g" \
@@ -1250,8 +1244,6 @@ jobs:
                     -e "s|REPLACE_PR|$PR_URL|g" \
                     -e "s|REPLACE_TIME|$TIMESTAMP|g" \
                     /tmp/slack-payload.json
-
                   echo "Slack payload:"
                   cat /tmp/slack-payload.json
-
-                  curl -X POST -H 'Content-type: application/json' --data @/tmp/slack-payload.json ${{ secrets.SLACK_HOOK_URL }}          
+                  curl -X POST -H 'Content-type: application/json' --data @/tmp/slack-payload.json ${{ secrets.SLACK_HOOK_URL }}
