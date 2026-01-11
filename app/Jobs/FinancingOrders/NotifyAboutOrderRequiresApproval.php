@@ -27,7 +27,7 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private FinancingOrder $financingOrder, private User $user)
+    public function __construct(private int $financingOrderId, private User $user)
     {
         $this->onQueue('notifications');
     }
@@ -39,6 +39,8 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
      */
     public function handle()
     {
+        $financingOrder = FinancingOrder::find($this->financingOrderId);
+
         $notifiables = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) {
                 $query->where(function ($query) {
@@ -52,7 +54,7 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
                 });
             });
 
-        Notification::send($notifiables, new OrderRequiresApproval($this->financingOrder, $this->user));
+        Notification::send($notifiables, new OrderRequiresApproval($financingOrder, $this->user));
     }
 
     public function isNotifyAllowed()
