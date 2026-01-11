@@ -16,16 +16,13 @@ class PendingEligibleCommoditiesAction implements PendingEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        $startTime = microtime(true);
         $localMarketOrder->update(['status' => OrderStatus::PendingEligibleCommodities]);
         $this->createLocalMarketOrderHistory($localMarketOrder, OrderHistoryStatus::PendingEligibleCommodities);
 
         app(FindEligibleCommodities::class)->handle($localMarketOrder);
 
-        $duration = microtime(true) - $startTime;
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('after find eligible commodities at PendingEligibleCommoditiesAction', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration($duration),
         ]);
     }
 }

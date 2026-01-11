@@ -31,7 +31,6 @@ class BuyCommoditiesAction implements BuyCommodities
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
         try {
-            $startTime = microtime(true);
 
             InsertOrderInventoriesAndUnits::dispatch($localMarketOrder->id);
             $data = UnitService::getUnitsByGroupedByPreviousOwner($localMarketOrder);
@@ -48,7 +47,6 @@ class BuyCommoditiesAction implements BuyCommodities
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('BuyCommoditiesAction Duration', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
                 'status' => $localMarketOrder->status,
-                'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             ]);
         } catch (\Exception $e) {
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error at BuyCommoditiesAction', $localMarketOrder), [

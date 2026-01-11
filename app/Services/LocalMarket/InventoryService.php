@@ -58,7 +58,6 @@ class InventoryService
 
     private function findEligibleInventoriesForLoan($loanAmount, $companyId, $preferredItemTypes, $localMarketOrder)
     {
-        $startTime = microtime(true);
         $data = LocalMarketInventory::query()
             ->select([
                 'local_market_inventories.*',
@@ -92,7 +91,6 @@ class InventoryService
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findEligibleInventoriesForLoan Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
             'loanAmount' => $loanAmount,
             'companyId' => $companyId,
             'preferredItemTypes' => $preferredItemTypes,
@@ -109,7 +107,6 @@ class InventoryService
             return false;
         }
 
-        $startTime = microtime(true);
         if ($inventories->isEmpty()) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('The inventories list are empty');
 
@@ -120,7 +117,6 @@ class InventoryService
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findOptimalCombination Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
         ]);
 
         return empty($result) ? false : $result;

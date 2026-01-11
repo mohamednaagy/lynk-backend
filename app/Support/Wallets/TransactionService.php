@@ -62,17 +62,12 @@ class TransactionService implements TransactionServiceInterface
                 ],
             ]);
 
-            $startTime = microtime(true);
-
             $transaction = Transaction::create($transactionData);
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
             Log::info('TransactionService::withdraw SUCCESS wallet_id => '.$wallet->getKey().' reference_number => '.$finalReferenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $transaction->id,
                 'transaction_amount' => $transaction->amount->jsonSerialize(),
-                'execution_time_ms' => $executionTime,
             ]);
 
             return $transaction;

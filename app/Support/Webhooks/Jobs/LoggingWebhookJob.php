@@ -12,7 +12,6 @@ class LoggingWebhookJob extends CallWebhookJob
 {
     public function handle()
     {
-        $startTime = microtime(true);
 
         Log::channel(LOG_CHANNEL_WEBHOOKS)->info('HTTP webhook request initiated', [
             'webhook_url' => $this->webhookUrl,
@@ -45,18 +44,14 @@ class LoggingWebhookJob extends CallWebhookJob
                 ])
                 ->{$this->httpVerb}($this->webhookUrl, $this->payload);
 
-            $endTime = microtime(true);
-            $duration = round(($endTime - $startTime) * 1000, 2); // Duration in milliseconds
-
             // Log successful response
-            $this->logHttpResponse($response, $duration, true);
+            $this->logHttpResponse($response, true);
 
             // Check if response is successful (2xx status codes)
             if ($response->successful()) {
                 Log::channel(LOG_CHANNEL_WEBHOOKS)->info('Webhook HTTP request completed successfully with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
                     'webhook_url' => $this->webhookUrl,
                     'status_code' => $response->status(),
-                    'duration_ms' => $duration,
                     'attempt' => $this->attempts(),
                     'order_id' => $this->getOrderId(),
                     'trader_order_id' => $this->getTraderOrderId(),
@@ -66,12 +61,9 @@ class LoggingWebhookJob extends CallWebhookJob
             }
 
             // Handle non-2xx responses
-            $this->handleFailedResponse($response, $duration);
+            $this->handleFailedResponse($response);
         } catch (Exception $e) {
-            $endTime = microtime(true);
-            $duration = round(($endTime - $startTime) * 1000, 2);
-
-            $this->logHttpException($e, $duration);
+            $this->logHttpException($e);
 
             // Re-throw to trigger retry mechanism
             throw $e;
@@ -81,7 +73,7 @@ class LoggingWebhookJob extends CallWebhookJob
     /**
      * Log HTTP response details
      */
-    private function logHttpResponse(Response $response, float $duration, bool $isSuccess = true): void
+    private function logHttpResponse(Response $response, bool $isSuccess = true): void
     {
         $logLevel = $isSuccess ? 'info' : 'warning';
 
@@ -89,7 +81,6 @@ class LoggingWebhookJob extends CallWebhookJob
             'webhook_url' => $this->webhookUrl,
             'status_code' => $response->status(),
             'status_text' => $response->reason(),
-            'duration_ms' => $duration,
             'response_headers' => $response->headers(),
             'response_body' => $this->truncateResponseBody($response->body()),
             'response_size' => strlen($response->body()),
@@ -103,13 +94,12 @@ class LoggingWebhookJob extends CallWebhookJob
     /**
      * Handle failed HTTP responses
      */
-    private function handleFailedResponse(Response $response, float $duration): void
+    private function handleFailedResponse(Response $response): void
     {
         Log::channel(LOG_CHANNEL_WEBHOOKS)->error('Webhook HTTP request failed with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
             'status_code' => $response->status(),
             'status_text' => $response->reason(),
-            'duration_ms' => $duration,
             'response_headers' => $response->headers(),
             'response_body' => $this->truncateResponseBody($response->body()),
             'attempt' => $this->attempts(),
@@ -125,11 +115,10 @@ class LoggingWebhookJob extends CallWebhookJob
     /**
      * Log HTTP exceptions
      */
-    private function logHttpException(Exception $e, float $duration): void
+    private function logHttpException(Exception $e): void
     {
         Log::channel(LOG_CHANNEL_WEBHOOKS)->error('Webhook HTTP request exception with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
-            'duration_ms' => $duration,
             'exception_class' => get_class($e),
             'exception_message' => $e->getMessage(),
             'exception_code' => $e->getCode(),

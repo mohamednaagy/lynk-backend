@@ -74,16 +74,11 @@ class TransactionUtil implements TransactionUtilInterface
                 'reason' => $reason,
             ]);
 
-            $startTime = microtime(true);
-
             $result = $handler->process($wallet, $amount, $reason, $refrenceNumber, $meta);
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
             Log::info('TransactionUtil::process SUCCESS wallet_id => '.$wallet->getKey().' reference_number => '.$refrenceNumber, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $result->id,
-                'execution_time_ms' => $executionTime,
             ]);
 
             return $result;
