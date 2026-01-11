@@ -1,21 +1,83 @@
+# Version Control
 .git
 .gitignore
+.gitattributes
+
+# Node.js
 node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# PHP Vendor (will be copied from composer stage)
 vendor
+
+# Storage directories (will be created at runtime)
 storage/logs
 storage/framework/cache
 storage/framework/sessions
 storage/framework/views
+
 # Allow .env file to be copied (created by GitHub Actions workflow)
-# Still exclude encrypted .env files
+# Still exclude encrypted .env files and examples
 .env.*.encrypted
 .env.example
-docker-compose.yml
+.env.testing
+.env.local
+.env.backup
+
+# Docker files
+docker-compose*.yml
 docker/
+.docker/
+Dockerfile*
+
+# IDE and Editor
 .idea
 .vscode
-npm-debug.log
-yarn-error.log
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+tests
+.phpunit.result.cache
+phpunit.xml
+coverage
+
+# CI/CD
+.github
+
+# Documentation (keep README.md)
+*.md
+!README.md
+docs
+
+# Development tools
+.editorconfig
+.php_cs
+.php_cs.cache
+.php-cs-fixer.cache
+phpstan.neon
+psalm.xml
+
+# Build artifacts
+public/hot
+public/storage
+*.key
+
+# Large files
 *.sql
+*.dump
 *.zip
-.docker/
+*.tar.gz
+*.bak
+*.backup
+*.old
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
