@@ -512,4 +512,9 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->commodity_type_id > 0;
     }
+
+    public function canBeMarkedAsCompleted(): bool
+    {
+        return $this->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted) || $this->doesLastActionMatchWith(FinancingOrderHistory::DeliveryConfirmed);
+    }
 }
