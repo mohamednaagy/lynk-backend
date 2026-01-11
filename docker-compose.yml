@@ -7,6 +7,17 @@ x-app-volumes: &app-volumes
 x-host-network: &host-network
   network_mode: host
 
+# Shared Nightwatch environment configuration
+# Note: Using 127.0.0.1:2407 instead of nightwatch-agent:2407 due to host networking
+x-nightwatch-env: &nightwatch-env
+  environment:
+    - NIGHTWATCH_ENABLED=true
+    - NIGHTWATCH_TOKEN=${NIGHTWATCH_TOKEN}
+    - NIGHTWATCH_REQUEST_SAMPLE_RATE=${NIGHTWATCH_REQUEST_SAMPLE_RATE:-0.1}
+    - NIGHTWATCH_COMMAND_SAMPLE_RATE=${NIGHTWATCH_COMMAND_SAMPLE_RATE:-1.0}
+    - NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${NIGHTWATCH_EXCEPTION_SAMPLE_RATE:-1.0}
+    - NIGHTWATCH_INGEST_URI=127.0.0.1:2407
+
 # Profile Usage:
 # - Production deployment: --profile web --profile group1 --profile group2 --profile group3 --profile dev-services
 # - Local development: --profile local (includes nginx, redis, mysql, phpmyadmin, mailhog)
@@ -26,7 +37,7 @@ services:
     container_name: lynk-backend-app
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     healthcheck:
       test: ["CMD", "php", "-r", "exit(0);"]
       interval: 30s
@@ -137,8 +148,8 @@ services:
     container_name: laravel-nightwatch
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
-    command: tail -f /dev/null
+    <<: [*app-volumes, *host-network, *nightwatch-env]
+    command: php artisan nightwatch:agent --verbose --listen-on=0.0.0.0:2407
     depends_on:
       - app
     healthcheck:
@@ -155,7 +166,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=local_market_commodities_settlement
     depends_on:
       - app
@@ -170,7 +181,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_eligible_quantities
     depends_on:
       - app
@@ -185,7 +196,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_inventories_units_logging
     depends_on:
       - app
@@ -200,7 +211,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_order_initiation
     depends_on:
       - app
@@ -215,7 +226,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=trader_order_initiation
     depends_on:
       - app
@@ -230,7 +241,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_commodities_purchased_local_market
     depends_on:
       - app
@@ -245,7 +256,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=buy_commodities_local_market_orders
     depends_on:
       - app
@@ -260,7 +271,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=apply_order_fees
     depends_on:
       - app
@@ -278,7 +289,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_states
     depends_on:
       - app
@@ -293,7 +304,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_process
     depends_on:
       - app
@@ -308,7 +319,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=hold_eligible_units_local_market_orders
     depends_on:
       - app
@@ -323,7 +334,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=refresh_eligibilities
     depends_on:
       - app
@@ -338,7 +349,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=notifications
     depends_on:
       - app
@@ -353,7 +364,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=create_trader_orders
     depends_on:
       - app
@@ -368,7 +379,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=default
     depends_on:
       - app
@@ -383,7 +394,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=bursam
     depends_on:
       - app
@@ -398,7 +409,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=complete_purchasing_local_market_orders
     depends_on:
       - app
@@ -413,7 +424,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=mq
     depends_on:
       - app
@@ -431,7 +442,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=5 --timeout=120 --queue=local_market_webhooks
     depends_on:
       - app
@@ -446,7 +457,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=50 --timeout=120 --queue=expire_trader_order
     depends_on:
       - app
@@ -461,7 +472,7 @@ services:
     image: app-php-fpm:latest
     working_dir: /var/www/html
     restart: unless-stopped
-    <<: [*app-volumes, *host-network]
+    <<: [*app-volumes, *host-network, *nightwatch-env]
     command: php artisan queue:work redis --verbose --tries=3 --timeout=120 --queue=unit-inventory
     depends_on:
       - app

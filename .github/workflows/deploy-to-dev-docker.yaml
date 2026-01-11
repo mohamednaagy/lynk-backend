@@ -459,7 +459,7 @@ jobs:
 
                     echo ''
                     echo '🚀 Starting all containers with scaling...'
-                    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services up -d \
+                    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
                       --scale local-market-states-worker=8 \
                       --scale local-market-webhooks-worker=5 \
                       --scale local-market-process-worker=8 \
