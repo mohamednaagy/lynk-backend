@@ -429,132 +429,73 @@ jobs:
 
                   echo "✅ Image transferred to ${{ matrix.server }}"
 
-            - name: Transfer docker-compose.yml to server
+            - name: Transfer docker-compose.yml and deployment script to server
               run: |
-                  echo "📋 Transferring docker-compose.yml to server..."
+                  echo "📋 Transferring docker-compose.yml and deployment script to server..."
 
+                  # Transfer docker-compose.yml
                   scp -i ~/.ssh/deploy_key \
                       -o StrictHostKeyChecking=no \
                       docker-compose.yml \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/var/www/lynk-backend/
 
-                  echo "✅ docker-compose.yml transferred"
+                  # Transfer deployment script
+                  scp -i ~/.ssh/deploy_key \
+                      -o StrictHostKeyChecking=no \
+                      .github/scripts/deploy-with-rollback.sh \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/tmp/deploy-with-rollback.sh
 
-            - name: Deploy containers on server ${{ matrix.server }}
+                  # Make script executable
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
+                      "chmod +x /tmp/deploy-with-rollback.sh"
+
+                  echo "✅ Files transferred and script made executable"
+
+            - name: Deploy containers on server ${{ matrix.server }} with zero-downtime
               run: |
-                  echo "🚀 Deploying containers on ${{ matrix.server }}..."
+                  echo "🚀 Deploying containers on ${{ matrix.server }} with zero-downtime strategy..."
 
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
                     set -euo pipefail
 
-                    # Load Docker image
-                    echo '📥 Loading Docker image...'
+                    # Load new Docker image
+                    echo '📥 Loading new Docker image...'
                     gunzip -c /tmp/app-php-fpm.tar.gz | docker load
                     rm -f /tmp/app-php-fpm.tar.gz
 
                     # Tag as latest
+                    echo '🏷️  Tagging image as latest...'
                     docker tag app-php-fpm:${{ needs.setup.outputs.commit_hash }} app-php-fpm:latest
 
-                    echo '📊 Current running containers:'
-                    docker ps --filter name=lynk --format 'table {{.Names}}\\t{{.Status}}' || true
+                    # Execute zero-downtime deployment script
+                    echo '🚀 Executing zero-downtime deployment with automatic rollback...'
+                    /tmp/deploy-with-rollback.sh
 
-                    cd /var/www/lynk-backend
-
-                    echo ''
-                    echo '🛑 Stopping existing containers...'
-                    docker compose --profile web --profile group1 --profile group2 --profile group3 down || true
-
-                    echo ''
-                    echo '🚀 Starting all containers with scaling...'
-                    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
-                      --scale local-market-states-worker=8 \
-                      --scale local-market-webhooks-worker=5 \
-                      --scale local-market-process-worker=8 \
-                      --scale local-market-expire-trader-order-worker=8 \
-                      --scale local-market-commodities-settlement-worker=8 \
-                      --scale local-market-eligible-quantities-worker=8 \
-                      --scale local-market-order-inventories-units-logging=5 \
-                      --scale local-market-order-initiation=5 \
-                      --scale trader-order-initiation=5 \
-                      --scale local-market-generate-units=1 \
-                      --scale hold-eligible-local-order-units-worker=5 \
-                      --scale complete-commodities-purchased-local-market-worker=5 \
-                      --scale buy-commodities-local-market-orders-worker=5 \
-                      --scale refresh-eligibilities-worker=1 \
-                      --scale notifications-worker=5 \
-                      --scale create-trader-orders-worker=8 \
-                      --scale default-worker=8 \
-                      --scale bursam-worker=1 \
-                      --scale apply-order-fees-worker=1 \
-                      --scale complete-purchasing-local-market-orders-worker=5 \
-                      --scale message-queue-worker=2
-
-                    echo ''
-                    echo '✅ Containers started, waiting for health checks...'
+                    # Cleanup deployment script
+                    rm -f /tmp/deploy-with-rollback.sh
                   "
 
-            - name: Wait for containers to be healthy
+            - name: Verify deployment status
               run: |
-                  echo "🏥 Checking container health on ${{ matrix.server }}..."
+                  echo "📊 Verifying final deployment status on ${{ matrix.server }}..."
 
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
                     cd /var/www/lynk-backend
 
-                    # Wait up to 5 minutes for containers to be healthy
-                    MAX_WAIT=300
-                    ELAPSED=0
-                    SLEEP_INTERVAL=10
+                    echo '📊 Container Status:'
+                    docker compose ps --format 'table {{.Name}}\t{{.Status}}'
 
-                    while [ \$ELAPSED -lt \$MAX_WAIT ]; do
-                      echo ''
-                      echo '[$(date +%H:%M:%S)] Checking container status...'
-
-                      # Get container counts using simple grep
-                      RUNNING_COUNT=\$(docker compose ps | grep -c 'Up' || echo '0')
-                      EXITED_COUNT=\$(docker compose ps -a | grep -c 'Exited' || echo '0')
-                      UNHEALTHY_COUNT=\$(docker compose ps | grep -c 'unhealthy' || echo '0')
-
-                      echo \"  Running containers: \$RUNNING_COUNT\"
-                      echo \"  Exited containers: \$EXITED_COUNT\"
-                      echo \"  Unhealthy containers: \$UNHEALTHY_COUNT\"
-
-                      # Check if any containers failed
-                      if [ \"\$EXITED_COUNT\" -gt 0 ]; then
-                        echo ''
-                        echo '❌ Some containers have exited!'
-                        docker compose ps -a
-                        echo ''
-                        echo '📋 Logs from failed containers:'
-                        docker compose logs --tail=50
-                        exit 1
-                      fi
-
-                      # Check if any containers are unhealthy
-                      if [ \"\$UNHEALTHY_COUNT\" -gt 0 ]; then
-                        echo \"  ⚠️  Waiting for \$UNHEALTHY_COUNT unhealthy container(s)...\"
-                      elif [ \"\$RUNNING_COUNT\" -gt 0 ]; then
-                        # All containers running and healthy
-                        echo ''
-                        echo '✅ All containers are running and healthy!'
-                        docker compose ps
-                        exit 0
-                      fi
-
-                      echo \"  Waiting ${SLEEP_INTERVAL}s before next check...\"
-                      sleep \$SLEEP_INTERVAL
-                      ELAPSED=\$((ELAPSED + SLEEP_INTERVAL))
-                    done
-
-                    # Timeout reached
                     echo ''
-                    echo '⚠️ Timeout reached waiting for containers'
-                    docker compose ps -a
+                    echo '📈 Container Counts:'
+                    RUNNING=\$(docker compose ps | grep -c 'Up' || echo '0')
+                    TOTAL=\$(docker compose ps -a | wc -l)
+                    echo \"Running: \$RUNNING / \$TOTAL containers\"
+
                     echo ''
-                    echo '📋 Recent logs:'
-                    docker compose logs --tail=100
-                    exit 1
+                    echo '✅ Deployment verification complete'
                   "
 
             - name: Run post-deployment tasks
