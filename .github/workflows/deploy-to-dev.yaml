@@ -17,9 +17,17 @@ jobs:
         outputs:
             servers: ${{ steps.set-servers.outputs.servers }}
             commit_hash: ${{ steps.commit.outputs.short_sha }}
+            start_ts: ${{ steps.timestamp.outputs.start_ts }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+
+            - name: Capture workflow start time
+              id: timestamp
+              run: |
+                  START_TS=$(date +%s)
+                  echo "start_ts=${START_TS}" >> $GITHUB_OUTPUT
+                  echo "Workflow started at: $(date -d @${START_TS} +"%Y-%m-%d %H:%M:%S")"
 
             - name: Extract commit hash
               id: commit
