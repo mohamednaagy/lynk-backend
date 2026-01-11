@@ -31,6 +31,32 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('Trade Request Cancelled');
+    }
+
+    /**
+     * Get the description for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('Trade request #:trader_order_id for order #:order_id has been cancelled by :user_name. Amount: :amount, Selling Price: :selling_price', [
+            'trader_order_id' => $this->traderOrder->id,
+            'order_id' => $this->traderOrder->financing_order_id,
+            'user_name' => $this->user->fullName,
+            'amount' => $this->traderOrder->order->amount,
+            'selling_price' => $this->traderOrder->order->selling_price,
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable

@@ -8,6 +8,7 @@ return [
     ],
     'order_cancelled' => [
         'label' => 'Order Cancelled',
+        'description' => 'Order #:order_id has been cancelled by :user_name. Amount: :amount, Selling Price: :selling_price',
     ],
     'order_requires_approval' => [
         'label' => 'Order Requires Approval',

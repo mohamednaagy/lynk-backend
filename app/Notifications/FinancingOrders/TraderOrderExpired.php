@@ -30,6 +30,29 @@ class TraderOrderExpired extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('Trade Request Expired');
+    }
+
+    /**
+     * Get the description for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('Trade request #:trader_order_id for order #:order_id has expired. Trade request ID: :trader_order_id, Order ID: :order_id', [
+            'trader_order_id' => $this->traderOrder->id,
+            'order_id' => $this->traderOrder->financing_order_id,
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable

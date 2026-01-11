@@ -31,6 +31,31 @@ class OrderCancelled extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('notification-types.order_cancelled.label');
+    }
+
+    /**
+     * Get the description for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('notification-types.order_cancelled.description', [
+            'order_id' => $this->financingOrder->id,
+            'user_name' => $this->user->fullName,
+            'amount' => $this->financingOrder->amount,
+            'selling_price' => $this->financingOrder->selling_price,
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable

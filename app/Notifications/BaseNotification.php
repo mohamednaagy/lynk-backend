@@ -50,8 +50,23 @@ abstract class BaseNotification extends Notification
     }
 
     /**
+     * Get the database representation of the notification.
+     *
+     * @param  mixed  $notifiable
+     * @return array
+     */
+    public function toDatabase($notifiable)
+    {
+        return [
+            ...$this->toArray($notifiable),
+            'title' => $this->getTitle($notifiable),
+            'description' => $this->getDescription($notifiable),
+        ];
+    }
+
+    /**
      * Get the array representation of the notification.
-     * This is critical for database notifications.
+     * This is used by other channels as well.
      *
      * @param  mixed  $notifiable
      * @return array
@@ -62,6 +77,22 @@ abstract class BaseNotification extends Notification
             'type' => $this->getType()->value,
         ];
     }
+
+    /**
+     * Get the title for the notification.
+     * Subclasses should override this method to provide a specific title.
+     *
+     * @param  mixed  $notifiable
+     */
+    abstract public function getTitle($notifiable): string;
+
+    /**
+     * Get the description for the notification.
+     * Subclasses should override this method to provide a specific description.
+     *
+     * @param  mixed  $notifiable
+     */
+    abstract public function getDescription($notifiable): string;
 
     /**
      * Specify which queue should handle which channels.

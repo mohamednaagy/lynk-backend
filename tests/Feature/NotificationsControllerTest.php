@@ -26,6 +26,16 @@ class NotificationsControllerTest extends TestCase
                 return SystemNotificationType::ORDER_CANCELLED;
             }
 
+            public function getTitle($notifiable): string
+            {
+                return 'Test Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Test notification description within 30 days';
+            }
+
             public function via($notifiable): array
             {
                 return ['database'];
@@ -46,6 +56,16 @@ class NotificationsControllerTest extends TestCase
             public function getType(): SystemNotificationType
             {
                 return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function getTitle($notifiable): string
+            {
+                return 'Old Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Old notification description';
             }
 
             public function via($notifiable): array
@@ -126,6 +146,16 @@ class NotificationsControllerTest extends TestCase
                 return SystemNotificationType::ORDER_CANCELLED;
             }
 
+            public function getTitle($notifiable): string
+            {
+                return 'Earlier Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Earlier notification description';
+            }
+
             public function via($notifiable): array
             {
                 return ['database'];
@@ -148,6 +178,16 @@ class NotificationsControllerTest extends TestCase
             public function getType(): SystemNotificationType
             {
                 return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function getTitle($notifiable): string
+            {
+                return 'Latest Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Latest notification description';
             }
 
             public function via($notifiable): array
@@ -200,6 +240,16 @@ class NotificationsControllerTest extends TestCase
                     return SystemNotificationType::ORDER_CANCELLED;
                 }
 
+                public function getTitle($notifiable): string
+                {
+                    return "Notification #{$this->index} Title";
+                }
+
+                public function getDescription($notifiable): string
+                {
+                    return "Notification #{$this->index} Description";
+                }
+
                 public function via($notifiable): array
                 {
                     return ['database'];
@@ -249,6 +299,16 @@ class NotificationsControllerTest extends TestCase
                 return SystemNotificationType::ORDER_CANCELLED;
             }
 
+            public function getTitle($notifiable): string
+            {
+                return 'Unread Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Unread notification description';
+            }
+
             public function via($notifiable): array
             {
                 return ['database'];
@@ -269,6 +329,16 @@ class NotificationsControllerTest extends TestCase
             public function getType(): SystemNotificationType
             {
                 return SystemNotificationType::ORDER_CANCELLED;
+            }
+
+            public function getTitle($notifiable): string
+            {
+                return 'Read Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Read notification description';
             }
 
             public function via($notifiable): array
@@ -333,6 +403,16 @@ class NotificationsControllerTest extends TestCase
                 return SystemNotificationType::ORDER_CANCELLED;
             }
 
+            public function getTitle($notifiable): string
+            {
+                return 'Test Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Test notification to mark as read description';
+            }
+
             public function via($notifiable): array
             {
                 return ['database'];
@@ -392,6 +472,16 @@ class NotificationsControllerTest extends TestCase
                 return SystemNotificationType::ORDER_CANCELLED;
             }
 
+            public function getTitle($notifiable): string
+            {
+                return 'Another User Notification Title';
+            }
+
+            public function getDescription($notifiable): string
+            {
+                return 'Another user notification description';
+            }
+
             public function via($notifiable): array
             {
                 return ['database'];
@@ -436,6 +526,16 @@ class NotificationsControllerTest extends TestCase
                 public function getType(): SystemNotificationType
                 {
                     return SystemNotificationType::ORDER_CANCELLED;
+                }
+
+                public function getTitle($notifiable): string
+                {
+                    return "Unread Notification #{$this->index}";
+                }
+
+                public function getDescription($notifiable): string
+                {
+                    return "Unread notification #{$this->index} description";
                 }
 
                 public function via($notifiable): array

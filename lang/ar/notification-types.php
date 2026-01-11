@@ -8,6 +8,7 @@ return [
     ],
     'order_cancelled' => [
         'label' => 'تم إلغاء الطلب',
+        'description' => 'تم إلغاء الطلب #:order_id بواسطة :user_name. المبلغ: :amount, سعر البيع: :selling_price',
     ],
     'order_requires_approval' => [
         'label' => 'الطلب يتطلب موافقة',
