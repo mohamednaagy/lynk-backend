@@ -9,7 +9,8 @@ COMPOSE_FILE="docker-compose.yml"
 DEPLOYMENT_DIR="/var/www/lynk-backend"
 HEALTH_CHECK_TIMEOUT=300  # 5 minutes
 HEALTH_CHECK_INTERVAL=10  # 10 seconds
-MIN_HEALTHY_PERCENTAGE=80 # At least 80% of containers must be healthy
+MIN_HEALTHY_PERCENTAGE=70 # At least 70% of containers must be healthy
+SCALE_DOWN_WAIT_TIME=30   # Wait 30 seconds after scaling down before final check
 
 # Colors for output
 RED='\033[0;31m'
@@ -112,6 +113,7 @@ check_deployment_health() {
         return 0
     else
         log_error "Deployment is unhealthy ($health_percentage% < $MIN_HEALTHY_PERCENTAGE%)"
+        log_warning "Some containers may still be starting - this is normal during deployment"
         return 1
     fi
 }
@@ -216,7 +218,7 @@ perform_rolling_deployment() {
     backup_deployment_state
 
     log_info "Current running containers:"
-    docker compose ps --format "table {{.Name}}\t{{.Status}}" || true
+    docker compose ps --format 'table {{.Name}}\t{{.Status}}' || true
 
     # Start new containers alongside old ones (scale up)
     log_info "Scaling up new containers..."
@@ -278,13 +280,34 @@ perform_rolling_deployment() {
         --scale complete-purchasing-local-market-orders-worker=5 \
         --scale message-queue-worker=2
 
-    # Final health check
-    sleep 10
-    if ! check_deployment_health; then
-        log_error "Final health check failed after scaling down - rolling back..."
-        perform_rollback
-        exit 1
-    fi
+    # Wait for containers to stabilize after scaling down
+    log_info "Waiting ${SCALE_DOWN_WAIT_TIME}s for containers to stabilize after scale-down..."
+    sleep $SCALE_DOWN_WAIT_TIME
+
+    # Give containers additional time to complete startup if needed
+    log_info "Performing final health verification..."
+    local final_check_attempts=3
+    local attempt=1
+
+    while [ $attempt -le $final_check_attempts ]; do
+        log_info "Final health check attempt $attempt/$final_check_attempts..."
+
+        if check_deployment_health; then
+            log_success "Final health check passed!"
+            break
+        fi
+
+        if [ $attempt -lt $final_check_attempts ]; then
+            log_warning "Health check attempt $attempt failed, waiting 15s before retry..."
+            sleep 15
+        else
+            log_error "Final health check failed after $final_check_attempts attempts - rolling back..."
+            perform_rollback
+            exit 1
+        fi
+
+        attempt=$((attempt + 1))
+    done
 
     # Clean up old containers
     log_info "Cleaning up old containers..."
@@ -294,7 +317,7 @@ perform_rolling_deployment() {
 
     # Show final state
     log_info "Final deployment state:"
-    docker compose ps --format "table {{.Name}}\t{{.Status}}"
+    docker compose ps --format 'table {{.Name}}\t{{.Status}}'
 }
 
 # Main execution

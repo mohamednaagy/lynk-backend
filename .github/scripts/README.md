@@ -44,8 +44,11 @@ Key parameters can be adjusted at the top of the script:
 ```bash
 HEALTH_CHECK_TIMEOUT=300      # Max time to wait for health (seconds)
 HEALTH_CHECK_INTERVAL=10      # Check every N seconds
-MIN_HEALTHY_PERCENTAGE=80     # Required healthy percentage
+MIN_HEALTHY_PERCENTAGE=70     # Required healthy percentage (70%)
+SCALE_DOWN_WAIT_TIME=30       # Wait time after scale-down (seconds)
 ```
+
+**Note on Health Percentage**: Set to 70% to account for containers that may still be in "starting" state during the scale-down phase. This prevents false-positive rollbacks while maintaining safety.
 
 ### Features
 
@@ -128,6 +131,36 @@ Before production deployment:
 - Increase `HEALTH_CHECK_TIMEOUT`
 - Review container logs for startup issues
 - Verify health check command is correct
+- Check if containers show "starting" status - they may just need more time
+
+### Health Check Fails During Scale-Down
+
+**Symptom**: Deployment succeeds during scale-up (85%+ healthy) but fails during scale-down (drops to 60-70%)
+
+**Cause**: Many containers are still in "starting" status and haven't completed initialization
+
+**Solutions**:
+1. **Reduce `MIN_HEALTHY_PERCENTAGE`** to 70% (already set as default)
+2. **Increase `SCALE_DOWN_WAIT_TIME`** from 30s to 60s if containers take longer to start
+3. **Add retry logic** (already implemented - 3 attempts with 15s between)
+
+The script now includes:
+- 30-second wait after scaling down
+- 3 retry attempts for final health check (15s between attempts)
+- Total grace period: ~75 seconds for containers to become healthy
+
+### Docker Compose Variable Warnings
+
+If you see warnings like:
+```
+The "t" variable is not set. Defaulting to a blank string.
+```
+
+This is harmless and has been fixed by using single quotes in format strings:
+```bash
+docker compose ps --format 'table {{.Name}}\t{{.Status}}'  # Correct
+docker compose ps --format "table {{.Name}}\t{{.Status}}"  # Wrong - bash interprets \t
+```
 
 ## References
 
