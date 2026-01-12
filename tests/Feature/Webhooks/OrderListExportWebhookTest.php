@@ -12,7 +12,7 @@ class OrderListExportWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $user;
+    public User $user;
 
     protected string $webhookSecret;
 
