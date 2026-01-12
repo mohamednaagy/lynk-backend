@@ -13,12 +13,6 @@ class LoggingWebhookJob extends CallWebhookJob
     public function handle()
     {
 
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->info('LoggingWebhookJob started info');
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->warning('LoggingWebhookJob started in warning');
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->error('LoggingWebhookJob started in error');
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->critical('LoggingWebhookJob started in critical');
-        Log::channel(LOG_CHANNEL_WEBHOOKS)->debug('LoggingWebhookJob started in debug');
-
         Log::channel(LOG_CHANNEL_WEBHOOKS)->info('HTTP webhook request initiated', [
             'webhook_url' => $this->webhookUrl,
             'http_verb' => $this->httpVerb,

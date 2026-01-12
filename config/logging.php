@@ -168,11 +168,11 @@ return [
         ],
         LOG_CHANNEL_WEBHOOKS => [
             'driver' => 'stack',
-            'channels' => ['webhooks_file', 'nightwatch'],
+            'channels' => ['external_links', 'nightwatch'],
             'ignore_exceptions' => false,
         ],
 
-        'webhooks_file' => [
+        'external_links' => [
             'driver' => 'daily',
             'path' => storage_path('logs/lynk/webhooks.log'),
             'level' => env('LOG_LEVEL', 'debug'),
