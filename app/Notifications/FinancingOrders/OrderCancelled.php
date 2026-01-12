@@ -87,6 +87,7 @@ class OrderCancelled extends BaseNotification implements ShouldQueue
             'selling_price' => $this->financingOrder->selling_price,
             'user_id' => $this->user->id,
             'user_name' => $this->user->fullName,
+            'url' => 'orders/'.$this->financingOrder->id,
         ];
     }
 }
