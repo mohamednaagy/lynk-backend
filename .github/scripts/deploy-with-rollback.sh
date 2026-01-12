@@ -309,18 +309,6 @@ perform_rolling_deployment() {
         attempt=$((attempt + 1))
     done
 
-    #Run Migration files
-    log_info "Running database migrations..."
-    docker exec lynk-backend-app php artisan migrate
-
-    #Run database structure clear
-    log_info "Running database structure clear..."
-    docker exec lynk-backend-app php artisan structure:clear 
-
-    #Run package discover
-    log_info "Running package discover..."
-    docker exec lynk-backend-app php artisan package:discover
-
     # Clean up old containers
     log_info "Cleaning up old containers..."
     docker compose ps -a --filter "status=exited" -q | xargs -r docker rm 2>/dev/null || true
