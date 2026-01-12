@@ -25,4 +25,8 @@ return [
     'lender_registered' => [
         'label' => 'تم تسجيل مقرض جديد',
     ],
+    'export_ready' => [
+        'label' => 'الملف جاهز',
+        'description' => 'الملف :exportType جاهز للتحميل',
+    ],
 ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 enum SystemNotificationType: string
@@ -16,6 +18,8 @@ enum SystemNotificationType: string
 
     case LENDER_REGISTERED = 'lender_registered';
 
+    case EXPORT_READY = 'export_ready';
+
     public static function getAdminNotificationTypes(): array
     {
         return [
@@ -25,6 +29,7 @@ enum SystemNotificationType: string
             self::DELIVERY_CONFIRMATION_RECEIVED,
             self::ORDER_APPROVED,
             self::LENDER_REGISTERED,
+            self::EXPORT_READY,
         ];
     }
 
@@ -36,6 +41,7 @@ enum SystemNotificationType: string
             self::ORDER_REQUIRES_APPROVAL,
             self::ORDER_APPROVED,
             self::LENDER_REGISTERED,
+            self::EXPORT_READY,
         ];
     }
 }

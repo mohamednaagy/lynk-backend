@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs\Reports;
 
+use App\Jobs\Reports\Dto\OrderListMessage;
 use App\Jobs\Reports\Dto\ReportMessage;
-use App\Jobs\Reports\Dto\SupplierMonthlyUsageMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -14,18 +14,21 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Throwable;
 
-class SupplierMonthlyUsageJob implements ShouldQueue
+class ExportOrderListJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
     public function __construct(
-        public int $modelId,
-        public string $startDate,
-        public string $endDate
+        public int $userId,
+        public string $exportType,
+        public array $exportData = []
     ) {
         $this->onQueue('mq');
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
         Queue::connection('rabbitmq')->pushRaw(
@@ -38,10 +41,10 @@ class SupplierMonthlyUsageJob implements ShouldQueue
      */
     public function failed(?Throwable $exception): void
     {
-        Log::error("SupplierMonthlyUsageJob failed after all retries - supplier id {$this->modelId}", [
-            'model_id' => $this->modelId,
-            'start_date' => $this->startDate,
-            'end_date' => $this->endDate,
+        Log::error("ExportOrderListJob failed after all retries - user id {$this->userId}", [
+            'user_id' => $this->userId,
+            'export_type' => $this->exportType,
+            'export_data' => $this->exportData,
             'queue' => config('services.rabbitmq.queue_name'),
             'exception' => $exception?->getMessage(),
             'exception_trace' => $exception?->getTraceAsString(),
@@ -50,10 +53,10 @@ class SupplierMonthlyUsageJob implements ShouldQueue
 
     private function buildMessage(): ReportMessage
     {
-        return new SupplierMonthlyUsageMessage(
-            modelId: $this->modelId,
-            startDate: $this->startDate,
-            endDate: $this->endDate,
+        return new OrderListMessage(
+            modelId: $this->userId,
+            exportType: $this->exportType,
+            exportData: $this->exportData,
         );
     }
 }

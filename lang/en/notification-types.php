@@ -25,4 +25,8 @@ return [
     'lender_registered' => [
         'label' => 'New Lender Registered',
     ],
+    'export_ready' => [
+        'label' => 'Export Ready',
+        'description' => 'Your :exportType export is ready for download.',
+    ],
 ];

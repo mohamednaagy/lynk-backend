@@ -115,4 +115,26 @@ return [
             Role::Manager,
         ],
     ],
+    SystemNotificationType::EXPORT_READY->value => [
+        'label' => 'notification-types.export_ready.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => true,
+                'is_editable' => true,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => true,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::Manager,
+            Role::LenderAdmin,
+            Role::LenderApiUser,
+            Role::LenderSupervisor,
+            Role::LenderBilling,
+            Role::LenderOrderCreator,
+        ],
+    ],
 ];
