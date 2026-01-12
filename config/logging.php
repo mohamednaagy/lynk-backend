@@ -167,6 +167,12 @@ return [
             'days' => 14,
         ],
         LOG_CHANNEL_WEBHOOKS => [
+            'driver' => 'stack',
+            'channels' => ['webhooks_file', 'nightwatch'],
+            'ignore_exceptions' => false,
+        ],
+
+        'webhooks_file' => [
             'driver' => 'daily',
             'path' => storage_path('logs/lynk/webhooks.log'),
             'level' => env('LOG_LEVEL', 'debug'),
