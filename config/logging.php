@@ -169,7 +169,7 @@ return [
         LOG_CHANNEL_WEBHOOKS => [
             'driver' => 'stack',
             'channels' => ['external_links', 'nightwatch'],
-            'ignore_exceptions' => false,
+            'ignore_exceptions' => true,
         ],
 
         'external_links' => [
