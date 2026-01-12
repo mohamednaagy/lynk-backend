@@ -14,6 +14,8 @@ class ExportService
      * Dispatch an export job to be processed asynchronously via RabbitMQ
      */
     public function dispatchExportJob(
+        string $sqlQuery,
+        array $params,
         string $exportType,
         User $user,
         string $exportClass,
@@ -24,6 +26,8 @@ class ExportService
             userId: $user->id,
             exportType: $exportType,
             exportData: [
+                'sql_query' => $sqlQuery,
+                'query_params' => $params,
                 'export_class' => $exportClass,
                 'request_data' => $request->all(),
                 'user_id' => $user->id,

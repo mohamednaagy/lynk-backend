@@ -12,6 +12,7 @@ use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
 use App\Models\Lender;
 use App\Services\ExportService;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -30,9 +31,28 @@ class ExportOrders extends Controller
         BuildFinancingOrdersQuery $buildOrdersQuery,
         ExportService $exportService
     ): JsonResponse {
+        $query = $buildOrdersQuery->setRelations([
+            'activeTraderOrder' => fn ($query) => $query->latest(),
+            'lender' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'responsableAdmin' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+            'creator' => fn ($query) => $query->withoutGlobalScope(SoftDeletingScope::class),
+        ])
+            ->handle();
+
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        // Convert bindings to proper values
+        $params = [];
+        foreach ($bindings as $binding) {
+            $params[] = \is_object($binding) && $binding instanceof \DateTimeInterface ? $binding->format('Y-m-d H:i:s') : $binding;
+        }
+
         // Dispatch the export job to be processed asynchronously
         $exportService->dispatchExportJob(
-            exportType: 'admin_financing_orders',
+            sqlQuery: $sql,
+            params: $params,
+            exportType: 'ORDER_LIST',
             user: $request->user(),
             exportClass: FinancingOrdersExport::class,
             request: $request
