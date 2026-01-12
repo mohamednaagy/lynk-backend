@@ -505,11 +505,11 @@ jobs:
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
                     echo '🗄️  Running database migrations...'
-                    docker exec lynk-laravel-app php artisan migrate --force
+                    docker exec lynk-backend-app php artisan migrate --force
 
                     echo '🧹 Clearing application cache...'
-                    docker exec lynk-laravel-app php artisan structure:clear
-                    docker exec lynk-laravel-app php artisan package:discover
+                    docker exec lynk-backend-app php artisan structure:clear
+                    docker exec lynk-backend-app php artisan package:discover
 
                     echo '✅ Post-deployment tasks completed'
                   "
@@ -823,7 +823,7 @@ jobs:
               # Create unified deployment directory structure
               mkdir -p gh-pages-deploy/deploy-validation/${{ github.run_number }}
               mkdir -p gh-pages-deploy/deploy-validation/latest
-              mkdir -p gh-pages-deploy/deploy-validation/data
+              mkdir -p gh-pages-deploy/deploy-validation/database
 
               # Copy allure report to run number directory
               cp -R allure-report/* gh-pages-deploy/deploy-validation/${{ github.run_number }}/
