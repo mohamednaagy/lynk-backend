@@ -3,6 +3,7 @@
 namespace App\Jobs\LocalMarket\states;
 
 use App\Enums\LocalMarket\OrderStatus;
+use App\Exceptions\LocalMarket\FailedToHoldRequiredUnitsException;
 use App\Services\LocalMarket\UnitService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
@@ -61,7 +62,9 @@ class HoldEligibleUnitInventoriesJob extends BaseStatus implements ShouldBeUniqu
         ]);
 
         $this->localMarketOrder->update([
-            'status' => OrderStatus::FailedPurchase,
+            'status' => $exception instanceof FailedToHoldRequiredUnitsException
+                ? OrderStatus::NoEligibleCommoditiesAvailable
+                : OrderStatus::FailedPurchase,
         ]);
     }
 
