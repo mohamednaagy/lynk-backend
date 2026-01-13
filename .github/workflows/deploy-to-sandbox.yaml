@@ -1,47 +1,551 @@
-name: deploy on sandbox
+name: Deploy to Sandbox (Docker)
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - sandbox
+    workflow_dispatch:
+    push:
+        branches:
+            - sandbox
+
+concurrency:
+    group: deploy-sandbox-docker
+    cancel-in-progress: false
 
 jobs:
-  deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install SSH key
-        id: install-ssh-key
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_SANDBOX_PRIVATE_KEY }}
+    setup:
+        runs-on: ubuntu-latest
+        environment: sandbox
+        outputs:
+            servers: ${{ steps.set-servers.outputs.servers }}
+            commit_hash: ${{ steps.commit.outputs.short_sha }}
+            start_ts: ${{ steps.timestamp.outputs.start_ts }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: pulling and build code
-        id: pull-and-build
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SANDBOX_USER_NAME }}@144.24.208.157 \
-           "cd /var/www/lynk-backend/ && sudo git pull origin sandbox && sudo composer install --no-interaction --prefer-dist --optimize-autoloader && sudo php artisan migrate && sudo php artisan structure:clear && sudo php artisan package:discover && sudo supervisorctl stop all && sudo supervisorctl start all"
+            - name: Capture workflow start time
+              id: timestamp
+              run: |
+                  START_TS=$(date +%s)
+                  echo "start_ts=${START_TS}" >> $GITHUB_OUTPUT
+                  echo "Workflow started at: $(date -d @${START_TS} +"%Y-%m-%d %H:%M:%S")"
 
-      - name: set pr url
+            - name: Extract commit hash
+              id: commit
+              run: |
+                  SHORT_SHA=$(git rev-parse --short=8 HEAD)
+                  echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+                  echo "Image will be tagged as: app-php-fpm:${SHORT_SHA}"
+
+            - name: Set server IPs
+              id: set-servers
+              run: |
+                  # Currently single server, but structured as JSON array for future expansion
+                  # To add more servers in the future, simply add IPs to this array:
+                  # SERVERS='["144.24.208.157", "10.0.0.2", "10.0.0.3"]'
+                  SERVERS='["144.24.208.157"]'
+                  echo "servers=$SERVERS" >> $GITHUB_OUTPUT
+                  echo "Deploying to sandbox server(s): $SERVERS"
+
+    build:
+        needs: setup
+        runs-on: ubuntu-latest
+        environment: sandbox
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Create .env file from GitHub secrets and variables
+              run: |
+                  # Create .env file from GitHub environment secrets and variables
+                  cat > .env.build << 'ENVEOF'
+                  # Application Configuration
+                  APP_NAME=${{ vars.APP_NAME }}
+                  APP_ENV=${{ vars.APP_ENV }}
+                  APP_KEY=${{ vars.APP_KEY }}
+                  APP_DEBUG=${{ vars.APP_DEBUG }}
+                  APP_URL=${{ vars.APP_URL }}
+
+                  # Logging
+                  LOG_CHANNEL=${{ vars.LOG_CHANNEL }}
+                  LOG_DEPRECATIONS_CHANNEL=${{ vars.LOG_DEPRECATIONS_CHANNEL }}
+                  LOG_LEVEL=${{ vars.LOG_LEVEL }}
+
+                  # Database Configuration
+                  DB_CONNECTION=${{ vars.DB_CONNECTION }}
+                  DB_HOST=${{ vars.DB_HOST }}
+                  DB_PORT=${{ vars.DB_PORT }}
+                  DB_DATABASE=${{ vars.DB_DATABASE }}
+                  DB_USERNAME=${{ vars.DB_USERNAME }}
+                  DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+                  # Wallet Database
+                  WALLET_DB_HOST=${{ vars.WALLET_DB_HOST }}
+                  WALLET_DB_PORT=${{ vars.WALLET_DB_PORT }}
+                  WALLET_DB_DATABASE=${{ vars.WALLET_DB_DATABASE }}
+                  WALLET_DB_USERNAME=${{ vars.WALLET_DB_USERNAME }}
+                  WALLET_DB_PASSWORD=${{ secrets.WALLET_DB_PASSWORD }}
+
+                  # Broadcasting & Queue
+                  BROADCAST_DRIVER=${{ vars.BROADCAST_DRIVER }}
+                  CACHE_DRIVER=${{ vars.CACHE_DRIVER }}
+                  FILESYSTEM_DISK=${{ vars.FILESYSTEM_DISK }}
+                  QUEUE_CONNECTION=${{ vars.QUEUE_CONNECTION }}
+                  SESSION_DRIVER=${{ vars.SESSION_DRIVER }}
+                  SESSION_LIFETIME=${{ vars.SESSION_LIFETIME }}
+
+                  # Memcached Configuration
+                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
+
+                  # Redis Configuration
+                  REDIS_HOST=${{ vars.REDIS_HOST }}
+                  REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+                  REDIS_PORT=${{ vars.REDIS_PORT }}
+
+                  # Mail Configuration
+                  MAIL_MAILER=${{ vars.MAIL_MAILER }}
+                  MAIL_HOST=${{ vars.MAIL_HOST }}
+                  MAIL_PORT=${{ vars.MAIL_PORT }}
+                  MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+                  MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+                  MAIL_ENCRYPTION=${{ vars.MAIL_ENCRYPTION }}
+                  MAIL_FROM_ADDRESS=${{ vars.MAIL_FROM_ADDRESS }}
+                  MAIL_FROM_NAME=${{ vars.MAIL_FROM_NAME }}
+
+                  # AWS Configuration
+                  AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+                  AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}
+                  AWS_BUCKET=${{ vars.AWS_BUCKET }}
+                  AWS_USE_PATH_STYLE_ENDPOINT=${{ vars.AWS_USE_PATH_STYLE_ENDPOINT }}
+
+                  # OCI Object Storage Configuration
+                  OCI_ACCESS_KEY_ID=${{ secrets.OCI_ACCESS_KEY_ID }}
+                  OCI_SECRET_ACCESS_KEY=${{ secrets.OCI_SECRET_ACCESS_KEY }}
+                  OCI_DEFAULT_REGION=${{ vars.OCI_DEFAULT_REGION }}
+                  OCI_BUCKET=${{ vars.OCI_BUCKET }}
+                  OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
+
+                  # OCI Public Object Storage Configuration
+                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
+                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
+                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
+                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
+                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
+
+                  # SES Configuration
+                  SES_ACCESS_KEY_ID=${{ secrets.SES_ACCESS_KEY_ID }}
+                  SES_SECRET_ACCESS_KEY=${{ secrets.SES_SECRET_ACCESS_KEY }}
+                  SES_DEFAULT_REGION=${{ vars.SES_DEFAULT_REGION }}
+
+                  # Pusher Configuration
+                  PUSHER_APP_ID=${{ secrets.PUSHER_APP_ID }}
+                  PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
+                  PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}
+                  PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
+
+                  MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
+                  MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
+
+                  # Twilio Configuration
+                  OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
+                  OTPIFY_TWILIO_TOKEN=${{ secrets.OTPIFY_TWILIO_TOKEN }}
+                  OTPIFY_TWILIO_FROM=${{ vars.OTPIFY_TWILIO_FROM }}
+                  OTPIFY_TWILIO_VERIFY_SID=${{ secrets.OTPIFY_TWILIO_VERIFY_SID }}
+                  OTPIFY_TWILIO_SSL_VERIFY_PEER=${{ vars.OTPIFY_TWILIO_SSL_VERIFY_PEER }}
+                  OTPIFY_TWILIO_SSL_VERIFY_HOST=${{ vars.OTPIFY_TWILIO_SSL_VERIFY_HOST }}
+
+                  # Application Specific - OTP & Auth
+                  OTPIFY_DEFAULT_DRIVER=${{ vars.OTPIFY_DEFAULT_DRIVER }}
+                  OTPIFY_CODE_LENGTH=${{ vars.OTPIFY_CODE_LENGTH }}
+                  OTPIFY_CODE_EXPIRATION_TIME=${{ vars.OTPIFY_CODE_EXPIRATION_TIME }}
+                  OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
+                  OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
+
+                  # SMS & Mobile Verification
+                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
+                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
+
+                  # Bitly
+                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
+
+                  AUTHORIZED_TOKEN_LENGTH=${{ vars.AUTHORIZED_TOKEN_LENGTH }}
+                  DEFAULT_GUARD=${{ vars.DEFAULT_GUARD }}
+                  PERMISSION_GUARDS=${{ vars.PERMISSION_GUARDS }}
+                  GRANTIFY_DEFAULT_DRIVER=${{ vars.GRANTIFY_DEFAULT_DRIVER }}
+                  SETTINGS_CACHE_ENABLED=${{ vars.SETTINGS_CACHE_ENABLED }}
+                  HOST_WHITELIST=${{ vars.HOST_WHITELIST }}
+
+                  # Sanctum
+                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
+
+                  # Telescope
+                  TELESCOPE_ENABLED=${{ vars.TELESCOPE_ENABLED }}
+                  TELESCOPE_PRUNE_HOURS=${{ vars.TELESCOPE_PRUNE_HOURS }}
+                  TELESCOPE_DB_CONNECTION=${{ vars.TELESCOPE_DB_CONNECTION }}
+                  TELESCOPE_DB_HOST=${{ vars.TELESCOPE_DB_HOST }}
+                  TELESCOPE_DB_PORT=${{ vars.TELESCOPE_DB_PORT }}
+                  TELESCOPE_DB_DATABASE=${{ vars.TELESCOPE_DB_DATABASE }}
+                  TELESCOPE_DB_USERNAME=${{ vars.TELESCOPE_DB_USERNAME }}
+                  TELESCOPE_DB_PASSWORD=${{ secrets.TELESCOPE_DB_PASSWORD }}
+
+                  # Trading & SMS
+                  DEFAULT_TRADER=${{ vars.DEFAULT_TRADER }}
+                  MSEGAT_USERNAME=${{ secrets.MSEGAT_USERNAME }}
+                  MSEGAT_API_KEY=${{ secrets.MSEGAT_API_KEY }}
+
+                  # Bursam Trader Configuration
+                  BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
+                  BURSAM_BASE_URL=${{ vars.BURSAM_BASE_URL }}
+                  BURSAM_SELLING_COMMODITY_START_TIME=${{ vars.BURSAM_SELLING_COMMODITY_START_TIME }}
+                  BURSAM_SELLING_COMMODITY_END_TIME=${{ vars.BURSAM_SELLING_COMMODITY_END_TIME }}
+                  BURSAM_MARKET_OPENING_START_TIME=${{ vars.BURSAM_MARKET_OPENING_START_TIME }}
+                  BURSAM_MARKET_OPENING_END_TIME=${{ vars.BURSAM_MARKET_OPENING_END_TIME }}
+                  BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION=${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}
+
+                  # JWT Secret
+                  JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+                  # EDAAT Configuration
+                  EDAAT_BASE_URL=${{ vars.EDAAT_BASE_URL }}
+                  EDAAT_WEBHOOK_URL=${{ vars.EDAAT_WEBHOOK_URL }}
+                  EDAAT_PRODUCT=${{ vars.EDAAT_PRODUCT }}
+                  EDAAT_USERNAME=${{ vars.EDAAT_USERNAME }}
+                  EDAAT_PASSWORD=${{ secrets.EDAAT_PASSWORD }}
+                  EDAAT_COMPANY=${{ vars.EDAAT_COMPANY }}
+                  EDAAT_VERIFY_TLS_CERTS=${{ vars.EDAAT_VERIFY_TLS_CERTS }}
+                  EDAAT_PAYMENT_URL=${{ vars.EDAAT_PAYMENT_URL }}
+                  EDAAT_BILL_URL=${{ vars.EDAAT_BILL_URL }}
+                  EDAAT_RECONCILE_URL=${{ vars.EDAAT_RECONCILE_URL }}
+
+                  # Wallet Configuration
+                  WALLET_CACHE_DRIVER=${{ vars.WALLET_CACHE_DRIVER }}
+                  WALLET_CACHE_TTL=${{ vars.WALLET_CACHE_TTL }}
+                  WALLET_LOCK_DRIVER=${{ vars.WALLET_LOCK_DRIVER }}
+                  WALLET_LOCK_SECONDS=${{ vars.WALLET_LOCK_SECONDS }}
+
+                  # RabbitMQ Configuration
+                  RABBITMQ_QUEUE_NAME=${{ vars.RABBITMQ_QUEUE_NAME }}
+                  RABBITMQ_HOST=${{ vars.RABBITMQ_HOST }}
+                  RABBITMQ_PORT=${{ vars.RABBITMQ_PORT }}
+                  RABBITMQ_USER=${{ vars.RABBITMQ_USER }}
+                  RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+                  RABBITMQ_VHOST=${{ vars.RABBITMQ_VHOST }}
+
+                  # reCAPTCHA Configuration
+                  RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
+                  RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+
+                  # Lynk Application Configuration
+                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
+                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
+                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
+
+                  # Rate Limiting
+                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
+
+                  # Loan Coverage
+                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
+                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
+
+                  # Auto-Verified Users (Development/Testing)
+                  AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
+                  AUTO_VERIFIED_USERS_PASSWORD=${{ vars.AUTO_VERIFIED_USERS_PASSWORD }}
+
+                  # Master OTP for Development
+                  ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
+                  MASTER_OTP_KEY=${{ vars.MASTER_OTP_KEY }}
+
+                  # Nightwatch Monitoring
+                  NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
+                  NIGHTWATCH_TOKEN=${{ secrets.NIGHTWATCH_TOKEN }}
+                  NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
+                  NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
+                  NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
+
+                  # PDF & Storage
+                  DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
+                  STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
+                  ENVEOF
+
+                  echo "✓ .env file created from GitHub secrets/variables"
+                  echo "File size: $(wc -c < .env.build) bytes"
+
+                  # Rename to .env so Docker can copy it
+                  mv .env.build .env
+
+                  echo "✓ Renamed to .env for Docker build"
+                  echo "First 5 lines of .env:"
+                  head -5 .env
+
+            - name: Build Docker image
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./docker/laravel/Dockerfile
+                  load: true
+                  tags: |
+                      app-php-fpm:${{ needs.setup.outputs.commit_hash }}
+                      app-php-fpm:latest
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Save and compress Docker image
+              run: |
+                  echo "📦 Saving Docker image to tar archive..."
+                  docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  echo "Compressed image size:"
+                  ls -lh /tmp/app-php-fpm.tar.gz
+
+                  echo "✅ Image saved successfully"
+
+            - name: Upload Docker image as artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: docker-image-sandbox
+                  path: /tmp/app-php-fpm.tar.gz
+                  retention-days: 1
+
+            - name: Clean up
+              if: always()
+              run: |
+                  rm -f .env .env.build
+
+    deploy:
+        needs: [build, setup]
+        runs-on: ubuntu-latest
+        environment: sandbox
+        strategy:
+            matrix:
+                # Get servers from the setup job output
+                # Currently single server, but can be expanded to multiple servers in the future
+                server: ${{ fromJson(needs.setup.outputs.servers) }}
+            fail-fast: false
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Download Docker image
+              uses: actions/download-artifact@v4
+              with:
+                  name: docker-image-sandbox
+                  path: /tmp/
+
+            - name: Setup SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+
+            - name: Transfer image to server
+              run: |
+                  echo "🚀 Transferring Docker image to ${{ matrix.server }}..."
+
+                  scp -i ~/.ssh/deploy_key \
+                      -o StrictHostKeyChecking=no \
+                      -o ConnectTimeout=30 \
+                      -o Compression=yes \
+                      -C /tmp/app-php-fpm.tar.gz \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/tmp/
+
+                  echo "✅ Image transferred to ${{ matrix.server }}"
+
+            - name: Transfer docker-compose.yml and deployment script to server
+              run: |
+                  echo "📋 Transferring docker-compose.yml and deployment script to server..."
+
+                  # Transfer docker-compose.yml
+                  scp -i ~/.ssh/deploy_key \
+                      -o StrictHostKeyChecking=no \
+                      docker-compose.yml \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/var/www/lynk-backend/
+
+                  # Transfer deployment script
+                  scp -i ~/.ssh/deploy_key \
+                      -o StrictHostKeyChecking=no \
+                      .github/scripts/deploy-with-rollback.sh \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/tmp/deploy-with-rollback.sh
+
+                  # Make script executable
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
+                      "chmod +x /tmp/deploy-with-rollback.sh"
+
+                  echo "✅ Files transferred and script made executable"
+
+            - name: Deploy containers with zero-downtime
+              run: |
+                  echo "🚀 Deploying containers on ${{ matrix.server }} with zero-downtime strategy..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+                    set -euo pipefail
+
+                    # Load new Docker image
+                    echo '📥 Loading new Docker image...'
+                    gunzip -c /tmp/app-php-fpm.tar.gz | docker load
+                    rm -f /tmp/app-php-fpm.tar.gz
+
+                    # Tag as latest
+                    echo '🏷️  Tagging image as latest...'
+                    docker tag app-php-fpm:${{ needs.setup.outputs.commit_hash }} app-php-fpm:latest
+
+                    # Execute zero-downtime deployment script
+                    echo '🚀 Executing zero-downtime deployment with automatic rollback...'
+                    /tmp/deploy-with-rollback.sh
+
+                    # Cleanup deployment script
+                    rm -f /tmp/deploy-with-rollback.sh
+                  "
+
+            - name: Verify deployment status
+              run: |
+                  echo "📊 Verifying final deployment status on ${{ matrix.server }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+                    cd /var/www/lynk-backend
+
+                    echo '📊 Container Status:'
+                    docker compose ps --format 'table {{.Name}}\\t{{.Status}}'
+
+                    echo ''
+                    echo '📈 Container Counts:'
+                    RUNNING=\$(docker compose ps | grep -c 'Up' || echo '0')
+                    TOTAL=\$(docker compose ps -a | wc -l)
+                    echo \"Running: \$RUNNING / \$TOTAL containers\"
+
+                    echo ''
+                    echo '✅ Deployment verification complete'
+                  "
+
+            - name: Run post-deployment tasks
+              run: |
+                  echo "🔧 Running post-deployment tasks on ${{ matrix.server }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+                    echo '🗄️  Running database migrations...'
+                    docker exec lynk-backend-app php artisan migrate --force
+
+                    echo '🧹 Clearing application cache...'
+                    docker exec lynk-backend-app php artisan structure:clear
+                    docker exec lynk-backend-app php artisan package:discover
+
+                    echo '✅ Post-deployment tasks completed'
+                  "
+
+            - name: Verify deployment
+              run: |
+                  echo "🔍 Verifying deployment on ${{ matrix.server }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+                    cd /var/www/lynk-backend
+
+                    echo '📊 Container Summary:'
+                    echo '==================='
+                    docker compose ps --format 'table {{.Name}}\\\\t{{.Status}}'
+
+                    echo ''
+                    echo '📈 Container Count:'
+                    echo 'Total containers: '\$(docker compose ps -q | wc -l)
+
+                    echo ''
+                    echo '🏷️  Image Information:'
+                    docker images | grep app-php-fpm
+
+                    echo ''
+                    echo '✅ Deployment verification complete on ${{ matrix.server }}'
+                  "
+
+    notify:
+        needs: [deploy, setup]
         if: always()
-        id: pr-url
-        run: |
-          echo "Fetching PR info for commit ${{ github.sha }}"
-          PR_URL=$(curl -s -H "Accept: application/vnd.github.groot-preview+json" \
-            -H "Authorization: token ${{ secrets.GB_OAUTH_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
-            | jq -r 'if type == "array" and length > 0 then .[0].html_url else "" end')
+        runs-on: ubuntu-latest
+        environment: sandbox
 
-          echo "pr-url=$PR_URL" >> $GITHUB_OUTPUT
-
-      - name: print info
-        if: always()
-        run: |
-          echo "Repository Name: $GITHUB_REPOSITORY"
-          echo "Branch Name: $GITHUB_REF"
-          echo "pr-url: ${{ steps.pr-url.outputs.url }}"
-          echo "Execution Time: $(date)"
-          echo "Workflow Status: ${{ job.status }}"
-
-          curl --insecure -X POST -H 'Content-type: application/json' --data '{"text":"Repository Name: '"$GITHUB_REPOSITORY"'\nBranch Name: '"$GITHUB_REF"'\nExecution Time: '"$(date)"'\nWorkflow Status: '"${{ job.status }}"'\n pull request URL: '"${{ steps.pr-url.outputs.url }}"'"}' ${{ secrets.SLACK_HOOK_URL }}
+        steps:
+            - name: Send Slack notification
+              run: |
+                  STATUS="${{ needs.deploy.result }}"
+                  if [ "$STATUS" = "success" ]; then
+                    EMOJI="✅"
+                    COLOR="good"
+                    STATUS_LABEL="Success"
+                  else
+                    EMOJI="❌"
+                    COLOR="danger"
+                    STATUS_LABEL="Failed"
+                  fi
+                  START_TS="${{ needs.setup.outputs.start_ts }}"
+                  END_TS=$(date +%s)
+                  DURATION_SEC=$((END_TS - START_TS))
+                  if [ "$DURATION_SEC" -lt 0 ]; then DURATION_SEC=0; fi
+                  D_H=$((DURATION_SEC/3600))
+                  D_M=$(((DURATION_SEC%3600)/60))
+                  D_S=$((DURATION_SEC%60))
+                  DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
+                  PR_URL="${{ github.event.pull_request.html_url }}"
+                  PR_TITLE="${{ github.event.pull_request.title }}"
+                  COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+                  if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
+                    PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+                  fi
+                  if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
+                    if [ -n "$COMMIT_MESSAGE" ] && [ "$COMMIT_MESSAGE" != "null" ]; then
+                      # Use only the first line of the commit message to avoid newlines breaking sed
+                      PR_TITLE="$(printf '%s' "$COMMIT_MESSAGE" | head -n1)"
+                    else
+                      PR_TITLE="$GITHUB_REPOSITORY"
+                    fi
+                  fi
+                  # Make a sed-safe version of the title (remove '|' which is used as sed delimiter)
+                  SAFE_PR_TITLE="$(printf '%s' "$PR_TITLE" | tr '|' '-')"
+                  RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
+                  IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
+                  # Use workflow start time (captured in setup) for display
+                  START_TS="${{ needs.setup.outputs.start_ts }}"
+                  TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
+                  cat > /tmp/slack-payload.json <<'EOF'
+                  {
+                    "text": "Backend Deployment (Sandbox) - REPLACE_STATUS",
+                    "attachments": [
+                      {
+                        "color": "REPLACE_COLOR",
+                        "title": "REPLACE_TITLE",
+                        "title_link": "REPLACE_RUN_URL",
+                        "fields": [
+                          { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
+                          { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
+                          { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
+                          { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
+                          { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
+                          { "title": "Time", "value": "REPLACE_TIME", "short": true }
+                        ],
+                        "footer": "Lynk Backend (Sandbox)"
+                      }
+                    ]
+                  }
+                  EOF
+                  sed -i \
+                    -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
+                    -e "s|REPLACE_COLOR|$COLOR|g" \
+                    -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
+                    -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
+                    -e "s|REPLACE_TITLE|$SAFE_PR_TITLE|g" \
+                    -e "s|REPLACE_BRANCH|$BRANCH|g" \
+                    -e "s|REPLACE_EMOJI|$EMOJI|g" \
+                    -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
+                    -e "s|REPLACE_PR|$PR_URL|g" \
+                    -e "s|REPLACE_TIME|$TIMESTAMP|g" \
+                    /tmp/slack-payload.json
+                  echo "Slack payload:"
+                  cat /tmp/slack-payload.json
+                  curl -X POST -H 'Content-type: application/json' --data @/tmp/slack-payload.json ${{ secrets.SLACK_HOOK_URL }}
