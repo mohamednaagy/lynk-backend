@@ -62,9 +62,7 @@ class HoldEligibleUnitInventoriesJob extends BaseStatus implements ShouldBeUniqu
         ]);
 
         $this->localMarketOrder->update([
-            'status' => $exception instanceof FailedToHoldRequiredUnitsException
-                ? OrderStatus::NoEligibleCommoditiesAvailable
-                : OrderStatus::FailedPurchase,
+            'status' => $this->getOrderStatus($exception),
         ]);
     }
 
@@ -127,5 +125,12 @@ class HoldEligibleUnitInventoriesJob extends BaseStatus implements ShouldBeUniqu
     public function uniqueId(): string
     {
         return __CLASS__.'_'.$this->localMarketOrder->id;
+    }
+
+    private function getOrderStatus($exception)
+    {
+        return $exception instanceof FailedToHoldRequiredUnitsException
+                ? OrderStatus::NoEligibleCommoditiesAvailable
+                : OrderStatus::FailedPurchase;
     }
 }

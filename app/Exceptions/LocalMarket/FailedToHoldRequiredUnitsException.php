@@ -38,7 +38,7 @@ class FailedToHoldRequiredUnitsException extends Exception
         if ($request->expectsJson()) {
             return response()->json([
                 'error' => $message,
-                'error_code' => ErrorCode::ERROR_CHEKING_UNITS,
+                'error_code' => ErrorCode::ERROR_HOLDING_UNITS,
             ], $code);
         }
 
