@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Enums\SystemNotificationType;
+use App\Models\Media;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 
 class ExportReadyNotification extends BaseNotification implements ShouldQueue
 {
+    private ?Media $media = null;
+
     /**
      * Create a new notification instance.
      *
@@ -17,9 +20,11 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function __construct(
         private string $exportType,
-        private string $downloadUrl,
+        private string $mediaId,
         private string $fileName
-    ) {}
+    ) {
+        $this->media = Media::find($this->mediaId);
+    }
 
     /**
      * Get the notification's type.
@@ -37,7 +42,17 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function getTitle($notifiable): string
     {
-        return __('notification-types.export_ready.label');
+        $prefix = $this->getReportName();
+
+        return ($prefix ? $prefix.' ' : '').__('notification-types.export_ready.label');
+    }
+
+    private function getReportName(): string
+    {
+        return match ($this->exportType) {
+            'ORDER_LIST' => 'Order List',
+            default => ''
+        };
     }
 
     /**
@@ -48,7 +63,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
     public function getDescription($notifiable): string
     {
         return __('notification-types.export_ready.description', [
-            'exportType' => $this->exportType,
+            'exportType' => $this->getReportName() ?: $this->exportType,
         ]);
     }
 
@@ -59,11 +74,13 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function toMail($notifiable): MailMessage
     {
+        $reportName = $this->getReportName();
+
         return (new MailMessage)
-            ->subject(__("Your {$this->exportType} Export is Ready"))
+            ->subject(__("Your {$reportName} Export is Ready"))
             ->greeting(__('Hello'))
-            ->line(__("Your {$this->exportType} export has been completed and is ready for download."))
-            ->action(__('Download Export'), $this->downloadUrl)
+            ->line(__("Your {$reportName} export has been completed and is ready for download."))
+            ->action(__('Download Export'), formatMediaUrl($this->media?->fileUrl))
             ->line(__('Thank you for using our service!'));
     }
 
@@ -77,7 +94,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
         return [
             ...parent::toArray($notifiable),
             'export_type' => $this->exportType,
-            'url' => $this->downloadUrl,
+            'download_url' => formatMediaUrl($this->media?->fileUrl),
             'file_name' => $this->fileName,
         ];
     }
