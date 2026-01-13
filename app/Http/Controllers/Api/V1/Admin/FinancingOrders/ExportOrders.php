@@ -60,7 +60,7 @@ class ExportOrders extends Controller
 
         // Return a response indicating the export is being processed
         return response()->json([
-            'message' => 'Export request has been queued successfully. You will receive a notification when the export is ready for download.',
+            'message' => 'Your export request has been submitted and is being processed.',
             'status' => 'processing',
         ], JsonResponse::HTTP_ACCEPTED);
     }
