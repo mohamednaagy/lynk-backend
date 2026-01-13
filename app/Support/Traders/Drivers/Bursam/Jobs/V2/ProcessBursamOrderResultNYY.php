@@ -53,7 +53,7 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress)) {
+        if ($traderOrder->status->isNot(TraderOrderStatus::InProgress) && $traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)) {
             Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultNYY job', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
@@ -63,7 +63,7 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument)) {
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument) && $traderOrder->status->is(TraderOrderStatus::InProgress)) {
             log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOrderResultNYY Job - incorrect action state', $traderOrder), [
                 'financingOrderId' => $traderOrder?->order?->id,
                 'traderOrderId' => $this->traderOrderId,
@@ -90,5 +90,10 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     public function failed($exception)
     {
         log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace' => $exception->getTraceAsString()]);
+        $traderOrder = TraderOrder::query()->find($this->traderOrderId);
+        $traderOrder->update([
+            'status' => TraderOrderStatus::FailureToCancel,
+        ]);
+
     }
 }
