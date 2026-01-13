@@ -564,7 +564,7 @@ jobs:
               ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
                 sudo -u ubuntu bash -c '
                   cd /home/ubuntu/lynk-backend-automation &&
-                  git remote set-url origin https://x-access-token:${{ secrets.GB_OAUTH_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
+                  git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
                   git fetch origin main &&
                   git reset --hard origin/main &&
                   echo \"Updated to commit: \$(git rev-parse HEAD)\"
@@ -832,7 +832,7 @@ jobs:
               cp -R allure-report/* gh-pages-deploy/deploy-validation/latest/
 
               # Checkout gh-pages to get existing dashboard data
-              git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GB_OAUTH_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-checkout || mkdir -p gh-pages-checkout
+              git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.PERSONAL_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-checkout || mkdir -p gh-pages-checkout
 
               # Initialize or update runs.json
               if [[ -f gh-pages-checkout/deploy-validation/data/runs.json ]]; then
@@ -1014,7 +1014,7 @@ jobs:
           - name: 🌐 Deploy to GitHub Pages
             uses: peaceiris/actions-gh-pages@v3
             with:
-              github_token: ${{ secrets.GB_OAUTH_TOKEN }}
+              github_token: ${{ secrets.PERSONAL_TOKEN }}
               publish_dir: ./gh-pages-deploy
               publish_branch: gh-pages
               destination_dir: .
