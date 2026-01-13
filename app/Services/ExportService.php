@@ -26,8 +26,8 @@ class ExportService
             userId: $user->id,
             exportType: $exportType,
             exportData: [
-                'sql_query' => $sqlQuery,
-                'query_params' => $params,
+                // 'sql_query' => $sqlQuery,
+                // 'query_params' => $params,
                 'export_class' => $exportClass,
                 'request_data' => $request->all(),
                 'user_id' => $user->id,
