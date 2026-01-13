@@ -54,7 +54,7 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
         }
 
         if ($traderOrder->status->isNot(TraderOrderStatus::InProgress) && $traderOrder->status->isNot(TraderOrderStatus::PendingCancellation)) {
-            Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress in ProcessBursamOrderResultNYY job', $traderOrder), [
+            Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->traderOrderId.' with status in progress or pending cancellation in ProcessBursamOrderResultNYY job', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $this->traderOrderId,
                 'status' => $traderOrder->status->value,
@@ -91,9 +91,11 @@ class ProcessBursamOrderResultNYY implements ShouldBeUnique, ShouldQueue
     {
         log::channel(LOG_CHANNEL_BURSAM)->error('error at ProcessBursamOrderResultNYY Job - trader_order_id => '.$this->traderOrderId, ['traderOrderId' => $this->traderOrderId,  'message' => $exception->getMessage(), 'line' => $exception->getLine(), 'file' => $exception->getFile(), 'trace' => $exception->getTraceAsString()]);
         $traderOrder = TraderOrder::query()->find($this->traderOrderId);
-        $traderOrder->update([
-            'status' => TraderOrderStatus::FailureToCancel,
-        ]);
+        if ($traderOrder) {
+            $traderOrder->update([
+                'status' => TraderOrderStatus::FailureToCancel,
+            ]);
+        }
 
     }
 }
