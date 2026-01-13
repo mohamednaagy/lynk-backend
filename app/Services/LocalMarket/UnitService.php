@@ -236,21 +236,22 @@ class UnitService
         return LocalMarketInventoryUnits::select(
             'local_market_inventory_units.local_market_inventory_id',
             DB::raw("
-                CASE
-                    WHEN local_market_inventory_units.previous_owner_type = $ownershipTypeOriginalSupplier
-                    THEN COALESCE(MAX(companies.name), '$previousOrdersText')
-                    ELSE '$previousOrdersText'
-                END AS previous_owner
-                "),
+            CASE
+                WHEN local_market_inventory_units.previous_owner_type = $ownershipTypeOriginalSupplier
+                THEN companies.name
+                ELSE '$previousOrdersText'
+            END AS previous_owner
+        "),
             'local_market_inventory_units.previous_owner_type',
-            DB::raw('COUNT(*) AS unit_count')
+            DB::raw('COUNT(*) AS unit_count'),
         )
             ->join('local_market_inventories', 'local_market_inventories.id', '=', 'local_market_inventory_units.local_market_inventory_id')
             ->leftJoin('companies', 'companies.id', '=', 'local_market_inventory_units.previous_owner')
             ->where('local_market_inventory_units.hold_for', $localMarketOrder->id)
             ->groupBy(
                 'local_market_inventory_units.local_market_inventory_id',
-                'local_market_inventory_units.previous_owner_type'
+                'local_market_inventory_units.previous_owner_type',
+                'companies.name'
             )
             ->get()
             ->toArray();
