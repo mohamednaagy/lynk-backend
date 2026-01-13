@@ -55,7 +55,8 @@ class ExportOrders extends Controller
             exportType: 'ORDER_LIST',
             user: $request->user(),
             exportClass: FinancingOrdersExport::class,
-            request: $request
+            fileName: $this->getFileName($request),
+            requestData: $request->all()
         );
 
         // Return a response indicating the export is being processed
@@ -78,7 +79,7 @@ class ExportOrders extends Controller
     protected function getFirstCompany(Request $request)
     {
         $company = $request->company;
-        $company = is_array($company) ? $company : explode(',', $company);
+        $company = is_array($company) ? $company : explode(',', $company ?? '');
         if (count($company) !== 1) {
             return null;
         }

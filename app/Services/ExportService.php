@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Jobs\Reports\ExportOrderListJob;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class ExportService
 {
@@ -19,7 +18,8 @@ class ExportService
         string $exportType,
         User $user,
         string $exportClass,
-        Request $request,
+        string $fileName,
+        array $requestData,
     ): void {
         // Dispatch the job to RabbitMQ queue for processing by external service
         ExportOrderListJob::dispatch(
@@ -29,7 +29,8 @@ class ExportService
                 // 'sql_query' => $sqlQuery,
                 // 'query_params' => $params,
                 'export_class' => $exportClass,
-                'request_data' => $request->all(),
+                'file_name' => $fileName,
+                'request_data' => $requestData,
                 'user_id' => $user->id,
                 'export_type' => $exportType,
                 'created_at' => now()->toISOString(),
