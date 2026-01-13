@@ -120,21 +120,16 @@ return [
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => true,
-                'is_editable' => true,
+                'is_editable' => false,
             ],
             NotificationChannel::MAIL->value => [
-                'default' => true,
-                'is_editable' => true,
+                'default' => false,
+                'is_editable' => false,
             ],
         ],
         'roles' => [
             Role::Admin,
             Role::Manager,
-            Role::LenderAdmin,
-            Role::LenderApiUser,
-            Role::LenderSupervisor,
-            Role::LenderBilling,
-            Role::LenderOrderCreator,
         ],
     ],
 ];
