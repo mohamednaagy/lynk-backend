@@ -131,12 +131,14 @@ class UnitService
                     );
                 }
             } catch (Exception $e) {
-                Log::channel('local_market')->error('Stored procedure hold_order_unit failed', [
-                    'order_id' => $localMarketOrder->id,
-                    'inventory_id' => $inventoryId,
-                    'error' => $e->getMessage(),
-                ]);
-                throw $e;
+                throw new FailedToHoldRequiredUnitsException(
+                    $data['numberOfSuitableUnits'],
+                    $heldUnitsCount,
+                    $inventoryId,
+                    $localMarketOrder->id,
+                    $e->getMessage(),
+                    $e,
+                );
             }
         }
 

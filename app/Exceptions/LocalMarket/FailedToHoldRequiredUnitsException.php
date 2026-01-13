@@ -16,7 +16,6 @@ class FailedToHoldRequiredUnitsException extends Exception
         private int $inventoryId,
         private ?int $orderId = null,
         string $message = '',
-        int $code = 0,
         ?Throwable $previous = null
     ) {
         $msg = $message ?: sprintf(
@@ -27,7 +26,7 @@ class FailedToHoldRequiredUnitsException extends Exception
             $this->orderId ? ", order ID: {$this->orderId}" : ''
         );
 
-        parent::__construct($msg, $code, $previous);
+        parent::__construct($msg, ErrorCode::ERROR_HOLDING_UNITS, $previous);
     }
 
     public function render(Request $request)
