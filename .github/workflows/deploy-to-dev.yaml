@@ -1226,7 +1226,7 @@ jobs:
                           { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
                           { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
                           { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
-                          { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
+                          { "title": "PR / Commit", "value": "<REPLACE_PR_URL|View>", "short": true },
                           { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
                           { "title": "Time", "value": "REPLACE_TIME", "short": true },
                           { "title": "PR Creator", "value": "REPLACE_PR_CREATOR", "short": true },
@@ -1247,7 +1247,7 @@ jobs:
                     -e "s|REPLACE_BRANCH|$BRANCH|g" \
                     -e "s|REPLACE_EMOJI|$EMOJI|g" \
                     -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
-                    -e "s|REPLACE_PR|$PR_URL|g" \
+                    -e "s|REPLACE_PR_URL|$PR_URL|g" \
                     -e "s|REPLACE_TIME|$TIMESTAMP|g" \
                     -e "s|REPLACE_PR_CREATOR|${{ steps.pr-info.outputs.pr_creator }}|g" \
                     -e "s|REPLACE_PR_REVIEWERS|${{ steps.pr-info.outputs.pr_reviewers }}|g" \
