@@ -6,8 +6,6 @@ use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
-use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class FindEligibleCommoditiesAction implements FindEligibleCommodities
@@ -18,29 +16,21 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        DB::beginTransaction();
-        try {
-            $eligibleCommodities = $this->loanService->getCommoditiesForLoan($localMarketOrder);
+        $eligibleCommodities = $this->loanService->getCommoditiesForLoan($localMarketOrder);
 
-            if ($eligibleCommodities) {
-                $localMarketOrder->update([
-                    'status' => OrderStatus::EligibleCommoditiesAvailable,
-                    'data' => ['inventories' => $eligibleCommodities],
-                ]);
-            } else {
-                $localMarketOrder->update([
-                    'status' => OrderStatus::NoEligibleCommoditiesAvailable,
-                ]);
-            }
-
-            DB::commit();
-
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder), [
-                'localMarketOrderId' => $localMarketOrder->id,
+        if ($eligibleCommodities) {
+            $localMarketOrder->update([
+                'status' => OrderStatus::EligibleCommoditiesAvailable,
+                'data' => ['inventories' => $eligibleCommodities],
             ]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            throw $e;
+        } else {
+            $localMarketOrder->update([
+                'status' => OrderStatus::NoEligibleCommoditiesAvailable,
+            ]);
         }
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+        ]);
     }
 }
