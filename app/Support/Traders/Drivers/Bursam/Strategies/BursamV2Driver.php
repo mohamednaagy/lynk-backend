@@ -146,6 +146,7 @@ class BursamV2Driver extends BursamV1Driver
     ): void {
         Bus::chain([
             new ProcessBursamSellingCommodityToOpenMarketForCancellation($traderOrder->id),
+            new ProcessBursamOrderResultNYY($traderOrder->id),
             new ProcessBursamStbCertificateAfterCancellation($traderOrder->id, $cancelReason, $cancelledByType, $cancelledBy),
             function () use ($traderOrder, $cancelReason) {
                 $this->finalizeCancellation($traderOrder, $cancelReason);
