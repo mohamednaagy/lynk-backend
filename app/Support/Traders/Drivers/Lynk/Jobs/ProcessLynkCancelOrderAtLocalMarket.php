@@ -51,9 +51,6 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
         ]);
 
         try {
-            Log::channel(self::LOG_CHANNEL)->info('Starting database transaction for order cancellation , traderOrderId => '.$this->traderOrderId, [
-                'trader_order_id' => $this->traderOrderId,
-            ]);
 
             $traderOrder = TraderOrder::query()
                 ->where('status', TraderOrderStatus::PendingCancellation)
@@ -102,11 +99,6 @@ class ProcessLynkCancelOrderAtLocalMarket implements ShouldBeUnique, ShouldQueue
                     'should_notify_provider' => false,
                 ]);
             }
-
-            Log::channel(self::LOG_CHANNEL)->info(formatLogTitle('Database transaction completed successfully', $traderOrder), [
-                'financingOrderId' => $traderOrder->financing_order_id,
-                'traderOrderId' => $this->traderOrderId,
-            ]);
 
             Log::channel(self::LOG_CHANNEL)->info('ProcessLynkCancelOrderAtLocalMarket job completed successfully traderOrderId => '.$this->traderOrderId, [
                 'trader_order_id' => $this->traderOrderId,

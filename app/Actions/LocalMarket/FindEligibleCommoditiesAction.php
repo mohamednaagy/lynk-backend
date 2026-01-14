@@ -6,7 +6,6 @@ use App\Actions\Contracts\LocalMarket\FindEligibleCommodities;
 use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
-use Exception;
 use Illuminate\Support\Facades\Log;
 
 class FindEligibleCommoditiesAction implements FindEligibleCommodities
@@ -17,25 +16,21 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        try {
-            $eligibleCommodities = $this->loanService->getCommoditiesForLoan($localMarketOrder);
+        $eligibleCommodities = $this->loanService->getCommoditiesForLoan($localMarketOrder);
 
-            if ($eligibleCommodities) {
-                $localMarketOrder->update([
-                    'status' => OrderStatus::EligibleCommoditiesAvailable,
-                    'data' => ['inventories' => $eligibleCommodities],
-                ]);
-            } else {
-                $localMarketOrder->update([
-                    'status' => OrderStatus::NoEligibleCommoditiesAvailable,
-                ]);
-            }
-
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder), [
-                'localMarketOrderId' => $localMarketOrder->id,
+        if ($eligibleCommodities) {
+            $localMarketOrder->update([
+                'status' => OrderStatus::EligibleCommoditiesAvailable,
+                'data' => ['inventories' => $eligibleCommodities],
             ]);
-        } catch (Exception $e) {
-            throw $e;
+        } else {
+            $localMarketOrder->update([
+                'status' => OrderStatus::NoEligibleCommoditiesAvailable,
+            ]);
         }
+
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder), [
+            'localMarketOrderId' => $localMarketOrder->id,
+        ]);
     }
 }
