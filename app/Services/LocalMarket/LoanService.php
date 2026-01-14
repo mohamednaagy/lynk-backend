@@ -47,7 +47,8 @@ class LoanService
         } catch (Exception $e) {
             DB::rollBack();
 
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('Error in getCommoditiesForLoan', [
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error in getCommoditiesForLoan', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
                 'error' => $e->getMessage(),
                 'trace' => config('app.debug') ? $e->getTraceAsString() : 'Hidden in production',
             ]);
