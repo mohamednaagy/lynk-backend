@@ -30,6 +30,8 @@ class LoanService
             );
 
             if (empty($eligibleInventories)) {
+                DB::commit();
+
                 return false;
             }
 
