@@ -561,13 +561,31 @@ jobs:
 
           - name: 🔄 Update Automation Repo
             run: |
+              # Verify token is set (for debugging)
+              TOKEN="${{ secrets.GB_AUTOMATION_TEST_TOKEN }}"
+              if [ -z "$TOKEN" ]; then
+                echo "❌ Error: GB_AUTOMATION_TEST_TOKEN secret is not configured"
+                exit 1
+              fi
+              echo "✅ Token is configured (length: ${#TOKEN} characters)"
+              
               ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
                 sudo -u ubuntu bash -c '
                   cd /home/ubuntu/lynk-backend-automation &&
+                  echo \"Setting git remote URL...\" &&
                   git remote set-url origin https://x-access-token:${{ secrets.GB_AUTOMATION_TEST_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
+                  REMOTE_URL=\$(git remote get-url origin) &&
+                  if [[ \"\$REMOTE_URL\" == *\"x-access-token\"* ]]; then
+                    echo \"✅ Remote URL configured with token\"
+                  else
+                    echo \"⚠️  Warning: Remote URL may not contain token\"
+                    echo \"Remote URL: \${REMOTE_URL%%@*}\"
+                  fi &&
+                  echo \"Fetching from origin/main...\" &&
                   git fetch origin main &&
+                  echo \"Resetting to origin/main...\" &&
                   git reset --hard origin/main &&
-                  echo \"Updated to commit: \$(git rev-parse HEAD)\"
+                  echo \"✅ Updated to commit: \$(git rev-parse HEAD)\"
                 '
               "
 
