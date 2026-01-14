@@ -42,22 +42,24 @@ class LocalMarketOrderObserver implements ShouldHandleEventsAfterCommit
 
     public function updating(LocalMarketOrder $localMarketOrder)
     {
-        $originalStatus = $localMarketOrder->getOriginal('status');
-        $newStatus = $localMarketOrder->status;
-        if ($newStatus !== $originalStatus) {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('LocalMarketOrderObserver::updating - Validating status transition', [
-                'localMarketOrderId' => $localMarketOrder->id,
-                'fromStatus' => $originalStatus,
-                'toStatus' => $newStatus,
-            ]);
+        if ($localMarketOrder->isDirty('status')) {
+            $originalStatus = $localMarketOrder->getOriginal('status');
+            $newStatus = $localMarketOrder->status;
+            if ($newStatus !== $originalStatus) {
+                Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('LocalMarketOrderObserver::updating - Validating status transition', [
+                    'localMarketOrderId' => $localMarketOrder->id,
+                    'fromStatus' => $originalStatus,
+                    'toStatus' => $newStatus,
+                ]);
 
-            return $this->canMoveToNextStep($originalStatus, $newStatus, $localMarketOrder);
-        } else {
-            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->warning('LocalMarketOrderObserver::updating - Same status update detected, skipping validation', [
-                'localMarketOrderId' => $localMarketOrder->id,
-                'status' => $originalStatus,
-                'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), // Last 5 stack frames
-            ]);
+                return $this->canMoveToNextStep($originalStatus, $newStatus, $localMarketOrder);
+            } else {
+                Log::channel(LOG_CHANNEL_LOCAL_MARKET)->warning('LocalMarketOrderObserver::updating - Same status update detected, skipping validation', [
+                    'localMarketOrderId' => $localMarketOrder->id,
+                    'status' => $originalStatus,
+                    'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), // Last 5 stack frames
+                ]);
+            }
         }
     }
 
