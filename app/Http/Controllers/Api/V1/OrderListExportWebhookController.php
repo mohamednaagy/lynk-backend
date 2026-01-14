@@ -103,6 +103,11 @@ class OrderListExportWebhookController extends Controller
 
         $webhookSecret = config('services.order_export_webhook.secret');
 
+        // Explicitly reject requests when the webhook secret is empty/misconfigured
+        if (empty($webhookSecret)) {
+            return false;
+        }
+
         // 2. Validate headers exist
         if (empty($signatureHeader) || empty($timestampHeader)) {
             return false;
