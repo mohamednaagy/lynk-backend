@@ -563,29 +563,11 @@ jobs:
             run: |
               ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
                 sudo -u ubuntu bash -c '
-                  cd /home/ubuntu/lynk-backend-automation || { echo \"Error: Directory not found\"; exit 1; }
-                  
-                  # Verify token is set
-                  if [ -z \"${{ secrets.GB_AUTOMATION_TEST_TOKEN }}\" ]; then
-                    echo \"Error: GB_AUTOMATION_TEST_TOKEN secret is not configured\"
-                    exit 1
-                  fi
-                  
-                  # Set remote URL with token
-                  git remote set-url origin https://x-access-token:${{ secrets.GB_AUTOMATION_TEST_TOKEN }}@github.com/lynksa/lynk-backend-automation.git
-                  
-                  # Test access before attempting operations
-                  if ! git ls-remote --heads origin main > /dev/null 2>&1; then
-                    echo \"Error: Cannot access repository. Check token permissions:\"
-                    echo \"  - Token must have 'Contents: Read and write' permission\"
-                    echo \"  - Token must have access to 'lynksa/lynk-backend-automation' repository\"
-                    exit 1
-                  fi
-                  
-                  # Fetch and reset
+                  cd /home/ubuntu/lynk-backend-automation &&
+                  git remote set-url origin https://x-access-token:${{ secrets.GB_AUTOMATION_TEST_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
                   git fetch origin main &&
                   git reset --hard origin/main &&
-                  echo \"✅ Updated to commit: \$(git rev-parse HEAD)\"
+                  echo \"Updated to commit: \$(git rev-parse HEAD)\"
                 '
               "
 
