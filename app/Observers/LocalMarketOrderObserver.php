@@ -42,26 +42,22 @@ class LocalMarketOrderObserver implements ShouldHandleEventsAfterCommit
 
     public function updating(LocalMarketOrder $localMarketOrder)
     {
-        if ($localMarketOrder->wasChanged(['status'])) {
-            $originalStatus = $localMarketOrder->getOriginal('status');
-            $newStatus = $localMarketOrder->status;
+        $originalStatus = $localMarketOrder->getOriginal('status');
+        $newStatus = $localMarketOrder->status;
+        if ($newStatus !== $originalStatus) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('LocalMarketOrderObserver::updating - Validating status transition', [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'fromStatus' => $originalStatus,
+                'toStatus' => $newStatus,
+            ]);
 
-            // Skip validation if status hasn't actually changed (same status update)
-            if ($originalStatus == $newStatus) {
-                Log::channel(LOG_CHANNEL_LOCAL_MARKET)->warning('LocalMarketOrderObserver::updating - Same status update detected, skipping validation', [
-                    'localMarketOrderId' => $localMarketOrder->id,
-                    'status' => $originalStatus,
-                    'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), // Last 5 stack frames
-                ]);
-            } else {
-                Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info('LocalMarketOrderObserver::updating - Validating status transition', [
-                    'localMarketOrderId' => $localMarketOrder->id,
-                    'fromStatus' => $originalStatus,
-                    'toStatus' => $newStatus,
-                ]);
-
-                return $this->canMoveToNextStep($originalStatus, $newStatus, $localMarketOrder);
-            }
+            return $this->canMoveToNextStep($originalStatus, $newStatus, $localMarketOrder);
+        } else {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->warning('LocalMarketOrderObserver::updating - Same status update detected, skipping validation', [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'status' => $originalStatus,
+                'trace' => debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5), // Last 5 stack frames
+            ]);
         }
     }
 

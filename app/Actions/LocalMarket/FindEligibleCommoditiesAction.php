@@ -7,7 +7,6 @@ use App\Enums\LocalMarket\OrderStatus;
 use App\Models\LocalMarketOrder;
 use App\Services\LocalMarket\LoanService;
 use Exception;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class FindEligibleCommoditiesAction implements FindEligibleCommodities
@@ -18,7 +17,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
 
     public function handle(LocalMarketOrder $localMarketOrder): void
     {
-        DB::beginTransaction();
         try {
             $eligibleCommodities = $this->loanService->getCommoditiesForLoan($localMarketOrder);
 
@@ -33,13 +31,13 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 ]);
             }
 
-            DB::commit();
-
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('FindEligibleCommoditiesAction Duration', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
             ]);
         } catch (Exception $e) {
-            DB::rollBack();
+            $localMarketOrder->update([
+                'status' => OrderStatus::FailedPurchase,
+            ]);
             throw $e;
         }
     }
