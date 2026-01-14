@@ -35,12 +35,14 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 /**
- * @property mixed $status
+ * @property FinancingOrderStatus $status
  * @property mixed $traderOrders
  * @property mixed $currency
  * @property mixed $amount
  * @property mixed $selling_price
  * @property mixed $id
+ * @property ?string $latest_activity
+ * @property ?MurabhaStep $current_step
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
@@ -54,7 +56,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'reference_number',
@@ -81,6 +83,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         'borrower_type',
         'cost_with_vat',
         'cost_without_vat',
+        'latest_activity',
     ];
 
     protected $casts = [

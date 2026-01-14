@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Enums\FinancingOrderStatus;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;
@@ -9,6 +10,17 @@ use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
 {
+    /**
+     * Handle the FinancingOrder "saving" event.
+     */
+    public function saving(FinancingOrder $financingOrder): void
+    {
+        $financingOrder->latest_activity = $financingOrder->status->isNot(FinancingOrderStatus::InProgress)
+            || \is_null($financingOrder->current_step)
+            ? $financingOrder->status->description
+            : $financingOrder->current_step->description;
+    }
+
     /**
      * Handle the TraderOrder "created" event.
      */
