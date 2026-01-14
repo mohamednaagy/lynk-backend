@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\RealtimeNotification;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\ExportReadyNotification;
@@ -63,6 +64,8 @@ class OrderListExportWebhookController extends Controller
                 $validatedData['mediaId'],
                 $validatedData['fileName']
             ));
+
+            event(new RealtimeNotification('new order list export webhook'));
 
             Log::info('Order list export webhook processed successfully', [
                 'user_id' => $validatedData['modelId'],
