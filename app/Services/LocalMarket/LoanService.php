@@ -38,7 +38,6 @@ class LoanService
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getCommoditiesForLoan Duration', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,
             ]);
-
             $this->updateEligibleQuantities($eligibleInventories, $localMarketOrder->id);
 
             $units = $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
@@ -47,6 +46,7 @@ class LoanService
             return $units;
         } catch (Exception $e) {
             DB::rollBack();
+
             Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error('Error in getCommoditiesForLoan', [
                 'error' => $e->getMessage(),
                 'trace' => config('app.debug') ? $e->getTraceAsString() : 'Hidden in production',

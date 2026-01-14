@@ -35,9 +35,6 @@ class FindEligibleCommoditiesAction implements FindEligibleCommodities
                 'localMarketOrderId' => $localMarketOrder->id,
             ]);
         } catch (Exception $e) {
-            $localMarketOrder->update([
-                'status' => OrderStatus::FailedPurchase,
-            ]);
             throw $e;
         }
     }
