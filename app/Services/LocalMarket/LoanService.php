@@ -21,7 +21,6 @@ class LoanService
 
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
-        $startTime = microtime(true);
 
         $eligibleInventories = $this->inventoryService->findEligibleInventoryForLoan(
             $localMarketOrder
@@ -33,7 +32,6 @@ class LoanService
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getCommoditiesForLoan Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
-            'duration' => convertMicrotimeToDuration(microtime(true) - $startTime),
         ]);
 
         $this->updateEligibleQuantities($eligibleInventories, $localMarketOrder->id);

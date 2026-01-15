@@ -43,16 +43,11 @@ class OrderCreationFeeType implements TransactionTypeHandlerInterface
                 'trader_order_id' => $meta['trader_order_id'] ?? 'unknown',
             ]);
 
-            $startTime = microtime(true);
-
             $result = $wallet->withdraw($amount, $reason, $referenceNumber, $meta);
-
-            $executionTime = round((microtime(true) - $startTime) * 1000, 2);
 
             Log::info('OrderCreationFeeType::process SUCCESS trader_order_id => '.$traderOrderId.' wallet_id => '.$walletId.' reference_number => '.$referenceNumber.' transaction_id => '.$result->id, [
                 'wallet_id' => $wallet->getKey(),
                 'transaction_id' => $result->id,
-                'execution_time_ms' => $executionTime,
             ]);
 
             return $result;

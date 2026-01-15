@@ -114,7 +114,10 @@
     "extra": {
         "laravel": {
             "dont-discover": [
-                "laravel/telescope"
+                "laravel/telescope",
+                "andyabih/laravel-to-uml",
+                "barryvdh/laravel-ide-helper",
+                "beyondcode/laravel-dump-server"
             ]
         },
         "hooks": {

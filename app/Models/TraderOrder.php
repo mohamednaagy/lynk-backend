@@ -512,4 +512,52 @@ class TraderOrder extends Model implements HasMedia
     {
         return $this->commodity_type_id > 0;
     }
+
+    public function canBeMarkedAsCompleted(): bool
+    {
+        return $this->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted) || $this->doesLastActionMatchWith(FinancingOrderHistory::DeliveryConfirmed);
+    }
+
+    public function canProcessBursamOrderResultNYY(): bool
+    {
+        if (! $this->status->in([TraderOrderStatus::InProgress, TraderOrderStatus::PendingCancellation])) {
+            Log::channel(LOG_CHANNEL_BURSAM)->warning(formatLogTitle('bursa purchasing step => trader order not found traderOrderId: '.$this->id.' with status in progress or pending cancellation in ProcessBursamOrderResultNYY job', $this), [
+                'financingOrderId' => $this->financing_order_id,
+                'traderOrderId' => $this->id,
+                'status' => $this->status->value,
+            ]);
+
+            return false;
+        }
+
+        if ($this->status->is(TraderOrderStatus::InProgress)) {
+            $canProcess = $this->doesLastActionMatchWith(FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument);
+
+            if (! $canProcess) {
+                Log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('error at ProcessBursamOrderResultNYY Job - incorrect action state', $this), [
+                    'financingOrderId' => $this->order?->id,
+                    'traderOrderId' => $this->id,
+                    'actual_last_action' => $this->last_history_action,
+                    'expected_action' => FinancingOrderHistory::GetWarrantAmendmentExceptWarrantNoDocument,
+                ]);
+            }
+
+            return $canProcess;
+        }
+
+        return true;
+    }
+
+    public function handleBursamOrderResultNYYFailure(): void
+    {
+        if ($this->status->is(TraderOrderStatus::PendingCancellation)) {
+            $this->update([
+                'status' => TraderOrderStatus::FailureToCancel,
+            ]);
+        } elseif ($this->status->is(TraderOrderStatus::InProgress)) {
+            $this->update([
+                'status' => TraderOrderStatus::FailureToSell,
+            ]);
+        }
+    }
 }
