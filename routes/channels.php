@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -14,5 +15,9 @@ use Illuminate\Support\Facades\Broadcast;
 */
 
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+    return $user instanceof User && (int) $user->id === (int) $id;
+});
+// NOTICE: this will resolve to `private-export-notifications.{id}` but we should never add `private-` here
+Broadcast::channel('export-notifications.{id}', function ($user, $id) {
+    return $user instanceof User && (int) $user->id === (int) $id;
 });

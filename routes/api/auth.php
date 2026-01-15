@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Auth\SendEmailVerification;
 use App\Http\Controllers\Api\V1\Auth\SendOtp;
 use App\Http\Controllers\Api\V1\Auth\VerifyEmail;
 use App\Http\Controllers\Api\V1\Auth\VerifyOtp;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// Custom authentication for broadcasting that handles JWT
+Broadcast::routes([
+    'middleware' => ['api', 'auth:api'], // JWT instead of session
+]);
 
 Route::middleware('auth:api')->prefix('v1/auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout']);

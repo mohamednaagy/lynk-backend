@@ -65,7 +65,7 @@ class OrderListExportWebhookController extends Controller
                 $validatedData['fileName']
             ));
 
-            event(new RealtimeNotification('new order list export webhook'));
+            event(new RealtimeNotification('Your order list export ready to download', $user->id));
 
             Log::info('Order list export webhook processed successfully', [
                 'user_id' => $validatedData['modelId'],

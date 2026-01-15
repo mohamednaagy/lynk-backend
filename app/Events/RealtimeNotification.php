@@ -13,23 +13,18 @@ class RealtimeNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
-
     /**
      * Create a new event instance.
      */
-    public function __construct(string $message)
-    {
-        $this->message = $message;
-    }
+    public function __construct(public readonly string $message, private readonly int $userId) {}
 
     public function broadcastOn()
     {
-        return ['my-channel'];
+        return ['private-export-notifications.'.$this->userId];
     }
 
     public function broadcastAs()
     {
-        return 'my-event';
+        return 'export-ready-notification';
     }
 }
