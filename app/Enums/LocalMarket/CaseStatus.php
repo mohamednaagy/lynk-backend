@@ -18,4 +18,6 @@ final class CaseStatus extends Enum implements LocalizedEnum
     const FailedSell = 5;
 
     const TransferOwnershipToCustomer = 6;
+
+    const FailedToCancel = 7;
 }
