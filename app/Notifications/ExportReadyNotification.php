@@ -21,7 +21,6 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
     public function __construct(
         private string $exportType,
         private string $mediaId,
-        private string $fileName
     ) {
         $this->media = Media::find($this->mediaId);
     }
@@ -44,7 +43,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
     {
         $prefix = $this->getReportName();
 
-        return ($prefix ? $prefix.' ' : '').__('notification-types.export_ready.label');
+        return ($prefix ? "{$prefix} " : '').__('notification-types.export_ready.label');
     }
 
     private function getReportName(): string
@@ -95,7 +94,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
             ...parent::toArray($notifiable),
             'export_type' => $this->exportType,
             'download_url' => formatMediaUrl($this->media?->fileUrl),
-            'file_name' => $this->fileName,
+            'file_name' => $this->media->file_name,
         ];
     }
 }

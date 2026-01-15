@@ -34,12 +34,9 @@ class OrderListExportWebhookController extends Controller
         try {
             // Validate the new NestJS format
             $validatedData = $request->validate([
-                'mediaId' => 'required|exists:media,id',
-                'exportType' => 'required|string|max:255',
-                'downloadUrl' => 'required|string|max:2048', // Changed from url to string to allow relative paths
-                'fileName' => 'required|string|max:500',
-                'modelId' => 'required|exists:users,id', // Using modelId instead of userId
-                'message' => 'nullable|string|max:1000',
+                'media_id' => 'required|exists:media,id',
+                'export_type' => 'required|string|max:255',
+                'model_id' => 'required|exists:users,id', // Using model_id instead of userId
             ]);
         } catch (ValidationException $e) {
             Log::warning('Invalid order list export webhook payload', [
@@ -56,21 +53,20 @@ class OrderListExportWebhookController extends Controller
         try {
             // Find the user who initiated the export
             /* @var User $user */
-            $user = User::findOrFail($validatedData['modelId']);
+            $user = User::findOrFail($validatedData['model_id']);
 
             // Send the export ready notification to the user
             $user->notify(new ExportReadyNotification(
-                $validatedData['exportType'],
-                $validatedData['mediaId'],
-                $validatedData['fileName']
+                $validatedData['export_type'],
+                $validatedData['media_id'],
             ));
 
             event(new RealtimeNotification('Your order list export ready to download', $user->id));
 
             Log::info('Order list export webhook processed successfully', [
-                'user_id' => $validatedData['modelId'],
-                'export_type' => $validatedData['exportType'],
-                'file_name' => $validatedData['fileName'],
+                'user_id' => $validatedData['model_id'],
+                'export_type' => $validatedData['export_type'],
+                'media_id' => $validatedData['media_id'],
             ]);
 
             return response()->json([

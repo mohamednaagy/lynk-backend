@@ -11,5 +11,5 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::post('order-list-export/webhook', OrderListExportWebhookController::class);
+    Route::post('report-service/callback', OrderListExportWebhookController::class);
 });
