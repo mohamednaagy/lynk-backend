@@ -15,6 +15,7 @@ return [
     ],
     'delivery_confirmation_received' => [
         'label' => 'Delivery Confirmation Received',
+        'description' => 'Delivery confirmation received for order #:order_id with trader reference #:trader_reference',
     ],
     'order_approved' => [
         'label' => 'Order Approved',

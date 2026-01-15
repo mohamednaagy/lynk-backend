@@ -41,7 +41,7 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
      */
     public function getTitle($notifiable): string
     {
-        return __('Delivery Confirmation Received');
+        return __('notification-types.delivery_confirmation_received.label');
     }
 
     /**
@@ -51,7 +51,7 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
      */
     public function getDescription($notifiable): string
     {
-        return __('Delivery confirmation received for order #:order_id with trader reference #:trader_reference', [
+        return __('notification-types.delivery_confirmation_received.description', [
             'order_id' => $this->financingOrder->id,
             'trader_reference' => $this->traderOrder->reference,
         ]);
