@@ -8,8 +8,6 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
     Route::get('notifications', [NotificationsController::class, 'index'])->name('notifications.index');
     Route::put('notifications/{id}/read', [NotificationsController::class, 'markAsRead'])->name('notifications.markAsRead');
     Route::put('notifications/read-all', [NotificationsController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
-
-    Route::post('order-list-export/webhook', OrderListExportWebhookController::class);
 });
 
 Route::prefix('v1')->group(function () {
