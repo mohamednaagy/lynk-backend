@@ -113,7 +113,7 @@ class BursamClient
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
-            'response' => $response->json(),
+            'response' => $response?->json(),
             'statusCode' => $response->getStatusCode(),
         ]);
 
