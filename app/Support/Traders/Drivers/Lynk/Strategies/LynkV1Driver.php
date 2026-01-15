@@ -381,6 +381,7 @@ class LynkV1Driver implements Deliverable, TraderInterface
             TraderOrderCancelReason::ExpiredConfirmationTimeLimit => __('order.trader.lynk.expired_confirmation_time_limit', [
                 'time' => $traderOrder->getRecentTimeLimit(TraderOrderTimeLimitType::DeliveryConfirmationTimeLimit, TraderOrderTimeLimitStatus::Expired)->default_value,
             ]),
+            TraderOrderCancelReason::FailureToCancel => __('order.trader.lynk.internal_technical_error'),
             default => null,
         };
     }

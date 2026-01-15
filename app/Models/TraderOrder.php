@@ -350,7 +350,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function cancelDetail()
     {
-        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
+        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id')->latestOfMany();
     }
 
     public function timeLimits()
