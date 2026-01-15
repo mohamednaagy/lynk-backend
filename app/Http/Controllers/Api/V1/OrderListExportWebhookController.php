@@ -94,7 +94,7 @@ class OrderListExportWebhookController extends Controller
     /**
      * Validate the webhook signature to ensure the request is from a trusted source
      */
-    public function isValidSignature(Request $request): bool
+    private function isValidSignature(Request $request): bool
     {
         // 1. Retrieve the headers and raw payload
         // Note: $request->input() or json_decode() might alter the JSON string (e.g., whitespace).
