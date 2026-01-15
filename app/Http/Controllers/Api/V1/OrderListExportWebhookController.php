@@ -52,7 +52,6 @@ class OrderListExportWebhookController extends Controller
 
         try {
             // Find the user who initiated the export
-            /* @var User $user */
             $user = User::findOrFail($validatedData['model_id']);
 
             // Send the export ready notification to the user

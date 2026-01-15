@@ -23,7 +23,6 @@ class NotificationsController extends Controller
      */
     public function index(Request $request)
     {
-        /* @var User $user */
         $user = Auth::user();
 
         $query = $user->notifications();
@@ -53,7 +52,6 @@ class NotificationsController extends Controller
      */
     public function markAsRead($id)
     {
-        /* @var User $user */
         $user = Auth::user();
 
         $notification = $user->notifications()->where('id', $id)->first();
@@ -80,7 +78,6 @@ class NotificationsController extends Controller
      */
     public function markAllAsRead()
     {
-        /* @var User $user */
         $user = Auth::user();
 
         $user->unreadNotifications()->update(['read_at' => now()]);
