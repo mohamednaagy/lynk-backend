@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Transformers\NotificationTransformer;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
@@ -48,9 +48,8 @@ class NotificationsController extends Controller
      * Mark a notification as read.
      *
      * @param  string  $id  The ID of the notification to mark as read.
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function markAsRead($id)
+    public function markAsRead($id): JsonResponse
     {
         $user = Auth::user();
 
@@ -67,7 +66,7 @@ class NotificationsController extends Controller
         $notification->markAsRead();
 
         return response()->json([
-            'message' => 'Notification marked as read',
+            'message' => __('notification.notification-marked-read'),
         ], Response::HTTP_OK);
     }
 
@@ -83,7 +82,7 @@ class NotificationsController extends Controller
         $user->unreadNotifications()->update(['read_at' => now()]);
 
         return response()->json([
-            'message' => 'All notifications marked as read',
+            'message' => __('notification.notification-all-marked-read'),
         ], Response::HTTP_OK);
     }
 }
