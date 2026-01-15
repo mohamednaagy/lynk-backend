@@ -80,7 +80,7 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 break;
             case CaseStatus::FailedToCancel:
                 Trader::driver($traderOrder->provider, $traderOrder->version)
-                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToCancel);
+                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToCancelAtLocalMarket);
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->confirmCancelledFromProvider($traderOrder);
                 break;

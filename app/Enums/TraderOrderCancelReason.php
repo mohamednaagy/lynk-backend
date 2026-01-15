@@ -27,5 +27,5 @@ final class TraderOrderCancelReason extends Enum implements LocalizedEnum
 
     const BursamBuyOrderRetriesExceeded = 10;
 
-    const FailureToCancel = 11;
+    const FailureToCancelAtLocalMarket = 11;
 }
