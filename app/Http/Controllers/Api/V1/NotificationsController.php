@@ -42,16 +42,7 @@ class NotificationsController extends Controller
     {
         $user = Auth::user();
 
-        $notification = $user->notifications()->where('id', $id)->first();
-
-        if (! $notification) {
-            return response()->errorResponse(
-                trans('error.item_not_found'),
-                Response::HTTP_NOT_FOUND,
-                \App\Enums\ErrorCode::ITEM_NOT_FOUND
-            );
-        }
-
+        $notification = $user->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsRead();
 
         return response()->json([
