@@ -21,11 +21,11 @@ class RealtimeNotification implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new PrivateChannel('export-notifications.'.$this->userId);
+        return new PrivateChannel("user-notifications.{$this->userId}");
     }
 
     public function broadcastAs()
     {
-        return 'export-ready-notification';
+        return 'user-notification';
     }
 }
