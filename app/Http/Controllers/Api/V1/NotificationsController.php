@@ -12,18 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NotificationsController extends Controller
 {
-    public const NOTIFICATIONS_DAYS = 30;
-
-    public const NOTIFICATIONS_PER_PAGE = 10;
-
     /**
      * Get a paginated list of user notifications.
      */
     public function index(Request $request): JsonResponse
     {
-        $user = Auth::user();
-
-        $query = $user->notifications();
+        $query = Auth::user()->notifications();
 
         // Filter for unread notifications only if requested
         $query->when($request->boolean('unread_only'), function ($query) {
@@ -32,9 +26,9 @@ class NotificationsController extends Controller
 
         // Get notifications for the authenticated user from the last 30 days
         $notifications = $query
-            ->where('created_at', '>=', now()->subDays(self::NOTIFICATIONS_DAYS))
-            ->orderBy('created_at', 'desc')
-            ->paginate(self::NOTIFICATIONS_PER_PAGE);
+            ->where('created_at', '>=', now()->subDays(config('notifications.panel.days')))
+            ->latest()
+            ->paginate(config('notifications.panel.count_per_page'));
 
         // Transform the response using Fractal
         return fractal($notifications, new NotificationTransformer)

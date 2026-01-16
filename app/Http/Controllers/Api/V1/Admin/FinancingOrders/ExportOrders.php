@@ -9,6 +9,7 @@ use App\Enums\Area;
 use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
+use App\Jobs\Reports\Enums\ReportType;
 use App\Models\Lender;
 use App\Services\ExportService;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +31,7 @@ class ExportOrders extends Controller
     ): JsonResponse {
         // Dispatch the export job to be processed asynchronously
         $exportService->dispatchExportJob(
-            exportType: 'ORDER_LIST',
+            exportType: ReportType::OrderList,
             user: $request->user(),
             exportClass: FinancingOrdersExport::class,
             fileName: $this->getFileName($request),
