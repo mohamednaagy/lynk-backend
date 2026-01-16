@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Contracts\Notifications\BuildUserNotificationsQuery;
 use App\Http\Controllers\Controller;
 use App\Transformers\NotificationTransformer;
 use Illuminate\Http\JsonResponse;
@@ -15,19 +16,15 @@ class NotificationsController extends Controller
     /**
      * Get a paginated list of user notifications.
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request, BuildUserNotificationsQuery $builder): JsonResponse
     {
-        $query = Auth::user()->notifications();
-
-        // Filter for unread notifications only if requested
-        $query->when($request->boolean('unread_only'), function ($query) {
-            $query->whereNull('read_at');
-        });
+        $query = $builder
+            ->setUser(Auth::user())
+            ->setUnreadOnly($request->boolean('unread_only'))
+            ->handle();
 
         // Get notifications for the authenticated user from the last 30 days
         $notifications = $query
-            ->where('created_at', '>=', now()->subDays(config('notifications.panel.days')))
-            ->latest()
             ->paginate(config('notifications.panel.count_per_page'));
 
         // Transform the response using Fractal
