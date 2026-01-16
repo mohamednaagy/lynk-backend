@@ -6,52 +6,31 @@ namespace App\Jobs\Reports;
 
 use App\Jobs\Reports\Dto\OrderListMessage;
 use App\Jobs\Reports\Dto\ReportMessage;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Throwable;
 
-class ExportOrderListJob implements ShouldQueue
+class ExportOrderListJob extends BaseReportJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable;
-
     public function __construct(
         public int $userId,
         public string $exportType,
         public array $exportData = []
     ) {
-        $this->onQueue('mq');
+        parent::__construct();
     }
 
     /**
-     * Execute the job.
+     * Get the context for logging job failures
      */
-    public function handle(): void
+    protected function getLogContext(?Throwable $exception): array
     {
-        Queue::connection('rabbitmq')->pushRaw(
-            json_encode($this->buildMessage()->toArray()),
-        );
-    }
-
-    /**
-     * Handle a job failure.
-     */
-    public function failed(?Throwable $exception): void
-    {
-        Log::error("ExportOrderListJob failed after all retries - user id {$this->userId}", [
+        return array_merge(parent::getLogContext($exception), [
             'user_id' => $this->userId,
             'export_type' => $this->exportType,
             'export_data' => $this->exportData,
-            'queue' => config('services.rabbitmq.queue_name'),
-            'exception' => $exception?->getMessage(),
-            'exception_trace' => $exception?->getTraceAsString(),
         ]);
     }
 
-    private function buildMessage(): ReportMessage
+    protected function buildMessage(): ReportMessage
     {
         return new OrderListMessage(
             modelId: $this->userId,
