@@ -21,12 +21,14 @@ return [
     ],
     'order_approved' => [
         'label' => 'Order Approved',
+        'description' => 'Order #:order_id has been approved by :approver_name at :approved_at',
     ],
     'invoice_paid' => [
         'label' => 'Invoice Paid',
     ],
     'lender_registered' => [
         'label' => 'New Lender Registered',
+        'description' => 'A new lender has been registered: :company_name',
     ],
     'export_ready' => [
         'label' => 'Export Ready',

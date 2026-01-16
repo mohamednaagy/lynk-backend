@@ -38,7 +38,7 @@ class OrderApproved extends BaseNotification implements ShouldQueue
      */
     public function getTitle($notifiable): string
     {
-        return __('Order Approved');
+        return __('notification-types.order_approved.label');
     }
 
     /**
@@ -48,7 +48,7 @@ class OrderApproved extends BaseNotification implements ShouldQueue
      */
     public function getDescription($notifiable): string
     {
-        return __('Order #:order_id has been approved by :approver_name at :approved_at', [
+        return __('notification-types.order_approved.description', [
             'order_id' => $this->financingOrder->id,
             'approver_name' => $this->approver->full_name,
             'approved_at' => $this->approvalTime->toDateTimeString(),

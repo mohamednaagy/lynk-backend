@@ -21,12 +21,14 @@ return [
     ],
     'order_approved' => [
         'label' => 'تم الموافقة على الطلب',
+        'description' => 'تم الموافقة على الطلب #:order_id بواسطة :approver_name في :approved_at',
     ],
     'invoice_paid' => [
         'label' => 'تم دفع الفاتورة',
     ],
     'lender_registered' => [
         'label' => 'تم تسجيل مقرض جديد',
+        'description' => 'تم تسجيل مقرض جديد: :company_name',
     ],
     'export_ready' => [
         'label' => 'الملف جاهز',

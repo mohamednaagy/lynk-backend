@@ -32,7 +32,7 @@ class LenderRegistered extends BaseNotification implements ShouldQueue
      */
     public function getTitle($notifiable): string
     {
-        return __('Lender Registered');
+        return __('notification-types.lender_registered.label');
     }
 
     /**
@@ -42,7 +42,7 @@ class LenderRegistered extends BaseNotification implements ShouldQueue
      */
     public function getDescription($notifiable): string
     {
-        return __('A new lender has been registered: :company_name', ['company_name' => $this->lender->name]);
+        return __('notification-types.lender_registered.description', ['company_name' => $this->lender->name]);
     }
 
     /**
