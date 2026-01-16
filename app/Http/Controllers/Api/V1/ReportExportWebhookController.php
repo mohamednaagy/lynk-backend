@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
-class OrderListExportWebhookController extends Controller
+class ReportExportWebhookController extends Controller
 {
     /**
      * Handle the webhook request from the NestJS microservice
