@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     'trade_request_cancelled' => [
         'label' => 'تم إلغاء طلب التداول',
+        'description' => 'تم إلغاء طلب التداول #:trader_order_id للطلب #:order_id بواسطة :user_name. المبلغ: :amount, سعر البيع: :selling_price',
     ],
     'order_cancelled' => [
         'label' => 'تم إلغاء الطلب',
@@ -12,6 +13,7 @@ return [
     ],
     'order_requires_approval' => [
         'label' => 'الطلب يتطلب موافقة',
+        'description' => 'الطلب #:order_id يتطلب موافقة الموقع. المبلغ: :amount, سعر البيع: :selling_price',
     ],
     'delivery_confirmation_received' => [
         'label' => 'تم استلام تأكيد التسليم',

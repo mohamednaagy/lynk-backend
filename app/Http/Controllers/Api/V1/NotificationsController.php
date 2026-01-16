@@ -18,10 +18,8 @@ class NotificationsController extends Controller
 
     /**
      * Get a paginated list of user notifications.
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
 
@@ -47,9 +45,9 @@ class NotificationsController extends Controller
     /**
      * Mark a notification as read.
      *
-     * @param  string  $id  The ID of the notification to mark as read.
+     * @param  int  $id  The ID of the notification to mark as read.
      */
-    public function markAsRead($id): JsonResponse
+    public function markAsRead(int $id): JsonResponse
     {
         $user = Auth::user();
 
@@ -72,10 +70,8 @@ class NotificationsController extends Controller
 
     /**
      * Mark all notifications as read
-     *
-     * @return \Illuminate\Http\JsonResponse
      */
-    public function markAllAsRead()
+    public function markAllAsRead(): JsonResponse
     {
         $user = Auth::user();
 

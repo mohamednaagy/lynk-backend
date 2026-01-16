@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     'trade_request_cancelled' => [
         'label' => 'Trade Request Cancelled',
+        'description' => 'Trade request #:trader_order_id for order #:order_id has been cancelled by :user_name. Amount: :amount, Selling Price: :selling_price',
     ],
     'order_cancelled' => [
         'label' => 'Order Cancelled',
@@ -12,6 +13,7 @@ return [
     ],
     'order_requires_approval' => [
         'label' => 'Order Requires Approval',
+        'description' => 'Order #:order_id requires your approval. Amount: :amount, Selling Price: :selling_price',
     ],
     'delivery_confirmation_received' => [
         'label' => 'Delivery Confirmation Received',

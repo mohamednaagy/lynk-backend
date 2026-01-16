@@ -5,7 +5,7 @@ namespace App\Jobs\FinancingOrders;
 use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
-use App\Notifications\FinancingOrders\TraderOrderExpired;
+use App\Notifications\FinancingOrders\TraderOrderCancelled;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -47,6 +47,6 @@ class NotifyAboutExpireTraderOrder implements ShouldQueue
                 });
             });
 
-        Notification::send($notifiables, new TraderOrderExpired($this->traderOrder));
+        Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder));
     }
 }

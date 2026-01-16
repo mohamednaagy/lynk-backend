@@ -38,7 +38,7 @@ final class OrderRequiresApproval extends BaseNotification implements ShouldQueu
      */
     public function getTitle($notifiable): string
     {
-        return __('Order Requires Approval');
+        return __('notification-types.order_requires_approval.label');
     }
 
     /**
@@ -48,7 +48,7 @@ final class OrderRequiresApproval extends BaseNotification implements ShouldQueu
      */
     public function getDescription($notifiable): string
     {
-        return __('Order #:order_id requires your approval. Amount: :amount, Selling Price: :selling_price', [
+        return __('notification-types.order_requires_approval.description', [
             'order_id' => $this->financingOrder->id,
             'amount' => $this->financingOrder->amount,
             'selling_price' => $this->financingOrder->selling_price,
