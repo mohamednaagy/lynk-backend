@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Webhooks;
 
+use App\Models\Media;
 use App\Models\User;
 use App\Notifications\ExportReadyNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,21 +54,18 @@ class OrderListExportWebhookTest extends TestCase
         ]);
 
         $payload = [
-            'mediaId' => $media->id,
-            'exportType' => 'Order List',
-            'downloadUrl' => 'https://example.com/downloads/orders.xlsx',
-            'fileName' => 'orders_export_2023_01_01.xlsx',
-            'modelId' => $this->user->id,
-            'message' => 'Your order list export is ready for download.',
+            'media_id' => $media->id,
+            'export_type' => 'ORDER_LIST',
+            'model_id' => $this->user->id,
         ];
 
         $timestamp = time();
         $signature = hash_hmac('sha256', $timestamp.'.'.json_encode($payload), $this->webhookSecret);
 
         // Verify the media record exists before sending the request
-        $this->assertNotNull(\App\Models\Media::find($media->id));
+        $this->assertNotNull(Media::find($media->id), 'Media record should exist with ID: '.$media->id);
 
-        $response = $this->postJson('/api/v1/order-list-export/webhook', $payload, [
+        $response = $this->postJson('/api/v1/report-service/callback', $payload, [
             'X-Signature' => $signature,
             'X-Timestamp' => $timestamp,
         ]);
@@ -78,8 +76,7 @@ class OrderListExportWebhookTest extends TestCase
         ]);
 
         Notification::assertSentTo($this->user, ExportReadyNotification::class, function ($notification) use ($payload) {
-            return $notification->exportType === $payload['exportType'] &&
-                   $notification->fileName === $payload['fileName'];
+            return $notification->getExportType() === $payload['export_type'];
         });
     }
 
@@ -107,18 +104,15 @@ class OrderListExportWebhookTest extends TestCase
         ]);
 
         $payload = [
-            'mediaId' => $media->id,
-            'exportType' => 'Order List',
-            'downloadUrl' => 'https://example.com/downloads/orders.xlsx',
-            'fileName' => 'orders_export_2023_01_01.xlsx',
-            'modelId' => $this->user->id,
-            'message' => 'Your order list export is ready for download.',
+            'media_id' => $media->id,
+            'export_type' => 'ORDER_LIST',
+            'model_id' => $this->user->id,
         ];
 
         $timestamp = time();
         $signature = hash_hmac('sha256', $timestamp.'.'.json_encode($payload), ''); // Empty secret
 
-        $response = $this->postJson('/api/v1/order-list-export/webhook', $payload, [
+        $response = $this->postJson('/api/v1/report-service/callback', $payload, [
             'X-Signature' => $signature,
             'X-Timestamp' => $timestamp,
         ]);
@@ -150,14 +144,12 @@ class OrderListExportWebhookTest extends TestCase
         ]);
 
         $payload = [
-            'mediaId' => $media->id,
-            'exportType' => 'Order List',
-            'downloadUrl' => 'https://example.com/downloads/orders.xlsx',
-            'fileName' => 'orders_export_2023_01_01.xlsx',
-            'modelId' => $this->user->id,
+            'media_id' => $media->id,
+            'export_type' => 'ORDER_LIST',
+            'model_id' => $this->user->id,
         ];
 
-        $response = $this->postJson('/api/v1/order-list-export/webhook', $payload, [
+        $response = $this->postJson('/api/v1/report-service/callback', $payload, [
             'X-Signature' => 'invalid_signature',
             'X-Timestamp' => time(),
         ]);
@@ -191,18 +183,16 @@ class OrderListExportWebhookTest extends TestCase
         ]);
 
         $payload = [
-            'mediaId' => $media->id,
-            'exportType' => 'Order List',
-            'downloadUrl' => 'https://example.com/downloads/orders.xlsx',
-            'fileName' => 'orders_export_2023_01_01.xlsx',
-            'modelId' => $this->user->id,
+            'media_id' => $media->id,
+            'export_type' => 'ORDER_LIST',
+            'model_id' => $this->user->id,
         ];
 
         // Use a timestamp that's more than 5 minutes ago
         $expiredTimestamp = time() - 400; // 400 seconds = 6+ minutes ago
         $signature = hash_hmac('sha256', $expiredTimestamp.'.'.json_encode($payload), $this->webhookSecret);
 
-        $response = $this->postJson('/api/v1/order-list-export/webhook', $payload, [
+        $response = $this->postJson('/api/v1/report-service/callback', $payload, [
             'X-Signature' => $signature,
             'X-Timestamp' => $expiredTimestamp,
         ]);
@@ -238,25 +228,23 @@ class OrderListExportWebhookTest extends TestCase
         ]);
 
         $payload = [
-            'mediaId' => $media->id,
-            'exportType' => '', // Invalid - empty
-            'downloadUrl' => 'invalid-url', // Invalid URL
-            'fileName' => str_repeat('a', 600), // Too long
-            'modelId' => 999999, // Non-existent user
+            'media_id' => $media->id,
+            'export_type' => '', // Invalid - empty
+            'model_id' => 999999, // Non-existent user
         ];
 
         $timestamp = time();
         $signature = hash_hmac('sha256', $timestamp.'.'.json_encode($payload), $this->webhookSecret);
 
-        $response = $this->postJson('/api/v1/order-list-export/webhook', $payload, [
+        $response = $this->postJson('/api/v1/report-service/callback', $payload, [
             'X-Signature' => $signature,
             'X-Timestamp' => $timestamp,
         ]);
 
-        $response->assertStatus(400);
+        $response->assertStatus(422);
         $response->assertJsonStructure([
-            'error',
-            'details',
+            'message',
+            'errors',
         ]);
 
         Notification::assertNothingSent();

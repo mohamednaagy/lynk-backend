@@ -30,6 +30,22 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the export type
+     */
+    public function getExportType(): string
+    {
+        return $this->exportType;
+    }
+
+    /**
+     * Get the media ID
+     */
+    public function getMediaId(): string
+    {
+        return $this->mediaId;
+    }
+
+    /**
      * Get the notification's type.
      * This should be a value from SystemNotificationType enum.
      */
