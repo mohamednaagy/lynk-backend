@@ -49,10 +49,7 @@ class ReportExportWebhookController extends Controller
                 'payload' => $validatedData,
             ]);
 
-            return response()->json([
-                'error' => 'Failed to process webhook',
-                'message' => $e->getMessage(),
-            ], 500);
+            return $this->errorResponse('Failed to process webhook');
         }
     }
 }
