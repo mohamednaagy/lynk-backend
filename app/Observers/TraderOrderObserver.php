@@ -76,9 +76,8 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
     {
         $financingOrder = $traderOrder->order;
 
-        // Load the observer and call the helper function
-        $observer = app(FinancingOrderObserver::class);
-        $observer->updateLatestActivity($financingOrder);
+        // Use the service to update the latest activity
+        app(\App\Services\FinancingOrderActivityUpdateService::class)->updateFinancingOrderLatestActivity($financingOrder);
     }
 
     /**
