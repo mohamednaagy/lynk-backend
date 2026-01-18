@@ -45,10 +45,10 @@ class ReportExportWebhookController extends Controller
                 'media_id' => $validatedData['media_id'],
             ]);
 
-            return response()->json([
-                'message' => 'Webhook processed successfully',
+            return $this->successResponse([
+                'message' => 'Export webhook processed successfully',
                 'processed_at' => now()->toISOString(),
-            ], 200);
+            ]);
         } catch (\Exception $e) {
             Log::error('Failed to process export webhook', [
                 'error' => $e->getMessage(),
