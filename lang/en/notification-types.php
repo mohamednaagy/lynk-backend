@@ -30,7 +30,7 @@ return [
         'label' => 'New Lender Registered',
         'description' => 'A new lender has been registered: :company_name',
     ],
-    'export_ready' => [
+    'orders_report_export_ready' => [
         'label' => 'Export Ready',
         'description' => 'Your :exportType export is ready for download.',
     ],

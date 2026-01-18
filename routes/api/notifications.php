@@ -12,7 +12,7 @@ Route::middleware('auth:api')->prefix('v1')->group(function () {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::post('report-service/callback', ReportExportWebhookController::class);
+    Route::post('report-service/callback', ReportExportWebhookController::class)->middleware('webhook.signature');
 });
 
 // Custom authentication for broadcasting that handles JWT

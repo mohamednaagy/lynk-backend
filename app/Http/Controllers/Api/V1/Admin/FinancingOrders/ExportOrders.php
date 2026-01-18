@@ -40,7 +40,7 @@ class ExportOrders extends Controller
 
         // Return a response indicating the export is being processed
         return $this->successResponse([
-            'message' => __('notifications.orders-export-processing'),
+            'message' => __('notification.order-export-processing'),
         ]);
     }
 

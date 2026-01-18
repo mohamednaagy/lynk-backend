@@ -31,7 +31,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function getType(): SystemNotificationType
     {
-        return SystemNotificationType::EXPORT_READY;
+        return SystemNotificationType::ORDERS_REPORT_EXPORT_READY;
     }
 
     /**
@@ -43,7 +43,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
     {
         $prefix = $this->getReportName();
 
-        return ($prefix ? "{$prefix} " : '').__('notification-types.export_ready.label');
+        return ($prefix ? "{$prefix} " : '').__('notification-types.orders_report_export_ready.label');
     }
 
     private function getReportName(): string
@@ -61,7 +61,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function getDescription($notifiable): string
     {
-        return __('notification-types.export_ready.description', [
+        return __('notification-types.orders_report_export_ready.description', [
             'exportType' => $this->getReportName() ?: $this->exportType,
         ]);
     }

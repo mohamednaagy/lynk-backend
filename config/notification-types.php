@@ -115,8 +115,8 @@ return [
             Role::Manager,
         ],
     ],
-    SystemNotificationType::EXPORT_READY->value => [
-        'label' => 'notification-types.export_ready.label',
+    SystemNotificationType::ORDERS_REPORT_EXPORT_READY->value => [
+        'label' => 'notification-types.orders_report_export_ready.label',
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => true,

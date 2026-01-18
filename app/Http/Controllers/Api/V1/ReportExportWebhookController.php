@@ -19,18 +19,6 @@ class ReportExportWebhookController extends Controller
      */
     public function __invoke(Request $request): JsonResponse
     {
-        // Validate webhook signature for security
-        if (! $this->isValidSignature($request)) {
-            Log::warning('Unauthorized order list export webhook request', [
-                'ip' => $request->ip(),
-                'headers' => $request->header(),
-            ]);
-
-            return response()->json([
-                'error' => 'Unauthorized webhook request',
-            ], 401);
-        }
-
         try {
             // Validate the new NestJS format
             $validatedData = $request->validate([
@@ -84,63 +72,5 @@ class ReportExportWebhookController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Validate the webhook signature to ensure the request is from a trusted source
-     */
-    private function isValidSignature(Request $request): bool
-    {
-        // 1. Retrieve the headers and raw payload
-        // Note: $request->input() or json_decode() might alter the JSON string (e.g., whitespace).
-        // We need the RAW body exactly as it was sent.
-        $payload = $request->getContent();
-
-        $signatureHeader = $request->header('X-Signature');
-        $timestampHeader = $request->header('X-Timestamp');
-
-        $webhookSecret = config('services.order_export_webhook.secret');
-
-        // Explicitly reject requests when the webhook secret is empty/misconfigured
-        if (empty($webhookSecret)) {
-            return false;
-        }
-
-        // 2. Validate headers exist
-        if (empty($signatureHeader) || empty($timestampHeader)) {
-            return false;
-        }
-
-        // 3. Check if timestamp is within acceptable range (5 minutes)
-        $currentTime = time();
-
-        // Handle both millisecond and second timestamps for validation purposes
-        $validationTimestamp = (int) $timestampHeader;
-
-        // If timestamp is too far in the future (indicating milliseconds), convert to seconds for comparison
-        // A timestamp from year 3000+ is definitely in milliseconds
-        if ($validationTimestamp > 100000000000) { // Year 1973+ in seconds, much less in milliseconds
-            $validationTimestamp = intval($validationTimestamp / 1000);
-        }
-
-        $timeDifference = abs($currentTime - $validationTimestamp);
-        $maxTimeDifference = 5 * 60; // 5 minutes in seconds
-
-        if ($timeDifference > $maxTimeDifference) {
-            return false;
-        }
-
-        // 4. Recreate the signature data string
-        // Use the original timestamp header for signature calculation (to match what sender used)
-        $signatureData = $timestampHeader.'.'.$payload;
-
-        // 5. Generate the expected HMAC hash
-        // 'sha256' matches the NestJS algorithm
-        // $webhookSecret is your 'notificationToken'
-        $expectedSignature = hash_hmac('sha256', $signatureData, $webhookSecret);
-
-        // 6. Compare securely
-        // hash_equals prevents timing attacks
-        return hash_equals($expectedSignature, $signatureHeader);
     }
 }
