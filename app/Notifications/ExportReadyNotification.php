@@ -23,6 +23,10 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
         private string $mediaId,
     ) {
         $this->media = Media::find($this->mediaId);
+
+        if (! $this->media) {
+            throw new \InvalidArgumentException("Media with ID {$this->mediaId} does not exist.");
+        }
     }
 
     /**
