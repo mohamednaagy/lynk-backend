@@ -20,7 +20,6 @@ class NotificationsController extends Controller
     {
         $query = $builder
             ->setUser(Auth::user())
-            ->setUnreadOnly($request->boolean('unread_only'))
             ->handle();
 
         // Get notifications for the authenticated user from the last 30 days

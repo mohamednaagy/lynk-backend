@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 interface BuildUserNotificationsQuery
 {
-    public function handle(): Builder;
+    public function handle(): ?Builder;
 
     public function setUser(User $user): self;
-
-    public function setUnreadOnly(bool $unreadOnly): self;
 }
