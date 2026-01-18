@@ -10,7 +10,6 @@ use App\Enums\Subject;
 use App\Exports\FinancingOrdersExport;
 use App\Http\Controllers\Controller;
 use App\Jobs\Reports\Enums\ReportType;
-use App\Models\Lender;
 use App\Services\ExportService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,21 +46,7 @@ class ExportOrders extends Controller
     protected function getFileName(Request $request, string $type = 'xlsx')
     {
         $today = saudi_now('Ymd_His');
-        $company = $this->getFirstCompany($request);
 
-        return $company
-            ? "{$company->name}_LYNKOrderList_{$today}.{$type}"
-            : "LYNKOrderList_{$today}.{$type}";
-    }
-
-    protected function getFirstCompany(Request $request)
-    {
-        $company = $request->company;
-        $company = is_array($company) ? $company : explode(',', $company ?? '');
-        if (count($company) !== 1) {
-            return null;
-        }
-
-        return Lender::find($company[0], ['name']);
+        return "LYNKOrderList_{$today}.{$type}";
     }
 }
