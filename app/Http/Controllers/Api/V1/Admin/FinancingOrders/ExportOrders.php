@@ -39,10 +39,9 @@ class ExportOrders extends Controller
         );
 
         // Return a response indicating the export is being processed
-        return response()->json([
-            'message' => 'Your export request has been submitted and is being processed.',
-            'status' => 'processing',
-        ], JsonResponse::HTTP_ACCEPTED);
+        return $this->successResponse([
+            'message' => __('notifications.orders-export-processing'),
+        ]);
     }
 
     protected function getFileName(Request $request, string $type = 'xlsx')
