@@ -15,10 +15,7 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
      */
     public function saving(FinancingOrder $financingOrder): void
     {
-        $financingOrder->latest_activity = $financingOrder->status->isNot(FinancingOrderStatus::InProgress)
-            || \is_null($financingOrder->current_step)
-            ? $financingOrder->status->description
-            : $financingOrder->current_step->description;
+        $financingOrder->latest_activity = $this->getLatestActivityDescription($financingOrder);
     }
 
     /**
@@ -50,5 +47,25 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
             && FinancingOrder::readyForProcessing()->exists()) {
             ProcessInProgressOrder::dispatch($financingOrder->id);
         }
+    }
+
+    /**
+     * Helper function to get the latest activity description for a financing order
+     */
+    public function updateLatestActivity(FinancingOrder $financingOrder): void
+    {
+        $financingOrder->latest_activity = $this->getLatestActivityDescription($financingOrder);
+        $financingOrder->saveQuietly();
+    }
+
+    /**
+     * Get the latest activity description based on status and current step
+     */
+    private function getLatestActivityDescription(FinancingOrder $financingOrder): string
+    {
+        return $financingOrder->status->isNot(FinancingOrderStatus::InProgress)
+            || \is_null($financingOrder->current_step)
+            ? $financingOrder->status->description
+            : $financingOrder->current_step->description;
     }
 }
