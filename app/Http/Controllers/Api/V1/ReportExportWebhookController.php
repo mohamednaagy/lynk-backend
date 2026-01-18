@@ -4,12 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Events\RealtimeNotification;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ReportExportWebhookRequest;
 use App\Models\User;
 use App\Notifications\ExportReadyNotification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 
 class ReportExportWebhookController extends Controller
 {
@@ -17,26 +16,9 @@ class ReportExportWebhookController extends Controller
      * Handle the webhook request from the NestJS microservice
      * Called when an order list export is completed
      */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(ReportExportWebhookRequest $request): JsonResponse
     {
-        try {
-            // Validate the new NestJS format
-            $validatedData = $request->validate([
-                'media_id' => 'required|exists:media,id',
-                'export_type' => 'required|string|max:255',
-                'model_id' => 'required|exists:users,id', // Using model_id instead of userId
-            ]);
-        } catch (ValidationException $e) {
-            Log::warning('Invalid order list export webhook payload', [
-                'errors' => $e->errors(),
-                'payload' => $request->all(),
-            ]);
-
-            return response()->json([
-                'error' => 'Invalid payload',
-                'details' => $e->errors(),
-            ], 400);
-        }
+        $validatedData = $request->validated();
 
         try {
             // Find the user who initiated the export
