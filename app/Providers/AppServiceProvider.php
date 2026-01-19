@@ -4,9 +4,9 @@ namespace App\Providers;
 
 use App\Actions\Companies\GetFinancingOrderTypeAction;
 use App\Actions\Contracts\Companies\GetFinancingOrderType;
-use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Listeners\LogActivity;
-use App\Services\FinancingOrderActivityUpdateService;
+use App\Services\FinancingOrder\FinancingOrderActivityUpdateService;
 use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageStrategy;
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\OptimizedLoanCoverageStrategy;

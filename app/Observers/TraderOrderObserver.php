@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;

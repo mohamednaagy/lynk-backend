@@ -9,6 +9,8 @@ use App\Jobs\Reports\Enums\ReportType;
 use App\Models\Media;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class ExportReadyNotification extends BaseNotification implements ShouldQueue
 {
@@ -20,13 +22,13 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      * @return void
      */
     public function __construct(
-        private string $exportType,
-        private string $mediaId,
+        private readonly string $exportType,
+        private readonly string $mediaId,
     ) {
         $this->media = Media::find($this->mediaId);
 
         if (! $this->media) {
-            throw new \InvalidArgumentException("Media with ID {$this->mediaId} does not exist.");
+            throw new InvalidArgumentException("Media with ID {$this->mediaId} does not exist.");
         }
     }
 
@@ -113,7 +115,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
 
     private function getReportName(): string
     {
-        return match ($this->exportType) {
+        return match (Str::convertCase($this->exportType)) {
             ReportType::OrderList => 'Order List',
             default => ''
         };

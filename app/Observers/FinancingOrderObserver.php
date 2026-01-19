@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Models\FinancingOrder;
 use Illuminate\Console\Command;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\FinancingOrder;
 
-use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 
