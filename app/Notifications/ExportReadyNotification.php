@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Enums\SystemNotificationType;
+use App\Jobs\Reports\Enums\ReportType;
 use App\Models\Media;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -66,14 +67,6 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
         return ($prefix ? "{$prefix} " : '').__('notification-types.orders_report_export_ready.label');
     }
 
-    private function getReportName(): string
-    {
-        return match ($this->exportType) {
-            'ORDER_LIST' => 'Order List',
-            default => ''
-        };
-    }
-
     /**
      * Get the description for the notification.
      *
@@ -116,5 +109,13 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
             'download_url' => formatMediaUrl($this->media?->fileUrl),
             'file_name' => $this->media->file_name,
         ];
+    }
+
+    private function getReportName(): string
+    {
+        return match ($this->exportType) {
+            ReportType::OrderList => 'Order List',
+            default => ''
+        };
     }
 }
