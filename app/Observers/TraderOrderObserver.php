@@ -7,6 +7,7 @@ use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Jobs\FinancingOrders\CompleteOrderJob;
 use App\Models\TraderOrder;
+use App\Services\FinancingOrderActivityUpdateService;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class TraderOrderObserver implements ShouldHandleEventsAfterCommit
@@ -77,7 +78,7 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
         $financingOrder = $traderOrder->order;
 
         // Use the service to update the latest activity
-        app(\App\Services\FinancingOrderActivityUpdateService::class)->updateFinancingOrderLatestActivity($financingOrder);
+        app(FinancingOrderActivityUpdateService::class)->updateFinancingOrderLatestActivity($financingOrder);
     }
 
     /**
