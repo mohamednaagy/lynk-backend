@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
 use App\Models\FinancingOrder;
-use App\Services\FinancingOrderActivityUpdateService;
 use Illuminate\Console\Command;
 
 class PopulateFinancingOrderLatestActivity extends Command
@@ -39,15 +39,12 @@ class PopulateFinancingOrderLatestActivity extends Command
         $bar->start();
 
         $processed = 0;
-        $service = app(FinancingOrderActivityUpdateService::class);
+        $service = app(FinancingOrderActivityUpdateInterface::class);
 
         // Process in chunks to avoid memory issues
         $query->chunk($chunkSize, function ($financingOrders) use ($bar, &$processed, $service) {
             foreach ($financingOrders as $order) {
-                // Calculate the latest activity based on the same logic as the observer
                 $service->updateFinancingOrderLatestActivity($order);
-
-                // Update the record directly
                 $processed++;
                 $bar->advance();
             }

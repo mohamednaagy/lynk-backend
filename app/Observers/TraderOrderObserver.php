@@ -2,12 +2,12 @@
 
 namespace App\Observers;
 
+use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
 use App\Jobs\FinancingOrders\CompleteOrderJob;
 use App\Models\TraderOrder;
-use App\Services\FinancingOrderActivityUpdateService;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class TraderOrderObserver implements ShouldHandleEventsAfterCommit
@@ -75,7 +75,7 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
      */
     private function updateFinancingOrderLatestActivity(TraderOrder $traderOrder): void
     {
-        app(FinancingOrderActivityUpdateService::class)->updateFinancingOrderLatestActivity($traderOrder->order);
+        app(FinancingOrderActivityUpdateInterface::class)->updateFinancingOrderLatestActivity($traderOrder->order);
     }
 
     /**

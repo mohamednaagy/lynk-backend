@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
+use App\Contracts\Services\FinancingOrderActivityUpdateInterface;
 use App\Models\FinancingOrder;
 
-class FinancingOrderActivityUpdateService
+class FinancingOrderActivityUpdateService implements FinancingOrderActivityUpdateInterface
 {
     /**
      * Update the latest activity for a financing order
@@ -18,7 +19,7 @@ class FinancingOrderActivityUpdateService
     /**
      * Get the latest activity description based on status and current step
      */
-    private function getLatestActivityDescription(FinancingOrder $financingOrder): string
+    public function getLatestActivityDescription(FinancingOrder $financingOrder): string
     {
         return $financingOrder->status->isNot(\App\Enums\FinancingOrderStatus::InProgress)
             || \is_null($financingOrder->current_step)
