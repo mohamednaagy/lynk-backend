@@ -43,7 +43,7 @@ class ExportOrders extends Controller
         ]);
     }
 
-    protected function getFileName(Request $request, string $type = 'xlsx')
+    protected function getFileName(Request $request, string $type = 'xlsx'): string
     {
         $today = saudi_now('Ymd_His');
 
