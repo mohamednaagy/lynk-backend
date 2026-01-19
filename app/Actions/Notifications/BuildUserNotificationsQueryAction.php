@@ -4,6 +4,7 @@ namespace App\Actions\Notifications;
 
 use App\Actions\Contracts\Notifications\BuildUserNotificationsQuery;
 use App\Models\User;
+use App\Support\QueryScoper\Scopes\Notifications\RecentNotificationsScope;
 use Illuminate\Database\Eloquent\Builder;
 
 class BuildUserNotificationsQueryAction implements BuildUserNotificationsQuery
@@ -16,15 +17,10 @@ class BuildUserNotificationsQueryAction implements BuildUserNotificationsQuery
             return null;
         }
 
-        $relation = $this->user->notifications();
-
-        $relation->where('created_at', '>=', now()->subDays(config('notifications.panel.days')));
-
-        // Get the underlying query builder and apply ordering
-        $builder = $relation->getQuery();
-        $builder->latest();
-
-        return $builder;
+        return $this->user->notifications()
+            ->getQuery()
+            ->toScopes($this->scopes())
+            ->latest();
     }
 
     public function setUser(User $user): self
@@ -32,5 +28,12 @@ class BuildUserNotificationsQueryAction implements BuildUserNotificationsQuery
         $this->user = $user;
 
         return $this;
+    }
+
+    private function scopes(): array
+    {
+        return [
+            'recent' => RecentNotificationsScope::class,
+        ];
     }
 }
