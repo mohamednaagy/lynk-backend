@@ -9,24 +9,11 @@ use Illuminate\Support\Facades\Config;
 
 class AddNotificationTypeSettings extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'notifications:add-type-settings
                             {type : The notification type to add settings for}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Add notification settings for a specific type to users with appropriate roles, without overwriting existing settings.';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $notificationType = $this->argument('type');
@@ -44,6 +31,9 @@ class AddNotificationTypeSettings extends Command
         }
 
         $notificationConfig = $notificationTypes[$notificationType];
+        $configRoleNames = array_map(function ($roleEnum) {
+            return $roleEnum->value ?? $roleEnum;
+        }, $notificationConfig['roles']);
 
         $this->info("Adding notification settings for type: {$notificationType}");
         $this->info('Roles that should receive this notification: '.implode(', ', array_column($notificationConfig['roles'], 'value')));
@@ -51,15 +41,11 @@ class AddNotificationTypeSettings extends Command
         $processedUsers = 0;
         $createdSettings = 0;
 
-        User::with('roles', 'notificationSettings')->chunk(100, function ($users) use ($notificationType, $notificationConfig, &$processedUsers, &$createdSettings) {
+        User::with('roles', 'notificationSettings')->chunk(100, function ($users) use ($notificationConfig, $notificationType, $configRoleNames, &$processedUsers, &$createdSettings) {
             foreach ($users as $user) {
                 $userRoles = $user->roles->pluck('name')->toArray();
 
                 // Check if user has any of the roles that should receive this notification
-                $configRoleNames = array_map(function ($roleEnum) {
-                    return $roleEnum->value ?? $roleEnum;
-                }, $notificationConfig['roles']);
-
                 $hasEligibleRole = ! empty(array_intersect($userRoles, $configRoleNames));
 
                 if (! $hasEligibleRole) {
@@ -68,28 +54,22 @@ class AddNotificationTypeSettings extends Command
 
                 // Process each channel for this notification type
                 foreach ($notificationConfig['channels'] as $channel => $channelConfig) {
-                    // Check if this specific setting already exists
-                    $existingSetting = $user->notificationSettings
-                        ->where('notification_type', $notificationType)
-                        ->where('channel', $channel)
-                        ->first();
-
-                    if (! $existingSetting) {
-                        // Create the setting if it doesn't exist
-                        UserNotificationSetting::create([
+                    // Create the setting if it doesn't exist
+                    UserNotificationSetting::firstOrCreate(
+                        [
                             'user_id' => $user->id,
                             'notification_type' => $notificationType,
                             'channel' => $channel,
-                            'is_enabled' => $channelConfig['default'],
-                        ]);
-                        $createdSettings++;
-                    } else {
-                        $this->info("Setting already exists for user {$user->id} ({$user->email}), skipping...");
-                    }
+                        ],
+                        [
+                            'is_enabled' => $channelConfig['default'] ?? false,
+                        ]
+                    );
+                    $createdSettings++;
                 }
-
-                $processedUsers++;
             }
+
+            $processedUsers++;
         });
 
         $this->info("Successfully processed notification settings for type: {$notificationType}");
