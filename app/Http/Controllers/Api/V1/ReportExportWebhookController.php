@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Events\RealtimeNotification;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\ReportExportWebhookRequest;
+use App\Jobs\Reports\Enums\ReportType;
 use App\Models\User;
 use App\Notifications\ExportReadyNotification;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +38,7 @@ class ReportExportWebhookController extends Controller
 
             // Send realtime notification with export-type-specific message
             $notificationMessage = $this->getNotificationMessage($validatedData['export_type']);
-            event(new RealtimeNotification(__($notificationMessage), $user->id));
+            event(new RealtimeNotification($notificationMessage, $user->id));
 
             Log::info('Export webhook processed successfully', [
                 'user_id' => $validatedData['model_id'],
@@ -66,9 +67,9 @@ class ReportExportWebhookController extends Controller
     private function getNotificationMessage(string $exportType): string
     {
         return match ($exportType) {
-            'ORDER_LIST', 'order_list' => 'notification.orders-exported',
-            'SUPPLIER_MONTHLY_USAGE', 'supplier_monthly_usage' => 'notification.supplier-monthly-usage-exported',
-            default => 'notification.export-completed'
+            ReportType::OrderList => __('notification.orders-exported'),
+            ReportType::SupplierMonthlyUsage => __('notification.supplier-monthly-usage-exported'),
+            default => __('notification.export-completed')
         };
     }
 }
