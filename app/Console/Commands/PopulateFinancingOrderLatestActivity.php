@@ -3,32 +3,20 @@
 namespace App\Console\Commands;
 
 use App\Models\FinancingOrder;
+use App\Services\FinancingOrderActivityUpdateService;
 use Illuminate\Console\Command;
 
 class PopulateFinancingOrderLatestActivity extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'financing-orders:populate-latest-activity
                             {--chunk-size=1000 : Number of records to process at once}
                             {--force : Force update even if latest_activity is already set}';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Populate the latest_activity field for all existing financing orders';
 
-    /**
-     * Execute the console command.
-     */
-    public function handle()
+    public function handle(): int
     {
-        $chunkSize = $this->option('chunk-size');
+        $chunkSize = $this->option('chunk-size') ?? 1000;
         $force = $this->option('force');
 
         $query = FinancingOrder::query();
@@ -39,7 +27,7 @@ class PopulateFinancingOrderLatestActivity extends Command
 
         $totalRecords = $query->count();
 
-        if ($totalRecords === 0) {
+        if (empty($totalRecords)) {
             $this->info('No financing orders need to be updated.');
 
             return 0;
@@ -51,18 +39,15 @@ class PopulateFinancingOrderLatestActivity extends Command
         $bar->start();
 
         $processed = 0;
+        $service = app(FinancingOrderActivityUpdateService::class);
 
         // Process in chunks to avoid memory issues
-        $query->chunk($chunkSize, function ($financingOrders) use ($bar, &$processed) {
+        $query->chunk($chunkSize, function ($financingOrders) use ($bar, &$processed, $service) {
             foreach ($financingOrders as $order) {
                 // Calculate the latest activity based on the same logic as the observer
-                $latestActivity = $order->status->isNot(\App\Enums\FinancingOrderStatus::InProgress)
-                      || is_null($order->current_step)
-                      ? $order->status->description
-                      : $order->current_step->description;
+                $service->updateFinancingOrderLatestActivity($order);
 
                 // Update the record directly
-                $order->update(['latest_activity' => $latestActivity]);
                 $processed++;
                 $bar->advance();
             }
