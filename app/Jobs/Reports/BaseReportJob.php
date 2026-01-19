@@ -23,6 +23,11 @@ abstract class BaseReportJob implements ShouldQueue
     }
 
     /**
+     * Build the message to be sent
+     */
+    abstract protected function buildMessage(): ReportMessage;
+
+    /**
      * Execute the job.
      */
     public function handle(): void
@@ -54,9 +59,4 @@ abstract class BaseReportJob implements ShouldQueue
             'exception_trace' => $exception?->getTraceAsString(),
         ];
     }
-
-    /**
-     * Build the message to be sent
-     */
-    abstract protected function buildMessage(): ReportMessage;
 }
