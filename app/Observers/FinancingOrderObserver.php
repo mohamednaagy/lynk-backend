@@ -15,7 +15,9 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
      */
     public function saving(FinancingOrder $financingOrder): void
     {
-        $financingOrder->latest_activity = $this->getLatestActivityDescription($financingOrder);
+        if ($financingOrder->isDirty('status')) {
+            $financingOrder->latest_activity = $this->getLatestActivityDescription($financingOrder);
+        }
     }
 
     /**
