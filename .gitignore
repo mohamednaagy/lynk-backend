@@ -45,3 +45,5 @@ boost.json
 .serena/
 .qwen/
 .gemini/
+
+.phpunit.cache/

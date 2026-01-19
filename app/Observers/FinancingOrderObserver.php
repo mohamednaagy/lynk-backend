@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;
@@ -9,6 +10,17 @@ use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
 class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
 {
+    /**
+     * Handle the FinancingOrder "saving" event.
+     */
+    public function saving(FinancingOrder $financingOrder): void
+    {
+        if ($financingOrder->isDirty('status')) {
+            $financingOrder->latest_activity = app(FinancingOrderActivityUpdateInterface::class)
+                ->getLatestActivityDescription($financingOrder);
+        }
+    }
+
     /**
      * Handle the TraderOrder "created" event.
      */

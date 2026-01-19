@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Enums\FinancingOrderHistory;
 use App\Enums\TraderOrderStatus;
 use App\Events\TraderOrderCancelled;
@@ -25,10 +26,12 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(TraderOrder $traderOrder)
     {
-
         if ($traderOrder->needsProcessingAfterInitiation()) {
             $traderOrder->processInitiatedTraderOrder();
         }
+
+        // Update the parent financing order's latest activity
+        $this->updateFinancingOrderLatestActivity($traderOrder);
     }
 
     /**
@@ -45,6 +48,11 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
         if ($traderOrder->wasChanged(['status'])) {
             $this->takeActionsIfStatusWasChanged($traderOrder);
         }
+
+        // Update the parent financing order's latest activity when status changes
+        if ($traderOrder->wasChanged('status')) {
+            $this->updateFinancingOrderLatestActivity($traderOrder);
+        }
     }
 
     protected function takeActionsIfStatusWasChanged(TraderOrder $traderOrder): void
@@ -60,7 +68,14 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
         ) {
             CompleteOrderJob::dispatch($traderOrder->order->id, []);
         }
+    }
 
+    /**
+     * Update the parent financing order's latest activity
+     */
+    private function updateFinancingOrderLatestActivity(TraderOrder $traderOrder): void
+    {
+        app(FinancingOrderActivityUpdateInterface::class)->updateFinancingOrderLatestActivity($traderOrder->order);
     }
 
     /**

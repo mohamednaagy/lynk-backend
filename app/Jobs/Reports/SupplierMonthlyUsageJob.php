@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs\Reports;
 
 use App\Jobs\Reports\Dto\ReportMessage;
@@ -24,16 +26,10 @@ class SupplierMonthlyUsageJob implements ShouldQueue
         $this->onQueue('mq');
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        $queueName = config('services.rabbitmq.queue_name');
-
         Queue::connection('rabbitmq')->pushRaw(
             json_encode($this->buildMessage()->toArray()),
-            $queueName
         );
     }
 

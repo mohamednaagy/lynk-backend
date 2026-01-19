@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Config;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as baseMedia;
 
+/**
+ * Summary of Media
+ *
+ * @property string $fileUrl
+ */
 class Media extends baseMedia
 {
     use SoftDeletes;
