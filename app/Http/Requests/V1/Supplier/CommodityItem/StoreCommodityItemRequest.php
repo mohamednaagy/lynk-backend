@@ -32,7 +32,7 @@ class StoreCommodityItemRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'max:32',
+                'max:16',
                 new CommodityItemUniqueNameRole,
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id)->withoutTrashed(),
             ],
