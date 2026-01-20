@@ -229,5 +229,4 @@ return [
     'need_to_select_financing_order_type' => 'You must select a financing order type to create the order.',
     'amount_gte' => 'Entered amount should be greater than or equal to :amount SAR',
     'auto_verified_not_allowed' => 'Auto verified users are not allowed',
-    'commodity_type_id_not_editable' => 'The commodity_type_id is not editable',
 ];
