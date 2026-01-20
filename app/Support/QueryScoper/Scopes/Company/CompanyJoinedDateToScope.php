@@ -29,5 +29,3 @@ class CompanyJoinedDateToScope extends QueryScoper
         return $builder->where('created_at', '<=', Carbon::parse($data['date_to'])->endOfDay());
     }
 }
-
- lynk-backend/app/Support/QueryScoper/Scopes/Company/CompanyJoinedDateToScope.php
