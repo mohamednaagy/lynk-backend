@@ -4,7 +4,6 @@ namespace App\Http\Requests\V1\Admin\Commodities\CommodityType;
 
 use App\Enums\CommodityTypeStatus;
 use App\Models\CommodityType;
-use App\Rules\CommodityTypeUniqueNameRole;
 use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -45,13 +44,7 @@ class UpdateCommodityTypeRequest extends FormRequest
             ],
 
             'unique_name' => [
-                'required',
-                'string',
-                'min:3',
-                'max:16',
-                new CommodityTypeUniqueNameRole,
-                Rule::unique(CommodityType::class, 'unique_name')->ignore($this->route('commodity_type')),
-
+                'prohibited',
             ],
             'status' => ['required',  new EnumValue(CommodityTypeStatus::class)],
 
