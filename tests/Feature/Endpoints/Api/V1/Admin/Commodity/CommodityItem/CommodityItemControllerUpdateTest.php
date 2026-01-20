@@ -211,10 +211,10 @@ class CommodityItemControllerUpdateTest extends TestCase
             ->putJson($this->endpoint, Arr::add(self::$commodityItem, 'commodity_type_id', 123))
             ->assertUnprocessable()
             ->assertExactJson([
-                'message' => 'The commodity_type_id should not be passed in the request.',
+                'message' => 'validation.failed',
                 'errors' => [
                     'commodity_type_id' => [
-                        'The commodity_type_id should not be passed in the request.',
+                        __('validation.commodity_type_id_not_editable'),
                     ],
                 ],
             ]);

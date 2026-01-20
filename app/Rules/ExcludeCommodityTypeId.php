@@ -26,6 +26,6 @@ class ExcludeCommodityTypeId implements Rule
      */
     public function message()
     {
-        return 'The commodity_type_id should not be passed in the request.';
+        return __('validation.commodity_type_id_not_editable');
     }
 }
