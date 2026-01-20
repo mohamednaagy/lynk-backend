@@ -335,6 +335,8 @@ jobs:
                   NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
                   NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
+
+                  ORDER_EXPORT_WEBHOOK_SECRET=${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}
                   ENVEOF
 
                   echo "✓ .env file created from GitHub secrets/variables"
