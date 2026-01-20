@@ -33,7 +33,7 @@ class UpdateCommodityTypeRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'max:32',
+                'max:64',
                 Rule::unique(CommodityType::class, 'name')->ignore($this->route('commodity_type')),
             ],
 

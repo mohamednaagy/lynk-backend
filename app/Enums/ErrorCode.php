@@ -103,4 +103,6 @@ class ErrorCode
     public const ITEM_NOT_FOUND = 1052;
 
     public const UNABLE_TO_SETTLE_ORDER = 1053;
+
+    public const ERROR_HOLDING_UNITS = 1054;
 }
