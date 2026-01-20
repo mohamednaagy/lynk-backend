@@ -11,6 +11,7 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
+use App\Jobs\FinancingOrders\NotifyAboutOrderCancelled;
 use App\Models\FinancingOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -61,11 +62,14 @@ class CancelOrder extends Controller
                 }
             }
 
+            $canceller = $request->user();
             $cancelOrder->handle(
                 $order,
-                $request->user(),
+                $canceller,
                 $request->validated()
             );
+
+            dispatch(new NotifyAboutOrderCancelled($order, $canceller));
 
             return $this->successResponse();
         });
