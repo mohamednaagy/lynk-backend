@@ -31,7 +31,7 @@ return [
         'description' => 'A new lender has been registered: :company_name',
     ],
     'orders_report_export_ready' => [
-        'label' => 'Export Ready',
-        'description' => 'Your :exportType export is ready for download.',
+        'label' => 'Order List Export Ready',
+        'description' => 'Your export file is ready to download.',
     ],
 ];
