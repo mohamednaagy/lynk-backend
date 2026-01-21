@@ -31,7 +31,7 @@ return [
         'description' => 'تم تسجيل مقرض جديد: :company_name',
     ],
     'orders_report_export_ready' => [
-        'label' => 'الملف جاهز',
-        'description' => 'الملف :exportType جاهز للتحميل',
+        'label' => 'تقرير الطلبات جاهز للتحميل',
+        'description' => 'الملف جاهز للتحميل',
     ],
 ];

@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\ExportReadyNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ReportExportWebhookController extends Controller
 {
@@ -37,7 +38,7 @@ class ReportExportWebhookController extends Controller
             Log::info('Notification created successfully');
 
             // Send realtime notification with export-type-specific message
-            $notificationMessage = $this->getNotificationMessage($validatedData['export_type']);
+            $notificationMessage = $this->getNotificationMessage($validatedData['export_type'], $user->preferredLocale());
             event(new RealtimeNotification($notificationMessage, $user->id));
 
             Log::info('Export webhook processed successfully', [
@@ -62,14 +63,14 @@ class ReportExportWebhookController extends Controller
     }
 
     /**
-     * Get the appropriate notification message based on export type
+     * Get the appropriate notification message based on export type and locale
      */
-    private function getNotificationMessage(string $exportType): string
+    private function getNotificationMessage(string $exportType, string $locale): string
     {
-        return match ($exportType) {
-            ReportType::OrderList => __('notification.orders-exported'),
-            ReportType::SupplierMonthlyUsage => __('notification.supplier-monthly-usage-exported'),
-            default => __('notification.export-completed')
+        return match (Str::convertCase($exportType, MB_CASE_LOWER)) {
+            ReportType::OrderList => __('notification.orders-exported', [], $locale),
+            ReportType::SupplierMonthlyUsage => __('notification.supplier-monthly-usage-exported', [], $locale),
+            default => __('notification.export-completed', [], $locale),
         };
     }
 }
