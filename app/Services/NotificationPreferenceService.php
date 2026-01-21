@@ -72,7 +72,7 @@ class NotificationPreferenceService
 
     private function filterNotificationTypesForUserRoles(Collection $notificationTypesConfig, array $userRoles): Collection
     {
-        return $notificationTypesConfig->filter(function ($typeConfig, $typeKey) use ($userRoles) {
+        return $notificationTypesConfig->filter(function ($typeConfig) use ($userRoles) {
             return ! empty($typeConfig['roles']) && ! empty(array_intersect($typeConfig['roles'], $userRoles));
         });
     }
@@ -167,7 +167,7 @@ class NotificationPreferenceService
 
     public function getEnabledUsersFor(SystemNotificationType $type, ?Closure $extra = null): Collection
     {
-        return $this->getEnabledUsersForChannel($type, NotificationChannel::MAIL, $extra);
+        return $this->getEnabledUsersForType($type, null, $extra);
     }
 
     public function getEnabledUsersForPortal(SystemNotificationType $type, ?Closure $extra = null): Collection
@@ -177,19 +177,24 @@ class NotificationPreferenceService
 
     public function getEnabledUsersForChannel(SystemNotificationType $type, NotificationChannel $channel, ?Closure $extra = null): Collection
     {
-        $usersQuery = User::query()
+        return $this->getEnabledUsersForType($type, $channel, $extra);
+    }
+
+    public function getEnabledUsersForType(SystemNotificationType $type, ?NotificationChannel $channel = null, ?Closure $extra = null): Collection
+    {
+        return User::query()
             ->withoutGlobalScope(TenantScope::class)
             ->whereHas('notificationSettings', function ($q) use ($type, $channel) {
                 $q->where('notification_type', $type)
-                    ->where('channel', $channel)
+                    ->when($channel, function ($query) use ($channel) {
+                        $query->where('channel', $channel);
+                    })
                     ->where('is_enabled', true);
-            });
-
-        if ($extra) {
-            $usersQuery->where($extra);
-        }
-
-        return $usersQuery->get();
+            })
+            ->when($extra, function ($query) use ($extra) {
+                $query->where($extra);
+            })
+            ->get();
     }
 
     public function getUserNotificationTypeSettings($notifiable, SystemNotificationType $type): Collection
