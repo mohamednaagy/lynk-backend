@@ -2,10 +2,7 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Action;
-use App\Enums\Area;
 use App\Enums\Role;
-use App\Enums\Subject;
 use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -49,25 +46,16 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
         }
 
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) {
-                $query->where(function ($query) {
-                    $query->role(Role::Admin)
-                        ->orWhere(function ($query) {
-                            $query->role(Role::Manager)
-                                ->permission(
-                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Edit])
-                                );
-                        });
-                });
+            ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) use ($financingOrder) {
+                $query->role(Role::Admin)
+                    ->orWhere(function ($query) use ($financingOrder) {
+                        $query->role(Role::LenderAdmin)
+                            ->whereHas('lender', function ($query) use ($financingOrder) {
+                                $query->where('id', $financingOrder->company_id);
+                            });
+                    });
             });
 
         Notification::send($notifiables, new OrderRequiresApproval($financingOrder, $this->user));
-    }
-
-    public function isNotifyAllowed()
-    {
-        // Since notify_admins_about_new_orders has been removed, always return true
-        // to maintain notification functionality
-        return true;
     }
 }

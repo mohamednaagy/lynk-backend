@@ -201,7 +201,10 @@ class OrderController extends Controller
                     )
                 );
 
-                dispatch(new NotifyAboutOrderRequiresApproval($financingOrder->id, $user))->afterCommit();
+                if ($lender->isOrderApprovalRequired()) {
+                    dispatch(new NotifyAboutOrderRequiresApproval($financingOrder->id, $user))->afterCommit();
+                }
+
                 $includes = [
                     'id',
                     'status',

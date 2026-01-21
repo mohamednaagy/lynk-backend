@@ -56,7 +56,7 @@ return [
         ],
         'roles' => [
             Role::Admin,
-            Role::Manager,
+            Role::LenderAdmin,
         ],
     ],
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => [

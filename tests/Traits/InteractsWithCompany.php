@@ -15,6 +15,7 @@ use App\Enums\WalletType;
 use App\Models\Company;
 use App\Models\EdaatInvoice;
 use App\Models\FinancingOrder;
+use App\Models\Lender;
 use App\Support\Wallets\Contracts\TransactionServiceInterface;
 use Cknow\Money\Money;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -53,7 +54,8 @@ trait InteractsWithCompany
             ]
         );
 
-        app(CreateDefaultPricingTier::class)->handle($company);
+        $lender = Lender::query()->findOrFail($company->id);
+        app(CreateDefaultPricingTier::class)->handle($lender);
 
         return [
             $company,
