@@ -11,17 +11,6 @@ use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
 {
     /**
-     * Handle the FinancingOrder "saving" event.
-     */
-    public function saving(FinancingOrder $financingOrder): void
-    {
-        if ($financingOrder->isDirty('status')) {
-            $financingOrder->latest_activity = app(FinancingOrderActivityUpdateInterface::class)
-                ->getLatestActivityDescription($financingOrder);
-        }
-    }
-
-    /**
      * Handle the TraderOrder "created" event.
      */
     public function created(FinancingOrder $financingOrder): void
@@ -37,6 +26,13 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
             'status' => $financingOrder->status,
             'creator_id' => auth()?->id(),
         ]);
+
+        $this->updateFinancingOrderLatestActivity($financingOrder);
+    }
+
+    private function updateFinancingOrderLatestActivity(FinancingOrder $financingOrder): void
+    {
+        app(FinancingOrderActivityUpdateInterface::class)->updateFinancingOrderLatestActivity($financingOrder);
     }
 
     /**
@@ -49,6 +45,10 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
         if ($financingOrder->status !== $financingOrder->getOriginal('status')
             && FinancingOrder::readyForProcessing()->exists()) {
             ProcessInProgressOrder::dispatch($financingOrder->id);
+        }
+
+        if ($financingOrder->wasChanged('status')) {
+            $this->updateFinancingOrderLatestActivity($financingOrder);
         }
     }
 }
