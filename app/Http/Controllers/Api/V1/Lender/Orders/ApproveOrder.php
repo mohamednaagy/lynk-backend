@@ -50,11 +50,9 @@ class ApproveOrder extends Controller
 
             $approveOrder->handle($order, $request->user());
 
-            if (! $order->creator->is($request->user())) {
-                $order->creator->notify(
-                    new OrderApproved($order, $request->user(), now())
-                );
-            }
+            $order->creator->notify(
+                new OrderApproved($order, $request->user(), now())
+            );
 
             return $this->successResponse();
         });

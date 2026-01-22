@@ -93,7 +93,6 @@ return [
             Role::LenderAdmin,
             Role::LenderApiUser,
             Role::LenderSupervisor,
-            Role::LenderBilling,
             Role::LenderOrderCreator,
         ],
     ],
