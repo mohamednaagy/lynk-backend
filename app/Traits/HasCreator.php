@@ -3,6 +3,8 @@
 namespace App\Traits;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Stancl\Tenancy\Database\TenantScope;
 
 trait HasCreator
 {
@@ -18,9 +20,9 @@ trait HasCreator
         'name' => 'user',
     ];
 
-    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, $this->key);
+        return $this->belongsTo(User::class, $this->key)->withoutGlobalScope(TenantScope::class);
     }
 
     public function getCreator(): array
