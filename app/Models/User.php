@@ -243,16 +243,16 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     public function scopeWithLenderAdminForCompany(Builder $query, int $companyId): Builder
     {
         return $query->lenderAdmin()
-            ->whereHas('lender', function ($lenderQuery) use ($companyId) {
-                $lenderQuery->where('id', $companyId);
-            });
+            ->where('company_id', $companyId);
     }
 
     public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
     {
-        return $query->admin()
-            ->orWhere(function ($q) use ($companyId) {
-                $q->withLenderAdminForCompany($companyId);
-            });
+        return $query->where(function ($q) use ($companyId) {
+            $q->admin()
+                ->orWhere(function ($q) use ($companyId) {
+                    $q->withLenderAdminForCompany($companyId);
+                });
+        });
     }
 }
