@@ -11,7 +11,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 class TraderOrderCancelled extends BaseNotification implements ShouldQueue
 {
-    public function __construct(private TraderOrder $traderOrder, private ?User $user = null) {}
+    public function __construct(private readonly TraderOrder $traderOrder, private readonly ?User $user = null) {}
 
     /**
      * Get the notification's type.
@@ -34,8 +34,6 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
 
     /**
      * Get the description for the notification.
-     *
-     * @param  mixed  $notifiable
      */
     public function getDescription($notifiable): string
     {
@@ -52,7 +50,7 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
@@ -71,9 +69,8 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return array
      */
-    public function toArray($notifiable)
+    public function toArray($notifiable): array
     {
         return [
             ...parent::toArray($notifiable),
