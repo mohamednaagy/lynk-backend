@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\User;
 use App\Models\UserNotificationSetting;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -94,72 +93,73 @@ class ResetNotificationTypeSettings extends Command
         $result = [
             'eligibleUsersProcessed' => 0,
             'ineligibleUsersProcessed' => 0,
-            'settingsUpserted' => 0,
+            'settingsInserted' => 0,
             'settingsRemoved' => 0,
         ];
 
-        DB::transaction(function () use ($notificationConfig, $notificationType, $configRoleNames, &$result) {
-            User::with('roles', 'notificationSettings')->chunk(100, function (Collection $users) use ($notificationConfig, $notificationType, $configRoleNames, &$result) {
-                foreach ($users as $user) {
-                    $userRoles = $user->roles->pluck('name')->toArray();
+        DB::transaction(function () use ($notificationType, $notificationConfig, $configRoleNames, &$result) {
+            // 1. Handle ineligible users: find and delete their settings in one query.
+            $ineligibleUserQuery = User::whereDoesntHave('roles', fn ($q) => $q->whereIn('name', $configRoleNames));
+            $result['ineligibleUsersProcessed'] = $ineligibleUserQuery->count();
+            $ineligibleUserIds = $ineligibleUserQuery->pluck('id');
 
-                    if ($this->userHasEligibleRole($userRoles, $configRoleNames)) {
-                        $result['eligibleUsersProcessed']++;
-                        $result['settingsUpserted'] += $this->upsertUserNotificationSettings($user, $notificationType, $notificationConfig);
-                    } else {
-                        $result['ineligibleUsersProcessed']++;
-                        $result['settingsRemoved'] += $this->removeUserNotificationSettings($user, $notificationType);
+            if ($ineligibleUserIds->isNotEmpty()) {
+                $result['settingsRemoved'] = UserNotificationSetting::where('notification_type', $notificationType)
+                    ->whereIn('user_id', $ineligibleUserIds)
+                    ->delete();
+            }
+
+            // 2. Handle eligible users: collect settings to insert and use one bulk operation.
+            $eligibleUserQuery = User::whereHas('roles', fn ($q) => $q->whereIn('name', $configRoleNames));
+            $result['eligibleUsersProcessed'] = $eligibleUserQuery->count();
+
+            $settingsToCreate = [];
+            $eligibleUserQuery->select('id')->chunk(200, function ($users) use (&$settingsToCreate, $notificationType, $notificationConfig) {
+                foreach ($users as $user) {
+                    foreach ($notificationConfig['channels'] as $channel => $channelConfig) {
+                        $settingsToCreate[] = [
+                            'user_id' => $user->id,
+                            'notification_type' => $notificationType,
+                            'channel' => $channel,
+                            'is_enabled' => $channelConfig['default'] ?? false,
+                        ];
                     }
                 }
             });
+
+            if (! empty($settingsToCreate)) {
+                // Using insertOrIgnore to only insert new records without updating existing ones.
+                // Count existing records before insert for exact combinations
+                $existingCount = UserNotificationSetting::where('notification_type', $notificationType)
+                    ->where(function ($query) use ($settingsToCreate) {
+                        foreach ($settingsToCreate as $setting) {
+                            $query->orWhere(function ($q) use ($setting) {
+                                $q->where('user_id', $setting['user_id'])
+                                    ->where('channel', $setting['channel']);
+                            });
+                        }
+                    })
+                    ->count();
+
+                UserNotificationSetting::insertOrIgnore($settingsToCreate);
+
+                // Count total records after insert to get the actual number of inserted records
+                $totalCount = UserNotificationSetting::where('notification_type', $notificationType)
+                    ->where(function ($query) use ($settingsToCreate) {
+                        foreach ($settingsToCreate as $setting) {
+                            $query->orWhere(function ($q) use ($setting) {
+                                $q->where('user_id', $setting['user_id'])
+                                    ->where('channel', $setting['channel']);
+                            });
+                        }
+                    })
+                    ->count();
+
+                $result['settingsInserted'] = $totalCount - $existingCount;
+            }
         });
 
         return $result;
-    }
-
-    /**
-     * Check if user has any of the roles that should receive this notification
-     */
-    private function userHasEligibleRole(array $userRoles, array $configRoleNames): bool
-    {
-        return ! empty(array_intersect($userRoles, $configRoleNames));
-    }
-
-    /**
-     * Insert notification settings for a user if they don't exist
-     */
-    private function upsertUserNotificationSettings(User $user, string $notificationType, array $notificationConfig): int
-    {
-        $insertCount = 0;
-
-        foreach ($notificationConfig['channels'] as $channel => $channelConfig) {
-            $setting = UserNotificationSetting::firstOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'notification_type' => $notificationType,
-                    'channel' => $channel,
-                ],
-                [
-                    'is_enabled' => $channelConfig['default'] ?? false,
-                ]
-            );
-
-            if ($setting->wasRecentlyCreated) {
-                $insertCount++;
-            }
-        }
-
-        return $insertCount;
-    }
-
-    /**
-     * Remove all notification settings for a user for the given notification type
-     */
-    private function removeUserNotificationSettings(User $user, string $notificationType): int
-    {
-        return UserNotificationSetting::where('user_id', $user->id)
-            ->where('notification_type', $notificationType)
-            ->delete();
     }
 
     /**
@@ -168,7 +168,7 @@ class ResetNotificationTypeSettings extends Command
     private function displayResults(string $notificationType, array $result): void
     {
         $this->info("Successfully reset notification settings for type: $notificationType");
-        $this->info("Processed {$result['eligibleUsersProcessed']} eligible users, upserted {$result['settingsUpserted']} settings.");
+        $this->info("Processed {$result['eligibleUsersProcessed']} eligible users, inserted {$result['settingsInserted']} settings.");
         $this->info("Processed {$result['ineligibleUsersProcessed']} ineligible users, removed {$result['settingsRemoved']} settings.");
     }
 
