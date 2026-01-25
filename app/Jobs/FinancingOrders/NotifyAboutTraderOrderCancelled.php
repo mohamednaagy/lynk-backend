@@ -2,7 +2,6 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -34,17 +33,11 @@ class NotifyAboutTraderOrderCancelled implements ShouldQueue
      */
     public function handle(): void
     {
+        $companyId = $this->traderOrder->order->company_id;
+
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) {
-                $query->where(function ($query) {
-                    $query->role(Role::Admin)
-                        ->orWhere(function ($query) {
-                            $query->role(Role::LenderAdmin)
-                                ->whereHas('lender', function ($query) {
-                                    $query->where('id', $this->traderOrder->order->company_id);
-                                });
-                        });
-                });
+            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($companyId) {
+                $query->forTradeRequestCancelledNotification($companyId);
             });
 
         Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder, $this->canceller));

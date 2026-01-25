@@ -36,6 +36,11 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property-read string $full_name
  * @property \Spatie\Permission\Models\Role[] $roles
  *
+ * @method static Builder admin()
+ * @method static Builder lenderAdmin()
+ * @method static Builder withLenderAdminForCompany(int $companyId)
+ * @method static Builder forTradeRequestCancelledNotification(int $companyId)
+ *
  * @mixin Builder
  */
 class User extends Authenticatable implements Grantifiable, HasLocalePreference, JWTSubject, MustVerifyEmail, Otpifiable
@@ -218,10 +223,36 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     /**
      * Get the entity's notifications.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphMany<DatabaseNotification, $this>
+     * @return MorphMany<DatabaseNotification, $this>
      */
     public function notifications(): MorphMany
     {
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest();
+    }
+
+    public function scopeAdmin(Builder $query): Builder
+    {
+        return $query->role(Role::Admin);
+    }
+
+    public function scopeLenderAdmin(Builder $query): Builder
+    {
+        return $query->role(Role::LenderAdmin);
+    }
+
+    public function scopeWithLenderAdminForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->lenderAdmin()
+            ->whereHas('lender', function ($lenderQuery) use ($companyId) {
+                $lenderQuery->where('id', $companyId);
+            });
+    }
+
+    public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
+    {
+        return $query->admin()
+            ->orWhere(function ($q) use ($companyId) {
+                $q->withLenderAdminForCompany($companyId);
+            });
     }
 }
