@@ -35,6 +35,7 @@ class NotifyAboutTraderOrderCancelled implements ShouldQueue
     {
         $companyId = $this->traderOrder->order->company_id;
 
+        // good query
         $notifiables = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($companyId) {
                 $query->forTradeRequestCancelledNotification($companyId);
