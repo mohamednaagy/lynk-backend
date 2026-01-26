@@ -481,6 +481,24 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+  # ============================================================================
+  # Schedule PROFILE
+  # ============================================================================
+
+  schedule-worker:
+    profiles: ["schedule"]
+    image: app-php-fpm:latest
+    working_dir: /var/www/html
+    restart: unless-stopped
+    <<: [*app-volumes, *host-network, *nightwatch-env]
+    command: php artisan schedule:work redis --verbose --tries=3 --timeout=120 --queue=schedule
+    depends_on:
+      - app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 volumes:
   redis_data:
