@@ -43,7 +43,7 @@ class CancelTraderOrder extends Controller
         return DB::transaction(function () use ($request, $cancelTraderOrder, $traderOrder) {
             $traderOrder = TraderOrder::lockForUpdate()->findOrFail($traderOrder);
 
-            if (! $traderOrder->canBeCancelled()) {
+            if (! $traderOrder->canBeCancelled(10)) {
                 return $this->errorResponse(
                     __('error.unable_to_cancel_order'),
                     Response::HTTP_FORBIDDEN,
