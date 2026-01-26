@@ -15,6 +15,7 @@ use App\Jobs\FinancingOrders\NotifyAboutTraderOrderCancelled;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class CancelTraderOrder extends Controller
@@ -72,5 +73,21 @@ class CancelTraderOrder extends Controller
 
             return $this->successResponse();
         });
+    }
+
+    private function dead()
+    {
+        Log::channel(LOG_CHANNEL_LYNK)->info('Test phpstan dead code detection');
+        $this->testDeprecatedCodeDetection();
+    }
+
+    /**
+     * @deprecated
+     *
+     * @return void
+     */
+    public function testDeprecatedCodeDetection()
+    {
+        Log::channel(LOG_CHANNEL_LYNK)->info('Test phpstan deprecated code detection');
     }
 }
