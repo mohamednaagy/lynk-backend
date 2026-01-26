@@ -491,7 +491,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: [*app-volumes, *host-network, *nightwatch-env]
-    command: php artisan schedule:work redis --verbose --tries=3 --timeout=120 --queue=schedule
+    command: php artisan schedule:run --verbose
     depends_on:
       - app
     healthcheck:
