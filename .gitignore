@@ -48,3 +48,4 @@ boost.json
 .ai/
 
 .phpunit.cache/
+.scannerwork/

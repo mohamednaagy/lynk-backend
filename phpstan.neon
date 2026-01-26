@@ -1,0 +1,23 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+#    - /mnt/d/CLOUD/WORK/LYNK/phpstan-baseline.neon
+
+parameters:
+
+    paths:
+        - app/
+        - config/
+        - database/
+        - Modules/
+
+    # The level 9 is the highest level
+    level: 5
+
+    ignoreErrors:
+        - '#Unsafe usage of new static#'
+
+#
+#    excludePaths:
+#        - ./*/*/FileToBeExcluded.php
+#
+#    checkMissingIterableValueType: false
