@@ -67,6 +67,7 @@ class CancelTraderOrder extends Controller
                 TraderOrderCancelReason::TraderOrderIsCancelled
             );
 
+            // test pre-commit hook
             dispatch(new NotifyAboutTraderOrderCancelled($traderOrder, $canceller));
 
             return $this->successResponse();
