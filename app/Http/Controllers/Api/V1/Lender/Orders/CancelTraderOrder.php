@@ -11,6 +11,7 @@ use App\Enums\Subject;
 use App\Enums\TraderOrderCancelReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Lender\Orders\CancelOrderRequest;
+use App\Jobs\FinancingOrders\NotifyAboutTraderOrderCancelled;
 use App\Models\TraderOrder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -58,12 +59,15 @@ class CancelTraderOrder extends Controller
                 );
             }
 
+            $canceller = $request->user();
             $cancelTraderOrder->handle(
                 $traderOrder,
-                $request->user(),
+                $canceller,
                 $request->validated(),
                 TraderOrderCancelReason::TraderOrderIsCancelled
             );
+
+            dispatch(new NotifyAboutTraderOrderCancelled($traderOrder, $canceller));
 
             return $this->successResponse();
         });
