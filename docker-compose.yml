@@ -491,7 +491,7 @@ services:
     working_dir: /var/www/html
     restart: unless-stopped
     <<: [*app-volumes, *host-network, *nightwatch-env]
-    command: php artisan schedule:run --verbose
+    command: php artisan schedule:work
     depends_on:
       - app
     healthcheck:
