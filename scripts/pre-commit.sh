@@ -24,12 +24,7 @@ echo "🎨 Running Laravel Pint..."
 vendor/bin/pint "${STAGED_PHP_FILES[@]}"
 
 # Re-stage files in case Pint modified them
-# Use a for loop to properly handle each file individually
-for file in "${STAGED_PHP_FILES[@]}"; do
-  if [[ -n "$file" ]]; then
-    git add "$file"
-  fi
-done
+git add "${STAGED_PHP_FILES[@]}"
 
 echo "✅ Pint formatting applied"
 

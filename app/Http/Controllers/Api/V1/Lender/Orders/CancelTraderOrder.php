@@ -51,6 +51,7 @@ class CancelTraderOrder extends Controller
                 );
             }
 
+            // dummy
             if ($traderOrder->doesLastActionMatchWith(FinancingOrderHistory::ContractSigned)) {
                 return $this->errorResponse(
                     __('error.unable_to_cancel_order'),
