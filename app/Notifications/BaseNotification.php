@@ -31,6 +31,11 @@ abstract class BaseNotification extends Notification
      */
     public function via($notifiable): array
     {
+        // Check if the user has allowed roles for this notification type
+        if (! $this->userHasAllowedRole($notifiable)) {
+            return [];
+        }
+
         $typeSettings = app(NotificationPreferenceService::class)->getUserNotificationTypeSettings($notifiable, $this->getType());
 
         return $this->getUserEnabledChannels($typeSettings);
@@ -51,7 +56,7 @@ abstract class BaseNotification extends Notification
 
     /**
      * Get the array representation of the notification.
-     * This is critical for database notifications.
+     * This is used by other channels as well.
      *
      * @param  mixed  $notifiable
      * @return array
@@ -60,7 +65,51 @@ abstract class BaseNotification extends Notification
     {
         return [
             'type' => $this->getType()->value,
+            'title' => $this->getTitle($notifiable),
+            'description' => $this->getDescription($notifiable),
         ];
+    }
+
+    /**
+     * Get the title for the notification.
+     * Subclasses should override this method to provide a specific title.
+     *
+     * @param  mixed  $notifiable
+     */
+    abstract public function getTitle($notifiable): string;
+
+    /**
+     * Get the description for the notification.
+     * Subclasses should override this method to provide a specific description.
+     *
+     * @param  mixed  $notifiable
+     */
+    abstract public function getDescription($notifiable): string;
+
+    /**
+     * Check if the user has allowed roles for this notification type.
+     *
+     * @param  mixed  $notifiable
+     */
+    private function userHasAllowedRole($notifiable): bool
+    {
+        $notificationType = $this->getType()->value;
+        $allowedRoles = config("notification-types.{$notificationType}.roles", []);
+
+        // If there are no allowed roles defined in config, allow all users
+        if (empty($allowedRoles)) {
+            return true;
+        }
+
+        // Validate that the user has one of the allowed roles
+        foreach ($allowedRoles as $role) {
+            if ($notifiable->hasRole($role)) {
+                return true;
+            }
+        }
+
+        // User doesn't have any of the allowed roles
+        return false;
     }
 
     /**

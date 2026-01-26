@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;
@@ -25,6 +26,13 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
             'status' => $financingOrder->status,
             'creator_id' => auth()?->id(),
         ]);
+
+        $this->updateFinancingOrderLatestActivity($financingOrder);
+    }
+
+    private function updateFinancingOrderLatestActivity(FinancingOrder $financingOrder): void
+    {
+        app(FinancingOrderActivityUpdateInterface::class)->updateFinancingOrderLatestActivity($financingOrder);
     }
 
     /**
@@ -37,6 +45,10 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
         if ($financingOrder->status !== $financingOrder->getOriginal('status')
             && FinancingOrder::readyForProcessing()->exists()) {
             ProcessInProgressOrder::dispatch($financingOrder->id);
+        }
+
+        if ($financingOrder->wasChanged('status')) {
+            $this->updateFinancingOrderLatestActivity($financingOrder);
         }
     }
 }

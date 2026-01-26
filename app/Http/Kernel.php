@@ -79,5 +79,6 @@ class Kernel extends HttpKernel
         'checkDataOfSupplier' => \App\Http\Middleware\EnsureDataOfUserSupplier::class,
         'ensureTokenNotExpired' => \App\Http\Middleware\EnsureTokenNotExpiredMiddleware::class,
         'verify.token.version' => \App\Http\Middleware\VerifyTokenVersion::class,
+        'webhook.signature' => \App\Http\Middleware\ValidateWebhookSignature::class,
     ];
 }

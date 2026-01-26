@@ -4,6 +4,7 @@ namespace App\Services\LocalMarket;
 
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketOrder;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -22,21 +23,38 @@ class LoanService
     public function getCommoditiesForLoan(LocalMarketOrder $localMarketOrder)
     {
 
-        $eligibleInventories = $this->inventoryService->findEligibleInventoryForLoan(
-            $localMarketOrder
-        );
+        DB::beginTransaction();
+        try {
+            $eligibleInventories = $this->inventoryService->findEligibleInventoryForLoan(
+                $localMarketOrder
+            );
 
-        if (empty($eligibleInventories)) {
-            return false;
+            if (empty($eligibleInventories)) {
+                DB::commit();
+
+                return false;
+            }
+
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getCommoditiesForLoan Duration', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+            ]);
+            $this->updateEligibleQuantities($eligibleInventories, $localMarketOrder->id);
+
+            $units = $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
+            DB::commit();
+
+            return $units;
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Error in getCommoditiesForLoan', $localMarketOrder), [
+                'localMarketOrderId' => $localMarketOrder->id,
+                'error' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : 'Hidden in production',
+            ]);
+
+            throw $e;
         }
-
-        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('getCommoditiesForLoan Duration', $localMarketOrder), [
-            'localMarketOrderId' => $localMarketOrder->id,
-        ]);
-
-        $this->updateEligibleQuantities($eligibleInventories, $localMarketOrder->id);
-
-        return $this->unitService->getEligibleUnits($localMarketOrder, $eligibleInventories);
     }
 
     /**

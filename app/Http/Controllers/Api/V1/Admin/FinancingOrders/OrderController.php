@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\FinancingOrders\ListOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\StoreOrderRequest;
 use App\Http\Requests\V1\Admin\FinancingOrders\UpdateOrderRequest;
+use App\Jobs\FinancingOrders\NotifyAboutOrderRequiresApproval;
 use App\Models\FinancingOrder;
 use App\Models\Lender;
 use App\Transformers\FinancingOrderTransformer;
@@ -201,6 +202,10 @@ class OrderController extends Controller
                         ]
                     )
                 );
+
+                if ($lender->isOrderApprovalRequired()) {
+                    dispatch(new NotifyAboutOrderRequiresApproval($financingOrder->id, $user))->afterCommit();
+                }
 
                 return fractal($financingOrder, new FinancingOrderTransformer)
                     ->parseIncludes([

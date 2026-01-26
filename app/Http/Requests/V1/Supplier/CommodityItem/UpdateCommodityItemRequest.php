@@ -5,6 +5,7 @@ namespace App\Http\Requests\V1\Supplier\CommodityItem;
 use App\Models\CommodityItem;
 use App\Rules\CommodityItemUniqueNameRole;
 use App\Rules\ExcludeCommodityTypeId;
+use App\Rules\SpecialCharValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,13 +37,13 @@ class UpdateCommodityItemRequest extends FormRequest
                 new CommodityItemUniqueNameRole,
                 Rule::unique(CommodityItem::class, 'unique_name')->where('company_id', tenant()->id)->ignore($this->route('commodity_item'))->withoutTrashed(),
             ],
-            'name' => ['required', 'string',  'max:256'],
-            'description' => ['nullable', 'string', 'max:512'],
+            'name' => ['required', 'string',  'max:256', new SpecialCharValidation],
+            'description' => ['nullable', 'string', 'max:512', new SpecialCharValidation],
             'commodity_type_id' => [new ExcludeCommodityTypeId],
             'max_price' => ['required', 'numeric', 'gt:0', 'gte:min_price'],
             'min_price' => ['required', 'numeric', 'gt:0', 'lte:max_price'],
             'currency_id' => ['required', 'exists:currencies,id'],
-            'volume_sellable_unit' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,5})?$/'],
+            'volume_sellable_unit' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,5})?$/', 'gt:0'],
             'measurement_id' => ['required', 'exists:measurements,id'],
         ];
     }

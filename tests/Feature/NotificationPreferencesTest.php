@@ -26,8 +26,8 @@ class NotificationPreferencesTest extends TestCase
         $settings = $service->listForUser($user);
 
         foreach ($settings as $setting) {
-            $this->assertFalse($setting['channels']['mail']['enabled'], "Email notification should default to disabled for {$setting['name']}");
-            $this->assertFalse($setting['channels']['platform']['enabled'], "Portal notification should default to disabled for {$setting['name']}");
+            $this->assertFalse($setting['channels'][NotificationChannel::MAIL->value]['enabled'], "Email notification should default to disabled for {$setting['name']}");
+            $this->assertFalse($setting['channels'][NotificationChannel::PLATFORM->value]['enabled'], "Portal notification should default to disabled for {$setting['name']}");
         }
     }
 
@@ -138,7 +138,7 @@ class NotificationPreferencesTest extends TestCase
 
             $portalSetting = UserNotificationSetting::where('user_id', $user->id)
                 ->where('notification_type', $type)
-                ->where('channel', \App\Enums\NotificationChannel::PLATFORM)
+                ->where('channel', NotificationChannel::PLATFORM)
                 ->first();
 
             $this->assertNotNull($portalSetting, "Portal notification setting should exist for type: {$type->value}");

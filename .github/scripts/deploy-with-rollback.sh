@@ -177,7 +177,7 @@ perform_rollback() {
         --scale local-market-commodities-settlement-worker=8 \
         --scale local-market-eligible-quantities-worker=8 \
         --scale local-market-order-inventories-units-logging=5 \
-        --scale local-market-order-initiation=5 \
+        --scale local-market-order-initiation=1 \
         --scale trader-order-initiation=5 \
         --scale local-market-generate-units=1 \
         --scale hold-eligible-local-order-units-worker=5 \
@@ -230,7 +230,7 @@ perform_rolling_deployment() {
         --scale local-market-commodities-settlement-worker=16 \
         --scale local-market-eligible-quantities-worker=16 \
         --scale local-market-order-inventories-units-logging=10 \
-        --scale local-market-order-initiation=10 \
+        --scale local-market-order-initiation=2 \
         --scale trader-order-initiation=10 \
         --scale local-market-generate-units=2 \
         --scale hold-eligible-local-order-units-worker=10 \
@@ -265,7 +265,7 @@ perform_rolling_deployment() {
         --scale local-market-commodities-settlement-worker=8 \
         --scale local-market-eligible-quantities-worker=8 \
         --scale local-market-order-inventories-units-logging=5 \
-        --scale local-market-order-initiation=5 \
+        --scale local-market-order-initiation=1 \
         --scale trader-order-initiation=5 \
         --scale local-market-generate-units=1 \
         --scale hold-eligible-local-order-units-worker=5 \

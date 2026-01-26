@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
@@ -34,6 +35,11 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property-read string $fullName
  * @property-read string $full_name
  * @property \Spatie\Permission\Models\Role[] $roles
+ *
+ * @method static Builder admin()
+ * @method static Builder lenderAdmin()
+ * @method static Builder withLenderAdminForCompany(int $companyId)
+ * @method static Builder forTradeRequestCancelledNotification(int $companyId)
  *
  * @mixin Builder
  */
@@ -212,5 +218,41 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     public function lender(): BelongsTo
     {
         return $this->belongsTo(Lender::class, 'company_id');
+    }
+
+    /**
+     * Get the entity's notifications.
+     *
+     * @return MorphMany<DatabaseNotification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest();
+    }
+
+    public function scopeAdmin(Builder $query): Builder
+    {
+        return $query->role(Role::Admin);
+    }
+
+    public function scopeLenderAdmin(Builder $query): Builder
+    {
+        return $query->role(Role::LenderAdmin);
+    }
+
+    public function scopeWithLenderAdminForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->lenderAdmin()
+            ->where('company_id', $companyId);
+    }
+
+    public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
+    {
+        return $query->where(function ($q) use ($companyId) {
+            $q->admin()
+                ->orWhere(function ($q) use ($companyId) {
+                    $q->withLenderAdminForCompany($companyId);
+                });
+        });
     }
 }

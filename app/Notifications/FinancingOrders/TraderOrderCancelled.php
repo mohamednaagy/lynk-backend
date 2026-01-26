@@ -11,15 +11,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 
 class TraderOrderCancelled extends BaseNotification implements ShouldQueue
 {
-    /**
-     * Create a new notification instance.
-     *
-     * @return void
-     */
-    public function __construct(private TraderOrder $traderOrder, private User $user)
-    {
-        //
-    }
+    public function __construct(private readonly TraderOrder $traderOrder, private readonly ?User $user = null) {}
 
     /**
      * Get the notification's type.
@@ -31,10 +23,34 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('notification-types.trade_request_cancelled.label');
+    }
+
+    /**
+     * Get the description for the notification.
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('notification-types.trade_request_cancelled.description', [
+            'trader_order_id' => $this->traderOrder->id,
+            'order_id' => $this->traderOrder->financing_order_id,
+            'user_name' => $this->user->fullName ?? 'System',
+            'amount' => $this->traderOrder->order->amount,
+            'selling_price' => $this->traderOrder->order->selling_price,
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
@@ -53,9 +69,8 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
      * Get the array representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return array
      */
-    public function toArray($notifiable)
+    public function toArray($notifiable): array
     {
         return [
             ...parent::toArray($notifiable),
@@ -63,8 +78,8 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
             'order_id' => $this->traderOrder->financing_order_id,
             'amount' => $this->traderOrder->order->amount,
             'selling_price' => $this->traderOrder->order->selling_price,
-            'user_id' => $this->user->id,
-            'user_name' => $this->user->fullName,
+            'user_id' => $this->user->id ?? null,
+            'user_name' => $this->user->fullName ?? 'System',
         ];
     }
 }

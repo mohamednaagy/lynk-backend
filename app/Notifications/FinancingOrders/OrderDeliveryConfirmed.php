@@ -35,6 +35,29 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('notification-types.delivery_confirmation_received.label');
+    }
+
+    /**
+     * Get the description for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('notification-types.delivery_confirmation_received.description', [
+            'order_id' => $this->financingOrder->id,
+            'trader_reference' => $this->traderOrder->reference,
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable
