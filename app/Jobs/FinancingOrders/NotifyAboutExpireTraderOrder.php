@@ -6,6 +6,7 @@ use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
 use App\Notifications\FinancingOrders\TraderRequestExpired;
 use App\Services\NotificationPreferenceService;
+use App\Support\QueryScoper\Scopes\Notifications\TradeRequestExpiredNotificationScope;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -36,7 +37,8 @@ class NotifyAboutExpireTraderOrder implements ShouldQueue
 
         $notifiables = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_EXPIRED, function ($query) use ($companyId) {
-                $query->forTradeRequestExpiredNotification($companyId);
+                $scope = new TradeRequestExpiredNotificationScope($companyId);
+                $scope->apply($query);
             });
 
         Notification::send($notifiables, new TraderRequestExpired($this->traderOrder));
