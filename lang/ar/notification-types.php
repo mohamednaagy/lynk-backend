@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'trade_request_cancelled' => [
         'label' => 'تم إلغاء طلب التداول',
-        'description' => 'تم إلغاء طلب التداول #:trader_order_id للطلب #:order_id بواسطة :user_name. المبلغ: :amount, سعر البيع: :selling_price',
+        'description' => 'تم إلغاء طلب المرابحة #:trader_order_id للطلب #:order_id بواسطة :user_name. المبلغ: :amount, سعر البيع: :selling_price',
     ],
     'order_cancelled' => [
         'label' => 'تم إلغاء الطلب',
@@ -33,5 +33,9 @@ return [
     'orders_report_export_ready' => [
         'label' => 'تقرير الطلبات جاهز للتحميل',
         'description' => 'الملف جاهز للتحميل',
+    ],
+    'trade_request_expired' => [
+        'label' => 'انتهت صلاحية طلب التداول',
+        'description' => 'انتهت صلاحية طلب المرابحة #:trader_order_id للطلب #:order_id .',
     ],
 ];

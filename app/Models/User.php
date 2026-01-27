@@ -40,6 +40,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @method static Builder lenderAdmin()
  * @method static Builder withLenderAdminForCompany(int $companyId)
  * @method static Builder forTradeRequestCancelledNotification(int $companyId)
+ * @method static Builder forTradeRequestExpiredNotification(int $companyId)
  *
  * @mixin Builder
  */
@@ -247,6 +248,16 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     }
 
     public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
+    {
+        return $query->where(function ($q) use ($companyId) {
+            $q->admin()
+                ->orWhere(function ($q) use ($companyId) {
+                    $q->withLenderAdminForCompany($companyId);
+                });
+        });
+    }
+
+    public function scopeForTradeRequestExpiredNotification(Builder $query, int $companyId): Builder
     {
         return $query->where(function ($q) use ($companyId) {
             $q->admin()

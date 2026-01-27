@@ -2,10 +2,9 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
-use App\Notifications\FinancingOrders\TraderOrderCancelled;
+use App\Notifications\FinancingOrders\TraderRequestExpired;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -23,30 +22,23 @@ class NotifyAboutExpireTraderOrder implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private TraderOrder $traderOrder)
+    public function __construct(private readonly TraderOrder $traderOrder)
     {
         $this->onQueue('notifications');
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        $lender = $this->traderOrder->order->lender()->withTrashed()->first();
+        $companyId = $this->traderOrder->order->company_id;
 
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($lender) {
-                $query->where(function ($query) use ($lender) {
-                    $query->role(Role::LenderAdmin)
-                        ->whereHas('lender', function ($query) use ($lender) {
-                            $query->where('id', $lender->id);
-                        });
-                });
+            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_EXPIRED, function ($query) use ($companyId) {
+                $query->forTradeRequestExpiredNotification($companyId);
             });
 
-        Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder));
+        Notification::send($notifiables, new TraderRequestExpired($this->traderOrder));
     }
 }

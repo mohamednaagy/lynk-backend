@@ -32,6 +32,8 @@ use Stancl\VirtualColumn\VirtualColumn;
 use UnexpectedValueException;
 
 /**
+ * @property int $id
+ * @property int $financing_order_id
  * @property mixed $reference
  * @property mixed $order
  * @property mixed $provider

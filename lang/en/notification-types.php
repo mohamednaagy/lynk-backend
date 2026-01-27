@@ -34,4 +34,8 @@ return [
         'label' => 'Order List Export Ready',
         'description' => 'Your export file is ready to download.',
     ],
+    'trade_request_expired' => [
+        'label' => 'Trade Request Expired',
+        'description' => 'The Trading Request #:trader_order_id has expired for Order #:order_id.',
+    ],
 ];
