@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Contracts\Services\FinancingOrder;
+namespace App\Actions\Contracts;
 
 use App\Models\FinancingOrder;
 
-interface FinancingOrderActivityUpdateInterface
+interface FinancingOrderActivityUpdate
 {
     /**
      * Get the latest activity description based on status and current step

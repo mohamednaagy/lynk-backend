@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Contracts\Services\PdfServiceInterface;
+use App\Actions\Contracts\PdfService;
 use App\Enums\DocumentType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GeneratePdfRequest;
@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class PdfController extends Controller
 {
     public function __construct(
-        private PdfServiceInterface $pdfService
+        private PdfService $pdfService
     ) {}
 
     /**
@@ -39,7 +39,6 @@ class PdfController extends Controller
                 'message' => $result['message'],
                 'error' => $result['error'] ?? null,
             ], 400);
-
         } catch (\Exception $e) {
             Log::error('PDF generation failed', [
                 'request' => $request->all(),
