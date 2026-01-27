@@ -35,13 +35,14 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property-read string $fullName
  * @property-read string $full_name
  * @property \Spatie\Permission\Models\Role[] $roles
+ * @property mixed $dummy
  *
- * @method static Builder admin()
- * @method static Builder lenderAdmin()
- * @method static Builder withLenderAdminForCompany(int $companyId)
- * @method static Builder forTradeRequestCancelledNotification(int $companyId)
+ * @method static Builder<User> admin()
+ * @method static Builder<User> lenderAdmin()
+ * @method static Builder<User> withLenderAdminForCompany(int $companyId)
+ * @method static Builder<User> forTradeRequestCancelledNotification(int $companyId)
  *
- * @mixin Builder
+ * @mixin Builder<User>
  */
 class User extends Authenticatable implements Grantifiable, HasLocalePreference, JWTSubject, MustVerifyEmail, Otpifiable
 {
@@ -71,7 +72,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -249,7 +250,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
     {
         return $query->where(function ($q) use ($companyId) {
-            $q->admin()
+            $q->admin() // @phpstan-ignore method.notFound
                 ->orWhere(function ($q) use ($companyId) {
                     $q->withLenderAdminForCompany($companyId);
                 });
