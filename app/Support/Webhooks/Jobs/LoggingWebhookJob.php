@@ -10,14 +10,14 @@ use Spatie\WebhookServer\CallWebhookJob;
 
 class LoggingWebhookJob extends CallWebhookJob
 {
-    public function handle()
+    public function handle(): void
     {
 
         Log::channel(LOG_CHANNEL_WEBHOOKS)->info('HTTP webhook request initiated', [
             'webhook_url' => $this->webhookUrl,
             'http_verb' => $this->httpVerb,
             'headers' => $this->headers,
-            'payload_size' => strlen(json_encode($this->payload)),
+            'payload_size' => strlen(json_encode($this->payload) ?: ''),
             'timeout' => $this->requestTimeout,
             'attempt' => $this->attempts(),
             'order_id' => $this->getOrderId(),
@@ -146,7 +146,7 @@ class LoggingWebhookJob extends CallWebhookJob
     /**
      * Handle job failure (when all retries are exhausted)
      */
-    public function failed(\Throwable $exception)
+    public function failed(\Throwable $exception): void
     {
         Log::channel(LOG_CHANNEL_WEBHOOKS)->critical('Webhook HTTP request permanently failed with order id: '.$this->getOrderId().' and trader order id: '.$this->getTraderOrderId(), [
             'webhook_url' => $this->webhookUrl,
@@ -159,10 +159,8 @@ class LoggingWebhookJob extends CallWebhookJob
             'trader_order_id' => $this->getTraderOrderId(),
         ]);
 
-        // Call parent failed method if it exists
-        if (method_exists(parent::class, 'failed')) {
-            parent::failed($exception);
-        }
+        // Call parent failed method
+        parent::failed($exception);
     }
 
     private function getOrderId(): ?int
@@ -173,5 +171,15 @@ class LoggingWebhookJob extends CallWebhookJob
     private function getTraderOrderId(): ?int
     {
         return $this->payload['trading_information']['trading_id'] ?? null;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function testUnusedFunction(): array
+    {
+        return [
+            'test' => 'test',
+        ];
     }
 }
