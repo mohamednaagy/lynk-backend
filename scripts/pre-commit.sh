@@ -6,7 +6,10 @@ export PATH="/usr/bin:/bin:/usr/local/bin:$PATH"
 echo "🔍 Running checks on staged files..."
 
 # Collect staged PHP files into an array using null-terminated strings to handle filenames with spaces
-mapfile -d '' STAGED_PHP_FILES < <(git diff --cached --name-only --diff-filter=ACMR -z | grep -z '\.php$')
+STAGED_PHP_FILES=()
+while IFS= read -r -d '' file; do
+    STAGED_PHP_FILES+=("$file")
+done < <(git diff --cached --name-only --diff-filter=ACMR -z | grep -z '\.php$')
 
 if [ ${#STAGED_PHP_FILES[@]} -eq 0 ]; then
   echo "⚠️  No staged PHP files detected. Did you forget git add?"
