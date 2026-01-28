@@ -103,4 +103,6 @@ class ErrorCode
     public const ITEM_NOT_FOUND = 1052;
 
     public const UNABLE_TO_SETTLE_ORDER = 1053;
+
+    public const BURSAM_REQUIRED_CONFIG_NOT_SET = 1054;
 }
