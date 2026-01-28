@@ -2,10 +2,7 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Action;
-use App\Enums\Area;
 use App\Enums\Role;
-use App\Enums\Subject;
 use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -45,12 +42,6 @@ class NotifyAboutOrderCancelled implements ShouldQueue
             ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED, function ($query) use ($lender) {
                 $query->where(function ($query) use ($lender) {
                     $query->role(Role::Admin)
-                        ->orWhere(function ($query) {
-                            $query->role(Role::Manager)
-                                ->permission(
-                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
-                                );
-                        })
                         ->orWhere(function ($query) use ($lender) {
                             $query->role(Role::LenderAdmin)
                                 ->whereHas('lender', function ($query) use ($lender) {

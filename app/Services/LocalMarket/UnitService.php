@@ -7,6 +7,7 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Enums\LocalMarket\OwnershipTypes;
 use App\Enums\LocalMarket\UnitOwnershipAction;
 use App\Exceptions\LocalMarket\ErrorPurchasingAtLocalMarket;
+use App\Exceptions\LocalMarket\FailedToHoldRequiredUnitsException;
 use App\Jobs\LocalMarket\states\ClearEligibleFlagAndRefreshInventory;
 use App\Models\Company;
 use App\Models\Lender;
@@ -116,13 +117,28 @@ class UnitService
                     $localMarketOrder->company_id,
                     $inventoryId,
                 ]);
+
+                $heldUnitsCount = LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                    ->where('local_market_inventory_id', $inventoryId)
+                    ->count();
+
+                if ($heldUnitsCount != $data['numberOfSuitableUnits']) {
+                    throw new FailedToHoldRequiredUnitsException(
+                        $data['numberOfSuitableUnits'],
+                        $heldUnitsCount,
+                        $inventoryId,
+                        $localMarketOrder->id
+                    );
+                }
             } catch (Exception $e) {
-                Log::channel('local_market')->error('Stored procedure hold_order_unit failed', [
-                    'order_id' => $localMarketOrder->id,
-                    'inventory_id' => $inventoryId,
-                    'error' => $e->getMessage(),
-                ]);
-                throw $e;
+                throw new FailedToHoldRequiredUnitsException(
+                    $data['numberOfSuitableUnits'],
+                    $heldUnitsCount,
+                    $inventoryId,
+                    $localMarketOrder->id,
+                    $e->getMessage(),
+                    $e,
+                );
             }
         }
 

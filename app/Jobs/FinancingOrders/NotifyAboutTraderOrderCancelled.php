@@ -2,10 +2,6 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Action;
-use App\Enums\Area;
-use App\Enums\Role;
-use App\Enums\Subject;
 use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
 use App\Models\User;
@@ -27,37 +23,21 @@ class NotifyAboutTraderOrderCancelled implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(private TraderOrder $traderOrder, private User $canceller)
+    public function __construct(private readonly TraderOrder $traderOrder, private readonly User $canceller)
     {
         $this->onQueue('notifications');
     }
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
-        $lender = $this->traderOrder->order->lender()->withTrashed()->first();
+        $companyId = $this->traderOrder->order->company_id;
 
         $notifiables = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($lender) {
-                $query->where(function ($query) use ($lender) {
-                    $query->role(Role::Admin)
-                        ->orWhere(function ($query) {
-                            $query->role(Role::Manager)
-                                ->permission(
-                                    perm(Area::SuperAdmin, [Subject::FinancingOrders, Action::Cancel])
-                                );
-                        })
-                        ->orWhere(function ($query) use ($lender) {
-                            $query->role(Role::LenderAdmin)
-                                ->whereHas('lender', function ($query) use ($lender) {
-                                    $query->where('id', $lender->id);
-                                });
-                        });
-                });
+            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($companyId) {
+                $query->forTradeRequestCancelledNotification($companyId);
             });
 
         Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder, $this->canceller));

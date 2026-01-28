@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Actions\Contracts\Notifications\BuildUserNotificationsQuery;
+use App\Http\Controllers\Controller;
+use App\Transformers\NotificationTransformer;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+
+class NotificationsController extends Controller
+{
+    /**
+     * Get a paginated list of user notifications.
+     */
+    public function index(Request $request, BuildUserNotificationsQuery $builder): JsonResponse
+    {
+        $query = $builder
+            ->setUser(Auth::user())
+            ->handle();
+
+        // Get notifications for the authenticated user from the last 30 days
+        $notifications = $query
+            ->paginate(config('notifications.panel.count_per_page'));
+
+        // Transform the response using Fractal
+        return fractal($notifications, new NotificationTransformer)
+            ->paginateWith(new IlluminatePaginatorAdapter($notifications))
+            ->respond();
+    }
+}

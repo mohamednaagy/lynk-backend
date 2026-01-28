@@ -21,7 +21,6 @@ return [
         ],
         'roles' => [
             Role::Admin,
-            Role::Manager,
             Role::LenderAdmin,
         ],
     ],
@@ -39,7 +38,6 @@ return [
         ],
         'roles' => [
             Role::Admin,
-            Role::Manager,
             Role::LenderAdmin,
         ],
     ],
@@ -57,7 +55,7 @@ return [
         ],
         'roles' => [
             Role::Admin,
-            Role::Manager,
+            Role::LenderAdmin,
         ],
     ],
     SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED->value => [
@@ -94,7 +92,6 @@ return [
             Role::LenderAdmin,
             Role::LenderApiUser,
             Role::LenderSupervisor,
-            Role::LenderBilling,
             Role::LenderOrderCreator,
         ],
     ],
@@ -113,6 +110,40 @@ return [
         'roles' => [
             Role::Admin,
             Role::Manager,
+        ],
+    ],
+    SystemNotificationType::ORDERS_REPORT_EXPORT_READY->value => [
+        'label' => 'notification-types.orders_report_export_ready.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => true,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::Manager,
+        ],
+    ],
+    SystemNotificationType::TRADE_REQUEST_EXPIRED->value => [
+        'label' => 'notification-types.trade_request_expired.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::LenderAdmin,
         ],
     ],
 ];

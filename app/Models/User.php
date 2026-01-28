@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Http\Request;
@@ -34,8 +35,14 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property-read string $fullName
  * @property-read string $full_name
  * @property \Spatie\Permission\Models\Role[] $roles
+ * @property mixed $dummy
  *
- * @mixin Builder
+ * @method static Builder<User> admin()
+ * @method static Builder<User> lenderAdmin()
+ * @method static Builder<User> withLenderAdminForCompany(int $companyId)
+ * @method static Builder<User> forTradeRequestCancelledNotification(int $companyId)
+ *
+ * @mixin Builder<User>
  */
 class User extends Authenticatable implements Grantifiable, HasLocalePreference, JWTSubject, MustVerifyEmail, Otpifiable
 {
@@ -65,7 +72,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
@@ -212,5 +219,41 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     public function lender(): BelongsTo
     {
         return $this->belongsTo(Lender::class, 'company_id');
+    }
+
+    /**
+     * Get the entity's notifications.
+     *
+     * @return MorphMany<DatabaseNotification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest();
+    }
+
+    public function scopeAdmin(Builder $query): Builder
+    {
+        return $query->role(Role::Admin);
+    }
+
+    public function scopeLenderAdmin(Builder $query): Builder
+    {
+        return $query->role(Role::LenderAdmin);
+    }
+
+    public function scopeWithLenderAdminForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->lenderAdmin()
+            ->where('company_id', $companyId);
+    }
+
+    public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
+    {
+        return $query->where(function ($q) use ($companyId) {
+            $q->admin() // @phpstan-ignore method.notFound
+                ->orWhere(function ($q) use ($companyId) {
+                    $q->withLenderAdminForCompany($companyId);
+                });
+        });
     }
 }

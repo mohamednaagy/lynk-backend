@@ -32,6 +32,30 @@ final class OrderRequiresApproval extends BaseNotification implements ShouldQueu
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('notification-types.order_requires_approval.label');
+    }
+
+    /**
+     * Get the description for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('notification-types.order_requires_approval.description', [
+            'order_id' => $this->financingOrder->id,
+            'amount' => $this->financingOrder->amount,
+            'selling_price' => $this->financingOrder->selling_price,
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable

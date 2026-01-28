@@ -32,6 +32,30 @@ class OrderApproved extends BaseNotification implements ShouldQueue
     }
 
     /**
+     * Get the title for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getTitle($notifiable): string
+    {
+        return __('notification-types.order_approved.label');
+    }
+
+    /**
+     * Get the description for the notification.
+     *
+     * @param  mixed  $notifiable
+     */
+    public function getDescription($notifiable): string
+    {
+        return __('notification-types.order_approved.description', [
+            'order_id' => $this->financingOrder->id,
+            'approver_name' => $this->approver->full_name,
+            'approved_at' => $this->approvalTime->toDateTimeString(),
+        ]);
+    }
+
+    /**
      * Get the mail representation of the notification.
      *
      * @param  mixed  $notifiable

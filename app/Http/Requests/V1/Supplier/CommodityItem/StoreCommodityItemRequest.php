@@ -42,7 +42,7 @@ class StoreCommodityItemRequest extends FormRequest
             'max_price' => ['required', 'numeric', 'gt:0', 'gte:min_price'],
             'min_price' => ['required', 'numeric', 'gt:0', 'lte:max_price'],
             'currency_id' => ['required', 'exists:currencies,id'],
-            'volume_sellable_unit' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,5})?$/'],
+            'volume_sellable_unit' => ['required', 'numeric', 'regex:/^\d+(\.\d{1,5})?$/', 'gt:0'],
             'measurement_id' => ['required', 'exists:measurements,id'],
         ];
     }

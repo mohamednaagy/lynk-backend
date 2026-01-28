@@ -169,7 +169,7 @@ perform_rollback() {
 
     # Start containers with rollback image
     log_info "Starting containers with rollback image..."
-    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
+    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile schedule up -d \
         --scale local-market-states-worker=8 \
         --scale local-market-webhooks-worker=5 \
         --scale local-market-process-worker=8 \
@@ -177,7 +177,7 @@ perform_rollback() {
         --scale local-market-commodities-settlement-worker=8 \
         --scale local-market-eligible-quantities-worker=8 \
         --scale local-market-order-inventories-units-logging=5 \
-        --scale local-market-order-initiation=5 \
+        --scale local-market-order-initiation=1 \
         --scale trader-order-initiation=5 \
         --scale local-market-generate-units=1 \
         --scale hold-eligible-local-order-units-worker=5 \
@@ -230,7 +230,7 @@ perform_rolling_deployment() {
         --scale local-market-commodities-settlement-worker=16 \
         --scale local-market-eligible-quantities-worker=16 \
         --scale local-market-order-inventories-units-logging=10 \
-        --scale local-market-order-initiation=10 \
+        --scale local-market-order-initiation=2 \
         --scale trader-order-initiation=10 \
         --scale local-market-generate-units=2 \
         --scale hold-eligible-local-order-units-worker=10 \
@@ -265,7 +265,7 @@ perform_rolling_deployment() {
         --scale local-market-commodities-settlement-worker=8 \
         --scale local-market-eligible-quantities-worker=8 \
         --scale local-market-order-inventories-units-logging=5 \
-        --scale local-market-order-initiation=5 \
+        --scale local-market-order-initiation=1 \
         --scale trader-order-initiation=5 \
         --scale local-market-generate-units=1 \
         --scale hold-eligible-local-order-units-worker=5 \
@@ -308,18 +308,6 @@ perform_rolling_deployment() {
 
         attempt=$((attempt + 1))
     done
-
-    #Run Migration files
-    log_info "Running database migrations..."
-    docker exec lynk-backend-app php artisan migrate
-
-    #Run database structure clear
-    log_info "Running database structure clear..."
-    docker exec lynk-backend-app php artisan structure:clear 
-
-    #Run package discover
-    log_info "Running package discover..."
-    docker exec lynk-backend-app php artisan package:discover
 
     # Clean up old containers
     log_info "Cleaning up old containers..."

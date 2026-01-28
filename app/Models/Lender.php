@@ -56,4 +56,9 @@ class Lender extends Company
     {
         return $this->allowedFinancingOrderTypes()[0] ?? FinancingOrderTypeEnum::NormalLending;
     }
+
+    public function isOrderApprovalRequired()
+    {
+        return $this->lenderDetail->does_order_require_approval;
+    }
 }

@@ -32,6 +32,8 @@ use Stancl\VirtualColumn\VirtualColumn;
 use UnexpectedValueException;
 
 /**
+ * @property int $id
+ * @property int $financing_order_id
  * @property mixed $reference
  * @property mixed $order
  * @property mixed $provider
@@ -350,7 +352,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function cancelDetail()
     {
-        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id');
+        return $this->hasOne(TraderOrderCancelDetail::class, 'trader_order_id')->latestOfMany();
     }
 
     public function timeLimits()

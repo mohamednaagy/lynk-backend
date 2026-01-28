@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Contracts\Services;
+namespace App\Actions\Contracts;
 
 use App\Enums\DocumentType;
 
-interface PdfServiceInterface
+interface PdfService
 {
     /**
      * Generate or retrieve PDF document
