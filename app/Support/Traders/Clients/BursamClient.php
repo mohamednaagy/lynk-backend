@@ -761,7 +761,7 @@ class BursamClient
 
     private function buildUrl($path)
     {
-        $baseUrl = $this->getRequiredConfig('trader.providers.bursam.base_url', 'Bursam base_url is not set');
+        $baseUrl = $this->getRequiredConfig('trader.providers.bursam.base_url');
 
         return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
     }
