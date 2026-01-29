@@ -15,6 +15,7 @@ use App\Enums\TraderOrderCancelType;
 use App\Enums\TraderOrderMode;
 use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderException;
+use App\Jobs\FinancingOrders\NotifyAboutExpireTraderOrder;
 use App\Jobs\General\ProcessAskClientForWakala;
 use App\Jobs\General\ProcessProceedClientWakala;
 use App\Jobs\General\ProcessProceedContractSigned;
@@ -49,18 +50,16 @@ class BursamV2Driver extends BursamV1Driver
             return $financingOrder->initiatedTraderOrders()->first();
         }
 
-        $traderOrder = $financingOrder->traderOrders()->create([
+        return $financingOrder->traderOrders()->create([
             'uuid_one' => Str::uuid(),
             'provider' => $this->provider,
             'reference' => '',
             'status' => TraderOrderStatus::Initiated,
             'version' => $this->version,
             'mode' => TraderOrderMode::Automatic,
-            'creator_id' => auth()?->user()?->id,
+            'creator_id' => auth()->user()?->id,
             'commodity_type_id' => $preferredCommodityTypeId,
         ]);
-
-        return $traderOrder;
     }
 
     public function getDefaultInitialTradeOrderStatus()
@@ -70,6 +69,7 @@ class BursamV2Driver extends BursamV1Driver
 
     /**
      * @throws TraderException
+     * @throws Exception
      */
     public function cancelTraderOrder(
         TraderOrder $traderOrder,
@@ -87,7 +87,6 @@ class BursamV2Driver extends BursamV1Driver
         );
 
         return TraderOrderCancellationStatus::Cancelled;
-
     }
 
     private function validateOrderCanBeCancelled(TraderOrder $traderOrder): void
@@ -131,6 +130,11 @@ class BursamV2Driver extends BursamV1Driver
         app(UpdateTraderOrderStatusToCancel::class)->handle($traderOrder, $cancelReason);
         $this->updateFinancingOrderStatus($traderOrder->order);
         app(FireWebhookWhenStatusIsCancelled::class)->handle($traderOrder);
+
+        // Send notification when order is canceled due to market close time
+        if ($cancelReason === TraderOrderCancelReason::MurabhaTimeout) {
+            NotifyAboutExpireTraderOrder::dispatch($traderOrder);
+        }
     }
 
     private function requiresSellingBeforeCancellation(TraderOrder $traderOrder): bool
