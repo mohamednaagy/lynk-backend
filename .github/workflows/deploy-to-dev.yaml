@@ -499,8 +499,8 @@ jobs:
 
                     echo ''
                     echo '📈 Container Counts:'
-                    RUNNING=\$(docker compose ps | grep -c 'Up' || echo '0')
-                    TOTAL=\$(docker compose ps -a | wc -l)
+                    RUNNING=\$(docker compose -p lynk-backend ps | grep -c 'Up' || echo '0')
+                    TOTAL=\$(docker compose -p lynk-backend ps -a | wc -l)
                     echo \"Running: \$RUNNING / \$TOTAL containers\"
 
                     echo ''
@@ -533,11 +533,11 @@ jobs:
 
                     echo '📊 Container Summary:'
                     echo '==================='
-                    docker compose ps --format 'table {{.Name}}\\t{{.Status}}'
+                    docker compose -p lynk-backend ps --format 'table {{.Name}}\\t{{.Status}}'
 
                     echo ''
                     echo '📈 Container Count:'
-                    echo 'Total containers: '\$(docker compose ps -q | wc -l)
+                    echo 'Total containers: '\$(docker compose -p lynk-backend ps -q | wc -l)
 
                     echo ''
                     echo '🏷️  Image Information:'
