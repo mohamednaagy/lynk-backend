@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Configuration
 COMPOSE_FILE="docker-compose.yml"
-DEPLOYMENT_DIR="/var/www/lynk-backend"
+DEPLOYMENT_DIR="/var/www/backend-pipeline"
 HEALTH_CHECK_TIMEOUT=300  # 5 minutes
 HEALTH_CHECK_INTERVAL=10  # 10 seconds
 MIN_HEALTHY_PERCENTAGE=70 # At least 70% of containers must be healthy

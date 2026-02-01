@@ -363,7 +363,7 @@ jobs:
                   scp -i ~/.ssh/deploy_key \
                       -o StrictHostKeyChecking=no \
                       docker-compose.yml \
-                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/var/www/lynk-backend/
+                      ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }}:/var/www/backend-pipeline/
 
                   # Transfer deployment script
                   scp -i ~/.ssh/deploy_key \
@@ -409,7 +409,7 @@ jobs:
 
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
-                    cd /var/www/lynk-backend
+                    cd /var/www/backend-pipeline
 
                     echo '📊 Container Status:'
                     docker compose ps --format 'table {{.Name}}\\t{{.Status}}'
@@ -446,7 +446,7 @@ jobs:
 
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
-                    cd /var/www/lynk-backend
+                    cd /var/www/backend-pipeline
 
                     echo '📊 Container Summary:'
                     echo '==================='
