@@ -50,7 +50,7 @@ backup_deployment_state() {
     echo "$CURRENT_IMAGE" > /tmp/last_known_good_image.txt
 
     # Save list of running containers
-    docker compose ps --format json > /tmp/last_deployment_state.json 2>/dev/null || true
+    docker compose -p lynk-backend ps --format json > /tmp/last_deployment_state.json 2>/dev/null || true
 
     log_success "Deployment state backed up: $CURRENT_IMAGE"
 }
@@ -70,7 +70,7 @@ check_container_health() {
 
 # Function to get all service containers
 get_all_containers() {
-    docker compose ps --format json | jq -r '.Name' 2>/dev/null || docker compose ps -q
+    docker compose -p lynk-backend ps --format json | jq -r '.Name' 2>/dev/null || docker compose -p lynk-backend ps -q
 }
 
 # Function to check overall deployment health
@@ -159,7 +159,7 @@ perform_rollback() {
 
     # Stop current containers
     log_info "Stopping current containers..."
-    docker compose down || true
+    docker compose -p lynk-backend down || true
 
     # Tag the rollback image as latest
     docker tag "$ROLLBACK_IMAGE" app-php-fpm:latest || {
@@ -169,7 +169,7 @@ perform_rollback() {
 
     # Start containers with rollback image
     log_info "Starting containers with rollback image..."
-    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile schedule up -d \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile schedule up -d \
         --scale local-market-states-worker=8 \
         --scale local-market-webhooks-worker=5 \
         --scale local-market-process-worker=8 \
@@ -218,11 +218,11 @@ perform_rolling_deployment() {
     backup_deployment_state
 
     log_info "Current running containers:"
-    docker compose ps --format 'table {{.Name}}\t{{.Status}}' || true
+    docker compose -p lynk-backend ps --format 'table {{.Name}}\t{{.Status}}' || true
 
     # Start new containers alongside old ones (scale up)
     log_info "Scaling up new containers..."
-    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d --no-recreate \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d --no-recreate \
         --scale local-market-states-worker=16 \
         --scale local-market-webhooks-worker=10 \
         --scale local-market-process-worker=16 \
@@ -257,7 +257,7 @@ perform_rolling_deployment() {
 
     # Scale down to target numbers (removes old containers)
     log_info "Scaling down to target numbers (removing old containers)..."
-    docker compose --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
         --scale local-market-states-worker=8 \
         --scale local-market-webhooks-worker=5 \
         --scale local-market-process-worker=8 \
@@ -311,13 +311,13 @@ perform_rolling_deployment() {
 
     # Clean up old containers
     log_info "Cleaning up old containers..."
-    docker compose ps -a --filter "status=exited" -q | xargs -r docker rm 2>/dev/null || true
+    docker compose -p lynk-backend ps -a --filter "status=exited" -q | xargs -r docker rm 2>/dev/null || true
 
     log_success "Rolling deployment completed successfully!"
 
     # Show final state
     log_info "Final deployment state:"
-    docker compose ps --format 'table {{.Name}}\t{{.Status}}'
+    docker compose -p lynk-backend ps --format 'table {{.Name}}\t{{.Status}}'
 }
 
 # Main execution
