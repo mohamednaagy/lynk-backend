@@ -19,6 +19,7 @@ use App\Support\Money\Casts\MoneyStringCast;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Traders\Traits\TraderHelperTrait;
 use App\Traits\HasCreator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -40,9 +41,13 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property mixed $currency
  * @property mixed $amount
  * @property mixed $selling_price
- * @property mixed $id
+ * @property int $id
+ * @property PhoneNumber|null $phone_number
  * @property ?string $latest_activity
  * @property ?MurabhaStep $current_step
+ * @property-read CommodityType|null $commodityType
+ *
+ * @mixin Builder<FinancingOrder>
  */
 class FinancingOrder extends Model implements HasMedia, Otpifiable
 {
@@ -157,6 +162,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
+    /**
+     * @return Attribute<bool, $this>
+     */
     protected function isUpdatable(): Attribute
     {
         return Attribute::get(
@@ -164,6 +172,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
+    /**
+     * @return Attribute<string|null, $this>
+     */
     protected function phoneNumberCountryCode(): Attribute
     {
         return Attribute::make(
@@ -171,10 +182,13 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         );
     }
 
+    /**
+     * @return Attribute<string, $this>
+     */
     protected function mobileDialingPhoneNumber(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->phone_number?->formatForMobileDialingInCountry($this->phone_number?->getCountry()),
+            get: fn () => $this->phone_number?->formatForMobileDialingInCountry($this->phoneNumberCountryCode),
         );
     }
 
@@ -191,37 +205,52 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->singleFile();
     }
 
-    public function approver()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approver_id', 'id');
     }
 
-    public function getPowerOfAttorneyAttribute()
+    public function getPowerOfAttorneyAttribute(): string
     {
         return $this->getFirstMediaUrl(FinancingOrderMediaCollection::PowerOfAttorney);
     }
 
-    public function getContractAttribute()
+    public function getContractAttribute(): string
     {
         return $this->getFirstMediaUrl(FinancingOrderMediaCollection::Contract);
     }
 
-    public function traderOrders()
+    /**
+     * @return HasMany<TraderOrder, $this>
+     */
+    public function traderOrders(): HasMany
     {
         return $this->hasMany(TraderOrder::class, 'financing_order_id', 'id');
     }
 
+    /**
+     * @return HasMany<FinancingOrderStatusHistory, $this>
+     */
     public function statusHistories(): HasMany
     {
         return $this->hasMany(FinancingOrderStatusHistory::class, 'order_id', 'id');
     }
 
+    /**
+     * @return HasOne<FinancingOrderStatusHistory, $this>
+     */
     public function latestStatusHistory(): HasOne
     {
         return $this->hasOne(FinancingOrderStatusHistory::class, 'order_id', 'id')->latestOfMany();
     }
 
-    public function creationFeeTransactions()
+    /**
+     * @return HasMany<Transaction, $this>
+     */
+    public function creationFeeTransactions(): HasMany
     {
         return $this->hasMany(Transaction::class, 'meta->financing_order_id')
             ->where('reason', TransactionReason::OrderCreationFee);
@@ -329,11 +358,14 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->having('trader_orders_count', 0);
     }
 
-    public function scopeByCreator($query, Model $model)
+    public function scopeByCreator($query, Model $model): Builder
     {
-        $query->where('creator_id', $model->getKey());
+        return $query->where('creator_id', $model->getKey());
     }
 
+    /**
+     * @return HasMany<TraderOrder, $this>
+     */
     public function activeTraderOrder(): HasMany
     {
         return $this->traderOrders()
@@ -343,11 +375,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
+    /**
+     * @return HasOne<TraderOrder, $this>
+     */
     public function latestTraderOrder(): HasOne
     {
         return $this->hasOne(TraderOrder::class, 'financing_order_id', 'id')->latestOfMany();
     }
 
+    /**
+     * @return HasMany<TraderOrder, $this>
+     */
     public function initiatedTraderOrders(): HasMany
     {
         return $this->traderOrders()
@@ -355,6 +393,9 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
             ->latest();
     }
 
+    /**
+     * @return HasMany<TraderOrder, $this>
+     */
     public function holdTraderOrders(): HasMany
     {
         return $this->traderOrders()
@@ -367,7 +408,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
         $allTraderOrders = $this->traderOrders();
         $traderOrderCompleted = ($area == Area::Lender)
-        ? $allTraderOrders->get()->every(fn ($traderOrder) => $traderOrder->canBeMarkedAsCompleted())
+        ? $allTraderOrders->get()->some(fn (TraderOrder $traderOrder) => $traderOrder->canBeMarkedAsCompleted())
         : $allTraderOrders->completed()->exists();
 
         return $traderOrderCompleted
@@ -376,7 +417,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
     }
 
-    public function cantBeCompleted()
+    public function cantBeCompleted(): bool
     {
         return ! $this->canBeCompleted();
     }
@@ -459,12 +500,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->lender?->lenderDetail->trading_mode->is($mode);
     }
 
-    public function isDefaultTraderAvailable()
+    public function isDefaultTraderAvailable(): bool
     {
         return true;
     }
 
-    public function isCancellable($area)
+    public function isCancellable(string $area): bool
     {
         $canMoveToPendingCancellation = $this->status->canMoveTo(FinancingOrderStatus::PendingCancellation);
 
@@ -478,25 +519,31 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
         $this->refresh();
 
-        return $this->activeTraderOrder->every(fn ($traderOrder) => $traderOrder->isCancellable($area));
+        return $this->activeTraderOrder->every(fn (TraderOrder $traderOrder) => $traderOrder->isCancellable($area));
     }
 
-    public function responsableAdmin()
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function responsableAdmin(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assignable_id', 'id')->withTrashed();
     }
 
-    public function retry()
+    public function retry(): void
     {
         $this->updateOrderStatus($this, FinancingOrderStatus::PendingTraderOrder);
     }
 
+    /**
+     * @return BelongsTo<CommodityType, $this>
+     */
     public function commodityType(): BelongsTo
     {
         return $this->belongsTo(CommodityType::class);
     }
 
-    public function getPreferredTrader()
+    public function getPreferredTrader(): string
     {
         if ($this->commodity_type_id) {
             return $this->commodityType->provider->value;
@@ -509,14 +556,20 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         }
     }
 
+    /**
+     * @return Attribute<string|null, $this>
+     */
     protected function customerName(): Attribute
     {
         return Attribute::make(
+            get: fn () => $this->getBorrowerName(),
             set: fn ($value) => ['borrower_identifier' => $value],
-            get: fn () => $this->getBorrowerName()
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getLenderInfo(): array
     {
         return [
@@ -526,7 +579,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         ];
     }
 
-    public function getBorrowerInfo()
+    /**
+     * @return array<string, mixed>
+     */
+    public function getBorrowerInfo(): array
     {
         return [
             'type' => $this->borrower_type,
@@ -534,12 +590,12 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         ];
     }
 
-    public function getLenderName()
+    public function getLenderName(): ?string
     {
-        return Lender::withTrashed()->find($this->lender_identifier)->name;
+        return Lender::withTrashed()->find($this->lender_identifier)->name ?? null;
     }
 
-    public function getBorrowerName()
+    public function getBorrowerName(): ?string
     {
         if ($this->borrower_type == FinancingOrderBorrowerTypeEnum::Lender) {
             return $this->lender->name;
@@ -562,7 +618,10 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         $this->save();
     }
 
-    public function lender()
+    /**
+     * @return BelongsTo<Lender, $this>
+     */
+    public function lender(): BelongsTo
     {
         return $this->belongsTo(Lender::class, 'company_id')->withTrashed();
     }
