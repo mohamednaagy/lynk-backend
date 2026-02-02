@@ -546,7 +546,7 @@ jobs:
         name: 🧪 Regression Tests
         runs-on: ubuntu-latest
         needs: deploy
-        if: ${{ needs.deploy.result == 'success' }}
+        if: ${{ needs.deploy.result == 'success' && vars.RUN_REGRESSION_TEST == 'true' }}
         steps:
           - name: Install SSH key
             uses: webfactory/ssh-agent@v0.5.3
