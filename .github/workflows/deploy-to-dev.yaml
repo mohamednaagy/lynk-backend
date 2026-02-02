@@ -150,9 +150,6 @@ jobs:
                   PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}
                   PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
 
-                  MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
-                  MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
-
                   # Twilio Configuration
                   OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
                   OTPIFY_TWILIO_TOKEN=${{ secrets.OTPIFY_TWILIO_TOKEN }}
