@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Actions;
 
-use App\Contracts\Services\PdfServiceInterface;
+use App\Actions\Contracts\PdfService;
 use App\Enums\DocumentType;
 use App\Support\DocumentEngine\PdfFactory;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
-class PdfService implements PdfServiceInterface
+class PdfServiceAction implements PdfService
 {
     /**
      * Generate or retrieve PDF document
@@ -30,7 +30,6 @@ class PdfService implements PdfServiceInterface
                     'disk' => $pdf->getDisk(),
                 ],
             ];
-
         } catch (InvalidArgumentException $e) {
             Log::error('Invalid document type requested', [
                 'document_type' => $documentType->value,
@@ -43,7 +42,6 @@ class PdfService implements PdfServiceInterface
                 'message' => 'Invalid document type',
                 'error' => $e->getMessage(),
             ];
-
         } catch (\Exception $e) {
             Log::error('Error generating PDF', [
                 'document_type' => $documentType->value,

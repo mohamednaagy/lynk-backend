@@ -78,6 +78,12 @@ class LocalMarketWebhookAction implements LocalMarketWebhook
                 Trader::driver($traderOrder->provider, $traderOrder->version)
                     ->confirmCancelledFromProvider($traderOrder);
                 break;
+            case CaseStatus::FailedToCancel:
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FailureToCancelAtLocalMarket);
+                Trader::driver($traderOrder->provider, $traderOrder->version)
+                    ->confirmCancelledFromProvider($traderOrder);
+                break;
             default:
                 throw new LocalMarketWebhookException;
         }

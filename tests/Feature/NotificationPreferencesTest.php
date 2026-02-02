@@ -125,11 +125,11 @@ class NotificationPreferencesTest extends TestCase
         $service = app(NotificationPreferenceService::class);
         $service->ensureDefaults($user);
 
-        $adminNotificationTypes = SystemNotificationType::getAdminNotificationTypes();
+        $notificationTypes = SystemNotificationType::cases();
 
-        foreach ($adminNotificationTypes as $type) {
+        foreach ($notificationTypes as $type) {
             $mailSetting = UserNotificationSetting::where('user_id', $user->id)
-                ->where('notification_type', $type)
+                ->where('notification_type', $type->value)
                 ->where('channel', \App\Enums\NotificationChannel::MAIL)
                 ->first();
 
@@ -137,7 +137,7 @@ class NotificationPreferencesTest extends TestCase
             $this->assertFalse($mailSetting->is_enabled, "Email notification should be disabled by default for {$type->value}");
 
             $portalSetting = UserNotificationSetting::where('user_id', $user->id)
-                ->where('notification_type', $type)
+                ->where('notification_type', $type->value)
                 ->where('channel', NotificationChannel::PLATFORM)
                 ->first();
 

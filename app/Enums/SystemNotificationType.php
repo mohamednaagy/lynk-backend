@@ -20,28 +20,5 @@ enum SystemNotificationType: string
 
     case ORDERS_REPORT_EXPORT_READY = 'orders_report_export_ready';
 
-    public static function getAdminNotificationTypes(): array
-    {
-        return [
-            self::TRADE_REQUEST_CANCELLED,
-            self::ORDER_CANCELLED,
-            self::ORDER_REQUIRES_APPROVAL,
-            self::DELIVERY_CONFIRMATION_RECEIVED,
-            self::ORDER_APPROVED,
-            self::LENDER_REGISTERED,
-            self::ORDERS_REPORT_EXPORT_READY,
-        ];
-    }
-
-    public static function getLenderNotificationTypes(): array
-    {
-        return [
-            self::TRADE_REQUEST_CANCELLED,
-            self::ORDER_CANCELLED,
-            self::ORDER_REQUIRES_APPROVAL,
-            self::ORDER_APPROVED,
-            self::LENDER_REGISTERED,
-            self::ORDERS_REPORT_EXPORT_READY,
-        ];
-    }
+    case TRADE_REQUEST_EXPIRED = 'trade_request_expired';
 }

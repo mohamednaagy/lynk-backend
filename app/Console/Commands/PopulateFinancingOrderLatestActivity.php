@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
+use App\Actions\Contracts\FinancingOrderActivityUpdate;
 use App\Models\FinancingOrder;
 use Illuminate\Console\Command;
 
@@ -39,7 +39,7 @@ class PopulateFinancingOrderLatestActivity extends Command
         $bar->start();
 
         $processed = 0;
-        $service = app(FinancingOrderActivityUpdateInterface::class);
+        $service = app(FinancingOrderActivityUpdate::class);
 
         // Process in chunks to avoid memory issues
         $query->chunk($chunkSize, function ($financingOrders) use ($bar, &$processed, $service) {

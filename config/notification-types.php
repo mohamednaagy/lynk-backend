@@ -129,4 +129,21 @@ return [
             Role::Manager,
         ],
     ],
+    SystemNotificationType::TRADE_REQUEST_EXPIRED->value => [
+        'label' => 'notification-types.trade_request_expired.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::LenderAdmin,
+        ],
+    ],
 ];

@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Services\FinancingOrder;
+namespace App\Actions;
 
-use App\Contracts\Services\FinancingOrder\FinancingOrderActivityUpdateInterface;
+use App\Actions\Contracts\FinancingOrderActivityUpdate;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 
-class FinancingOrderActivityUpdateService implements FinancingOrderActivityUpdateInterface
+class FinancingOrderActivityUpdateAction implements FinancingOrderActivityUpdate
 {
     /**
      * Update the latest activity for a financing order
