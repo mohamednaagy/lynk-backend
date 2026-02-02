@@ -269,6 +269,7 @@ jobs:
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
                   STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
+                  ORDER_EXPORT_WEBHOOK_SECRET=${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}
                   ENVEOF
 
                   echo "✓ .env file created from GitHub secrets/variables"
