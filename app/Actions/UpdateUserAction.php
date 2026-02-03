@@ -25,6 +25,9 @@ class UpdateUserAction implements UpdateUser
 
         if ($user->email != $data['email']) {
             $this->changeEmailWithSendNotification($user, $data['email']);
+            if (auth()->user()->id == $user->id) {
+                $this->removeTokensOfUser($user);
+            }
         }
 
         if (array_key_exists('password', $data)) {
@@ -54,7 +57,6 @@ class UpdateUserAction implements UpdateUser
     {
         Mail::to($user->email)->send(new ChangeEmail($user, $new_email));
         $user->update(['email_verified_at' => null]);
-        $this->removeTokensOfUser($user);
     }
 
     public function removeTokensOfUser(User $user): void

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Area;
 use App\Enums\Role;
 use App\Http\Controllers\Api\V1\Supplier\Auth\CompleteRegister;
 use App\Http\Controllers\Api\V1\Supplier\Auth\GetAuthUser;
@@ -36,23 +37,25 @@ Route::prefix('v1/supplier')->name('api.v1.supplier.')->group(function () {
         InitializeTenancyByRequestData::class,
     ])->group(function () {
         Route::get('auth', GetAuthUser::class);
-        Route::get('constants', [ConstantController::class, 'index']);
-        Route::prefix('commodity-types')->group(function () {
-            Route::get('/', [CommodityTypeController::class, 'index']);
-            Route::get('/dropdown-list', CommodityTypesLiteList::class);
+        Route::group(['middleware' => 'verified.email:'.Area::CommoditySupplier], function () {
+            Route::get('constants', [ConstantController::class, 'index']);
+            Route::prefix('commodity-types')->group(function () {
+                Route::get('/', [CommodityTypeController::class, 'index']);
+                Route::get('/dropdown-list', CommodityTypesLiteList::class);
+            });
+            Route::get('locations/dropdown-list', CommodityLocationLiteList::class);
+            Route::apiResource('locations', SupplierLocation::class)->middleware('checkDataOfSupplier');
+            Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
+            Route::apiResource('commodity-items/{item}/inventory', LocalMarketInventoryController::class)->middleware('checkDataOfSupplier');
+            Route::prefix('users')->group(function () {
+                Route::get('/', [UsersController::class, 'index']);
+                Route::post('/', [UsersController::class, 'store']);
+                Route::put('{user}', [UsersController::class, 'update']);
+                Route::get('{user}', [UsersController::class, 'show']);
+                Route::delete('{user}', [UsersController::class, 'destroy']);
+                Route::post('{user}/resend-invitation', [ResendInvitationToUserController::class, '__invoke']);
+            })->middleware('checkDataOfSupplier');
         });
-        Route::get('locations/dropdown-list', CommodityLocationLiteList::class);
-        Route::apiResource('locations', SupplierLocation::class)->middleware('checkDataOfSupplier');
-        Route::apiResource('commodity-items', CommodityItemController::class)->middleware('checkDataOfSupplier');
-        Route::apiResource('commodity-items/{item}/inventory', LocalMarketInventoryController::class)->middleware('checkDataOfSupplier');
-        Route::prefix('users')->group(function () {
-            Route::get('/', [UsersController::class, 'index']);
-            Route::post('/', [UsersController::class, 'store']);
-            Route::put('{user}', [UsersController::class, 'update']);
-            Route::get('{user}', [UsersController::class, 'show']);
-            Route::delete('{user}', [UsersController::class, 'destroy']);
-            Route::post('{user}/resend-invitation', [ResendInvitationToUserController::class, '__invoke']);
-        })->middleware('checkDataOfSupplier');
 
     });
     Route::post('{user}/sign-up', CompleteRegister::class)->name('sign-up');
