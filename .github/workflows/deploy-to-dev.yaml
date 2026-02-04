@@ -265,7 +265,7 @@ jobs:
                   NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
                   NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
-
+                  NIGHTWATCH_INGEST_URI=${{ vars.NIGHTWATCH_INGEST_URI }}
 
                   # Bursam Trader Configuration
                   BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
@@ -415,7 +415,7 @@ jobs:
                 echo "📁 Setting up pipeline directory on ${{ matrix.server }}..."
                 ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
                     ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
-                    "mkdir -p /var/www/backend-pipeline"
+                    "mkdir -p /var/www/backend-pipeline && mkdir -p /var/www/backend-pipeline/logs"
 
             - name: Transfer image to server ${{ matrix.server }}
               run: |

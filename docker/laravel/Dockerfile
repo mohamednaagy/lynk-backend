@@ -38,6 +38,7 @@ ARG GROUP_ID=1000
 RUN apk add --no-cache \
     # Runtime dependencies (kept in final image)
     bash \
+    su-exec \
     icu-libs \
     libzip \
     oniguruma \
@@ -133,8 +134,9 @@ RUN mkdir -p storage/framework/cache \
 # Configure PHP-FPM to listen on port 8000
 RUN echo "listen = 8000" >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
-# Switch to www-data user
-USER www-data
+# Copy entrypoint script (fixes bind mount permissions at runtime)
+COPY docker/laravel/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Expose php-fpm port
 EXPOSE 8000
@@ -143,5 +145,6 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD php -r "exit(0);"
 
-# Start php-fpm
+# Use entrypoint to fix permissions then drop to www-data
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm", "-F"]
