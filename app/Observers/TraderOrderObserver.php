@@ -48,7 +48,7 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
         }
 
         // Update the parent financing order's latest activity when status/last_history_action changes
-        if ($traderOrder->wasChanged('status') || $traderOrder->wasChanged('last_history_action')) {
+        if ($traderOrder->wasChanged('last_history_action')) {
             $this->updateFinancingOrderLatestActivity($traderOrder);
         }
     }
