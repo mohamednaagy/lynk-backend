@@ -3,6 +3,7 @@
 namespace App\Support\Traders\Clients;
 
 use App\Enums\BursamErrorCode;
+use App\Exceptions\BURSAM\BursamRequiredConfigException;
 use App\Exceptions\RateLimitExceededException;
 use App\Models\TraderOrder;
 use Carbon\Carbon;
@@ -31,7 +32,7 @@ class BursamClient
     private function __construct(protected $traderOrder)
     {
         if (empty($traderOrder->reference)) {
-            $this->fake = config('trader.providers.bursam.fake');
+            $this->fake = $this->getRequiredConfig('trader.providers.bursam.fake');
         } else {
             $this->fake = $this->isTraderOrderInitiatedByFake();
         }
@@ -58,6 +59,16 @@ class BursamClient
         return strpos($this->traderOrder->reference, '-') === false;
     }
 
+    private function getRequiredConfig(string $key, ?string $customErrorMessage = null): mixed
+    {
+        $value = config($key);
+        if ($value === null || $value === '') {
+            throw new BursamRequiredConfigException($key, $customErrorMessage);
+        }
+
+        return $value;
+    }
+
     public static function of(TraderOrder $traderOrder)
     {
         return new static($traderOrder);
@@ -66,11 +77,11 @@ class BursamClient
     public function buyProduct($productCode)
     {
         $financingOrder = $this->traderOrder->order;
-
         log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => buy product', $this->traderOrder), [
             'financingOrderId' => $financingOrder->id,
             'traderOrderId' => $this->traderOrder->id,
-            'time' => now()]);
+            'time' => now(),
+        ]);
         $url = 'api/process/svc/bsas/order.json';
 
         $request = [
@@ -85,7 +96,7 @@ class BursamClient
                 'currency' => 'SAR',
                 'bidValue' => (string) $financingOrder->amount->convertAndFormatByDecimal(),
                 'valueDate' => now('Asia/Kuala_Lumpur')->format('Ymd'),
-                'tenor' => config('trader.providers.bursam.tenor'),
+                'tenor' => $this->getRequiredConfig('trader.providers.bursam.tenor'),
                 'otcCounterParty' => $financingOrder->customer_name,
                 'otcMurabaha' => '',
                 'otcMurabahaValue' => (string) $financingOrder->selling_price->convertAndFormatByDecimal(),
@@ -94,7 +105,7 @@ class BursamClient
         ];
 
         $requestHeader = [
-            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'memberShortName' => $this->getRequiredConfig('trader.providers.bursam.member_short_name'),
             'uuid' => $this->traderOrder->uuid_one,
         ];
 
@@ -113,8 +124,8 @@ class BursamClient
             'url' => $url,
             'request' => $request,
             'headers' => $requestHeader,
-            'response' => $response->json(),
-            'statusCode' => $response->getStatusCode(),
+            'response' => $response?->json(),
+            'statusCode' => $response?->getStatusCode(),
         ]);
 
         return $response;
@@ -147,7 +158,6 @@ class BursamClient
         }
 
         return true;
-
     }
 
     public function validateFetchYNN($response): bool
@@ -224,7 +234,7 @@ class BursamClient
 
         $url = 'api/process/svc/bsas/order.json';
         $requestHeader = [
-            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'memberShortName' => $this->getRequiredConfig('trader.providers.bursam.member_short_name'),
             'uuid' => $this->traderOrder->uuid_two,
         ];
 
@@ -277,7 +287,8 @@ class BursamClient
         log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => fetchBuyResult', $this->traderOrder), [
             'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
-            'time' => now()]);
+            'time' => now(),
+        ]);
 
         return $this->fetchOrderResult($this->traderOrder->uuid_one);
     }
@@ -292,11 +303,12 @@ class BursamClient
         log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => fetchOrderResult', $this->traderOrder), [
             'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
-            'time' => now()]);
+            'time' => now(),
+        ]);
         $url = 'api/process/svc/bsas/orderResult.json';
 
         $requestHeader = [
-            'memberShortName' => config('trader.providers.bursam.member_short_name'),
+            'memberShortName' => $this->getRequiredConfig('trader.providers.bursam.member_short_name'),
             'uuid' => $uuid,
         ];
         $request = [
@@ -335,10 +347,11 @@ class BursamClient
         log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => getBidXml', $this->traderOrder), [
             'financingOrderId' => $this->traderOrder->financing_order_id,
             'traderOrderId' => $this->traderOrder->id,
-            'time' => now()]);
+            'time' => now(),
+        ]);
         $url = 'api/process/svc/bsas/bidXML.json';
         $request = [
-            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'membershortname' => $this->getRequiredConfig('trader.providers.bursam.member_short_name'),
             'ecertno' => $this->traderOrder->reference,
         ];
         $response = $this->rateLimitRequest(
@@ -367,7 +380,7 @@ class BursamClient
     {
         $url = 'api/process/svc/bsas/otcXML.json';
         $request = [
-            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'membershortname' => $this->getRequiredConfig('trader.providers.bursam.member_short_name'),
             'ecertno' => $this->traderOrder->reference,
         ];
         $response = $this->rateLimitRequest(
@@ -396,7 +409,7 @@ class BursamClient
     {
         $url = 'api/process/svc/bsas/stbXML.json';
         $request = [
-            'membershortname' => config('trader.providers.bursam.member_short_name'),
+            'membershortname' => $this->getRequiredConfig('trader.providers.bursam.member_short_name'),
             'ecertno' => $this->traderOrder->reference,
         ];
 
@@ -424,7 +437,8 @@ class BursamClient
 
     private function http(): PendingRequest
     {
-        $timeoutSeconds = config('trader.providers.bursam.http_timeout_seconds');
+        $this->getRequiredConfig('trader.providers.bursam.base_url');
+        $timeoutSeconds = $this->getRequiredConfig('trader.providers.bursam.http_timeout_seconds');
         $instance = Http::bursam()->timeout($timeoutSeconds); // Set configurable timeout to prevent long-running requests
 
         $lastRequest = [
@@ -493,9 +507,9 @@ class BursamClient
     protected function rateLimitRequest($callback, $remainingRetries = 0)
     {
         try {
-            $maxRetriesBeforeException = (int) config('trader.providers.bursam.rate_limit.max_retries_before_exception');
-            $decaySeconds = (int) config('trader.providers.bursam.rate_limit.decay_seconds');
-            $maxAttempts = (int) config('trader.providers.bursam.rate_limit.max_attempts');
+            $maxRetriesBeforeException = (int) $this->getRequiredConfig('trader.providers.bursam.rate_limit.max_retries_before_exception');
+            $decaySeconds = (int) $this->getRequiredConfig('trader.providers.bursam.rate_limit.decay_seconds');
+            $maxAttempts = (int) $this->getRequiredConfig('trader.providers.bursam.rate_limit.max_attempts');
 
             if ($remainingRetries > $maxRetriesBeforeException) {
                 $exception = new RateLimitExceededException('bursam_api');
@@ -561,6 +575,14 @@ class BursamClient
                 'decaySeconds' => $decaySeconds,
                 'remainingRetries' => $remainingRetries,
                 'maxRetriesBeforeException' => $maxRetriesBeforeException,
+            ]);
+        } catch (BursamRequiredConfigException $e) {
+            log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursam required config not set', $this->traderOrder), [
+                'financingOrderId' => $this->traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrder->id,
+                'error_code' => $e->getCode(),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         } catch (Exception $e) {
             log::channel(LOG_CHANNEL_BURSAM)->error('bursa Bursam exception occurred', [
@@ -739,6 +761,8 @@ class BursamClient
 
     private function buildUrl($path)
     {
-        return rtrim(config('trader.providers.bursam.base_url'), '/').'/'.ltrim($path, '/');
+        $baseUrl = $this->getRequiredConfig('trader.providers.bursam.base_url');
+
+        return rtrim($baseUrl, '/').'/'.ltrim($path, '/');
     }
 }

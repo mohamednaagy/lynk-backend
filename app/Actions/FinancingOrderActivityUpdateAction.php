@@ -5,11 +5,14 @@ namespace App\Actions;
 use App\Actions\Contracts\FinancingOrderActivityUpdate;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
+use Illuminate\Support\Traits\Localizable;
 
 class FinancingOrderActivityUpdateAction implements FinancingOrderActivityUpdate
 {
+    use Localizable;
+
     /**
-     * Update the latest activity for a financing order
+     * Update the latest activity (Quietly) for a financing order
      */
     public function updateFinancingOrderLatestActivity(FinancingOrder $financingOrder): void
     {
@@ -22,9 +25,11 @@ class FinancingOrderActivityUpdateAction implements FinancingOrderActivityUpdate
      */
     public function getLatestActivityDescription(FinancingOrder $financingOrder): string
     {
-        return $financingOrder->status->isNot(FinancingOrderStatus::InProgress)
+        return $this->withLocale('en', function () use ($financingOrder) {
+            return $financingOrder->status->isNot(FinancingOrderStatus::InProgress)
             || is_null($financingOrder->current_step)
-            ? $financingOrder->status->description
-            : $financingOrder->current_step->description;
+                ? $financingOrder->status->description
+                : $financingOrder->current_step->description;
+        });
     }
 }

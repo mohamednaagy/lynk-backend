@@ -105,4 +105,6 @@ class ErrorCode
     public const UNABLE_TO_SETTLE_ORDER = 1053;
 
     public const ERROR_HOLDING_UNITS = 1054;
+
+    public const BURSAM_REQUIRED_CONFIG_NOT_SET = 1055;
 }
