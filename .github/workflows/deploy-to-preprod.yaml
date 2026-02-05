@@ -312,8 +312,18 @@ jobs:
 
             - name: Save and compress Docker image
               run: |
+                  set -euo pipefail
+
                   echo "📦 Saving Docker image to tar archive..."
                   docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  # Verify the archive is valid (not a near-empty file from a failed save)
+                  FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz)
+                  if [ "$FILE_SIZE" -lt 1048576 ]; then
+                    echo "❌ Image archive is only ${FILE_SIZE} bytes — docker save likely failed (no space left on device?)"
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    exit 1
+                  fi
 
                   echo "Compressed image size:"
                   ls -lh /tmp/app-php-fpm.tar.gz

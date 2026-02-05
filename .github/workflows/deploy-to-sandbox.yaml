@@ -265,11 +265,14 @@ jobs:
                   NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
                   NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
+                  NIGHTWATCH_INGEST_URI=${{ vars.NIGHTWATCH_INGEST_URI }}
 
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
                   STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
+                  
                   ORDER_EXPORT_WEBHOOK_SECRET=${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}
+                  
                   #CORS Allowed Origins
                   ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
                   ENVEOF
@@ -298,8 +301,18 @@ jobs:
 
             - name: Save and compress Docker image
               run: |
+                  set -euo pipefail
+
                   echo "📦 Saving Docker image to tar archive..."
                   docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  # Verify the archive is valid (not a near-empty file from a failed save)
+                  FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz)
+                  if [ "$FILE_SIZE" -lt 1048576 ]; then
+                    echo "❌ Image archive is only ${FILE_SIZE} bytes — docker save likely failed (no space left on device?)"
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    exit 1
+                  fi
 
                   echo "Compressed image size:"
                   ls -lh /tmp/app-php-fpm.tar.gz
@@ -350,8 +363,8 @@ jobs:
                 echo "📁 Setting up pipeline directory on ${{ matrix.server }}..."
                 ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
                     ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
-                    "mkdir -p /var/www/backend-pipeline"
-
+                    "mkdir -p /var/www/backend-pipeline && mkdir -p /var/www/backend-pipeline/logs"
+            
             - name: Transfer image to server
               run: |
                   echo "🚀 Transferring Docker image to ${{ matrix.server }}..."

@@ -105,9 +105,6 @@ jobs:
                   SESSION_DRIVER=${{ vars.SESSION_DRIVER }}
                   SESSION_LIFETIME=${{ vars.SESSION_LIFETIME }}
 
-                  # Memcached Configuration
-                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
-
                   # Redis Configuration
                   REDIS_HOST=${{ vars.REDIS_HOST }}
                   REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
@@ -137,13 +134,6 @@ jobs:
                   OCI_BUCKET=${{ vars.OCI_BUCKET }}
                   OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
 
-                  # OCI Public Object Storage Configuration
-                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
-                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
-                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
-                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
-                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
-
                   # SES Configuration
                   SES_ACCESS_KEY_ID=${{ secrets.SES_ACCESS_KEY_ID }}
                   SES_SECRET_ACCESS_KEY=${{ secrets.SES_SECRET_ACCESS_KEY }}
@@ -154,9 +144,6 @@ jobs:
                   PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
                   PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}
                   PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
-
-                  MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
-                  MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
 
                   # Twilio Configuration
                   OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
@@ -173,10 +160,6 @@ jobs:
                   OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
                   OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
 
-                  # SMS & Mobile Verification
-                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
-                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
-
                   # Bitly
                   BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
 
@@ -186,9 +169,6 @@ jobs:
                   GRANTIFY_DEFAULT_DRIVER=${{ vars.GRANTIFY_DEFAULT_DRIVER }}
                   SETTINGS_CACHE_ENABLED=${{ vars.SETTINGS_CACHE_ENABLED }}
                   HOST_WHITELIST=${{ vars.HOST_WHITELIST }}
-
-                  # Sanctum
-                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
 
                   # Telescope
                   TELESCOPE_ENABLED=${{ vars.TELESCOPE_ENABLED }}
@@ -204,15 +184,6 @@ jobs:
                   DEFAULT_TRADER=${{ vars.DEFAULT_TRADER }}
                   MSEGAT_USERNAME=${{ secrets.MSEGAT_USERNAME }}
                   MSEGAT_API_KEY=${{ secrets.MSEGAT_API_KEY }}
-
-                  # Bursam Trader Configuration
-                  BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
-                  BURSAM_BASE_URL=${{ vars.BURSAM_BASE_URL }}
-                  BURSAM_SELLING_COMMODITY_START_TIME=${{ vars.BURSAM_SELLING_COMMODITY_START_TIME }}
-                  BURSAM_SELLING_COMMODITY_END_TIME=${{ vars.BURSAM_SELLING_COMMODITY_END_TIME }}
-                  BURSAM_MARKET_OPENING_START_TIME=${{ vars.BURSAM_MARKET_OPENING_START_TIME }}
-                  BURSAM_MARKET_OPENING_END_TIME=${{ vars.BURSAM_MARKET_OPENING_END_TIME }}
-                  BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION=${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}
 
                   # JWT Secret
                   JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -247,14 +218,6 @@ jobs:
                   RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
                   RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
 
-                  # Lynk Application Configuration
-                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
-                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
-                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
-
-                  # Rate Limiting
-                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
-
                   # Loan Coverage
                   LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
                   LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
@@ -266,13 +229,6 @@ jobs:
                   # Master OTP for Development
                   ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
                   MASTER_OTP_KEY=${{ vars.MASTER_OTP_KEY }}
-
-                  # Nightwatch Monitoring
-                  NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
-                  NIGHTWATCH_TOKEN=${{ secrets.NIGHTWATCH_TOKEN }}
-                  NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
-                  NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
-                  NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
 
 
                   # Bursam Trader Configuration
@@ -287,25 +243,12 @@ jobs:
                   # Sanctum
                   SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
 
-                  OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
-                  OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
-
                   # SMS & Mobile Verification
                   SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
                   MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
 
-                  # Bitly
-                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
-
                   # Memcached Configuration
                   MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
-
-                  # OCI Object Storage Configuration
-                  OCI_ACCESS_KEY_ID=${{ secrets.OCI_ACCESS_KEY_ID }}
-                  OCI_SECRET_ACCESS_KEY=${{ secrets.OCI_SECRET_ACCESS_KEY }}
-                  OCI_DEFAULT_REGION=${{ vars.OCI_DEFAULT_REGION }}
-                  OCI_BUCKET=${{ vars.OCI_BUCKET }}
-                  OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
 
                   # OCI Public Object Storage Configuration
                   OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
@@ -326,14 +269,6 @@ jobs:
                   # Rate Limiting
                   ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
 
-                  # Loan Coverage
-                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
-                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
-
-                  # Auto-Verified Users (Development/Testing)
-                  AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
-                  AUTO_VERIFIED_USERS_PASSWORD=${{ secrets.AUTO_VERIFIED_USERS_PASSWORD }}
-
                   # Nightwatch Monitoring
                   NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
                   NIGHTWATCH_TOKEN="${{ secrets.NIGHTWATCH_TOKEN }}"
@@ -342,6 +277,9 @@ jobs:
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
 
                   ORDER_EXPORT_WEBHOOK_SECRET="${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}"
+
+                  #CORS
+                  ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}
                   ENVEOF
 
                   echo "✓ .env file created from GitHub secrets/variables"
@@ -368,8 +306,18 @@ jobs:
 
             - name: Save and compress Docker image
               run: |
+                  set -euo pipefail
+
                   echo "📦 Saving Docker image to tar archive..."
                   docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  # Verify the archive is valid (not a near-empty file from a failed save)
+                  FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz)
+                  if [ "$FILE_SIZE" -lt 1048576 ]; then
+                    echo "❌ Image archive is only ${FILE_SIZE} bytes — docker save likely failed (no space left on device?)"
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    exit 1
+                  fi
 
                   echo "Compressed image size:"
                   ls -lh /tmp/app-php-fpm.tar.gz
@@ -428,9 +376,9 @@ jobs:
             - name: Set up pipeline directory
               run: |
                 echo "📁 Setting up pipeline directory on ${{ matrix.server }}..."
-                ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
-                    ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
-                    "mkdir -p /var/www/backend-pipeline && chown -R ${{ secrets.DEPLOYMENT_USER }}:${{ secrets.DEPLOYMENT_USER }} /var/www/backend-pipeline"
+                ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} \
+                    "mkdir -p /var/www/backend-pipeline && mkdir -p /var/www/backend-pipeline/logs"
 
             - name: Transfer image to server ${{ steps.server.outputs.ip }}
               run: |
@@ -527,7 +475,7 @@ jobs:
                     cd /var/www/backend-pipeline
 
                     echo '📊 Container Status:'
-                    docker compose. -p lynk-backend --profile web --profile ${{ matrix.worker_group }} --profile observability ps --format 'table {{.Name}}\t{{.Status}}'
+                    docker compose -p lynk-backend --profile web --profile ${{ matrix.worker_group }} --profile observability ps --format 'table {{.Name}}\t{{.Status}}'
 
                     echo ''
                     echo '🏷️  Image Information:'
@@ -547,7 +495,7 @@ jobs:
                     cd /var/www/backend-pipeline
 
                     # Get the app container name
-                    APP_CONTAINER=\$(docker compose. -p lynk-backend --profile web ps -q app | head -1)
+                    APP_CONTAINER=\$(docker compose -p lynk-backend --profile web ps -q app | head -1)
 
                     if [ -z \"\$APP_CONTAINER\" ]; then
                       echo '❌ App container not found'

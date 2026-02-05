@@ -169,7 +169,7 @@ perform_rollback() {
 
     # Start containers with rollback image
     log_info "Starting containers with rollback image..."
-    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile schedule up -d \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
         --scale local-market-states-worker=8 \
         --scale local-market-webhooks-worker=5 \
         --scale local-market-process-worker=8 \
@@ -313,11 +313,93 @@ perform_rolling_deployment() {
     log_info "Cleaning up old containers..."
     docker compose -p lynk-backend ps -a --filter "status=exited" -q | xargs -r docker rm 2>/dev/null || true
 
+    # Clean up old images after successful deployment
+    cleanup_old_images
+
+    # Check storage health and warn if usage is high
+    check_storage_health
+    
     log_success "Rolling deployment completed successfully!"
 
     # Show final state
     log_info "Final deployment state:"
     docker compose -p lynk-backend ps --format 'table {{.Name}}\t{{.Status}}'
+}
+
+cleanup_old_images() {
+    log_info "Cleaning up old Docker images..."
+
+    # Get the image ID of the current latest image
+    local latest_image_id
+    latest_image_id=$(docker images --format '{{.ID}}' app-php-fpm:latest 2>/dev/null || echo "")
+
+    if [ -z "$latest_image_id" ]; then
+        log_warning "No latest image found, skipping image cleanup"
+        return
+    fi
+
+    # Find all app-php-fpm image IDs except the current one
+    local old_images
+    old_images=$(docker images --format '{{.ID}} {{.Repository}}:{{.Tag}}' app-php-fpm | grep -v "^${latest_image_id}" | awk '{print $1}' | sort -u)
+
+    if [ -z "$old_images" ]; then
+        log_info "No old images to clean up"
+        return
+    fi
+
+    local removed=0
+    local failed=0
+
+    for image_id in $old_images; do
+        if docker rmi "$image_id" 2>/dev/null; then
+            removed=$((removed + 1))
+            log_info "Successfully removed old image: $image_id"
+        else
+            failed=$((failed + 1))
+            log_warning "Failed to remove old image: $image_id (still in use)"
+        fi
+    done
+
+    log_success "Image cleanup complete: $removed removed, $failed skipped (still in use)"
+}
+
+# Function to check storage health and warn if usage exceeds threshold
+check_storage_health() {
+    log_info "Checking storage health..."
+
+    local warnings=0
+
+    while IFS= read -r line; do
+        local usage
+        local mount
+        usage=$(echo "$line" | awk '{print $5}' | tr -d '%')
+        mount=$(echo "$line" | awk '{print $6}')
+
+        if [ "$usage" -ge "$STORAGE_WARNING_THRESHOLD" ]; then
+            log_warning "STORAGE WARNING: $mount is at ${usage}% usage (threshold: ${STORAGE_WARNING_THRESHOLD}%)"
+            warnings=$((warnings + 1))
+        fi
+    done < <(df -h 2>/dev/null | tail -n +2 | grep -vE '^(tmpfs|devtmpfs|overlay|shm)')
+
+    # Check Docker-specific storage
+    local docker_usage
+    docker_usage=$(docker system df --format '{{.Type}}\t{{.Size}}\t{{.Reclaimable}}' 2>/dev/null || echo "")
+
+    if [ -n "$docker_usage" ]; then
+        log_info "Docker storage usage:"
+        echo "$docker_usage" | while IFS= read -r line; do
+            log_info "  $line"
+        done
+    fi
+
+    if [ "$warnings" -gt 0 ]; then
+        log_warning "========================================="
+        log_warning "RELEASE WARNING: $warnings filesystem(s) above ${STORAGE_WARNING_THRESHOLD}% usage"
+        log_warning "Consider freeing disk space to avoid deployment failures"
+        log_warning "========================================="
+    else
+        log_success "Storage health OK: all filesystems below ${STORAGE_WARNING_THRESHOLD}%"
+    fi
 }
 
 # Main execution
