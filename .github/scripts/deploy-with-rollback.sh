@@ -170,7 +170,7 @@ perform_rollback() {
 
     # Start containers with rollback image
     log_info "Starting containers with rollback image..."
-    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile=schedule up -d \
         --scale local-market-states-worker=8 \
         --scale local-market-webhooks-worker=5 \
         --scale local-market-process-worker=8 \
