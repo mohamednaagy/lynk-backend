@@ -28,10 +28,11 @@ services:
     restart: unless-stopped
     <<: [*app-volumes, *host-network]
     healthcheck:
-      test: ["CMD", "php", "-r", "exit(0);"]
+      test: ["CMD", "php", "/var/www/html/artisan", "health:check", "--quiet"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
+      start_period: 30s
 
   # ============================================================================
   # LOCAL PROFILE - Development Infrastructure
