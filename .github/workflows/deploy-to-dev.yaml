@@ -494,7 +494,7 @@ jobs:
 
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
-                    docker exec -it lynk-backend-app php artisan health:check
+                    docker exec lynk-backend-app php artisan health:check
                     echo '✅ Deployment verification complete'
                   "
 
