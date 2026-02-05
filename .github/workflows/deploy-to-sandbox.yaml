@@ -265,11 +265,16 @@ jobs:
                   NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
                   NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
+                  NIGHTWATCH_INGEST_URI=${{ vars.NIGHTWATCH_INGEST_URI }}
 
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
                   STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
+                  
                   ORDER_EXPORT_WEBHOOK_SECRET=${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}
+                  
+                  #CORS Allowed Origins
+                  ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
                   ENVEOF
 
                   echo "✓ .env file created from GitHub secrets/variables"
@@ -296,8 +301,18 @@ jobs:
 
             - name: Save and compress Docker image
               run: |
+                  set -euo pipefail
+
                   echo "📦 Saving Docker image to tar archive..."
                   docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  # Verify the archive is valid (not a near-empty file from a failed save)
+                  FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz)
+                  if [ "$FILE_SIZE" -lt 1048576 ]; then
+                    echo "❌ Image archive is only ${FILE_SIZE} bytes — docker save likely failed (no space left on device?)"
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    exit 1
+                  fi
 
                   echo "Compressed image size:"
                   ls -lh /tmp/app-php-fpm.tar.gz
@@ -343,6 +358,13 @@ jobs:
                   echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deploy_key
                   chmod 600 ~/.ssh/deploy_key
 
+            - name: Set up pipeline directory
+              run: |
+                echo "📁 Setting up pipeline directory on ${{ matrix.server }}..."
+                ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
+                    "mkdir -p /var/www/backend-pipeline && mkdir -p /var/www/backend-pipeline/logs"
+            
             - name: Transfer image to server
               run: |
                   echo "🚀 Transferring Docker image to ${{ matrix.server }}..."
@@ -413,12 +435,12 @@ jobs:
                     cd /var/www/backend-pipeline
 
                     echo '📊 Container Status:'
-                    docker compose ps --format 'table {{.Name}}\\t{{.Status}}'
+                    docker compose -p lynk-backend ps --format 'table {{.Name}}\\t{{.Status}}'
 
                     echo ''
                     echo '📈 Container Counts:'
-                    RUNNING=\$(docker compose ps | grep -c 'Up' || echo '0')
-                    TOTAL=\$(docker compose ps -a | wc -l)
+                    RUNNING=\$(docker compose -p lynk-backend ps | grep -c 'Up' || echo '0')
+                    TOTAL=\$(docker compose -p lynk-backend ps -a | wc -l)
                     echo \"Running: \$RUNNING / \$TOTAL containers\"
 
                     echo ''
@@ -451,11 +473,11 @@ jobs:
 
                     echo '📊 Container Summary:'
                     echo '==================='
-                    docker compose ps --format 'table {{.Name}}\\\\t{{.Status}}'
+                    docker compose -p lynk-backend ps --format 'table {{.Name}}\\\\t{{.Status}}'
 
                     echo ''
                     echo '📈 Container Count:'
-                    echo 'Total containers: '\$(docker compose ps -q | wc -l)
+                    echo 'Total containers: '\$(docker compose -p lynk-backend ps -q | wc -l)
 
                     echo ''
                     echo '🏷️  Image Information:'
@@ -466,87 +488,122 @@ jobs:
                   "
 
     notify:
-        needs: [deploy, setup]
-        if: always()
-        runs-on: ubuntu-latest
-        environment: sandbox
+      needs: [deploy, setup]
+      if: always()
+      runs-on: ubuntu-latest
+      environment: sandbox
 
-        steps:
-            - name: Send Slack notification
-              run: |
-                  STATUS="${{ needs.deploy.result }}"
-                  if [ "$STATUS" = "success" ]; then
-                    EMOJI="✅"
-                    COLOR="good"
-                    STATUS_LABEL="Success"
-                  else
-                    EMOJI="❌"
-                    COLOR="danger"
-                    STATUS_LABEL="Failed"
-                  fi
-                  START_TS="${{ needs.setup.outputs.start_ts }}"
-                  END_TS=$(date +%s)
-                  DURATION_SEC=$((END_TS - START_TS))
-                  if [ "$DURATION_SEC" -lt 0 ]; then DURATION_SEC=0; fi
-                  D_H=$((DURATION_SEC/3600))
-                  D_M=$(((DURATION_SEC%3600)/60))
-                  D_S=$((DURATION_SEC%60))
-                  DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
-                  PR_URL="${{ github.event.pull_request.html_url }}"
-                  PR_TITLE="${{ github.event.pull_request.title }}"
-                  COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
-                  if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
-                    PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-                  fi
-                  if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
-                    if [ -n "$COMMIT_MESSAGE" ] && [ "$COMMIT_MESSAGE" != "null" ]; then
-                      # Use only the first line of the commit message to avoid newlines breaking sed
-                      PR_TITLE="$(printf '%s' "$COMMIT_MESSAGE" | head -n1)"
-                    else
-                      PR_TITLE="$GITHUB_REPOSITORY"
-                    fi
-                  fi
-                  # Make a sed-safe version of the title (remove '|' which is used as sed delimiter)
-                  SAFE_PR_TITLE="$(printf '%s' "$PR_TITLE" | tr '|' '-')"
-                  RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
-                  IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
-                  # Use workflow start time (captured in setup) for display
-                  START_TS="${{ needs.setup.outputs.start_ts }}"
-                  TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
-                  cat > /tmp/slack-payload.json <<'EOF'
-                  {
-                    "text": "Backend Deployment (Sandbox) - REPLACE_STATUS",
-                    "attachments": [
-                      {
-                        "color": "REPLACE_COLOR",
-                        "title": "REPLACE_TITLE",
-                        "title_link": "REPLACE_RUN_URL",
-                        "fields": [
-                          { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
-                          { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
-                          { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
-                          { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
-                          { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
-                          { "title": "Time", "value": "REPLACE_TIME", "short": true }
-                        ],
-                        "footer": "Lynk Backend (Sandbox)"
-                      }
-                    ]
-                  }
-                  EOF
-                  sed -i \
-                    -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
-                    -e "s|REPLACE_COLOR|$COLOR|g" \
-                    -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
-                    -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
-                    -e "s|REPLACE_TITLE|$SAFE_PR_TITLE|g" \
-                    -e "s|REPLACE_BRANCH|$BRANCH|g" \
-                    -e "s|REPLACE_EMOJI|$EMOJI|g" \
-                    -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
-                    -e "s|REPLACE_PR|$PR_URL|g" \
-                    -e "s|REPLACE_TIME|$TIMESTAMP|g" \
-                    /tmp/slack-payload.json
-                  echo "Slack payload:"
-                  cat /tmp/slack-payload.json
-                  curl -X POST -H 'Content-type: application/json' --data @/tmp/slack-payload.json ${{ secrets.SLACK_HOOK_URL }}
+      steps:
+        - name: Send Slack notification
+          shell: bash
+          run: |
+            set -euo pipefail
+
+            # -----------------------------
+            # Deployment status
+            # -----------------------------
+            STATUS="${{ needs.deploy.result }}"
+            if [[ "$STATUS" == "success" ]]; then
+              EMOJI="✅"
+              COLOR="good"
+              STATUS_LABEL="Success"
+            else
+              EMOJI="❌"
+              COLOR="danger"
+              STATUS_LABEL="Failed"
+            fi
+
+            # -----------------------------
+            # Duration
+            # -----------------------------
+            START_TS="${{ needs.setup.outputs.start_ts }}"
+            END_TS="$(date +%s)"
+            DURATION_SEC=$(( END_TS - START_TS ))
+            (( DURATION_SEC < 0 )) && DURATION_SEC=0
+
+            D_H=$(( DURATION_SEC / 3600 ))
+            D_M=$(( (DURATION_SEC % 3600) / 60 ))
+            D_S=$(( DURATION_SEC % 60 ))
+            DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
+
+            # -----------------------------
+            # PR / Commit info (SAFE)
+            # -----------------------------
+            PR_URL="${{ github.event.pull_request.html_url || '' }}"
+            PR_TITLE="${{ github.event.pull_request.title || '' }}"
+
+            # Capture commit message safely (may be multiline)
+            COMMIT_MESSAGE="${{ github.event.head_commit.message || '' }}"
+
+            # Fallback to commit URL
+            if [[ -z "$PR_URL" || "$PR_URL" == "null" ]]; then
+              PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+            fi
+
+            # Use first line only (Slack + sed safe)
+            if [[ -z "$PR_TITLE" || "$PR_TITLE" == "null" ]]; then
+              if [[ -n "$COMMIT_MESSAGE" && "$COMMIT_MESSAGE" != "null" ]]; then
+                PR_TITLE="$(printf '%s\n' "$COMMIT_MESSAGE" | head -n1)"
+              else
+                PR_TITLE="${{ github.repository }}"
+              fi
+            fi
+
+            # sed-safe title
+            SAFE_PR_TITLE="$(printf '%s' "$PR_TITLE" | tr '|' '-' | tr '\n' ' ')"
+
+            # -----------------------------
+            # Metadata
+            # -----------------------------
+            RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
+            IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
+            TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
+
+            # -----------------------------
+            # Slack payload template
+            # -----------------------------
+            cat > /tmp/slack-payload.json <<'EOF'
+            {
+              "text": "Backend Deployment (Sandbox) - REPLACE_STATUS",
+              "attachments": [
+                {
+                  "color": "REPLACE_COLOR",
+                  "title": "REPLACE_TITLE",
+                  "title_link": "REPLACE_RUN_URL",
+                  "fields": [
+                    { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
+                    { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
+                    { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
+                    { "title": "PR / Commit", "value": "<REPLACE_PR|View>", "short": true },
+                    { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
+                    { "title": "Time", "value": "REPLACE_TIME", "short": true }
+                  ],
+                  "footer": "Lynk Backend (Sandbox)"
+                }
+              ]
+            }
+            EOF
+
+            # -----------------------------
+            # Replace placeholders
+            # -----------------------------
+            sed -i \
+              -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
+              -e "s|REPLACE_COLOR|$COLOR|g" \
+              -e "s|REPLACE_TITLE|$SAFE_PR_TITLE|g" \
+              -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
+              -e "s|REPLACE_BRANCH|$BRANCH|g" \
+              -e "s|REPLACE_EMOJI|$EMOJI|g" \
+              -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
+              -e "s|REPLACE_PR|$PR_URL|g" \
+              -e "s|REPLACE_TIME|$TIMESTAMP|g" \
+              /tmp/slack-payload.json
+
+            echo "Slack payload:"
+            cat /tmp/slack-payload.json
+
+            curl -X POST \
+              -H 'Content-type: application/json' \
+              --data @/tmp/slack-payload.json \
+              "${{ secrets.SLACK_HOOK_URL }}"

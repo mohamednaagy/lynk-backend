@@ -8,7 +8,6 @@ use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageS
 use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\OptimizedLoanCoverageStrategy;
 use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\TraderManager;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\URL;
@@ -98,9 +97,5 @@ class AppServiceProvider extends ServiceProvider
             ProcessNotification::class,
             [LogActivity::class, 'handle']
         );
-
-        Config::set('cors.allowed_origins', app()->isProduction()
-            ? array_values(Config::get('app.frontend_url'))
-            : ['*']);
     }
 }
