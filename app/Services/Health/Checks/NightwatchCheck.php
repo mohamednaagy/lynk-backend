@@ -4,7 +4,7 @@ namespace App\Services\Health\Checks;
 
 use App\Services\Health\CheckResult;
 use App\Services\Health\Contracts\HealthCheck;
-use RuntimeException;
+use Illuminate\Support\Facades\Artisan;
 use Throwable;
 
 class NightwatchCheck implements HealthCheck
@@ -18,7 +18,7 @@ class NightwatchCheck implements HealthCheck
     {
         $start = microtime(true);
 
-        if (! env('NIGHTWATCH_ENABLED')) {
+        if (! config('nightwatch.enabled')) {
             return new CheckResult(
                 name: $this->name(),
                 status: 'skipped',
@@ -28,29 +28,22 @@ class NightwatchCheck implements HealthCheck
         }
 
         try {
-            $ingestUri = env('NIGHTWATCH_INGEST_URI');
-            $url = 'http://'.$ingestUri;
-            $ch = curl_init($url);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_CONNECTTIMEOUT => 3,
-                CURLOPT_TIMEOUT => 5,
-                CURLOPT_NOBODY => true,
-            ]);
-            curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $error = curl_error($ch);
-            curl_close($ch);
+            $exitCode = Artisan::call('nightwatch:status');
 
-            if ($error) {
-                throw new RuntimeException('Nightwatch agent unreachable: '.$error);
+            if ($exitCode === 0) {
+                return new CheckResult(
+                    name: $this->name(),
+                    status: 'healthy',
+                    durationMs: round((microtime(true) - $start) * 1000, 2),
+                    meta: ['message' => 'The Nightwatch agent is running and accepting connections.'],
+                );
             }
 
             return new CheckResult(
                 name: $this->name(),
-                status: 'healthy',
+                status: 'unhealthy',
                 durationMs: round((microtime(true) - $start) * 1000, 2),
-                meta: ['http_code' => $httpCode],
+                meta: ['error' => 'Nightwatch agent is not running or not accepting connections.'],
             );
         } catch (Throwable $e) {
             return new CheckResult(
