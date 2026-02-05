@@ -223,7 +223,7 @@ perform_rolling_deployment() {
 
     # Start new containers alongside old ones (scale up)
     log_info "Scaling up new containers..."
-    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d --no-recreate \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile schedule up -d --no-recreate \
         --scale local-market-states-worker=16 \
         --scale local-market-webhooks-worker=10 \
         --scale local-market-process-worker=16 \
@@ -258,7 +258,7 @@ perform_rolling_deployment() {
 
     # Scale down to target numbers (removes old containers)
     log_info "Scaling down to target numbers (removing old containers)..."
-    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability up -d \
+    docker compose -p lynk-backend --profile web --profile group1 --profile group2 --profile group3 --profile dev-services --profile observability --profile schedule up -d \
         --scale local-market-states-worker=8 \
         --scale local-market-webhooks-worker=5 \
         --scale local-market-process-worker=8 \
