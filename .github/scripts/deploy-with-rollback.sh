@@ -11,6 +11,7 @@ HEALTH_CHECK_TIMEOUT=300  # 5 minutes
 HEALTH_CHECK_INTERVAL=10  # 10 seconds
 MIN_HEALTHY_PERCENTAGE=70 # At least 70% of containers must be healthy
 SCALE_DOWN_WAIT_TIME=30   # Wait 30 seconds after scaling down before final check
+STORAGE_WARNING_THRESHOLD=70 # Warn if disk usage exceeds this percentage
 
 # Colors for output
 RED='\033[0;31m'
