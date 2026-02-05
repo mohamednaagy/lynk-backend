@@ -494,18 +494,7 @@ jobs:
 
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
                       ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
-                    cd /var/www/backend-pipeline
-
-                    echo '📊 Container Status:'
-                    docker compose ps --format 'table {{.Name}}\t{{.Status}}'
-
-                    echo ''
-                    echo '📈 Container Counts:'
-                    RUNNING=\$(docker compose -p lynk-backend ps | grep -c 'Up' || echo '0')
-                    TOTAL=\$(docker compose -p lynk-backend ps -a | wc -l)
-                    echo \"Running: \$RUNNING / \$TOTAL containers\"
-
-                    echo ''
+                    docker exec -it lynk-backend-app php artisan health:check
                     echo '✅ Deployment verification complete'
                   "
 
