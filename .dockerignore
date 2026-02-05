@@ -29,7 +29,10 @@ storage/framework/views
 
 # Docker files
 docker-compose*.yml
-docker/
+docker/*
+!docker/laravel
+docker/laravel/*
+!docker/laravel/entrypoint.sh
 .docker/
 Dockerfile*
 

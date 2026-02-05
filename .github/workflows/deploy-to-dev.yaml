@@ -150,9 +150,6 @@ jobs:
                   PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}
                   PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
 
-                  MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
-                  MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
-
                   # Twilio Configuration
                   OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
                   OTPIFY_TWILIO_TOKEN=${{ secrets.OTPIFY_TWILIO_TOKEN }}
@@ -268,7 +265,7 @@ jobs:
                   NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
                   NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
-
+                  NIGHTWATCH_INGEST_URI=${{ vars.NIGHTWATCH_INGEST_URI }}
 
                   # Bursam Trader Configuration
                   BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
@@ -366,8 +363,18 @@ jobs:
 
             - name: Save and compress Docker image
               run: |
+                  set -euo pipefail
+
                   echo "📦 Saving Docker image to tar archive..."
                   docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  # Verify the archive is valid (not a near-empty file from a failed save)
+                  FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz)
+                  if [ "$FILE_SIZE" -lt 1048576 ]; then
+                    echo "❌ Image archive is only ${FILE_SIZE} bytes — docker save likely failed (no space left on device?)"
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    exit 1
+                  fi
 
                   echo "Compressed image size:"
                   ls -lh /tmp/app-php-fpm.tar.gz
@@ -418,7 +425,7 @@ jobs:
                 echo "📁 Setting up pipeline directory on ${{ matrix.server }}..."
                 ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o ConnectTimeout=30 \
                     ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} \
-                    "mkdir -p /var/www/backend-pipeline"
+                    "mkdir -p /var/www/backend-pipeline && mkdir -p /var/www/backend-pipeline/logs"
 
             - name: Transfer image to server ${{ matrix.server }}
               run: |
@@ -546,7 +553,7 @@ jobs:
         name: 🧪 Regression Tests
         runs-on: ubuntu-latest
         needs: deploy
-        if: ${{ needs.deploy.result == 'success' }}
+        if: ${{ needs.deploy.result == 'success' && vars.RUN_REGRESSION_TEST == 'true' }}
         steps:
           - name: Install SSH key
             uses: webfactory/ssh-agent@v0.5.3

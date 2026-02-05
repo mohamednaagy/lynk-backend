@@ -1,19 +1,19 @@
-name: Deploy to Preprod (Docker)
+name: Deploy to Production (Docker)
 
 on:
     workflow_dispatch:
     push:
         branches:
-            - pre-production
+            - production
 
 concurrency:
-    group: deploy-preprod
+    group: deploy-production
     cancel-in-progress: false
 
 jobs:
     setup:
         runs-on: ubuntu-latest
-        environment: pre-production
+        environment: production
         outputs:
             servers: ${{ steps.set-servers.outputs.servers }}
             commit_hash: ${{ steps.commit.outputs.short_sha }}
@@ -22,7 +22,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  ref: pre-production
+                  ref: production
 
             - name: Capture workflow start time
               id: timestamp
@@ -55,9 +55,9 @@ jobs:
     build:
         needs: setup
         runs-on:
-            group: pre-prod-runner-group
+            group: production-runner-group
             labels: [self-hosted]
-        environment: pre-production
+        environment: production
 
         steps:
             - name: Checkout code
@@ -66,7 +66,7 @@ jobs:
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v3
 
-            - name: Create .env file from GitHub secrets and variables for pre-production
+            - name: Create .env file from GitHub secrets and variables for production
               run: |
                   # Create .env file from GitHub environment secrets and variables
                   cat > .env.build << 'ENVEOF'
@@ -105,9 +105,6 @@ jobs:
                   SESSION_DRIVER=${{ vars.SESSION_DRIVER }}
                   SESSION_LIFETIME=${{ vars.SESSION_LIFETIME }}
 
-                  # Memcached Configuration
-                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
-
                   # Redis Configuration
                   REDIS_HOST=${{ vars.REDIS_HOST }}
                   REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
@@ -137,13 +134,6 @@ jobs:
                   OCI_BUCKET=${{ vars.OCI_BUCKET }}
                   OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
 
-                  # OCI Public Object Storage Configuration
-                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
-                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
-                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
-                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
-                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
-
                   # SES Configuration
                   SES_ACCESS_KEY_ID=${{ secrets.SES_ACCESS_KEY_ID }}
                   SES_SECRET_ACCESS_KEY=${{ secrets.SES_SECRET_ACCESS_KEY }}
@@ -154,9 +144,6 @@ jobs:
                   PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
                   PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}
                   PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
-
-                  MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
-                  MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
 
                   # Twilio Configuration
                   OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
@@ -173,10 +160,6 @@ jobs:
                   OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
                   OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
 
-                  # SMS & Mobile Verification
-                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
-                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
-
                   # Bitly
                   BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
 
@@ -186,9 +169,6 @@ jobs:
                   GRANTIFY_DEFAULT_DRIVER=${{ vars.GRANTIFY_DEFAULT_DRIVER }}
                   SETTINGS_CACHE_ENABLED=${{ vars.SETTINGS_CACHE_ENABLED }}
                   HOST_WHITELIST=${{ vars.HOST_WHITELIST }}
-
-                  # Sanctum
-                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
 
                   # Telescope
                   TELESCOPE_ENABLED=${{ vars.TELESCOPE_ENABLED }}
@@ -238,13 +218,9 @@ jobs:
                   RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
                   RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
 
-                  # Lynk Application Configuration
-                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
-                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
-                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
-
-                  # Rate Limiting
-                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
+                  # Loan Coverage
+                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
+                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
 
                   # Auto-Verified Users (Development/Testing)
                   AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
@@ -253,6 +229,7 @@ jobs:
                   # Master OTP for Development
                   ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
                   MASTER_OTP_KEY=${{ vars.MASTER_OTP_KEY }}
+
 
                   # Bursam Trader Configuration
                   BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
@@ -263,16 +240,34 @@ jobs:
                   BURSAM_MARKET_OPENING_END_TIME=${{ vars.BURSAM_MARKET_OPENING_END_TIME }}
                   BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION=${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}
 
-                  # Bitly
-                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
+                  # Sanctum
+                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
+
+                  # SMS & Mobile Verification
+                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
+                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
+
+                  # Memcached Configuration
+                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
+
+                  # OCI Public Object Storage Configuration
+                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
+                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
+                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
+                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
+                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
 
                   # PDF & Storage
                   DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
                   STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
 
-                  # Loan Coverage
-                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
-                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
+                  # Lynk Application Configuration
+                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
+                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
+                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
+
+                  # Rate Limiting
+                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
 
                   # Nightwatch Monitoring
                   NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
@@ -280,12 +275,11 @@ jobs:
                   NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
                   NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
                   NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
-                  NIGHTWATCH_INGEST_URI=${{ vars.NIGHTWATCH_INGEST_URI }}
 
                   ORDER_EXPORT_WEBHOOK_SECRET="${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}"
 
-                  #CORS Allowed Origins
-                  ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
+                  #CORS
+                  ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}
                   ENVEOF
 
                   echo "✓ .env file created from GitHub secrets/variables"
@@ -333,7 +327,7 @@ jobs:
             - name: Upload Docker image as artifact
               uses: actions/upload-artifact@v4
               with:
-                  name: docker-image-preprod
+                  name: docker-image-production
                   path: /tmp/app-php-fpm.tar.gz
                   retention-days: 1
 
@@ -345,9 +339,9 @@ jobs:
     deploy:
         needs: [build, setup]
         runs-on:
-            group: pre-prod-runner-group
+            group: production-runner-group
             labels: [self-hosted]
-        environment: pre-production
+        environment: production
         strategy:
             matrix:
                 include:
@@ -363,7 +357,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
               with:
-                  ref: pre-production
+                  ref: production
 
             - name: Get server IP
               id: server
@@ -522,7 +516,7 @@ jobs:
         needs: [deploy]
         if: always()
         runs-on:
-            group: pre-prod-runner-group
+            group: production-runner-group
             labels: [self-hosted]
 
         steps:
@@ -535,7 +529,7 @@ jobs:
         needs: [deploy, setup]
         if: always()
         runs-on: ubuntu-latest
-        environment: pre-production
+        environment: production
 
         steps:
             - name: 📋 Fetch PR Information
@@ -635,7 +629,7 @@ jobs:
                   TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
                   cat > /tmp/slack-payload.json <<'EOF'
                   {
-                    "text": "Backend Deployment (pre-production) - REPLACE_STATUS",
+                    "text": "Backend Deployment (production) - REPLACE_STATUS",
                     "attachments": [
                       {
                         "color": "REPLACE_COLOR",
@@ -652,7 +646,7 @@ jobs:
                           { "title": "PR Reviewer", "value": "REPLACE_PR_REVIEWERS", "short": true },
                           { "title": "PR Merger", "value": "REPLACE_PR_MERGER", "short": true }
                         ],
-                        "footer": "Lynk Backend (pre-production)"
+                        "footer": "Lynk Backend (production)"
                       }
                     ]
                   }
