@@ -26,8 +26,11 @@ class FinancingOrderActivityUpdateAction implements FinancingOrderActivityUpdate
     public function getLatestActivityDescription(FinancingOrder $financingOrder): string
     {
         return $this->withLocale('en', function () use ($financingOrder) {
-            return $financingOrder->status->isNot(FinancingOrderStatus::InProgress)
-            || is_null($financingOrder->current_step)
+            if ($financingOrder->status->is(FinancingOrderStatus::InProgress)) {
+                return $financingOrder->status->description;
+            }
+
+            return is_null($financingOrder->current_step)
                 ? $financingOrder->status->description
                 : $financingOrder->current_step->description;
         });
