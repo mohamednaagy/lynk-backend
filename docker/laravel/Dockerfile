@@ -8,7 +8,7 @@ FROM composer:2 AS composer-stage
 WORKDIR /app
 
 # Copy only composer files first (better layer caching)
-COPY composer.json composer.lock* ./
+COPY composer.json ./
 
 # Install production dependencies only (--no-dev removes dev packages)
 RUN composer install \
