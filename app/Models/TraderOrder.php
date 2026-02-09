@@ -18,6 +18,7 @@ use App\Support\Traders\Drivers\Lynk\Jobs\ProcessLynkInitiatedTraderOrder;
 use App\Support\Traders\Facades\Trader;
 use App\Traits\HasCreator;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,9 +39,13 @@ use UnexpectedValueException;
  * @property mixed $order
  * @property mixed $provider
  * @property mixed $version
+ * @property int|null $last_history_action
  * @property TraderOrderStatus $status
  * @property Collection $traderHistories
  * @property Carbon $created_at
+ * @property Carbon $updated_at
+ *
+ * @mixin Builder<TraderOrder>
  */
 class TraderOrder extends Model implements HasMedia
 {

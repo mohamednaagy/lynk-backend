@@ -11,7 +11,10 @@ use Illuminate\Support\Facades\Log;
 
 class ContractAndClientWakalaCompletedCase implements TraderOrderProceedCase
 {
-    private array $requiredStepForProccessedTraderOrder = [
+    /**
+     * @var array<string, string>
+     */
+    private array $requiredStepForProcessedTraderOrder = [
         EnumTrader::Lynk => MurabhaStep::ContractSigned,
         EnumTrader::Bursam => MurabhaStep::ContractSigned,
         EnumTrader::FakeDmcc => MurabhaStep::ClientWakala,
@@ -20,7 +23,7 @@ class ContractAndClientWakalaCompletedCase implements TraderOrderProceedCase
 
     public function canProceed(TraderOrder $traderOrder, bool $forceToProceed = false): bool
     {
-        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || is_null($traderOrder->last_history_action)) {
+        if ($this->isPreviousStepOfContractAndClientWakalaNotCompleted($traderOrder) || $this->isContractSigned($traderOrder) || is_null($traderOrder->last_history_action)) {
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('ContractAndClientWakalaCompletedCase: traderOrderId: '.$traderOrder->id.' - can not proceed', $traderOrder), [
                 'traderOrderId' => $traderOrder->id,
                 'financingOrderId' => $traderOrder->order?->id,
@@ -38,11 +41,16 @@ class ContractAndClientWakalaCompletedCase implements TraderOrderProceedCase
     protected function isPreviousStepOfContractAndClientWakalaNotCompleted(TraderOrder $traderOrder): bool
     {
         $murabhaSteps = array_keys(get_murabha_steps($traderOrder->provider, $traderOrder->version));
-        $stepIndex = array_search($this->requiredStepForProccessedTraderOrder[$traderOrder->provider], $murabhaSteps);
+        $stepIndex = array_search($this->requiredStepForProcessedTraderOrder[$traderOrder->provider], $murabhaSteps);
 
         return ! $traderOrder->checkOrderStepComplete(
             (new StepHistoriesDictionary($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type))
                 ->getPreviousStepOf($murabhaSteps[$stepIndex])->step
         );
+    }
+
+    protected function isContractSigned(TraderOrder $traderOrder): bool
+    {
+        return $traderOrder->checkOrderStepComplete(MurabhaStep::ContractSigned);
     }
 }
