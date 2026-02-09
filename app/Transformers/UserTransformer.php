@@ -20,6 +20,7 @@ class UserTransformer extends TransformerAbstract
         'id',
         'first_name',
         'last_name',
+        'full_name',
         'email',
         'role',
         'roles',
@@ -34,7 +35,6 @@ class UserTransformer extends TransformerAbstract
         'is_active',
         'is_invitation_accepted',
         'can_manage_orders',
-        'full_name',
     ];
 
     public function __construct(?string $area = null)

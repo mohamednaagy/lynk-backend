@@ -63,6 +63,7 @@ class AdminController extends Controller
                 'id',
                 'first_name',
                 'last_name',
+                'full_name',
                 'email',
                 'role',
                 'phone_number',
