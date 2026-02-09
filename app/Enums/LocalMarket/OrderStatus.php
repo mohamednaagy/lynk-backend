@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums\LocalMarket;
 
 use BenSampo\Enum\Contracts\LocalizedEnum;
 use BenSampo\Enum\Enum;
 use UnexpectedValueException;
 
+/**
+ * @extends Enum<int>
+ */
 final class OrderStatus extends Enum implements LocalizedEnum
 {
     const initiate = 0;
@@ -42,6 +47,9 @@ final class OrderStatus extends Enum implements LocalizedEnum
 
     const PendingDelivery = 16;
 
+    /**
+     * @var array<int, array<int>>
+     */
     private static array $state = [
         self::initiate => [
             self::PendingEligibleCommodities,
@@ -91,6 +99,7 @@ final class OrderStatus extends Enum implements LocalizedEnum
         self::CommoditiesSell => [],
         self::TransferOwnershipToCustomer => [
             self::PendingSellCommodities,
+            self::PendingCancellation,
         ],
 
     ];
