@@ -38,4 +38,8 @@ return [
         'label' => 'Trade Request Expired',
         'description' => 'The Trading Request #:trader_order_id has expired for Order #:order_id.',
     ],
+    'in_progress_orders' => [
+        'label' => 'In Progress Orders',
+        'description' => ':company_name has in-progress order(s).',
+    ],
 ];

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\NotificationChannel;
+use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\User;
 use App\Models\UserNotificationSetting;
@@ -168,6 +169,13 @@ class NotificationPreferenceService
     public function getEnabledUsersFor(SystemNotificationType $type, ?Closure $extra = null): Collection
     {
         return $this->getEnabledUsersForType($type, null, $extra);
+    }
+
+    public function getEnabledAdminsFor(SystemNotificationType $type): Collection
+    {
+        return $this->getEnabledUsersForType($type, null, function ($query) {
+            $query->role(Role::Admin);
+        });
     }
 
     public function getEnabledUsersForPortal(SystemNotificationType $type, ?Closure $extra = null): Collection

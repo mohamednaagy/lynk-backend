@@ -7,6 +7,7 @@ use App\Enums\SystemNotificationType;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Collection;
 
 /**
  * BaseNotification
@@ -41,17 +42,16 @@ abstract class BaseNotification extends Notification
         return $this->getUserEnabledChannels($typeSettings);
     }
 
-    private function getUserEnabledChannels($typeSettings): array
+    /**
+     * Specify which queue should handle which channels.
+     *
+     * @return array
+     */
+    public function viaQueues()
     {
-        $channels = [];
-        foreach (NotificationChannel::cases() as $channel) {
-            $setting = $typeSettings->where('channel', $channel)->first();
-            if ($setting?->is_enabled) {
-                $channels[] = $channel->value;
-            }
-        }
-
-        return $channels;
+        return [
+            'mail' => 'notifications',
+        ];
     }
 
     /**
@@ -86,6 +86,18 @@ abstract class BaseNotification extends Notification
      */
     abstract public function getDescription($notifiable): string;
 
+    protected function getBccUsers(): Collection
+    {
+        $notificationPreferenceService = app(NotificationPreferenceService::class);
+
+        return $notificationPreferenceService->getEnabledAdminsFor($this->getType())->pluck('email');
+    }
+
+    protected function getActionURL(): string
+    {
+        return '';
+    }
+
     /**
      * Check if the user has allowed roles for this notification type.
      *
@@ -112,15 +124,16 @@ abstract class BaseNotification extends Notification
         return false;
     }
 
-    /**
-     * Specify which queue should handle which channels.
-     *
-     * @return array
-     */
-    public function viaQueues()
+    private function getUserEnabledChannels($typeSettings): array
     {
-        return [
-            'mail' => 'notifications',
-        ];
+        $channels = [];
+        foreach (NotificationChannel::cases() as $channel) {
+            $setting = $typeSettings->where('channel', $channel)->first();
+            if ($setting?->is_enabled) {
+                $channels[] = $channel->value;
+            }
+        }
+
+        return $channels;
     }
 }

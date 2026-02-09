@@ -1,0 +1,680 @@
+name: Deploy to Preprod (Docker)
+
+on:
+    workflow_dispatch:
+    push:
+        branches:
+            - pre-production
+
+concurrency:
+    group: deploy-preprod
+    cancel-in-progress: false
+
+jobs:
+    setup:
+        runs-on: ubuntu-latest
+        environment: pre-production
+        outputs:
+            servers: ${{ steps.set-servers.outputs.servers }}
+            commit_hash: ${{ steps.commit.outputs.short_sha }}
+            start_ts: ${{ steps.timestamp.outputs.start_ts }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  ref: pre-production
+
+            - name: Capture workflow start time
+              id: timestamp
+              run: |
+                  START_TS=$(date +%s)
+                  echo "start_ts=${START_TS}" >> $GITHUB_OUTPUT
+                  echo "Workflow started at: $(date -d @${START_TS} +"%Y-%m-%d %H:%M:%S")"
+
+            - name: Extract commit hash
+              id: commit
+              run: |
+                  SHORT_SHA=$(git rev-parse --short=8 HEAD)
+                  echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+                  echo "Image will be tagged as: app-php-fpm:${SHORT_SHA}"
+
+            - name: Set server IPs from environment variable
+              id: set-servers
+              env:
+                  SERVERS_JSON: ${{ vars.DEPLOYMENT_SERVER_IPS }}
+              run: |
+                  # Debug: Show what we're getting
+                  echo "Raw value from vars.DEPLOYMENT_SERVER_IPS:"
+                  echo "$SERVERS_JSON"
+                  echo "---"
+
+                  # Use env variable to avoid bash quote interpretation
+                  # Expected format: ["10.0.0.1", "10.0.0.2", "10.0.0.3"]
+                  echo "servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
+
+    build:
+        needs: setup
+        runs-on:
+            group: pre-prod-runner-group
+            labels: [self-hosted]
+        environment: pre-production
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Create .env file from GitHub secrets and variables for pre-production
+              run: |
+                  # Create .env file from GitHub environment secrets and variables
+                  cat > .env.build << 'ENVEOF'
+                  # Application Configuration
+                  APP_NAME=${{ vars.APP_NAME }}
+                  APP_ENV=${{ vars.APP_ENV }}
+                  APP_KEY=${{ vars.APP_KEY }}
+                  APP_DEBUG=${{ vars.APP_DEBUG }}
+                  APP_URL=${{ vars.APP_URL }}
+                  ADMIN_URL=${{ vars.ADMIN_URL }}
+                  LENDER_URL=${{ vars.LENDER_URL }}
+                  SUPPLIER_URL=${{ vars.SUPPLIER_URL }}
+
+                  # Logging
+                  LOG_CHANNEL=${{ vars.LOG_CHANNEL }}
+                  LOG_DEPRECATIONS_CHANNEL=${{ vars.LOG_DEPRECATIONS_CHANNEL }}
+                  LOG_LEVEL=${{ vars.LOG_LEVEL }}
+
+                  # Database Configuration
+                  DB_CONNECTION=${{ vars.DB_CONNECTION }}
+                  DB_HOST=${{ vars.DB_HOST }}
+                  DB_PORT=${{ vars.DB_PORT }}
+                  DB_DATABASE=${{ vars.DB_DATABASE }}
+                  DB_USERNAME=${{ vars.DB_USERNAME }}
+                  DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+
+                  # Wallet Database
+                  WALLET_DB_HOST=${{ vars.WALLET_DB_HOST }}
+                  WALLET_DB_PORT=${{ vars.WALLET_DB_PORT }}
+                  WALLET_DB_DATABASE=${{ vars.WALLET_DB_DATABASE }}
+                  WALLET_DB_USERNAME=${{ vars.WALLET_DB_USERNAME }}
+                  WALLET_DB_PASSWORD="${{ secrets.WALLET_DB_PASSWORD }}"
+
+                  # Broadcasting & Queue
+                  BROADCAST_DRIVER=${{ vars.BROADCAST_DRIVER }}
+                  CACHE_DRIVER=${{ vars.CACHE_DRIVER }}
+                  FILESYSTEM_DISK=${{ vars.FILESYSTEM_DISK }}
+                  QUEUE_CONNECTION=${{ vars.QUEUE_CONNECTION }}
+                  SESSION_DRIVER=${{ vars.SESSION_DRIVER }}
+                  SESSION_LIFETIME=${{ vars.SESSION_LIFETIME }}
+
+                  # Memcached Configuration
+                  MEMCACHED_HOST=${{ vars.MEMCACHED_HOST }}
+
+                  # Redis Configuration
+                  REDIS_HOST=${{ vars.REDIS_HOST }}
+                  REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+                  REDIS_PORT=${{ vars.REDIS_PORT }}
+
+                  # Mail Configuration
+                  MAIL_MAILER=${{ vars.MAIL_MAILER }}
+                  MAIL_HOST=${{ vars.MAIL_HOST }}
+                  MAIL_PORT=${{ vars.MAIL_PORT }}
+                  MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}"
+                  MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
+                  MAIL_ENCRYPTION=${{ vars.MAIL_ENCRYPTION }}
+                  MAIL_FROM_ADDRESS=${{ vars.MAIL_FROM_ADDRESS }}
+                  MAIL_FROM_NAME=${{ vars.MAIL_FROM_NAME }}
+
+                  # AWS Configuration
+                  AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+                  AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  AWS_DEFAULT_REGION=${{ vars.AWS_DEFAULT_REGION }}
+                  AWS_BUCKET=${{ vars.AWS_BUCKET }}
+                  AWS_USE_PATH_STYLE_ENDPOINT=${{ vars.AWS_USE_PATH_STYLE_ENDPOINT }}
+
+                  # OCI Object Storage Configuration
+                  OCI_ACCESS_KEY_ID=${{ secrets.OCI_ACCESS_KEY_ID }}
+                  OCI_SECRET_ACCESS_KEY=${{ secrets.OCI_SECRET_ACCESS_KEY }}
+                  OCI_DEFAULT_REGION=${{ vars.OCI_DEFAULT_REGION }}
+                  OCI_BUCKET=${{ vars.OCI_BUCKET }}
+                  OCI_ENDPOINT=${{ vars.OCI_ENDPOINT }}
+
+                  # OCI Public Object Storage Configuration
+                  OCI_PUBLIC_ACCESS_KEY_ID=${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}
+                  OCI_PUBLIC_SECRET_ACCESS_KEY=${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}
+                  OCI_PUBLIC_DEFAULT_REGION=${{ vars.OCI_PUBLIC_DEFAULT_REGION }}
+                  OCI_PUBLIC_BUCKET=${{ vars.OCI_PUBLIC_BUCKET }}
+                  OCI_PUBLIC_ENDPOINT=${{ vars.OCI_PUBLIC_ENDPOINT }}
+
+                  # SES Configuration
+                  SES_ACCESS_KEY_ID=${{ secrets.SES_ACCESS_KEY_ID }}
+                  SES_SECRET_ACCESS_KEY=${{ secrets.SES_SECRET_ACCESS_KEY }}
+                  SES_DEFAULT_REGION=${{ vars.SES_DEFAULT_REGION }}
+
+                  # Pusher Configuration
+                  PUSHER_APP_ID=${{ secrets.PUSHER_APP_ID }}
+                  PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
+                  PUSHER_APP_SECRET=${{ secrets.PUSHER_APP_SECRET }}
+                  PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
+
+                  MIX_PUSHER_APP_KEY=${{ secrets.PUSHER_APP_KEY }}
+                  MIX_PUSHER_APP_CLUSTER=${{ vars.PUSHER_APP_CLUSTER }}
+
+                  # Twilio Configuration
+                  OTPIFY_TWILIO_SID=${{ secrets.OTPIFY_TWILIO_SID }}
+                  OTPIFY_TWILIO_TOKEN=${{ secrets.OTPIFY_TWILIO_TOKEN }}
+                  OTPIFY_TWILIO_FROM=${{ vars.OTPIFY_TWILIO_FROM }}
+                  OTPIFY_TWILIO_VERIFY_SID=${{ secrets.OTPIFY_TWILIO_VERIFY_SID }}
+                  OTPIFY_TWILIO_SSL_VERIFY_PEER=${{ vars.OTPIFY_TWILIO_SSL_VERIFY_PEER }}
+                  OTPIFY_TWILIO_SSL_VERIFY_HOST=${{ vars.OTPIFY_TWILIO_SSL_VERIFY_HOST }}
+
+                  # Application Specific - OTP & Auth
+                  OTPIFY_DEFAULT_DRIVER=${{ vars.OTPIFY_DEFAULT_DRIVER }}
+                  OTPIFY_CODE_LENGTH=${{ vars.OTPIFY_CODE_LENGTH }}
+                  OTPIFY_CODE_EXPIRATION_TIME=${{ vars.OTPIFY_CODE_EXPIRATION_TIME }}
+                  OTPIFY_AUTH_DEFAULT_DRIVER=${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}
+                  OTPIFY_NATIONAL_ID_DEFAULT_DRIVER=${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}
+
+                  # SMS & Mobile Verification
+                  SMS_DEFAULT_DRIVER=${{ vars.SMS_DEFAULT_DRIVER }}
+                  MOBILE_VERIFY_DEFAULT_DRIVER=${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}
+
+                  # Bitly
+                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
+
+                  AUTHORIZED_TOKEN_LENGTH=${{ vars.AUTHORIZED_TOKEN_LENGTH }}
+                  DEFAULT_GUARD=${{ vars.DEFAULT_GUARD }}
+                  PERMISSION_GUARDS=${{ vars.PERMISSION_GUARDS }}
+                  GRANTIFY_DEFAULT_DRIVER=${{ vars.GRANTIFY_DEFAULT_DRIVER }}
+                  SETTINGS_CACHE_ENABLED=${{ vars.SETTINGS_CACHE_ENABLED }}
+                  HOST_WHITELIST=${{ vars.HOST_WHITELIST }}
+
+                  # Sanctum
+                  SANCTUM_STATEFUL_DOMAINS=${{ vars.SANCTUM_STATEFUL_DOMAINS }}
+
+                  # Telescope
+                  TELESCOPE_ENABLED=${{ vars.TELESCOPE_ENABLED }}
+                  TELESCOPE_PRUNE_HOURS=${{ vars.TELESCOPE_PRUNE_HOURS }}
+                  TELESCOPE_DB_CONNECTION=${{ vars.TELESCOPE_DB_CONNECTION }}
+                  TELESCOPE_DB_HOST=${{ vars.TELESCOPE_DB_HOST }}
+                  TELESCOPE_DB_PORT=${{ vars.TELESCOPE_DB_PORT }}
+                  TELESCOPE_DB_DATABASE=${{ vars.TELESCOPE_DB_DATABASE }}
+                  TELESCOPE_DB_USERNAME=${{ vars.TELESCOPE_DB_USERNAME }}
+                  TELESCOPE_DB_PASSWORD=${{ secrets.TELESCOPE_DB_PASSWORD }}
+
+                  # Trading & SMS
+                  DEFAULT_TRADER=${{ vars.DEFAULT_TRADER }}
+                  MSEGAT_USERNAME=${{ secrets.MSEGAT_USERNAME }}
+                  MSEGAT_API_KEY=${{ secrets.MSEGAT_API_KEY }}
+
+                  # JWT Secret
+                  JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+                  # EDAAT Configuration
+                  EDAAT_BASE_URL=${{ vars.EDAAT_BASE_URL }}
+                  EDAAT_WEBHOOK_URL=${{ vars.EDAAT_WEBHOOK_URL }}
+                  EDAAT_PRODUCT=${{ vars.EDAAT_PRODUCT }}
+                  EDAAT_USERNAME=${{ vars.EDAAT_USERNAME }}
+                  EDAAT_PASSWORD="${{ secrets.EDAAT_PASSWORD }}"
+                  EDAAT_COMPANY=${{ vars.EDAAT_COMPANY }}
+                  EDAAT_VERIFY_TLS_CERTS=${{ vars.EDAAT_VERIFY_TLS_CERTS }}
+                  EDAAT_PAYMENT_URL=${{ vars.EDAAT_PAYMENT_URL }}
+                  EDAAT_BILL_URL=${{ vars.EDAAT_BILL_URL }}
+                  EDAAT_RECONCILE_URL=${{ vars.EDAAT_RECONCILE_URL }}
+
+                  # Wallet Configuration
+                  WALLET_CACHE_DRIVER=${{ vars.WALLET_CACHE_DRIVER }}
+                  WALLET_CACHE_TTL=${{ vars.WALLET_CACHE_TTL }}
+                  WALLET_LOCK_DRIVER=${{ vars.WALLET_LOCK_DRIVER }}
+                  WALLET_LOCK_SECONDS=${{ vars.WALLET_LOCK_SECONDS }}
+
+                  # RabbitMQ Configuration
+                  RABBITMQ_QUEUE_NAME=${{ vars.RABBITMQ_QUEUE_NAME }}
+                  RABBITMQ_HOST=${{ vars.RABBITMQ_HOST }}
+                  RABBITMQ_PORT=${{ vars.RABBITMQ_PORT }}
+                  RABBITMQ_USER="${{ vars.RABBITMQ_USER }}"
+                  RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
+                  RABBITMQ_VHOST="${{ vars.RABBITMQ_VHOST }}"
+
+                  # reCAPTCHA Configuration
+                  RECAPTCHA_SITE_KEY=${{ secrets.RECAPTCHA_SITE_KEY }}
+                  RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+
+                  # Lynk Application Configuration
+                  LYNK_DEFAULT_VERSION=${{ vars.LYNK_DEFAULT_VERSION }}
+                  LYNK_MAX_UNITS_PER_TRADER=${{ vars.LYNK_MAX_UNITS_PER_TRADER }}
+                  GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT=${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}
+
+                  # Rate Limiting
+                  ENABLE_RATE_LIMITER=${{ vars.ENABLE_RATE_LIMITER }}
+
+                  # Auto-Verified Users (Development/Testing)
+                  AUTO_VERIFIED_USERS=${{ vars.AUTO_VERIFIED_USERS }}
+                  AUTO_VERIFIED_USERS_PASSWORD="${{ vars.AUTO_VERIFIED_USERS_PASSWORD }}"
+
+                  # Master OTP for Development
+                  ALLOW_VERIFY_WITH_MASTER_KEY=${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}
+                  MASTER_OTP_KEY=${{ vars.MASTER_OTP_KEY }}
+
+                  # Bursam Trader Configuration
+                  BURSAM_FAKE=${{ vars.BURSAM_FAKE }}
+                  BURSAM_BASE_URL=${{ vars.BURSAM_BASE_URL }}
+                  BURSAM_SELLING_COMMODITY_START_TIME=${{ vars.BURSAM_SELLING_COMMODITY_START_TIME }}
+                  BURSAM_SELLING_COMMODITY_END_TIME=${{ vars.BURSAM_SELLING_COMMODITY_END_TIME }}
+                  BURSAM_MARKET_OPENING_START_TIME=${{ vars.BURSAM_MARKET_OPENING_START_TIME }}
+                  BURSAM_MARKET_OPENING_END_TIME=${{ vars.BURSAM_MARKET_OPENING_END_TIME }}
+                  BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION=${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}
+
+                  # Bitly
+                  BITLY_ACCESS_TOKEN=${{ secrets.BITLY_ACCESS_TOKEN }}
+
+                  # PDF & Storage
+                  DEFAULT_PDF_GENERATOR=${{ vars.DEFAULT_PDF_GENERATOR }}
+                  STATIC_PDF_STORAGE_DRIVER=${{ vars.STATIC_PDF_STORAGE_DRIVER }}
+
+                  # Loan Coverage
+                  LOAN_COVERAGE_STRATEGY=${{ vars.LOAN_COVERAGE_STRATEGY }}
+                  LOAN_COVERAGE_TIMEOUT=${{ vars.LOAN_COVERAGE_TIMEOUT }}
+
+                  # Nightwatch Monitoring
+                  NIGHTWATCH_ENABLED=${{ vars.NIGHTWATCH_ENABLED }}
+                  NIGHTWATCH_TOKEN="${{ secrets.NIGHTWATCH_TOKEN }}"
+                  NIGHTWATCH_REQUEST_SAMPLE_RATE=${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}
+                  NIGHTWATCH_COMMAND_SAMPLE_RATE=${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}
+                  NIGHTWATCH_EXCEPTION_SAMPLE_RATE=${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}
+                  NIGHTWATCH_INGEST_URI=${{ vars.NIGHTWATCH_INGEST_URI }}
+
+                  ORDER_EXPORT_WEBHOOK_SECRET="${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}"
+
+                  #CORS Allowed Origins
+                  ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
+                  ENVEOF
+
+                  echo "✓ .env file created from GitHub secrets/variables"
+                  echo "File size: $(wc -c < .env.build) bytes"
+
+                  # Rename to .env so Docker can copy it
+                  mv .env.build .env
+
+                  echo "✓ Renamed to .env for Docker build"
+                  echo "First 5 lines of .env:"
+                  head -5 .env
+
+            - name: Build Docker image
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  file: ./docker/laravel/Dockerfile
+                  load: true
+                  tags: |
+                      app-php-fpm:${{ needs.setup.outputs.commit_hash }}
+                      app-php-fpm:latest
+                  cache-from: type=local,src=/tmp/.buildx-cache
+                  cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+            - name: Save and compress Docker image
+              run: |
+                  set -euo pipefail
+
+                  echo "📦 Saving Docker image to tar archive..."
+                  docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+                  # Verify the archive is valid (not a near-empty file from a failed save)
+                  FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz)
+                  if [ "$FILE_SIZE" -lt 1048576 ]; then
+                    echo "❌ Image archive is only ${FILE_SIZE} bytes — docker save likely failed (no space left on device?)"
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    exit 1
+                  fi
+
+                  echo "Compressed image size:"
+                  ls -lh /tmp/app-php-fpm.tar.gz
+
+                  echo "✅ Image saved successfully"
+
+            - name: Upload Docker image as artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: docker-image-preprod
+                  path: /tmp/app-php-fpm.tar.gz
+                  retention-days: 1
+
+            - name: Clean up
+              if: always()
+              run: |
+                  rm -f .env.build
+
+    deploy:
+        needs: [build, setup]
+        runs-on:
+            group: pre-prod-runner-group
+            labels: [self-hosted]
+        environment: pre-production
+        strategy:
+            matrix:
+                include:
+                    - server_index: 0
+                      worker_group: group1
+                    - server_index: 1
+                      worker_group: group2
+                    - server_index: 2
+                      worker_group: group3
+            fail-fast: false
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  ref: pre-production
+
+            - name: Get server IP
+              id: server
+              run: |
+                  SERVERS='${{ needs.setup.outputs.servers }}'
+                  SERVER_IP=$(echo $SERVERS | jq -r '.[${{ matrix.server_index }}]')
+                  echo "ip=$SERVER_IP" >> $GITHUB_OUTPUT
+                  echo "Deploying to server ${{ steps.server.outputs.ip }}: $SERVER_IP"
+
+            - name: Setup SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DEPLOYMENT_KEY }}" > ~/.ssh/deploy_key
+                  chmod 600 ~/.ssh/deploy_key
+
+            - name: Set up pipeline directory
+              run: |
+                echo "📁 Setting up pipeline directory on ${{ matrix.server }}..."
+                ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} \
+                    "mkdir -p /var/www/backend-pipeline && mkdir -p /var/www/backend-pipeline/logs"
+
+            - name: Transfer image to server ${{ steps.server.outputs.ip }}
+              run: |
+                  echo "🚀 Transferring Docker image to server ${{ steps.server.outputs.ip }}..."
+
+                  scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    /tmp/app-php-fpm.tar.gz \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/
+
+                  echo "✅ Image transferred to server ${{ steps.server.outputs.ip }}"
+
+            - name: Transfer docker-compose.yml and deployment script
+              run: |
+                  echo "📋 Transferring docker-compose.yml and deployment script..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} \
+                    "mkdir -p /tmp/lynk-backend-compose"
+
+                  # Transfer docker-compose.yml
+                  scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    docker-compose.yml \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/docker-compose.yml
+
+                  # Transfer deployment script
+                  scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    .github/scripts/deploy-preprod.sh \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }}:/tmp/lynk-backend-compose/deploy.sh
+
+                  echo "✅ Files transferred"
+
+            - name: Load Docker image on server ${{ steps.server.outputs.ip }}
+              run: |
+                  echo "📥 Loading Docker image on server ${{ steps.server.outputs.ip }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                    set -euo pipefail
+
+                    echo '📥 Loading Docker image...'
+                    gunzip -c /tmp/app-php-fpm.tar.gz | docker load
+
+                    echo '🏷️  Tagging image...'
+                    docker tag app-php-fpm:${{ needs.setup.outputs.commit_hash }} app-php-fpm:latest
+
+                    rm -f /tmp/app-php-fpm.tar.gz
+                    echo '✅ Docker image loaded successfully'
+                  "
+
+            - name: Prepare deployment directory
+              run: |
+                  echo "📁 Preparing deployment directory on server ${{ steps.server.outputs.ip }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                    set -euo pipefail
+
+                    mkdir -p /var/www/backend-pipeline
+                    cd /var/www/backend-pipeline
+
+                    # Copy docker-compose.yml
+                    cp /tmp/lynk-backend-compose/docker-compose.yml .
+
+                    # Copy deployment script
+                    cp /tmp/lynk-backend-compose/deploy.sh .
+                    chmod +x deploy.sh
+                    rm -rf /tmp/lynk-backend-compose
+
+                    echo '✅ Deployment directory prepared'
+                  "
+
+            - name: Deploy with zero-downtime rolling update
+              timeout-minutes: 10
+              run: |
+                  echo "🚀 Deploying containers on server ${{ steps.server.outputs.ip }} with zero-downtime strategy..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                    set -euo pipefail
+                    cd /var/www/backend-pipeline
+
+                    echo 'Deploying services with profiles: web,${{ matrix.worker_group }},observability'
+                    ./deploy.sh 'web,${{ matrix.worker_group }},observability'
+
+                    echo '✅ Server ${{ steps.server.outputs.ip }} deployment completed successfully'
+                  "
+
+            - name: Verify deployment status
+              run: |
+                  echo "📊 Verifying deployment status on server ${{ steps.server.outputs.ip }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                    cd /var/www/backend-pipeline
+
+                    echo '📊 Container Status:'
+                    docker compose -p lynk-backend --profile web --profile ${{ matrix.worker_group }} --profile observability ps --format 'table {{.Name}}\t{{.Status}}'
+
+                    echo ''
+                    echo '🏷️  Image Information:'
+                    docker images | grep app-php-fpm
+
+                    echo ''
+                    echo '✅ Deployment verification complete on server ${{ steps.server.outputs.ip }}'
+                  "
+
+            - name: Run post-deployment tasks
+              if: matrix.server_index == 0
+              run: |
+                  echo "🔧 Running post-deployment tasks on server ${{ steps.server.outputs.ip }}..."
+
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+                    ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
+                    cd /var/www/backend-pipeline
+
+                    # Get the app container name
+                    APP_CONTAINER=\$(docker compose -p lynk-backend --profile web ps -q app | head -1)
+
+                    if [ -z \"\$APP_CONTAINER\" ]; then
+                      echo '❌ App container not found'
+                      exit 1
+                    fi
+
+                    echo '🗄️  Running database migrations...'
+                    docker exec \$APP_CONTAINER php artisan migrate --force
+
+                    echo '🧹 Optimizing caches...'
+                    docker exec \$APP_CONTAINER php artisan config:cache
+                    docker exec \$APP_CONTAINER php artisan route:cache
+
+                    echo '✅ Post-deployment tasks completed'
+                  "
+
+    cleanup:
+        needs: [deploy]
+        if: always()
+        runs-on:
+            group: pre-prod-runner-group
+            labels: [self-hosted]
+
+        steps:
+            - name: Cleanup local build artifacts
+              run: |
+                  rm -f /tmp/app-php-fpm.tar.gz
+                  echo "✅ Build artifacts cleaned up"
+
+    notify:
+        needs: [deploy, setup]
+        if: always()
+        runs-on: ubuntu-latest
+        environment: pre-production
+
+        steps:
+            - name: 📋 Fetch PR Information
+              id: pr-info
+              run: |
+                  # Install jq for JSON processing
+                  sudo apt-get update && sudo apt-get install -y jq
+
+                  echo "Fetching PR info for commit ${{ github.sha }}"
+
+                  # Try to get PR info from GitHub API
+                  PR_DATA=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+                    -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                    "https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" || echo "[]")
+
+                  # Extract PR creator and merger
+                  PR_CREATOR=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 then .[0].user.login else "" end' || echo "")
+                  PR_MERGER=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 and .[0].merged_by != null then .[0].merged_by.login else "" end' || echo "")
+
+                  # Try to get reviewers (people who approved/reviewed the PR)
+                  if [ -n "$PR_CREATOR" ]; then
+                    PR_NUMBER=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 then .[0].number else "" end' || echo "")
+                    if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
+                      # Get PR reviews to find reviewers
+                      REVIEWS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+                        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                        "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews" || echo "[]")
+
+                      # Get reviewers who approved (state: APPROVED)
+                      PR_REVIEWERS=$(echo "$REVIEWS" | jq -r '[.[] | select(.state == "APPROVED") | .user.login] | unique | join(", ")' || echo "")
+                    fi
+                  fi
+
+                  # Fallback: use event context if available
+                  if [ -z "$PR_CREATOR" ] && [ -n "${{ github.event.pull_request.user.login }}" ]; then
+                    PR_CREATOR="${{ github.event.pull_request.user.login }}"
+                  fi
+
+                  if [ -z "$PR_MERGER" ] && [ -n "${{ github.event.pull_request.merged_by.login }}" ]; then
+                    PR_MERGER="${{ github.event.pull_request.merged_by.login }}"
+                  fi
+
+                  # Set outputs (use "N/A" if empty, and make sed-safe by replacing '|' with '-')
+                  PR_CREATOR_SAFE=$(echo "${PR_CREATOR:-N/A}" | tr '|' '-')
+                  PR_MERGER_SAFE=$(echo "${PR_MERGER:-N/A}" | tr '|' '-')
+                  PR_REVIEWERS_SAFE=$(echo "${PR_REVIEWERS:-N/A}" | tr '|' '-')
+
+                  echo "pr_creator=$PR_CREATOR_SAFE" >> $GITHUB_OUTPUT
+                  echo "pr_merger=$PR_MERGER_SAFE" >> $GITHUB_OUTPUT
+                  echo "pr_reviewers=$PR_REVIEWERS_SAFE" >> $GITHUB_OUTPUT
+
+                  echo "PR Creator: ${PR_CREATOR:-N/A}"
+                  echo "PR Merger: ${PR_MERGER:-N/A}"
+                  echo "PR Reviewers: ${PR_REVIEWERS:-N/A}"
+
+            - name: Send Slack notification
+              run: |
+                  STATUS="${{ needs.deploy.result }}"
+                  if [ "$STATUS" = "success" ]; then
+                    EMOJI="✅"
+                    COLOR="good"
+                    STATUS_LABEL="Success"
+                  else
+                    EMOJI="❌"
+                    COLOR="danger"
+                    STATUS_LABEL="Failed"
+                  fi
+                  START_TS="${{ needs.setup.outputs.start_ts }}"
+                  END_TS=$(date +%s)
+                  DURATION_SEC=$((END_TS - START_TS))
+                  if [ "$DURATION_SEC" -lt 0 ]; then DURATION_SEC=0; fi
+                  D_H=$((DURATION_SEC/3600))
+                  D_M=$(((DURATION_SEC%3600)/60))
+                  D_S=$((DURATION_SEC%60))
+                  DURATION_HUMAN=$(printf "%02dh %02dm %02ds" "$D_H" "$D_M" "$D_S")
+                  PR_URL="${{ github.event.pull_request.html_url }}"
+                  PR_TITLE="${{ github.event.pull_request.title }}"
+                  COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+                  if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
+                    PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+                  fi
+                  if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
+                    if [ -n "$COMMIT_MESSAGE" ] && [ "$COMMIT_MESSAGE" != "null" ]; then
+                      # Use only the first line of the commit message to avoid newlines breaking sed
+                      PR_TITLE="$(printf '%s' "$COMMIT_MESSAGE" | head -n1)"
+                    else
+                      PR_TITLE="$GITHUB_REPOSITORY"
+                    fi
+                  fi
+                  # Make a sed-safe version of the title (remove '|' which is used as sed delimiter)
+                  SAFE_PR_TITLE="$(printf '%s' "$PR_TITLE" | tr '|' '-')"
+                  RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  BRANCH="${GITHUB_REF_NAME:-${GITHUB_REF##refs/heads/}}"
+                  IMAGE_TAG="app-php-fpm:${{ needs.setup.outputs.commit_hash }}"
+                  # Use workflow start time (captured in setup) for display
+                  START_TS="${{ needs.setup.outputs.start_ts }}"
+                  TIMESTAMP="$(TZ=Africa/Cairo date -d @"$START_TS" +"%Y-%m-%d %H:%M:%S %Z")"
+                  cat > /tmp/slack-payload.json <<'EOF'
+                  {
+                    "text": "Backend Deployment (pre-production) - REPLACE_STATUS",
+                    "attachments": [
+                      {
+                        "color": "REPLACE_COLOR",
+                        "title": "REPLACE_TITLE",
+                        "title_link": "REPLACE_RUN_URL",
+                        "fields": [
+                          { "title": "Branch", "value": "REPLACE_BRANCH", "short": true },
+                          { "title": "Status", "value": "REPLACE_EMOJI REPLACE_STATUS", "short": true },
+                          { "title": "Duration", "value": "REPLACE_DURATION", "short": true },
+                          { "title": "PR / Commit", "value": "<REPLACE_PR_URL|View>", "short": true },
+                          { "title": "Run", "value": "<REPLACE_RUN_URL|View Workflow>", "short": true },
+                          { "title": "Time", "value": "REPLACE_TIME", "short": true },
+                          { "title": "PR Creator", "value": "REPLACE_PR_CREATOR", "short": true },
+                          { "title": "PR Reviewer", "value": "REPLACE_PR_REVIEWERS", "short": true },
+                          { "title": "PR Merger", "value": "REPLACE_PR_MERGER", "short": true }
+                        ],
+                        "footer": "Lynk Backend (pre-production)"
+                      }
+                    ]
+                  }
+                  EOF
+                  sed -i \
+                    -e "s|REPLACE_STATUS|$STATUS_LABEL|g" \
+                    -e "s|REPLACE_COLOR|$COLOR|g" \
+                    -e "s|REPLACE_RUN_URL|$RUN_URL|g" \
+                    -e "s|REPLACE_RUN|${{ github.run_number }}|g" \
+                    -e "s|REPLACE_TITLE|$SAFE_PR_TITLE|g" \
+                    -e "s|REPLACE_BRANCH|$BRANCH|g" \
+                    -e "s|REPLACE_EMOJI|$EMOJI|g" \
+                    -e "s|REPLACE_DURATION|$DURATION_HUMAN|g" \
+                    -e "s|REPLACE_PR_URL|$PR_URL|g" \
+                    -e "s|REPLACE_TIME|$TIMESTAMP|g" \
+                    -e "s|REPLACE_PR_CREATOR|${{ steps.pr-info.outputs.pr_creator }}|g" \
+                    -e "s|REPLACE_PR_REVIEWERS|${{ steps.pr-info.outputs.pr_reviewers }}|g" \
+                    -e "s|REPLACE_PR_MERGER|${{ steps.pr-info.outputs.pr_merger }}|g" \
+                    /tmp/slack-payload.json
+                  echo "Slack payload:"
+                  cat /tmp/slack-payload.json
+                  curl -X POST -H 'Content-type: application/json' --data @/tmp/slack-payload.json ${{ secrets.SLACK_HOOK_URL }}
