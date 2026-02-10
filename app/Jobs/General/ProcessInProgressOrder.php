@@ -2,6 +2,7 @@
 
 namespace App\Jobs\General;
 
+use App\Actions\Contracts\FinancingOrderActivityUpdate;
 use App\Actions\Contracts\Orders\CanCreateOrder;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderStatus;
@@ -47,6 +48,7 @@ class ProcessInProgressOrder implements ShouldQueue
         try {
             // Add withoutGlobalScopes to prevent filtering orders with null company_id when looking for suitable trader
             $financingOrder = FinancingOrder::withoutGlobalScopes()->lockForUpdate()->findOrFail($this->financingOrderId);
+            app(FinancingOrderActivityUpdate::class)->updateFinancingOrderLatestActivity($financingOrder);
             $trader = Trader::getSuitableDriverForCompany($financingOrder);
 
             if ($financingOrder->traderOrders()->where('status', TraderOrderStatus::InProgress)->count() > 0) {
