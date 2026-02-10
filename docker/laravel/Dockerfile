@@ -42,6 +42,7 @@ RUN apk add --no-cache \
     icu-libs \
     libzip \
     oniguruma \
+    acl \
     libpng \
     libjpeg-turbo \
     freetype \
