@@ -3,14 +3,14 @@
 namespace App\Http\Middleware;
 
 use App\Actions\Contracts\GetSettingsClassInstance;
+use App\Enums\Area;
 use App\Enums\ErrorCode;
 use Closure;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\Request;
 
 class IsEmailVerified
 {
-    protected $getSettingsClassInstance;
+    protected GetSettingsClassInstance $getSettingsClassInstance;
 
     public function __construct(GetSettingsClassInstance $getSettingsClassInstance)
     {
@@ -26,9 +26,17 @@ class IsEmailVerified
     public function handle(Request $request, Closure $next, string $area)
     {
         $user = $request->user();
-
-        if (! $user || ($user instanceof MustVerifyEmail && $this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail())) {
+        if (! $user) {
             return $this->notAuthorizedResponse($request);
+        }
+        if ($area == Area::Lender) {
+            if ($this->isEmailVerifiedRequired($area) && ! $user->hasVerifiedEmail()) {
+                return $this->notAuthorizedResponse($request);
+            }
+        } elseif ($area == Area::CommoditySupplier) {
+            if (! $user->hasVerifiedEmail()) {
+                return $this->notAuthorizedResponse($request);
+            }
         }
 
         return $next($request);

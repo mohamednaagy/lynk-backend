@@ -58,6 +58,7 @@ class FinancingOrderTransformer extends TransformerAbstract
         'phone_number_formatted',
         'created_at',
         'current_step',
+        'latest_activity',
         'history',
         'active_trader',
         'trader_orders',
@@ -230,6 +231,11 @@ class FinancingOrderTransformer extends TransformerAbstract
             'value' => $step->value,
             'description' => $step->description,
         ] : null);
+    }
+
+    public function includeLatestActivity(FinancingOrder $financingOrder): Primitive
+    {
+        return $this->primitive($financingOrder->latest_activity);
     }
 
     /**

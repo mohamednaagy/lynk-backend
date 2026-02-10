@@ -81,6 +81,7 @@ class OrderController extends Controller
                 'selling_price_formatted',
                 'status_reason',
                 'current_step',
+                'latest_activity',
                 'creator',
                 'assignable_admin',
                 'company_name',
