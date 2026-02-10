@@ -1,0 +1,24 @@
+name: Setup SSH
+description: Configure SSH key for deployment server access
+
+inputs:
+  ssh-key:
+    description: Private SSH key for deployment
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Configure SSH key
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ inputs.ssh-key }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        cat >> ~/.ssh/config <<EOF
+        Host *
+          StrictHostKeyChecking no
+          ConnectTimeout 30
+          IdentityFile ~/.ssh/deploy_key
+        EOF
+        chmod 600 ~/.ssh/config

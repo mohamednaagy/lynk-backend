@@ -1,0 +1,121 @@
+name: Slack Deploy Notification
+description: Send deployment status notification to Slack
+
+inputs:
+  webhook-url:
+    description: Slack webhook URL
+    required: true
+  environment-label:
+    description: "Environment name for display (e.g. Dev, Sandbox, pre-production)"
+    required: true
+  deploy-result:
+    description: "Deployment result (success or failure)"
+    required: true
+  start-ts:
+    description: Unix timestamp when workflow started
+    required: true
+  commit-hash:
+    description: Short commit hash
+    required: true
+  run-url:
+    description: GitHub Actions run URL
+    required: true
+  pr-url:
+    description: PR or commit URL
+    required: false
+    default: ""
+  pr-title:
+    description: PR title or commit message (first line)
+    required: false
+    default: ""
+  pr-creator:
+    description: PR creator username
+    required: false
+    default: "N/A"
+  pr-merger:
+    description: PR merger username
+    required: false
+    default: "N/A"
+  pr-reviewers:
+    description: PR reviewers (comma-separated)
+    required: false
+    default: "N/A"
+  include-pr-info:
+    description: "Whether to include PR creator/merger/reviewer fields"
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Send Slack notification
+      shell: bash
+      run: |
+        STATUS="${{ inputs.deploy-result }}"
+        if [ "$STATUS" = "success" ]; then
+          COLOR="good"
+          STATUS_LABEL="Success"
+        else
+          COLOR="danger"
+          STATUS_LABEL="Failed"
+        fi
+
+        END_TS=$(date +%s)
+        DURATION_SEC=$((END_TS - ${{ inputs.start-ts }}))
+        if [ "$DURATION_SEC" -lt 0 ]; then DURATION_SEC=0; fi
+        DURATION_HUMAN=$(printf "%02dh %02dm %02ds" $((DURATION_SEC/3600)) $(((DURATION_SEC%3600)/60)) $((DURATION_SEC%60)))
+
+        TIMESTAMP="$(TZ=Africa/Cairo date -d @"${{ inputs.start-ts }}" +"%Y-%m-%d %H:%M:%S %Z" 2>/dev/null || TZ=Africa/Cairo date -r "${{ inputs.start-ts }}" +"%Y-%m-%d %H:%M:%S %Z" 2>/dev/null || echo "N/A")"
+
+        PR_URL="${{ inputs.pr-url }}"
+        TITLE="${{ inputs.pr-title }}"
+        [ -z "$TITLE" ] && TITLE="Deployment"
+
+        # Build fields array using jq for proper JSON escaping
+        FIELDS=$(jq -n \
+          --arg branch_val "${GITHUB_REF_NAME:-unknown}" \
+          --arg status_val "$STATUS_LABEL" \
+          --arg duration_val "$DURATION_HUMAN" \
+          --arg pr_url "$PR_URL" \
+          --arg run_url "${{ inputs.run-url }}" \
+          --arg time_val "$TIMESTAMP" \
+          '[
+            { "title": "Branch",     "value": $branch_val,               "short": true },
+            { "title": "Status",     "value": $status_val,               "short": true },
+            { "title": "Duration",   "value": $duration_val,             "short": true },
+            { "title": "PR / Commit","value": ("<" + $pr_url + "|View>"),"short": true },
+            { "title": "Run",        "value": ("<" + $run_url + "|View Workflow>"), "short": true },
+            { "title": "Time",       "value": $time_val,                 "short": true }
+          ]')
+
+        if [ "${{ inputs.include-pr-info }}" = "true" ]; then
+          FIELDS=$(echo "$FIELDS" | jq \
+            --arg creator "${{ inputs.pr-creator }}" \
+            --arg reviewers "${{ inputs.pr-reviewers }}" \
+            --arg merger "${{ inputs.pr-merger }}" \
+            '. + [
+              { "title": "PR Creator",  "value": $creator,   "short": true },
+              { "title": "PR Reviewer", "value": $reviewers, "short": true },
+              { "title": "PR Merger",   "value": $merger,    "short": true }
+            ]')
+        fi
+
+        PAYLOAD=$(jq -n \
+          --arg text "Backend Deployment (${{ inputs.environment-label }}) - $STATUS_LABEL" \
+          --arg color "$COLOR" \
+          --arg title "$TITLE" \
+          --arg title_link "${{ inputs.run-url }}" \
+          --arg footer "Lynk Backend (${{ inputs.environment-label }})" \
+          --argjson fields "$FIELDS" \
+          '{
+            "text": $text,
+            "attachments": [{
+              "color": $color,
+              "title": $title,
+              "title_link": $title_link,
+              "fields": $fields,
+              "footer": $footer
+            }]
+          }')
+
+        curl -s -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "${{ inputs.webhook-url }}"

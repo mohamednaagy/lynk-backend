@@ -1,0 +1,511 @@
+name: Deploy to Dev (Docker)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+concurrency:
+  group: deploy-dev-docker
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      environment: development
+      runner: '"ubuntu-latest"'
+      cache-type: gha
+      artifact-name: docker-image-dev
+      run-trivy: true
+    secrets: inherit
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: development
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.build.outputs.servers) }}
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-dev
+          path: /tmp/
+
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.DEPLOYMENT_KEY }}
+
+      - name: Deploy to server
+        uses: ./.github/actions/deploy-to-server
+        with:
+          server-ip: ${{ matrix.server }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          commit-hash: ${{ needs.build.outputs.commit_hash }}
+          deploy-script: .github/scripts/deploy.sh
+          use-staging-dir: "false"
+
+      - name: Verify deployment
+        run: |
+          ssh ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+            docker exec lynk-backend-app php artisan health:check
+          "
+
+      - name: Post-deploy tasks
+        uses: ./.github/actions/post-deploy
+        with:
+          server-ip: ${{ matrix.server }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          commands: |
+            php artisan migrate --force
+            php artisan structure:clear
+            php artisan package:discover
+
+      - name: Verify containers
+        run: |
+          ssh ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+            cd /var/www/backend-pipeline
+            docker compose -p lynk-backend ps --format 'table {{.Name}}\t{{.Status}}'
+            echo ''
+            echo 'Total containers: '\$(docker compose -p lynk-backend ps -q | wc -l)
+            docker images | grep app-php-fpm
+          "
+
+  test:
+    name: Regression Tests
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: ${{ needs.deploy.result == 'success' && vars.RUN_REGRESSION_TEST == 'true' }}
+    steps:
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Debug SSH User
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            echo 'Current user:' && whoami &&
+            echo 'Home directory:' && echo \$HOME &&
+            echo 'Looking for automation repo...' &&
+            sudo find /home -name 'lynk-backend-automation' -type d 2>/dev/null &&
+            echo 'Permissions on /home:' && ls -la /home/
+          "
+
+      - name: Update Automation Repo
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              git remote set-url origin https://x-access-token:${{ secrets.GB_AUTOMATION_TEST_TOKEN }}@github.com/lynksa/lynk-backend-automation.git &&
+              git fetch origin main &&
+              git reset --hard origin/main &&
+              echo \"Updated to commit: \$(git rev-parse HEAD)\"
+            '
+          "
+
+      - name: Prepare Test Environment
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              rm -rf allure-results merged-allure-results allure-report &&
+              mkdir -p allure-results/admin allure-results/lender allure-results/supplier merged-allure-results
+            '
+          "
+
+      - name: Run Regression Tests
+        id: run-tests
+        run: |
+          ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=30 ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+
+              echo \"Cleaning up existing Docker resources...\"
+              docker-compose down --remove-orphans -v 2>/dev/null || true
+              docker rm -f test-admin test-lender test-supplier 2>/dev/null || true
+              docker network rm lynk-backend-automation_default 2>/dev/null || true
+              sleep 2
+
+              echo \"Building containers...\"
+              docker-compose build --no-cache
+
+              echo \"Starting containers...\"
+              if ! docker-compose up -d; then
+                echo \"Failed to start containers\"
+                docker-compose logs
+                exit 2
+              fi
+
+              docker ps -a
+
+              echo \"Waiting for all test containers to complete...\"
+              while true; do
+                ADMIN_RUNNING=\$(docker ps -q -f name=test-admin 2>/dev/null)
+                LENDER_RUNNING=\$(docker ps -q -f name=test-lender 2>/dev/null)
+                SUPPLIER_RUNNING=\$(docker ps -q -f name=test-supplier 2>/dev/null)
+
+                if [ -z \"\$ADMIN_RUNNING\" ] && [ -z \"\$LENDER_RUNNING\" ] && [ -z \"\$SUPPLIER_RUNNING\" ]; then
+                  echo \"All containers have stopped.\"
+                  break
+                fi
+
+                RUNNING=\"\"
+                [ -n \"\$ADMIN_RUNNING\" ] && RUNNING=\"\$RUNNING admin\"
+                [ -n \"\$LENDER_RUNNING\" ] && RUNNING=\"\$RUNNING lender\"
+                [ -n \"\$SUPPLIER_RUNNING\" ] && RUNNING=\"\$RUNNING supplier\"
+                echo \"[$(date +%H:%M:%S)] Still running:\$RUNNING\"
+                sleep 30
+              done
+
+              ADMIN_EXIT=\$(docker inspect test-admin --format=\"{{.State.ExitCode}}\" 2>/dev/null) || ADMIN_EXIT=999
+              LENDER_EXIT=\$(docker inspect test-lender --format=\"{{.State.ExitCode}}\" 2>/dev/null) || LENDER_EXIT=999
+              SUPPLIER_EXIT=\$(docker inspect test-supplier --format=\"{{.State.ExitCode}}\" 2>/dev/null) || SUPPLIER_EXIT=999
+
+              echo \"Container exit codes:\"
+              echo \"  test-admin: \$ADMIN_EXIT\"
+              echo \"  test-lender: \$LENDER_EXIT\"
+              echo \"  test-supplier: \$SUPPLIER_EXIT\"
+
+              docker-compose logs --tail=100
+
+              FAILED=0
+              for name in ADMIN LENDER SUPPLIER; do
+                eval EXIT=\$\${name}_EXIT
+                if [ \"\$EXIT\" -eq 999 ]; then
+                  echo \"test-\$(echo \$name | tr A-Z a-z) container did not start\"
+                  FAILED=1
+                elif [ \"\$EXIT\" -gt 1 ]; then
+                  echo \"test-\$(echo \$name | tr A-Z a-z) crashed with exit code \$EXIT\"
+                  FAILED=1
+                fi
+              done
+
+              ADMIN_COUNT=\$(find allure-results/admin -name \"*-result.json\" 2>/dev/null | wc -l)
+              LENDER_COUNT=\$(find allure-results/lender -name \"*-result.json\" 2>/dev/null | wc -l)
+              SUPPLIER_COUNT=\$(find allure-results/supplier -name \"*-result.json\" 2>/dev/null | wc -l)
+
+              if [ \"\$ADMIN_COUNT\" -eq 0 ] || [ \"\$LENDER_COUNT\" -eq 0 ] || [ \"\$SUPPLIER_COUNT\" -eq 0 ]; then
+                echo \"Missing test results from one or more containers\"
+                FAILED=1
+              fi
+
+              docker-compose down --remove-orphans 2>/dev/null || true
+
+              if [ \"\$FAILED\" -eq 1 ]; then
+                exit 2
+              fi
+              echo \"All containers completed with test results\"
+            '
+          "
+        continue-on-error: true
+        timeout-minutes: 45
+
+      - name: Fix Permissions
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo chown -R ubuntu:ubuntu /home/ubuntu/lynk-backend-automation/allure-results /home/ubuntu/lynk-backend-automation/allure-report /home/ubuntu/lynk-backend-automation/merged-allure-results 2>/dev/null || true
+          "
+
+      - name: Merge Allure Results
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              mkdir -p merged-allure-results &&
+              cp -R allure-results/admin/* merged-allure-results/ 2>/dev/null || true &&
+              cp -R allure-results/lender/* merged-allure-results/ 2>/dev/null || true &&
+              cp -R allure-results/supplier/* merged-allure-results/ 2>/dev/null || true
+            '
+          "
+
+      - name: Generate Allure Report
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              allure generate merged-allure-results -o allure-report --clean
+            '
+          "
+
+      - name: Download Allure Report
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              tar -czf /tmp/allure-report.tar.gz allure-report merged-allure-results
+            '
+            sudo chmod 644 /tmp/allure-report.tar.gz
+          "
+          scp -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }}:/tmp/allure-report.tar.gz ./allure-report.tar.gz
+          tar -xzf allure-report.tar.gz
+
+      - name: Extract Test Results
+        id: test-results
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+          TOTAL=0; PASSED=0; FAILED=0; SKIPPED=0
+
+          if [ -d "merged-allure-results" ]; then
+            for f in merged-allure-results/*-result.json; do
+              if [ -f "$f" ]; then
+                status=$(jq -r '.status // "unknown"' "$f" 2>/dev/null)
+                case "$status" in
+                  "passed") PASSED=$((PASSED + 1)) ;;
+                  "failed"|"broken") FAILED=$((FAILED + 1)) ;;
+                  "skipped") SKIPPED=$((SKIPPED + 1)) ;;
+                esac
+              fi
+            done
+            TOTAL=$((PASSED + FAILED + SKIPPED))
+          fi
+
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
+
+          if [ "$FAILED" -eq 0 ] && [ "$TOTAL" -gt 0 ]; then
+            echo "status=PASSED" >> $GITHUB_OUTPUT
+            echo "color=good" >> $GITHUB_OUTPUT
+          else
+            echo "status=FAILED" >> $GITHUB_OUTPUT
+            echo "color=danger" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload Allure Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-validation-allure-results
+          path: merged-allure-results/
+          retention-days: 30
+
+      - name: Upload Allure Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-validation-allure-report
+          path: allure-report/
+          retention-days: 30
+
+      - name: Set link vars
+        id: links
+        run: |
+          BASE_URL="https://${{ github.repository_owner }}.github.io/lynk-backend"
+          echo "THIS_RUN_URL=${BASE_URL}/deploy-validation/${{ github.run_number }}/" >> $GITHUB_OUTPUT
+          echo "LATEST_URL=${BASE_URL}/deploy-validation/latest/" >> $GITHUB_OUTPUT
+          echo "DASHBOARD_URL=${BASE_URL}/deploy-validation/" >> $GITHUB_OUTPUT
+
+      - name: Prepare GitHub Pages Content
+        run: |
+          mkdir -p gh-pages-deploy/deploy-validation/${{ github.run_number }}
+          mkdir -p gh-pages-deploy/deploy-validation/latest
+          mkdir -p gh-pages-deploy/deploy-validation/data
+
+          cp -R allure-report/* gh-pages-deploy/deploy-validation/${{ github.run_number }}/
+          cp -R allure-report/* gh-pages-deploy/deploy-validation/latest/
+
+          git clone --depth 1 --branch gh-pages https://x-access-token:${{ secrets.GB_AUTOMATION_TEST_TOKEN }}@github.com/${{ github.repository }}.git gh-pages-checkout || mkdir -p gh-pages-checkout
+
+          if [[ -f gh-pages-checkout/deploy-validation/data/runs.json ]]; then
+            cp gh-pages-checkout/deploy-validation/data/runs.json gh-pages-deploy/deploy-validation/data/runs.json
+          else
+            echo "[]" > gh-pages-deploy/deploy-validation/data/runs.json
+          fi
+
+          jq --arg run "${{ github.run_number }}" \
+            --arg branch "${{ github.ref_name }}" \
+            --arg status "${{ steps.test-results.outputs.status }}" \
+            --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --arg total "${{ steps.test-results.outputs.total }}" \
+            --arg passed "${{ steps.test-results.outputs.passed }}" \
+            --arg failed "${{ steps.test-results.outputs.failed }}" \
+            '. + [{"run": $run, "branch": $branch, "status": $status, "timestamp": $timestamp, "total": $total|tonumber, "passed": $passed|tonumber, "failed": $failed|tonumber}] | unique_by(.run) | sort_by(.run | tonumber) | reverse | .[0:50]' \
+            gh-pages-deploy/deploy-validation/data/runs.json > gh-pages-deploy/deploy-validation/data/runs_new.json
+          mv gh-pages-deploy/deploy-validation/data/runs_new.json gh-pages-deploy/deploy-validation/data/runs.json
+
+          cat > gh-pages-deploy/deploy-validation/index.html << 'HTMLEOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Deploy Validation - Lynk Test Reports</title>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                  * { margin: 0; padding: 0; box-sizing: border-box; }
+                  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); min-height: 100vh; padding: 20px; }
+                  .container { max-width: 1200px; margin: 0 auto; }
+                  .header { background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+                  h1 { color: #2d3748; margin-bottom: 10px; }
+                  .quick-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+                  .quick-link { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-decoration: none; color: #2d3748; transition: transform 0.2s; }
+                  .quick-link:hover { transform: translateY(-5px); }
+                  .runs-container { background: white; border-radius: 10px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+                  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                  th { background: #f7fafc; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+                  td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+                  .status-success { color: #22543d; background: #c6f6d5; padding: 4px 8px; border-radius: 4px; }
+                  .status-failure { color: #742a2a; background: #fed7d7; padding: 4px 8px; border-radius: 4px; }
+                  .view-btn { background: #1a202c; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-block; }
+                  .view-btn:hover { background: #2d3748; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header"><h1>Deploy Validation Reports</h1><p>Post-Deploy Regression Testing Dashboard</p></div>
+                  <div class="quick-links">
+                      <a href="latest/" class="quick-link"><h3>Latest Report</h3><p>View the most recent test execution</p></a>
+                      <a href="../" class="quick-link"><h3>All Workflows</h3><p>Back to main dashboard</p></a>
+                  </div>
+                  <div class="runs-container">
+                      <h2>Run History</h2>
+                      <table><thead><tr><th>Run #</th><th>Status</th><th>Branch</th><th>Tests</th><th>Date</th><th>Action</th></tr></thead><tbody id="runs-table"></tbody></table>
+                  </div>
+              </div>
+              <script>
+                  fetch('data/runs.json').then(r => r.json()).then(runs => {
+                      const tbody = document.getElementById('runs-table');
+                      runs.forEach(run => {
+                          const row = document.createElement('tr');
+                          const cls = run.status === 'PASSED' ? 'status-success' : 'status-failure';
+                          row.innerHTML = `<td><strong>#${run.run}</strong></td><td><span class="${cls}">${run.status}</span></td><td>${run.branch}</td><td>${run.passed} passed / ${run.failed} failed / ${run.total} total</td><td>${new Date(run.timestamp).toLocaleString()}</td><td><a href="${run.run}/" class="view-btn">View Report</a></td>`;
+                          tbody.appendChild(row);
+                      });
+                  }).catch(() => { document.getElementById('runs-table').innerHTML = '<tr><td colspan="6">No historical data available yet</td></tr>'; });
+              </script>
+          </body>
+          </html>
+          HTMLEOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GB_AUTOMATION_TEST_TOKEN }}
+          publish_dir: ./gh-pages-deploy
+          publish_branch: gh-pages
+          destination_dir: .
+          keep_files: true
+
+      - name: Cleanup Remote
+        if: always()
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER_NAME }}@${{ secrets.DEV_IP }} "
+            sudo -u ubuntu bash -c '
+              cd /home/ubuntu/lynk-backend-automation &&
+              docker-compose down --remove-orphans 2>/dev/null || true
+            '
+            sudo rm -f /tmp/allure-report.tar.gz
+          "
+
+      - name: Send Test Slack Notification
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "text": "${{ steps.test-results.outputs.status == 'PASSED' && '✅' || '❌' }} Deploy Validation - Run #${{ github.run_number }}",
+              "attachments": [{
+                "color": "${{ steps.test-results.outputs.color }}",
+                "title": "Deploy Validation Test Results",
+                "title_link": "${{ steps.links.outputs.THIS_RUN_URL }}",
+                "fields": [
+                  { "title": "Status",  "value": "${{ steps.test-results.outputs.status }}", "short": true },
+                  { "title": "Tests",   "value": "Total: ${{ steps.test-results.outputs.total }}\nPassed: ${{ steps.test-results.outputs.passed }}\nFailed: ${{ steps.test-results.outputs.failed }}\nSkipped: ${{ steps.test-results.outputs.skipped }}", "short": true },
+                  { "title": "Branch",  "value": "${{ github.ref_name }}", "short": true },
+                  { "title": "Trigger", "value": "${{ github.actor }}", "short": true }
+                ],
+                "actions": [
+                  { "type": "button", "text": "This Run (#${{ github.run_number }})", "url": "${{ steps.links.outputs.THIS_RUN_URL }}", "style": "primary" },
+                  { "type": "button", "text": "Latest Report", "url": "${{ steps.links.outputs.LATEST_URL }}" },
+                  { "type": "button", "text": "Workflow Details", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }
+                ],
+                "footer": "Lynk Backend - Deploy Validation"
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Create GitHub Summary
+        if: always()
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## Deploy Validation Test Results
+
+          **Status:** ${{ steps.test-results.outputs.status }}
+
+          | Metric | Count |
+          |--------|-------|
+          | Total | ${{ steps.test-results.outputs.total }} |
+          | Passed | ${{ steps.test-results.outputs.passed }} |
+          | Failed | ${{ steps.test-results.outputs.failed }} |
+          | Skipped | ${{ steps.test-results.outputs.skipped }} |
+
+          ### Reports
+          - [This Run (#${{ github.run_number }})](${{ steps.links.outputs.THIS_RUN_URL }})
+          - [Latest Results](${{ steps.links.outputs.LATEST_URL }})
+          - [All Runs](${{ steps.links.outputs.DASHBOARD_URL }})
+          EOF
+
+  notify:
+    needs: [deploy, build]
+    if: always()
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch PR info
+        id: pr-info
+        uses: ./.github/actions/fetch-pr-info
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.sha }}
+          repository: ${{ github.repository }}
+
+      - name: Resolve PR URL and title
+        id: meta
+        run: |
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ] && PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+          if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
+            if [ -n "$COMMIT_MSG" ] && [ "$COMMIT_MSG" != "null" ]; then
+              PR_TITLE="$(printf '%s' "$COMMIT_MSG" | head -n1)"
+            else
+              PR_TITLE="${{ github.repository }}"
+            fi
+          fi
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_HOOK_URL }}
+          environment-label: Dev
+          deploy-result: ${{ needs.deploy.result }}
+          start-ts: ${{ needs.build.outputs.start_ts }}
+          commit-hash: ${{ needs.build.outputs.commit_hash }}
+          run-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          pr-url: ${{ steps.meta.outputs.pr_url }}
+          pr-title: ${{ steps.meta.outputs.pr_title }}
+          pr-creator: ${{ steps.pr-info.outputs.pr-creator }}
+          pr-merger: ${{ steps.pr-info.outputs.pr-merger }}
+          pr-reviewers: ${{ steps.pr-info.outputs.pr-reviewers }}
+          include-pr-info: "true"
