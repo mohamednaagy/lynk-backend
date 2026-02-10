@@ -41,7 +41,6 @@ on:
       servers:
         description: JSON array of server IPs from environment vars
         value: ${{ jobs.setup.outputs.servers }}
-    secrets: inherit
 
 permissions:
   contents: read
