@@ -1,0 +1,116 @@
+name: Deploy to Sandbox (Docker)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - sandbox
+
+concurrency:
+  group: deploy-sandbox-docker
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      environment: sandbox
+      runner: '"ubuntu-latest"'
+      cache-type: gha
+      artifact-name: docker-image-sandbox
+      run-trivy: false
+    secrets: inherit
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: sandbox
+    strategy:
+      matrix:
+        server: ${{ fromJson(needs.build.outputs.servers) }}
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-sandbox
+          path: /tmp/
+
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.DEPLOYMENT_KEY }}
+
+      - name: Deploy to server
+        uses: ./.github/actions/deploy-to-server
+        with:
+          server-ip: ${{ matrix.server }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          commit-hash: ${{ needs.build.outputs.commit_hash }}
+          deploy-script: .github/scripts/deploy.sh
+          use-staging-dir: "false"
+
+      - name: Post-deploy tasks
+        uses: ./.github/actions/post-deploy
+        with:
+          server-ip: ${{ matrix.server }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          commands: |
+            php artisan migrate --force
+            php artisan structure:clear
+            php artisan package:discover
+
+      - name: Verify containers
+        run: |
+          ssh ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
+            cd /var/www/backend-pipeline
+            docker compose -p lynk-backend ps --format 'table {{.Name}}\t{{.Status}}'
+            echo 'Total containers: '\$(docker compose -p lynk-backend ps -q | wc -l)
+            docker images | grep app-php-fpm
+          "
+
+  notify:
+    needs: [deploy, build]
+    if: always()
+    runs-on: ubuntu-latest
+    environment: sandbox
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Resolve PR URL and title
+        id: meta
+        run: |
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ] && PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+          if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
+            if [ -n "$COMMIT_MSG" ] && [ "$COMMIT_MSG" != "null" ]; then
+              PR_TITLE="$(printf '%s' "$COMMIT_MSG" | head -n1)"
+            else
+              PR_TITLE="${{ github.repository }}"
+            fi
+          fi
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_HOOK_URL }}
+          environment-label: Sandbox
+          deploy-result: ${{ needs.deploy.result }}
+          start-ts: ${{ needs.build.outputs.start_ts }}
+          commit-hash: ${{ needs.build.outputs.commit_hash }}
+          run-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          pr-url: ${{ steps.meta.outputs.pr_url }}
+          pr-title: ${{ steps.meta.outputs.pr_title }}
+          include-pr-info: "false"

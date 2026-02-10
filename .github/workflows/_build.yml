@@ -1,0 +1,364 @@
+name: Build Docker Image (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment name for secrets/vars resolution
+        required: true
+        type: string
+      runner:
+        description: 'JSON string for runs-on (e.g. "ubuntu-latest" or {"group":"pre-prod-runner-group","labels":["self-hosted"]})'
+        required: false
+        default: '"ubuntu-latest"'
+        type: string
+      cache-type:
+        description: "Docker buildx cache type: gha or local"
+        required: false
+        default: gha
+        type: string
+      artifact-name:
+        description: Name for the uploaded Docker image artifact
+        required: true
+        type: string
+      checkout-ref:
+        description: Git ref to checkout (leave empty for default)
+        required: false
+        default: ""
+        type: string
+      run-trivy:
+        description: Whether to run Trivy security scan
+        required: false
+        default: false
+        type: boolean
+    outputs:
+      commit_hash:
+        description: Short commit SHA used as image tag
+        value: ${{ jobs.setup.outputs.commit_hash }}
+      start_ts:
+        description: Unix timestamp when the workflow started
+        value: ${{ jobs.setup.outputs.start_ts }}
+      servers:
+        description: JSON array of server IPs from environment vars
+        value: ${{ jobs.setup.outputs.servers }}
+    secrets: inherit
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    outputs:
+      servers: ${{ steps.set-servers.outputs.servers }}
+      commit_hash: ${{ steps.commit.outputs.short_sha }}
+      start_ts: ${{ steps.timestamp.outputs.start_ts }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout-ref || github.ref }}
+
+      - name: Capture workflow start time
+        id: timestamp
+        run: |
+          START_TS=$(date +%s)
+          echo "start_ts=${START_TS}" >> $GITHUB_OUTPUT
+
+      - name: Extract commit hash
+        id: commit
+        run: |
+          SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Set server IPs from environment variable
+        id: set-servers
+        env:
+          SERVERS_JSON: ${{ vars.DEPLOYMENT_SERVER_IPS }}
+        run: |
+          if [ -n "$SERVERS_JSON" ]; then
+            echo "servers=$SERVERS_JSON" >> $GITHUB_OUTPUT
+          else
+            echo "servers=[]" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: setup
+    runs-on: ${{ fromJson(inputs.runner) }}
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout-ref || github.ref }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create .env file
+        run: |
+          cat > .env << 'ENVEOF'
+          # Application Configuration
+          APP_NAME="${{ vars.APP_NAME }}"
+          APP_ENV="${{ vars.APP_ENV }}"
+          APP_KEY="${{ vars.APP_KEY }}"
+          APP_DEBUG="${{ vars.APP_DEBUG }}"
+          APP_URL="${{ vars.APP_URL }}"
+
+          # Logging
+          LOG_CHANNEL="${{ vars.LOG_CHANNEL }}"
+          LOG_DEPRECATIONS_CHANNEL="${{ vars.LOG_DEPRECATIONS_CHANNEL }}"
+          LOG_LEVEL="${{ vars.LOG_LEVEL }}"
+
+          # Database Configuration
+          DB_CONNECTION="${{ vars.DB_CONNECTION }}"
+          DB_HOST="${{ vars.DB_HOST }}"
+          DB_PORT="${{ vars.DB_PORT }}"
+          DB_DATABASE="${{ vars.DB_DATABASE }}"
+          DB_USERNAME="${{ vars.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+
+          # Wallet Database
+          WALLET_DB_HOST="${{ vars.WALLET_DB_HOST }}"
+          WALLET_DB_PORT="${{ vars.WALLET_DB_PORT }}"
+          WALLET_DB_DATABASE="${{ vars.WALLET_DB_DATABASE }}"
+          WALLET_DB_USERNAME="${{ vars.WALLET_DB_USERNAME }}"
+          WALLET_DB_PASSWORD="${{ secrets.WALLET_DB_PASSWORD }}"
+
+          # Broadcasting & Queue
+          BROADCAST_DRIVER="${{ vars.BROADCAST_DRIVER }}"
+          CACHE_DRIVER="${{ vars.CACHE_DRIVER }}"
+          FILESYSTEM_DISK="${{ vars.FILESYSTEM_DISK }}"
+          QUEUE_CONNECTION="${{ vars.QUEUE_CONNECTION }}"
+          SESSION_DRIVER="${{ vars.SESSION_DRIVER }}"
+          SESSION_LIFETIME="${{ vars.SESSION_LIFETIME }}"
+
+          # Memcached Configuration
+          MEMCACHED_HOST="${{ vars.MEMCACHED_HOST }}"
+
+          # Redis Configuration
+          REDIS_HOST="${{ vars.REDIS_HOST }}"
+          REDIS_PASSWORD="${{ secrets.REDIS_PASSWORD }}"
+          REDIS_PORT="${{ vars.REDIS_PORT }}"
+
+          # Mail Configuration
+          MAIL_MAILER="${{ vars.MAIL_MAILER }}"
+          MAIL_HOST="${{ vars.MAIL_HOST }}"
+          MAIL_PORT="${{ vars.MAIL_PORT }}"
+          MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}"
+          MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
+          MAIL_ENCRYPTION="${{ vars.MAIL_ENCRYPTION }}"
+          MAIL_FROM_ADDRESS="${{ vars.MAIL_FROM_ADDRESS }}"
+          MAIL_FROM_NAME="${{ vars.MAIL_FROM_NAME }}"
+
+          # AWS Configuration
+          AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+          AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          AWS_DEFAULT_REGION="${{ vars.AWS_DEFAULT_REGION }}"
+          AWS_BUCKET="${{ vars.AWS_BUCKET }}"
+          AWS_USE_PATH_STYLE_ENDPOINT="${{ vars.AWS_USE_PATH_STYLE_ENDPOINT }}"
+
+          # OCI Object Storage Configuration
+          OCI_ACCESS_KEY_ID="${{ secrets.OCI_ACCESS_KEY_ID }}"
+          OCI_SECRET_ACCESS_KEY="${{ secrets.OCI_SECRET_ACCESS_KEY }}"
+          OCI_DEFAULT_REGION="${{ vars.OCI_DEFAULT_REGION }}"
+          OCI_BUCKET="${{ vars.OCI_BUCKET }}"
+          OCI_ENDPOINT="${{ vars.OCI_ENDPOINT }}"
+
+          # OCI Public Object Storage Configuration
+          OCI_PUBLIC_ACCESS_KEY_ID="${{ secrets.OCI_PUBLIC_ACCESS_KEY_ID }}"
+          OCI_PUBLIC_SECRET_ACCESS_KEY="${{ secrets.OCI_PUBLIC_SECRET_ACCESS_KEY }}"
+          OCI_PUBLIC_DEFAULT_REGION="${{ vars.OCI_PUBLIC_DEFAULT_REGION }}"
+          OCI_PUBLIC_BUCKET="${{ vars.OCI_PUBLIC_BUCKET }}"
+          OCI_PUBLIC_ENDPOINT="${{ vars.OCI_PUBLIC_ENDPOINT }}"
+
+          # SES Configuration
+          SES_ACCESS_KEY_ID="${{ secrets.SES_ACCESS_KEY_ID }}"
+          SES_SECRET_ACCESS_KEY="${{ secrets.SES_SECRET_ACCESS_KEY }}"
+          SES_DEFAULT_REGION="${{ vars.SES_DEFAULT_REGION }}"
+
+          # Pusher Configuration
+          PUSHER_APP_ID="${{ secrets.PUSHER_APP_ID }}"
+          PUSHER_APP_KEY="${{ secrets.PUSHER_APP_KEY }}"
+          PUSHER_APP_SECRET="${{ secrets.PUSHER_APP_SECRET }}"
+          PUSHER_APP_CLUSTER="${{ vars.PUSHER_APP_CLUSTER }}"
+          MIX_PUSHER_APP_KEY="${{ secrets.PUSHER_APP_KEY }}"
+          MIX_PUSHER_APP_CLUSTER="${{ vars.PUSHER_APP_CLUSTER }}"
+
+          # Twilio Configuration
+          OTPIFY_TWILIO_SID="${{ secrets.OTPIFY_TWILIO_SID }}"
+          OTPIFY_TWILIO_TOKEN="${{ secrets.OTPIFY_TWILIO_TOKEN }}"
+          OTPIFY_TWILIO_FROM="${{ vars.OTPIFY_TWILIO_FROM }}"
+          OTPIFY_TWILIO_VERIFY_SID="${{ secrets.OTPIFY_TWILIO_VERIFY_SID }}"
+          OTPIFY_TWILIO_SSL_VERIFY_PEER="${{ vars.OTPIFY_TWILIO_SSL_VERIFY_PEER }}"
+          OTPIFY_TWILIO_SSL_VERIFY_HOST="${{ vars.OTPIFY_TWILIO_SSL_VERIFY_HOST }}"
+
+          # Application Specific - OTP & Auth
+          OTPIFY_DEFAULT_DRIVER="${{ vars.OTPIFY_DEFAULT_DRIVER }}"
+          OTPIFY_CODE_LENGTH="${{ vars.OTPIFY_CODE_LENGTH }}"
+          OTPIFY_CODE_EXPIRATION_TIME="${{ vars.OTPIFY_CODE_EXPIRATION_TIME }}"
+          OTPIFY_AUTH_DEFAULT_DRIVER="${{ vars.OTPIFY_AUTH_DEFAULT_DRIVER }}"
+          OTPIFY_NATIONAL_ID_DEFAULT_DRIVER="${{ vars.OTPIFY_NATIONAL_ID_DEFAULT_DRIVER }}"
+
+          # SMS & Mobile Verification
+          SMS_DEFAULT_DRIVER="${{ vars.SMS_DEFAULT_DRIVER }}"
+          MOBILE_VERIFY_DEFAULT_DRIVER="${{ vars.MOBILE_VERIFY_DEFAULT_DRIVER }}"
+
+          # Bitly
+          BITLY_ACCESS_TOKEN="${{ secrets.BITLY_ACCESS_TOKEN }}"
+
+          AUTHORIZED_TOKEN_LENGTH="${{ vars.AUTHORIZED_TOKEN_LENGTH }}"
+          DEFAULT_GUARD="${{ vars.DEFAULT_GUARD }}"
+          PERMISSION_GUARDS="${{ vars.PERMISSION_GUARDS }}"
+          GRANTIFY_DEFAULT_DRIVER="${{ vars.GRANTIFY_DEFAULT_DRIVER }}"
+          SETTINGS_CACHE_ENABLED="${{ vars.SETTINGS_CACHE_ENABLED }}"
+          HOST_WHITELIST="${{ vars.HOST_WHITELIST }}"
+
+          # Sanctum
+          SANCTUM_STATEFUL_DOMAINS="${{ vars.SANCTUM_STATEFUL_DOMAINS }}"
+
+          # Telescope
+          TELESCOPE_ENABLED="${{ vars.TELESCOPE_ENABLED }}"
+          TELESCOPE_PRUNE_HOURS="${{ vars.TELESCOPE_PRUNE_HOURS }}"
+          TELESCOPE_DB_CONNECTION="${{ vars.TELESCOPE_DB_CONNECTION }}"
+          TELESCOPE_DB_HOST="${{ vars.TELESCOPE_DB_HOST }}"
+          TELESCOPE_DB_PORT="${{ vars.TELESCOPE_DB_PORT }}"
+          TELESCOPE_DB_DATABASE="${{ vars.TELESCOPE_DB_DATABASE }}"
+          TELESCOPE_DB_USERNAME="${{ vars.TELESCOPE_DB_USERNAME }}"
+          TELESCOPE_DB_PASSWORD="${{ secrets.TELESCOPE_DB_PASSWORD }}"
+
+          # Trading & SMS
+          DEFAULT_TRADER="${{ vars.DEFAULT_TRADER }}"
+          MSEGAT_USERNAME="${{ secrets.MSEGAT_USERNAME }}"
+          MSEGAT_API_KEY="${{ secrets.MSEGAT_API_KEY }}"
+
+          # Bursam Trader Configuration
+          BURSAM_FAKE="${{ vars.BURSAM_FAKE }}"
+          BURSAM_BASE_URL="${{ vars.BURSAM_BASE_URL }}"
+          BURSAM_SELLING_COMMODITY_START_TIME="${{ vars.BURSAM_SELLING_COMMODITY_START_TIME }}"
+          BURSAM_SELLING_COMMODITY_END_TIME="${{ vars.BURSAM_SELLING_COMMODITY_END_TIME }}"
+          BURSAM_MARKET_OPENING_START_TIME="${{ vars.BURSAM_MARKET_OPENING_START_TIME }}"
+          BURSAM_MARKET_OPENING_END_TIME="${{ vars.BURSAM_MARKET_OPENING_END_TIME }}"
+          BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION="${{ vars.BURSAM_RATE_LIMIT_MAX_RETRIES_BEFORE_EXCEPTION }}"
+
+          # JWT Secret
+          JWT_SECRET="${{ secrets.JWT_SECRET }}"
+
+          # EDAAT Configuration
+          EDAAT_BASE_URL="${{ vars.EDAAT_BASE_URL }}"
+          EDAAT_WEBHOOK_URL="${{ vars.EDAAT_WEBHOOK_URL }}"
+          EDAAT_PRODUCT="${{ vars.EDAAT_PRODUCT }}"
+          EDAAT_USERNAME="${{ vars.EDAAT_USERNAME }}"
+          EDAAT_PASSWORD="${{ secrets.EDAAT_PASSWORD }}"
+          EDAAT_COMPANY="${{ vars.EDAAT_COMPANY }}"
+          EDAAT_VERIFY_TLS_CERTS="${{ vars.EDAAT_VERIFY_TLS_CERTS }}"
+          EDAAT_PAYMENT_URL="${{ vars.EDAAT_PAYMENT_URL }}"
+          EDAAT_BILL_URL="${{ vars.EDAAT_BILL_URL }}"
+          EDAAT_RECONCILE_URL="${{ vars.EDAAT_RECONCILE_URL }}"
+
+          # Wallet Configuration
+          WALLET_CACHE_DRIVER="${{ vars.WALLET_CACHE_DRIVER }}"
+          WALLET_CACHE_TTL="${{ vars.WALLET_CACHE_TTL }}"
+          WALLET_LOCK_DRIVER="${{ vars.WALLET_LOCK_DRIVER }}"
+          WALLET_LOCK_SECONDS="${{ vars.WALLET_LOCK_SECONDS }}"
+
+          # RabbitMQ Configuration
+          RABBITMQ_QUEUE_NAME="${{ vars.RABBITMQ_QUEUE_NAME }}"
+          RABBITMQ_HOST="${{ vars.RABBITMQ_HOST }}"
+          RABBITMQ_PORT="${{ vars.RABBITMQ_PORT }}"
+          RABBITMQ_USER="${{ vars.RABBITMQ_USER }}"
+          RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
+          RABBITMQ_VHOST="${{ vars.RABBITMQ_VHOST }}"
+
+          # reCAPTCHA Configuration
+          RECAPTCHA_SITE_KEY="${{ secrets.RECAPTCHA_SITE_KEY }}"
+          RECAPTCHA_SECRET_KEY="${{ secrets.RECAPTCHA_SECRET_KEY }}"
+
+          # Lynk Application Configuration
+          LYNK_DEFAULT_VERSION="${{ vars.LYNK_DEFAULT_VERSION }}"
+          LYNK_MAX_UNITS_PER_TRADER="${{ vars.LYNK_MAX_UNITS_PER_TRADER }}"
+          GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT="${{ vars.GENERATE_UNITS_MAX_PATCH_SIZE_LIMIT }}"
+
+          # Rate Limiting
+          ENABLE_RATE_LIMITER="${{ vars.ENABLE_RATE_LIMITER }}"
+
+          # Loan Coverage
+          LOAN_COVERAGE_STRATEGY="${{ vars.LOAN_COVERAGE_STRATEGY }}"
+          LOAN_COVERAGE_TIMEOUT="${{ vars.LOAN_COVERAGE_TIMEOUT }}"
+
+          # Auto-Verified Users
+          AUTO_VERIFIED_USERS="${{ vars.AUTO_VERIFIED_USERS }}"
+          AUTO_VERIFIED_USERS_PASSWORD="${{ vars.AUTO_VERIFIED_USERS_PASSWORD }}"
+
+          # Master OTP
+          ALLOW_VERIFY_WITH_MASTER_KEY="${{ vars.ALLOW_VERIFY_WITH_MASTER_KEY }}"
+          MASTER_OTP_KEY="${{ vars.MASTER_OTP_KEY }}"
+
+          # Nightwatch Monitoring
+          NIGHTWATCH_ENABLED="${{ vars.NIGHTWATCH_ENABLED }}"
+          NIGHTWATCH_TOKEN="${{ secrets.NIGHTWATCH_TOKEN }}"
+          NIGHTWATCH_REQUEST_SAMPLE_RATE="${{ vars.NIGHTWATCH_REQUEST_SAMPLE_RATE }}"
+          NIGHTWATCH_COMMAND_SAMPLE_RATE="${{ vars.NIGHTWATCH_COMMAND_SAMPLE_RATE }}"
+          NIGHTWATCH_EXCEPTION_SAMPLE_RATE="${{ vars.NIGHTWATCH_EXCEPTION_SAMPLE_RATE }}"
+          NIGHTWATCH_INGEST_URI="${{ vars.NIGHTWATCH_INGEST_URI }}"
+
+          # PDF & Storage
+          DEFAULT_PDF_GENERATOR="${{ vars.DEFAULT_PDF_GENERATOR }}"
+          STATIC_PDF_STORAGE_DRIVER="${{ vars.STATIC_PDF_STORAGE_DRIVER }}"
+
+          # Webhooks
+          ORDER_EXPORT_WEBHOOK_SECRET="${{ secrets.ORDER_EXPORT_WEBHOOK_SECRET }}"
+
+          # CORS Allowed Origins
+          ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
+          ENVEOF
+
+          echo "::notice::.env file created ($(wc -l < .env) lines, $(wc -c < .env) bytes)"
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/laravel/Dockerfile
+          load: true
+          tags: |
+            app-php-fpm:${{ needs.setup.outputs.commit_hash }}
+            app-php-fpm:latest
+          cache-from: ${{ inputs.cache-type == 'gha' && 'type=gha' || 'type=local,src=/tmp/.buildx-cache' }}
+          cache-to: ${{ inputs.cache-type == 'gha' && 'type=gha,mode=max' || 'type=local,dest=/tmp/.buildx-cache-new,mode=max' }}
+
+      - name: Run security scan
+        if: inputs.run-trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: app-php-fpm:${{ needs.setup.outputs.commit_hash }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Save and compress Docker image
+        run: |
+          set -euo pipefail
+          docker save app-php-fpm:${{ needs.setup.outputs.commit_hash }} | gzip > /tmp/app-php-fpm.tar.gz
+
+          FILE_SIZE=$(stat --format='%s' /tmp/app-php-fpm.tar.gz 2>/dev/null || stat -f '%z' /tmp/app-php-fpm.tar.gz)
+          if [ "$FILE_SIZE" -lt 1048576 ]; then
+            echo "::error::Image archive is only ${FILE_SIZE} bytes - docker save likely failed"
+            rm -f /tmp/app-php-fpm.tar.gz
+            exit 1
+          fi
+          echo "::notice::Compressed image size: $(ls -lh /tmp/app-php-fpm.tar.gz | awk '{print $5}')"
+
+      - name: Upload Docker image as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: /tmp/app-php-fpm.tar.gz
+          retention-days: 1
+
+      - name: Clean up
+        if: always()
+        run: rm -f .env

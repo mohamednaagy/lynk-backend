@@ -1,0 +1,44 @@
+name: Post-Deploy Tasks
+description: Run post-deployment artisan commands on the server
+
+inputs:
+  server-ip:
+    description: Target server IP address
+    required: true
+  deployment-user:
+    description: SSH username for deployment
+    required: true
+  commands:
+    description: "Multi-line artisan commands to execute (one per line)"
+    required: true
+  use-profile-discovery:
+    description: "Use docker compose profile discovery instead of direct container name"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Run post-deployment tasks
+      shell: bash
+      run: |
+        SERVER="${{ inputs.deployment-user }}@${{ inputs.server-ip }}"
+
+        if [ "${{ inputs.use-profile-discovery }}" = "true" ]; then
+          EXEC_PREFIX='APP_CONTAINER=$(cd /var/www/backend-pipeline && docker compose -p lynk-backend --profile web ps -q app | head -1); if [ -z "$APP_CONTAINER" ]; then echo "App container not found"; exit 1; fi; docker exec $APP_CONTAINER'
+        else
+          EXEC_PREFIX="docker exec lynk-backend-app"
+        fi
+
+        # Build command string from multi-line input
+        CMDS=""
+        while IFS= read -r cmd; do
+          cmd=$(echo "$cmd" | xargs)  # trim whitespace
+          [ -z "$cmd" ] && continue
+          CMDS="${CMDS}${EXEC_PREFIX} ${cmd} && "
+        done <<< "${{ inputs.commands }}"
+
+        # Remove trailing ' && '
+        CMDS="${CMDS% && }"
+
+        ssh "$SERVER" "$CMDS"

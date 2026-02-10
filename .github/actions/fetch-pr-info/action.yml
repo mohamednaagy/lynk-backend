@@ -1,0 +1,53 @@
+name: Fetch PR Information
+description: Fetch PR creator, merger, and reviewers from GitHub API
+
+inputs:
+  github-token:
+    description: GitHub token for API access
+    required: true
+  commit-sha:
+    description: Commit SHA to look up
+    required: true
+  repository:
+    description: Repository in owner/repo format
+    required: true
+
+outputs:
+  pr-creator:
+    description: PR creator username
+    value: ${{ steps.fetch.outputs.pr_creator }}
+  pr-merger:
+    description: PR merger username
+    value: ${{ steps.fetch.outputs.pr_merger }}
+  pr-reviewers:
+    description: Comma-separated list of approved reviewers
+    value: ${{ steps.fetch.outputs.pr_reviewers }}
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch PR info from GitHub API
+      id: fetch
+      shell: bash
+      run: |
+        PR_DATA=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token ${{ inputs.github-token }}" \
+          "https://api.github.com/repos/${{ inputs.repository }}/commits/${{ inputs.commit-sha }}/pulls" || echo "[]")
+
+        PR_CREATOR=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 then .[0].user.login else "" end' || echo "")
+        PR_MERGER=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 and .[0].merged_by != null then .[0].merged_by.login else "" end' || echo "")
+
+        PR_REVIEWERS=""
+        if [ -n "$PR_CREATOR" ]; then
+          PR_NUMBER=$(echo "$PR_DATA" | jq -r 'if type == "array" and length > 0 then .[0].number else "" end' || echo "")
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
+            REVIEWS=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+              -H "Authorization: token ${{ inputs.github-token }}" \
+              "https://api.github.com/repos/${{ inputs.repository }}/pulls/$PR_NUMBER/reviews" || echo "[]")
+            PR_REVIEWERS=$(echo "$REVIEWS" | jq -r '[.[] | select(.state == "APPROVED") | .user.login] | unique | join(", ")' || echo "")
+          fi
+        fi
+
+        echo "pr_creator=${PR_CREATOR:-N/A}" >> $GITHUB_OUTPUT
+        echo "pr_merger=${PR_MERGER:-N/A}" >> $GITHUB_OUTPUT
+        echo "pr_reviewers=${PR_REVIEWERS:-N/A}" >> $GITHUB_OUTPUT
