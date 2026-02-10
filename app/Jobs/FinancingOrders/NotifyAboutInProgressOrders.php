@@ -38,14 +38,13 @@ class NotifyAboutInProgressOrders implements ShouldQueue
         $notifiableEmails = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(
                 SystemNotificationType::IN_PROGRESS_ORDERS,
-                function ($query) use ($lenderId) {
-                    $query->whereDoesntHave('roles', fn ($q) => $q->where('name', Role::Admin))
-                        ->where(function ($q) use ($lenderId) {
-                            $q->role(Role::LenderAdmin)
-                                ->whereHas('lender', fn ($q) => $q->where('id', $lenderId));
-                        });
-                }
-            )->pluck('email')->toArray();
+                fn ($query) => $query
+                    ->withoutRole(Role::Admin)
+                    ->role(Role::LenderAdmin)
+                    ->whereHas('lender', fn ($q) => $q->whereKey($lenderId))
+            )
+            ->pluck('email')
+            ->all();
 
         Notification::route('mail', $notifiableEmails)
             ->notify(new InProgressOrdersNotification($lenderId));

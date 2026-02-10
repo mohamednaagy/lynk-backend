@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Config;
 
 final class InProgressOrdersNotification extends BaseNotification implements ShouldQueue
 {
+    private ?string $companyName = null;
+
     /**
      * Create a new notification instance.
      *
@@ -119,8 +121,12 @@ final class InProgressOrdersNotification extends BaseNotification implements Sho
 
     private function getCompanyName(): string
     {
-        $company = Company::withoutGlobalScopes()->find($this->companyId);
+        if (! isset($this->companyName)) {
+            $company = Company::withoutGlobalScopes()->find($this->companyId);
 
-        return $company?->name ?? (string) $this->companyId;
+            $this->companyName = $company?->name ?? (string) $this->companyId;
+        }
+
+        return $this->companyName;
     }
 }
