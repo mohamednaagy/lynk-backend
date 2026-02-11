@@ -58,12 +58,6 @@ jobs:
           deploy-script: .github/scripts/deploy.sh
           use-staging-dir: "false"
 
-      - name: Verify deployment
-        run: |
-          ssh ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
-            docker exec lynk-backend-app php artisan health:check
-          "
-
       - name: Post-deploy tasks
         uses: ./.github/actions/post-deploy
         with:
@@ -74,15 +68,11 @@ jobs:
             php artisan structure:clear
             php artisan package:discover
 
-      - name: Verify containers
-        run: |
-          ssh ${{ secrets.DEPLOYMENT_USER }}@${{ matrix.server }} "
-            cd /var/www/backend-pipeline
-            docker compose -p lynk-backend ps --format 'table {{.Name}}\t{{.Status}}'
-            echo ''
-            echo 'Total containers: '\$(docker compose -p lynk-backend ps -q | wc -l)
-            docker images | grep app-php-fpm
-          "
+      - name: Verify deployment
+        uses: ./.github/actions/verify-deployment
+        with:
+          server-ip: ${{ matrix.server }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
 
   test:
     name: Regression Tests
