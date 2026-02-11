@@ -106,6 +106,9 @@ jobs:
           APP_KEY="${{ vars.APP_KEY }}"
           APP_DEBUG="${{ vars.APP_DEBUG }}"
           APP_URL="${{ vars.APP_URL }}"
+          ADMIN_URL=${{ vars.ADMIN_URL }}
+          LENDER_URL=${{ vars.LENDER_URL }}
+          SUPPLIER_URL=${{ vars.SUPPLIER_URL }}
 
           # Logging
           LOG_CHANNEL="${{ vars.LOG_CHANNEL }}"
