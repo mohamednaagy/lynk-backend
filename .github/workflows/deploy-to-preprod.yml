@@ -13,6 +13,7 @@ concurrency:
 permissions:
   contents: read
   actions: read
+  security-events: write
 
 jobs:
   build:
@@ -71,12 +72,12 @@ jobs:
           use-staging-dir: "true"
 
       - name: Verify deployment
-        run: |
-          ssh ${{ secrets.DEPLOYMENT_USER }}@${{ steps.server.outputs.ip }} "
-            cd /var/www/backend-pipeline
-            docker compose -p lynk-backend --profile web --profile ${{ matrix.worker_group }} --profile observability ps --format 'table {{.Name}}\t{{.Status}}'
-            docker images | grep app-php-fpm
-          "
+        uses: ./.github/actions/verify-deployment
+        with:
+          server-ip: ${{ steps.server.outputs.ip }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          profiles: "web ${{ matrix.worker_group }} observability"
+          use-profile-discovery: "true"
 
       - name: Post-deploy tasks
         if: matrix.server_index == 0

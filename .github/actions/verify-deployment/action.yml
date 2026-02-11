@@ -1,0 +1,73 @@
+name: Verify Deployment
+description: Verify deployment health check and container status on the server
+
+inputs:
+  server-ip:
+    description: Target server IP address
+    required: true
+  deployment-user:
+    description: SSH username for deployment
+    required: true
+  profiles:
+    description: "Space-separated Docker Compose profiles for container listing (e.g., 'web group1 observability')"
+    required: false
+    default: ""
+  use-profile-discovery:
+    description: "Use docker compose profile discovery to find app container"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Verify deployment health
+      shell: bash
+      run: |
+        SERVER="${{ inputs.deployment-user }}@${{ inputs.server-ip }}"
+        echo "Verifying deployment status on ${{ inputs.server-ip }}..."
+
+        if [ "${{ inputs.use-profile-discovery }}" = "true" ]; then
+          ssh "$SERVER" "
+            APP_CONTAINER=\$(cd /var/www/backend-pipeline && docker compose -p lynk-backend --profile web ps -q app | head -1)
+            if [ -z \"\$APP_CONTAINER\" ]; then
+              echo 'App container not found'
+              exit 1
+            fi
+            HEALTH_OUTPUT=\$(docker exec \"\$APP_CONTAINER\" php artisan health:check 2>&1)
+            echo \"\$HEALTH_OUTPUT\"
+            if echo \"\$HEALTH_OUTPUT\" | grep -q 'UNHEALTHY'; then
+              echo 'Deployment health check failed - system is UNHEALTHY'
+              exit 1
+            fi
+            echo 'Deployment verification complete'
+          "
+        else
+          ssh "$SERVER" "
+            HEALTH_OUTPUT=\$(docker exec lynk-backend-app php artisan health:check 2>&1)
+            echo \"\$HEALTH_OUTPUT\"
+            if echo \"\$HEALTH_OUTPUT\" | grep -q 'UNHEALTHY'; then
+              echo 'Deployment health check failed - system is UNHEALTHY'
+              exit 1
+            fi
+            echo 'Deployment verification complete'
+          "
+        fi
+
+    - name: Verify containers
+      shell: bash
+      run: |
+        SERVER="${{ inputs.deployment-user }}@${{ inputs.server-ip }}"
+
+        PROFILE_FLAGS=""
+        if [ -n "${{ inputs.profiles }}" ]; then
+          for profile in ${{ inputs.profiles }}; do
+            PROFILE_FLAGS="$PROFILE_FLAGS --profile $profile"
+          done
+        fi
+
+        ssh "$SERVER" "
+          cd /var/www/backend-pipeline
+          docker compose -p lynk-backend${PROFILE_FLAGS} ps --format 'table {{.Name}}\t{{.Status}}'
+          echo 'Total containers: '\$(docker compose -p lynk-backend${PROFILE_FLAGS} ps -q | wc -l)
+          docker images | grep app-php-fpm
+        "
