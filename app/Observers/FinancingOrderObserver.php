@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Actions\Contracts\FinancingOrderActivityUpdate;
+use App\Enums\FinancingOrderStatus;
 use App\Jobs\General\ProcessInProgressOrder;
 use App\Models\FinancingOrder;
 use App\Services\AdminOrderAssignmentService;
@@ -44,6 +45,7 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
     {
         if (
             $financingOrder->status !== $financingOrder->getOriginal('status')
+            && $financingOrder->status->is(FinancingOrderStatus::PendingTraderOrder)
             && FinancingOrder::readyForProcessing()->exists()
         ) {
             ProcessInProgressOrder::dispatch($financingOrder->id);
