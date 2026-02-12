@@ -118,7 +118,7 @@ final class InProgressOrdersNotification extends BaseNotification implements Sho
         $query = http_build_query([
             'direction' => 'desc',
             'sort' => 'id',
-            'charged_transactions' => 1,
+            'charged_transactions' => 0,
             'status' => FinancingOrderStatus::InProgress,
             'page' => 1,
         ]);

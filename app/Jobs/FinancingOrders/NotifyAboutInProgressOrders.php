@@ -11,7 +11,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutInProgressOrders implements ShouldQueue
 {
@@ -35,7 +34,10 @@ class NotifyAboutInProgressOrders implements ShouldQueue
     public function handle()
     {
         $lenderId = $this->lenderId;
-        $notifiableEmails = app(NotificationPreferenceService::class)
+        $notificationPreferenceService = app(NotificationPreferenceService::class);
+
+        // Primary recipients: lender admins who enabled this notification type
+        $notifiableEmails = $notificationPreferenceService
             ->getEnabledUsersFor(
                 SystemNotificationType::IN_PROGRESS_ORDERS,
                 fn ($query) => $query
@@ -46,7 +48,7 @@ class NotifyAboutInProgressOrders implements ShouldQueue
             ->pluck('email')
             ->all();
 
-        Notification::route('mail', $notifiableEmails)
-            ->notify(new InProgressOrdersNotification($lenderId));
+        $notification = new InProgressOrdersNotification($lenderId);
+        $notification->sendWithAdminFallback($notifiableEmails);
     }
 }
