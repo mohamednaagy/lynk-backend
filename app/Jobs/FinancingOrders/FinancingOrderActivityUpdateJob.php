@@ -31,7 +31,10 @@ class FinancingOrderActivityUpdateJob implements ShouldQueue
     {
         $this->financingOrder->latest_activity = $this->getLatestActivityDescription($this->financingOrder);
         Log::channel(LOG_CHANNEL_LYNK)
-            ->debug('FinancingOrderActivityUpdateJob update latest_activity to: '.$this->financingOrder->latest_activity.' for order: '.$this->financingOrder->id);
+            ->debug('FinancingOrderActivityUpdateJob: updating latest_activity for order', [
+                'order_id' => $this->financingOrder->id,
+                'latest_activity' => $this->financingOrder->latest_activity,
+            ]);
         $this->financingOrder->saveQuietly();
     }
 
