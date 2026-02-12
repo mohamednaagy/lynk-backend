@@ -71,6 +71,7 @@ final class OrderStatus extends Enum implements LocalizedEnum
         self::EligibleCommoditiesAvailable => [
             self::CommoditiesPurchased,
             self::PendingCancellation,
+            self::NoEligibleCommoditiesAvailable,
         ],
         self::CommoditiesPurchased => [
             self::PendingCancellation,
