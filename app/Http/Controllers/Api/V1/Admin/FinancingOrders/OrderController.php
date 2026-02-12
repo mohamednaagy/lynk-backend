@@ -80,7 +80,6 @@ class OrderController extends Controller
                 'amount_formatted',
                 'selling_price_formatted',
                 'status_reason',
-                'current_step',
                 'latest_activity',
                 'creator',
                 'assignable_admin',
