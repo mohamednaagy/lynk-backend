@@ -34,7 +34,7 @@ class SendInProgressOrdersNotificationCommand extends Command
                 ->whereHas('traderOrders', function ($q) {
                     $q->where('status', TraderOrderStatus::InProgress);
                 });
-        })->get(['id'])->pluck('id');
+        })->pluck('id');
 
         if ($lenderIds->isEmpty()) {
             $this->info('No companies with in-progress trader orders.');
