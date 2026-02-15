@@ -29,6 +29,7 @@ class SendInProgressOrdersNotificationCommand extends Command
      */
     public function handle(): int
     {
+        Lender::flushCache();
         $lenderIds = Lender::whereHas('orders', function ($q) {
             $q->where('status', FinancingOrderStatus::InProgress)
                 ->whereHas('traderOrders', function ($q) {
