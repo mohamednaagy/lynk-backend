@@ -3,9 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Lender;
-use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 
-class LenderObserver implements ShouldHandleEventsAfterCommit
+class LenderObserver
 {
     /**
      * Handle the Company "created" event.
