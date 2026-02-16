@@ -23,14 +23,10 @@ return new class extends Migration
                     $provider = (string) $traderOrder->provider;
                     $version = (string) $traderOrder->version;
                     $contractType = $traderOrder->contract_signed_type?->value;
-                    $configKey = TraderOrderDurationService::STEP_CONFIG_KEY_MAP[$provider] ?? null;
-                    if ($configKey === null) {
-                        continue;
-                    }
+                    $configKey = TraderOrderDurationService::STEP_CONFIG_KEY_MAP[$provider];
+
                     $stepsConfig = Config::get("murabha-steps.{$configKey}.{$version}.{$contractType}");
-                    if (! is_array($stepsConfig)) {
-                        continue;
-                    }
+
                     foreach ($stepsConfig as $endHistoryAction => $stepDef) {
                         if (! is_array($stepDef) || empty($stepDef['end_history'])) {
                             continue;
