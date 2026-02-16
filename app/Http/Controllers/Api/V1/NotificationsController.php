@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
-use Symfony\Component\HttpFoundation\Response;
 
 class NotificationsController extends Controller
 {
@@ -37,7 +36,9 @@ class NotificationsController extends Controller
     {
         $unreadCount = $query->setUser(Auth::user())->handle();
 
-        return response()->json(['unread_count' => $unreadCount]);
+        return $this->successResponse([
+            'unread_count' => $unreadCount,
+        ]);
     }
 
     /**
@@ -48,13 +49,12 @@ class NotificationsController extends Controller
     public function markAsRead(string $id): JsonResponse
     {
         $user = Auth::user();
-
         $notification = $user->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsRead();
 
-        return response()->json([
+        return $this->successResponse([
             'message' => __('notification.notification-marked-read'),
-        ], Response::HTTP_OK);
+        ]);
     }
 
     /**
@@ -65,13 +65,12 @@ class NotificationsController extends Controller
     public function markAsUnread(string $id): JsonResponse
     {
         $user = Auth::user();
-
         $notification = $user->notifications()->where('id', $id)->firstOrFail();
         $notification->markAsUnRead();
 
-        return response()->json([
+        return $this->successResponse([
             'message' => __('notification.notification-marked-unread'),
-        ], Response::HTTP_OK);
+        ]);
     }
 
     /**
@@ -80,11 +79,10 @@ class NotificationsController extends Controller
     public function markAllAsRead(): JsonResponse
     {
         $user = Auth::user();
-
         $user->unreadNotifications()->update(['read_at' => now()]);
 
-        return response()->json([
+        return $this->successResponse([
             'message' => __('notification.notification-all-marked-read'),
-        ], Response::HTTP_OK);
+        ]);
     }
 }
