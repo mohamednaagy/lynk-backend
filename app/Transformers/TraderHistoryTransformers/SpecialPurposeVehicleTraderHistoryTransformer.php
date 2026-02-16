@@ -21,7 +21,7 @@ class SpecialPurposeVehicleTraderHistoryTransformer extends AbstractTraderHistor
             'is_deliverable' => $this->traderOrder->isDeliverable(),
             'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => null,
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->getDurationForStep(MurabhaStep::ContractSigned),
         ];
 
         if ($this->traderOrder->isVersion('v2')) {

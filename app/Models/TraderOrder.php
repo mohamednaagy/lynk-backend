@@ -146,6 +146,11 @@ class TraderOrder extends Model implements HasMedia
         return $this->hasOne(TraderOrderSettlement::class, 'trader_order_id', 'id')->latestOfMany();
     }
 
+    public function traderOrderDuration(): HasOne
+    {
+        return $this->hasOne(TraderOrderDuration::class, 'trader_order_id', 'id');
+    }
+
     public function isCancellable(?string $area): bool
     {
         return Trader::driver($this->provider, $this->version)
