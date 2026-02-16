@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Contracts\Notifications\BuildUserNotificationsQuery;
+use App\Actions\Contracts\Notifications\BuildUserUnreadNotificationsQuery;
 use App\Http\Controllers\Controller;
 use App\Transformers\NotificationTransformer;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,13 @@ class NotificationsController extends Controller
         return fractal($notifications, new NotificationTransformer)
             ->paginateWith(new IlluminatePaginatorAdapter($notifications))
             ->respond();
+    }
+
+    public function unreadCount(Request $request, BuildUserUnreadNotificationsQuery $query): JsonResponse
+    {
+        $unreadCount = $query->setUser(Auth::user())->handle();
+
+        return response()->json(['unread_count' => $unreadCount]);
     }
 
     /**
