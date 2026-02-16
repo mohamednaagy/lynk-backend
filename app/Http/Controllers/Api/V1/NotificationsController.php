@@ -35,9 +35,9 @@ class NotificationsController extends Controller
     /**
      * Mark a notification as read.
      *
-     * @param  int  $id  The ID of the notification to mark as read.
+     * @param  string  $id  The ID of the notification to mark as read.
      */
-    public function markAsRead(int $id): JsonResponse
+    public function markAsRead(string $id): JsonResponse
     {
         $user = Auth::user();
 
@@ -46,6 +46,23 @@ class NotificationsController extends Controller
 
         return response()->json([
             'message' => __('notification.notification-marked-read'),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Mark a notification as un-read.
+     *
+     * @param  string  $id  The ID of the notification to mark as un-read.
+     */
+    public function markAsUnread(string $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        $notification = $user->notifications()->where('id', $id)->firstOrFail();
+        $notification->markAsUnRead();
+
+        return response()->json([
+            'message' => __('notification.notification-marked-unread'),
         ], Response::HTTP_OK);
     }
 
