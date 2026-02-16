@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\Fractal\Pagination\IlluminatePaginatorAdapter;
+use Symfony\Component\HttpFoundation\Response;
 
 class NotificationsController extends Controller
 {
@@ -29,5 +30,36 @@ class NotificationsController extends Controller
         return fractal($notifications, new NotificationTransformer)
             ->paginateWith(new IlluminatePaginatorAdapter($notifications))
             ->respond();
+    }
+
+    /**
+     * Mark a notification as read.
+     *
+     * @param  int  $id  The ID of the notification to mark as read.
+     */
+    public function markAsRead(int $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        $notification = $user->notifications()->where('id', $id)->firstOrFail();
+        $notification->markAsRead();
+
+        return response()->json([
+            'message' => __('notification.notification-marked-read'),
+        ], Response::HTTP_OK);
+    }
+
+    /**
+     * Mark all notifications as read
+     */
+    public function markAllAsRead(): JsonResponse
+    {
+        $user = Auth::user();
+
+        $user->unreadNotifications()->update(['read_at' => now()]);
+
+        return response()->json([
+            'message' => __('notification.notification-all-marked-read'),
+        ], Response::HTTP_OK);
     }
 }
