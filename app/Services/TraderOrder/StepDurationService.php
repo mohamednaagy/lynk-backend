@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 class StepDurationService
 {
@@ -23,7 +24,7 @@ class StepDurationService
             $traderHistoryAction
         );
 
-        if ($stepDuration === null) {
+        if (is_null($stepDuration)) {
             return;
         }
 
@@ -33,17 +34,25 @@ class StepDurationService
 
     public function updateDurationWhenStepCompleted(TraderOrder $traderOrder, array $stepDuration): void
     {
-        $histories = $traderOrder->traderHistories;
+        try {
+            $histories = $traderOrder->traderHistories;
 
-        $startTime = $this->getCreatedAtForAction($histories, $stepDuration['start_history']);
-        $endTime = $this->getCreatedAtForAction($histories, $stepDuration['end_history']);
-        if ($startTime === null || $endTime === null) {
-            return;
+            $startTime = $this->getCreatedAtForAction($histories, $stepDuration['start_history']);
+            $endTime = $this->getCreatedAtForAction($histories, $stepDuration['end_history']);
+            if (is_null($startTime) || is_null($endTime)) {
+                return;
+            }
+            $durationSeconds = $this->durationInSeconds($startTime, $endTime);
+
+            $this->persistDuration($traderOrder->id, $stepDuration['step'], $durationSeconds);
+        } catch (\Exception $e) {
+            Log::channel(LOG_CHANNEL_LYNK)->error(formatLogTitle('Error while updating duration when step completed', $traderOrder), [
+                'traderOrderId' => $traderOrder->id,
+                'stepDuration' => $stepDuration,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
-
-        $durationSeconds = $this->durationInSeconds($startTime, $endTime);
-
-        $this->persistDuration($traderOrder->id, $stepDuration['step'], $durationSeconds);
     }
 
     /**
@@ -97,7 +106,7 @@ class StepDurationService
     public function getStepDuration(TraderOrder $traderOrder, string $step): ?string
     {
         $seconds = $traderOrder->traderOrderDuration?->{$step};
-        if ($seconds === null) {
+        if (is_null($seconds)) {
             return null;
         }
 
