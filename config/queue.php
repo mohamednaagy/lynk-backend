@@ -101,8 +101,8 @@ return [
                     'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
                     'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
                 ],
-                'heartbeat' => (int) env('RABBITMQ_HEARTBEAT', 60),
-                'prefetch_count' => (int) env('RABBITMQ_PREFETCH', 10),
+                'heartbeat' => (int) env('RABBITMQ_HEARTBEAT', 120),
+                'prefetch_count' => (int) env('RABBITMQ_PREFETCH', 1),
             ],
 
             'retry_after' => 90,
