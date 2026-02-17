@@ -33,21 +33,17 @@ class StepDurationService
 
     public function updateDurationWhenStepCompleted(TraderOrder $traderOrder, array $stepDuration): void
     {
-        try {
-            $histories = $traderOrder->traderHistories;
+        $histories = $traderOrder->traderHistories;
 
-            $startTime = $this->getCreatedAtForAction($histories, $stepDuration['start_history']);
-            $endTime = $this->getCreatedAtForAction($histories, $stepDuration['end_history']);
-            if ($startTime === null || $endTime === null) {
-                return;
-            }
-
-            $durationSeconds = $this->durationInSeconds($startTime, $endTime);
-
-            $this->persistDuration($traderOrder->id, $stepDuration['step'], $durationSeconds);
-        } catch (\Exception $e) {
-            throw $e;
+        $startTime = $this->getCreatedAtForAction($histories, $stepDuration['start_history']);
+        $endTime = $this->getCreatedAtForAction($histories, $stepDuration['end_history']);
+        if ($startTime === null || $endTime === null) {
+            return;
         }
+
+        $durationSeconds = $this->durationInSeconds($startTime, $endTime);
+
+        $this->persistDuration($traderOrder->id, $stepDuration['step'], $durationSeconds);
     }
 
     /**
