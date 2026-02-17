@@ -50,3 +50,5 @@ boost.json
 .phpunit.cache/
 /.scannerwork/
 
+.claude/
+.specify/
