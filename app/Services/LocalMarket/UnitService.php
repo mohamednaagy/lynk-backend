@@ -109,30 +109,57 @@ class UnitService
 
     private function executeHoldProcedures(LocalMarketOrder $localMarketOrder, array $eligibleInventories): void
     {
+        $maxAttempts = 3;
+
         foreach ($eligibleInventories as $inventoryId => $data) {
+            $heldUnitsCount = 0;
+            $requestedUnits = $data['numberOfSuitableUnits'];
+
             try {
-                DB::statement('CALL hold_order_unit(?, ?, ?, ?)', [
-                    $localMarketOrder->id,
-                    $data['numberOfSuitableUnits'],
-                    $localMarketOrder->company_id,
-                    $inventoryId,
-                ]);
+                for ($attempt = 1; $attempt <= $maxAttempts; $attempt++) {
+                    $remainingUnits = $requestedUnits - $heldUnitsCount;
 
-                $heldUnitsCount = LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
-                    ->where('local_market_inventory_id', $inventoryId)
-                    ->count();
+                    DB::statement('CALL hold_order_unit(?, ?, ?, ?)', [
+                        $localMarketOrder->id,
+                        $remainingUnits,
+                        $localMarketOrder->company_id,
+                        $inventoryId,
+                    ]);
 
-                if ($heldUnitsCount != $data['numberOfSuitableUnits']) {
+                    $heldUnitsCount = LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                        ->where('local_market_inventory_id', $inventoryId)
+                        ->count();
+
+                    if ($heldUnitsCount >= $requestedUnits) {
+                        break;
+                    }
+
+                    if ($attempt < $maxAttempts) {
+                        Log::channel('local_market')->warning('Hold attempt fell short, retrying', [
+                            'order_id' => $localMarketOrder->id,
+                            'inventory_id' => $inventoryId,
+                            'attempt' => $attempt,
+                            'requested' => $requestedUnits,
+                            'held' => $heldUnitsCount,
+                            'remaining' => $requestedUnits - $heldUnitsCount,
+                        ]);
+                        usleep(50000); // 50ms
+                    }
+                }
+
+                if ($heldUnitsCount < $requestedUnits) {
                     throw new FailedToHoldRequiredUnitsException(
-                        $data['numberOfSuitableUnits'],
+                        $requestedUnits,
                         $heldUnitsCount,
                         $inventoryId,
                         $localMarketOrder->id
                     );
                 }
+            } catch (FailedToHoldRequiredUnitsException $e) {
+                throw $e;
             } catch (Exception $e) {
                 throw new FailedToHoldRequiredUnitsException(
-                    $data['numberOfSuitableUnits'],
+                    $requestedUnits,
                     $heldUnitsCount,
                     $inventoryId,
                     $localMarketOrder->id,
