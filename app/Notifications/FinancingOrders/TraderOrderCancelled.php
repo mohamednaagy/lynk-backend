@@ -60,7 +60,7 @@ class TraderOrderCancelled extends BaseNotification implements ShouldQueue
                 'order_id' => $this->traderOrder->financing_order_id,
             ]))
             ->line(__('emails/trader-order-cancelled.body', [
-                'trader_order_id' => $this->traderOrder->id,
+                'reference' => $this->traderOrder->reference,
                 'order_id' => $this->traderOrder->financing_order_id,
             ]));
     }
