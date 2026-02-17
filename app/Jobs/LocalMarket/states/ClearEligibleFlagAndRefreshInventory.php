@@ -89,7 +89,7 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
                     'order_id' => $this->localMarketOrderId,
                     'current_touched_by' => $this->getCurrentTouchedByValue(),
                 ]);
-            }, 3);
+            });
         } else {
             Log::channel(self::LOG_CHANNEL)->info('the latest order is not touched by this inventory', [
                 'inventory_id' => $this->inventoryId,

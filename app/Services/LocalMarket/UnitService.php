@@ -143,7 +143,7 @@ class UnitService
                             'held' => $heldUnitsCount,
                             'remaining' => $requestedUnits - $heldUnitsCount,
                         ]);
-                        usleep(50000); // 50ms
+                        usleep(300000); // 300ms this under test might be tuned later on
                     }
                 }
 
