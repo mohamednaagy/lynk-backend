@@ -6,6 +6,7 @@ use App\Jobs\ApplyOrderFeesJob;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
+use App\Services\TraderOrder\StepDurationService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
@@ -15,7 +16,10 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
 {
     use ObserverHelper;
 
-    public function __construct(private FeesService $feesService) {}
+    public function __construct(
+        private readonly FeesService $feesService,
+        private readonly StepDurationService $stepDurationService
+    ) {}
 
     /**
      * @throws \Exception
@@ -102,6 +106,7 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
             ]);
 
             $this->applyOrderFees($traderHistory);
+            $this->stepDurationService->setStepDuration($traderOrder, $traderHistory->action);
 
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Order fees applied, updating cached last history action', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
@@ -110,7 +115,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
                 'action' => $traderHistory->action,
                 'last_history_action' => $traderOrder->last_history_action,
             ]);
-
         } catch (\Exception $e) {
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('TraderHistoryObserver::created failed', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,

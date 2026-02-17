@@ -8,9 +8,9 @@ use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as TraderEnum;
 use App\Models\TraderOrder;
+use App\Services\TraderOrder\StepDurationService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
@@ -18,6 +18,8 @@ use League\Fractal\TransformerAbstract;
 class TraderHistoryTransformer extends TransformerAbstract
 {
     protected StepHistoriesDictionary $traderStepHistories;
+
+    protected StepDurationService $stepDurationService;
 
     protected Collection $traderHistories;
 
@@ -30,6 +32,8 @@ class TraderHistoryTransformer extends TransformerAbstract
         $this->setDefaultIncludes(array_merge($this->getDefaultIncludes(), $historySteps));
         $this->traderStepHistories = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version, $this->traderOrder->contract_signed_type);
         $this->traderHistories = $traderOrder->traderHistories ?? collect();
+        $this->traderOrder->traderOrderDuration;
+        $this->stepDurationService = app(StepDurationService::class);
     }
 
     public function transform($historiesActions): array
@@ -68,7 +72,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::PurchasingCommodity),
         ];
 
         if ($this->traderOrder->provider === TraderEnum::Bursam) {
@@ -89,7 +93,8 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeClientWakala($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::ClientWakala
+            $historiesActions,
+            MurabhaStep::ClientWakala
         );
 
         $signedWakalaDocumentMediaFile = $this->getMedia(TraderOrderMediaCollection::SignedClientWakala);
@@ -104,14 +109,15 @@ class TraderHistoryTransformer extends TransformerAbstract
                 'url' => $signedWakalaDocumentMediaFile?->file_url,
                 'date' => $signedWakalaDocumentMediaFile ? saudi_now('Y-m-d h:i:s A', $signedWakalaDocumentMediaFile->created_at) : null,
             ],
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::ClientWakala),
         ]);
     }
 
     public function includeContractSigned($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::ContractSigned
+            $historiesActions,
+            MurabhaStep::ContractSigned
         );
         $transferOwnershipToLenderDocumentHistory = $this->traderOrder->traderHistories()
             ->where('action', FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)
@@ -132,7 +138,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ])),
                 'date' => $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null,
             ],
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::ContractSigned),
         ];
 
         if ($this->traderOrder->isVersion('v2')) {
@@ -145,7 +151,8 @@ class TraderHistoryTransformer extends TransformerAbstract
     public function includeCommoditySoldToCustomer($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::CommoditySoldToCustomer
+            $historiesActions,
+            MurabhaStep::CommoditySoldToCustomer
         );
 
         return $this->primitive([
@@ -161,14 +168,15 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::CommoditySoldToCustomer),
         ]);
     }
 
     public function includeMurabhaOfferIssued($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::MurabhaOfferIssued
+            $historiesActions,
+            MurabhaStep::MurabhaOfferIssued
         );
 
         return $this->primitive([
@@ -184,14 +192,15 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::MurabhaOfferIssued),
         ]);
     }
 
     public function includeMurabahaSaleCompleted($historiesActions): Primitive
     {
         [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep(
-            $historiesActions, MurabhaStep::MurabahaSaleCompleted
+            $historiesActions,
+            MurabhaStep::MurabahaSaleCompleted
         );
 
         $data = [
@@ -207,7 +216,7 @@ class TraderHistoryTransformer extends TransformerAbstract
                 ])),
                 'date' => $history ? saudi_now('Y-m-d h:i:s A', $history->created_at) : null,
             ],
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::MurabahaSaleCompleted),
         ];
 
         if ($this->traderOrder->provider === TraderEnum::Lynk) {
@@ -226,63 +235,6 @@ class TraderHistoryTransformer extends TransformerAbstract
         }
 
         return $this->primitive($data);
-    }
-
-    public function includeHold($historiesActions): Primitive
-    {
-        [$history, $lastHistoryOfStepNode] = $this->getCurrentLastHistoryAndLastHistoryOfStep($historiesActions, MurabhaStep::Hold);
-
-        return $this->primitive([
-            'step' => MurabhaStep::Hold,
-            'is_complete' => (bool) $history,
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
-        ]);
-    }
-
-    public function getDurationForHistoryStep($history)
-    {
-        $CurrentStep = $this->traderStepHistories->getStepByHistory($history)
-            ?->step;
-
-        if (blank($CurrentStep)) {
-            return null;
-        }
-
-        $previousAction = $this->getLatestTraderHistoryOfPreviousStep($CurrentStep);
-        $latestAction = $this->getLatestTraderHistoryOfStep($CurrentStep);
-        $endTime = $latestAction?->created_at;
-        if ($this->traderOrder->isCancelled() && $this->traderOrder->cancelDetail?->cancel_step == $CurrentStep) {
-            $endTime = $this->traderOrder->cancelDetail->created_at;
-        }
-
-        if ($previousAction?->created_at && $endTime) {
-            return convertDateTimeToHumanDate(Carbon::make($previousAction->created_at), Carbon::make($endTime));
-        }
-
-        return null;
-    }
-
-    private function getLatestTraderHistoryOfPreviousStep($step)
-    {
-        $previousStepActions = $this->traderStepHistories->getPreviousStepOf($step)
-            ?->histories;
-
-        return blank($previousStepActions)
-            ? null
-            : $this->traderHistories->whereIn('action', $previousStepActions)
-                ->sortBy('updated_at', descending: true)
-                ->first();
-    }
-
-    private function getLatestTraderHistoryOfStep($step)
-    {
-        $stepActions = (new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version, $this->traderOrder->contract_signed_type))
-            ->getStepOf($step)
-            ?->histories;
-
-        return $this->traderHistories->whereIn('action', $stepActions ?? [])
-            ->sortBy('updated_at', descending: true)
-            ->first();
     }
 
     public function getHistory($history)
@@ -313,7 +265,7 @@ class TraderHistoryTransformer extends TransformerAbstract
             'is_complete' => (bool) $history,
             'completed_at' => $history?->created_at?->clone()->tz('Asia/Riyadh')->format('Y-m-d h:i:s A'),
             'delivery_details' => $this->traderOrder->getCustomerDeliveryStatusAndMessage(),
-            'duration' => $this->getDurationForHistoryStep($lastHistoryOfStepNode),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::CustomerDeliveryConfirmation),
         ]);
     }
 }
