@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\TraderOrder;
-use App\Services\TraderOrder\TraderOrderDurationService;
+use App\Services\TraderOrder\StepDurationService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Config;
 
@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $service = app(TraderOrderDurationService::class);
+        $service = app(StepDurationService::class);
 
         TraderOrder::query()
             ->chunk(100, function ($traderOrders) use ($service): void {
@@ -23,9 +23,8 @@ return new class extends Migration
                     $provider = (string) $traderOrder->provider;
                     $version = (string) $traderOrder->version;
                     $contractType = $traderOrder->contract_signed_type?->value;
-                    $configKey = TraderOrderDurationService::STEP_CONFIG_KEY_MAP[$provider];
 
-                    $stepsConfig = Config::get("murabha-steps.{$configKey}.{$version}.{$contractType}");
+                    $stepsConfig = Config::get("murabha-steps.{$provider}-step-duration.{$version}.{$contractType}");
 
                     foreach ($stepsConfig as $endHistoryAction => $stepDef) {
                         if (! is_array($stepDef) || empty($stepDef['end_history'])) {
@@ -34,10 +33,7 @@ return new class extends Migration
                         if (! $traderOrder->traderHistories->contains('action', $endHistoryAction)) {
                             continue;
                         }
-                        $stepDefinition = $service->getStepDefinitionForEndHistory($provider, $version, $contractType, $endHistoryAction);
-                        if ($stepDefinition) {
-                            $service->updateDurationWhenStepCompleted($traderOrder, $stepDefinition);
-                        }
+                        $service->setStepDuration($traderOrder, $endHistoryAction);
                     }
                 }
             });

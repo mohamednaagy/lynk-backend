@@ -22,7 +22,7 @@ class TimeDepositTraderHistoryTransformer extends AbstractTraderHistoryTransform
             'is_deliverable' => $this->traderOrder->isDeliverable(),
             'contract_signed_message' => Trader::driver($this->traderOrder->provider, $this->traderOrder->version)->contractSignedMessage($this->traderOrder),
             'wakala_document' => null,
-            'duration' => $this->getDurationForStep(MurabhaStep::ContractSigned),
+            'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::ContractSigned),
         ];
 
         if ($this->traderOrder->isVersion('v2')) {

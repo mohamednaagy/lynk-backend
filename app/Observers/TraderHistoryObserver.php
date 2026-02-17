@@ -6,7 +6,7 @@ use App\Jobs\ApplyOrderFeesJob;
 use App\Models\TraderHistory;
 use App\Observers\Traits\ObserverHelper;
 use App\Services\TraderOrder\FeesService;
-use App\Services\TraderOrder\TraderOrderDurationService;
+use App\Services\TraderOrder\StepDurationService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
 use App\Support\Traders\Facades\Trader;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
@@ -18,7 +18,7 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
 
     public function __construct(
         private readonly FeesService $feesService,
-        private readonly TraderOrderDurationService $traderOrderDurationService
+        private readonly StepDurationService $stepDurationService
     ) {}
 
     /**
@@ -106,10 +106,8 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
             ]);
 
             $this->applyOrderFees($traderHistory);
+            $this->stepDurationService->setStepDuration($traderOrder, $traderHistory->action);
 
-            if ($stepDuration = $this->traderOrderDurationService->getStepDefinitionForEndHistory($traderOrder->provider, $traderOrder->version, $traderOrder->contract_signed_type?->value, $traderHistory->action)) {
-                $this->traderOrderDurationService->updateDurationWhenStepCompleted($traderOrder, $stepDuration);
-            }
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->info(formatLogTitle('TraderHistoryObserver::created - Order fees applied, updating cached last history action', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
                 'traderOrderId' => $traderOrder->id,
@@ -117,7 +115,6 @@ class TraderHistoryObserver implements ShouldHandleEventsAfterCommit
                 'action' => $traderHistory->action,
                 'last_history_action' => $traderOrder->last_history_action,
             ]);
-
         } catch (\Exception $e) {
             Log::channel(getSuitableLoggingFromTraderProvider($traderOrder))->error(formatLogTitle('TraderHistoryObserver::created failed', $traderOrder), [
                 'financingOrderId' => $traderOrder->financing_order_id,
