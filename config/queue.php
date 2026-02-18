@@ -102,7 +102,7 @@ return [
                     'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
                 ],
                 'heartbeat' => (int) env('RABBITMQ_HEARTBEAT', 120),
-                'connection_timeout' => (int) env('RABBITMQ_CONNECTION_TIMEOUT', 30),
+                'connection_timeout' => (int) env('RABBITMQ_CONNECTION_TIMEOUT', 120),
                 'read_write_timeout' => (int) env('RABBITMQ_READ_WRITE_TIMEOUT', 200), // Must be > heartbeat
                 'prefetch_count' => (int) env('RABBITMQ_PREFETCH', 1),
             ],
