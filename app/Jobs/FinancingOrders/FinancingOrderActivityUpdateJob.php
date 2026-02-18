@@ -6,15 +6,18 @@ namespace App\Jobs\FinancingOrders;
 
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Traits\Localizable;
 
-class FinancingOrderActivityUpdateJob implements ShouldQueue
+class FinancingOrderActivityUpdateJob implements ShouldBeUnique, ShouldQueue
 {
     use Localizable;
     use Queueable;
+    use SerializesModels;
 
     /**
      * Create a new job instance.
@@ -22,6 +25,14 @@ class FinancingOrderActivityUpdateJob implements ShouldQueue
     public function __construct(private readonly FinancingOrder $financingOrder)
     {
         $this->onQueue('default');
+    }
+
+    /**
+     * The unique ID of the job.
+     */
+    public function uniqueId(): string
+    {
+        return (string) $this->financingOrder->id;
     }
 
     /**
