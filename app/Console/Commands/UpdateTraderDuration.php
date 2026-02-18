@@ -29,7 +29,7 @@ class UpdateTraderDuration extends Command
         $stepsConfig = $this->getStepsConfig();
 
         $query = TraderOrder::query()
-            ->select(['id', 'provider', 'version', 'contract_signed_type'])
+            ->select(['id', 'provider', 'version', 'contract_signed_type', 'financing_order_id'])
             ->with([
                 'traderHistories' => fn ($q) => $q->select(['id', 'trader_order_id', 'action', 'created_at']),
             ]);
