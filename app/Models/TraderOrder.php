@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Area;
 use App\Enums\ContractSignedType;
 use App\Enums\CustomerDeliveryStatus;
 use App\Enums\FinancingOrderHistory;
@@ -520,9 +521,23 @@ class TraderOrder extends Model implements HasMedia
         return $this->commodity_type_id > 0;
     }
 
-    public function canBeMarkedAsCompleted(): bool
+    /**
+     * Determines if the trader order can be marked as completed based on the user's area.
+     *
+     * - Lender users can only complete orders when the last action is MurabahaSaleCompleted (normal sale flow).
+     * - SuperAdmin/LYNK Admin can complete orders in all cases, including the Client Wakala > Delivery flow.
+     *
+     * This distinction ensures that Lender users cannot complete orders that went through
+     * the Client Wakala > Delivery path (DeliveryConfirmed), which should only be completable by LYNK Admin.
+     */
+    public function canBeMarkedAsCompleted(?string $area = Area::SuperAdmin): bool
     {
-        return $this->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted) || $this->doesLastActionMatchWith(FinancingOrderHistory::DeliveryConfirmed);
+        if ($area == Area::Lender) {
+            return $this->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted);
+        }
+
+        return $this->doesLastActionMatchWith(FinancingOrderHistory::MurabahaSaleCompleted)
+            || $this->doesLastActionMatchWith(FinancingOrderHistory::DeliveryConfirmed);
     }
 
     public function canProcessBursamOrderResultNYY(): bool
