@@ -8,6 +8,8 @@ use App\Enums\LocalMarket\OrderStatus;
 use App\Services\LocalMarket\InventoryService;
 use App\Services\LocalMarket\UnitService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class PendingCancelOrderStatus extends BaseStatus
 {
@@ -41,7 +43,6 @@ class PendingCancelOrderStatus extends BaseStatus
             $this->localMarketOrder->changeStatusTo(OrderStatus::Cancelled);
         } catch (\Throwable $e) {
             DB::rollBack();
-            $this->localMarketOrder->changeStatusTo(OrderStatus::FailedToCancel);
             throw $e;
         }
     }
@@ -52,5 +53,21 @@ class PendingCancelOrderStatus extends BaseStatus
             'cancelled_by' => OrderCancelledBy::Customer,
             'cancel_reason' => OrderCancelReason::CancelOrder,
         ]);
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        $this->localMarketOrder->changeStatusTo(OrderStatus::FailedToCancel);
+
+        $errorMessage = formatLocalMarketOrderTitle("failed {$this->className}, the given ", $this->localMarketOrder);
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(
+            $errorMessage,
+            [
+                'localMarketOrderId' => $this->localMarketOrderID,
+                'order_reference' => $this->localMarketOrder->external_order_no,
+                'message' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
+            ]
+        );
     }
 }

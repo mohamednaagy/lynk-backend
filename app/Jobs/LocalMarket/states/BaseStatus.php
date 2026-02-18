@@ -22,7 +22,7 @@ abstract class BaseStatus implements ShouldQueue
 
     protected LocalMarketOrder $localMarketOrder;
 
-    private string $className;
+    protected string $className;
 
     public function __construct(protected int $localMarketOrderID)
     {
