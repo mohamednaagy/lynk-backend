@@ -43,6 +43,8 @@ class PendingCancelOrderStatus extends BaseStatus
             $this->localMarketOrder->changeStatusTo(OrderStatus::Cancelled);
         } catch (\Throwable $e) {
             DB::rollBack();
+            $this->logFailure($e);
+
             throw $e;
         }
     }
@@ -58,11 +60,16 @@ class PendingCancelOrderStatus extends BaseStatus
     public function failed(Throwable $exception): void
     {
         $this->localMarketOrder->changeStatusTo(OrderStatus::FailedToCancel);
+        $this->logFailure($exception);
+    }
 
+    private function logFailure(Throwable $exception): void
+    {
         $errorMessage = formatLocalMarketOrderTitle("failed {$this->className}, the given ", $this->localMarketOrder);
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(
             $errorMessage,
             [
+                'attempt' => $this->attempts(),
                 'localMarketOrderId' => $this->localMarketOrderID,
                 'order_reference' => $this->localMarketOrder->external_order_no,
                 'message' => $exception->getMessage(),
