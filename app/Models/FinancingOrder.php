@@ -408,7 +408,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
         $allTraderOrders = $this->traderOrders();
         $traderOrderCompleted = ($area == Area::Lender)
-        ? $allTraderOrders->get()->some(fn (TraderOrder $traderOrder) => $traderOrder->canBeMarkedAsCompleted())
+        ? $allTraderOrders->get()->some(fn (TraderOrder $traderOrder) => $traderOrder->canBeMarkedAsCompleted($area))
         : $allTraderOrders->completed()->exists();
 
         return $traderOrderCompleted

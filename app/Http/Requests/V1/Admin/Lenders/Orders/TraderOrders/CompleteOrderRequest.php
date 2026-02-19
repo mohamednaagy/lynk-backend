@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Admin\Lenders\Orders\TraderOrders;
 
+use App\Enums\Area;
 use App\Models\FinancingOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -26,7 +27,7 @@ class CompleteOrderRequest extends FormRequest
     {
         $financingOrder = FinancingOrder::findOrFail($this->route('order'));
 
-        if ($financingOrder->canBeCompleted()) {
+        if ($financingOrder->canBeCompleted(Area::SuperAdmin)) {
             return [
                 'payment_proof' => ['sometimes', 'nullable', 'file', 'mimes:pdf,png,jpeg,jpg', 'max:5120'],
             ];

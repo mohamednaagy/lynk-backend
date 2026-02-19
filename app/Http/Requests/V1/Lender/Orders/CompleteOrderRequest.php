@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1\Lender\Orders;
 
+use App\Enums\Area;
 use App\Models\FinancingOrder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\ValidationException;
@@ -17,7 +18,7 @@ class CompleteOrderRequest extends FormRequest
     {
         $financingOrder = FinancingOrder::findOrFail($this->route('order'));
 
-        return $financingOrder->canBeCompleted();
+        return $financingOrder->canBeCompleted(Area::Lender);
     }
 
     /**
