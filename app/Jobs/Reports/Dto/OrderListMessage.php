@@ -26,7 +26,7 @@ final class OrderListMessage extends AbstractReportMessage
             ],
             options: [
                 'output_timezone' => $outputTimezone,
-                'rows_limit' => (int) env('ORDERS_EXPORT_LIMIT', 10000),
+                'rows_limit' => (int) env('ORDERS_EXPORT_LIMIT', 300000),
             ],
         );
     }
