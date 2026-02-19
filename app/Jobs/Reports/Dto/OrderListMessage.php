@@ -8,8 +8,6 @@ use App\Jobs\Reports\Enums\ReportType;
 use App\Models\User;
 use Illuminate\Support\Str;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
-
 final class OrderListMessage extends AbstractReportMessage
 {
     public function __construct(
