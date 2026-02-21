@@ -2,17 +2,13 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Role;
-use App\Enums\SystemNotificationType;
 use App\Models\TraderOrder;
 use App\Notifications\FinancingOrders\OrderDeliveryConfirmed;
-use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutOrderDeliveryConfirmed implements ShouldQueue
 {
@@ -35,11 +31,8 @@ class NotifyAboutOrderDeliveryConfirmed implements ShouldQueue
      */
     public function handle()
     {
-        $admins = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::DELIVERY_CONFIRMATION_RECEIVED, function ($query) {
-                $query->role(Role::Admin);
-            });
-
-        Notification::send($admins, new OrderDeliveryConfirmed($this->traderOrder));
+        $notification = new OrderDeliveryConfirmed($this->traderOrder);
+        // no need to pass emails, since the admins emails will be included internally as BCC
+        $notification->sendTo([]);
     }
 }

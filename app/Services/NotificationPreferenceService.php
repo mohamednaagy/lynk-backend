@@ -171,10 +171,15 @@ class NotificationPreferenceService
         return $this->getEnabledUsersForType($type, null, $extra);
     }
 
-    public function getEnabledAdminsFor(SystemNotificationType $type): Collection
+    /**
+     * Retrieve enabled Admin and Manager users eligible for the given notification type.
+     *
+     * @return Collection<int, User>
+     */
+    public function getEligibleAdminsOrManagers(SystemNotificationType $type): Collection
     {
         return $this->getEnabledUsersForType($type, null, function ($query) {
-            $query->role(Role::Admin);
+            $query->role([Role::Admin, Role::Manager]);
         });
     }
 

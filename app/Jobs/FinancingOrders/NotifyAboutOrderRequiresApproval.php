@@ -14,7 +14,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutOrderRequiresApproval implements ShouldQueue
 {
@@ -45,17 +44,21 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
             return;
         }
 
-        $notifiables = app(NotificationPreferenceService::class)
+        $notifiableEmails = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) use ($financingOrder) {
-                $query->role(Role::Admin)
-                    ->orWhere(function ($query) use ($financingOrder) {
-                        $query->role(Role::LenderAdmin)
-                            ->whereHas('lender', function ($query) use ($financingOrder) {
-                                $query->where('id', $financingOrder->company_id);
-                            });
-                    });
-            });
+                $query->where(function ($query) use ($financingOrder) {
+                    $query->withoutRole(Role::Admin)
+                        ->orWhere(function ($query) use ($financingOrder) {
+                            $query->role(Role::LenderAdmin)
+                                ->whereHas('lender', function ($query) use ($financingOrder) {
+                                    $query->where('id', $financingOrder->company_id);
+                                });
+                        });
+                });
+            })->pluck('email')
+            ->all();
 
-        Notification::send($notifiables, new OrderRequiresApproval($financingOrder, $this->user));
+        $notification = new OrderRequiresApproval($financingOrder, $this->user);
+        $notification->sendTo($notifiableEmails);
     }
 }

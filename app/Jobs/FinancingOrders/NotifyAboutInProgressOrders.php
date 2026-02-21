@@ -49,6 +49,6 @@ class NotifyAboutInProgressOrders implements ShouldQueue
             ->all();
 
         $notification = new InProgressOrdersNotification($lenderId);
-        $notification->sendWithAdminFallback($notifiableEmails);
+        $notification->sendTo($notifiableEmails);
     }
 }

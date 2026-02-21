@@ -82,19 +82,11 @@ final class InProgressOrdersNotification extends BaseNotification implements Sho
      */
     public function toMail($notifiable): MailMessage
     {
-        $mail = (new MailMessage)
+        return (new MailMessage)
             ->subject(__('emails/in-progress-orders.subject'))
             ->greeting(__('emails/in-progress-orders.greeting', ['company_name' => $this->getCompanyName()]))
             ->line(__('emails/in-progress-orders.body'))
             ->action(__('emails/in-progress-orders.action'), $this->getActionURL());
-
-        if (app()->isLocal()) {
-            $mail->cc($this->getBccUsers());
-        } else {
-            $mail->bcc($this->getBccUsers());
-        }
-
-        return $mail;
     }
 
     /**

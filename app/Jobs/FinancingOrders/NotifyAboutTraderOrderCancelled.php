@@ -12,7 +12,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutTraderOrderCancelled implements ShouldQueue
 {
@@ -35,11 +34,13 @@ class NotifyAboutTraderOrderCancelled implements ShouldQueue
     {
         $companyId = $this->traderOrder->order->company_id;
 
-        $notifiables = app(NotificationPreferenceService::class)
+        $notifiableEmails = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($companyId) {
                 $query->forTradeRequestCancelledNotification($companyId);
-            });
+            })->pluck('email')
+            ->all();
 
-        Notification::send($notifiables, new TraderOrderCancelled($this->traderOrder, $this->canceller));
+        $notification = new TraderOrderCancelled($this->traderOrder, $this->canceller);
+        $notification->sendTo($notifiableEmails);
     }
 }

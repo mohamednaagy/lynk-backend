@@ -2,6 +2,7 @@
 
 namespace App\Support\QueryScoper\Scopes\Notifications;
 
+use App\Enums\Role;
 use App\Support\QueryScoper\QueryScoper;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,7 +15,7 @@ class TradeRequestExpiredNotificationScope extends QueryScoper
         $companyId = $this->companyId;
 
         return $builder->where(function ($q) use ($companyId) {
-            $q->admin()
+            $q->withoutRole(Role::Admin)
                 ->orWhere(function ($q) use ($companyId) {
                     $q->withLenderAdminForCompany($companyId);
                 });

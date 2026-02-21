@@ -12,7 +12,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutExpireTraderOrder implements ShouldQueue
 {
@@ -35,12 +34,14 @@ class NotifyAboutExpireTraderOrder implements ShouldQueue
     {
         $companyId = $this->traderOrder->order->company_id;
 
-        $notifiables = app(NotificationPreferenceService::class)
+        $notifiableEmails = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_EXPIRED, function ($query) use ($companyId) {
                 $scope = new TradeRequestExpiredNotificationScope($companyId);
                 $scope->apply($query);
-            });
+            })->pluck('email')
+            ->all();
 
-        Notification::send($notifiables, new TraderRequestExpired($this->traderOrder));
+        $notification = new TraderRequestExpired($this->traderOrder);
+        $notification->sendTo($notifiableEmails);
     }
 }

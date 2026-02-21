@@ -73,7 +73,7 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
                 'company_name' => $order->lender->name,
             ]))
             ->markdown('emails.order-delivery-confirmed', [
-                'name' => $notifiable->fullName,
+                'name' => 'LYNK Admin',
                 'order_id' => $order->id,
                 'trader_reference' => $this->traderOrder->reference,
                 'company_name' => $this->traderOrder->order->lender->name,

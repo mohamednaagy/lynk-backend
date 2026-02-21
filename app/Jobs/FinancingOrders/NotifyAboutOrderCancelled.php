@@ -13,7 +13,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutOrderCancelled implements ShouldQueue
 {
@@ -38,10 +37,10 @@ class NotifyAboutOrderCancelled implements ShouldQueue
     {
         $lender = $this->financingOrder->lender()->withTrashed()->first();
 
-        $notifiables = app(NotificationPreferenceService::class)
+        $notifiableEmails = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED, function ($query) use ($lender) {
                 $query->where(function ($query) use ($lender) {
-                    $query->role(Role::Admin)
+                    $query->withoutRole(Role::Admin)
                         ->orWhere(function ($query) use ($lender) {
                             $query->role(Role::LenderAdmin)
                                 ->whereHas('lender', function ($query) use ($lender) {
@@ -49,8 +48,10 @@ class NotifyAboutOrderCancelled implements ShouldQueue
                                 });
                         });
                 });
-            });
+            })->pluck('email')
+            ->all();
 
-        Notification::send($notifiables, new OrderCancelled($this->financingOrder, $this->canceller));
+        $notification = new OrderCancelled($this->financingOrder, $this->canceller);
+        $notification->sendTo($notifiableEmails);
     }
 }

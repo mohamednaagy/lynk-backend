@@ -250,7 +250,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
     public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
     {
         return $query->where(function ($q) use ($companyId) {
-            $q->admin() // @phpstan-ignore method.notFound
+            $q->withoutRole(Role::Admin)
                 ->orWhere(function ($q) use ($companyId) {
                     $q->withLenderAdminForCompany($companyId);
                 });

@@ -2,18 +2,13 @@
 
 namespace App\Jobs\Lenders;
 
-use App\Enums\Action;
-use App\Enums\Area;
-use App\Enums\Subject;
 use App\Models\Lender;
-use App\Models\User;
 use App\Notifications\LenderRegistered;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
 
 class NotifyAboutLenderRegistration implements ShouldQueue
 {
@@ -34,16 +29,8 @@ class NotifyAboutLenderRegistration implements ShouldQueue
      */
     public function handle(): void
     {
-        $users = User::permission(
-            perm_arr(
-                Area::SuperAdmin,
-                [Subject::All, Action::Manage],
-                [Subject::Lenders, Action::Edit, Action::Show]
-            )
-        )
-            ->withoutTenancy()
-            ->get();
-
-        Notification::send($users, new LenderRegistered($this->lender));
+        $notification = new LenderRegistered($this->lender);
+        // no need to pass emails, since the admins emails will be included internally as BCC
+        $notification->sendTo([]);
     }
 }

@@ -10,7 +10,6 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 /**
  * BaseNotification
@@ -90,49 +89,27 @@ abstract class BaseNotification extends Notification
     abstract public function getDescription($notifiable): string;
 
     /**
-     * Send this notification to a list of primary email recipients, with a reusable
-     * fallback behavior:
+     * Send this notification as a single email using the content from toMail().
      *
-     * - If there are primary recipients, send the notification normally via the
-     *   mail channel (admins will be attached as CC/BCC inside toMail(), if any).
-     * - If there are NO primary recipients, send the email body only to admin
-     *   users of this notification type, keeping them strictly in CC/BCC and
-     *   leaving the "to" field empty.
+     * - Admins (from getBccUsers()) are always added as BCC.
+     * - If $recipients is not empty, they are set as To; otherwise the email has no To recipients.
      *
-     * This is intended to be reused by jobs that work with raw email address lists.
+     * @param  array<int, string>  $recipients  Primary recipient email addresses (To). May be empty for admin-only sends.
      */
-    public function sendWithAdminFallback(array $primaryEmails): void
+    public function sendTo(array $recipients): void
     {
-        if (! empty($primaryEmails)) {
-            // Normal path: let the notification system handle delivery,
-            // including any CC/BCC logic defined in toMail().
-            NotificationFacade::route('mail', $primaryEmails)->notify($this);
-
-            return;
-        }
-
-        // Fallback: no primary recipients. Use the same admin list we normally
-        // use as BCC/CC recipients and send the email only to them.
-        $adminEmails = $this->getBccUsers()->all();
-
-        if (empty($adminEmails)) {
-            return;
-        }
-
-        // Reuse the existing mail content defined by the concrete notification.
+        $admins = $this->getBccUsers()->toArray();
         $mailMessage = $this->toMail(new AnonymousNotifiable);
-        $html = (string) $mailMessage->render();
 
-        Mail::html($html, function ($message) use ($mailMessage, $adminEmails) {
-            // Try to reuse the subject from the MailMessage when available.
-            if (property_exists($mailMessage, 'subject') && $mailMessage->subject) {
+        Mail::html((string) $mailMessage->render(), function ($message) use ($mailMessage, $recipients, $admins) {
+            if ($mailMessage->subject) {
                 $message->subject($mailMessage->subject);
             }
 
-            if (app()->isLocal()) {
-                $message->cc($adminEmails);
-            } else {
-                $message->bcc($adminEmails);
+            $message->bcc($admins);
+
+            if (! empty($recipients)) {
+                $message->to($recipients);
             }
         });
     }
@@ -141,7 +118,7 @@ abstract class BaseNotification extends Notification
     {
         $notificationPreferenceService = app(NotificationPreferenceService::class);
 
-        return $notificationPreferenceService->getEnabledAdminsFor($this->getType())->pluck('email');
+        return $notificationPreferenceService->getEligibleAdminsOrManagers($this->getType())->pluck('email');
     }
 
     protected function getActionURL(): string
