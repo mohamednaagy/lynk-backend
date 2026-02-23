@@ -107,7 +107,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return Attribute::make(
             get: function () {
                 try {
-                    $traderOrder = $this->activeTraderOrder->first();
+                    $traderOrder = $this->activeTraderOrder()->first();
                     if (is_null($traderOrder)) {
                         Log::error(
                             "No active trader order found for financing_order_id => {$this->id}",
@@ -142,7 +142,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
 
                     return MurabhaStep::fromValue($currentStepNode->step);
                 } catch (\Exception $e) {
-                    $traderOrder = $this->activeTraderOrder->first();
+                    $traderOrder = $this->activeTraderOrder()->first();
                     $logMessage = "Error retrieving current step for order {$this->id}: ".$e->getMessage();
                     if ($traderOrder) {
                         $logMessage .= ' trader_order_id => '.$traderOrder->id;
