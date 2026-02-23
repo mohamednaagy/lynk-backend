@@ -323,6 +323,7 @@ jobs:
 
           #export limit
           ORDERS_EXPORT_LIMIT="${{ vars.ORDERS_EXPORT_LIMIT }}"
+          ENVEOF
 
           echo "::notice::.env file created ($(wc -l < .env) lines, $(wc -c < .env) bytes)"
 
