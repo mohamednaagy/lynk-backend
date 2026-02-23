@@ -6,7 +6,11 @@ use App\Enums\NotificationChannel;
 use App\Enums\SystemNotificationType;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification as NotificationFacade;
 
 /**
  * BaseNotification
@@ -41,17 +45,16 @@ abstract class BaseNotification extends Notification
         return $this->getUserEnabledChannels($typeSettings);
     }
 
-    private function getUserEnabledChannels($typeSettings): array
+    /**
+     * Specify which queue should handle which channels.
+     *
+     * @return array
+     */
+    public function viaQueues()
     {
-        $channels = [];
-        foreach (NotificationChannel::cases() as $channel) {
-            $setting = $typeSettings->where('channel', $channel)->first();
-            if ($setting?->is_enabled) {
-                $channels[] = $channel->value;
-            }
-        }
-
-        return $channels;
+        return [
+            'mail' => 'notifications',
+        ];
     }
 
     /**
@@ -87,6 +90,66 @@ abstract class BaseNotification extends Notification
     abstract public function getDescription($notifiable): string;
 
     /**
+     * Send this notification to a list of primary email recipients, with a reusable
+     * fallback behavior:
+     *
+     * - If there are primary recipients, send the notification normally via the
+     *   mail channel (admins will be attached as CC/BCC inside toMail(), if any).
+     * - If there are NO primary recipients, send the email body only to admin
+     *   users of this notification type, keeping them strictly in CC/BCC and
+     *   leaving the "to" field empty.
+     *
+     * This is intended to be reused by jobs that work with raw email address lists.
+     */
+    public function sendWithAdminFallback(array $primaryEmails): void
+    {
+        if (! empty($primaryEmails)) {
+            // Normal path: let the notification system handle delivery,
+            // including any CC/BCC logic defined in toMail().
+            NotificationFacade::route('mail', $primaryEmails)->notify($this);
+
+            return;
+        }
+
+        // Fallback: no primary recipients. Use the same admin list we normally
+        // use as BCC/CC recipients and send the email only to them.
+        $adminEmails = $this->getBccUsers()->all();
+
+        if (empty($adminEmails)) {
+            return;
+        }
+
+        // Reuse the existing mail content defined by the concrete notification.
+        $mailMessage = $this->toMail(new AnonymousNotifiable);
+        $html = (string) $mailMessage->render();
+
+        Mail::html($html, function ($message) use ($mailMessage, $adminEmails) {
+            // Try to reuse the subject from the MailMessage when available.
+            if (property_exists($mailMessage, 'subject') && $mailMessage->subject) {
+                $message->subject($mailMessage->subject);
+            }
+
+            if (app()->isLocal()) {
+                $message->cc($adminEmails);
+            } else {
+                $message->bcc($adminEmails);
+            }
+        });
+    }
+
+    protected function getBccUsers(): Collection
+    {
+        $notificationPreferenceService = app(NotificationPreferenceService::class);
+
+        return $notificationPreferenceService->getEnabledAdminsFor($this->getType())->pluck('email');
+    }
+
+    protected function getActionURL(): string
+    {
+        return '';
+    }
+
+    /**
      * Check if the user has allowed roles for this notification type.
      *
      * @param  mixed  $notifiable
@@ -112,15 +175,16 @@ abstract class BaseNotification extends Notification
         return false;
     }
 
-    /**
-     * Specify which queue should handle which channels.
-     *
-     * @return array
-     */
-    public function viaQueues()
+    private function getUserEnabledChannels($typeSettings): array
     {
-        return [
-            'mail' => 'notifications',
-        ];
+        $channels = [];
+        foreach (NotificationChannel::cases() as $channel) {
+            $setting = $typeSettings->where('channel', $channel)->first();
+            if ($setting?->is_enabled) {
+                $channels[] = $channel->value;
+            }
+        }
+
+        return $channels;
     }
 }

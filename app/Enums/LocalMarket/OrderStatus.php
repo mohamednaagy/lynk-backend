@@ -71,6 +71,8 @@ final class OrderStatus extends Enum implements LocalizedEnum
         self::EligibleCommoditiesAvailable => [
             self::CommoditiesPurchased,
             self::PendingCancellation,
+            self::FailedPurchase,
+            self::NoEligibleCommoditiesAvailable, // fallback if commodities become ineligible after selection (race condition)
         ],
         self::CommoditiesPurchased => [
             self::PendingCancellation,

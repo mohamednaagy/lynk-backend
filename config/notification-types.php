@@ -146,4 +146,22 @@ return [
             Role::LenderAdmin,
         ],
     ],
+    SystemNotificationType::IN_PROGRESS_ORDERS->value => [
+        'label' => 'notification-types.in_progress_orders.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::LenderAdmin,
+        ],
+    ],
+
 ];

@@ -56,7 +56,7 @@ class TraderRequestExpired extends BaseNotification implements ShouldQueue
                 'order_id' => $this->traderOrder->financing_order_id,
             ]))
             ->line(__('emails/trader-request-expired.body', [
-                'trader_order_id' => $this->traderOrder->id,
+                'reference' => $this->traderOrder->reference,
                 'order_id' => $this->traderOrder->financing_order_id,
             ]));
     }

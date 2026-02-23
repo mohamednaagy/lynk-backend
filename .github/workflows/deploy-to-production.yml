@@ -1,0 +1,153 @@
+name: Deploy to Production (Docker)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - production
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      environment: production
+      runner: '{"group":"production-runner-group","labels":["self-hosted"]}'
+      cache-type: local
+      artifact-name: docker-image-production
+      checkout-ref: production
+      run-trivy: true
+    secrets: inherit
+
+  deploy:
+    needs: build
+    runs-on:
+      group: production-runner-group
+      labels: [self-hosted]
+    environment: production
+    strategy:
+      matrix:
+        include:
+          - server_index: 0
+            worker_group: group1
+          - server_index: 1
+            worker_group: group2
+          - server_index: 2
+            worker_group: group3
+      fail-fast: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: production
+
+      - name: Get server IP
+        id: server
+        run: |
+          SERVERS='${{ needs.build.outputs.servers }}'
+          SERVER_IP=$(echo "$SERVERS" | jq -r '.[${{ matrix.server_index }}]')
+          echo "ip=$SERVER_IP" >> $GITHUB_OUTPUT
+
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.DEPLOYMENT_KEY }}
+
+      - name: Deploy to server
+        uses: ./.github/actions/deploy-to-server
+        with:
+          server-ip: ${{ steps.server.outputs.ip }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          commit-hash: ${{ needs.build.outputs.commit_hash }}
+          deploy-script: .github/scripts/deploy.sh
+          deploy-script-args: "'web,${{ matrix.worker_group }},observability'"
+          use-staging-dir: "true"
+
+      - name: Verify deployment
+        uses: ./.github/actions/verify-deployment
+        with:
+          server-ip: ${{ steps.server.outputs.ip }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          profiles: "web ${{ matrix.worker_group }} observability"
+          use-profile-discovery: "true"
+
+      - name: Post-deploy tasks
+        if: matrix.server_index == 0
+        uses: ./.github/actions/post-deploy
+        with:
+          server-ip: ${{ steps.server.outputs.ip }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          use-profile-discovery: "true"
+          commands: |
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+
+  cleanup:
+    needs: deploy
+    if: always()
+    runs-on:
+      group: production-runner-group
+      labels: [self-hosted]
+    steps:
+      - name: Cleanup local build artifacts
+        run: |
+          rm -f /tmp/app-php-fpm.tar.gz
+
+  notify:
+    needs: [deploy, build]
+    if: always()
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch PR info
+        id: pr-info
+        uses: ./.github/actions/fetch-pr-info
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.sha }}
+          repository: ${{ github.repository }}
+
+      - name: Resolve PR URL and title
+        id: meta
+        run: |
+          PR_URL="${{ github.event.pull_request.html_url }}"
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ] && PR_URL="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+          if [ -z "$PR_TITLE" ] || [ "$PR_TITLE" = "null" ]; then
+            if [ -n "$COMMIT_MSG" ] && [ "$COMMIT_MSG" != "null" ]; then
+              PR_TITLE="$(printf '%s' "$COMMIT_MSG" | head -n1)"
+            else
+              PR_TITLE="${{ github.repository }}"
+            fi
+          fi
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+
+      - name: Send Slack notification
+        uses: ./.github/actions/slack-notify
+        with:
+          webhook-url: ${{ secrets.SLACK_HOOK_URL }}
+          environment-label: production
+          deploy-result: ${{ needs.deploy.result }}
+          start-ts: ${{ needs.build.outputs.start_ts }}
+          commit-hash: ${{ needs.build.outputs.commit_hash }}
+          run-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          pr-url: ${{ steps.meta.outputs.pr_url }}
+          pr-title: ${{ steps.meta.outputs.pr_title }}
+          pr-creator: ${{ steps.pr-info.outputs.pr-creator }}
+          pr-merger: ${{ steps.pr-info.outputs.pr-merger }}
+          pr-reviewers: ${{ steps.pr-info.outputs.pr-reviewers }}
+          include-pr-info: "true"

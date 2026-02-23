@@ -38,4 +38,8 @@ return [
         'label' => 'انتهت صلاحية طلب التداول',
         'description' => 'انتهت صلاحية طلب المرابحة #:trader_order_id للطلب #:order_id .',
     ],
+    'in_progress_orders' => [
+        'label' => 'الطلبات قيد التنفيذ',
+        'description' => 'لدى :company_name طلب/طلبات قيد التنفيذ.',
+    ],
 ];

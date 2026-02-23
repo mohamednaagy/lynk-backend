@@ -1,170 +1,110 @@
-# Zero-Downtime Deployment Scripts
+# Deployment Scripts & Actions
 
 ## Overview
 
-This directory contains scripts for implementing zero-downtime deployments with automatic rollback capabilities for Docker Compose applications.
+This directory contains the unified deployment script used by all environment workflows. The `.github/actions/` directory contains reusable composite actions that eliminate duplication across workflows.
 
-## deploy-with-rollback.sh
+## Architecture
 
-A comprehensive deployment script that implements a **rolling deployment strategy** to achieve zero-downtime updates with automatic rollback on failure.
+```
+.github/
+├── actions/
+│   ├── setup-ssh/           # SSH key configuration
+│   ├── fetch-pr-info/       # PR creator/merger/reviewer lookup
+│   ├── slack-notify/        # Deployment Slack notification (jq-based)
+│   ├── deploy-to-server/    # Docker image transfer + deployment
+│   └── post-deploy/         # Post-deploy artisan commands
+├── scripts/
+│   ├── README.md            # This file
+│   └── deploy.sh            # Unified zero-downtime deployment script
+└── workflows/
+    ├── _build.yml           # Reusable build workflow (Docker image + .env)
+    ├── deploy-to-dev.yml    # Dev deployment + regression tests
+    ├── deploy-to-sandbox.yml
+    ├── deploy-to-preprod.yml
+    └── deploy-to-production.yml
+```
+
+## deploy.sh
+
+A unified zero-downtime deployment script for all environments. Replaces the previous `deploy-with-rollback.sh` (dev/sandbox) and `deploy-preprod.sh` (preprod/production).
+
+### Usage
+
+```bash
+./deploy.sh                                    # All profiles (dev/sandbox)
+./deploy.sh 'web,group1,observability'         # Specific profiles (preprod/prod per-server)
+```
 
 ### How It Works
 
-The script follows a carefully orchestrated deployment process:
-
-1. **Backup Current State**
-   - Captures the current Docker image tag
-   - Saves deployment state for potential rollback
-
-2. **Rolling Update (Scale Up)**
-   - Doubles the number of containers (old + new running simultaneously)
-   - New containers start alongside existing ones
-   - No service interruption during this phase
-
-3. **Health Check Verification**
-   - Monitors container health for up to 5 minutes
-   - Checks both Docker health checks and container running status
-   - Requires 80% of containers to be healthy to proceed
-
-4. **Scale Down (Remove Old)**
-   - Once new containers are verified healthy
-   - Scales down to target numbers
-   - Removes old containers gracefully
-
-5. **Automatic Rollback**
-   - Triggers if health checks fail at any stage
-   - Stops new containers
-   - Restarts previous version
-   - Verifies rollback succeeded
+1. **Backup** - Captures current Docker image tag and deployment state
+2. **Scale Up** - Doubles container count (old + new running simultaneously)
+3. **Health Check** - Monitors for up to 5 minutes, requires 70%+ healthy
+4. **Scale Down** - Removes old containers, scales to target numbers
+5. **Verify** - Final health check with 3 retry attempts
+6. **Rollback** - Automatic if health checks fail at any stage
 
 ### Configuration
 
-Key parameters can be adjusted at the top of the script:
-
 ```bash
-HEALTH_CHECK_TIMEOUT=300      # Max time to wait for health (seconds)
-HEALTH_CHECK_INTERVAL=10      # Check every N seconds
-MIN_HEALTHY_PERCENTAGE=70     # Required healthy percentage (70%)
-SCALE_DOWN_WAIT_TIME=30       # Wait time after scale-down (seconds)
+HEALTH_CHECK_TIMEOUT=300      # Max wait for health (seconds)
+HEALTH_CHECK_INTERVAL=10      # Check interval (seconds)
+MIN_HEALTHY_PERCENTAGE=70     # Required healthy percentage
+SCALE_DOWN_WAIT_TIME=30       # Stabilization wait after scale-down
+STORAGE_WARNING_THRESHOLD=70  # Disk usage warning threshold (%)
 ```
 
-**Note on Health Percentage**: Set to 70% to account for containers that may still be in "starting" state during the scale-down phase. This prevents false-positive rollbacks while maintaining safety.
+### Profile-Based Scaling
 
-### Features
+The script automatically determines container scale based on active profiles:
 
-- **Zero Downtime**: Always maintains running containers
-- **Automatic Rollback**: Reverts to previous version on failure
-- **Health Verification**: Comprehensive health checking
-- **Detailed Logging**: Color-coded output for easy monitoring
-- **Safe Deployment**: Multiple verification steps
+| Profile | Key Workers |
+|---------|------------|
+| `group1` | commodities-settlement, eligible-quantities, order-inventories, trader-order-initiation |
+| `group2` | states, process, hold-eligible, create-trader-orders, default |
+| `group3` | webhooks, expire-trader-order, generate-units |
 
-### Exit Codes
+The `schedule` profile is auto-added when `group3` is active.
 
-- `0`: Deployment successful
-- `1`: Deployment failed (rollback may have been performed)
+## Composite Actions
 
-### GitHub Actions Integration
+### setup-ssh
+Configures SSH key and `~/.ssh/config` with `StrictHostKeyChecking=no` and `ConnectTimeout=30`. All downstream SSH/SCP commands inherit this config automatically.
 
-The script is automatically transferred to deployment servers and executed by the GitHub Actions workflow:
+### fetch-pr-info
+Queries GitHub API for PR creator, merger, and approved reviewers given a commit SHA.
 
-```yaml
-- name: Deploy containers with zero-downtime
-  run: |
-    ssh server "/tmp/deploy-with-rollback.sh"
-```
+### slack-notify
+Builds Slack notification payloads using `jq` (instead of fragile `sed` replacements). Properly handles special characters in PR titles and commit messages.
 
-## Best Practices
+### deploy-to-server
+Transfers Docker image and files to server, loads image, tags as latest, and executes the deployment script. Supports both direct deploy (dev/sandbox) and staging directory (preprod/prod) patterns.
 
-### Health Checks
-
-Ensure your services have proper health checks defined in `docker-compose.yml`:
-
-```yaml
-services:
-  app:
-    healthcheck:
-      test: ["CMD", "php", "-r", "exit(0);"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-```
-
-### Resource Planning
-
-During rolling updates, container count temporarily doubles. Ensure your server has:
-- Sufficient memory for 2x containers
-- Available CPU resources
-- Adequate network bandwidth
-
-### Monitoring
-
-The script provides detailed output including:
-- Container health status
-- Deployment progress
-- Rollback triggers
-- Final deployment state
-
-### Testing Recommendations
-
-Before production deployment:
-1. Test the script in a staging environment
-2. Verify health checks work correctly
-3. Simulate failure scenarios to test rollback
-4. Monitor resource usage during scaled-up phase
+### post-deploy
+Runs artisan commands inside the app container. Supports both direct container name (`lynk-backend-app`) and profile-based discovery (`docker compose --profile web ps -q app`).
 
 ## Troubleshooting
 
 ### Deployment Fails Immediately
-
 - Check Docker image loaded correctly
 - Verify `docker-compose.yml` is valid
 - Ensure services have health checks defined
 
 ### Rollback Fails
-
 - Manual intervention required
 - Check `/tmp/last_known_good_image.txt` for previous version
 - Manually tag and deploy last known good image
 
 ### Containers Not Becoming Healthy
-
-- Increase `HEALTH_CHECK_TIMEOUT`
+- Increase `HEALTH_CHECK_TIMEOUT` in `deploy.sh`
 - Review container logs for startup issues
 - Verify health check command is correct
-- Check if containers show "starting" status - they may just need more time
 
 ### Health Check Fails During Scale-Down
-
-**Symptom**: Deployment succeeds during scale-up (85%+ healthy) but fails during scale-down (drops to 60-70%)
-
-**Cause**: Many containers are still in "starting" status and haven't completed initialization
-
-**Solutions**:
-1. **Reduce `MIN_HEALTHY_PERCENTAGE`** to 70% (already set as default)
-2. **Increase `SCALE_DOWN_WAIT_TIME`** from 30s to 60s if containers take longer to start
-3. **Add retry logic** (already implemented - 3 attempts with 15s between)
-
-The script now includes:
-- 30-second wait after scaling down
-- 3 retry attempts for final health check (15s between attempts)
-- Total grace period: ~75 seconds for containers to become healthy
-
-### Docker Compose Variable Warnings
-
-If you see warnings like:
-```
-The "t" variable is not set. Defaulting to a blank string.
-```
-
-This is harmless and has been fixed by using single quotes in format strings:
-```bash
-docker compose ps --format 'table {{.Name}}\t{{.Status}}'  # Correct
-docker compose ps --format "table {{.Name}}\t{{.Status}}"  # Wrong - bash interprets \t
-```
+The script includes 30s stabilization wait + 3 retry attempts (15s apart) = ~75s grace period for containers to become healthy after scale-down.
 
 ## References
-
-This implementation is based on Docker Compose zero-downtime deployment best practices:
 
 - [Blue-Green Deployments Guide](https://thomasbandt.com/blue-green-deployments)
 - [Docker Rollout Tool](https://github.com/wowu/docker-rollout)

@@ -1,0 +1,96 @@
+name: Deploy to Server
+description: Transfer Docker image and deploy to a remote server
+
+inputs:
+  server-ip:
+    description: Target server IP address
+    required: true
+  deployment-user:
+    description: SSH username for deployment
+    required: true
+  commit-hash:
+    description: Docker image tag (short commit hash)
+    required: true
+  deploy-script:
+    description: "Path to the deploy script in the repo (e.g. .github/scripts/deploy.sh)"
+    required: true
+  deploy-script-args:
+    description: "Arguments to pass to the deploy script (e.g. profile list)"
+    required: false
+    default: ""
+  transfer-compose:
+    description: "Whether to transfer docker-compose.yml"
+    required: false
+    default: "true"
+  use-staging-dir:
+    description: "Use /tmp/lynk-backend-compose staging dir (preprod/prod pattern)"
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up pipeline directory
+      shell: bash
+      run: |
+        ssh ${{ inputs.deployment-user }}@${{ inputs.server-ip }} \
+          "mkdir -p /var/www/backend-pipeline/logs"
+
+    - name: Transfer Docker image
+      shell: bash
+      run: |
+        scp -C /tmp/app-php-fpm.tar.gz \
+          ${{ inputs.deployment-user }}@${{ inputs.server-ip }}:/tmp/
+
+    - name: Transfer files and deploy
+      shell: bash
+      run: |
+        SERVER="${{ inputs.deployment-user }}@${{ inputs.server-ip }}"
+
+        if [ "${{ inputs.use-staging-dir }}" = "true" ]; then
+          # Preprod/prod pattern: stage in /tmp, then copy to deployment dir
+          ssh "$SERVER" "mkdir -p /tmp/lynk-backend-compose"
+
+          if [ "${{ inputs.transfer-compose }}" = "true" ]; then
+            scp docker-compose.yml "$SERVER":/tmp/lynk-backend-compose/docker-compose.yml
+          fi
+          scp ${{ inputs.deploy-script }} "$SERVER":/tmp/lynk-backend-compose/deploy.sh
+
+          ssh "$SERVER" "
+            set -euo pipefail
+            # Load Docker image
+            gunzip -c /tmp/app-php-fpm.tar.gz | docker load
+            docker tag app-php-fpm:${{ inputs.commit-hash }} app-php-fpm:latest
+            rm -f /tmp/app-php-fpm.tar.gz
+
+            # Copy files to deployment directory
+            mkdir -p /var/www/backend-pipeline
+            cd /var/www/backend-pipeline
+            cp /tmp/lynk-backend-compose/docker-compose.yml .
+            cp /tmp/lynk-backend-compose/deploy.sh .
+            chmod +x deploy.sh
+            rm -rf /tmp/lynk-backend-compose
+
+            # Execute deployment
+            ./deploy.sh ${{ inputs.deploy-script-args }}
+          "
+        else
+          # Dev/sandbox pattern: direct deploy
+          if [ "${{ inputs.transfer-compose }}" = "true" ]; then
+            scp docker-compose.yml "$SERVER":/var/www/backend-pipeline/
+          fi
+          scp ${{ inputs.deploy-script }} "$SERVER":/tmp/deploy.sh
+          ssh "$SERVER" "chmod +x /tmp/deploy.sh"
+
+          ssh "$SERVER" "
+            set -euo pipefail
+            # Load Docker image
+            gunzip -c /tmp/app-php-fpm.tar.gz | docker load
+            docker tag app-php-fpm:${{ inputs.commit-hash }} app-php-fpm:latest
+            rm -f /tmp/app-php-fpm.tar.gz
+
+            # Execute deployment
+            /tmp/deploy.sh ${{ inputs.deploy-script-args }}
+            rm -f /tmp/deploy.sh
+          "
+        fi
