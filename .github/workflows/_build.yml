@@ -320,7 +320,9 @@ jobs:
 
           # CORS Allowed Origins
           ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
-          ENVEOF
+
+          #export limit
+          ORDERS_EXPORT_LIMIT="${{ vars.ORDERS_EXPORT_LIMIT }}"
 
           echo "::notice::.env file created ($(wc -l < .env) lines, $(wc -c < .env) bytes)"
 
