@@ -7,6 +7,7 @@ use App\Enums\Area;
 use App\Enums\CompanyType;
 use App\Enums\EdaatInvoiceStatus;
 use App\Enums\FinancingOrderBorrowerTypeEnum;
+use App\Enums\FinancingOrderCancelReason;
 use App\Enums\FinancingOrderLenderTypeEnum;
 use App\Enums\FinancingOrderStatus;
 use App\Enums\OrderFeeType;
@@ -152,7 +153,7 @@ trait InteractsWithCompany
 
     public function createOrder(int $companyId, int $userId, array $data = []): FinancingOrder|Model|Builder
     {
-        return FinancingOrder::query()->create(array_merge([
+        $order = FinancingOrder::query()->create(array_merge([
             'company_id' => $companyId,
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
@@ -168,6 +169,19 @@ trait InteractsWithCompany
             'borrower_type' => FinancingOrderBorrowerTypeEnum::Customer,
             'borrower_identifier' => 'youssof okiel',
         ], $data));
+
+        $statusReason = $data['status_reason'] ?? null;
+        if (! is_null($statusReason) && in_array($order->status->value, [FinancingOrderStatus::Rejected, FinancingOrderStatus::Cancelled])) {
+            $order->cancelDetail()->create([
+                'creator_id' => $userId,
+                'cancel_reason' => $order->status->value === FinancingOrderStatus::Rejected
+                    ? FinancingOrderCancelReason::Rejected
+                    : FinancingOrderCancelReason::Cancelled,
+                'comment' => $statusReason,
+            ]);
+        }
+
+        return $order;
     }
 
     public function createEdaatInvoice(int $companyId, int $userId, array $data = []): Model|Builder
