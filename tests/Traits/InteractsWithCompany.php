@@ -152,7 +152,7 @@ trait InteractsWithCompany
 
     public function createOrder(int $companyId, int $userId, array $data = []): FinancingOrder|Model|Builder
     {
-        $order = FinancingOrder::query()->create(array_merge([
+        return FinancingOrder::query()->create(array_merge([
             'company_id' => $companyId,
             'approved_at' => Carbon::now(),
             'creator_id' => $userId,
@@ -168,8 +168,6 @@ trait InteractsWithCompany
             'borrower_type' => FinancingOrderBorrowerTypeEnum::Customer,
             'borrower_identifier' => 'youssof okiel',
         ], $data));
-
-        return $order;
     }
 
     public function createEdaatInvoice(int $companyId, int $userId, array $data = []): Model|Builder
