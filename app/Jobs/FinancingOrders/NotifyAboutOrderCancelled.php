@@ -41,7 +41,7 @@ class NotifyAboutOrderCancelled implements ShouldQueue
             ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED, function ($query) use ($lender) {
                 $query->where(function ($query) use ($lender) {
                     $query->withoutRole(Role::Admin)
-                        ->orWhere(function ($query) use ($lender) {
+                        ->where(function ($query) use ($lender) {
                             $query->role(Role::LenderAdmin)
                                 ->whereHas('lender', function ($query) use ($lender) {
                                     $query->where('id', $lender->id);

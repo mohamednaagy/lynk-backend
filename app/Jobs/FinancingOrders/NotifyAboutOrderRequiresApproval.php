@@ -48,7 +48,7 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
             ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) use ($financingOrder) {
                 $query->where(function ($query) use ($financingOrder) {
                     $query->withoutRole(Role::Admin)
-                        ->orWhere(function ($query) use ($financingOrder) {
+                        ->where(function ($query) use ($financingOrder) {
                             $query->role(Role::LenderAdmin)
                                 ->whereHas('lender', function ($query) use ($financingOrder) {
                                     $query->where('id', $financingOrder->company_id);
