@@ -20,6 +20,7 @@ use Stancl\Tenancy\Tenancy;
 
 class ProcessAutoCompleteSell implements ShouldQueue
 {
+    
     use Dispatchable, InteractsWithQueue, Queueable;
 
     public function __construct(
