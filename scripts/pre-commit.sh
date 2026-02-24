@@ -36,6 +36,6 @@ echo "✅ Pint formatting applied"
 # ----------------------------------
 echo "🐘 Running PHPStan..."
 
-vendor/bin/phpstan analyse --memory-limit=512M "${STAGED_PHP_FILES[@]}"
+vendor/bin/phpstan --memory-limit=1G analyse "${STAGED_PHP_FILES[@]}"
 
 echo "✅ PHPStan passed"
