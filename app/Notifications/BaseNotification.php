@@ -121,6 +121,7 @@ abstract class BaseNotification extends Notification
         return $notificationPreferenceService->getEligibleAdminsOrManagers($this->getType())->pluck('email');
     }
 
+    
     protected function getActionURL(): string
     {
         return '';
