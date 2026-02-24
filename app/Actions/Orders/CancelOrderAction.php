@@ -26,25 +26,22 @@ class CancelOrderAction implements CancelOrder
         $statusReason = $data['status_reason'] ?? null;
         if ($activeTraderOrders->count() === 0) {
             $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Cancelled);
-            if ($statusReason) {
-                $this->createCancelDetail($financingOrder, $user, $statusReason, FinancingOrderCancelReason::Cancelled);
-            }
+            $this->createCancelDetail($financingOrder, $user, $statusReason, FinancingOrderCancelReason::Cancelled);
 
             return;
         }
 
         $this->updateOrderStatus($financingOrder, FinancingOrderStatus::PendingCancellation);
-        if ($statusReason) {
-            $this->createCancelDetail($financingOrder, $user, $statusReason, FinancingOrderCancelReason::Cancelled);
-        }
         $cancelByType = is_null($user) ? TraderOrderCancelType::System : TraderOrderCancelType::User;
         $activeTraderOrders->each(function ($traderOrder) use ($user, $cancelByType) {
             Trader::driver($traderOrder->provider, $traderOrder->version)
                 ->cancelTraderOrder($traderOrder, TraderOrderCancelReason::FinancingOrderIsCancelled, cancelledBy: $user, cancelledByType: $cancelByType);
         });
+        $this->createCancelDetail($financingOrder, $user, $statusReason, FinancingOrderCancelReason::Cancelled);
+
     }
 
-    private function createCancelDetail(FinancingOrder $financingOrder, User $user, string $comment, int $cancelReason): void
+    private function createCancelDetail(FinancingOrder $financingOrder, User $user, ?string $comment, int $cancelReason): void
     {
         $financingOrder->cancelDetail()->create([
             'creator_id' => $user->id,

@@ -3,7 +3,7 @@
 namespace App\Actions\Orders;
 
 use App\Actions\Contracts\Orders\RejectOrder;
-use App\Enums\FinancingOrderCancelReason;
+use App\Enums\FinancingOrderRejectionReason;
 use App\Enums\FinancingOrderStatus;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -16,12 +16,10 @@ class RejectOrderAction implements RejectOrder
     public function handle(FinancingOrder $financingOrder, User $user, array $data): void
     {
         $this->updateOrderStatus($financingOrder, FinancingOrderStatus::Rejected);
-        if (isset($data['status_reason']) && ! is_null($data['status_reason'])) {
-            $financingOrder->cancelDetail()->create([
-                'creator_id' => $user->id,
-                'cancel_reason' => FinancingOrderCancelReason::Rejected,
-                'comment' => $data['status_reason'],
-            ]);
-        }
+        $financingOrder->rejectionDetail()->create([
+            'creator_id' => $user->id,
+            'rejection_reason' => FinancingOrderRejectionReason::Rejected,
+            'comment' => $data['status_reason'],
+        ]);
     }
 }

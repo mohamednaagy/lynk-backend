@@ -208,7 +208,7 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includeStatusReason(FinancingOrder $financingOrder)
     {
-        return $this->primitive($financingOrder->cancelDetail?->comment);
+        return $this->primitive($financingOrder->getStatusReasonComment());
     }
 
     public function includeCommodityTypeId(FinancingOrder $financingOrder)
