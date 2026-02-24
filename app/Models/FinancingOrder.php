@@ -625,4 +625,23 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
     {
         return $this->belongsTo(Lender::class, 'company_id')->withTrashed();
     }
+
+    public function cancelDetail(): HasOne
+    {
+        return $this->hasOne(FinancingOrderCancelDetail::class);
+    }
+
+    public function rejectionDetail(): HasOne
+    {
+        return $this->hasOne(FinancingOrderRejectionDetail::class);
+    }
+
+    public function getStatusReasonComment(): ?string
+    {
+        return match ($this->status->value) {
+            FinancingOrderStatus::Rejected => $this->rejectionDetail?->comment,
+            FinancingOrderStatus::Cancelled => $this->cancelDetail?->comment,
+            default => null,
+        };
+    }
 }
