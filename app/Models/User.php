@@ -246,14 +246,4 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         return $query->lenderAdmin()
             ->where('company_id', $companyId);
     }
-
-    public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
-    {
-        return $query->where(function ($q) use ($companyId) {
-            $q->withoutRole(Role::Admin)
-                ->where(function ($q) use ($companyId) {
-                    $q->withLenderAdminForCompany($companyId);
-                });
-        });
-    }
 }

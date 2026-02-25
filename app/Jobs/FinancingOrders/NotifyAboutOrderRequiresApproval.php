@@ -2,7 +2,6 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -45,17 +44,9 @@ class NotifyAboutOrderRequiresApproval implements ShouldQueue
         }
 
         $notifiableEmails = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL, function ($query) use ($financingOrder) {
-                $query->where(function ($query) use ($financingOrder) {
-                    $query->withoutRole(Role::Admin)
-                        ->where(function ($query) use ($financingOrder) {
-                            $query->role(Role::LenderAdmin)
-                                ->whereHas('lender', function ($query) use ($financingOrder) {
-                                    $query->where('id', $financingOrder->company_id);
-                                });
-                        });
-                });
-            })->pluck('email')
+            ->getEnabledUsersFor(SystemNotificationType::ORDER_REQUIRES_APPROVAL,
+                fn ($query) => $query->withLenderAdminForCompany($financingOrder->company_id)
+            )->pluck('email')
             ->all();
 
         $notification = new OrderRequiresApproval($financingOrder, $this->user);

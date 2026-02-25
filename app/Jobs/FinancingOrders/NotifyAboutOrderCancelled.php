@@ -2,7 +2,6 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\FinancingOrder;
 use App\Models\User;
@@ -38,17 +37,9 @@ class NotifyAboutOrderCancelled implements ShouldQueue
         $lender = $this->financingOrder->lender()->withTrashed()->first();
 
         $notifiableEmails = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED, function ($query) use ($lender) {
-                $query->where(function ($query) use ($lender) {
-                    $query->withoutRole(Role::Admin)
-                        ->where(function ($query) use ($lender) {
-                            $query->role(Role::LenderAdmin)
-                                ->whereHas('lender', function ($query) use ($lender) {
-                                    $query->where('id', $lender->id);
-                                });
-                        });
-                });
-            })->pluck('email')
+            ->getEnabledUsersFor(SystemNotificationType::ORDER_CANCELLED,
+                fn ($query) => $query->withLenderAdminForCompany($lender->id)
+            )->pluck('email')
             ->all();
 
         $notification = new OrderCancelled($this->financingOrder, $this->canceller);
