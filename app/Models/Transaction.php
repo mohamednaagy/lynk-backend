@@ -5,16 +5,28 @@ namespace App\Models;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Support\Collections\TransactionCollection;
 use App\Support\Money\Casts\MoneyStringCast;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Translatable\HasTranslations;
 
+/**
+ * @property int $id
+ * @property int|null $reason
+ * @property string|null $description
+ * @property \App\Models\Media|null $zatcaInvoiceMedia
+ *
+ * @mixin Builder<Transaction>
+ */
 class Transaction extends Model implements HasMedia
 {
-    use HasFactory, HasUuids, InteractsWithMedia;
+    use HasFactory, HasTranslations, HasUuids, InteractsWithMedia;
+
+    public array $translatable = ['description'];
 
     public function uniqueIds()
     {
