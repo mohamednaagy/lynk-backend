@@ -15,6 +15,7 @@ final class TransactionListMessage extends AbstractReportMessage
         string $exportType,
         array $exportData = [],
         string $outputTimezone = 'Asia/Riyadh',
+        string $outputLanguage = 'en',
     ) {
         parent::__construct(
             type: Str::upper(ReportType::TransactionList),
@@ -25,6 +26,7 @@ final class TransactionListMessage extends AbstractReportMessage
                 'export_data' => $exportData,
             ],
             options: [
+                'language' => $outputLanguage,
                 'output_timezone' => $outputTimezone,
                 'rows_limit' => config('reports.orders_export_limit'),
             ],

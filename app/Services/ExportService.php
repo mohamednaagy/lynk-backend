@@ -41,6 +41,7 @@ class ExportService
         string $exportClass,
         string $fileName,
         array $requestData,
+        ?string $locale = 'en',
     ): void {
         // Dispatch the job to RabbitMQ queue for processing by external service
         ExportTransactionListJob::dispatch(
@@ -53,7 +54,8 @@ class ExportService
                 'user_id' => $user->id,
                 'export_type' => $exportType,
                 'created_at' => now()->toISOString(),
-            ]
+            ],
+            locale: $locale,
         );
     }
 }

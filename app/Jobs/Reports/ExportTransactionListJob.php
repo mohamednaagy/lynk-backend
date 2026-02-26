@@ -13,7 +13,8 @@ class ExportTransactionListJob extends BaseReportJob
     public function __construct(
         public int $userId,
         public string $exportType,
-        public array $exportData = []
+        public array $exportData = [],
+        public string $locale = 'en',
     ) {
         parent::__construct();
     }
@@ -36,6 +37,7 @@ class ExportTransactionListJob extends BaseReportJob
             modelId: $this->userId,
             exportType: $this->exportType,
             exportData: $this->exportData,
+            outputLanguage: $this->locale,
         );
     }
 }
