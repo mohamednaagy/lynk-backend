@@ -51,8 +51,6 @@ class ExportService
                 'export_class' => $exportClass,
                 'file_name' => $fileName,
                 'request_data' => $requestData,
-                'user_id' => $user->id,
-                'export_type' => $exportType,
                 'created_at' => now()->toISOString(),
             ],
             locale: $locale,
