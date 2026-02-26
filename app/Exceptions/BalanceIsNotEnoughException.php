@@ -19,14 +19,11 @@ class BalanceIsNotEnoughException extends Exception
         $message = trans('error.no_enough_balance');
         $code = Response::HTTP_BAD_REQUEST;
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::BALANCE_NOT_ENOUGH
-            );
-        }
+        return response()->errorResponse(
+            $message,
+            $code,
+            ErrorCode::BALANCE_NOT_ENOUGH
+        );
 
-        abort($code, $message);
     }
 }
