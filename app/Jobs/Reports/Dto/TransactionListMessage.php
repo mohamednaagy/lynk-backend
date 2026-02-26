@@ -8,7 +8,7 @@ use App\Jobs\Reports\Enums\ReportType;
 use App\Models\User;
 use Illuminate\Support\Str;
 
-final class OrderListMessage extends AbstractReportMessage
+final class TransactionListMessage extends AbstractReportMessage
 {
     public function __construct(
         int $modelId,
@@ -17,7 +17,7 @@ final class OrderListMessage extends AbstractReportMessage
         string $outputTimezone = 'Asia/Riyadh',
     ) {
         parent::__construct(
-            type: Str::upper(ReportType::OrderList),
+            type: Str::upper(ReportType::TransactionList),
             modelType: User::class,
             modelId: $modelId,
             filters: [
