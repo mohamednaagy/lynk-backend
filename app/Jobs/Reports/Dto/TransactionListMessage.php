@@ -28,7 +28,7 @@ final class TransactionListMessage extends AbstractReportMessage
             options: [
                 'language' => $outputLanguage,
                 'output_timezone' => $outputTimezone,
-                'rows_limit' => config('reports.orders_export_limit'),
+                'rows_limit' => config('reports.transactions_export_limit'),
             ],
         );
     }
