@@ -32,15 +32,20 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property int $id
  * @property string $email
  * @property string $password
+ * @property string|null $national_id
+ * @property string|null $phone_country
  * @property-read string $fullName
  * @property-read string $full_name
  * @property \Spatie\Permission\Models\Role[] $roles
  * @property mixed $dummy
  *
  * @method static Builder<User> admin()
+ * @method static Builder<User> whereFullNameLike(string $search)
  * @method static Builder<User> lenderAdmin()
  * @method static Builder<User> withLenderAdminForCompany(int $companyId)
  * @method static Builder<User> forTradeRequestCancelledNotification(int $companyId)
+ * @method static Builder<User> role(string|array|\Spatie\Permission\Contracts\Role $role, string|null $guard = null)
+ * @method static Builder<User> withoutRole(string|array $role)
  *
  * @mixin Builder<User>
  */
@@ -105,6 +110,14 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         );
     }
 
+    public function scopeWhereFullNameLike(Builder $query, string $search): Builder
+    {
+        return $query->whereRaw(
+            "CONCAT(first_name, ' ', last_name) LIKE ?",
+            ["%{$search}%"]
+        );
+    }
+
     protected function mobileDialingPhoneNumber(): Attribute
     {
         return Attribute::make(
@@ -126,7 +139,7 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
 
     public function getNationalId(): string
     {
-        return $this->national_id;
+        return $this->national_id ?? '';
     }
 
     public function routeOtpForPhoneNumber()
@@ -231,19 +244,47 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
         return $this->morphMany(DatabaseNotification::class, 'notifiable')->latest();
     }
 
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
     public function scopeAdmin(Builder $query): Builder
     {
         return $query->role(Role::Admin);
     }
 
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
     public function scopeLenderAdmin(Builder $query): Builder
     {
         return $query->role(Role::LenderAdmin);
     }
 
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
     public function scopeWithLenderAdminForCompany(Builder $query, int $companyId): Builder
     {
         return $query->lenderAdmin()
             ->where('company_id', $companyId);
+    }
+
+    /**
+     * @param  Builder<User>  $query
+     * @return Builder<User>
+     */
+    public function scopeForTradeRequestCancelledNotification(Builder $query, int $companyId): Builder
+    {
+        return $query->where(function (Builder $q) use ($companyId) {
+            /** @var Builder<User> $q */
+            $q->withoutRole(Role::Admin)
+                ->where(function (Builder $q) use ($companyId) {
+                    /** @var Builder<User> $q */
+                    $q->withLenderAdminForCompany($companyId);
+                });
+        });
     }
 }

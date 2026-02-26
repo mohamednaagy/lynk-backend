@@ -11,6 +11,7 @@ use App\Enums\Area;
 use App\Enums\Role;
 use App\Enums\Subject;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\Admin\AdminsListRequest;
 use App\Http\Requests\V1\Admin\PartiallyUpdateAdminRequest;
 use App\Http\Requests\V1\Admin\StoreAdminRequest;
 use App\Http\Requests\V1\Admin\UpdateAdminRequest;
@@ -54,9 +55,15 @@ class AdminController extends Controller
         )->only('destroy');
     }
 
-    public function index(GetPaginatedUsersByRole $getPaginatedUsersByRole): JsonResponse
-    {
-        $admins = $getPaginatedUsersByRole->handle(Area::roles(Area::SuperAdmin))->paginate();
+    public function index(
+        AdminsListRequest $request,
+        GetPaginatedUsersByRole $getPaginatedUsersByRole
+    ): JsonResponse {
+        $admins = $getPaginatedUsersByRole
+            ->setName($request->validated('name'))
+            ->setRole($request->validated('role'))
+            ->handle(Area::roles(Area::SuperAdmin))
+            ->paginate();
 
         return fractal($admins, new UserTransformer(Area::SuperAdmin))
             ->parseIncludes([
@@ -99,7 +106,6 @@ class AdminController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  StoreAdminRequest  $createAdminRequest
      *
      * @throws \Throwable
      */
@@ -142,7 +148,6 @@ class AdminController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  UpdateAdminRequest  $updateAdminRequest
      *
      * @throws \Throwable
      */
