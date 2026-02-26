@@ -3,30 +3,22 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
-class ErrorCreatingUnitsForThisInventory extends Exception
+class ErrorCreatingUnitsForThisInventory extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = 'Error creating units for this innventory';
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::ERROR_CREATING_UNITS;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::ERROR_CREATING_UNITS
-            );
-        }
+    protected function errorMessage(): string
+    {
+        return 'Error creating units for this inventory';
+    }
 
-        abort($code, $message);
+    public function report(): void
+    {
+        Log::channel('local_market')->error($this->errorMessage());
     }
 }

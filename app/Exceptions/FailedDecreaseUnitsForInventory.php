@@ -3,30 +3,22 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
-class FailedDecreaseUnitsForInventory extends Exception
+class FailedDecreaseUnitsForInventory extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = 'Failed to decrease quantity for inventory';
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::ERROR_CHEKING_UNITS;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::ERROR_CHEKING_UNITS
-            );
-        }
+    protected function errorMessage(): string
+    {
+        return 'Failed to decrease quantity for inventory';
+    }
 
-        abort($code, $message);
+    public function report(): void
+    {
+        Log::channel('local_market')->error($this->errorMessage());
     }
 }
