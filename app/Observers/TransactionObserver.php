@@ -49,14 +49,16 @@ class TransactionObserver implements ShouldHandleEventsAfterCommit
     public function setTransactionDescription(Transaction $transaction): void
     {
         $locales = config('app.locales');
+        $descriptions = [];
         foreach ($locales as $locale) {
-            $this->withLocale($locale, function () use ($transaction) {
-                $transaction->description = ! is_null($transaction->reason)
+            $this->withLocale($locale, function () use ($transaction, &$descriptions) {
+                $descriptions[app()->getLocale()] = ! is_null($transaction->reason)
                     ? app(TransactionUtilInterface::class)->getDescription($transaction)
                     : null;
-
-                $transaction->saveQuietly();
             });
         }
+
+        $transaction->setTranslations('description', $descriptions);
+        $transaction->saveQuietly();
     }
 }
