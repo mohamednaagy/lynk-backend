@@ -2,7 +2,6 @@
 
 namespace App\Jobs\FinancingOrders;
 
-use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Notifications\FinancingOrders\InProgressOrdersNotification;
 use App\Services\NotificationPreferenceService;
@@ -34,18 +33,11 @@ class NotifyAboutInProgressOrders implements ShouldQueue
     public function handle()
     {
         $lenderId = $this->lenderId;
-        $notificationPreferenceService = app(NotificationPreferenceService::class);
 
-        // Primary recipients: lender admins who enabled this notification type
-        $notifiableEmails = $notificationPreferenceService
-            ->getEnabledUsersFor(
-                SystemNotificationType::IN_PROGRESS_ORDERS,
-                fn ($query) => $query
-                    ->withoutRole(Role::Admin)
-                    ->role(Role::LenderAdmin)
-                    ->whereHas('lender', fn ($q) => $q->whereKey($lenderId))
-            )
-            ->pluck('email')
+        $notifiableEmails = app(NotificationPreferenceService::class)
+            ->getEnabledUsersFor(SystemNotificationType::IN_PROGRESS_ORDERS,
+                fn ($query) => $query->withLenderAdminForCompany($lenderId)
+            )->pluck('email')
             ->all();
 
         $notification = new InProgressOrdersNotification($lenderId);
