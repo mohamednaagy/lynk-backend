@@ -35,9 +35,9 @@ class NotifyAboutTraderOrderCancelled implements ShouldQueue
         $companyId = $this->traderOrder->order->company_id;
 
         $notifiableEmails = app(NotificationPreferenceService::class)
-            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED, function ($query) use ($companyId) {
-                $query->forTradeRequestCancelledNotification($companyId);
-            })->pluck('email')
+            ->getEnabledUsersFor(SystemNotificationType::TRADE_REQUEST_CANCELLED,
+                fn ($query) => $query->withLenderAdminForCompany($companyId)
+            )->pluck('email')
             ->all();
 
         $notification = new TraderOrderCancelled($this->traderOrder, $this->canceller);
