@@ -8,4 +8,5 @@ return [
     'report-export-processing' => 'Your export request has been submitted and is being processed.',
     'supplier-monthly-usage-exported' => 'Your supplier monthly usage export is ready to download',
     'export-completed' => 'Your export is ready to download',
+    'wallet-exported' => 'Your wallet export ready to download',
 ];

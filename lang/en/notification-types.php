@@ -42,4 +42,8 @@ return [
         'label' => 'In Progress Orders',
         'description' => ':company_name has in-progress order(s).',
     ],
+    'wallet_report_export_ready' => [
+        'label' => 'Wallet Export Ready',
+        'description' => 'Your export file is ready to download.',
+    ],
 ];

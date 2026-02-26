@@ -163,5 +163,21 @@ return [
             Role::LenderAdmin,
         ],
     ],
-
+    SystemNotificationType::WALLET_REPORT_EXPORT_READY->value => [
+        'label' => 'notification-types.wallet_report_export_ready.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => true,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::Manager,
+        ],
+    ],
 ];

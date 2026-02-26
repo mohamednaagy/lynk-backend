@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\ReportExportWebhookRequest;
 use App\Jobs\Reports\Enums\ReportType;
 use App\Models\User;
-use App\Notifications\ExportReadyNotification;
+use App\Notifications\OrdersExportReadyNotification;
+use App\Notifications\WalletExportReadyNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -30,10 +31,7 @@ class ReportExportWebhookController extends Controller
 
             // Send the export ready notification to the user
             // This might throw an exception if media doesn't exist
-            $user->notify(new ExportReadyNotification(
-                $validatedData['export_type'],
-                $validatedData['media_id'],
-            ));
+            $user->notify($this->getNotificationType($validatedData));
 
             Log::info('Notification created successfully');
 
@@ -70,7 +68,23 @@ class ReportExportWebhookController extends Controller
         return match (Str::convertCase($exportType, MB_CASE_LOWER)) {
             ReportType::OrderList => __('notification.orders-exported', [], $locale),
             ReportType::SupplierMonthlyUsage => __('notification.supplier-monthly-usage-exported', [], $locale),
+            ReportType::TransactionList => __('notification.wallet-exported', [], $locale),
             default => __('notification.export-completed', [], $locale),
+        };
+    }
+
+    private function getNotificationType($validatedData)
+    {
+        return match (Str::convertCase($validatedData['export_type'], MB_CASE_LOWER)) {
+            ReportType::OrderList => new OrdersExportReadyNotification(
+                $validatedData['export_type'],
+                $validatedData['media_id'],
+            ),
+            ReportType::TransactionList => new WalletExportReadyNotification(
+                $validatedData['export_type'],
+                $validatedData['media_id'],
+            ),
+            default => throw new \Exception('Failed to process export type'),
         };
     }
 }

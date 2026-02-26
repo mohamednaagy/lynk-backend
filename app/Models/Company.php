@@ -9,12 +9,20 @@ use App\Enums\OrderFeeType;
 use App\Enums\Trader;
 use App\Support\QueryScoper\HasScopes;
 use App\Support\Wallets\Traits\HasWallet;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Stancl\Tenancy\Database\Concerns\HasScopedValidationRules;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
+/**
+ * @property int $id
+ * @property string $unique_name
+ * @property-read Lender $lender
+ *
+ * @mixin Builder<Company>
+ */
 class Company extends BaseTenant
 {
     use HasFactory, HasScopedValidationRules, HasScopes, HasWallet, SoftDeletes;

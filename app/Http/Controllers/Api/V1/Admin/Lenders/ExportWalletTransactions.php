@@ -47,9 +47,8 @@ class ExportWalletTransactions extends Controller
 
     private function getFileName(Lender $lender, string $extension = 'xlsx'): string
     {
-        $lenderName = str_replace(' ', '', $lender->name);
         $dateTime = saudi_now('Ymd_His');
 
-        return "{$lenderName}_LYNKWalletTransactions_{$dateTime}.{$extension}";
+        return "{$lender->unique_name}_LYNKWalletTrans_{$dateTime}.{$extension}";
     }
 }
