@@ -29,12 +29,13 @@ class ExportOrders extends Controller
         ExportService $exportService
     ): JsonResponse {
         // Dispatch the export job to be processed asynchronously
-        $exportService->dispatchOrderListExportJob(
+        $exportService->dispatchReportExportJob(
             exportType: ReportType::OrderList,
             user: $request->user(),
             exportClass: FinancingOrdersExport::class,
             fileName: $this->getFileName($request),
-            requestData: $request->all()
+            requestData: $request->all(),
+            locale: app()->currentLocale(),
         );
 
         // Return a response indicating the export is being processed

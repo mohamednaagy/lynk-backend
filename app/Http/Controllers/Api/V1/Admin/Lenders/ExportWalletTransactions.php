@@ -31,7 +31,7 @@ class ExportWalletTransactions extends Controller
             ->getKey();
 
         // Dispatch the export job to be processed asynchronously
-        $exportService->dispatchTransactionListExportJob(
+        $exportService->dispatchReportExportJob(
             exportType: ReportType::TransactionList,
             user: $request->user(),
             exportClass: WalletTransactionsExport::class,
