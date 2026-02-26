@@ -53,9 +53,7 @@ class GetPaginatedUsersByRoleAction implements GetPaginatedUsersByRole
     public function applyNameFilter(Builder $builder): Builder
     {
         return $builder->where(function ($query) {
-            $query->where('first_name', 'like', "%{$this->name}%")
-                ->orWhere('last_name', 'like', "%{$this->name}%")
-                ->orWhere(fn (Builder $q) => $q->whereFullNameLike($this->name));
+            $query->Where(fn (Builder $q) => $q->whereFullNameLike($this->name));
         });
     }
 
