@@ -36,7 +36,7 @@ class ExportWalletTransactions extends Controller
             user: $request->user(),
             exportClass: WalletTransactionsExport::class,
             fileName: $this->getFileName($lender),
-            requestData: [...$request->validated(), 'wallet_id' => $walletId],
+            requestData: [...$request->validated(), 'wallet_id' => $walletId, 'lang' => app()->getLocale()],
         );
 
         // Return a response indicating the export is being processed
