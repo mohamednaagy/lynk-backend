@@ -3,25 +3,19 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class LocalMarketWebhookException extends Exception
+class LocalMarketWebhookException extends BaseApiException
 {
-    public function render(Request $request)
+    protected int $httpStatus = Response::HTTP_UNPROCESSABLE_ENTITY;
+
+    protected function errorCode(): int
     {
-        $message = __('error.invalid_case_local_market');
-        $code = Response::HTTP_UNPROCESSABLE_ENTITY;
+        return ErrorCode::LOCAL_MARKET_WEBHOOK_INVALID_CASE;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::LOCAL_MARKET_WEBHOOK_INVALID_CASE
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return __('error.invalid_case_local_market');
     }
 }

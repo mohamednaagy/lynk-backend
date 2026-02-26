@@ -3,25 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class OrderAlreadyHasActiveTraderOrderException extends Exception
+class OrderAlreadyHasActiveTraderOrderException extends BaseApiException
 {
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = __('error.order_already_has_active_trader_order');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::ORDER_ALREADY_HAS_ACTIVE_TRADER_ORDER;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::ORDER_ALREADY_HAS_ACTIVE_TRADER_ORDER
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return __('error.order_already_has_active_trader_order');
     }
 }

@@ -3,25 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class OrderRequiresClientVerification extends Exception
+class OrderRequiresClientVerification extends BaseApiException
 {
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = __('error.order_require_client_verification');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::ORDER_REQUIRE_CLIENT_VERIFICATION;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::ORDER_REQUIRE_CLIENT_VERIFICATION
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return __('error.order_require_client_verification');
     }
 }

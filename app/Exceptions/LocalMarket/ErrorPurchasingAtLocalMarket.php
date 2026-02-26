@@ -3,30 +3,20 @@
 namespace App\Exceptions\LocalMarket;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
+use App\Exceptions\BaseApiException;
 use Illuminate\Http\Response;
 
-class ErrorPurchasingAtLocalMarket extends Exception
+class ErrorPurchasingAtLocalMarket extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected int $httpStatus = Response::HTTP_INTERNAL_SERVER_ERROR;
+
+    protected function errorCode(): int
     {
-        $message = 'Error When Purchasing From Local Marker Available Commodity != Eligible Commodity';
-        $code = Response::HTTP_INTERNAL_SERVER_ERROR;
+        return ErrorCode::LOCAL_MARKET_CANT_PURCHASING;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::LOCAL_MARKET_CANT_PURCHASING
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return 'Error When Purchasing From Local Marker Available Commodity != Eligible Commodity';
     }
 }

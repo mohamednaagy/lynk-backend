@@ -3,28 +3,17 @@
 namespace App\Exceptions\LocalMarket;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
+use App\Exceptions\BaseApiException;
 
-class PurchaseProductException extends Exception
+class PurchaseProductException extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = trans('error.no_enough_balance');
-        $code = ErrorCode::LOCAL_MARKET_PURCHASE_PRODUCT;
+        return ErrorCode::LOCAL_MARKET_PURCHASE_PRODUCT;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return trans('error.no_enough_balance');
     }
 }

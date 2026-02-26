@@ -3,12 +3,10 @@
 namespace App\Exceptions\LocalMarket;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use App\Exceptions\BaseApiException;
 use Throwable;
 
-class FailedToHoldRequiredUnitsException extends Exception
+class FailedToHoldRequiredUnitsException extends BaseApiException
 {
     public function __construct(
         private int $requestedUnits,
@@ -18,29 +16,17 @@ class FailedToHoldRequiredUnitsException extends Exception
         string $message = '',
         ?Throwable $previous = null
     ) {
-        $msg = $message ?: sprintf(
+        parent::__construct($message ?: sprintf(
             'Failed to hold required units. Requested: %d, Held: %d for inventory ID: %d%s',
             $this->requestedUnits,
             $this->heldUnits,
             $this->inventoryId,
             $this->orderId ? ", order ID: {$this->orderId}" : ''
-        );
-
-        parent::__construct($msg, ErrorCode::ERROR_HOLDING_UNITS, $previous);
+        ), ErrorCode::ERROR_HOLDING_UNITS, $previous);
     }
 
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = $this->getMessage();
-        $code = Response::HTTP_BAD_REQUEST;
-
-        if ($request->expectsJson()) {
-            return response()->json([
-                'error' => $message,
-                'error_code' => ErrorCode::ERROR_HOLDING_UNITS,
-            ], $code);
-        }
-
-        abort($code, $message);
+        return ErrorCode::ERROR_HOLDING_UNITS;
     }
 }

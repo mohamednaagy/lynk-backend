@@ -3,25 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class CommodityMarketIsUnavailableException extends Exception
+class CommodityMarketIsUnavailableException extends BaseApiException
 {
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = __('error.commodity_market_is_unavailable');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::COMMODITY_MARKET_IS_UNAVAILABLE;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::COMMODITY_MARKET_IS_UNAVAILABLE
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return __('error.commodity_market_is_unavailable');
     }
 }

@@ -3,30 +3,19 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-class UserDoesntBelongToCompany extends Exception
+class UserDoesntBelongToCompany extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected int $httpStatus = Response::HTTP_UNPROCESSABLE_ENTITY;
+
+    protected function errorCode(): int
     {
-        $message = trans('error.user_doesnt_belong_to_company');
-        $code = Response::HTTP_UNPROCESSABLE_ENTITY;
+        return ErrorCode::USER_DOESNT_BELONG_TO_COMPANY;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::USER_DOESNT_BELONG_TO_COMPANY
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return trans('error.user_doesnt_belong_to_company');
     }
 }

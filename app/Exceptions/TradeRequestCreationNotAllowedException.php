@@ -3,25 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class TradeRequestCreationNotAllowedException extends Exception
+class TradeRequestCreationNotAllowedException extends BaseApiException
 {
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = __('error.trade_request_creation_not_allowed');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::TRADE_REQUEST_CREATION_NOT_ALLOWED;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::TRADE_REQUEST_CREATION_NOT_ALLOWED
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return __('error.trade_request_creation_not_allowed');
     }
 }
