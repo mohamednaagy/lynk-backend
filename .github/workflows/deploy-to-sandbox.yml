@@ -67,6 +67,8 @@ jobs:
             php artisan migrate --force
             php artisan structure:clear
             php artisan package:discover
+            php artisan config:cache
+            php artisan route:cache
 
       - name: Verify deployment
         uses: ./.github/actions/verify-deployment

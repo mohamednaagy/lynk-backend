@@ -360,6 +360,20 @@ perform_rolling_deployment() {
     log_info "Scaling down to target numbers (removing old containers)..."
     docker compose -p lynk-backend $PROFILE_FLAGS up -d $SCALE_FLAGS
 
+    # Force-recreate the PHP-FPM web container so it always uses the new image.
+    # Docker Compose does not auto-detect image content changes when the tag name
+    # is fixed (e.g. 'latest'), so the container would otherwise keep running
+    # with old code and a stale OPcache indefinitely.
+    if [[ "$PROFILES" == *"web"* ]]; then
+        log_info "Force-recreating PHP-FPM (web) container to load new image and reset OPcache..."
+        docker compose -p lynk-backend --profile web up -d --force-recreate --no-deps app || {
+            log_error "Failed to force-recreate web container"
+            perform_rollback
+            exit 1
+        }
+        log_success "PHP-FPM container recreated with new image"
+    fi
+
     log_info "Waiting ${SCALE_DOWN_WAIT_TIME}s for containers to stabilize..."
     sleep $SCALE_DOWN_WAIT_TIME
 

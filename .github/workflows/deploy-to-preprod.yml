@@ -79,7 +79,7 @@ jobs:
           profiles: "web ${{ matrix.worker_group }} observability"
           use-profile-discovery: "true"
 
-      - name: Post-deploy tasks
+      - name: Run migrations
         if: matrix.server_index == 0
         uses: ./.github/actions/post-deploy
         with:
@@ -88,6 +88,14 @@ jobs:
           use-profile-discovery: "true"
           commands: |
             php artisan migrate --force
+
+      - name: Warm caches (all servers)
+        uses: ./.github/actions/post-deploy
+        with:
+          server-ip: ${{ steps.server.outputs.ip }}
+          deployment-user: ${{ secrets.DEPLOYMENT_USER }}
+          use-profile-discovery: "true"
+          commands: |
             php artisan config:cache
             php artisan route:cache
 
