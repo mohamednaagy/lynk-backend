@@ -112,12 +112,12 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
 
         $inventory = LocalMarketInventory::find($this->inventoryId);
         if ($inventory) {
-            Log::channel(self::LOG_CHANNEL)->info('refreshing inventory stock', [
+            $inventory->markAsEditable();
+            $inventory->refreshStockQuantities(true);
+            Log::channel(self::LOG_CHANNEL)->info('finished to refreshing inventory stock', [
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
             ]);
-            $inventory->markAsEditable();
-            $inventory->refreshStockQuantities(true);
         }
 
     }
