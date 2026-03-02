@@ -42,4 +42,8 @@ return [
         'label' => 'الطلبات قيد التنفيذ',
         'description' => 'لدى :company_name طلب/طلبات قيد التنفيذ.',
     ],
+    'wallet_report_export_ready' => [
+        'label' => 'تقرير المحفظة جاهز للتحميل',
+        'description' => 'الملف جاهز للتحميل',
+    ],
 ];

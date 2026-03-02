@@ -23,4 +23,6 @@ enum SystemNotificationType: string
     case TRADE_REQUEST_EXPIRED = 'trade_request_expired';
 
     case IN_PROGRESS_ORDERS = 'in_progress_orders';
+
+    case WALLET_REPORT_EXPORT_READY = 'wallet_report_export_ready';
 }

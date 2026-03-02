@@ -11,6 +11,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media as baseMedia;
  * Summary of Media
  *
  * @property string $fileUrl
+ * @property string $file_url
  */
 class Media extends baseMedia
 {

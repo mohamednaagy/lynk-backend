@@ -5,7 +5,6 @@ namespace App\Transformers;
 use App\Enums\MediaCollections\TransactionMediaCollection;
 use App\Enums\TransactionReason;
 use App\Models\Transaction;
-use App\Support\Wallets\Contracts\TransactionUtilInterface;
 use League\Fractal\Resource\NullResource;
 use League\Fractal\Resource\Primitive;
 use League\Fractal\TransformerAbstract;
@@ -42,9 +41,7 @@ class TransactionTransformer extends TransformerAbstract
     public function includeDescription(Transaction $transaction): Primitive
     {
         return $this->primitive(
-            ! is_null($transaction->reason)
-                ? app(TransactionUtilInterface::class)->getDescription($transaction)
-                : null
+            $transaction->description
         );
     }
 
@@ -72,21 +69,27 @@ class TransactionTransformer extends TransformerAbstract
                 return $this->primitive(optional($transaction->zatcaInvoiceMedia)->file_url);
             }
 
-            return $this->primitive(
-                $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice)?->file_url
-            );
+            /** @var \App\Models\Media|null $media */
+            $media = $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice);
+
+            return $this->primitive($media?->file_url);
         } elseif ($transaction->reason === TransactionReason::ManualDeposit) {
-            return $this->primitive(
-                $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)?->file_url
-            );
+            /** @var \App\Models\Media|null $media */
+            $media = $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt);
+
+            return $this->primitive($media?->file_url);
         } elseif (in_array($transaction->reason, [TransactionReason::VatPercentageFee, TransactionReason::VatPercentageOnDeposit])) {
-            return $this->primitive(
-                $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice)?->file_url
-            );
+            /** @var \App\Models\Media|null $media */
+            $media = $transaction->getFirstMedia(TransactionMediaCollection::ZatcaInvoice);
+
+            return $this->primitive($media?->file_url);
         } elseif ($transaction->reason === TransactionReason::DepositByEdaat) {
             $fileUrl = null;
 
-            if ($media = $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt)) {
+            /** @var \App\Models\Media|null $media */
+            $media = $transaction->getFirstMedia(TransactionMediaCollection::VoucherReceipt);
+
+            if ($media) {
                 $fileUrl = $media->file_url;
             } elseif ($transaction->zatcaInvoiceMedia) {
                 $fileUrl = $transaction->zatcaInvoiceMedia->file_url;

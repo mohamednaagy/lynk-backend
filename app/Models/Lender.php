@@ -3,8 +3,15 @@
 namespace App\Models;
 
 use App\Enums\FinancingOrderTypeEnum;
+use Illuminate\Database\Eloquent\Builder;
 use Watson\Rememberable\Rememberable;
 
+/**
+ * @property int $id
+ * @property-read CompanyLenderDetail $lenderDetail
+ *
+ * @mixin Builder<Lender>
+ */
 class Lender extends Company
 {
     use Rememberable;

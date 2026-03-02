@@ -12,7 +12,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
-class ExportReadyNotification extends BaseNotification implements ShouldQueue
+class WalletExportReadyNotification extends BaseNotification implements ShouldQueue
 {
     private ?Media $media = null;
 
@@ -54,7 +54,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function getType(): SystemNotificationType
     {
-        return SystemNotificationType::ORDERS_REPORT_EXPORT_READY;
+        return SystemNotificationType::WALLET_REPORT_EXPORT_READY;
     }
 
     /**
@@ -64,7 +64,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function getTitle($notifiable): string
     {
-        return __('notification-types.orders_report_export_ready.label');
+        return __('notification-types.wallet_report_export_ready.label');
     }
 
     /**
@@ -74,7 +74,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
      */
     public function getDescription($notifiable): string
     {
-        return __('notification-types.orders_report_export_ready.description');
+        return __('notification-types.wallet_report_export_ready.description');
     }
 
     /**
@@ -112,7 +112,7 @@ class ExportReadyNotification extends BaseNotification implements ShouldQueue
     private function getReportName(): string
     {
         return match (Str::convertCase($this->exportType)) {
-            ReportType::OrderList => 'Order List',
+            ReportType::TransactionList => 'Transaction List',
             default => ''
         };
     }

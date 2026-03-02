@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers\Api\V1\Admin\Lenders;
 
-use App\Actions\Contracts\Wallets\GetTransactions;
 use App\Enums\Action;
 use App\Enums\Area;
 use App\Enums\Subject;
+use App\Enums\WalletType;
 use App\Exports\WalletTransactionsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\ListTransactionRequest;
+use App\Jobs\Reports\Enums\ReportType;
 use App\Models\Lender;
-use Maatwebsite\Excel\Excel as MaatwebsiteExcel;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Services\ExportService;
+use App\Support\Wallets\WalletService;
 
 class ExportWalletTransactions extends Controller
 {
@@ -23,28 +24,32 @@ class ExportWalletTransactions extends Controller
         );
     }
 
-    public function __invoke(ListTransactionRequest $request, Lender $lender)
+    public function __invoke(ListTransactionRequest $request, Lender $lender, ExportService $exportService)
     {
-        $getTransactions = app(GetTransactions::class);
-        $data = $request->validated();
-        $transactionsQuery = $getTransactions
-            ->setLender($lender)
-            ->setFilters($data)
-            ->handle();
+        $walletId = app(WalletService::class)
+            ->findByNameOrFail($lender, WalletType::CompanyWallet)
+            ->getKey();
 
-        // Generate and download the Excel file
-        $export = new WalletTransactionsExport($request, $transactionsQuery, $lender);
+        // Dispatch the export job to be processed asynchronously
+        $exportService->dispatchReportExportJob(
+            exportType: ReportType::TransactionList,
+            user: $request->user(),
+            exportClass: WalletTransactionsExport::class,
+            fileName: $this->getFileName($lender),
+            requestData: [...$request->validated(), 'wallet_id' => $walletId],
+            locale: app()->currentLocale(),
+        );
 
-        return Excel::download($export, $this->getFileName($lender, 'csv'), MaatwebsiteExcel::CSV, [
-            'X-File-Name' => $this->getFileName($lender, 'csv'),
+        // Return a response indicating the export is being processed
+        return $this->successResponse([
+            'message' => __('notification.report-export-processing'),
         ]);
     }
 
     private function getFileName(Lender $lender, string $extension = 'xlsx'): string
     {
-        $lenderName = str_replace(' ', '', $lender->name);
         $dateTime = saudi_now('Ymd_His');
 
-        return "{$lenderName}_LYNKWalletTransactions_{$dateTime}.{$extension}";
+        return "{$lender->unique_name}_LYNKWalletTrans_{$dateTime}.{$extension}";
     }
 }

@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Jobs\Reports;
 
-use App\Jobs\Reports\Dto\OrderListMessage;
+use App\Jobs\Reports\Dto\ExportReportMessage;
 use App\Jobs\Reports\Dto\ReportMessage;
 use Throwable;
 
-class ExportOrderListJob extends BaseReportJob
+final class ExportReportJob extends BaseReportJob
 {
     public function __construct(
         public int $userId,
         public string $exportType,
-        public array $exportData = []
+        public array $exportData = [],
+        public string $locale = 'en',
     ) {
         parent::__construct();
     }
@@ -32,10 +33,11 @@ class ExportOrderListJob extends BaseReportJob
 
     protected function buildMessage(): ReportMessage
     {
-        return new OrderListMessage(
+        return new ExportReportMessage(
             modelId: $this->userId,
             exportType: $this->exportType,
             exportData: $this->exportData,
+            outputLanguage: $this->locale,
         );
     }
 }
