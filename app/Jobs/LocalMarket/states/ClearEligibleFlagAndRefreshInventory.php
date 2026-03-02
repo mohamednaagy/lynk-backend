@@ -116,6 +116,7 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
                 'inventory_id' => $this->inventoryId,
                 'order_id' => $this->localMarketOrderId,
             ]);
+            $inventory->markAsEditable();
             $inventory->refreshStockQuantities(true);
         }
 
