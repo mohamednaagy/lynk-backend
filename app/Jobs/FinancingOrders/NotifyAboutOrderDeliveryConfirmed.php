@@ -34,5 +34,8 @@ class NotifyAboutOrderDeliveryConfirmed implements ShouldQueue
         $notification = new OrderDeliveryConfirmed($this->traderOrder);
         // no need to pass emails, since the admins emails will be included internally as BCC
         $notification->sendTo([]);
+
+        // push realtime notification to the user
+        event(new RealtimeNotification($notification->getTitle($this->traderOrder->user), $this->traderOrder->user->id));
     }
 }
