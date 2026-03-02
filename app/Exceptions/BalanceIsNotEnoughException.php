@@ -3,30 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class BalanceIsNotEnoughException extends Exception
+class BalanceIsNotEnoughException extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = trans('error.no_enough_balance');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::BALANCE_NOT_ENOUGH;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::BALANCE_NOT_ENOUGH
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return trans('error.no_enough_balance');
     }
 }

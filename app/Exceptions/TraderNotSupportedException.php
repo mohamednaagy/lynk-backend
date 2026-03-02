@@ -3,30 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class TraderNotSupportedException extends Exception
+class TraderNotSupportedException extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = trans('error.trader_not_supported');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::TRADER_NOT_SUPPORTED;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::TRADER_NOT_SUPPORTED
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return trans('error.trader_not_supported');
     }
 }

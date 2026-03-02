@@ -3,26 +3,23 @@
 namespace App\Exceptions\BURSAM;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
+use App\Exceptions\BaseApiException;
 use Illuminate\Support\Facades\Log;
 
-class BursamAccessTokenException extends Exception
+class BursamAccessTokenException extends BaseApiException
 {
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $code = ErrorCode::CAN_NOT_DEAL_WITH_BURSAM_SYSTEM;
-        $message = 'Error while getting access token from Bursam';
+        return ErrorCode::CAN_NOT_DEAL_WITH_BURSAM_SYSTEM;
+    }
 
+    protected function errorMessage(): string
+    {
+        return 'Error while getting access token from Bursam';
+    }
+
+    public function report(): void
+    {
         Log::channel(LOG_CHANNEL_BURSAM)->error('Error While Trying To Get Token From BURSAM for request details check BURSAM log files.');
-
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code
-            );
-        }
-
-        abort($code, $message);
     }
 }

@@ -3,30 +3,16 @@
 namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
-class InventoryUpdateConflictException extends Exception
+class InventoryUpdateConflictException extends BaseApiException
 {
-    /**
-     * Render the exception into an HTTP response.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function render(Request $request)
+    protected function errorCode(): int
     {
-        $message = __('error.inventory_update_conflict');
-        $code = Response::HTTP_BAD_REQUEST;
+        return ErrorCode::INVENTORY_NOT_UPDATABLE;
+    }
 
-        if ($request->expectsJson()) {
-            return response()->errorResponse(
-                $message,
-                $code,
-                ErrorCode::INVENTORY_NOT_UPDATABLE
-            );
-        }
-
-        abort($code, $message);
+    protected function errorMessage(): string
+    {
+        return __('error.inventory_update_conflict');
     }
 }
