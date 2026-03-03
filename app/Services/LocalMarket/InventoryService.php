@@ -213,6 +213,7 @@ class InventoryService
     public function confirmDeliverOrderUnits(LocalMarketOrder $localMarketOrder): void
     {
         try {
+            // we remove this transaction because there exist aleady a transaction in the ConfirmDeliverProductsAction
             LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
                 ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
             foreach ($localMarketOrder->orderInventories as $orderInventory) {

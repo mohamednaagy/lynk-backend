@@ -7,61 +7,36 @@ namespace App\Console\Commands;
 use App\Models\LocalMarketInventory;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RefreshQuantitiesLocalMarketInventories extends Command
 {
     protected $signature = 'inventories:refresh-quantities
-                            {--chunk-size=500 : Number of records to process at once}
-                            {--only-ids : Only display mismatched inventory IDs without applying any changes}';
+                            {--chunk-size=100 : Number of records to process at once}';
 
     protected $description = 'Find local market inventories with mismatched quantity/unit aggregates and refresh their stock quantities';
 
     public function handle(): int
     {
         $chunkSize = (int) ($this->option('chunk-size'));
-        $onlyIds = (bool) $this->option('only-ids');
-        $inventoryIds = $this->getMismatchedInventoryIds();
+        $mismatchedInventories = $this->getMismatchedInventoryIds();
 
-        if ($inventoryIds->isEmpty()) {
+        if ($mismatchedInventories->isEmpty()) {
             $this->info('No local market inventories with mismatched quantities found.');
 
             return 0;
         }
 
-        $totalRecords = $inventoryIds->count();
+        $totalRecords = $mismatchedInventories->count();
         $this->info("Found {$totalRecords} local market inventories with mismatched quantities.");
-
-        if ($onlyIds) {
-            $this->table(
-                [
-                    'Inventory ID',
-                    'Available (inventory)',
-                    'Available (units)',
-                    'Reserved (inventory)',
-                    'Reserved (units)',
-                ],
-                $inventoryIds
-                    ->map(static function (object $row): array {
-                        return [
-                            'inventory_id' => $row->inventory_id,
-                            'available_in_inventory' => $row->available_in_inventory,
-                            'available_in_units' => $row->available_in_units,
-                            'reserved_in_inventory' => $row->reserved_in_inventory,
-                            'reserved_in_units' => $row->reserved_in_units,
-                        ];
-                    })
-                    ->all()
-            );
-
-            return 0;
-        }
 
         $bar = $this->output->createProgressBar($totalRecords);
         $bar->start();
 
         $processed = 0;
         $failed = 0;
-        foreach ($inventoryIds->chunk($chunkSize) as $chunk) {
+        foreach ($mismatchedInventories->chunk($chunkSize) as $chunk) {
+            Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Processing chunk of {$chunk} inventories");
             $ids = $chunk->pluck('inventory_id')->all();
             $inventories = LocalMarketInventory::query()
                 ->whereIn('id', $ids)
@@ -70,8 +45,8 @@ class RefreshQuantitiesLocalMarketInventories extends Command
             foreach ($inventories as $inventory) {
                 try {
                     DB::transaction(function () use ($inventory): void {
-                        $inventory->markAsEditable();
-                        $inventory->refreshStockQuantities(true);
+                        $inventory->refreshStockQuantities(forceRebuildEligibility : true);
+                        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info("Refreshed inventory id = {$inventory->id}");
                     });
                     $processed++;
                 } catch (\Throwable $e) {
@@ -106,8 +81,8 @@ class RefreshQuantitiesLocalMarketInventories extends Command
                 SELECT 
                     lmi.id AS inventory_id,
                     COALESCE(lmi.available_quantity, 0) AS available_in_inventory,
-                    COALESCE(lmi.reserved_items, 0) AS reserved_in_inventory,
                     COALESCE(lmiu.available_units, 0) AS available_in_units,
+                    COALESCE(lmi.reserved_items, 0) AS reserved_in_inventory,
                     COALESCE(lmiu.reserved_units, 0) AS reserved_in_units
                 FROM local_market_inventories lmi
                 LEFT JOIN (
