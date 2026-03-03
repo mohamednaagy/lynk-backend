@@ -63,7 +63,7 @@ return [
         'channels' => [
             NotificationChannel::PLATFORM->value => [
                 'default' => false,
-                'is_editable' => false,
+                'is_editable' => true,
             ],
             NotificationChannel::MAIL->value => [
                 'default' => false,

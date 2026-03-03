@@ -4,12 +4,14 @@ namespace App\Notifications;
 
 use App\Enums\NotificationChannel;
 use App\Enums\SystemNotificationType;
+use App\Events\RealtimeNotification;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 /**
  * BaseNotification
@@ -99,7 +101,7 @@ abstract class BaseNotification extends Notification
     public function sendTo(array $recipients): void
     {
         $admins = $this->getBccUsers()->toArray();
-        $mailMessage = $this->toMail(new AnonymousNotifiable);
+        $mailMessage = $this->toMail(new AnonymousNotifiable); // @phpstan-ignore method.notFound
 
         Mail::html((string) $mailMessage->render(), function ($message) use ($mailMessage, $recipients, $admins) {
             if ($mailMessage->subject) {
@@ -114,6 +116,36 @@ abstract class BaseNotification extends Notification
         });
     }
 
+    /**
+     * Store a portal (database) notification and push realtime event for each user.
+     * Bypasses via() to avoid triggering mail channel (double-email prevention).
+     * Mirrors what Laravel's DatabaseChannel::send() does internally.
+     *
+     * @param  Collection<int, \App\Models\User>  $users
+     */
+    public function sendPortalTo(Collection $users): void
+    {
+        $users->each(function ($user) {
+            $user->notifications()->create([
+                'id' => (string) Str::uuid(),
+                'type' => get_class($this),
+                'data' => $this->toArray($user),
+                'read_at' => null,
+            ]);
+            event(new RealtimeNotification($this->getTitle($user), $user->id));
+        });
+    }
+
+    /**
+     * Fetches portal-enabled users for this notification's type then calls sendPortalTo().
+     */
+    public function sendPortal(): void
+    {
+        $this->sendPortalTo(
+            app(NotificationPreferenceService::class)->getEnabledUsersForPortal($this->getType())
+        );
+    }
+
     protected function getBccUsers(): Collection
     {
         $notificationPreferenceService = app(NotificationPreferenceService::class);
@@ -121,7 +153,6 @@ abstract class BaseNotification extends Notification
         return $notificationPreferenceService->getEligibleAdminsOrManagers($this->getType())->pluck('email');
     }
 
-    
     protected function getActionURL(): string
     {
         return '';
