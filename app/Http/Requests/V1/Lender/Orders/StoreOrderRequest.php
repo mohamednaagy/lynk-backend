@@ -104,6 +104,7 @@ class StoreOrderRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:100',
+                'regex:/^[A-Za-z\x{0600}-\x{06FF}0-9_\- \/]*$/u',
                 $this->handleUniqueReferenceNumber(),
             ],
             'type' => [
