@@ -4,12 +4,15 @@ namespace App\Models;
 
 use App\Enums\LocalMarket\OrderStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
 /**
  * @property mixed $currency
+ *
+ * @mixin Builder<LocalMarketOrder>
  */
 class LocalMarketOrder extends Model
 {
