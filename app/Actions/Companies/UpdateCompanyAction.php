@@ -58,6 +58,7 @@ class UpdateCompanyAction implements UpdateCompany
                 'auto_complete_murabaha_order',
                 'webhook_secret_key',
                 'allowed_financing_order_types',
+                'min_wallet_limit',
             ])
         );
 

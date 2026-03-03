@@ -157,6 +157,8 @@ Route::prefix('v1/admin')->name('api.v1.admins.')->group(function () {
 
         Route::apiResource('lenders', LenderController::class);
 
+        Route::patch('lenders/{lender}/partial-update', [LenderController::class, 'partialUpdate'])->name('lenders.partialUpdate');
+
         Route::prefix('commodity-suppliers')->group(function () {
             Route::post('{supplier}/users/{user}/resend-invitation', ResendSupplierInvitationToUser::class);
             Route::apiResource('{supplier}/users', CommoditySupplierUserController::class)->only(['index', 'show', 'store', 'update', 'destroy']);

@@ -14,8 +14,9 @@ use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\CompaniesListFilterRequest;
+use App\Http\Requests\V1\Admin\Companies\PartialUpdateCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
-use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
+use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest; // Add this import
 use App\Models\Lender;
 use App\Transformers\CompanyTransformer;
 use Cknow\Money\Money;
@@ -46,7 +47,7 @@ class LenderController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
-        )->only('update');
+        )->only('update', 'partialUpdate');
 
         $this->middleware(
             'permission:'.
@@ -161,6 +162,22 @@ class LenderController extends Controller
             $currency = $lender->getWallet(WalletType::CompanyWallet)->currency;
             $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers'], $currency);
+            $updateCompany->handle($lender, $data);
+
+            return $this->successResponse();
+        });
+    }
+
+    /**
+     * Partially update the specified resource in storage.
+     */
+    public function partialUpdate(
+        PartialUpdateCompanyRequest $request,
+        UpdateCompany $updateCompany,
+        Lender $lender
+    ): JsonResponse {
+        return DB::transaction(function () use ($request, $updateCompany, $lender) {
+            $data = $request->validated();
             $updateCompany->handle($lender, $data);
 
             return $this->successResponse();
