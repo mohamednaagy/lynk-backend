@@ -41,7 +41,10 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
      */
     public function getTitle($notifiable): string
     {
-        return __('notification-types.delivery_confirmation_received.label');
+        return __('notification-types.delivery_confirmation_received.title', [
+            'company_name' => $this->financingOrder->lender->name,
+            'order_id' => $this->financingOrder->id,
+        ]);
     }
 
     /**
@@ -52,9 +55,14 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
     public function getDescription($notifiable): string
     {
         return __('notification-types.delivery_confirmation_received.description', [
+            'company_name' => $this->financingOrder->lender->name,
             'order_id' => $this->financingOrder->id,
-            'trader_reference' => $this->traderOrder->reference,
         ]);
+    }
+
+    protected function getActionURL(): string
+    {
+        return config('app.frontend_url.admin').'/orders/'.$this->financingOrder->id;
     }
 
     /**
@@ -91,6 +99,7 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
             ...parent::toArray($notifiable),
             'trader_order_id' => $this->traderOrder->id,
             'order_id' => $this->financingOrder->id,
+            'action_url' => $this->getActionURL(),
         ];
     }
 
