@@ -59,7 +59,9 @@ class OrderDeliveryConfirmed extends BaseNotification implements ShouldQueue
 
     protected function getActionURL(): string
     {
-        return config('app.frontend_url.admin').'orders/'.$this->financingOrder->id;
+        $baseUrl = rtrim(config('app.frontend_url.admin'), '/');
+
+        return $baseUrl.'/orders/'.$this->financingOrder->id;
     }
 
     protected function getActionText(): string
