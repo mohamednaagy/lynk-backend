@@ -101,9 +101,10 @@ return [
                     'verify_peer' => env('RABBITMQ_SSL_VERIFY_PEER', true),
                     'passphrase' => env('RABBITMQ_SSL_PASSPHRASE', null),
                 ],
-                'heartbeat' => (int) env('RABBITMQ_HEARTBEAT', 120),
-                'read_write_timeout' => (int) env('RABBITMQ_READ_WRITE_TIMEOUT', 200), // Must be > heartbeat
-                'prefetch_count' => (int) env('RABBITMQ_PREFETCH', 1),
+                'heartbeat' => 120,
+                'connection_timeout' => 30, // Must be > heartbeat
+                'read_write_timeout' => 200, // Must be > heartbeat
+                'prefetch_count' => 1,
             ],
 
             'retry_after' => 90,

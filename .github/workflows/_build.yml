@@ -274,10 +274,6 @@ jobs:
           RABBITMQ_USER="${{ vars.RABBITMQ_USER }}"
           RABBITMQ_PASSWORD="${{ secrets.RABBITMQ_PASSWORD }}"
           RABBITMQ_VHOST="${{ vars.RABBITMQ_VHOST }}"
-          RABBITMQ_HEARTBEAT="${{ vars.RABBITMQ_HEARTBEAT }}"
-          RABBITMQ_CONNECTION_TIMEOUT="${{ vars.RABBITMQ_CONNECTION_TIMEOUT }}"
-          RABBITMQ_READ_WRITE_TIMEOUT="${{ vars.RABBITMQ_READ_WRITE_TIMEOUT }}"
-          RABBITMQ_PREFETCH="${{ vars.RABBITMQ_PREFETCH }}"
 
           # reCAPTCHA Configuration
           RECAPTCHA_SITE_KEY="${{ secrets.RECAPTCHA_SITE_KEY }}"
