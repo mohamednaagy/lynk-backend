@@ -158,6 +158,11 @@ abstract class BaseNotification extends Notification
         return '';
     }
 
+    protected function getActionText(): string
+    {
+        return '';
+    }
+
     /**
      * Check if the user has allowed roles for this notification type.
      *
