@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use App\Enums\ErrorCode;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Middleware\HandleCors;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Stancl\Tenancy\Exceptions\TenantCouldNotBeIdentifiedByRequestDataException;
@@ -40,6 +41,21 @@ class Handler extends ExceptionHandler
         'password',
         'password_confirmation',
     ];
+
+    /**
+     * Render an exception into an HTTP response.
+     *
+     * Overrides the default to ensure CORS headers are always applied to
+     * exception responses. Without this, exceptions can bypass the HandleCors
+     * middleware in the pipeline and the browser sees a CORS error instead of
+     * the actual error payload.
+     */
+    public function render($request, Throwable $e)
+    {
+        $response = parent::render($request, $e);
+
+        return app(HandleCors::class)->handle($request, fn () => $response);
+    }
 
     /**
      * Register the exception handling callbacks for the application.
