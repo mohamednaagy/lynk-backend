@@ -25,4 +25,6 @@ enum SystemNotificationType: string
     case IN_PROGRESS_ORDERS = 'in_progress_orders';
 
     case WALLET_REPORT_EXPORT_READY = 'wallet_report_export_ready';
+
+    case WALLET_REMAINING_BALANCE = 'wallet_remaining_balance';
 }
