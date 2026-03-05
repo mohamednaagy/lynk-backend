@@ -194,7 +194,6 @@ return [
         ],
         'roles' => [
             Role::Admin,
-            Role::Manager,
             Role::LenderAdmin,
             Role::LenderBilling,
         ],
