@@ -287,4 +287,13 @@ class User extends Authenticatable implements Grantifiable, HasLocalePreference,
                 });
         });
     }
+
+    public function routeNotificationForMail()
+    {
+        if ($this->hasRole([Role::Admin, Role::Manager])) {
+            return null;
+        }
+
+        return $this->email;
+    }
 }
