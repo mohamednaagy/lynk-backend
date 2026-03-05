@@ -6,9 +6,7 @@ return [
     'body' => "
 This is to inform you that your wallet remaining balance on the LYNK platform has reached or fallen below the configured limit.\n
 Current Remaining Balance: :balance.\n
-Configured Threshold: :remaining_balance_limit.\n
-To avoid order processing interruptions, please recharge your wallet at your earliest convenience.
-
-Regards,
-",
+Configured Threshold: :remaining_balance_limit.",
+    'footer' => 'To avoid order processing interruptions, please recharge your wallet at your earliest convenience.',
+    'regards' => 'Regards',
 ];

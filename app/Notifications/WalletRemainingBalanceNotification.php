@@ -69,11 +69,11 @@ class WalletRemainingBalanceNotification extends BaseNotification implements Sho
     {
         return (new MailMessage)
             ->subject(trans('emails/wallet-remaining-balance.subject'))
-            ->greeting(__('emails/wallet-remaining-balance.greeting', ['company_name' => $this->lender->name]))
-            ->salutation(trans('emails/wallet-remaining-balance.body', [
+            ->markdown('emails/wallet-remaining-balance', [
+                'company_name' => $this->lender->name,
                 'balance' => $this->balance,
                 'remaining_balance_limit' => $this->lender->lenderDetail->min_wallet_limit,
-            ]));
+            ]);
     }
 
     /**
