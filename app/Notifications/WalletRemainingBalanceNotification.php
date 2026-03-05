@@ -28,15 +28,6 @@ class WalletRemainingBalanceNotification extends BaseNotification implements Sho
         return SystemNotificationType::WALLET_REMAINING_BALANCE;
     }
 
-    public function via($notifiable): array
-    {
-        if (($this->lender->lenderDetail->min_wallet_limit ?? 0) <= 0) {
-            return [];
-        }
-
-        return parent::via($notifiable);
-    }
-
     /**
      * Get the title for the notification.
      *
