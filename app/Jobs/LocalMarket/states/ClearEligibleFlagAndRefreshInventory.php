@@ -109,6 +109,17 @@ class ClearEligibleFlagAndRefreshInventory extends BaseStatus implements ShouldB
             'inventory_id' => $this->inventoryId,
             'error' => $exception->getMessage(),
         ]);
+
+        $inventory = LocalMarketInventory::find($this->inventoryId);
+        if ($inventory) {
+            $inventory->markAsEditable();
+            $inventory->refreshStockQuantities(true);
+            Log::channel(self::LOG_CHANNEL)->info('finished to refreshing inventory stock', [
+                'inventory_id' => $this->inventoryId,
+                'order_id' => $this->localMarketOrderId,
+            ]);
+        }
+
     }
 
     public function middleware(): array
