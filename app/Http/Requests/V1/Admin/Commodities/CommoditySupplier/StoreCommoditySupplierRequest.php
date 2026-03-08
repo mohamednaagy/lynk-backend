@@ -50,6 +50,7 @@ class StoreCommoditySupplierRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
+                'max:16',
                 new CommodityUniqueNameRule,
                 Rule::unique(Company::class, 'unique_name')->where('type', CompanyType::Supplier),
 
