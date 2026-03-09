@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * @property mixed $currency
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LocalMarketOrderHasInventory> $orderInventories
  *
  * @mixin Builder<LocalMarketOrder>
  */

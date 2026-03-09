@@ -150,6 +150,9 @@ return [
      */
 
     'custom' => [
+        'reference_number' => [
+            'regex' => 'Only English alpha/ Arabic alpha /numbers/underscore/hyphen/whitespace/forward slash allowed',
+        ],
         'company_unique_name' => [
             'regex' => 'Identifier should contain only English letters, numbers and _. It should start with English letter',
         ],

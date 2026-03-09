@@ -17,7 +17,8 @@ return [
     ],
     'delivery_confirmation_received' => [
         'label' => 'تم استلام تأكيد التسليم',
-        'description' => 'تم استلام تأكيد التسليم للطلب #:order_id بواسطة :trader_reference',
+        'description' => 'قامت :company_name بتأكيد التسليم للطلب #:order_id',
+        'action_text' => 'طلب #:order_id',
     ],
     'order_approved' => [
         'label' => 'تم الموافقة على الطلب',

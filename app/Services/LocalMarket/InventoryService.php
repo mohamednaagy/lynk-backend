@@ -213,13 +213,12 @@ class InventoryService
     public function confirmDeliverOrderUnits(LocalMarketOrder $localMarketOrder): void
     {
         try {
-            DB::transaction(function () use ($localMarketOrder) {
-                LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
-                    ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
-                foreach ($localMarketOrder->orderInventories as $orderInventory) {
-                    $orderInventory->inventory->refreshStockQuantities();
-                }
-            });
+            // we remove this transaction because there exist aleady a transaction in the ConfirmDeliverProductsAction
+            LocalMarketInventoryUnits::where('hold_for', $localMarketOrder->id)
+                ->update(['status' => InventoryUnitsStatus::Free, 'hold_for' => null, 'deleted_at' => now()]);
+            foreach ($localMarketOrder->orderInventories as $orderInventory) {
+                $orderInventory->inventory->refreshStockQuantities();
+            }
         } catch (\Exception $e) {
             log::channel(LOG_CHANNEL_LOCAL_MARKET)->error(formatLocalMarketOrderTitle('Failed to deliver order units.', $localMarketOrder), [
                 'localMarketOrderId' => $localMarketOrder->id,

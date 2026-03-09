@@ -26,16 +26,12 @@ class NotifyAboutOrderDeliveryConfirmed implements ShouldQueue
 
     /**
      * Execute the job.
-     *
-     * @return void
      */
-    public function handle()
+    public function handle(): void
     {
         $notification = new OrderDeliveryConfirmed($this->traderOrder);
-        // no need to pass emails, since the admins emails will be included internally as BCC
-        $notification->sendTo([]);
 
-        // push realtime notification to the user
-        event(new RealtimeNotification($notification->getTitle($this->traderOrder->user), $this->traderOrder->user->id));
+        $notification->sendTo([]);   // email BCC to eligible admins
+        $notification->sendPortal(); // DB record + realtime push per admin with portal ON
     }
 }
