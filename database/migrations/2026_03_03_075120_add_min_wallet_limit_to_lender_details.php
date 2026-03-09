@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('company_lender_details', function (Blueprint $table) {
-            $table->decimal('min_wallet_limit')->nullable()->after('company_cr');
+            $table->decimal('min_wallet_limit', 64, 2)->nullable()->after('company_cr');
         });
     }
 

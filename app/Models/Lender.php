@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FinancingOrderTypeEnum;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Watson\Rememberable\Rememberable;
 
 /**
@@ -27,7 +28,7 @@ class Lender extends Company
         return Company::class;
     }
 
-    public function lenderDetail()
+    public function lenderDetail(): HasOne
     {
         return $this->hasOne(CompanyLenderDetail::class, 'company_id', 'id');
     }
