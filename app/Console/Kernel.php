@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $timezone = Config::get('services.bursam.timezone');
+        $riyadhTimezone = 'Asia/Riyadh';
 
         $schedule->command(RunHoldTraderWhenMarketOpenCommand::class)
             ->timezone($timezone)
@@ -40,11 +41,12 @@ class Kernel extends ConsoleKernel
 
         $schedule->command(SendInProgressOrdersNotificationCommand::class)
             ->dailyAt('17:00')
-            ->timezone($timezone)
+            ->timezone($riyadhTimezone)
             ->onOneServer();
 
         $schedule->command(SendWalletRemainingBalanceNotificationCommand::class)
-            ->dailyAt('12:00')
+            ->dailyAt('10:00')
+            ->timezone($riyadhTimezone)
             ->onOneServer();
     }
 
