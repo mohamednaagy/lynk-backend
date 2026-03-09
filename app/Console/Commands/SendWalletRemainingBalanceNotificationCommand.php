@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Jobs\Lenders\NotifyAboutRemainingBalanceLimit;
-use App\Models\CompanyLenderDetail;
 use App\Models\Lender;
 use Illuminate\Console\Command;
 
@@ -15,9 +14,6 @@ class SendWalletRemainingBalanceNotificationCommand extends Command
 
     public function handle(): int
     {
-        Lender::flushCache();
-        CompanyLenderDetail::flushCache();
-
         Lender::with('lenderDetail')->whereHas('lenderDetail', function ($q) {
             $q->whereNotNull('min_wallet_limit');
         })->chunk(20, function ($lenders) {
