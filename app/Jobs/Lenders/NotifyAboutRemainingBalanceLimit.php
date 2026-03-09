@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Jobs\Lenders;
 
-use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Enums\SystemNotificationType;
 use App\Models\Lender;
 use App\Notifications\WalletRemainingBalanceNotification;
+use App\Services\Company\CompanyLenderClientService;
 use App\Services\NotificationPreferenceService;
 use DragonCode\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
@@ -38,31 +38,20 @@ class NotifyAboutRemainingBalanceLimit implements ShouldQueue
             )->pluck('email')
             ->all();
 
-        $currentBalance = $this->getCurrentBalance();
+        $currentBalance = CompanyLenderClientService::getLenderCurrentBalance($this->lender);
 
         if (($this->lender->lenderDetail->min_wallet_limit ?? 0) <= $currentBalance) {
-            Log::info('Lender has enough balance in his wallet', [
-                'lender_id' => $lenderId,
-                'balance' => $currentBalance,
-                'limit' => $this->lender->lenderDetail->min_wallet_limit,
-            ]);
+            Log::channel(LOG_CHANNEL_LYNK)
+                ->info('Lender has enough balance in his wallet', [
+                    'lender_id' => $lenderId,
+                    'balance' => $currentBalance,
+                    'limit' => $this->lender->lenderDetail->min_wallet_limit,
+                ]);
 
             return;
         }
 
         $notification = new WalletRemainingBalanceNotification($this->lender, $currentBalance);
         $notification->sendTo($notifiableEmails);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getCurrentBalance(): float
-    {
-        $balances = app(GetLenderBalance::class)->handle($this->lender);
-        /* @var \Cknow\Money\Money $balance */
-        $balance = $balances['balance'];
-
-        return (float) $balance->convertAndFormatByDecimal();
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Services\Company;
 
+use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Models\ClientAutoSellPeriod;
 use App\Models\CompanyLenderClient;
+use App\Models\Lender;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -26,5 +28,17 @@ class CompanyLenderClientService
         }
 
         return null;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function getLenderCurrentBalance(Lender $lender): float
+    {
+        $balances = app(GetLenderBalance::class)->handle($lender);
+        /* @var \Cknow\Money\Money $balance */
+        $balance = $balances['balance'];
+
+        return (float) $balance->convertAndFormatByDecimal();
     }
 }
