@@ -100,10 +100,6 @@ abstract class BaseNotification extends Notification
      */
     public function sendTo(array $recipients): void
     {
-        if (! method_exists($this, 'toMail')) {
-            return;
-        }
-
         $admins = $this->getBccUsers()->toArray();
         $mailMessage = $this->toMail(new AnonymousNotifiable);
 
