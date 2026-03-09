@@ -16,7 +16,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\CompaniesListFilterRequest;
 use App\Http\Requests\V1\Admin\Companies\PartialUpdateCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
-use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest; // Add this import
+use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
 use App\Models\Lender;
 use App\Transformers\CompanyTransformer;
 use Cknow\Money\Money;
@@ -90,8 +90,9 @@ class LenderController extends Controller
         $data['type'] = CompanyType::Lender;
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
-            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
-                ->default_company_status_created_by_operation;
+            /** @var \App\Settings\Classes\Areas\LenderSettings $lenderSettings */
+            $lenderSettings = $getSettingsClassInstance->handle(Area::Lender);
+            $data['status'] = $lenderSettings->default_company_status_created_by_operation;
 
             $lender = $createCompany->handle($data);
 
@@ -168,9 +169,6 @@ class LenderController extends Controller
         });
     }
 
-    /**
-     * Partially update the specified resource in storage.
-     */
     public function partialUpdate(
         PartialUpdateCompanyRequest $request,
         UpdateCompany $updateCompany,

@@ -8,7 +8,6 @@ use App\Events\RealtimeNotification;
 use App\Services\NotificationPreferenceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\AnonymousNotifiable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
@@ -91,22 +90,6 @@ abstract class BaseNotification extends Notification
      */
     abstract public function getDescription($notifiable): string;
 
-    // TODO: make this final and return MailMessage
-    public function toMail($notifiable)
-    {
-        $admins = $this->getBccUsers()->toArray();
-
-        return $this->viaMail($notifiable)
-            ->bcc($admins);
-    }
-
-    // TODO: make this abstract and return MailMessage
-    public function viaMail($notifiable): MailMessage
-    {
-        return new MailMessage;
-    }
-
-    // TODO: remove this function and use Notification::send as before
     /**
      * Send this notification as a single email using the content from toMail().
      *
@@ -117,6 +100,10 @@ abstract class BaseNotification extends Notification
      */
     public function sendTo(array $recipients): void
     {
+        if (! method_exists($this, 'toMail')) {
+            return;
+        }
+
         $admins = $this->getBccUsers()->toArray();
         $mailMessage = $this->toMail(new AnonymousNotifiable);
 

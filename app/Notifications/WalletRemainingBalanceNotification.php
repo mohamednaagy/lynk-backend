@@ -56,7 +56,7 @@ class WalletRemainingBalanceNotification extends BaseNotification implements Sho
      *
      * @param  mixed  $notifiable
      */
-    public function viaMail($notifiable): MailMessage
+    public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
             ->subject(trans('emails/wallet-remaining-balance.subject'))
