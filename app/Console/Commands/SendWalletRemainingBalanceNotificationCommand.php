@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Actions\Contracts\Lenders\GetLenderBalance;
 use App\Jobs\Lenders\NotifyAboutRemainingBalanceLimit;
 use App\Models\Lender;
+use App\Support\QueryScoper\Scopes\Lenders\LendersWithMinWalletLimitScope;
 use Illuminate\Console\Command;
 
 class SendWalletRemainingBalanceNotificationCommand extends Command
@@ -15,10 +16,9 @@ class SendWalletRemainingBalanceNotificationCommand extends Command
 
     public function handle(): int
     {
-        Lender::with('lenderDetail')
-            ->whereHas('lenderDetail', function ($q) {
-                $q->whereNotNull('min_wallet_limit');
-            })
+        $query = Lender::with('lenderDetail');
+        app(LendersWithMinWalletLimitScope::class)
+            ->apply($query)
             ->chunk(20, function ($lenders) {
                 $lenders
                     ->each(function (Lender $lender) {
