@@ -101,7 +101,7 @@ abstract class BaseNotification extends Notification
     public function sendTo(array $recipients): void
     {
         $admins = $this->getBccUsers()->toArray();
-        $mailMessage = $this->toMail(new AnonymousNotifiable); // @phpstan-ignore method.notFound
+        $mailMessage = $this->toMail(new AnonymousNotifiable);
 
         Mail::html((string) $mailMessage->render(), function ($message) use ($mailMessage, $recipients, $admins) {
             if ($mailMessage->subject) {

@@ -57,6 +57,7 @@ class NormalCompanyCreationStrategy implements CompanyCreationStrategy
                     'webhook_secret_key',
                     'allow_preferred_commodity_in_order',
                     'allowed_financing_order_types',
+                    'min_wallet_limit',
                 ]
             )
         );

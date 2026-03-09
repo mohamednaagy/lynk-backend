@@ -191,6 +191,11 @@ class StoreCompanyRequest extends FormRequest
                 'integer',
                 new EnumValue(FinancingOrderTypeEnum::class, false),
             ],
+
+            'min_wallet_limit' => [
+                'nullable',
+                'decimal:0,2',
+            ],
         ];
     }
 

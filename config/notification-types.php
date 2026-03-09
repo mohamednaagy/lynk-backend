@@ -180,4 +180,22 @@ return [
             Role::Manager,
         ],
     ],
+    SystemNotificationType::WALLET_REMAINING_BALANCE->value => [
+        'label' => 'notification-types.wallet_remaining_balance.label',
+        'channels' => [
+            NotificationChannel::PLATFORM->value => [
+                'default' => false,
+                'is_editable' => false,
+            ],
+            NotificationChannel::MAIL->value => [
+                'default' => false,
+                'is_editable' => true,
+            ],
+        ],
+        'roles' => [
+            Role::Admin,
+            Role::LenderAdmin,
+            Role::LenderBilling,
+        ],
+    ],
 ];

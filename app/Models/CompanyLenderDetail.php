@@ -4,9 +4,18 @@ namespace App\Models;
 
 use App\Enums\CompanyMarketType;
 use App\Enums\TraderOrderMode;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Watson\Rememberable\Rememberable;
 
+/**
+ * Summary of CompanyLenderDetail
+ *
+ * @property int $id
+ * @property float|null $min_wallet_limit
+ *
+ * @mixin Builder<CompanyLenderDetail>
+ */
 class CompanyLenderDetail extends Model
 {
     use Rememberable;
@@ -49,6 +58,7 @@ class CompanyLenderDetail extends Model
         'token_expire_in',
         'token_version',
         'allowed_financing_order_types',
+        'min_wallet_limit',
     ];
 
     public function lender()

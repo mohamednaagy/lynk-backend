@@ -19,6 +19,7 @@ use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 /**
  * @property int $id
  * @property string $unique_name
+ * @property string $name
  * @property-read Lender $lender
  *
  * @mixin Builder<Company>

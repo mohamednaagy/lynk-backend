@@ -4,6 +4,14 @@ namespace App\Settings\Classes\Areas;
 
 use Spatie\LaravelSettings\Settings;
 
+/**
+ * @property int $default_company_registration_status
+ * @property int $default_company_status_created_by_operation
+ * @property bool $default_does_order_require_approval
+ * @property bool $email_verification_enabled
+ * @property float $default_order_cost
+ * @property bool $require_initiate_trade_request
+ */
 class LenderSettings extends Settings
 {
     public int $default_company_registration_status;

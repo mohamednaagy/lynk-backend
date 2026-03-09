@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\LocalMarket\OrderStatus;
 use App\Support\Traders\Traits\LocalMarketHelperTrait;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Log;
 /**
  * @property mixed $currency
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\LocalMarketOrderHasInventory> $orderInventories
+ *
+ * @mixin Builder<LocalMarketOrder>
  */
 class LocalMarketOrder extends Model
 {

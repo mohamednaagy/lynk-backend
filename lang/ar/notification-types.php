@@ -47,4 +47,8 @@ return [
         'label' => 'تقرير المحفظة جاهز للتحميل',
         'description' => 'الملف جاهز للتحميل',
     ],
+    'wallet_remaining_balance' => [
+        'label' => 'الرصيد المتبقي في المحفظة',
+        'description' => 'الرصيد المتبقي في المحفظة لشركة :company_id هو :balance.',
+    ],
 ];

@@ -47,4 +47,8 @@ return [
         'label' => 'Wallet Export Ready',
         'description' => 'Your export file is ready to download.',
     ],
+    'wallet_remaining_balance' => [
+        'label' => 'Wallet Remaining Balance',
+        'description' => 'Wallet remaining balance for company :company_id is :balance.',
+    ],
 ];

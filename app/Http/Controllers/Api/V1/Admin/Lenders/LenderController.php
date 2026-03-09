@@ -14,6 +14,7 @@ use App\Enums\Subject;
 use App\Enums\WalletType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Admin\Companies\CompaniesListFilterRequest;
+use App\Http\Requests\V1\Admin\Companies\PartialUpdateCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\StoreCompanyRequest;
 use App\Http\Requests\V1\Admin\Companies\UpdateCompanyRequest;
 use App\Models\Lender;
@@ -46,7 +47,7 @@ class LenderController extends Controller
         $this->middleware(
             'permission:'.
             perm(Area::SuperAdmin, [Subject::Lenders, Action::Edit, Action::Manage])
-        )->only('update');
+        )->only('update', 'partialUpdate');
 
         $this->middleware(
             'permission:'.
@@ -74,6 +75,7 @@ class LenderController extends Controller
                 'unique_name',
                 'created_at',
                 'order_cost',
+                'min_wallet_limit',
             ])
             ->respond();
     }
@@ -89,8 +91,9 @@ class LenderController extends Controller
         $data['type'] = CompanyType::Lender;
 
         return DB::transaction(function () use ($data, $getSettingsClassInstance, $createCompany) {
-            $data['status'] = $getSettingsClassInstance->handle(Area::Lender)
-                ->default_company_status_created_by_operation;
+            /** @var \App\Settings\Classes\Areas\LenderSettings $lenderSettings */
+            $lenderSettings = $getSettingsClassInstance->handle(Area::Lender);
+            $data['status'] = $lenderSettings->default_company_status_created_by_operation;
 
             $lender = $createCompany->handle($data);
 
@@ -112,6 +115,7 @@ class LenderController extends Controller
                     'order_cost',
                     'preferred_market_type',
                     'preferred_commodity_types',
+                    'min_wallet_limit',
                 ])
                 ->respond();
         });
@@ -147,6 +151,7 @@ class LenderController extends Controller
                 'allow_preferred_commodity_in_order',
                 'lender_order_allowed_commodity_types',
                 'allowed_financing_order_types',
+                'min_wallet_limit',
             ])
             ->respond();
     }
@@ -161,6 +166,19 @@ class LenderController extends Controller
             $currency = $lender->getWallet(WalletType::CompanyWallet)->currency;
             $data['order_cost_tiers'] = $this->unsetProrationAmounExceptForLastTier($data['order_cost_tiers']);
             $data['order_cost_tiers'] = $this->castTiersAmountsToMoney($data['order_cost_tiers'], $currency);
+            $updateCompany->handle($lender, $data);
+
+            return $this->successResponse();
+        });
+    }
+
+    public function partialUpdate(
+        PartialUpdateCompanyRequest $request,
+        UpdateCompany $updateCompany,
+        Lender $lender
+    ): JsonResponse {
+        return DB::transaction(function () use ($request, $updateCompany, $lender) {
+            $data = $request->validated();
             $updateCompany->handle($lender, $data);
 
             return $this->successResponse();

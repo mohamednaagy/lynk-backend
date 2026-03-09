@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\GenerateSupplierMonthlyUsageReportsCommand;
 use App\Console\Commands\RunHoldTraderWhenMarketOpenCommand;
 use App\Console\Commands\SendInProgressOrdersNotificationCommand;
+use App\Console\Commands\SendWalletRemainingBalanceNotificationCommand;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessDailySellingPendingCommodityToMarket;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -18,6 +19,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         $timezone = Config::get('services.bursam.timezone');
+        $riyadhTimezone = 'Asia/Riyadh';
 
         $schedule->command(RunHoldTraderWhenMarketOpenCommand::class)
             ->timezone($timezone)
@@ -39,7 +41,12 @@ class Kernel extends ConsoleKernel
 
         $schedule->command(SendInProgressOrdersNotificationCommand::class)
             ->dailyAt('17:00')
-            ->timezone($timezone)
+            ->timezone($riyadhTimezone)
+            ->onOneServer();
+
+        $schedule->command(SendWalletRemainingBalanceNotificationCommand::class)
+            ->dailyAt('10:00')
+            ->timezone($riyadhTimezone)
             ->onOneServer();
     }
 
