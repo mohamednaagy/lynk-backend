@@ -75,6 +75,7 @@ class LenderController extends Controller
                 'unique_name',
                 'created_at',
                 'order_cost',
+                'min_wallet_limit',
             ])
             ->respond();
     }
@@ -114,6 +115,7 @@ class LenderController extends Controller
                     'order_cost',
                     'preferred_market_type',
                     'preferred_commodity_types',
+                    'min_wallet_limit',
                 ])
                 ->respond();
         });
@@ -149,6 +151,7 @@ class LenderController extends Controller
                 'allow_preferred_commodity_in_order',
                 'lender_order_allowed_commodity_types',
                 'allowed_financing_order_types',
+                'min_wallet_limit',
             ])
             ->respond();
     }

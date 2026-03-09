@@ -39,7 +39,7 @@ class CompanyTransformer extends TransformerAbstract
         'token_expire_in',
         'lender_order_allowed_commodity_types',
         'allowed_financing_order_types',
-
+        'min_wallet_limit',
     ];
 
     public function transform(Lender $lender): array
@@ -55,6 +55,11 @@ class CompanyTransformer extends TransformerAbstract
     public function includeName(Lender $lender): Primitive
     {
         return $this->primitive($lender->name);
+    }
+
+    public function includeMinWalletLimit(Lender $lender): Primitive
+    {
+        return $this->primitive($lender->lenderDetail?->min_wallet_limit);
     }
 
     public function includeUniqueName(Lender $lender): Primitive
