@@ -44,8 +44,7 @@ class Kernel extends ConsoleKernel
             ->onOneServer();
 
         $schedule->command(SendWalletRemainingBalanceNotificationCommand::class)
-            ->dailyAt('10:00')
-            ->timezone($timezone)
+            ->dailyAt('12:00')
             ->onOneServer();
     }
 
