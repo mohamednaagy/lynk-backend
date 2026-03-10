@@ -12,4 +12,6 @@ interface FinancingOrderActivityUpdate
      * Update the latest activity for a financing order
      */
     public function updateFinancingOrderLatestActivity(FinancingOrder $financingOrder): void;
+
+    public function getLatestActivityDescription(FinancingOrder $financingOrder): string;
 }
