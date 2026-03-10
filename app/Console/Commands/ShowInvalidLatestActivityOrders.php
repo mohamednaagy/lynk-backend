@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Actions\Contracts\FinancingOrderActivityRead;
+use App\Actions\Contracts\FinancingOrderActivityUpdate;
 use App\Models\FinancingOrder;
 use Illuminate\Console\Command;
 
@@ -17,10 +17,12 @@ class ShowInvalidLatestActivityOrders extends Command
     public function handle(): int
     {
         $invalidLatestActivityOrdersCount = 0;
+        $action = app(FinancingOrderActivityUpdate::class);
+
         FinancingOrder::latest()
-            ->chunk(100, function ($financingOrders) use (&$invalidLatestActivityOrdersCount) {
+            ->chunk(100, function ($financingOrders) use ($action, &$invalidLatestActivityOrdersCount) {
                 foreach ($financingOrders as $financingOrder) {
-                    $originalLatestActivity = app(FinancingOrderActivityRead::class)->getLatestActivityDescription($financingOrder);
+                    $originalLatestActivity = $action->getLatestActivityDescription($financingOrder);
                     if ($financingOrder->latest_activity != $originalLatestActivity) {
                         $this->info("Financing order {$financingOrder->id} has latest activity `{$financingOrder->latest_activity}` but it should be `{$originalLatestActivity}`.");
                         $invalidLatestActivityOrdersCount++;
