@@ -3,7 +3,6 @@
 namespace App\Actions\Companies;
 
 use App\Actions\Contracts\Companies\UpdateCompany;
-use App\Enums\WalletNotificationType;
 use App\Models\Lender;
 use App\Models\TieredPricing;
 use Illuminate\Support\Arr;
@@ -25,15 +24,7 @@ class UpdateCompanyAction implements UpdateCompany
         );
 
         if (isset($data['order_cost_tiers'])) {
-            $isTieredBeforeUpdate = $lender->isTiered();
-
             $this->updateCompanyPricingTiers($lender, collect($data['order_cost_tiers']));
-
-            $isTieredAfterUpdate = $lender->isTiered();
-
-            if ($isTieredBeforeUpdate != $isTieredAfterUpdate && $isTieredAfterUpdate) {
-                $lender->walletNotification()->where('type', WalletNotificationType::ORDER_COUNT)->delete();
-            }
         }
 
         if (isset($data['preferred_commodity_types'])) {
