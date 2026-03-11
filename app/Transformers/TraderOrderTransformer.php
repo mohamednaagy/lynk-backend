@@ -37,7 +37,6 @@ class TraderOrderTransformer extends TransformerAbstract
         'provider',
         'mode',
         'version',
-        'failure_reason',
         'expiry_date',
         'refunded_at',
         'refund_status',
@@ -88,11 +87,6 @@ class TraderOrderTransformer extends TransformerAbstract
     public function includeVersion(TraderOrder $traderOrder): Primitive
     {
         return $this->primitive($traderOrder->version);
-    }
-
-    public function includeFailureReason(TraderOrder $traderOrder): Primitive
-    {
-        return $this->primitive($traderOrder->failure_reason);
     }
 
     public function includeRefundedAt(TraderOrder $traderOrder): Primitive
@@ -163,6 +157,15 @@ class TraderOrderTransformer extends TransformerAbstract
 
     public function includePurchasingCommodityInformation(TraderOrder $traderOrder): Primitive
     {
+        /** @var \App\Models\Media|null $ptpMedia */
+        $ptpMedia = $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase);
+
+        /** @var \App\Models\Media|null $holdingCertificateMedia */
+        $holdingCertificateMedia = $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate);
+
+        /** @var \App\Models\Media|null $financingInstitutionCertificateMedia */
+        $financingInstitutionCertificateMedia = $traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender);
+
         return $this->primitive([
             'products' => collect($traderOrder->products)->map(function ($product) {
                 $productDescription = in_array($product['product'], BursamProductCode::getValues())
@@ -173,11 +176,11 @@ class TraderOrderTransformer extends TransformerAbstract
 
                 return $product;
             }),
-            'ptp_document' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::PromiseToPurchase)?->file_url,
+            'ptp_document' => $ptpMedia?->file_url,
             'exchange_rate' => $traderOrder->exchange_rate,
-            'original_holding_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TtiHoldingCertificate)?->file_url,
+            'original_holding_certificate' => $holdingCertificateMedia?->file_url,
             'auto_generate_financing_institution_certificate' => $traderOrder->auto_generate_financing_institution_certificate,
-            'financing_institution_certificate' => $traderOrder->getFirstMedia(TraderOrderMediaCollection::TransferOwnershipToLender)?->file_url,
+            'financing_institution_certificate' => $financingInstitutionCertificateMedia?->file_url,
         ]);
     }
 
