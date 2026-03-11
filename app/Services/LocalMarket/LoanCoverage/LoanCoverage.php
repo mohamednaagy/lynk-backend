@@ -1,31 +1,34 @@
 <?php
 
-namespace App\Services\LocalMarket\LoanCoverageStrategy\Strategies;
+namespace App\Services\LocalMarket\LoanCoverage;
 
 use App\Models\LocalMarketInventory;
-use App\Services\LocalMarket\LoanCoverageStrategy\BaseLoanCoverageStrategy;
-use App\Services\LocalMarket\LoanCoverageStrategy\LoanCoverageTranslator;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
-class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
+class LoanCoverage
 {
-    /**
-     * Public method to calculate loan coverage
-     */
+    private int $maxUnitsPerTrader;
+
+    private float $loanCoverageTimeout;
+
+    public function __construct()
+    {
+        $this->maxUnitsPerTrader = config('trader.providers.lynk.max_units_per_trader', 10000);
+        $this->loanCoverageTimeout = config('trader.providers.lynk.loan_coverage_timeout', 3);
+    }
+
     public function calculateCombination(int $loanAmount, array $inventories): array
     {
-        $this->logInfo('Using OptimizedLoanCoverageStrategy');
         $this->logInfo('Loan Amount', ['loan' => $loanAmount]);
         $this->logInventories($inventories);
 
-        $coverageGaps = []; // Suggestions for adding required inventories
-        $startTime = microtime(true); // Start time
+        $coverageGaps = [];
+        $startTime = microtime(true);
 
         try {
-            // Check the sum and compare it with the loan amount
             $this->loanCoverageFastChecking($loanAmount, $inventories);
 
-            // Initialize necessary variables
             $loanAmountRemaining = $loanAmount;
             $queue = [];
             $coverage = 0;
@@ -33,7 +36,6 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
             $skippedInventories = [];
             $inventoriesMap = [];
 
-            // Run optimization logic
             $success = $this->processInventories($loanAmountRemaining, $tempInventories, $queue, $inventoriesMap, $coverage);
 
             $itemUsed = count($queue);
@@ -45,7 +47,7 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
                 $this->logInfo('Taken inventories map', $inventoriesMap);
 
                 if ($loanAmountRemaining != 0 && ! in_array($loanAmountRemaining, $coverageGaps)) {
-                    $coverageGaps[] = $loanAmountRemaining; // i.e The uncovered amount across all the provided inventories.
+                    $coverageGaps[] = $loanAmountRemaining;
                 }
 
                 $elapsedTime = microtime(true) - $startTime;
@@ -59,8 +61,11 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
                 if (($key = array_search($skipInventoryIndex, $queue)) !== false) {
                     unset($queue[$key]);
 
-                    $loanAmountRemaining += $inventories[$skipInventoryIndex]->max_price;
-                    $coverage -= $inventories[$skipInventoryIndex]->max_price;
+                    /** @var LocalMarketInventory $inventory */
+                    $inventory = $inventories[$skipInventoryIndex];
+
+                    $loanAmountRemaining += $inventory->max_price;
+                    $coverage -= $inventory->max_price;
 
                     if (! isset($skippedInventories[$skipInventoryIndex]) && isset($tempInventories[$skipInventoryIndex])) {
                         $skippedInventories[$skipInventoryIndex] = $tempInventories[$skipInventoryIndex];
@@ -69,7 +74,6 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
                     $removedInventory = $skippedInventories[$skipInventoryIndex] ?? null;
                     unset($tempInventories[$skipInventoryIndex]);
 
-                    // Debugging message
                     if ($removedInventory) {
                         $this->logInfo("Skipping the inventory ID {$removedInventory->id}, max_price {$removedInventory->max_price}, available quantity {$removedInventory->available_quantity}");
                         $this->logInfo("Removed an item from the queue related to the inventory ID {$removedInventory->id}");
@@ -80,7 +84,10 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
 
                     $success = $this->processInventories($loanAmountRemaining, $tempInventories, $queue, $inventoriesMap, $coverage, $coverageGaps);
                 } else {
-                    $this->logInfo('Remove inventory ID('.$inventories[$skipInventoryIndex]->id.') from the inventories map');
+                    /** @var LocalMarketInventory $inventory */
+                    $inventory = $inventories[$skipInventoryIndex];
+
+                    $this->logInfo('Remove inventory ID('.$inventory->id.') from the inventories map');
                     unset($inventoriesMap[0]);
                     $inventoriesMap = array_values($inventoriesMap);
                     $this->logInfo('The current inventories map', $inventoriesMap);
@@ -91,7 +98,6 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
             $this->logInfo('Selected Inventories: ', $selectedInventories);
 
             return $selectedInventories;
-
         } catch (Exception $e) {
             $elapsedTime = $this->getElapsedTime($startTime);
             $this->logError($loanAmount, $elapsedTime, $coverageGaps, $e->getMessage());
@@ -100,9 +106,6 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
         }
     }
 
-    /**
-     * Process inventories to cover a portion of the loan
-     */
     private function processInventories(int &$loanAmountRemaining, array &$inventories, array &$queue, array &$inventoriesMap, int &$coverage, array $coverageGaps = []): bool
     {
         foreach ($inventories as $inventoryIndex => &$inventory) {
@@ -117,7 +120,6 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
 
             $possibleUses = min((int) floor($loanAmountRemaining / $price), $count);
 
-            // Log only if there is a meaningful action
             if ($possibleUses > 0) {
                 $this->logInfo("Processing Inventory ID {$inventory->id}: price = $price, possible uses = $possibleUses");
             }
@@ -147,37 +149,28 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
         return false;
     }
 
-    /**
-     * Helper function to get loan coverage result
-     */
     private function getLoanCoverageResult(array $inventories, int $coverage, int $loanAmountRemaining, array $queue): array
     {
-        // Log the input values
         $this->logInfo('getLoanCoverageResult called with:', [
             'coverage' => $coverage,
             'loanRemaining' => $loanAmountRemaining,
             'queue' => $queue,
         ]);
 
-        // Count the used inventories
         $usedInventories = array_count_values($queue);
 
         $result = [];
         foreach ($usedInventories as $inventoryIndex => $count) {
-            // Assuming the queue contains instances of LocalMarketInventory
+            /** @var LocalMarketInventory $inventory */
             $inventory = $inventories[$inventoryIndex];
 
-            // Calculate the amount to cover
             $amountToCover = $count * $inventory->max_price;
 
-            // Use the LoanCoverageTranslator to translate the inventory data
             $translated = LoanCoverageTranslator::translate($inventory, $count, $amountToCover);
 
-            // Add the translated result to the final result array
             $result[] = $translated;
         }
 
-        // Log the final result
         $this->logInfo('Final Loan Coverage Result:', $result);
 
         return $result;
@@ -189,6 +182,7 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
         $totalItemsUsed = 0;
 
         foreach ($inventories as $inventory) {
+            /** @var LocalMarketInventory $inventory */
             if ($totalItemsUsed >= $this->maxUnitsPerTrader) {
                 break;
             }
@@ -216,7 +210,7 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
 
     private function logInventories(array $inventories): void
     {
-        $this->logInfo('Inventories', ['inventories' => array_map(fn ($inventory) => [
+        $this->logInfo('Inventories', ['inventories' => array_map(fn (LocalMarketInventory $inventory) => [
             'id' => $inventory->id,
             'commodity_item_id' => $inventory->commodity_item_id,
             'supplier_location_id' => $inventory->supplier_location_id,
@@ -226,5 +220,17 @@ class OptimizedLoanCoverageStrategy extends BaseLoanCoverageStrategy
             'max_price' => $inventory->max_price,
             'commodity_type_id' => $inventory->commodity_type_id,
         ], $inventories)]);
+    }
+
+    private function logInfo(string $message, array $data = []): void
+    {
+        Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info($message, $data);
+    }
+
+    private function getElapsedTime($startTime): float
+    {
+        $endTime = microtime(true);
+
+        return round(($endTime - $startTime), 4);
     }
 }

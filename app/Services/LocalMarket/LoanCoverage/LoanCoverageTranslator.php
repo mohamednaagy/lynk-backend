@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\LocalMarket\LoanCoverageStrategy;
+namespace App\Services\LocalMarket\LoanCoverage;
 
-use app\models\LocalMarketInventory;
+use App\Models\LocalMarketInventory;
 
 class LoanCoverageTranslator
 {
