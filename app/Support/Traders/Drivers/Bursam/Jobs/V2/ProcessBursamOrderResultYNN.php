@@ -83,7 +83,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             }
 
             /** @var \App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver $bursamDriver */
-            $bursamDriver = Trader::driver('bursam', $traderOrder->version);
+            $bursamDriver = Trader::driver($traderOrder->provider, $traderOrder->version);
 
             $bursamDriver->fetchOrderResultYNN($traderOrder);
 
