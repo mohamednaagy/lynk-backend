@@ -24,6 +24,14 @@ class CompleteOrderAction implements CompleteOrder
             ->lockForUpdate()
             ->findOrFail($orderId);
 
+        if ($financingOrder->isComplete()) {
+            Log::info('financing_order_id '.$financingOrder->id.' is already completed at CompleteOrderAction', [
+                'financingOrderId' => $financingOrder->id,
+            ]);
+
+            return true;
+        }
+
         if (! $financingOrder->canBeCompleted()) {
             Log::error('financing_order_id '.$financingOrder->id.' cant be completed at CompleteOrderAction', [
                 'financingOrderId' => $financingOrder->id,
