@@ -45,6 +45,13 @@ use UnexpectedValueException;
  * @property Collection $traderHistories
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon|null $refunded_at
+ * @property array|null $products
+ * @property float|null $exchange_rate
+ * @property bool $auto_generate_financing_institution_certificate
+ * @property string|null $product_code
+ * @property-read \App\Models\TraderOrderCancelDetail|null $cancelDetail
+ * @property-read \App\Models\CommodityType|null $commodityType
  *
  * @mixin Builder<TraderOrder>
  */
@@ -337,6 +344,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function isCommoditiesSettled(): bool
     {
+        /** @var \App\Models\TraderOrderSettlement|null $latestSettlement */
         $latestSettlement = $this->latestSettlement;
 
         return $latestSettlement && $latestSettlement->is_commodities_settled;
@@ -344,6 +352,7 @@ class TraderOrder extends Model implements HasMedia
 
     public function hasPendingSettlementCheck(): bool
     {
+        /** @var \App\Models\TraderOrderSettlement|null $latestSettlement */
         $latestSettlement = $this->latestSettlement;
 
         return $latestSettlement && $latestSettlement->status->is(TraderOrderSettlementStatus::Pending);

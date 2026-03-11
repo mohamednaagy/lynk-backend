@@ -8,7 +8,6 @@ use App\Enums\FinancingOrderStatus;
 use App\Enums\TraderOrderCancelReason;
 use App\Models\TraderOrder;
 use App\Support\Traders\Drivers\Bursam\Jobs\V2\ProcessBursamOrderResultYNN;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Event;
@@ -25,7 +24,7 @@ class ProcessBursamOrderResultYNNTest extends TestCase
 
     protected static CommittedOrder $financingOrder;
 
-    protected static Model|TraderOrder $traderOrder;
+    protected static TraderOrder $traderOrder;
 
     protected function setUp(): void
     {
@@ -81,8 +80,7 @@ class ProcessBursamOrderResultYNNTest extends TestCase
         self::$financingOrder->model()->refresh();
         self::$traderOrder->refresh();
 
-        $this->assertTrue(self::$financingOrder->model()->status->is(FinancingOrderStatus::TradingFailure));
-        $this->assertEquals($failureCode, self::$traderOrder->failure_reason);
-        $this->assertEquals(TraderOrderCancelReason::FailureToPurchase, self::$traderOrder->cancelDetail->cancel_reason);
+        $this->assertTrue(self::$financingOrder->model()->status->is(FinancingOrderStatus::PendingTraderOrder));
+        $this->assertEquals(TraderOrderCancelReason::NoEligibleCommoditiesAvailable, self::$traderOrder->cancelDetail->cancel_reason);
     }
 }

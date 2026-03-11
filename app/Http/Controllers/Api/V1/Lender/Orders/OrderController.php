@@ -62,7 +62,6 @@ class OrderController extends Controller
         'trader_orders.version',
         'trader_orders.mode',
         'trader_orders.reference',
-        'trader_orders.failure_reason',
         'trader_orders.is_cancellable',
         'trader_orders.history',
         'trader_orders.products.name',
