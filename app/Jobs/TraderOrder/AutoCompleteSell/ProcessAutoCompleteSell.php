@@ -20,7 +20,6 @@ use Stancl\Tenancy\Tenancy;
 
 class ProcessAutoCompleteSell implements ShouldQueue
 {
-    
     use Dispatchable, InteractsWithQueue, Queueable;
 
     public function __construct(
@@ -93,12 +92,21 @@ class ProcessAutoCompleteSell implements ShouldQueue
             ->where('status', TraderOrderStatus::InProgress)
             ->find($this->traderOrderId);
 
-        if (! $traderOrder || ! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
-            Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info(formatLogTitle('Invalid trader order state', $traderOrder), [
-                'financingOrderId' => $traderOrder?->financing_order_id,
+        if (! $traderOrder) {
+            Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info('Invalid trader order state | trader_order_id => '.$this->traderOrderId, [
                 'traderOrderId' => $this->traderOrderId,
-                'exists' => ! is_null($traderOrder),
-                'last_action' => $traderOrder?->last_history_action,
+                'exists' => false,
+            ]);
+
+            return null;
+        }
+
+        if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::CreateTransferOwnershipToLenderDocument)) {
+            Log::channel(LOG_CHANNEL_AUTO_COMPLETE_SELL)->info(formatLogTitle('Invalid trader order state', $traderOrder), [
+                'financingOrderId' => $traderOrder->financing_order_id,
+                'traderOrderId' => $this->traderOrderId,
+                'exists' => true,
+                'last_action' => $traderOrder->last_history_action,
             ]);
 
             return null;
