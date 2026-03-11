@@ -13,4 +13,5 @@ Route::prefix('v1/test')->group(function () {
 
     // TODO move it to inside the if statement after the release v1.34.0 go to production
     Route::post('notifications/send-in-progress-orders', [NotificationsController::class, 'sendInProgressOrders']);
+    Route::post('notifications/send-wallet-remaining-balance-limit', [NotificationsController::class, 'sendWalletBalanceLimitNotification']);
 });

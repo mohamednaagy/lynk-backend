@@ -9,10 +9,20 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationsController extends Controller
 {
+    public function sendWalletBalanceLimitNotification(): JsonResponse
+    {
+        return $this->processCommand('notifications:send-wallet-remaining-balance');
+    }
+
     public function sendInProgressOrders(): JsonResponse
     {
+        return $this->processCommand('notifications:send-in-progress-orders');
+    }
+
+    private function processCommand(string $command, array $parameters = []): JsonResponse
+    {
         try {
-            $exitCode = Artisan::call('notifications:send-in-progress-orders');
+            $exitCode = Artisan::call($command, $parameters);
 
             if ($exitCode === 0) {
                 return response()->json(['success' => true]);
@@ -23,7 +33,7 @@ class NotificationsController extends Controller
                 'message' => 'Command failed.',
             ], 500);
         } catch (\Exception $e) {
-            Log::error('API: Failed to execute SendInProgressOrdersNotificationCommand', [
+            Log::error("API: Failed to execute $command", [
                 'error' => $e->getMessage(),
             ]);
 
