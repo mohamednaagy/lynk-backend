@@ -115,7 +115,6 @@ class OrderControllerShowTest extends TestCase
                         'trader_orders.id',
                         'trader_orders.reference',
                         'trader_orders.provider',
-                        'trader_orders.failure_reason',
                         'trader_orders.refunded_at',
                         'trader_orders.refund_status',
                         'trader_orders.is_cancellable',

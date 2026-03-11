@@ -16,13 +16,12 @@ class UpdateTraderOrderStatusToPendingCancelAction implements UpdateTraderOrderS
 {
     use TraderHelperTrait;
 
-    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null, $cancelledByType = TraderOrderCancelType::System, ?User $cancelledBy = null): void
+    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, $cancelledByType = TraderOrderCancelType::System, ?User $cancelledBy = null): void
     {
         $currentStep = $traderOrder->getCancelStep() ?? MurabhaStep::TraderOrderCreated;
 
         $traderOrder->update([
             'status' => TraderOrderStatus::PendingCancellation,
-            'failure_reason' => $failureReason,
 
         ]);
 

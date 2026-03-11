@@ -7,5 +7,5 @@ use App\Models\TraderOrder;
 
 interface UpdateTraderOrderStatusToCancel
 {
-    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled, ?string $failureReason = null);
+    public function handle(TraderOrder $traderOrder, int $cancelReason = TraderOrderCancelReason::TraderOrderIsCancelled);
 }

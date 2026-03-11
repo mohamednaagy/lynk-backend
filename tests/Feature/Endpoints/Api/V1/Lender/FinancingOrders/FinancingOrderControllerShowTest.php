@@ -4,11 +4,10 @@ namespace Tests\Feature\Endpoints\Api\V1\Lender\FinancingOrders;
 
 use App\Enums\Role;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Transformers\FinancingOrderTransformer;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
@@ -35,13 +34,13 @@ class FinancingOrderControllerShowTest extends TestCase
 
     private static Wallet $secondWallet;
 
-    private static Builder|Model $firstOrderInSameCompany;
+    private static FinancingOrder $firstOrderInSameCompany;
 
-    private static Builder|Model $secondOrderInSameCompany;
+    private static FinancingOrder $secondOrderInSameCompany;
 
-    private static Builder|Model $thirdOrderInSameCompany;
+    private static FinancingOrder $thirdOrderInSameCompany;
 
-    private static Builder|Model $firstOrderInOtherCompany;
+    private static FinancingOrder $firstOrderInOtherCompany;
 
     protected function setUp(): void
     {
@@ -104,7 +103,6 @@ class FinancingOrderControllerShowTest extends TestCase
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
-                        'trader_orders.failure_reason',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
@@ -157,7 +155,6 @@ class FinancingOrderControllerShowTest extends TestCase
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
-                        'trader_orders.failure_reason',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',
@@ -220,7 +217,6 @@ class FinancingOrderControllerShowTest extends TestCase
                         'approver',
                         'trader_orders.id',
                         'trader_orders.reference',
-                        'trader_orders.failure_reason',
                         'trader_orders.is_cancellable',
                         'trader_orders.history',
                         'trader_orders.status',

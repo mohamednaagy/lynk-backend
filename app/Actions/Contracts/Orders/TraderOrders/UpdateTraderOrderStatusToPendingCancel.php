@@ -8,5 +8,5 @@ use App\Models\User;
 
 interface UpdateTraderOrderStatusToPendingCancel
 {
-    public function handle(TraderOrder $traderOrder, int $cancelReason, ?string $failureReason = null, $cancelledByType = TraderOrderCancelType::System, ?User $cancelledBy = null);
+    public function handle(TraderOrder $traderOrder, int $cancelReason, $cancelledByType = TraderOrderCancelType::System, ?User $cancelledBy = null);
 }

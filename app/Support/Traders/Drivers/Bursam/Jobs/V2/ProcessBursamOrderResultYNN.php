@@ -69,17 +69,23 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             }
 
             if (! $traderOrder->doesLastActionMatchWith(FinancingOrderHistory::GetTtiId)) {
-                log::channel(LOG_CHANNEL_BURSAM)->error(formatLogTitle('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', $traderOrder), [
-                    'financingOrderId' => $traderOrder->financing_order_id,
-                    'traderOrderId' => $this->traderOrderId,
-                    'actual_last_action' => $traderOrder->traderHistories()->latest()->first()->action,
-                    'expected_action' => FinancingOrderHistory::GetTtiId,
-                ]);
+                log::channel(LOG_CHANNEL_BURSAM)->error(
+                    formatLogTitle('bursa purchasing step => Trader Order dosent have correct history at ProcessBursamOrderResultYNN', $traderOrder),
+                    [
+                        'financingOrderId' => $traderOrder->financing_order_id,
+                        'traderOrderId' => $this->traderOrderId,
+                        'actual_last_action' => $traderOrder->traderHistories()->latest()->value('action'),
+                        'expected_action' => FinancingOrderHistory::GetTtiId,
+                    ]
+                );
 
                 return;
             }
 
-            Trader::driver('bursam', $traderOrder->version)->fetchOrderResultYNN($traderOrder);
+            /** @var \App\Support\Traders\Drivers\Bursam\Strategies\BursamV1Driver $bursamDriver */
+            $bursamDriver = Trader::driver($traderOrder->provider, $traderOrder->version);
+
+            $bursamDriver->fetchOrderResultYNN($traderOrder);
 
             log::channel(LOG_CHANNEL_BURSAM)->info(formatLogTitle('bursa purchasing step => Finishing ProcessBursamOrderResultYNN Job', $traderOrder), ['financingOrderId' => $traderOrder->financing_order_id, 'traderOrderId' => $this->traderOrderId]);
         } catch (Exception $e) {
@@ -116,8 +122,7 @@ class ProcessBursamOrderResultYNN implements ShouldBeUnique, ShouldQueue
             app(UpdateTraderOrderStatusToPendingCancel::class)->handle($traderOrder, $cancelReason);
             app(UpdateTraderOrderStatusToCancel::class)->handle(
                 $traderOrder,
-                $cancelReason,
-                $this->failureCode
+                $cancelReason
             );
         });
     }
