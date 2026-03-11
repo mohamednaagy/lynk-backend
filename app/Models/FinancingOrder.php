@@ -453,7 +453,7 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->traderOrders()->where('status', TraderOrderStatus::Hold)->exists();
     }
 
-    private function isComplete(): bool
+    public function isComplete(): bool
     {
         return $this->status->is(FinancingOrderStatus::Completed);
     }
