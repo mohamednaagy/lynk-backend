@@ -200,8 +200,6 @@ return [
         App\Providers\MacroServiceProvider::class,
         App\Providers\PasswordResetServiceProvider::class,
         App\Providers\DatabaseServiceProvider::class,
-        // sms provider
-        App\Providers\SmsServiceProvider::class,
         App\Providers\EdaatServiceProvider::class,
         App\Providers\BursamServiceProvider::class,
         App\Providers\PdfGeneratorServiceProvider::class,
@@ -237,7 +235,6 @@ return [
         'MobileVerify' => App\Support\MobileVerification\Facades\MobileVerify::class,
         'Trader' => App\Support\Traders\Facades\Trader::class,
         // 'ExampleClass' => App\Example\ExampleClass::class,
-        'Sms' => App\Support\Sms\Sms::class,
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
         'WebhookEvent' => \App\Support\Webhooks\Facades\WebhookEvent::class,
         'Agent' => Jenssegers\Agent\Facades\Agent::class,

@@ -7,19 +7,16 @@ use App\Enums\ErrorCode;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\Sms\Events\SmsSent;
 use App\Transformers\TraderOrderTransformer;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
-use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
@@ -38,9 +35,9 @@ class UpdatePurchasingCommodityTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static CommittedOrder $financingOrder;
+    private static FinancingOrder $financingOrder;
 
-    private static Builder|Model|TraderOrder $traderOrder;
+    private static TraderOrder $traderOrder;
 
     private static string $updatePurchasingCommodityUrl;
 
@@ -49,10 +46,6 @@ class UpdatePurchasingCommodityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        Event::fake([
-            SmsSent::class,
-        ]);
 
         self::$superAdminUser = $this->createSuperAdminUser();
 
@@ -63,7 +56,8 @@ class UpdatePurchasingCommodityTest extends TestCase
 
         self::$financingOrder = OrderScenario::inProgress()
             ->creator(self::$userLender)
-            ->commit();
+            ->commit()
+            ->model();
 
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(Trader::Bursam);
 
@@ -135,7 +129,7 @@ class UpdatePurchasingCommodityTest extends TestCase
                 ],
             ]);
 
-        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->currentStep);
+        $this->assertEquals(MurabhaStep::PurchasingCommodity, self::$traderOrder->current_step);
     }
 
     public function test_update_purchasing_commodity_not_follow_sequence(): void

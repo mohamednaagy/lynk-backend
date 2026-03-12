@@ -9,16 +9,13 @@ use App\Enums\MurabhaStep;
 use App\Enums\Trader;
 use App\Enums\TraderOrderStatus;
 use App\Models\Company;
+use App\Models\FinancingOrder;
 use App\Models\TraderOrder;
 use App\Models\User;
-use App\Support\Sms\Events\SmsSent;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Response;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
-use Tests\Support\FinancingOrders\CommittedOrder;
 use Tests\Support\FinancingOrders\InProgressOrder;
 use Tests\Support\FinancingOrders\OrderScenario;
 use Tests\Support\FinancingOrders\TraderOrderScenario;
@@ -37,9 +34,9 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
     private static User $superAdminUser;
 
-    private static CommittedOrder $financingOrder;
+    private static FinancingOrder $financingOrder;
 
-    private static Model|TraderOrder $traderOrder;
+    private static TraderOrder $traderOrder;
 
     private static string $updateMurabhaCompleteDocumentUrl;
 
@@ -48,10 +45,6 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        Event::fake([
-            SmsSent::class,
-        ]);
 
         self::$superAdminUser = $this->createSuperAdminUser();
 
@@ -62,7 +55,8 @@ class UpdateMurabhaCompleteDocumentTest extends TestCase
 
         self::$financingOrder = OrderScenario::inProgress()
             ->creator(self::$userLender)
-            ->commit();
+            ->commit()
+            ->model();
 
         self::$traderOrder = InProgressOrder::of(self::$financingOrder)->createTraderOrder(Trader::Bursam);
 
