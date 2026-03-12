@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Jobs\Lenders;
 
+use App\Enums\Role;
 use App\Enums\SystemNotificationType;
 use App\Models\Lender;
 use App\Notifications\WalletRemainingBalanceNotification;
@@ -32,7 +33,8 @@ class NotifyAboutRemainingBalanceLimit implements ShouldQueue
 
         $notifiableEmails = app(NotificationPreferenceService::class)
             ->getEnabledUsersFor(SystemNotificationType::WALLET_REMAINING_BALANCE,
-                fn ($query) => $query->withLenderAdminForCompany($lenderId)
+                fn ($query) => $query->role([Role::LenderAdmin, Role::LenderBilling])
+                    ->where('company_id', $lenderId)
             )->pluck('email')
             ->all();
 
