@@ -9,7 +9,6 @@ use App\Enums\WebhookType;
 use App\Models\Company;
 use App\Models\FinancingOrder;
 use App\Models\User;
-use App\Support\Sms\Events\SmsSent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;

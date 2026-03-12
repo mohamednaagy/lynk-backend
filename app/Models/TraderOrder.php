@@ -50,6 +50,7 @@ use UnexpectedValueException;
  * @property float|null $exchange_rate
  * @property bool $auto_generate_financing_institution_certificate
  * @property string|null $product_code
+ * @property string|null $current_step
  * @property-read \App\Models\TraderOrderCancelDetail|null $cancelDetail
  * @property-read \App\Models\CommodityType|null $commodityType
  *
