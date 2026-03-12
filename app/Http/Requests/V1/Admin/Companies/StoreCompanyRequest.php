@@ -194,7 +194,8 @@ class StoreCompanyRequest extends FormRequest
 
             'min_wallet_limit' => [
                 'nullable',
-                'decimal:0,2',
+                'integer',
+                'min:0',
             ],
         ];
     }
