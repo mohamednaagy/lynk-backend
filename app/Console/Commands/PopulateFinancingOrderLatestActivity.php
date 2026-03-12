@@ -5,9 +5,12 @@ namespace App\Console\Commands;
 use App\Actions\Contracts\FinancingOrderActivityUpdate;
 use App\Models\FinancingOrder;
 use Illuminate\Console\Command;
+use Illuminate\Support\Traits\Localizable;
 
 class PopulateFinancingOrderLatestActivity extends Command
 {
+    use Localizable;
+
     protected $signature = 'financing-orders:populate-latest-activity
                             {--chunk-size=1000 : Number of records to process at once}
                             {--force : Force update even if latest_activity is already set}';
@@ -39,12 +42,12 @@ class PopulateFinancingOrderLatestActivity extends Command
         $bar->start();
 
         $processed = 0;
-        $service = app(FinancingOrderActivityUpdate::class);
+        $action = app(FinancingOrderActivityUpdate::class);
 
         // Process in chunks to avoid memory issues
-        $query->chunk($chunkSize, function ($financingOrders) use ($bar, &$processed, $service) {
+        $query->chunk($chunkSize, function ($financingOrders) use ($action, $bar, &$processed) {
             foreach ($financingOrders as $order) {
-                $service->updateFinancingOrderLatestActivity($order);
+                $action->updateFinancingOrderLatestActivity($order);
                 $processed++;
                 $bar->advance();
             }
