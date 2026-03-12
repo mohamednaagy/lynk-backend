@@ -19,10 +19,6 @@ class AskClientWakalaAction implements AskClientWakala
             ]
         );
 
-        if (app()->isProduction()) {
-            app('bitly')->getUrl($url);
-        }
-
         return true;
     }
 }
