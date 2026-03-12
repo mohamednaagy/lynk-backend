@@ -20,8 +20,10 @@ class LoanCoverage
 
     public function calculateCombination(int $loanAmount, array $inventories): array
     {
-        $this->logInfo('Loan Amount', ['loan' => $loanAmount]);
-        $this->logInventories($inventories);
+        $this->logInfo('Loan coverage calculation started', [
+            'loan' => $loanAmount,
+            'inventories_count' => count($inventories),
+        ]);
 
         $coverageGaps = [];
         $startTime = microtime(true);
@@ -44,8 +46,6 @@ class LoanCoverage
             }
 
             while ((! $success && $loanAmountRemaining > 0 && ! empty($queue)) || count($queue) > $this->maxUnitsPerTrader) {
-                $this->logInfo('Taken inventories map', $inventoriesMap);
-
                 if ($loanAmountRemaining != 0 && ! in_array($loanAmountRemaining, $coverageGaps)) {
                     $coverageGaps[] = $loanAmountRemaining;
                 }
@@ -74,28 +74,23 @@ class LoanCoverage
                     $removedInventory = $skippedInventories[$skipInventoryIndex] ?? null;
                     unset($tempInventories[$skipInventoryIndex]);
 
-                    if ($removedInventory) {
-                        $this->logInfo("Skipping the inventory ID {$removedInventory->id}, max_price {$removedInventory->max_price}, available quantity {$removedInventory->available_quantity}");
-                        $this->logInfo("Removed an item from the queue related to the inventory ID {$removedInventory->id}");
-                        $this->logInfo("Adjusted loan remaining {$loanAmountRemaining}, adjusted coverage {$coverage}");
-                        $currentUsedItemCount = $usedInventories[$skipInventoryIndex] - 1;
-                        $this->logInfo("Current used item count in the queue related to the inventory ID {$removedInventory->id}: {$currentUsedItemCount}");
-                    }
-
                     $success = $this->processInventories($loanAmountRemaining, $tempInventories, $queue, $inventoriesMap, $coverage, $coverageGaps);
                 } else {
                     /** @var LocalMarketInventory $inventory */
                     $inventory = $inventories[$skipInventoryIndex];
 
-                    $this->logInfo('Remove inventory ID('.$inventory->id.') from the inventories map');
                     unset($inventoriesMap[0]);
                     $inventoriesMap = array_values($inventoriesMap);
-                    $this->logInfo('The current inventories map', $inventoriesMap);
                 }
             }
 
             $selectedInventories = $this->getLoanCoverageResult($inventories, $coverage, $loanAmountRemaining, $queue);
-            $this->logInfo('Selected Inventories: ', $selectedInventories);
+            $this->logInfo('Loan coverage calculation finished', [
+                'loan' => $loanAmount,
+                'covered_amount' => $coverage,
+                'remaining_amount' => $loanAmountRemaining,
+                'used_inventories_count' => count($selectedInventories),
+            ]);
 
             return $selectedInventories;
         } catch (Exception $e) {
@@ -113,16 +108,10 @@ class LoanCoverage
             $count = $inventory->available_quantity;
 
             if ($count === 0) {
-                $this->logInfo("Inventory ID {$inventory->id} is out of stock");
-
                 continue;
             }
 
             $possibleUses = min((int) floor($loanAmountRemaining / $price), $count);
-
-            if ($possibleUses > 0) {
-                $this->logInfo("Processing Inventory ID {$inventory->id}: price = $price, possible uses = $possibleUses");
-            }
 
             for ($i = 0; $i < $possibleUses; $i++) {
                 if ($loanAmountRemaining >= $price) {
@@ -140,8 +129,6 @@ class LoanCoverage
             }
 
             if ($loanAmountRemaining <= 0) {
-                $this->logInfo('Loan fully covered with current inventories.');
-
                 return true;
             }
         }
@@ -151,12 +138,6 @@ class LoanCoverage
 
     private function getLoanCoverageResult(array $inventories, int $coverage, int $loanAmountRemaining, array $queue): array
     {
-        $this->logInfo('getLoanCoverageResult called with:', [
-            'coverage' => $coverage,
-            'loanRemaining' => $loanAmountRemaining,
-            'queue' => $queue,
-        ]);
-
         $usedInventories = array_count_values($queue);
 
         $result = [];
@@ -170,8 +151,6 @@ class LoanCoverage
 
             $result[] = $translated;
         }
-
-        $this->logInfo('Final Loan Coverage Result:', $result);
 
         return $result;
     }
