@@ -126,7 +126,7 @@ class PartialUpdateCompanyRequest extends FormRequest
             'allowed_financing_order_types.*' => [
                 'sometimes', 'integer', new EnumValue(\App\Enums\FinancingOrderTypeEnum::class, false),
             ],
-            'min_wallet_limit' => ['sometimes', 'nullable', 'numeric'],
+            'min_wallet_limit' => ['sometimes', 'nullable', 'integer', 'min:0'],
         ];
     }
 
