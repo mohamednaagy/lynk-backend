@@ -88,10 +88,13 @@ class LoanService
         $sql = "
             UPDATE local_market_eligible_quantities
             SET
-                eligible_quantity = eligible_quantity - CASE
-                    {$caseClause}
-                    ELSE 0
-                END,
+                eligible_quantity = GREATEST(
+                    0,
+                    eligible_quantity - CASE
+                        {$caseClause}
+                        ELSE 0
+                    END
+                ),
                 touched_by = {$touchedBy},
                 updated_at = NOW()
             WHERE inventory_id IN ({$inventoryIdsList})
