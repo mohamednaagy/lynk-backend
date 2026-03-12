@@ -61,9 +61,7 @@ class LoanCoverage
                 if (($key = array_search($skipInventoryIndex, $queue)) !== false) {
                     unset($queue[$key]);
 
-                    /** @var LocalMarketInventory $inventory */
                     $inventory = $inventories[$skipInventoryIndex];
-
                     $loanAmountRemaining += $inventory->max_price;
                     $coverage -= $inventory->max_price;
 
@@ -76,9 +74,6 @@ class LoanCoverage
 
                     $success = $this->processInventories($loanAmountRemaining, $tempInventories, $queue, $inventoriesMap, $coverage, $coverageGaps);
                 } else {
-                    /** @var LocalMarketInventory $inventory */
-                    $inventory = $inventories[$skipInventoryIndex];
-
                     unset($inventoriesMap[0]);
                     $inventoriesMap = array_values($inventoriesMap);
                 }
@@ -142,11 +137,8 @@ class LoanCoverage
 
         $result = [];
         foreach ($usedInventories as $inventoryIndex => $count) {
-            /** @var LocalMarketInventory $inventory */
             $inventory = $inventories[$inventoryIndex];
-
             $amountToCover = $count * $inventory->max_price;
-
             $translated = LoanCoverageTranslator::translate($inventory, $count, $amountToCover);
 
             $result[] = $translated;
@@ -161,7 +153,6 @@ class LoanCoverage
         $totalItemsUsed = 0;
 
         foreach ($inventories as $inventory) {
-            /** @var LocalMarketInventory $inventory */
             if ($totalItemsUsed >= $this->maxUnitsPerTrader) {
                 break;
             }
