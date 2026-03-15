@@ -49,7 +49,8 @@ class FinancingOrderObserver implements ShouldHandleEventsAfterCommit
             ProcessInProgressOrder::dispatch($financingOrder->id);
         }
 
-        if ($financingOrder->wasChanged('status')) {
+        // NOTE: don't change this to $financingOrder->wasChanged('status')
+        if ($financingOrder->status !== $financingOrder->getOriginal('status')) {
             $this->updateFinancingOrderLatestActivity($financingOrder);
         }
     }
