@@ -85,12 +85,13 @@ class LoanService
                 'is_editable' => 0,
             ]);
 
+        // // Safely reduce eligible_quantity per inventory; LEAST ensures we never subtract more than available (prevents negative UNSIGNED values).
         $sql = "
             UPDATE local_market_eligible_quantities
             SET
-                eligible_quantity = GREATEST(
-                    0,
-                    eligible_quantity - CASE
+                eligible_quantity = eligible_quantity - LEAST(
+                    eligible_quantity,
+                    CASE
                         {$caseClause}
                         ELSE 0
                     END

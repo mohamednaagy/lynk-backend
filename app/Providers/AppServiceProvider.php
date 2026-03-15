@@ -3,9 +3,6 @@
 namespace App\Providers;
 
 use App\Listeners\LogActivity;
-use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
-use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\GreedyLoanCoverageStrategy;
-use App\Services\LocalMarket\LoanCoverageStrategy\Strategies\OptimizedLoanCoverageStrategy;
 use App\Support\Traders\Events\ProcessNotification;
 use App\Support\Traders\TraderManager;
 use Illuminate\Support\Facades\Event;
@@ -41,13 +38,6 @@ class AppServiceProvider extends ServiceProvider
             $numeralInstance->setLanguageManager(new LanguageManager);
 
             return $numeralInstance;
-        });
-
-        $this->app->singleton(LoanCoverageStrategy::class, function () {
-            return match (config('trader.providers.lynk.loan_coverage_strategy')) {
-                'greedy' => new GreedyLoanCoverageStrategy,
-                default => new OptimizedLoanCoverageStrategy, // Default to optimized
-            };
         });
     }
 

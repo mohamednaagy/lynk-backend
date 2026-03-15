@@ -9,13 +9,13 @@ use App\Enums\LocalMarket\InventoryUnitsStatus;
 use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketInventoryUnits;
 use App\Models\LocalMarketOrder;
-use App\Services\LocalMarket\LoanCoverageStrategy\Contracts\LoanCoverageStrategy;
+use App\Services\LocalMarket\LoanCoverage\LoanCoverage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class InventoryService
 {
-    public function __construct(private LoanCoverageStrategy $loanCoverageStrategy) {}
+    public function __construct(private LoanCoverage $loanCoverage) {}
 
     /**
      * Finds eligible inventory from the local market based on the loan amount, preferred item types, and previously used inventories.
@@ -113,7 +113,7 @@ class InventoryService
             return false;
         }
 
-        $result = $this->loanCoverageStrategy->calculateCombination($loanAmount, $inventories->all());
+        $result = $this->loanCoverage->calculateCombination($loanAmount, $inventories->all());
 
         Log::channel(LOG_CHANNEL_LOCAL_MARKET)->info(formatLocalMarketOrderTitle('findOptimalCombination Duration', $localMarketOrder), [
             'localMarketOrderId' => $localMarketOrder->id,
