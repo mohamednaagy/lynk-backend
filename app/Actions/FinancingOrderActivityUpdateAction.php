@@ -17,6 +17,8 @@ class FinancingOrderActivityUpdateAction implements FinancingOrderActivityUpdate
      */
     public function updateFinancingOrderLatestActivity(FinancingOrder $financingOrder): void
     {
+        $financingOrder->refresh();
+
         $financingOrder->latest_activity = $this->getLatestActivityDescription($financingOrder);
         Log::channel(LOG_CHANNEL_LYNK)
             ->debug('FinancingOrderActivityUpdateAction: updating latest_activity for order', [
