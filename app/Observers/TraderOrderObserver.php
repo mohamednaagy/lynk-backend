@@ -47,7 +47,10 @@ class TraderOrderObserver implements ShouldHandleEventsAfterCommit
             $this->takeActionsIfStatusWasChanged($traderOrder);
         }
 
-        if ($traderOrder->wasChanged('status') || $traderOrder->wasChanged('last_history_action')) {
+        if (
+            $traderOrder->status !== $traderOrder->getOriginal('status')
+            || $traderOrder->last_history_action !== $traderOrder->getOriginal('last_history_action')
+        ) {
             $this->updateFinancingOrderLatestActivity($traderOrder);
         }
     }
