@@ -102,6 +102,8 @@ final class OrderStatus extends Enum implements LocalizedEnum
         self::TransferOwnershipToCustomer => [
             self::PendingSellCommodities,
             self::PendingCancellation,
+            self::Delivered,
+            self::FailedDelivery,
         ],
 
     ];
