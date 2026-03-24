@@ -24,7 +24,7 @@ _ide_helper.php
 # Ignore Laravel bootstrap cache
 bootstrap/cache/*.php
 
-composer.lock
+# composer.lock is tracked for reproducible installs (Docker/CI, duplicate-PSL prevention)
 
 # Ignore all log files (logs are persisted on host via Docker volumes)
 /storage/logs/**/*.log
