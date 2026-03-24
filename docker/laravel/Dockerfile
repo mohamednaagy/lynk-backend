@@ -20,10 +20,11 @@ RUN composer install \
 # Copy application code (use .dockerignore to exclude unnecessary files)
 COPY . .
 
-# Generate optimized autoloader for production
+# Generate optimized autoloader (no scripts: composer image PHP cannot run `artisan package:discover`)
 RUN composer dump-autoload \
     --optimize \
-    --classmap-authoritative
+    --classmap-authoritative \
+    --no-scripts
 
 # Stage 2: Runtime image
 FROM php:8.4-fpm-alpine
@@ -125,6 +126,9 @@ RUN mkdir -p storage/framework/cache \
     bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
+
+# Discover packages using runtime PHP (same extensions as production)
+RUN php artisan package:discover --ansi --no-interaction
 
 # Pre-warm Laravel caches (optional, adds ~10MB but improves startup)
 # Uncomment if you want faster container startup
