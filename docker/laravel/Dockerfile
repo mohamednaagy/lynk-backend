@@ -7,8 +7,10 @@ FROM composer:2 AS composer-stage
 
 WORKDIR /app
 
-# Copy only composer files first (better layer caching)
-COPY composer.json ./
+# Copy lock file with manifest so install matches the repo (avoids duplicate
+# Psl packages: resolving from composer.json alone can install both azjezz/psl
+# and php-standard-library/php-standard-library → fatal redeclare at runtime).
+COPY composer.json composer.lock ./
 
 # Install production dependencies only (--no-dev removes dev packages)
 RUN composer install \
