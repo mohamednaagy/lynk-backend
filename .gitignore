@@ -24,8 +24,6 @@ _ide_helper.php
 # Ignore Laravel bootstrap cache
 bootstrap/cache/*.php
 
-composer.lock
-
 # Ignore all log files (logs are persisted on host via Docker volumes)
 /storage/logs/**/*.log
 /storage/logs/**/*.log.*
