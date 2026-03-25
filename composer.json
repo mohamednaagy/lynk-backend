@@ -139,6 +139,9 @@
             "php-http/discovery": true
         }
     },
+    "replace": {
+        "azjezz/psl": "*"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true
 }
