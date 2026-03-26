@@ -190,7 +190,7 @@ const SpecializedEntity = 5;
 
 **Purpose:** Denormalized FK that stores the SE company ID when `current_owner_type = SpecializedEntity`. Enables direct querying of which units belong to a given SE (for certificates, reporting, and any future SE-facing features) without type-casting the polymorphic `current_owner` string field.
 
-**Migration:**
+**Migration:** `2026_03_26_000002_add_specialized_entity_id_to_local_market_inventory_units_table.php`
 
 ```php
 Schema::table('local_market_inventory_units', function (Blueprint $table) {
@@ -201,13 +201,32 @@ Schema::table('local_market_inventory_units', function (Blueprint $table) {
 
 **Update rule:** When `changeOrderUnitsOwnershipTo()` is called with `OwnershipTypes::SpecializedEntity`, also set `specialized_entity_id = $ownerIdentifier`. For all other ownership types, set `specialized_entity_id = null`.
 
-### 4.3 Columns to Drop (Post-Data Migration)
+**Model:** Add `specialized_entity_id` to `$fillable` in `LocalMarketInventoryUnits`.
+
+### 4.3 New Column: `specialized_entity_id` on `local_market_orders`
+
+**Purpose:** Stores the SE company ID assigned to the order at the time of the sell step. Allows querying all orders handled by a specific SE and used as the source to determine the buyer name on the Sell Confirmation Certificate.
+
+**Migration:** `2026_03_26_000001_add_specialized_entity_id_to_local_market_orders_table.php`
+
+```php
+Schema::table('local_market_orders', function (Blueprint $table) {
+    $table->unsignedBigInteger('specialized_entity_id')->nullable()->after('is_commodities_settled');
+    $table->foreign('specialized_entity_id')->references('id')->on('companies');
+});
+```
+
+**Set when:** `PendingSellOrderStatus` resolves the active SE and calls `changeOrderUnitsOwnershipTo()` — the same SE ID is written to `local_market_orders.specialized_entity_id`.
+
+**Model:** Add `specialized_entity_id` to `$fillable` in `LocalMarketOrder`.
+
+### 4.4 Columns to Drop (Post-Data Migration)
 
 | Table | Column | Migration |
 |-------|--------|-----------|
 | `local_market_orders` | `is_commodities_settled` | `drop_is_commodities_settled_from_local_market_orders` |
 
-### 4.4 Tables to Drop (Post-Data Migration)
+### 4.5 Tables to Drop (Post-Data Migration)
 
 | Table | Migration |
 |-------|-----------|
@@ -303,25 +322,27 @@ public function getLastValidOwner(): array
 }
 ```
 
+**Revert logic on cancellation:**
+
+When an order is cancelled, units must be returned to their last valid owner:
+- If `specialized_entity_id` is set on the unit → the last valid owner is the SE → revert to SE
+- If `specialized_entity_id` is null → the last valid owner is the original supplier → revert to supplier
+
+This replaces the previous logic that used `last_completed_order_id` + `TraderOrder` type.
+
 **After:**
 ```php
 public function getLastValidOwner(): array
 {
-    if (is_null($this->last_completed_order_id)) {
+    if (is_null($this->specialized_entity_id)) {
         return ['current_owner' => $this->inventory->company_id, 'current_owner_type' => OwnershipTypes::OriginalSupplier];
     }
 
-    if ($this->current_owner_type === OwnershipTypes::SpecializedEntity) {
-        return ['current_owner' => $this->specialized_entity_id, 'current_owner_type' => OwnershipTypes::SpecializedEntity];
-    }
-
-    return ['current_owner' => $this->completedOrder->external_order_no, 'current_owner_type' => OwnershipTypes::TraderOrder];
+    return ['current_owner' => $this->specialized_entity_id, 'current_owner_type' => OwnershipTypes::SpecializedEntity];
 }
 ```
 
 > **`previous_owner_type` / `previous_owner` correctness:** When SE takes ownership, the bulk update shifts `current_owner` (customer identifier) → `previous_owner` and `current_owner_type` (Customer) → `previous_owner_type`. No special-casing needed.
-
-> ⚠️ **To Discuss:** `getLastValidOwner()` is called during order cancellation/revert via `revertInventoryUnitOwnership()`. Once a unit is owned by the SE, reverting to SE ownership may not be the intended behaviour — it is unclear whether a cancellation after the sell step should return units to the SE or to the original supplier/pool. This needs to be confirmed before implementing this change.
 
 ---
 
@@ -369,27 +390,7 @@ if ($this->traderOrder->provider === TraderEnum::Lynk) {
 }
 ```
 
-### 6.2 Step Data: `MurabhaOfferIssued` (Sell Commitment Certificate)
-
-**File:** `app/Transformers/TraderHistoryTransformers/AbstractTraderHistoryTransformer.php:168`
-
-The `mpo_document` field currently returns the Sell Commitment Certificate URL. For new SE orders (Category A/B), this certificate is no longer generated.
-
-**Detection logic:** If the associated local market order's units have `specialized_entity_id` set, it is a new SE order → `mpo_document` = null.
-
-```php
-// In includeMurabhaOfferIssued(), for Lynk orders:
-$isSeOrder = $this->localMarketOrderHasSeUnits(); // check specialized_entity_id on units
-
-$data['mpo_document'] = [
-    'url' => ($history && !$isSeOrder) ? $this->getCertificateLURL(...) : null,
-    'date' => ($history && !$isSeOrder) ? ... : null,
-];
-```
-
-For legacy orders (Categories C/D) where the Sell Commitment Certificate was already generated, the existing media file will be returned as before.
-
-### 6.3 Webhook: `warranty_document_url`
+### 6.2 Webhook: `warranty_document_url`
 
 **File:** `app/Actions/Orders/Webhooks/FireWebhookWhenStatusIsMurabhaSaleCompletedAction.php:44`
 
@@ -415,7 +416,7 @@ After SE, `warranty_document_url` for Lynk must point to `SELL_CONFIRMATION_DOCU
 ]),
 ```
 
-### 6.4 Frontend Impact
+### 6.3 Frontend Impact
 
 - Use `sell_confirmation_document` directly from the `MurabahaSaleCompleted` step data.
 - `warranty_document` is no longer present for Lynk orders — remove any frontend usage of it for Lynk.
@@ -426,60 +427,103 @@ After SE, `warranty_document_url` for Lynk must point to `SELL_CONFIRMATION_DOCU
 
 ## 7. Sell Confirmation Certificate — Buyer Name Logic
 
-### 7.1 Detection: SE Order vs Legacy Order
+### 7.1 Overview
 
-Since "عملاء متفرقين" applies to legacy orders (Categories C and D) where some or all units went through the old TraderOrder flow, the certificate generator must detect which case applies.
+The buyer name on the certificate is resolved from `trader_orders.specialized_entity_id`:
+- **Set** → SE order (Categories A/B) → show SE company name
+- **Null** → legacy order (Categories C/D) → show "عملاء متفرقين"
 
-**Detection rule:** Check whether any units for this order were sold through the old flow (have `last_purchasing_order_id` set but `specialized_entity_id = null`). Include soft-deleted units (`withTrashed`) because old-flow units are soft-deleted once re-sold.
+This column is populated via a new local market webhook case fired by `SoldOrderSuccessStatus` after the sell step completes.
+
+### 7.2 New Column: `specialized_entity_id` on `trader_orders`
+
+**Migration:** `2026_03_26_000003_add_specialized_entity_id_to_trader_orders_table.php`
 
 ```php
-$hasOldFlowUnits = LocalMarketInventoryUnits::withTrashed()
-    ->where('last_purchasing_order_id', $localMarketOrder->id)
-    ->whereNull('specialized_entity_id')
-    ->exists();
-
-$buyerName = $hasOldFlowUnits
-    ? 'عملاء متفرقين'
-    : LocalMarketInventoryUnits::withTrashed()
-          ->where('last_purchasing_order_id', $localMarketOrder->id)
-          ->whereNotNull('specialized_entity_id')
-          ->with('specializedEntity')
-          ->first()
-          ->specializedEntity
-          ->name;
+Schema::table('trader_orders', function (Blueprint $table) {
+    $table->unsignedBigInteger('specialized_entity_id')->nullable()->after('id');
+    $table->foreign('specialized_entity_id')->references('id')->on('companies');
+});
 ```
 
-| Scenario | `specialized_entity_id` null units | Result |
-|----------|-----------------------------------|--------|
-| New SE order (A/B) | None | SE name |
-| Partially sold legacy (C) | Some (old flow) | عملاء متفرقين |
-| Fully sold legacy (D) | All | عملاء متفرقين |
+**Model:** Add `specialized_entity_id` to `TraderOrder` virtual columns list (`getCustomColumns()`) and add a `specializedEntity()` relationship:
 
-### 7.2 `SellConfirmationDocumentPdf::prepareData()` Change
+```php
+public function specializedEntity()
+{
+    return $this->belongsTo(Company::class, 'specialized_entity_id');
+}
+```
+
+### 7.3 New Webhook Case: `CommoditiesSold`
+
+**`app/Enums/LocalMarket/CaseStatus.php`** — add new case (next value after `FailedToCancel = 7`):
+
+```php
+const CommoditiesSold = 8;
+```
+
+### 7.4 `SoldOrderSuccessStatus` Change
+
+**File:** `app/Jobs/LocalMarket/states/SoldOrderSuccessStatus.php`
+
+Currently this job only logs. After SE, it must fire the webhook with the new case so the trader order side records the SE.
+
+**After:**
+```php
+public function handle(): void
+{
+    $data = [
+        'case'                  => CaseStatus::CommoditiesSold,
+        'external_order_no'     => $this->localMarketOrder->external_order_no,
+        'specialized_entity_id' => $this->localMarketOrder->specialized_entity_id,
+    ];
+
+    $this->localMarketWebhook->with($data)->handle();
+    $this->logQueueJob('Order Sold successfully');
+}
+```
+
+### 7.5 `LocalMarketWebhookAction` Change
+
+**File:** `app/Actions/Orders/LocalMarketWebhookAction.php`
+
+Add the new case to the switch:
+
+```php
+case CaseStatus::CommoditiesSold:
+    $traderOrder->update([
+        'specialized_entity_id' => $this->data['specialized_entity_id'],
+    ]);
+    break;
+```
+
+### 7.6 `LocalMarketWebhookRequest` Change
+
+**File:** `app/Http/Requests/V1/Admin/Lenders/Orders/TraderOrders/LocalMarketWebhookRequest.php`
+
+Add `CommoditiesSold` to the allowed cases and add conditional validation for `specialized_entity_id`:
+
+```php
+'case' => ['required', 'in:CommoditiesPurchased,FailedPurchase,CommoditiesSold'],
+'specialized_entity_id' => ['nullable', 'integer', 'exists:companies,id'],
+```
+
+### 7.7 `SellConfirmationDocumentPdf::prepareData()` Change
 
 **File:** `app/Support/DocumentEngine/Generators/SellConfirmationDocumentPdf.php`
+
+Buyer name is now read directly from `traderOrder->specialized_entity_id` — no inventory unit queries needed.
 
 ```php
 protected function prepareData(): array
 {
     $traderOrder = $this->getTraderOrder();
     $financeOrder = $traderOrder->order;
-    $localMarketOrder = LocalMarketOrder::where('external_order_no', $traderOrder->reference)->firstOrFail();
 
-    $hasOldFlowUnits = LocalMarketInventoryUnits::withTrashed()
-        ->where('last_purchasing_order_id', $localMarketOrder->id)
-        ->whereNull('specialized_entity_id')
-        ->exists();
-
-    if ($hasOldFlowUnits) {
-        $buyerName = 'عملاء متفرقين';
-    } else {
-        $unit = LocalMarketInventoryUnits::withTrashed()
-            ->where('last_purchasing_order_id', $localMarketOrder->id)
-            ->with('specializedEntity')
-            ->first();
-        $buyerName = $unit->specializedEntity->name;
-    }
+    $buyerName = is_null($traderOrder->specialized_entity_id)
+        ? 'عملاء متفرقين'
+        : $traderOrder->specializedEntity->name;
 
     $data = [
         'trader_order_reference' => $traderOrder->reference,
@@ -493,16 +537,13 @@ protected function prepareData(): array
 }
 ```
 
-Add `specializedEntity` relationship to `LocalMarketInventoryUnits`:
+| Scenario | `trader_orders.specialized_entity_id` | Certificate buyer name |
+|----------|---------------------------------------|------------------------|
+| New SE order (A/B) | SE company ID | SE company name |
+| Partially sold legacy (C) | null | عملاء متفرقين |
+| Fully sold legacy (D) | null | عملاء متفرقين |
 
-```php
-public function specializedEntity()
-{
-    return $this->belongsTo(Company::class, 'specialized_entity_id');
-}
-```
-
-### 7.3 Blade Template Change
+### 7.8 Blade Template Change
 
 **File:** `resources/views/local-commodity-market/sell-confirmation-certificate.blade.php:796`
 
@@ -625,7 +666,9 @@ tests/Feature/Endpoints/Api/V1/Admin/Lenders/Orders/TraderOrders/CheckSettlement
 
 | File | Purpose |
 |------|---------|
-| `database/migrations/..._add_specialized_entity_id_to_local_market_inventory_units.php` | Add SE FK column |
+| `2026_03_26_000001_add_specialized_entity_id_to_local_market_orders_table.php` | Add SE FK column to `local_market_orders` |
+| `2026_03_26_000002_add_specialized_entity_id_to_local_market_inventory_units_table.php` | Add SE FK column to `local_market_inventory_units` |
+| `2026_03_26_000003_add_specialized_entity_id_to_trader_orders_table.php` | Add SE FK column to `trader_orders` |
 | `database/migrations/..._drop_is_commodities_settled_from_local_market_orders.php` | Remove settled flag (Phase 2) |
 | `database/migrations/..._drop_trader_order_settlements_table.php` | Remove table (Phase 2) |
 | `app/Console/Commands/LocalMarket/SettlePendingOrdersCommand.php` | Data migration command |
@@ -642,16 +685,26 @@ tests/Feature/Endpoints/Api/V1/Admin/Lenders/Orders/TraderOrders/CheckSettlement
 | `app/Jobs/LocalMarket/states/PendingSellOrderStatus.php` | Switch to SE ownership |
 | `app/Services/LocalMarket/UnitService.php` | Populate `specialized_entity_id` in bulk update |
 | `app/Models/LocalMarketInventoryUnits.php` | Add `specialized_entity_id` to `$fillable`; add `specializedEntity()` relationship; update `getLastValidOwner()` |
-| `app/Models/LocalMarketOrder.php` | Remove `markAsSettled()`, `isCommoditiesSettled()`; remove `is_commodities_settled` from `$fillable` and `$casts` |
-| `app/Models/TraderOrder.php` | Remove `settlements()`, `latestSettlement()`, `isCommoditiesSettled()`, `hasPendingSettlementCheck()`, `canBeSettled()`; remove `TraderOrderSettlementStatus` import |
+| `app/Models/LocalMarketOrder.php` | Add `specialized_entity_id` to `$fillable`; remove `markAsSettled()`, `isCommoditiesSettled()`; remove `is_commodities_settled` from `$fillable` and `$casts` |
+| `app/Models/TraderOrder.php` | Add `specialized_entity_id` to `getCustomColumns()`; add `specializedEntity()` relationship; remove `settlements()`, `latestSettlement()`, `isCommoditiesSettled()`, `hasPendingSettlementCheck()`, `canBeSettled()`; remove `TraderOrderSettlementStatus` import |
 | `app/Support/Traders/Clients/LynkClient.php` | Remove `checkOrderSettlement()` |
 | `app/Transformers/TraderHistoryTransformers/AbstractTraderHistoryTransformer.php` | `warranty_document` → Sell Confirmation for Lynk; remove `settlement_details`; remove `sell_confirmation_document` field; `mpo_document` → null for SE orders |
 | `app/Actions/Orders/Webhooks/FireWebhookWhenStatusIsMurabhaSaleCompletedAction.php` | `warranty_document_url` → Sell Confirmation for Lynk |
-| `app/Support/DocumentEngine/Generators/SellConfirmationDocumentPdf.php` | Add `buyer_name` logic (SE name vs "عملاء متفرقين") |
+| `app/Enums/LocalMarket/CaseStatus.php` | Add `CommoditiesSold = 8` |
+| `app/Jobs/LocalMarket/states/SoldOrderSuccessStatus.php` | Fire `CommoditiesSold` webhook with `specialized_entity_id` |
+| `app/Actions/Orders/LocalMarketWebhookAction.php` | Handle `CommoditiesSold` case — save SE ID to trader order |
+| `app/Http/Requests/V1/Admin/Lenders/Orders/TraderOrders/LocalMarketWebhookRequest.php` | Add `CommoditiesSold` to allowed cases; add `specialized_entity_id` validation |
+| `app/Support/DocumentEngine/Generators/SellConfirmationDocumentPdf.php` | Resolve `buyer_name` from `traderOrder->specializedEntity->name` or "عملاء متفرقين" |
 | `resources/views/local-commodity-market/sell-confirmation-certificate.blade.php` | Use `{{ $buyer_name }}` variable |
 | `routes/api/admin.php` | Remove `CheckSettlement` route |
-| `docker-compose.yml` | Remove `local_market_commodities_settlement` queue worker |
-| `docker-compose.mac.yml` | Remove `local_market_commodities_settlement` queue worker |
+| `docker-compose.yml` | Remove `local-market-commodities-settlement-worker` service (line 156) |
+| `docker-compose.mac.yml` | Remove `local-market-commodities-settlement-worker` service (line ~156) |
+
+> ⚠️ **Ops Note:** The `local-market-commodities-settlement-worker` Docker service runs `php artisan queue:work redis --queue=local_market_commodities_settlement`. This must be removed from:
+> - `docker-compose.yml` and `docker-compose.mac.yml` in this repo
+> - Any **production Supervisor configuration** on the server that manages this queue worker (if one exists outside the repo — confirm with DevOps before deployment)
+>
+> Failing to remove the worker after deployment is safe (it will process an empty queue) but wastes a container. It must be removed as part of the Phase 2 deployment.
 
 ### Deleted Files
 
