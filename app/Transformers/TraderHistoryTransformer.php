@@ -7,6 +7,7 @@ use App\Enums\FinancingOrderHistory;
 use App\Enums\MediaCollections\TraderOrderMediaCollection;
 use App\Enums\MurabhaStep;
 use App\Enums\Trader as TraderEnum;
+use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Services\TraderOrder\StepDurationService;
 use App\Support\FinancingOrders\StepAndHistories\StepHistoriesDictionary;
@@ -32,7 +33,6 @@ class TraderHistoryTransformer extends TransformerAbstract
         $this->setDefaultIncludes(array_merge($this->getDefaultIncludes(), $historySteps));
         $this->traderStepHistories = new StepHistoriesDictionary($this->traderOrder->provider, $this->traderOrder->version, $this->traderOrder->contract_signed_type);
         $this->traderHistories = $traderOrder->traderHistories ?? collect();
-        $this->traderOrder->traderOrderDuration;
         $this->stepDurationService = app(StepDurationService::class);
     }
 
@@ -136,7 +136,9 @@ class TraderHistoryTransformer extends TransformerAbstract
                         'trader_order_id' => $this->traderOrder->id,
                     ],
                 ])),
-                'date' => $transferOwnershipToLenderDocumentHistory ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at) : null,
+                'date' => $transferOwnershipToLenderDocumentHistory instanceof TraderHistory
+                    ? saudi_now('Y-m-d h:i:s A', $transferOwnershipToLenderDocumentHistory->created_at)
+                    : null,
             ],
             'duration' => $this->stepDurationService->getStepDuration($this->traderOrder, MurabhaStep::ContractSigned),
         ];
@@ -229,7 +231,9 @@ class TraderHistoryTransformer extends TransformerAbstract
                             'trader_order_id' => $this->traderOrder->id,
                         ],
                     ])),
-                    'date' => $attachedSellConfirmationDocument ? saudi_now('Y-m-d h:i:s A', $attachedSellConfirmationDocument->created_at) : null,
+                    'date' => $attachedSellConfirmationDocument instanceof TraderHistory
+                        ? saudi_now('Y-m-d h:i:s A', $attachedSellConfirmationDocument->created_at)
+                        : null,
                 ];
             }
         }

@@ -6,9 +6,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Watson\Rememberable\Rememberable;
 
 class TraderOrderDuration extends Model
 {
+    use Rememberable;
+
+    protected $rememberCacheTag = 'trader_order_durations';
+
+    protected $rememberCachePrefix = 'trader_order_durations';
+
+    protected $rememberFor = 60 * 60 * 24;
+
     protected $fillable = [
         'trader_order_id',
         'purchasing_commodity',

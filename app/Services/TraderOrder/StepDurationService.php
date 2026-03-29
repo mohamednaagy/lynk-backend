@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\TraderOrder;
 
 use App\Exceptions\InvalidStepDurationConfigException;
+use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\TraderOrderDuration;
 use Carbon\Carbon;
@@ -44,7 +45,7 @@ class StepDurationService
             }
             $durationSeconds = $this->durationInSeconds($startTime, $endTime);
 
-            $this->persistDuration($traderOrder->id, $stepDuration['step'], $durationSeconds);
+            $this->persistDuration($traderOrder, $stepDuration['step'], $durationSeconds);
         } catch (\Exception $e) {
             Log::channel(LOG_CHANNEL_LYNK)->error(formatLogTitle('Error while updating duration when step completed', $traderOrder), [
                 'traderOrderId' => $traderOrder->id,
@@ -84,6 +85,9 @@ class StepDurationService
         return $step;
     }
 
+    /**
+     * @param  Collection<int, TraderHistory>  $histories
+     */
     private function getCreatedAtForAction(Collection $histories, int $action): ?Carbon
     {
         $record = $histories->firstWhere('action', $action);
@@ -98,9 +102,12 @@ class StepDurationService
         return $seconds;
     }
 
-    private function persistDuration(int $traderOrderId, string $stepColumn, int $durationSeconds): void
+    private function persistDuration(TraderOrder $traderOrder, string $stepColumn, int $durationSeconds): void
     {
-        TraderOrderDuration::updateOrCreate(['trader_order_id' => $traderOrderId], [$stepColumn => $durationSeconds]);
+        TraderOrderDuration::updateOrCreate(
+            ['trader_order_id' => $traderOrder->id],
+            [$stepColumn => $durationSeconds]
+        );
     }
 
     public function getStepDuration(TraderOrder $traderOrder, string $step): ?string

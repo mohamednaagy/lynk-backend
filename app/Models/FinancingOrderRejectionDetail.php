@@ -11,6 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinancingOrderRejectionDetail extends Model
 {
+    /**
+     * @property string|null $comment
+     */
     use HasCreator, HasFactory;
 
     protected $fillable = [
