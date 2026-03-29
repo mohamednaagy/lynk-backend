@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,6 +10,7 @@ use Stancl\VirtualColumn\VirtualColumn;
 
 /**
  * @property TraderOrder $traderOrder
+ * @property Carbon|null $created_at
  */
 class TraderHistory extends Model
 {

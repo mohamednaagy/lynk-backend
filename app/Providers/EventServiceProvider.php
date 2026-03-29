@@ -14,6 +14,7 @@ use App\Models\LocalMarketInventory;
 use App\Models\LocalMarketOrder;
 use App\Models\TraderHistory;
 use App\Models\TraderOrder;
+use App\Models\TraderOrderDuration;
 use App\Models\TraderOrderTimeLimit;
 use App\Models\Transaction;
 use App\Models\User;
@@ -26,6 +27,7 @@ use App\Observers\LenderObserver;
 use App\Observers\LocalMarketInventoryObserver;
 use App\Observers\LocalMarketOrderObserver;
 use App\Observers\TraderHistoryObserver;
+use App\Observers\TraderOrderDurationObserver;
 use App\Observers\TraderOrderObserver;
 use App\Observers\TraderOrderTimeLimitObserver;
 use App\Observers\TransactionObserver;
@@ -54,6 +56,7 @@ class EventServiceProvider extends ServiceProvider
         FinancingOrder::class => [FinancingOrderObserver::class],
         TraderHistory::class => [TraderHistoryObserver::class],
         TraderOrder::class => [TraderOrderObserver::class],
+        TraderOrderDuration::class => [TraderOrderDurationObserver::class],
         Transaction::class => [TransactionObserver::class],
         LocalMarketInventory::class => [LocalMarketInventoryObserver::class],
         LocalMarketOrder::class => [LocalMarketOrderObserver::class],
@@ -62,9 +65,8 @@ class EventServiceProvider extends ServiceProvider
         User::class => [UserObserver::class],
         TraderOrderTimeLimit::class => [TraderOrderTimeLimitObserver::class],
         Company::class => [CompanyObserver::class],
-        Lender::class => [CompanyObserver::class],
+        Lender::class => [CompanyObserver::class, LenderObserver::class],
         CompanyLenderDetail::class => [CompanyLenderDetailObserver::class],
-        Lender::class => [LenderObserver::class],
 
     ];
 

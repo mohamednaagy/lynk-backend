@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\TraderOrder;
 
 use App\Exceptions\InvalidStepDurationConfigException;
+use App\Models\TraderHistory;
 use App\Models\TraderOrder;
 use App\Models\TraderOrderDuration;
 use Carbon\Carbon;
@@ -84,6 +85,9 @@ class StepDurationService
         return $step;
     }
 
+    /**
+     * @param  Collection<int, TraderHistory>  $histories
+     */
     private function getCreatedAtForAction(Collection $histories, int $action): ?Carbon
     {
         $record = $histories->firstWhere('action', $action);
@@ -103,9 +107,16 @@ class StepDurationService
         TraderOrderDuration::updateOrCreate(['trader_order_id' => $traderOrderId], [$stepColumn => $durationSeconds]);
     }
 
+    private function getDuration(int $traderOrderId): ?TraderOrderDuration
+    {
+        return TraderOrderDuration::query()
+            ->where('trader_order_id', $traderOrderId)
+            ->first();
+    }
+
     public function getStepDuration(TraderOrder $traderOrder, string $step): ?string
     {
-        $seconds = $traderOrder->traderOrderDuration?->{$step};
+        $seconds = $this->getDuration($traderOrder->id)?->{$step};
         if (is_null($seconds)) {
             return null;
         }
