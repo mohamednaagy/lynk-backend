@@ -10,6 +10,7 @@ use App\Enums\TraderOrderStatus;
 use App\Exceptions\TraderNotSupportedException;
 use App\Models\FinancingOrder;
 use App\Models\Lender;
+use App\Models\Media;
 use App\Models\User;
 use App\Transformers\TraderHistoryTransformers\TraderHistoryTransformerFactory;
 use League\Fractal\Resource\Collection;
@@ -249,6 +250,7 @@ class FinancingOrderTransformer extends TransformerAbstract
                 TraderOrderStatus::Completed,
                 TraderOrderStatus::InProgress,
             ])
+            ->with('traderOrderDuration')
             ->latest()
             ->first();
 
@@ -307,9 +309,9 @@ class FinancingOrderTransformer extends TransformerAbstract
 
     public function includePaymentProofUrl(FinancingOrder $financingOrder): Primitive
     {
-        $url = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
+        $media = $financingOrder->getFirstMedia(FinancingOrderMediaCollection::PaymentProofFromLenderToCustomer);
 
-        return $this->primitive($url?->file_url);
+        return $this->primitive($media instanceof Media ? $media->file_url : null);
     }
 
     public function includeCanCreateTraderOrder(FinancingOrder $financingOrder): Primitive

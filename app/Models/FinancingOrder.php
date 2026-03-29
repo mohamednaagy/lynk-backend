@@ -46,6 +46,7 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
  * @property ?string $latest_activity
  * @property ?MurabhaStep $current_step
  * @property-read CommodityType|null $commodityType
+ * @property-read User|null $creator
  *
  * @mixin Builder<FinancingOrder>
  */
@@ -626,11 +627,17 @@ class FinancingOrder extends Model implements HasMedia, Otpifiable
         return $this->belongsTo(Lender::class, 'company_id')->withTrashed();
     }
 
+    /**
+     * @return HasOne<FinancingOrderCancelDetail, $this>
+     */
     public function cancelDetail(): HasOne
     {
         return $this->hasOne(FinancingOrderCancelDetail::class);
     }
 
+    /**
+     * @return HasOne<FinancingOrderRejectionDetail, $this>
+     */
     public function rejectionDetail(): HasOne
     {
         return $this->hasOne(FinancingOrderRejectionDetail::class);

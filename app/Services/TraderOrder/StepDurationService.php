@@ -45,7 +45,7 @@ class StepDurationService
             }
             $durationSeconds = $this->durationInSeconds($startTime, $endTime);
 
-            $this->persistDuration($traderOrder->id, $stepDuration['step'], $durationSeconds);
+            $this->persistDuration($traderOrder, $stepDuration['step'], $durationSeconds);
         } catch (\Exception $e) {
             Log::channel(LOG_CHANNEL_LYNK)->error(formatLogTitle('Error while updating duration when step completed', $traderOrder), [
                 'traderOrderId' => $traderOrder->id,
@@ -102,21 +102,17 @@ class StepDurationService
         return $seconds;
     }
 
-    private function persistDuration(int $traderOrderId, string $stepColumn, int $durationSeconds): void
+    private function persistDuration(TraderOrder $traderOrder, string $stepColumn, int $durationSeconds): void
     {
-        TraderOrderDuration::updateOrCreate(['trader_order_id' => $traderOrderId], [$stepColumn => $durationSeconds]);
-    }
-
-    private function getDuration(int $traderOrderId): ?TraderOrderDuration
-    {
-        return TraderOrderDuration::query()
-            ->where('trader_order_id', $traderOrderId)
-            ->first();
+        TraderOrderDuration::updateOrCreate(
+            ['trader_order_id' => $traderOrder->id],
+            [$stepColumn => $durationSeconds]
+        );
     }
 
     public function getStepDuration(TraderOrder $traderOrder, string $step): ?string
     {
-        $seconds = $this->getDuration($traderOrder->id)?->{$step};
+        $seconds = $traderOrder->traderOrderDuration?->{$step};
         if (is_null($seconds)) {
             return null;
         }
